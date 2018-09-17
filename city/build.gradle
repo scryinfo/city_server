@@ -1,0 +1,54 @@
+allprojects {
+    apply plugin: 'java'
+}
+
+allprojects {
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        compile group: 'io.netty', name: 'netty-all', version: '4.1.28.Final'
+        //compile 'com.google.protobuf:protobuf-java:3.6.1'
+        compile 'com.google.protobuf:protobuf-java:2.5.0'
+        //compile group: 'com.rabbitmq', name: 'amqp-client', version: '5.3.0'
+        compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.8.0'
+        compile group: 'log4j', name: 'log4j', version: '1.2.17'
+        compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+    }
+    compileJava.options.encoding = "UTF-8"
+    compileTestJava.options.encoding = "UTF-8"
+
+    //compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+group 'info.scry'
+//version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+project(':as') {
+    dependencies {
+        compile project(':Shared')
+    }
+}
+
+project(':gs') {
+    dependencies {
+        compile project(':Shared')
+    }
+}
+
+jar {
+    baseName = 'libs'
+    //version='0.0.1'
+    //from configurations.compile.collect{it.isDirectory()?it:zipTree(it)}
+    from configurations.compile.collect{zipTree(it)}
+}
+task myCopyTask(type: Copy) {
+    dependsOn jar
+    from "build/libs/libs.jar"
+    into "../../server_bin"
+}
+assemble.dependsOn myCopyTask

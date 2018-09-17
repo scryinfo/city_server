@@ -1,0 +1,104 @@
+package Game;
+
+import org.bson.types.ObjectId;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+public class NpcManager {
+    private static NpcManager instance = new NpcManager();
+    public static NpcManager instance() {
+        return instance;
+    }
+    public void update(long diffNano) {
+        if (updateIdx == waitToUpdate.size()) // job is done, wait next time section coming
+            return;
+        Set<ObjectId> ids = waitToUpdate.get(updateIdx);
+        Iterator<ObjectId> i = ids.iterator();
+        while(i.hasNext()) {
+            Npc npc = allNpc.get(i.next());
+            if(npc == null)     // this npc be deleted
+                i.remove();
+            else
+                npc.update(diffNano);
+        }
+        if(reCalcuWaitToUpdate) {
+            ids.forEach(id -> {
+                int idx = id.hashCode()%updateTimesAtNextTimeSection;
+                waitToUpdateNext.get(idx).add(id);
+            });
+            ids.clear();
+        }
+        ++updateIdx;
+    }
+    void timeSectionTick(int newIdx, int nowHour, int hours) {
+         while(updateIdx < waitToUpdate.size()) {
+             this.update(City.UpdateIntervalNano);
+         }
+         updateIdx = 0;
+
+         int updateTimesAtLastTimeSection = updateTimesAtCurrentTimeSection;
+         updateTimesAtCurrentTimeSection = (int) (TimeUnit.HOURS.toNanos(hours) / City.UpdateIntervalNano);
+         if(reCalcuWaitToUpdate) {
+             List<Set<ObjectId>> tmp = waitToUpdateNext;
+             waitToUpdateNext = waitToUpdate;
+             waitToUpdate = tmp;
+         }
+         MetaCity metaCity = City.instance().getMeta();
+         int hoursNext = metaCity.nextTimeSectionDuration(newIdx);
+         if(hoursNext == hours)
+             reCalcuWaitToUpdate = false;
+         else
+         {
+             reCalcuWaitToUpdate = true;
+             updateTimesAtNextTimeSection = (int) (TimeUnit.HOURS.toNanos(hoursNext) / City.UpdateIntervalNano);
+             if(updateTimesAtNextTimeSection < updateTimesAtLastTimeSection)
+                 waitToUpdateNext = waitToUpdateNext.subList(0, updateTimesAtNextTimeSection);
+             else if(updateTimesAtNextTimeSection > updateTimesAtLastTimeSection) {
+                 int n = updateTimesAtNextTimeSection - updateTimesAtLastTimeSection;
+                 while(n > 0) {
+                     waitToUpdateNext.add(new TreeSet<>());
+                     --n;
+                 }
+             }
+         }
+    }
+    public void delete(ObjectId buildingId) {
+        Set<ObjectId> ids = buildingIndex.remove(buildingId);
+        if(ids == null)
+            return;
+        ids.forEach(id->allNpc.remove(id));
+        //waitToUpdate.forEach(s->s.removeAll(ids)); // can save this by check npc is null in update
+    }
+    public List<Npc> create(int n, Building building) {
+        List<Npc> res = new ArrayList<>();
+        for(int i = 0; i < n; ++i) {
+            Npc npc = new Npc(building);
+            res.add(npc);
+            addImpl(npc);
+        }
+        return res;
+    }
+    private void addImpl(Npc npc) {
+        allNpc.put(npc.id(), npc);
+        buildingIndex.getOrDefault(npc.building().id(), new TreeSet<>()).add(npc.id());
+        int idx = npc.id().hashCode()% updateTimesAtCurrentTimeSection;
+        waitToUpdate.get(idx).add(npc.id());
+    }
+    private Map<ObjectId, Npc> allNpc = new HashMap<>();
+    private Map<ObjectId, Set<ObjectId>> buildingIndex = new HashMap<>();
+    private List<Set<ObjectId>> waitToUpdate = new ArrayList<>();
+    private List<Set<ObjectId>> waitToUpdateNext = new ArrayList<>();
+    private int updateTimesAtCurrentTimeSection;
+    private int updateTimesAtNextTimeSection;
+    private int updateIdx;
+    private boolean reCalcuWaitToUpdate;
+    private NpcManager() {
+        Set<Npc> npcs = GameDb.readAllNpc();
+        npcs.forEach(npc->this.addImpl(npc));
+        // set the updateIdx according to the left time to next time section
+        long leftMs = City.instance().leftMsToNextTimeSection();
+        updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(City.instance().nextTimeSectionDuration()) * updateTimesAtCurrentTimeSection);
+        //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
+    }
+}

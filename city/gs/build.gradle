@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+}
+
+group 'info.scry.city'
+//version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+jar {
+    baseName = 'gs'
+    //version = '0.0.1'
+    manifest {
+        attributes 'Main-Class':'GameServer'
+    }
+}
+task myCopyTask(type: Copy) {
+    dependsOn jar
+    from "build/libs/gs.jar"
+    into "../../../server_bin/gs"
+}
+//myCopyTask.dependsOn jar
+assemble.dependsOn myCopyTask
