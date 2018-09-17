@@ -1,0 +1,14 @@
+.gradle
+.idea
+/server/city/build
+/server/city/as/build
+/server/city/as/out
+/server/city/gs/build
+/server/city/gs/out
+/server/city/shared/build
+/server/city/shared/out
+/server/city/log
+/server_bin
+/robot/python/*_pb2.py
+/robot/python/*.pyc
+/robot/python/venv
