@@ -1,0 +1,17 @@
+//syntax = "proto3";
+
+package gacode;
+
+enum OpCode{
+	login = 1;
+	serverInfo = 2;
+	stateReport = 3;
+	validateAck = 4;	// ack of AccountToGameOpCode::validate_info 
+	
+	validateInfo = 11;
+	chargeInform = 12;
+	sendMail = 13;
+	banChat = 14;
+	announcement = 15;
+	kickAllRole = 16;
+}
