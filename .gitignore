@@ -1,5 +1,6 @@
 .gradle
 .idea
+.iml
 /server/city/build
 /server/city/as/build
 /server/city/as/out
