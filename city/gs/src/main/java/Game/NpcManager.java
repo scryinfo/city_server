@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class NpcManager {
     private static NpcManager instance = new NpcManager();
@@ -63,30 +64,30 @@ public class NpcManager {
              }
          }
     }
-    public void delete(ObjectId buildingId) {
-        Set<ObjectId> ids = buildingIndex.remove(buildingId);
-        if(ids == null)
-            return;
-        ids.forEach(id->allNpc.remove(id));
+    public void delete(Set<Npc> npc) {
+        npc.forEach(n->{
+            n.readyForDestory();
+            allNpc.remove(n.id());
+        });
+        GameDb.delNpc(npc.stream().map(Npc::id).collect(Collectors.toList()));
         //waitToUpdate.forEach(s->s.removeAll(ids)); // can save this by check npc is null in update
     }
-    public List<Npc> create(int n, Building building) {
+    public List<Npc> create(int n, Building building, int salary) {
         List<Npc> res = new ArrayList<>();
         for(int i = 0; i < n; ++i) {
-            Npc npc = new Npc(building);
+            Npc npc = new Npc(building, salary);
             res.add(npc);
             addImpl(npc);
         }
+        GameDb.create(res);
         return res;
     }
     private void addImpl(Npc npc) {
         allNpc.put(npc.id(), npc);
-        buildingIndex.getOrDefault(npc.building().id(), new TreeSet<>()).add(npc.id());
-        int idx = npc.id().hashCode()% updateTimesAtCurrentTimeSection;
+       int idx = npc.id().hashCode()% updateTimesAtCurrentTimeSection;
         waitToUpdate.get(idx).add(npc.id());
     }
     private Map<ObjectId, Npc> allNpc = new HashMap<>();
-    private Map<ObjectId, Set<ObjectId>> buildingIndex = new HashMap<>();
     private List<Set<ObjectId>> waitToUpdate = new ArrayList<>();
     private List<Set<ObjectId>> waitToUpdateNext = new ArrayList<>();
     private int updateTimesAtCurrentTimeSection;
@@ -94,11 +95,13 @@ public class NpcManager {
     private int updateIdx;
     private boolean reCalcuWaitToUpdate;
     private NpcManager() {
-        Set<Npc> npcs = GameDb.readAllNpc();
-        npcs.forEach(npc->this.addImpl(npc));
+        GameDb.readAllNpc().forEach(npc->this.addImpl(npc));
         // set the updateIdx according to the left time to next time section
         long leftMs = City.instance().leftMsToNextTimeSection();
         updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(City.instance().nextTimeSectionDuration()) * updateTimesAtCurrentTimeSection);
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
+    }
+
+    public void hourTickAction(int nowHour) {
     }
 }

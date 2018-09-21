@@ -86,4 +86,8 @@ public class Coord implements Comparable<Coord> {
                 .setY(this.y)
                 .build();
     }
+
+    public Document toBson() {
+        return new Document().append("x", x).append("y", y);
+    }
 }

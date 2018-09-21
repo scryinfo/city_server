@@ -1,5 +1,6 @@
 package Game;
 
+import com.google.protobuf.Message;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -14,4 +15,9 @@ public class MaterialFactory extends Building{
         this.meta = meta;
     }
     private MetaMaterialFactory meta;
+
+    @Override
+    public Message detailProto() {
+        return null;
+    }
 }

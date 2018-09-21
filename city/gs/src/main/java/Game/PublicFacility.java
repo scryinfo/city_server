@@ -1,5 +1,6 @@
 package Game;
 
+import com.google.protobuf.Message;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -11,6 +12,12 @@ public class PublicFacility extends Building {
     private MetaPublicFacility meta;
     private int rent;
     private HashMap<ObjectId, List<Contract>> contract = new HashMap<ObjectId, List<Contract>>();
+
+    @Override
+    public Message detailProto() {
+        return null;
+    }
+
     class Contract {
         Contract(int days){
             this.days = days;

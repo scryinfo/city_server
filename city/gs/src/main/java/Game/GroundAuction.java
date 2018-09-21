@@ -5,6 +5,7 @@ import Shared.Util;
 import Game.Timers.DateTimeTracker;
 import com.google.protobuf.ByteString;
 
+import com.mongodb.client.ClientSession;
 import common.Common;
 import gs.Gs;
 import gscode.GsCode;
@@ -87,6 +88,7 @@ public class GroundAuction {
             a.timer.update(diffNano);
             if(a.timer.passed())
             {
+                iter.remove();
                 GameSession biderSession = GameServer.allGameSessions.get(a.bider);
                 if(biderSession == null) {
                     GameDb.getPlayer(a.bider).bidWin(a);
@@ -94,7 +96,6 @@ public class GroundAuction {
                 else {
                     biderSession.getPlayer().bidWin(a);
                 }
-                iter.remove();
 
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(ByteString.copyFrom(a.meta.id.toByteArray())).build());
                 this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
@@ -143,15 +144,20 @@ public class GroundAuction {
         a.price = price;
         a.bider = bider.id();
         bider.lockMoney(id, price);
-        GameDb.update(bider);
-        GameDb.updateGroundAuction(toBson(), GameServer.gsInfo.getId());
-        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.IdNum.newBuilder().setId(ByteString.copyFrom(id.toByteArray())).setNum(price).build());
+        ClientSession session = GameDb.startTransaction();
+        bider.save();
+        this.save();
+        GameDb.commit(session);
+        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.ByteNum.newBuilder().setId(ByteString.copyFrom(id.toByteArray())).setNum(price).build());
         this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
             if(channel.id().equals(cId))
                 return true;
             return false;
         }));
         return Optional.empty();
+    }
+    public void save() {
+        GameDb.updateGroundAuction(toBson(), GameServer.gsInfo.getId());
     }
     public void regist(ChannelId id) {
         this.watcher.add(id);

@@ -5,6 +5,7 @@ import Shared.Package;
 import Shared.Util;
 import com.google.common.collect.Sets;
 import com.google.protobuf.ByteString;
+import com.mongodb.client.ClientSession;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class City {
     public static final ObjectId SysRoleId = new ObjectId("5b7e150fd291651fd0691841");
@@ -42,11 +44,12 @@ public class City {
         return allBuilding.get(bId);
     }
 
-    public enum TerrianInfo {
-        NONE,
-        BUILDING
-    }
-    private TerrianInfo[][] terrian;
+    public static final int TERRIAN_NONE = 0;
+    public static final int TERRIAN_TRIVIAL = 0x00000001;
+    public static final int TERRIAN_PLAYER = 0x00000002;
+    public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
+
+    private short[][] terrian;
     private HashMap<ObjectId, Building> allBuilding = new HashMap<>();
 
 //    private HashMap<ObjectId, TrivialBuilding> allTrivialBuilding = new HashMap<>();
@@ -78,15 +81,16 @@ public class City {
             for(int j = 0; j < GridMaxY; ++j)
                 grids[i][j] = new Grid(i,j);
         }
-        terrian = new TerrianInfo[meta.x][meta.y];
+        terrian = new short[meta.x][meta.y];
         this.currentTimeSectionIdx = meta.indexOfHour(this.localTime().getHour());
         // load initial buildings
         loadSysBuildings();
         // load all player buildings, cache them into maps
         loadPlayerBuildings();
-        calcuTerrian();
 
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
+
+        this.lastHour = this.localTime().getHour();
     }
 
     private void loadSysBuildings() {
@@ -98,32 +102,13 @@ public class City {
                 continue;
             }
             Building b = Building.create(i.id, new Coord(i.x, i.y), SysRoleId);
-            this.allBuilding.put(b.id(), b);
-            //this.allTrivialBuilding.put(b.id(), (TrivialBuilding) b);
+            this.calcuTerrian(b);
+            // b is useless, discard it
         }
     }
     private void loadPlayerBuildings() {
-        allBuilding = GameDb.readAllBuilding();
-//        allApartment = GameDb.getAllApartment();
-//        allApartment.forEach((k, v)->allBuilding.put(k, v));
-//        allPublicFacility = GameDb.getAllPublicFacility();
-//        allPublicFacility.forEach((k, v)->allBuilding.put(k, v));
-//        allProductingDepartment = GameDb.getAllProductingDepartment();
-//        allProductingDepartment.forEach((k, v)->allBuilding.put(k, v));
-//        allLaboratory = GameDb.getAllLaboratory();
-//        allLaboratory.forEach((k, v)->allBuilding.put(k, v));
-//        allMaterialFactory = GameDb.getAllMaterialFactory();
-//        allMaterialFactory.forEach((k, v)->allBuilding.put(k, v));
-//        allRetailShop = GameDb.getAllRetailShop();
-//        allRetailShop.forEach((k, v)->allBuilding.put(k, v));
-    }
-    private void calcuTerrian() {
-        for (Building b : allBuilding.values()) {
-            for (int x = b.area().l.x; x <= b.area().r.x; ++x) {
-                for (int y = b.area().l.y; y <= b.area().r.y; ++y) {
-                    terrian[x][y] = TerrianInfo.BUILDING;
-                }
-            }
+        for(Building b : GameDb.readAllBuilding()) {
+            this.take(b);
         }
     }
 
@@ -155,6 +140,8 @@ public class City {
         }, 0, UpdateIntervalNano, TimeUnit.NANOSECONDS);
     }
     private long lastTs;
+    private int lastHour;
+
     public void update(long diffNano) {
         if(this.metaAuctionLoadTimer.update(diffNano)) {
             GroundAuction.instance().loadMore();
@@ -173,10 +160,16 @@ public class City {
     }
     private int currentTimeSectionIdx;
     private void updateTimeSection(long diffNano) {
+        int nowHour = this.localTime().getHour();
+        if(lastHour != nowHour)
+        {
+            hourTickAction(nowHour);
+            lastHour = nowHour;
+        }
         timeSectionAccumlateNano += diffNano;
         if(timeSectionAccumlateNano - TimeUnit.SECONDS.toNanos(10) > TimeUnit.HOURS.toNanos(meta.minHour))
         {
-            int nowHour = this.localTime().getHour();
+
             int index = meta.indexOfHour(nowHour);
             if(index == -1) // still in the range
                 return;
@@ -185,6 +178,11 @@ public class City {
                 timeSectionTickAction(index, nowHour, meta.timeSectionDuration(index));
             }
         }
+    }
+
+    private void hourTickAction(int nowHour) {
+        NpcManager.instance().hourTickAction(nowHour);
+        allBuilding.forEach((k,v)->v.hourTickAction(nowHour));
     }
 
     private void timeSectionTickAction(int newIndex, int nowHour, int hours) {
@@ -284,9 +282,13 @@ public class City {
         Building b = this.allBuilding.get(id);
         if(b == null || b.ownerId() != player.id())
             return false;
+        NpcManager.instance().delete(b.getAllNpc());
+        b.readyForDestory();
         this.allBuilding.remove(id);
         this.playerBuilding.getOrDefault(player.id(), new HashMap<>()).remove(id);
+
         GameDb.delBuilding(b);
+
         return true;
     }
     public boolean addBuilding(int id, Coord pos, Player owner) {
@@ -296,7 +298,8 @@ public class City {
         int cost = 100;
         if(owner.money() < cost)
             return false;
-        build(b);
+        take(b);
+        owner.decMoney(cost);
         GridIndexPair gip = pos.toGridIndex().toSyncRange();
         Package pack = Package.create(GsCode.OpCode.unitCreate_VALUE, Gs.UnitCreate.newBuilder().addInfo(b.toProto()).build());
         for(int x = gip.l.x; x < gip.r.x; ++x) {
@@ -304,30 +307,42 @@ public class City {
                 grids[x][y].send(pack);
             }
         }
-        owner.decMoney(cost);
-        GameDb.update(owner);
+
+        ClientSession s = GameDb.startTransaction();
+        owner.save();
         GameDb.addBuilding(b);
+        GameDb.commit(s);
+
         return true;
     }
     private boolean canBuild(Building building) {
         for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
-                if(terrian[x][y] != TerrianInfo.NONE)
+                if(terrian[x][y] != TERRIAN_NONE)
                     return false;
             }
         }
         return true;
     }
-    private void build(Building building) {
-        for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
-            for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
-                terrian[x][y] = TerrianInfo.BUILDING;
-            }
-        }
+    private void take(Building building) {
+        assert building.type() != MetaBuilding.TRIVIAL;
+        calcuTerrian(building);
         this.allBuilding.put(building.id(), building);
         HashMap<ObjectId, Building> bs = this.playerBuilding.getOrDefault(building.ownerId(), new HashMap<>());
         bs.put(building.id(), building);
     }
+
+    private void calcuTerrian(Building building) {
+        for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
+            for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
+                if(building.type() == MetaBuilding.TRIVIAL)
+                    terrian[x][y] = TERRIAN_TRIVIAL;
+                else
+                    terrian[x][y] = TERRIAN_PLAYER;
+            }
+        }
+    }
+
     class GridDiffs {
         public GridDiffs() {
             l.ensureCapacity(Grid.SYNC_RANGE_NUM);

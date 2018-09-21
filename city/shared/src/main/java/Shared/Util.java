@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
@@ -30,4 +32,14 @@ public class Util {
     public static LocalTime getLocalTime(int offset) {
          return LocalTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(offset)));
     }
+    //problematic. the wall clock might jitter to prev day
+//    public static long currentTimeMillis(int hour, int minute, int second) {
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(new Date());
+//        cal.set(Calendar.HOUR_OF_DAY, hour);
+//        cal.set(Calendar.MINUTE, minute);
+//        cal.set(Calendar.SECOND, second);
+//        cal.set(Calendar.MILLISECOND, 0);
+//        return cal.getTime().getTime();
+//    }
 }

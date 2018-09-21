@@ -291,6 +291,10 @@ public final class Common {
        * <code>auctionPriceIsLow = 5;</code>
        */
       auctionPriceIsLow(5, 5),
+      /**
+       * <code>moneyNotEnough = 6;</code>
+       */
+      moneyNotEnough(6, 6),
       ;
 
       /**
@@ -317,6 +321,10 @@ public final class Common {
        * <code>auctionPriceIsLow = 5;</code>
        */
       public static final int auctionPriceIsLow_VALUE = 5;
+      /**
+       * <code>moneyNotEnough = 6;</code>
+       */
+      public static final int moneyNotEnough_VALUE = 6;
 
 
       public final int getNumber() { return value; }
@@ -329,6 +337,7 @@ public final class Common {
           case 3: return roleNameDuplicated;
           case 4: return auctionNotFound;
           case 5: return auctionPriceIsLow;
+          case 6: return moneyNotEnough;
           default: return null;
         }
       }
@@ -961,14 +970,14 @@ public final class Common {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014common.proto\022\006common\"\334\001\n\004Fail\022\016\n\006opcod" +
+      "\n\014common.proto\022\006common\"\360\001\n\004Fail\022\016\n\006opcod" +
       "e\030\001 \002(\005\022#\n\006reason\030\002 \001(\0162\023.common.Fail.Re" +
-      "ason\022\t\n\001s\030\003 \001(\t\022\t\n\001i\030\004 \001(\005\"\210\001\n\006Reason\022\014\n" +
+      "ason\022\t\n\001s\030\003 \001(\t\022\t\n\001i\030\004 \001(\005\"\234\001\n\006Reason\022\014\n" +
       "\010noReason\020\000\022\023\n\017accountInFreeze\020\001\022\027\n\023game" +
       "ServerNotOnline\020\002\022\026\n\022roleNameDuplicated\020" +
       "\003\022\023\n\017auctionNotFound\020\004\022\025\n\021auctionPriceIs" +
-      "Low\020\005*#\n\006OpCode\022\t\n\005error\020\000\022\016\n\ncompressed" +
-      "\020\001"
+      "Low\020\005\022\022\n\016moneyNotEnough\020\006*#\n\006OpCode\022\t\n\005e" +
+      "rror\020\000\022\016\n\ncompressed\020\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

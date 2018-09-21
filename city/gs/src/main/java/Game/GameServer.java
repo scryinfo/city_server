@@ -65,6 +65,7 @@ public class GameServer {
     }
     public void run() throws Exception {
         City.init(MetaData.getCity()); // some other object depend on city, so init it first
+        NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.instance();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();

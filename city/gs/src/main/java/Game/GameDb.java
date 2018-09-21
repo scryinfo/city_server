@@ -1,15 +1,22 @@
 package Game;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import Shared.DatabaseName;
 import Shared.RoleBriefInfo;
 import Shared.RoleFieldName;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.mongodb.*;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.Updates;
+import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -17,6 +24,7 @@ import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
 public class GameDb {
+	private static final Logger logger = Logger.getLogger(GameDb.class);
 	public static void init(String url) { //"mongodb://localhost:27017"
 		connectionString = new MongoClientURI(url);
 	}
@@ -57,13 +65,21 @@ public class GameDb {
 //	private static MongoCollection<Document> publicFacilityCol;
 
 	private static MongoCollection<Document> buildingCol;
+	private static LoadingCache<ObjectId, Player> graphs = CacheBuilder.newBuilder()
+			.weakValues()
+			.build(
+					new CacheLoader<ObjectId, Player>() {
+						public Player load(ObjectId id) {
+							Document d = playerCol.find(Filters.eq(id)).first();
+							if(d == null)
+								return null;
+							return new Player(d);
+						}
+					});
 	public static Player getPlayer(ObjectId id) {
-		Document d = playerCol.find(Filters.eq(id)).first();
-		if(d == null)
-			return null;
-		return new Player(d);
+		return graphs.getUnchecked(id);
 	}
-	
+
 	public static boolean createPlayer(Player p)
 	{
 		Document bson = p.toBson();
@@ -105,11 +121,11 @@ public class GameDb {
 		groundAuctionCol.updateOne(Filters.eq(serverId), d);
 	}
 
-	public static HashMap<ObjectId, Building> readAllBuilding() {
-		HashMap<ObjectId, Building> res = new HashMap<>();
+	public static Set<Building> readAllBuilding() {
+		Set<Building> res = new HashSet<>();
 		buildingCol.find().forEach((Block<Document>) doc -> {
 			Building b = Building.create(doc);
-			res.put(b.id(), b);
+			res.add(b);
 		});
 		return res;
 	}
@@ -183,4 +199,58 @@ public class GameDb {
 		});
 		return res;
     }
+
+//	public static void paySalary(Player p, Set<Npc> allNpc, int salary) {
+//		ArrayList<ObjectId> ids = new ArrayList<>(allNpc.size());
+//		allNpc.forEach(npc->ids.add(npc.id()));
+//		ClientSession s = mongoClient.startSession();
+//		s.startTransaction();
+//		playerCol.updateOne(Filters.eq(p.id()), Updates.inc(RoleFieldName.MoneyFieldName, -salary*allNpc.size()));
+//		npcCol.updateMany(Filters.in("_id", ids), Updates.inc(RoleFieldName.MoneyFieldName, salary));
+//		s.commitTransaction();
+//	}
+
+	public static void offsetNpcMoney(Collection<ObjectId> ids, int delta) {
+		npcCol.updateMany(Filters.in("_id", ids), Updates.inc(RoleFieldName.MoneyFieldName, delta));
+	}
+
+
+	// must use transaction senario:
+	// 1. money which relative to any unit (this is mean any thing which invole with money include:
+	// 			buy ground, goods, building...
+	//			rent ground, building...
+
+	// only keep in memory is allowed:
+	// 1. where the building which npc located in
+	// 2. ?
+	public static ClientSession startTransaction() {
+		ClientSession s = mongoClient.startSession();
+		s.startTransaction();
+		return s;
+	}
+	public static boolean commit(ClientSession s) {
+		while (true) {
+			try {
+				s.commitTransaction();
+				return true;
+			} catch (MongoException e) {
+				// can retry commit
+				if (e.hasErrorLabel(MongoException.UNKNOWN_TRANSACTION_COMMIT_RESULT_LABEL)) {
+					continue;
+				} else {
+					//throw e;
+					s.abortTransaction();
+					logger.fatal("mongodb transaction fail " + e);
+					return false;
+				}
+			}
+		}
+	}
+
+	public static void create(List<Npc> res) {
+		npcCol.insertMany(res.stream().map(Npc::toBson).collect(Collectors.toList()));
+	}
+
+	public static void delNpc(Set<Npc> npc) {
+	}
 }

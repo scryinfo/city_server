@@ -213,7 +213,7 @@ public class GameSession {
 		this.write(Package.create(cmd, GroundAuction.instance().toProto()));
 	}
 	public void bidGround(short cmd, Message message) throws IllegalArgumentException {
-		Gs.IdNum c = (Gs.IdNum)message;
+		Gs.ByteNum c = (Gs.ByteNum)message;
 		ObjectId id = new ObjectId(c.getId().toByteArray());
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(id, player, c.getNum());
 		if(err.isPresent())
@@ -245,5 +245,45 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 		else
 			this.write(Package.create(cmd));
+	}
+	public void detailApartment(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		ObjectId id = new ObjectId(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.APARTMENT)
+			return;
+		this.write(Package.create(cmd, ((Apartment)b).detailProto()));
+	}
+	public void detailMaterialFactory(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		ObjectId id = new ObjectId(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.MATERIAL)
+			return;
+		this.write(Package.create(cmd, ((MaterialFactory)b).detailProto()));
+	}
+	public void setSalary(short cmd, Message message) {
+		Gs.ByteNum c = (Gs.ByteNum) message;
+		ObjectId id = new ObjectId(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null)
+			return;
+		if(player.money() < c.getNum())
+		{
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
+			return;
+		}
+		b.setSalary(c.getNum());
+		this.write(Package.create(cmd, c));
+	}
+	public void setRent(short cmd, Message message) {
+		Gs.ByteNum c = (Gs.ByteNum) message;
+		ObjectId id = new ObjectId(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.APARTMENT)
+			return;
+		Apartment a = (Apartment)b;
+		a.setRent(c.getNum());
+		this.write(Package.create(cmd, c));
 	}
 }

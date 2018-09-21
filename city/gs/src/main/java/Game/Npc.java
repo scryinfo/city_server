@@ -10,11 +10,14 @@ public class Npc {
     private Building tempBuilding;
     private Apartment apartment;
     private boolean inTravel;
-    public Npc(Building building) {
+    private boolean readyForDestory;
+    private int timeSection;
+    private City city;
+    public Npc(Building building, int salary) {
         this.building = building;
         this.city = City.instance();
         this.timeSection = city.currentTimeSectionIdx();
-        this.money = 0;
+        this.money = salary;
         this.tempBuilding = null;
         this.inTravel = false;
     }
@@ -26,7 +29,10 @@ public class Npc {
         ObjectId tmpBuildingId = doc.getObjectId("t");
         this.tempBuilding = tmpBuildingId == Util.NullOid?null:city.getBuilding(tmpBuildingId);
         if(tempBuilding != null)
+        {
+            tempBuilding.enter(this);
             inTravel = true;
+        }
     }
     Document toBson() {
         Document doc = new Document()
@@ -42,20 +48,27 @@ public class Npc {
     public ObjectId id() {
         return id;
     }
-    private int timeSection;
-    private City city;
+    public boolean hasApartment() {
+        return this.apartment != null;
+    }
     public void update(long diffNano) {
        int section = City.instance().currentTimeSectionIdx();
        switch(section) {
            //??
        }
     }
-    private void visit(Building building) {
+
+    // where the npc is are not important, location change can not persist to db
+    // after server restarted, all npc will return to its owner building
+    public void visit(Building building) {
+        building.enter(this);
         if(building == this.building) {
+            this.tempBuilding.leave(this);
             this.tempBuilding = null;
             this.inTravel = false;
         }
         else {
+            this.building.leave(this);
             this.tempBuilding = building;
             this.inTravel = true;
         }
@@ -75,5 +88,9 @@ public class Npc {
 
     public Building building() {
         return this.building;
+    }
+
+    public void readyForDestory() {
+        this.visit(this.building);
     }
 }

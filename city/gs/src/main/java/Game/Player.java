@@ -5,6 +5,7 @@ import Shared.RoleBriefInfo;
 import Shared.RoleFieldName;
 import Shared.Util;
 import com.google.protobuf.ByteString;
+import com.mongodb.client.ClientSession;
 import gs.Gs;
 import gscode.GsCode;
 import org.bson.Document;
@@ -40,7 +41,7 @@ public class Player {
         this.offlineTs = doc.getLong(RoleFieldName.OfflineTsFieldName);
         this.name = doc.getString(RoleFieldName.NameFieldName);
         this.account = doc.getString(RoleFieldName.AccountNameFieldName);
-        this.money = doc.getLong("money");
+        this.money = doc.getLong(RoleFieldName.MoneyFieldName);
         this.position = new GridIndex((Document)doc.get("coord"));
         for(Document d : (List<Document>) doc.get("lockMoney")) {
             ObjectId tid = d.getObjectId("tid");
@@ -100,7 +101,7 @@ public class Player {
                 //.append("acc", this.account)
                 //.append("name", this.name)
                 .append("coord", this.position.toBson())
-                .append("money", this.money)
+                .append(RoleFieldName.MoneyFieldName, this.money)
                 .append("lockMoney", lockMoneyArr);
         return doc;
     }
@@ -156,6 +157,9 @@ public class Player {
             return 0;
         }
     }
+    // should not warp db flush in function due to if an decMoney on player means there must has
+    // addMoney on others units. Those dec add should in an transaction, which means, db class
+    // will has many function to cope with those different situation?
     public boolean decMoney(int cost) {
         if(cost > this.money)
             return false;
@@ -166,18 +170,23 @@ public class Player {
     public void bidWin(GroundAuction.Auction a) {
         this.addGround(a.meta.area);
         int p = this.spentLockMoney(a.meta.id);
-        GameDb.update(this);
-        this.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.IdNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(p).build()));
+        ClientSession session = GameDb.startTransaction();
+        this.save();
+        GroundAuction.instance().save();
+        GameDb.commit(session);
+        this.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(p).build()));
     }
 
     private int spentLockMoney(ObjectId id) {
         return this.lockedMoney.remove(id);
     }
-
+    public void save() {
+        GameDb.update(this);
+    }
     public void groundBidingFail(ObjectId id, GroundAuction.Auction a) {
         int m = this.unlockMoney(a.meta.id);
         GameDb.update(this);
-        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.IdNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(m).build()));
+        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(m).build()));
     }
 
     public RoleBriefInfo briefInfo() {
