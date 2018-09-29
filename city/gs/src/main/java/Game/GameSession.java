@@ -5,19 +5,17 @@ import Shared.Package;
 import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
+import io.netty.util.concurrent.ScheduledFuture;
+import org.apache.log4j.Logger;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
-
-import io.netty.channel.ChannelId;
-import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
-
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.ScheduledFuture;
+import java.util.UUID;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -30,7 +28,7 @@ public class GameSession {
 	private ScheduledFuture<?> updateScheduleFuture;
 	private boolean valid = false;
 	private boolean loginFailed = false;
-	private ArrayList<ObjectId> roleIds = new ArrayList<>();
+	private ArrayList<UUID> roleIds = new ArrayList<>();
 
 	public Player getPlayer() {
 		return player;
@@ -40,7 +38,7 @@ public class GameSession {
 		ROLE_NO_LOGIN,
 		ROLE_LOGIN
 	}
-	ObjectId id() {
+	UUID id() {
 		return player.id();
 	}
 	private volatile LoginState loginState = LoginState.ROLE_NO_LOGIN;
@@ -66,7 +64,7 @@ public class GameSession {
 		}
 		GroundAuction.instance().unregist(this.channelId);
 		player.offline();
-		//GameDb.update(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
+		//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
 		//offline action of validate
 		Validator.getInstance().unRegist(accountName, token);
 		logger.debug("account: " + player.getAccount() + " logout");
@@ -77,12 +75,12 @@ public class GameSession {
 		this.channelId = ctx.channel().id();
 		this.player = p;
 
-		//updateScheduleFuture = ctx.channel().eventLoop().scheduleAtFixedRate(()->{this.update();}, 0, UPDATE_MS, TimeUnit.MILLISECONDS);
+		//updateScheduleFuture = ctx.channel().eventLoop().scheduleAtFixedRate(()->{this.saveOrUpdate();}, 0, UPDATE_MS, TimeUnit.MILLISECONDS);
 	}
 	
 	public GameSession(ChannelHandlerContext ctx){
 		this.ctx = ctx;
-		//updateScheduleFuture = ctx.channel().eventLoop().scheduleAtFixedRate(()->{this.update();}, 0, UPDATE_MS, TimeUnit.MILLISECONDS);
+		//updateScheduleFuture = ctx.channel().eventLoop().scheduleAtFixedRate(()->{this.saveOrUpdate();}, 0, UPDATE_MS, TimeUnit.MILLISECONDS);
 	}
 	public void write(Package pack) {
 		ctx.writeAndFlush(pack);
@@ -163,7 +161,7 @@ public class GameSession {
 	public void roleLogin(short cmd, Message message) {
 		// in city thread
 		Gs.Id c = (Gs.Id)message;
-		ObjectId roleId = new ObjectId(c.getId().toByteArray());
+		UUID roleId = Util.toUuid(c.getId().toByteArray());
 		player = GameDb.getPlayer(roleId);
 		if(player == null){
 			this.write(Package.fail(cmd));
@@ -214,7 +212,7 @@ public class GameSession {
 	}
 	public void bidGround(short cmd, Message message) throws IllegalArgumentException {
 		Gs.ByteNum c = (Gs.ByteNum)message;
-		ObjectId id = new ObjectId(c.getId().toByteArray());
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(id, player, c.getNum());
 		if(err.isPresent())
 			this.write(Package.fail(cmd, err.get()));
@@ -239,7 +237,7 @@ public class GameSession {
 	}
 	public void delBuilding(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
-		ObjectId id = new ObjectId(c.getId().toByteArray());
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		boolean ok = City.instance().delBuilding(id, player);
 		if(!ok)
 			this.write(Package.fail(cmd));
@@ -248,7 +246,7 @@ public class GameSession {
 	}
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
-		ObjectId id = new ObjectId(c.getId().toByteArray());
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
@@ -256,7 +254,7 @@ public class GameSession {
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
-		ObjectId id = new ObjectId(c.getId().toByteArray());
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
@@ -264,7 +262,7 @@ public class GameSession {
 	}
 	public void setSalary(short cmd, Message message) {
 		Gs.ByteNum c = (Gs.ByteNum) message;
-		ObjectId id = new ObjectId(c.getId().toByteArray());
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null)
 			return;
@@ -278,7 +276,7 @@ public class GameSession {
 	}
 	public void setRent(short cmd, Message message) {
 		Gs.ByteNum c = (Gs.ByteNum) message;
-		ObjectId id = new ObjectId(c.getId().toByteArray());
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;

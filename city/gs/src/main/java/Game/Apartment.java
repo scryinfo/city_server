@@ -4,19 +4,14 @@ import gs.Gs;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.Entity;
+import java.util.*;
 
+@Entity(name = "Apartment")
 public class Apartment extends Building {
 
-    public Apartment(MetaApartment meta, Coord pos, ObjectId ownerId) {
+    public Apartment(MetaApartment meta, Coord pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        this.meta = meta;
-    }
-    public Apartment(MetaApartment meta, Document d) {
-        super(meta, d);
         this.meta = meta;
     }
 
@@ -32,7 +27,7 @@ public class Apartment extends Building {
     public void take(Npc npc) {
         guest.put(npc.id(), npc);
     }
-    private Map<ObjectId, Npc> guest = new HashMap<>();
+    private Map<UUID, Npc> guest = new HashMap<>();
     private Deque<Integer> incomingHistory = new ArrayDeque<>();
     public Gs.ApartmentInfo detailProto() {
         return Gs.ApartmentInfo.newBuilder()

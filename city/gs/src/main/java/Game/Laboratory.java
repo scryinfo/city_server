@@ -4,13 +4,13 @@ import com.google.protobuf.Message;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-public class Laboratory extends Building {
-    public Laboratory(MetaLaboratory meta, Coord pos, ObjectId ownerId) {
-        super(meta, pos, ownerId);
-    }
+import javax.persistence.Entity;
+import java.util.UUID;
 
-    public Laboratory(MetaLaboratory meta, Document d) {
-        super(meta, d);
+@Entity(name = "Laboratory")
+public class Laboratory extends Building {
+    public Laboratory(MetaLaboratory meta, Coord pos, UUID ownerId) {
+        super(meta, pos, ownerId);
     }
 
     @Override

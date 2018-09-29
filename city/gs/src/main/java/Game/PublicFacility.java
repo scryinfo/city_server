@@ -4,10 +4,13 @@ import com.google.protobuf.Message;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
+@Entity(name = "PublicFacility")
 public class PublicFacility extends Building {
     private MetaPublicFacility meta;
     private int rent;
@@ -40,12 +43,8 @@ public class PublicFacility extends Building {
             this.buildingId = buildingId;
         }
     }
-    public PublicFacility(MetaPublicFacility meta, Coord pos, ObjectId ownerId) {
+    public PublicFacility(MetaPublicFacility meta, Coord pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        this.meta = meta;
-    }
-    public PublicFacility(MetaPublicFacility meta, Document d) {
-        super(meta, d);
         this.meta = meta;
     }
     int leftAdNum() {

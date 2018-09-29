@@ -1,5 +1,6 @@
 package Account;
 
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.*;
 
@@ -124,11 +125,15 @@ public class AccountSession {
                 cag.setAvailable(true);
             else
                 cag.setAvailable(false);
-            for(RoleBriefInfo briefInfo : AccountDb.getRoleBriefInfos(this.accountName, gsInfo.getGameDbUri(), gsInfo.getId())) {
-                cag.addBriefInfoBuilder()
-                        .setId(Util.toByteString(briefInfo.id))
-                        .setName(briefInfo.name)
-                        .setLastLoginTime(briefInfo.lastLoginTs);
+            try {
+                for(RoleBriefInfo briefInfo : AccountDb.getRoleBriefInfos(this.accountName, gsInfo.getGameDbUri())) {
+                    cag.addBriefInfoBuilder()
+                            .setId(Util.toByteString(briefInfo.id))
+                            .setName(briefInfo.name)
+                            .setLastLoginTime(briefInfo.lastLoginTs);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
             ca.addInfos(cag);
         }

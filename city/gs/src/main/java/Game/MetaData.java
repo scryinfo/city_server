@@ -1,5 +1,6 @@
 package Game;
 
+import Shared.Util;
 import com.google.protobuf.ByteString;
 import com.mongodb.Block;
 import com.mongodb.client.model.Filters;
@@ -167,7 +168,7 @@ class MetaPublicFacility extends MetaBuilding {
 }
 class MetaGroundAuction {
     MetaGroundAuction(Document d) {
-        this.id = d.getObjectId("_id");
+        this.id = Util.toUuid(d.getObjectId("_id"));
         List<Integer> index = (List<Integer>) d.get("area");
         if(index.size() % 2 != 0)  {
             System.out.println("Game.MetaGroundAuction area size is not odd!");
@@ -182,7 +183,7 @@ class MetaGroundAuction {
 
     Gs.MetaGroundAuction.Target toProto() {
         Gs.MetaGroundAuction.Target.Builder b = Gs.MetaGroundAuction.Target.newBuilder()
-                .setId(ByteString.copyFrom(id.toByteArray()))
+                .setId(Util.toByteString(id))
                 .setBeginTime(beginTime)
                 .setDurationSec((int) (endTime - beginTime))
                 .setBasePrice(price);
@@ -191,7 +192,7 @@ class MetaGroundAuction {
         }
         return b.build();
     }
-    ObjectId id;    // use to check this data has been changed or not, compare it with player db(if anyone bid it)
+    UUID id;    // use to check this data has been changed or not, compare it with player db(if anyone bid it)
     Set<Coord> area = new TreeSet<>();
     long beginTime;
     long endTime;
@@ -215,7 +216,7 @@ public class MetaData {
     private static final String trivialBuildingColName = "TrivialBuilding";
     //global field
 	private static MetaCity city;
-    private static final HashMap<ObjectId, MetaGroundAuction> groundAuction = new HashMap<ObjectId, MetaGroundAuction>();
+    private static final HashMap<UUID, MetaGroundAuction> groundAuction = new HashMap<>();
 	private static final TreeMap<Integer, MetaNpc> npc = new TreeMap<>();
     private static final TreeMap<Integer, MetaBuilding> trivial = new TreeMap<>();
     private static final TreeMap<Integer, MetaApartment> apartment = new TreeMap<>();
@@ -279,7 +280,7 @@ public class MetaData {
         }
         return res;
     }
-    public static MetaGroundAuction getGroundAuction(ObjectId id) {
+    public static MetaGroundAuction getGroundAuction(UUID id) {
         return groundAuction.get(id);
     }
 	public static void init(String uri){

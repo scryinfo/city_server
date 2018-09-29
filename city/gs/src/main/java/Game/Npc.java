@@ -1,51 +1,82 @@
 package Game;
 
-import Shared.Util;
-import org.bson.Document;
-import org.bson.types.ObjectId;
+import javax.persistence.*;
+import java.util.UUID;
 
+@Entity
+@Table(name = "NPC")
 public class Npc {
-    private ObjectId id = new ObjectId();
+    @Id
+    private UUID id;
+
+    @Transient
     private Building building;
+
+    @Transient
     private Building tempBuilding;
+
+    @Transient
     private Apartment apartment;
-    private boolean inTravel;
-    private boolean readyForDestory;
-    private int timeSection;
-    private City city;
+
+    @Column(name = "money", nullable = false)
+    private long money;
+
+    @Embeddable //hide those members, the only purpose is to mapping to the table
+    protected static class AdapterData {
+        @Column(name = "buildingId", updatable = false, nullable = false)
+        protected UUID buildingId;
+        @Column(name = "tempBuildingId")
+        protected UUID tempBuildingId;
+        @Column(name = "apartmentId")
+        protected UUID apartmentId;
+    }
+    @Embedded
+    protected final AdapterData adapterData = new AdapterData();
+
+    @PrePersist
+    @PreUpdate
+    private void _1() {
+        this.adapterData.buildingId = building.id();
+        this.adapterData.tempBuildingId = tempBuilding==null?null:tempBuilding.id();
+        this.adapterData.apartmentId = apartment==null?null:apartment.id();
+    }
+    @PostLoad
+    private void _2() {
+        this.building = City.instance().getBuilding(this.adapterData.buildingId);
+        this.tempBuilding = this.adapterData.tempBuildingId==null?null:City.instance().getBuilding(this.adapterData.tempBuildingId);
+        this.apartment = this.adapterData.apartmentId==null?null: (Apartment) City.instance().getBuilding(this.adapterData.apartmentId);
+    }
     public Npc(Building building, int salary) {
+        this.id = UUID.randomUUID();
         this.building = building;
-        this.city = City.instance();
-        this.timeSection = city.currentTimeSectionIdx();
         this.money = salary;
         this.tempBuilding = null;
-        this.inTravel = false;
     }
-    public Npc(Document doc) {
-        this.id = doc.getObjectId("_id");
-        this.city = City.instance();
-        this.building = city.getBuilding(doc.getObjectId("b"));
-        this.money = doc.getInteger("m");
-        ObjectId tmpBuildingId = doc.getObjectId("t");
-        this.tempBuilding = tmpBuildingId == Util.NullOid?null:city.getBuilding(tmpBuildingId);
-        if(tempBuilding != null)
-        {
-            tempBuilding.enter(this);
-            inTravel = true;
-        }
-    }
-    Document toBson() {
-        Document doc = new Document()
-                .append("_id", this.id)
-                .append("b", this.building.id())
-                .append("t", this.tempBuilding == null? Util.NullOid:this.tempBuilding.id())
-                .append("m", this.money);
-        return doc;
-    }
+//    public Npc(Document doc) {
+//        this.id = doc.getObjectId("_id");
+//        this.city = City.instance();
+//        this.building = city.getBuilding(doc.getObjectId("b"));
+//        this.money = doc.getInteger("m");
+//        ObjectId tmpBuildingId = doc.getObjectId("t");
+//        this.tempBuilding = tmpBuildingId == Util.NullOid?null:city.getBuilding(tmpBuildingId);
+//        if(tempBuilding != null)
+//        {
+//            tempBuilding.enter(this);
+//            inTravel = true;
+//        }
+//    }
+//    Document toBson() {
+//        Document doc = new Document()
+//                .append("_id", this.id)
+//                .append("b", this.building.id())
+//                .append("t", this.tempBuilding == null? Util.NullOid:this.tempBuilding.id())
+//                .append("m", this.money);
+//        return doc;
+//    }
     public Coord coordinate() {
         return this.tempBuilding == null? this.building.coordinate():this.tempBuilding.coordinate();
     }
-    public ObjectId id() {
+    public UUID id() {
         return id;
     }
     public boolean hasApartment() {
@@ -65,12 +96,10 @@ public class Npc {
         if(building == this.building) {
             this.tempBuilding.leave(this);
             this.tempBuilding = null;
-            this.inTravel = false;
         }
         else {
             this.building.leave(this);
             this.tempBuilding = building;
-            this.inTravel = true;
         }
     }
     public boolean rent(Apartment apartment) {
@@ -81,7 +110,6 @@ public class Npc {
         apartment.take(this);
         return true;
     }
-    private long money;
     public void addMoney(int money) {
         this.money += money;
     }

@@ -1,22 +1,15 @@
 package Shared;
 
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
-import java.util.Arrays;
-import java.util.List;
+import java.util.UUID;
 
 public class RoleBriefInfo {
-    public ObjectId id;
+    public UUID id;
     public String name;
     public long lastLoginTs;
-    public RoleBriefInfo(){}
-    public RoleBriefInfo(Document bson) {
-        id = bson.getObjectId("_id");
-        name = bson.getString(RoleFieldName.NameFieldName);
-        lastLoginTs = bson.getLong(RoleFieldName.OnlineTsFieldName);
-    }
-    public static List<String> queryFieldsName() {
-        return Arrays.asList("_id", RoleFieldName.NameFieldName, RoleFieldName.OnlineTsFieldName);
+
+    public RoleBriefInfo(UUID id, String name, long lastLoginTs) {
+        this.id = id;
+        this.name = name;
+        this.lastLoginTs = lastLoginTs;
     }
 }

@@ -5,11 +5,9 @@ import Shared.Package;
 import Shared.Util;
 import com.google.common.collect.Sets;
 import com.google.protobuf.ByteString;
-import com.mongodb.client.ClientSession;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -19,10 +17,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class City {
-    public static final ObjectId SysRoleId = new ObjectId("5b7e150fd291651fd0691841");
+    public static final UUID SysRoleId = UUID.nameUUIDFromBytes(new byte[16]);
     private static final Logger logger = Logger.getLogger(City.class);
     public static int GridMaxX;
     public static int GridMaxY;
@@ -40,7 +37,7 @@ public class City {
     public MetaCity getMeta() {
         return meta;
     }
-    public Building getBuilding(ObjectId bId) {
+    public Building getBuilding(UUID bId) {
         return allBuilding.get(bId);
     }
 
@@ -50,7 +47,7 @@ public class City {
     public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
 
     private short[][] terrian;
-    private HashMap<ObjectId, Building> allBuilding = new HashMap<>();
+    private HashMap<UUID, Building> allBuilding = new HashMap<>();
 
 //    private HashMap<ObjectId, TrivialBuilding> allTrivialBuilding = new HashMap<>();
 //    private HashMap<ObjectId, Apartment> allApartment;
@@ -62,7 +59,7 @@ public class City {
     // almost all of player's data are shared all the time
     // like building, ground, product. This requires and index to
     // retrieve those things according to player id
-    private HashMap<ObjectId, HashMap<ObjectId, Building>> playerBuilding = new HashMap<>();
+    private HashMap<UUID, HashMap<UUID, Building>> playerBuilding = new HashMap<>();
     //private HashMap<ObjectId, Ground> ground = new HashMap<>();
     public static void init(MetaCity meta) {
         instance = new City(meta);
@@ -107,7 +104,7 @@ public class City {
         }
     }
     private void loadPlayerBuildings() {
-        for(Building b : GameDb.readAllBuilding()) {
+        for(Building b : GameDb.getAllBuilding()) {
             this.take(b);
         }
     }
@@ -249,7 +246,7 @@ public class City {
 
         Gs.UnitRemove.Builder urb = Gs.UnitRemove.newBuilder();
         this.forEachBuilding(leavingGrids, (Building b)->{
-            urb.addId(ByteString.copyFrom(b.id().toByteArray()));
+            urb.addId(ByteString.copyFrom(Util.toBytes(b.id())));
         });
         p.send(Package.create(GsCode.OpCode.unitRemove_VALUE, urb.build()));
     }
@@ -272,13 +269,13 @@ public class City {
         return res;
     }
 
-    public void mount(ObjectId id, CoordPair area) {
+    public void mount(UUID id, CoordPair area) {
         //this.ground.getOrDefault(id, new ArrayList);
     }
-    public void mount(ObjectId id, Collection<Coord> area) {
+    public void mount(UUID id, Collection<Coord> area) {
         //this.ground.getOrDefault(id, new ArrayList);
     }
-    public boolean delBuilding(ObjectId id, Player player) {
+    public boolean delBuilding(UUID id, Player player) {
         Building b = this.allBuilding.get(id);
         if(b == null || b.ownerId() != player.id())
             return false;
@@ -287,7 +284,7 @@ public class City {
         this.allBuilding.remove(id);
         this.playerBuilding.getOrDefault(player.id(), new HashMap<>()).remove(id);
 
-        GameDb.delBuilding(b);
+        GameDb.delete(b);
 
         return true;
     }
@@ -300,6 +297,8 @@ public class City {
             return false;
         take(b);
         owner.decMoney(cost);
+        GameDb.saveOrUpdate(Arrays.asList(owner, b));
+
         GridIndexPair gip = pos.toGridIndex().toSyncRange();
         Package pack = Package.create(GsCode.OpCode.unitCreate_VALUE, Gs.UnitCreate.newBuilder().addInfo(b.toProto()).build());
         for(int x = gip.l.x; x < gip.r.x; ++x) {
@@ -307,12 +306,6 @@ public class City {
                 grids[x][y].send(pack);
             }
         }
-
-        ClientSession s = GameDb.startTransaction();
-        owner.save();
-        GameDb.addBuilding(b);
-        GameDb.commit(s);
-
         return true;
     }
     private boolean canBuild(Building building) {
@@ -328,7 +321,7 @@ public class City {
         assert building.type() != MetaBuilding.TRIVIAL;
         calcuTerrian(building);
         this.allBuilding.put(building.id(), building);
-        HashMap<ObjectId, Building> bs = this.playerBuilding.getOrDefault(building.ownerId(), new HashMap<>());
+        HashMap<UUID, Building> bs = this.playerBuilding.getOrDefault(building.ownerId(), new HashMap<>());
         bs.put(building.id(), building);
     }
 

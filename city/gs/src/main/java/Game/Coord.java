@@ -3,8 +3,14 @@ package Game;
 import gs.Gs;
 import org.bson.Document;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class Coord implements Comparable<Coord> {
+    @Column(name = "x", nullable = false)
     public int x;
+    @Column(name = "y", nullable = false)
     public int y;
     public Coord(int x, int y) {
         this.x = x;

@@ -28,13 +28,14 @@ import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class GameServer {
     private static final Logger logger = Logger.getLogger(GameServer.class);
     private static final EventExecutorGroup businessLogicExecutor = new DefaultEventExecutorGroup(4);
     public static final ChannelGroup allClientChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    public static final ConcurrentMap<ObjectId, GameSession> allGameSessions = new MapMaker().concurrencyLevel(1).weakValues().makeMap();
+    public static final ConcurrentMap<UUID, GameSession> allGameSessions = new MapMaker().concurrencyLevel(1).weakValues().makeMap();
     private static int id;
     public static GameServerInfo gsInfo;
     public static AccountServerInfo accInfo;
@@ -53,8 +54,10 @@ public class GameServer {
         LogDb.startUp();
         MetaData.init(gsInfo.getMetaDbUri());
         MetaData.startUp();
-        GameDb.init(gsInfo.getGameDbUri());
-        GameDb.startUp();
+
+        // db info is in hibernate.xml now
+        //GameDb.init(gsInfo.getGameDbUri());
+        //GameDb.startUp();
     }
 
     private void asConnectAction(ChannelFuture f) {

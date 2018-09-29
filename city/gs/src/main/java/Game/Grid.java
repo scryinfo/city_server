@@ -1,10 +1,10 @@
 package Game;
 
 import Shared.Package;
-import org.bson.types.ObjectId;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class Grid {
@@ -12,8 +12,8 @@ public class Grid {
     public static final int SYNC_RANGE_DELTA = (int) (Math.sqrt(SYNC_RANGE_NUM) - 1);
     private int x;
     private int y;
-    private HashMap<ObjectId, Building> buildings = new HashMap<>();
-    private HashSet<ObjectId> playerIds = new HashSet<>();
+    private HashMap<UUID, Building> buildings = new HashMap<>();
+    private HashSet<UUID> playerIds = new HashSet<>();
     public Grid(int x, int y) {
         this.x = x;
         this.y = y;
@@ -24,10 +24,10 @@ public class Grid {
     public void del(Building b) {
         this.buildings.remove(b.id());
     }
-    public void playerComing(ObjectId id) {
+    public void playerComing(UUID id) {
         this.playerIds.add(id);
     }
-    public void playerLeaving(ObjectId id) {
+    public void playerLeaving(UUID id) {
         this.playerIds.remove(id);
     }
     void send(Package pack) {
@@ -37,7 +37,7 @@ public class Grid {
                 s.write(pack);
         });
     }
-    public boolean hasBuilding(ObjectId id) {
+    public boolean hasBuilding(UUID id) {
         return this.buildings.containsKey(id);
     }
     public void forAllBuilding(Consumer<Building> f) {

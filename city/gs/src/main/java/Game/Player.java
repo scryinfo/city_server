@@ -1,33 +1,63 @@
 package Game;
 
+import Shared.DatabaseInfo;
 import Shared.Package;
-import Shared.RoleBriefInfo;
-import Shared.RoleFieldName;
 import Shared.Util;
+
 import com.google.protobuf.ByteString;
-import com.mongodb.client.ClientSession;
 import gs.Gs;
 import gscode.GsCode;
-import org.bson.Document;
-import org.bson.types.ObjectId;
 
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.*;
 import java.util.*;
 
+@Entity
+@Table(name = DatabaseInfo.Game.Player.Table, indexes = {
+        @Index(name = "NAME_IDX", columnList = DatabaseInfo.Game.Player.Name),
+        @Index(name = "ACCNAME_IDX", columnList = DatabaseInfo.Game.Player.AccountName)
+    }
+)
 public class Player {
-    private ObjectId id;
+    @Id
+    //@GeneratedValue(generator = "uuid2")
+    //@GenericGenerator(name = "id", strategy = "uuid2")
+    private UUID id;
+
+    @Column(name = DatabaseInfo.Game.Player.Name, unique = true, nullable = false)
     private String name;
+
+    @Column(name = DatabaseInfo.Game.Player.AccountName, unique = true, nullable = false)
     private String account;
+
+    @Column(name = DatabaseInfo.Game.Player.Money, nullable = false)
     private long money;
-    private HashMap<ObjectId, Building> buildings;
+
+    //private HashMap<ObjectId, Building> buildings;
+
+    @Column(name = DatabaseInfo.Game.Player.OfflineTs, nullable = false)
     private long offlineTs;
+
+    @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
     private Ground ground;
+
+    @Embedded
     private GridIndex position;
     private City city;
-    private HashMap<ObjectId, Integer> lockedMoney = new HashMap<>();
+
+    @ElementCollection
+    @CollectionTable(name="locked_money", joinColumns=@JoinColumn(name="player_id",referencedColumnName="id"))
+    @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
+    @MapKeyColumn(name = "transaction_id")
+    @Column(name="money", nullable = false)
+    private HashMap<UUID, Integer> lockedMoney = new HashMap<>();
+
     private GameSession session;
     public Player(String name, String account) {
-        this.id = new ObjectId();
+        this.id = UUID.randomUUID();
         this.account = account;
         this.name = name;
         this.offlineTs = 0;
@@ -35,23 +65,10 @@ public class Player {
         this.position = new GridIndex(0,0);
 
     }
-    public Player(Document doc){
-        this.id = doc.getObjectId("_id");
-        this.onlineTs = doc.getLong(RoleFieldName.OnlineTsFieldName);
-        this.offlineTs = doc.getLong(RoleFieldName.OfflineTsFieldName);
-        this.name = doc.getString(RoleFieldName.NameFieldName);
-        this.account = doc.getString(RoleFieldName.AccountNameFieldName);
-        this.money = doc.getLong(RoleFieldName.MoneyFieldName);
-        this.position = new GridIndex((Document)doc.get("coord"));
-        for(Document d : (List<Document>) doc.get("lockMoney")) {
-            ObjectId tid = d.getObjectId("tid");
-            int m = d.getInteger("m");
-            this.lockedMoney.put(tid, m);
-        }
-    }
+
     public Gs.Role toProto() {
         return Gs.Role.newBuilder()
-                .setId(ByteString.copyFrom(id.toByteArray()))
+                .setId(ByteString.copyFrom(Util.toBytes(id())))
                 .setName(this.name)
                 .setMoney(this.money)
                 .setLockedMoney(this.lockedMoney())
@@ -77,34 +94,18 @@ public class Player {
         if(this.session != null)
             this.session.write(pack);
     }
-    ObjectId id() {
+    UUID id() {
         return id;
     }
     public void online() {
         this.onlineTs = System.currentTimeMillis();
-        GameDb.updatePlayerOnlineTs(this.id, this.onlineTs);
+        GameDb.saveOrUpdate(this);
     }
     public void offline(){
         this.offlineTs = System.currentTimeMillis();
-        GameDb.updatePlayerOfflineTs(this.id, this.offlineTs);
+        GameDb.saveOrUpdate(this);
     }
-    Document toBson() {
-        List<Document> lockMoneyArr = new ArrayList<>();
-        for(Map.Entry<ObjectId, Integer> e : lockedMoney.entrySet()) {
-            Document d = new Document();
-            d.append("tid", e.getKey());
-            d.append("m", e.getValue());
-            lockMoneyArr.add(d);
-        }
-        Document doc = new Document()
-                //.append("_id", this.id)
-                //.append("acc", this.account)
-                //.append("name", this.name)
-                .append("coord", this.position.toBson())
-                .append(RoleFieldName.MoneyFieldName, this.money)
-                .append("lockMoney", lockMoneyArr);
-        return doc;
-    }
+
     String getAccount() {
         return account;
     }
@@ -137,7 +138,7 @@ public class Player {
             e.printStackTrace();
         }
     }
-    public void lockMoney(ObjectId transactionId, int price) {
+    public void lockMoney(UUID transactionId, int price) {
         Integer p = lockedMoney.get(transactionId);
         if(p != null) {
             this.money += (p - price);
@@ -147,7 +148,7 @@ public class Player {
             lockedMoney.put(transactionId, price);
         }
     }
-    public int unlockMoney(ObjectId transactionId) {
+    public int unlockMoney(UUID transactionId) {
         Integer p = lockedMoney.get(transactionId);
         if(p != null) {
             this.money += p;
@@ -167,33 +168,14 @@ public class Player {
         return true;
     }
 
-    public void bidWin(GroundAuction.Auction a) {
-        this.addGround(a.meta.area);
-        int p = this.spentLockMoney(a.meta.id);
-        ClientSession session = GameDb.startTransaction();
-        this.save();
-        GroundAuction.instance().save();
-        GameDb.commit(session);
-        this.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(p).build()));
-    }
-
-    private int spentLockMoney(ObjectId id) {
+    public int spentLockMoney(UUID id) {
         return this.lockedMoney.remove(id);
     }
-    public void save() {
-        GameDb.update(this);
-    }
-    public void groundBidingFail(ObjectId id, GroundAuction.Auction a) {
-        int m = this.unlockMoney(a.meta.id);
-        GameDb.update(this);
-        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(m).build()));
-    }
 
-    public RoleBriefInfo briefInfo() {
-        RoleBriefInfo res = new RoleBriefInfo();
-        res.id = this.id;
-        res.name = this.name;
-        return res;
+    public void groundBidingFail(UUID id, GroundAuction.Entry a) {
+        int m = this.unlockMoney(a.meta.id);
+        GameDb.saveOrUpdate(this);
+        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(m).build()));
     }
 
     public String getName() {
