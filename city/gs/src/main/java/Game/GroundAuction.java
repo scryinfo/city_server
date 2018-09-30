@@ -19,11 +19,18 @@ import java.util.*;
 @Entity
 @Table(name = "ground_auction")
 public class GroundAuction {
+    public static final int ID = 0;
     private static final Logger logger = Logger.getLogger(GroundAuction.class);
-    private static final GroundAuction instance = new GroundAuction();
+    private static GroundAuction instance;
     public static GroundAuction instance() {
         return instance;
     }
+    public static void init() {
+        instance = GameDb.getGroundAction();
+        instance.loadMore();
+    }
+    @Id
+    public final int id = ID;
 
     @Entity
     @Table(name = "ground_auction_entry")
@@ -61,7 +68,7 @@ public class GroundAuction {
     @OneToMany
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKey(name = "metaId")
-    private HashMap<UUID, Entry> auctions = new HashMap<>();
+    private Map<UUID, Entry> auctions = new HashMap<>();
     public void loadMore() {
         Set<MetaGroundAuction> m = MetaData.getNonFinishedGroundAuction();
         Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
@@ -77,13 +84,6 @@ public class GroundAuction {
         });
         GameDb.saveOrUpdate(newAdds);
         GameServer.allClientChannels.writeAndFlush(Package.create(GsCode.OpCode.metaGroundAuctionAddInform_VALUE, builder.build()));
-    }
-    private GroundAuction() {
-        Collection<Entry> auctions = GameDb.getAllGroundAction();
-        for(Entry a : auctions) {
-            this.auctions.put(a.metaId, a);
-        }
-        loadMore();
     }
 
     public void update(long diffNano) {
@@ -165,5 +165,6 @@ public class GroundAuction {
     public void unregist(ChannelId id) {
         this.watcher.remove(id);
     }
+    @Transient
     private Set<ChannelId> watcher = new HashSet<>();
 }

@@ -47,14 +47,14 @@ public abstract class Building {
     protected MetaBuilding metaBuilding;
 
     @Embeddable //hide those members, the only purpose is to mapping to the table
-    protected static class AdapterData {
+    protected static class _D {
         @Column(name = "mid", updatable = false, nullable = false)
         protected int metaId;
         @Column(name = "flowHistory")
         private byte[] flowHistoryBinary;
     }
     @Embedded
-    protected final AdapterData adapterData = new AdapterData();
+    protected final _D _d = new _D();
 
     // don't override this in subclass, or else this function will not gets called unless call super._base1()
     // so I name this function names strange in purpose
@@ -63,11 +63,11 @@ public abstract class Building {
     private void _base1() {
         Document d = new Document();
         d.append("1",  this.flowHistory.stream().flatMap(f -> Stream.of(f.n, f.ts)).collect(Collectors.toList()));
-        this.adapterData.flowHistoryBinary = Util.toBytes(d);
+        this._d.flowHistoryBinary = Util.toBytes(d);
     }
     @PostLoad
     private void _base2() {
-        Document d = Util.toDocument(this.adapterData.flowHistoryBinary);
+        Document d = Util.toDocument(this._d.flowHistoryBinary);
         List<Integer> l = (List<Integer>) d.get("1");
         for(int i = 0; i < l.size(); i+=2) {
             this.flowHistory.add(new FlowInfo(l.get(i), l.get(i+1)));
@@ -123,7 +123,7 @@ public abstract class Building {
         this.ownerId = ownerId;
         this.coord = pos;
         this.metaBuilding = meta;
-        this.adapterData.metaId = meta.id;
+        this._d.metaId = meta.id;
     }
     Set<Npc> getAllNpc() {
         return allNpc;
@@ -142,9 +142,9 @@ public abstract class Building {
 //        this.happy = doc.getInteger("happy");
 //
 //        int lastFlow = 0;
-//        for(Document d : (List<Document>) doc.get("flowHis")) {
-//            long ts = d.getLong("t");
-//            int n = d.getInteger("n");
+//        for(Document _d : (List<Document>) doc.get("flowHis")) {
+//            long ts = _d.getLong("t");
+//            int n = _d.getInteger("n");
 //            this.flowHistory.add(new FlowInfo(ts, n));
 //            lastFlow = n;
 //        }
@@ -174,10 +174,10 @@ public abstract class Building {
 //
 //        List<Document> flowHistoryArr = new ArrayList<>();
 //        for(FlowInfo i : this.flowHistory) {
-//            Document d = new Document();
-//            d.append("t", i.ts);
-//            d.append("n", i.n);
-//            flowHistoryArr.add(d);
+//            Document _d = new Document();
+//            _d.append("t", i.ts);
+//            _d.append("n", i.n);
+//            flowHistoryArr.add(_d);
 //        }
 //        res.append("flowHis", flowHistoryArr);
 //        return res;

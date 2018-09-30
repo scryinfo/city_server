@@ -5,6 +5,8 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import javax.persistence.Entity;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +14,19 @@ import java.util.UUID;
 
 @Entity(name = "PublicFacility")
 public class PublicFacility extends Building {
+    @Transient
     private MetaPublicFacility meta;
+
+    @Transient
     private int rent;
+    @Transient
     private HashMap<ObjectId, List<Contract>> contract = new HashMap<ObjectId, List<Contract>>();
+
+    @PostLoad
+    private void _1() {
+        this.meta = MetaData.getPublicFacility(this._d.metaId);
+        this.metaBuilding = this.meta;
+    }
 
     @Override
     public Message detailProto() {

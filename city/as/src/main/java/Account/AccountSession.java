@@ -126,7 +126,7 @@ public class AccountSession {
             else
                 cag.setAvailable(false);
             try {
-                for(RoleBriefInfo briefInfo : AccountDb.getRoleBriefInfos(this.accountName, gsInfo.getGameDbUri())) {
+                for(RoleBriefInfo briefInfo : AccountDb.getRoleBriefInfos(this.accountName, gsInfo.getGameDbUrl())) {
                     cag.addBriefInfoBuilder()
                             .setId(Util.toByteString(briefInfo.id))
                             .setName(briefInfo.name)

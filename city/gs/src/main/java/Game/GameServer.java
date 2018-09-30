@@ -22,7 +22,6 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -56,7 +55,7 @@ public class GameServer {
         MetaData.startUp();
 
         // db info is in hibernate.xml now
-        //GameDb.init(gsInfo.getGameDbUri());
+        //GameDb.init(gsInfo.getGameDbUrl());
         //GameDb.startUp();
     }
 
@@ -69,7 +68,7 @@ public class GameServer {
     public void run() throws Exception {
         City.init(MetaData.getCity()); // some other object depend on city, so init it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
-        GroundAuction.instance();
+        GroundAuction.init();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -123,12 +122,11 @@ public class GameServer {
             bossGroup.shutdownGracefully();
         }
     }
-
     public static void main(String[] args) throws Exception {
         // By default, logging is enabled via the popular SLF4J API. The use of SLF4J is optional; the driver will use SLF4J if the driver detects the presence of SLF4J in the classpath. Otherwise, the driver will fall back to JUL (java.util.logging)
         java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
-
         GlobalConfig.init(args[0]);
+        GameDb.init(args[1]);
         new GameServer().run();
     }
 }

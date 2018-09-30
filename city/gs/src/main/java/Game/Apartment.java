@@ -1,10 +1,11 @@
 package Game;
 
 import gs.Gs;
-import org.bson.Document;
-import org.bson.types.ObjectId;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 import java.util.*;
 
 @Entity(name = "Apartment")
@@ -14,21 +15,37 @@ public class Apartment extends Building {
         super(meta, pos, ownerId);
         this.meta = meta;
     }
-
+    @Transient
     private MetaApartment meta;
+
+    @Column(name = "rent", nullable = false)
+    private int rent;
+
+    @Transient
+    private Map<UUID, Npc> guest = new HashMap<>();
+
+    @Transient
+    private Deque<Integer> incomingHistory = new ArrayDeque<>();
+
+    @PostLoad
+    private void _1() {
+        this.meta = MetaData.getApartment(this._d.metaId);
+        this.metaBuilding = this.meta;
+    }
 
     public void setRent(int n) {
         this.rent = n;
     }
-    private int rent;
+
+
+
     public int rent() {
         return rent;
     }
     public void take(Npc npc) {
         guest.put(npc.id(), npc);
     }
-    private Map<UUID, Npc> guest = new HashMap<>();
-    private Deque<Integer> incomingHistory = new ArrayDeque<>();
+
     public Gs.ApartmentInfo detailProto() {
         return Gs.ApartmentInfo.newBuilder()
                 .setCommon(this.commonProto())

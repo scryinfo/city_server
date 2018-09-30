@@ -67,7 +67,7 @@ public class GameServerSession {
 			else {
 				ip = gsInfo.getIp();
 				port = gsInfo.getPort();
-				playerDbUri = gsInfo.getGameDbUri();
+				playerDbUri = gsInfo.getGameDbUrl();
 				valid = true;
 
 				AccountServer.allGsChannels.add(ctx.channel());

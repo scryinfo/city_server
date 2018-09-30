@@ -18,18 +18,19 @@ import org.hibernate.query.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public class GameDb {
-	private static final SessionFactory sessionFactory = buildSessionFactory();
+	private static SessionFactory sessionFactory;
 	private static final int BATCH_SIZE = 25;
-
+	private static String HIBERNATE_CFG_PATH;
 	private static SessionFactory buildSessionFactory() {
 		try {
-			StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder().configure("hibernate.cfg.xml").build();
+			StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder().configure(new File(HIBERNATE_CFG_PATH)).build();
 			Metadata metadata = new MetadataSources(standardRegistry).getMetadataBuilder().build();
 			return metadata.getSessionFactoryBuilder().build();
 		} catch (Throwable ex) {
@@ -68,28 +69,81 @@ public class GameDb {
 		return success;
 	}
 
-	public static Collection<GroundAuction.Entry> getAllGroundAction() {
-		Collection<GroundAuction.Entry> res;
+	public static GroundAuction getGroundAction() {
 		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<GroundAuction.Entry> criteria = builder.createQuery(GroundAuction.Entry.class);
-		criteria.from(GroundAuction.Entry.class);
-		res = session.createQuery(criteria).list();
-		session.close();
-		return res;
+		return session.get(GroundAuction.class, GroundAuction.ID);
 	}
 
 	public static Collection<Building> getAllBuilding() {
-		Collection<Building> res;
+		List<Building> res = new ArrayList<>();
+		res.addAll(getAllLaboratory());
+		res.addAll(getAllMaterialFactory());
+		res.addAll(getAllProductingDepartment());
+		res.addAll(getAllPublicFacility());
+		res.addAll(getAllRetailShop());
+		res.addAll(getAllApartment());
+		return res;
+	}
+	public static Collection<Laboratory> getAllLaboratory() {
+		Collection<Laboratory> res;
 		Session session = sessionFactory.openSession();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Building> criteria = builder.createQuery(Building.class);
-		criteria.from(Building.class);
+		CriteriaQuery<Laboratory> criteria = builder.createQuery(Laboratory.class);
+		criteria.from(Laboratory.class);
 		res = session.createQuery(criteria).list();
 		session.close();
 		return res;
 	}
-
+	public static Collection<MaterialFactory> getAllMaterialFactory() {
+		Collection<MaterialFactory> res;
+		Session session = sessionFactory.openSession();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<MaterialFactory> criteria = builder.createQuery(MaterialFactory.class);
+		criteria.from(MaterialFactory.class);
+		res = session.createQuery(criteria).list();
+		session.close();
+		return res;
+	}
+	public static Collection<ProductingDepartment> getAllProductingDepartment() {
+		Collection<ProductingDepartment> res;
+		Session session = sessionFactory.openSession();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<ProductingDepartment> criteria = builder.createQuery(ProductingDepartment.class);
+		criteria.from(ProductingDepartment.class);
+		res = session.createQuery(criteria).list();
+		session.close();
+		return res;
+	}
+	public static Collection<PublicFacility> getAllPublicFacility() {
+		Collection<PublicFacility> res;
+		Session session = sessionFactory.openSession();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<PublicFacility> criteria = builder.createQuery(PublicFacility.class);
+		criteria.from(PublicFacility.class);
+		res = session.createQuery(criteria).list();
+		session.close();
+		return res;
+	}
+	public static Collection<RetailShop> getAllRetailShop() {
+		Collection<RetailShop> res;
+		Session session = sessionFactory.openSession();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<RetailShop> criteria = builder.createQuery(RetailShop.class);
+		criteria.from(RetailShop.class);
+		res = session.createQuery(criteria).list();
+		session.close();
+		return res;
+	}
+	public static Collection<Apartment> getAllApartment() {
+		Collection<Apartment> res;
+		Session session = sessionFactory.openSession();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Apartment> criteria = builder.createQuery(Apartment.class);
+		criteria.from(Apartment.class);
+		res = session.createQuery(criteria).list();
+		session.close();
+		return res;
+	}
 	public static void saveOrUpdate(Collection objs) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -206,6 +260,11 @@ public class GameDb {
 		session.close();
 		return res;
 	}
+
+	public static void init(String arg) {
+		HIBERNATE_CFG_PATH = arg;
+		sessionFactory = buildSessionFactory();
+	}
 }
 //public class GameDb {
 //	private static final Logger logger = Logger.getLogger(GameDb.class);
@@ -254,10 +313,10 @@ public class GameDb {
 //			.build(
 //					new CacheLoader<ObjectId, Player>() {
 //						public Player load(ObjectId id) {
-//							Document d = playerCol.find(Filters.eq(id)).first();
-//							if(d == null)
+//							Document _d = playerCol.find(Filters.eq(id)).first();
+//							if(_d == null)
 //								return null;
-//							return new Player(d);
+//							return new Player(_d);
 //						}
 //					});
 //	public static Player getPlayer(ObjectId id) {
@@ -301,8 +360,8 @@ public class GameDb {
 //		return groundAuctionCol.find(Filters.eq("_id", id)).first();
 //    }
 //
-//	public static void updateGroundAuction(Document d, int serverId) {
-//		groundAuctionCol.updateOne(Filters.eq(serverId), d);
+//	public static void updateGroundAuction(Document _d, int serverId) {
+//		groundAuctionCol.updateOne(Filters.eq(serverId), _d);
 //	}
 //
 //	public static Set<Building> readAllBuilding() {

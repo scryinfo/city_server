@@ -1,8 +1,6 @@
 package Game;
 
 import com.google.protobuf.Message;
-import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
@@ -20,7 +18,7 @@ public class MaterialFactory extends Building{
     private MetaMaterialFactory meta;
     @PostLoad
     private void _1() {
-        this.meta = MetaData.getMaterialFactory(this.adapterData.metaId);
+        this.meta = MetaData.getMaterialFactory(this._d.metaId);
         this.metaBuilding = this.meta;
     }
     @Override

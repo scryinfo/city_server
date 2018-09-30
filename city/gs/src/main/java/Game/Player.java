@@ -8,11 +8,14 @@ import com.google.protobuf.ByteString;
 import gs.Gs;
 import gscode.GsCode;
 
+import org.bson.Document;
 import org.hibernate.annotations.MapKeyType;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = DatabaseInfo.Game.Player.Table, indexes = {
@@ -35,17 +38,19 @@ public class Player {
     @Column(name = DatabaseInfo.Game.Player.Money, nullable = false)
     private long money;
 
-    //private HashMap<ObjectId, Building> buildings;
-
     @Column(name = DatabaseInfo.Game.Player.OfflineTs, nullable = false)
     private long offlineTs;
 
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
+
+    @Embedded
     private Ground ground;
 
     @Embedded
     private GridIndex position;
+
+    @Transient
     private City city;
 
     @ElementCollection
@@ -53,9 +58,11 @@ public class Player {
     @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
     @MapKeyColumn(name = "transaction_id")
     @Column(name="money", nullable = false)
-    private HashMap<UUID, Integer> lockedMoney = new HashMap<>();
+    private Map<UUID, Integer> lockedMoney = new HashMap<>();
 
+    @Transient
     private GameSession session;
+
     public Player(String name, String account) {
         this.id = UUID.randomUUID();
         this.account = account;
@@ -63,7 +70,10 @@ public class Player {
         this.offlineTs = 0;
         this.money = 0;
         this.position = new GridIndex(0,0);
+        this.ground = new Ground();
+    }
 
+    public Player() {
     }
 
     public Gs.Role toProto() {
