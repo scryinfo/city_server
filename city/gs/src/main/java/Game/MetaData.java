@@ -45,16 +45,10 @@ class MetaCity {
 	public int[] timeSection;
     public int minHour;
     public int indexOfHour(int nowHour) {
-        int res = -1;
-        for(int i = 0; i < this.timeSection.length; ++i) {
-            if(nowHour > this.timeSection[i])
-                break;
-            if(nowHour == this.timeSection[i]) {
-                res = i;
-                break;
-            }
-        }
-        return res;
+        int idx = Arrays.binarySearch(this.timeSection, nowHour);
+        if(idx < 0)
+            idx = -(idx+2); // fuck java
+        return this.timeSection[idx];
     }
 
     private int minTimeSectionHour() {
