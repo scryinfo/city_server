@@ -1,13 +1,13 @@
 package Game;
 
 
-import Shared.DatabaseInfo;
 import Shared.RoleBriefInfo;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -63,12 +63,20 @@ public class GameDb {
 			success = true;
 		} catch (RuntimeException e) { // the exception is complex, may be javax.PersistenceException, or HibernateException, or jdbc exception ...
 			transaction.rollback();
+			e.printStackTrace();
 		} finally {
 			session.close();
 		}
 		return success;
 	}
-
+	public static void initGroundAction() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(GroundAuction.class, GroundAuction.ID) == null)
+			statelessSession.insert(new GroundAuction());
+		transaction.commit();
+		statelessSession.close();
+	}
 	public static GroundAuction getGroundAction() {
 		Session session = sessionFactory.openSession();
 		return session.get(GroundAuction.class, GroundAuction.ID);
@@ -184,8 +192,9 @@ public class GameDb {
 		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 		CriteriaQuery<RoleBriefInfo> criteriaQuery = criteriaBuilder.createQuery(RoleBriefInfo.class);
 		Root<Player> root = criteriaQuery.from(Player.class);
-		criteriaQuery.multiselect(root.get(DatabaseInfo.Game.Player.Name), root.get(DatabaseInfo.Game.Player.OfflineTs));
-		criteriaQuery.where(criteriaBuilder.equal(root.get(DatabaseInfo.Game.Player.AccountName), account));
+		// shouldn't this be column name? why field name??
+		criteriaQuery.multiselect(root.get("id"), root.get("account"), root.get("onlineTs"));
+		criteriaQuery.where(criteriaBuilder.equal(root.get("account"), account));
 		Query<RoleBriefInfo> query = session.createQuery(criteriaQuery);
 		return query.getResultList();
 	}

@@ -16,14 +16,10 @@ public class GridIndex implements Comparable<GridIndex> {
         this.x = x;
         this.y = y;
     }
-    GridIndex(Document d) {
-        this.x = d.getInteger("x");
-        this.y = d.getInteger("y");
-    }
+    GridIndex(){}
     Gs.GridIndex toProto() {
         return Gs.GridIndex.newBuilder().setX(x).setY(y).build();
     }
-    Document toBson(){return new Document().append("x", x).append("y", y);}
     @Override
     public final boolean equals(Object obj) {
         if(obj instanceof GridIndex)

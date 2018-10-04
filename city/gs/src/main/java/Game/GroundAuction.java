@@ -26,6 +26,7 @@ public class GroundAuction {
         return instance;
     }
     public static void init() {
+        GameDb.initGroundAction();
         instance = GameDb.getGroundAction();
         instance.loadMore();
     }
