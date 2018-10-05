@@ -11,8 +11,8 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-
+sourceSets {
+    main.java.srcDirs += 'src/jpaModelgen/generated'
 }
 
 jar {

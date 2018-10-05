@@ -9,3 +9,4 @@
 /city/shared/build
 /city/shared/out
 /city/log
+/city/gs/src/jpaModelgen/*

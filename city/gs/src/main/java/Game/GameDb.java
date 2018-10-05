@@ -192,9 +192,8 @@ public class GameDb {
 		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 		CriteriaQuery<RoleBriefInfo> criteriaQuery = criteriaBuilder.createQuery(RoleBriefInfo.class);
 		Root<Player> root = criteriaQuery.from(Player.class);
-		// shouldn't this be column name? why field name??
-		criteriaQuery.multiselect(root.get("id"), root.get("account"), root.get("onlineTs"));
-		criteriaQuery.where(criteriaBuilder.equal(root.get("account"), account));
+		criteriaQuery.multiselect(root.get(Player_.id), root.get(Player_.account), root.get(Player_.offlineTs));
+		criteriaQuery.where(criteriaBuilder.equal(root.get(Player_.account), account));
 		Query<RoleBriefInfo> query = session.createQuery(criteriaQuery);
 		return query.getResultList();
 	}
