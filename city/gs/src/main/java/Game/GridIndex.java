@@ -1,7 +1,6 @@
 package Game;
 
 import gs.Gs;
-import org.bson.Document;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

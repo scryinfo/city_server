@@ -5,7 +5,9 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 @Embeddable

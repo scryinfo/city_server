@@ -1,14 +1,9 @@
 package Shared;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;  
-import java.io.InputStreamReader;  
-import java.util.HashMap;  
-import java.util.Map;  
-import java.util.Properties;  
-
-import java.io.File;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class IniReader {  
     private Map<String, Properties> sectionsMap = new HashMap<String, Properties>();  

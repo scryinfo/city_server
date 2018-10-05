@@ -3,19 +3,17 @@ package Game;
 import Shared.DatabaseInfo;
 import Shared.Package;
 import Shared.Util;
-
 import com.google.protobuf.ByteString;
 import gs.Gs;
 import gscode.GsCode;
-
-import org.bson.Document;
 import org.hibernate.annotations.MapKeyType;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Entity
 @Table(name = DatabaseInfo.Game.Player.Table, indexes = {

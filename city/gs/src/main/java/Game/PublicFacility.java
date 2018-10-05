@@ -1,7 +1,6 @@
 package Game;
 
 import com.google.protobuf.Message;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import javax.persistence.Entity;

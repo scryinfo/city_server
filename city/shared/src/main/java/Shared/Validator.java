@@ -1,10 +1,10 @@
 package Shared;
 
+import org.apache.log4j.Logger;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-
-import org.apache.log4j.Logger;
 
 public class Validator {
 	static class Login {

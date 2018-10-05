@@ -8,10 +8,9 @@ import ascode.AsCode;
 import com.google.protobuf.Message;
 import ga.Ga;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
-
-import io.netty.channel.ChannelHandlerContext;
 
 
 public class GameServerSession {

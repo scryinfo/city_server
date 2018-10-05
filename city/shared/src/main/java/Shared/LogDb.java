@@ -1,12 +1,8 @@
 package Shared;
 
-import com.mongodb.client.MongoDatabase;
-import org.apache.log4j.Logger;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.MongoException;
-import org.bson.Document;
+import com.mongodb.client.MongoDatabase;
 
 public class LogDb {
 	private static final String dbName = "log";

@@ -1,16 +1,15 @@
 package Shared;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mongodb.Block;
-import org.bson.Document;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ServerCfgDb {
 		private static AccountServerInfo accInfo;

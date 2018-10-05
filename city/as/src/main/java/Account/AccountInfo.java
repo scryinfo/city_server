@@ -1,10 +1,10 @@
 package Account;
 
+import org.bson.Document;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-
-import org.bson.Document;
 
 public final class AccountInfo {
 	public String name;

@@ -1,17 +1,13 @@
 package Game;
 
 import Shared.Util;
-import com.google.protobuf.ByteString;
 import com.mongodb.Block;
-import com.mongodb.client.model.Filters;
-import gs.Gs;
-import org.apache.log4j.Logger;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
+import gs.Gs;
+import org.apache.log4j.Logger;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

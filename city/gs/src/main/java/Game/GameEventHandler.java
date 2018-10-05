@@ -1,8 +1,8 @@
 package Game;
 
 import Shared.Package;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 
 public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
 	private GameSession session;

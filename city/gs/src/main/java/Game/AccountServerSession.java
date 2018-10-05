@@ -2,15 +2,13 @@ package Game;
 
 import Shared.Package;
 import Shared.Validator;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import common.Common;
 import ga.Ga;
 import gacode.GaCode;
-import org.apache.log4j.Logger;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.log4j.Logger;
 
 public class AccountServerSession {
 	private static final Logger logger = Logger.getLogger(AccountServerSession.class);
