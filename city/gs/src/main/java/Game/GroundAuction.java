@@ -35,17 +35,19 @@ public class GroundAuction {
     @Entity
     @Table(name = "ground_auction_entry")
     public static class Entry {
-
+        public Entry(){}
         public Entry(MetaGroundAuction meta) {
             this.metaId = meta.id;
             this.meta = meta;
             this.timer = new DateTimeTracker(meta.beginTime, meta.endTime);
         }
         public Gs.GroundAuction.Target toProto() {
-            return Gs.GroundAuction.Target.newBuilder()
-                    .setId(Util.toByteString(meta.id))
-                    .setBiderId(Util.toByteString(biderId))
-                    .build();
+            Gs.GroundAuction.Target.Builder b =  Gs.GroundAuction.Target.newBuilder();
+            b.setId(Util.toByteString(meta.id));
+            b.setPrice(price);
+            if(biderId != null)
+                b.setBiderId(Util.toByteString(biderId));
+            return b.build();
         }
         @Transient
         MetaGroundAuction meta;

@@ -71,6 +71,28 @@ class MetaCity {
             return timeSectionDuration(index+1);
     }
 }
+abstract class MetaItem {
+    MetaItem(Document d) {
+        this.id = d.getInteger("id");
+        this.n = d.getDouble("numOneSec");
+    }
+    int id;
+    double n;
+    int size;
+}
+final class MetaMaterial extends MetaItem {
+    MetaMaterial(Document d) {
+        super(d);
+    }
+
+}
+final class MetaGood extends MetaItem {
+    MetaGood(Document d) {
+        super(d);
+        this.lux = d.getInteger("lux");
+    }
+    int lux;
+}
 class MetaBuilding {
     public static final int TRIVIAL = 10;
     public static final int MATERIAL = 11;
@@ -102,13 +124,14 @@ class MetaApartment extends MetaBuilding {
     }
 	public int npc;
 }
-class MetaMaterialFactory extends MetaBuilding {
-	public int lineNum;
-	public int workerMaxNumInOneLine;
-	public int storeCapacity;
-	public int shelfCapacity;
 
-    MetaMaterialFactory(Document d) {
+abstract class MetaFactoryBase extends MetaBuilding {
+    public int lineNum;
+    public int workerMaxNumInOneLine;
+    public int storeCapacity;
+    public int shelfCapacity;
+
+    MetaFactoryBase(Document d) {
         super(d);
         this.lineNum = d.getInteger("lineNum");
         this.workerMaxNumInOneLine = d.getInteger("workerMaxNumInOneLine");
@@ -116,18 +139,15 @@ class MetaMaterialFactory extends MetaBuilding {
         this.shelfCapacity = d.getInteger("shelfCapacity");
     }
 }
-class MetaProductingDepartment extends MetaBuilding {
-    public int lineNum;
-    public int workerMaxNumInOneLine;
-    public int storeCapacity;
-    public int shelfCapacity;
+class MetaMaterialFactory extends MetaFactoryBase {
+    MetaMaterialFactory(Document d) {
+        super(d);
+    }
+}
+class MetaProductingDepartment extends MetaFactoryBase {
 
     MetaProductingDepartment(Document d) {
         super(d);
-        this.lineNum = d.getInteger("lineNum");
-        this.workerMaxNumInOneLine = d.getInteger("workerMaxNumInOneLine");
-        this.storeCapacity = d.getInteger("storeCapacity");
-        this.shelfCapacity = d.getInteger("shelfCapacity");
     }
 }
 class MetaRetailShop extends MetaBuilding {
@@ -216,6 +236,9 @@ public class MetaData {
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
     private static final TreeMap<Integer, MetaMaterialFactory> materialFactory = new TreeMap<>();
 
+    private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
+    private static final HashMap<Integer, MetaGood> good = new HashMap<>();
+
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
     }
@@ -249,6 +272,17 @@ public class MetaData {
         // Initial building ObjectId have no requirement to be identity all the time, so omit it
     }
     private static final List<InitialBuildingInfo> initialBuilding = new ArrayList<>();
+
+    public static final MetaMaterial getMaterial(int id) {
+        return material.get(id);
+    }
+    public static final MetaGood getGood(int id) {
+        return good.get(id);
+    }
+    public static final MetaItem getItem(int id) {
+        MetaItem res = getMaterial(id);
+        return res == null ? getGood(id):res;
+    }
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }

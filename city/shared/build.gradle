@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    //testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'com.google.protobuf:protobuf-java:3.6.1'
 }
 
 task myCopyTask(type: Copy) {

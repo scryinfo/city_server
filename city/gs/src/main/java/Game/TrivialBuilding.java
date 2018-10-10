@@ -15,4 +15,9 @@ public class TrivialBuilding extends Building {
     public Message detailProto() {
         return null;
     }
+
+    @Override
+    protected void _update(long diffNano) {
+
+    }
 }

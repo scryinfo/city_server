@@ -76,7 +76,7 @@ public class Player {
 
     public Gs.Role toProto() {
         return Gs.Role.newBuilder()
-                .setId(ByteString.copyFrom(Util.toBytes(id())))
+                .setId(Util.toByteString(id()))
                 .setName(this.name)
                 .setMoney(this.money)
                 .setLockedMoney(this.lockedMoney())

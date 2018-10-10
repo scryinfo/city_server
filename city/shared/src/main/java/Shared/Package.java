@@ -21,6 +21,10 @@ public class Package {
 	public static Package create(int opcode, com.google.protobuf.Message message) {
 		return new Package(opcode, message);
 	}
+//	public static Package create(int opcode, com.google.protobuf.GeneratedMessageV3 message) {
+//		return new Package(opcode, message);
+//	}
+
 	public static Package create(int opcode) {
 		return new Package(opcode);
 	}

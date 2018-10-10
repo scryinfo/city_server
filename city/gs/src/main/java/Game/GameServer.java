@@ -7,11 +7,10 @@ import ga.Ga;
 import gacode.GaCode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.ChannelMatcher;
+import io.netty.channel.group.ChannelMatchers;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -25,9 +24,7 @@ import org.apache.log4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 public class GameServer {
@@ -40,6 +37,19 @@ public class GameServer {
     public static AccountServerInfo accInfo;
     public int getId() {
         return id;
+    }
+    private static class ChannelIdsMatcher implements ChannelMatcher {
+        private Collection<ChannelId> channelIds;
+        ChannelIdsMatcher(Collection<ChannelId> ids) {
+            this.channelIds = ids;
+        }
+        @Override
+        public boolean matches(Channel channel) {
+            return channelIds.contains(channel.id());
+        }
+    }
+    public static void sendTo(Collection<ChannelId> ids, Package pack) {
+        allClientChannels.writeAndFlush(pack, new ChannelIdsMatcher(ids));
     }
     public GameServer() throws Exception {
         ServerCfgDb.init(GlobalConfig.configUri());

@@ -1,8 +1,9 @@
-//syntax = "proto3";
+syntax = "proto3";
 
 package gacode;
 
 enum OpCode{
+	error = 0;
 	login = 1;
 	serverInfo = 2;
 	stateReport = 3;

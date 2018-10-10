@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package DB;
+
+message Lines {
+	message Line {
+		bytes id = 1;
+		int32 itemId = 2;
+		int32 nowCount = 3;
+		int32 targetCount = 4;
+		int32 workerNum = 5;
+		int64 sumNano = 6;
+	}
+	repeated Line line = 1;
+}
+
+message Store {
+	map<int32, int32> store = 1;
+}
+
+message FlowHistory {
+	message Info {
+		int32 ts = 1;
+		int32 n = 2;
+	}
+	repeated Info i = 1;
+}

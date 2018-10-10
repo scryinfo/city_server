@@ -10,12 +10,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
+import org.bson.types.ObjectId;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -244,12 +242,14 @@ public class GameSession {
 		else
 			this.write(Package.create(cmd));
 	}
+
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
+		b.watchDetailInfo(this);
 		this.write(Package.create(cmd, ((Apartment)b).detailProto()));
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
@@ -278,10 +278,42 @@ public class GameSession {
 		Gs.ByteNum c = (Gs.ByteNum) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.type() != MetaBuilding.APARTMENT)
+		if(b == null || b.type() != MetaBuilding.APARTMENT || !b.ownerId().equals(player.id()))
 			return;
 		Apartment a = (Apartment)b;
 		a.setRent(c.getNum());
 		this.write(Package.create(cmd, c));
+	}
+	public void addLine(short cmd, Message message) {
+		Gs.AddLine c = (Gs.AddLine) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || (b.type() != MetaBuilding.PRODUCTING && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+			return;
+		MetaItem m = MetaData.getItem(c.getItemId());
+		if (m == null)
+			return;
+		FactoryBase f = (FactoryBase) b;
+		if (f.freeWorkerNum() < c.getWorkerNum() || f.lineFull())
+			return;
+		LineBase line = f.addLine(m);
+		this.write(Package.create(cmd, line.toProto()));
+	}
+
+	public void changeLine(short cmd, Message message) {
+		Gs.ChangeLine c = (Gs.ChangeLine) message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if (b == null || (b.type() != MetaBuilding.PRODUCTING && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+			return;
+		ObjectId lineId = new ObjectId(c.getLineId().toByteArray());
+        FactoryBase f = (FactoryBase) b;
+        OptionalInt tn = c.hasTargetNum()?OptionalInt.of(c.getTargetNum()):OptionalInt.empty();
+        OptionalInt wn = c.hasWorkerNum()?OptionalInt.of(c.getWorkerNum()):OptionalInt.empty();
+        boolean ok = f.changeLine(lineId, tn, wn);
+        if(ok)
+            this.write(Package.create(cmd, c));
+        else
+            this.write(Package.fail(cmd));
 	}
 }

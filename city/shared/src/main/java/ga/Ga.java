@@ -6,54 +6,52 @@ package ga;
 public final class Ga {
   private Ga() {}
   public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
+      com.google.protobuf.ExtensionRegistryLite registry) {
   }
-  public interface LoginOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
 
-    // required int32 id = 1;
+  public static void registerAllExtensions(
+      com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions(
+        (com.google.protobuf.ExtensionRegistryLite) registry);
+  }
+  public interface LoginOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ga.Login)
+      com.google.protobuf.MessageOrBuilder {
+
     /**
-     * <code>required int32 id = 1;</code>
-     */
-    boolean hasId();
-    /**
-     * <code>required int32 id = 1;</code>
+     * <code>int32 id = 1;</code>
      */
     int getId();
   }
   /**
    * Protobuf type {@code ga.Login}
    */
-  public static final class Login extends
-      com.google.protobuf.GeneratedMessage
-      implements LoginOrBuilder {
+  public  static final class Login extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ga.Login)
+      LoginOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use Login.newBuilder() to construct.
-    private Login(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private Login(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private Login(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final Login defaultInstance;
-    public static Login getDefaultInstance() {
-      return defaultInstance;
+    private Login() {
+      id_ = 0;
     }
 
-    public Login getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private Login(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -65,16 +63,16 @@ public final class Ga {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
+            case 8: {
+
+              id_ = input.readInt32();
               break;
             }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              id_ = input.readInt32();
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -83,7 +81,7 @@ public final class Ga {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -94,92 +92,100 @@ public final class Ga {
       return ga.Ga.internal_static_ga_Login_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return ga.Ga.internal_static_ga_Login_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               ga.Ga.Login.class, ga.Ga.Login.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<Login> PARSER =
-        new com.google.protobuf.AbstractParser<Login>() {
-      public Login parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Login(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Login> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required int32 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
     private int id_;
     /**
-     * <code>required int32 id = 1;</code>
-     */
-    public boolean hasId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required int32 id = 1;</code>
+     * <code>int32 id = 1;</code>
      */
     public int getId() {
       return id_;
     }
 
-    private void initFields() {
-      id_ = 0;
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
-      if (!hasId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (id_ != 0) {
         output.writeInt32(1, id_);
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (id_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, id_);
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ga.Ga.Login)) {
+        return super.equals(obj);
+      }
+      ga.Ga.Login other = (ga.Ga.Login) obj;
+
+      boolean result = true;
+      result = result && (getId()
+          == other.getId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ga.Ga.Login parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ga.Ga.Login parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static ga.Ga.Login parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -203,46 +209,59 @@ public final class Ga {
     }
     public static ga.Ga.Login parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.Login parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.Login parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static ga.Ga.Login parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.Login parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.Login parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ga.Ga.Login prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(ga.Ga.Login prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -250,14 +269,16 @@ public final class Ga {
      * Protobuf type {@code ga.Login}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ga.Ga.LoginOrBuilder {
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ga.Login)
+        ga.Ga.LoginOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return ga.Ga.internal_static_ga_Login_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return ga.Ga.internal_static_ga_Login_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -270,38 +291,35 @@ public final class Ga {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         id_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return ga.Ga.internal_static_ga_Login_descriptor;
       }
 
+      @java.lang.Override
       public ga.Ga.Login getDefaultInstanceForType() {
         return ga.Ga.Login.getDefaultInstance();
       }
 
+      @java.lang.Override
       public ga.Ga.Login build() {
         ga.Ga.Login result = buildPartial();
         if (!result.isInitialized()) {
@@ -310,19 +328,47 @@ public final class Ga {
         return result;
       }
 
+      @java.lang.Override
       public ga.Ga.Login buildPartial() {
         ga.Ga.Login result = new ga.Ga.Login(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.id_ = id_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ga.Ga.Login) {
           return mergeFrom((ga.Ga.Login)other);
@@ -334,21 +380,20 @@ public final class Ga {
 
       public Builder mergeFrom(ga.Ga.Login other) {
         if (other == ga.Ga.Login.getDefaultInstance()) return this;
-        if (other.hasId()) {
+        if (other.getId() != 0) {
           setId(other.getId());
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasId()) {
-          
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -358,7 +403,7 @@ public final class Ga {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (ga.Ga.Login) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -366,98 +411,123 @@ public final class Ga {
         }
         return this;
       }
-      private int bitField0_;
 
-      // required int32 id = 1;
       private int id_ ;
       /**
-       * <code>required int32 id = 1;</code>
-       */
-      public boolean hasId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required int32 id = 1;</code>
+       * <code>int32 id = 1;</code>
        */
       public int getId() {
         return id_;
       }
       /**
-       * <code>required int32 id = 1;</code>
+       * <code>int32 id = 1;</code>
        */
       public Builder setId(int value) {
-        bitField0_ |= 0x00000001;
+        
         id_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int32 id = 1;</code>
+       * <code>int32 id = 1;</code>
        */
       public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         id_ = 0;
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:ga.Login)
     }
 
+    // @@protoc_insertion_point(class_scope:ga.Login)
+    private static final ga.Ga.Login DEFAULT_INSTANCE;
     static {
-      defaultInstance = new Login(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new ga.Ga.Login();
     }
 
-    // @@protoc_insertion_point(class_scope:ga.Login)
+    public static ga.Ga.Login getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Login>
+        PARSER = new com.google.protobuf.AbstractParser<Login>() {
+      @java.lang.Override
+      public Login parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Login(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<Login> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Login> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ga.Ga.Login getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
-  public interface StateReportOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface StateReportOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ga.StateReport)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required int32 onlineCount = 1;
     /**
-     * <code>required int32 onlineCount = 1;</code>
-     */
-    boolean hasOnlineCount();
-    /**
-     * <code>required int32 onlineCount = 1;</code>
+     * <code>int32 onlineCount = 1;</code>
      */
     int getOnlineCount();
   }
   /**
    * Protobuf type {@code ga.StateReport}
    */
-  public static final class StateReport extends
-      com.google.protobuf.GeneratedMessage
-      implements StateReportOrBuilder {
+  public  static final class StateReport extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ga.StateReport)
+      StateReportOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use StateReport.newBuilder() to construct.
-    private StateReport(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private StateReport(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private StateReport(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final StateReport defaultInstance;
-    public static StateReport getDefaultInstance() {
-      return defaultInstance;
+    private StateReport() {
+      onlineCount_ = 0;
     }
 
-    public StateReport getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private StateReport(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -469,16 +539,16 @@ public final class Ga {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
+            case 8: {
+
+              onlineCount_ = input.readInt32();
               break;
             }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              onlineCount_ = input.readInt32();
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -487,7 +557,7 @@ public final class Ga {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -498,92 +568,100 @@ public final class Ga {
       return ga.Ga.internal_static_ga_StateReport_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return ga.Ga.internal_static_ga_StateReport_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               ga.Ga.StateReport.class, ga.Ga.StateReport.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<StateReport> PARSER =
-        new com.google.protobuf.AbstractParser<StateReport>() {
-      public StateReport parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new StateReport(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<StateReport> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required int32 onlineCount = 1;
     public static final int ONLINECOUNT_FIELD_NUMBER = 1;
     private int onlineCount_;
     /**
-     * <code>required int32 onlineCount = 1;</code>
-     */
-    public boolean hasOnlineCount() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required int32 onlineCount = 1;</code>
+     * <code>int32 onlineCount = 1;</code>
      */
     public int getOnlineCount() {
       return onlineCount_;
     }
 
-    private void initFields() {
-      onlineCount_ = 0;
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
-      if (!hasOnlineCount()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (onlineCount_ != 0) {
         output.writeInt32(1, onlineCount_);
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (onlineCount_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, onlineCount_);
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ga.Ga.StateReport)) {
+        return super.equals(obj);
+      }
+      ga.Ga.StateReport other = (ga.Ga.StateReport) obj;
+
+      boolean result = true;
+      result = result && (getOnlineCount()
+          == other.getOnlineCount());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ONLINECOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getOnlineCount();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ga.Ga.StateReport parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ga.Ga.StateReport parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static ga.Ga.StateReport parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -607,46 +685,59 @@ public final class Ga {
     }
     public static ga.Ga.StateReport parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.StateReport parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.StateReport parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static ga.Ga.StateReport parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.StateReport parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.StateReport parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ga.Ga.StateReport prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(ga.Ga.StateReport prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -654,14 +745,16 @@ public final class Ga {
      * Protobuf type {@code ga.StateReport}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ga.Ga.StateReportOrBuilder {
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ga.StateReport)
+        ga.Ga.StateReportOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return ga.Ga.internal_static_ga_StateReport_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return ga.Ga.internal_static_ga_StateReport_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -674,38 +767,35 @@ public final class Ga {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         onlineCount_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return ga.Ga.internal_static_ga_StateReport_descriptor;
       }
 
+      @java.lang.Override
       public ga.Ga.StateReport getDefaultInstanceForType() {
         return ga.Ga.StateReport.getDefaultInstance();
       }
 
+      @java.lang.Override
       public ga.Ga.StateReport build() {
         ga.Ga.StateReport result = buildPartial();
         if (!result.isInitialized()) {
@@ -714,19 +804,47 @@ public final class Ga {
         return result;
       }
 
+      @java.lang.Override
       public ga.Ga.StateReport buildPartial() {
         ga.Ga.StateReport result = new ga.Ga.StateReport(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.onlineCount_ = onlineCount_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ga.Ga.StateReport) {
           return mergeFrom((ga.Ga.StateReport)other);
@@ -738,21 +856,20 @@ public final class Ga {
 
       public Builder mergeFrom(ga.Ga.StateReport other) {
         if (other == ga.Ga.StateReport.getDefaultInstance()) return this;
-        if (other.hasOnlineCount()) {
+        if (other.getOnlineCount() != 0) {
           setOnlineCount(other.getOnlineCount());
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasOnlineCount()) {
-          
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -762,7 +879,7 @@ public final class Ga {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (ga.Ga.StateReport) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -770,81 +887,105 @@ public final class Ga {
         }
         return this;
       }
-      private int bitField0_;
 
-      // required int32 onlineCount = 1;
       private int onlineCount_ ;
       /**
-       * <code>required int32 onlineCount = 1;</code>
-       */
-      public boolean hasOnlineCount() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required int32 onlineCount = 1;</code>
+       * <code>int32 onlineCount = 1;</code>
        */
       public int getOnlineCount() {
         return onlineCount_;
       }
       /**
-       * <code>required int32 onlineCount = 1;</code>
+       * <code>int32 onlineCount = 1;</code>
        */
       public Builder setOnlineCount(int value) {
-        bitField0_ |= 0x00000001;
+        
         onlineCount_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int32 onlineCount = 1;</code>
+       * <code>int32 onlineCount = 1;</code>
        */
       public Builder clearOnlineCount() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         onlineCount_ = 0;
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:ga.StateReport)
     }
 
+    // @@protoc_insertion_point(class_scope:ga.StateReport)
+    private static final ga.Ga.StateReport DEFAULT_INSTANCE;
     static {
-      defaultInstance = new StateReport(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new ga.Ga.StateReport();
     }
 
-    // @@protoc_insertion_point(class_scope:ga.StateReport)
+    public static ga.Ga.StateReport getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StateReport>
+        PARSER = new com.google.protobuf.AbstractParser<StateReport>() {
+      @java.lang.Override
+      public StateReport parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new StateReport(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<StateReport> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StateReport> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ga.Ga.StateReport getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
-  public interface ValidationCodeOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface ValidationCodeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ga.ValidationCode)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required string code = 1;
     /**
-     * <code>required string code = 1;</code>
-     */
-    boolean hasCode();
-    /**
-     * <code>required string code = 1;</code>
+     * <code>string code = 1;</code>
      */
     java.lang.String getCode();
     /**
-     * <code>required string code = 1;</code>
+     * <code>string code = 1;</code>
      */
     com.google.protobuf.ByteString
         getCodeBytes();
 
-    // required string accountName = 2;
     /**
-     * <code>required string accountName = 2;</code>
-     */
-    boolean hasAccountName();
-    /**
-     * <code>required string accountName = 2;</code>
+     * <code>string accountName = 2;</code>
      */
     java.lang.String getAccountName();
     /**
-     * <code>required string accountName = 2;</code>
+     * <code>string accountName = 2;</code>
      */
     com.google.protobuf.ByteString
         getAccountNameBytes();
@@ -852,36 +993,33 @@ public final class Ga {
   /**
    * Protobuf type {@code ga.ValidationCode}
    */
-  public static final class ValidationCode extends
-      com.google.protobuf.GeneratedMessage
-      implements ValidationCodeOrBuilder {
+  public  static final class ValidationCode extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ga.ValidationCode)
+      ValidationCodeOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use ValidationCode.newBuilder() to construct.
-    private ValidationCode(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private ValidationCode(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private ValidationCode(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final ValidationCode defaultInstance;
-    public static ValidationCode getDefaultInstance() {
-      return defaultInstance;
+    private ValidationCode() {
+      code_ = "";
+      accountName_ = "";
     }
 
-    public ValidationCode getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private ValidationCode(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -893,21 +1031,23 @@ public final class Ga {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
-              bitField0_ |= 0x00000001;
-              code_ = input.readBytes();
+              java.lang.String s = input.readStringRequireUtf8();
+
+              code_ = s;
               break;
             }
             case 18: {
-              bitField0_ |= 0x00000002;
-              accountName_ = input.readBytes();
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountName_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -916,7 +1056,7 @@ public final class Ga {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -927,40 +1067,18 @@ public final class Ga {
       return ga.Ga.internal_static_ga_ValidationCode_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return ga.Ga.internal_static_ga_ValidationCode_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               ga.Ga.ValidationCode.class, ga.Ga.ValidationCode.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<ValidationCode> PARSER =
-        new com.google.protobuf.AbstractParser<ValidationCode>() {
-      public ValidationCode parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ValidationCode(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ValidationCode> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required string code = 1;
     public static final int CODE_FIELD_NUMBER = 1;
-    private java.lang.Object code_;
+    private volatile java.lang.Object code_;
     /**
-     * <code>required string code = 1;</code>
-     */
-    public boolean hasCode() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string code = 1;</code>
+     * <code>string code = 1;</code>
      */
     public java.lang.String getCode() {
       java.lang.Object ref = code_;
@@ -970,14 +1088,12 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          code_ = s;
-        }
+        code_ = s;
         return s;
       }
     }
     /**
-     * <code>required string code = 1;</code>
+     * <code>string code = 1;</code>
      */
     public com.google.protobuf.ByteString
         getCodeBytes() {
@@ -993,17 +1109,10 @@ public final class Ga {
       }
     }
 
-    // required string accountName = 2;
     public static final int ACCOUNTNAME_FIELD_NUMBER = 2;
-    private java.lang.Object accountName_;
+    private volatile java.lang.Object accountName_;
     /**
-     * <code>required string accountName = 2;</code>
-     */
-    public boolean hasAccountName() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required string accountName = 2;</code>
+     * <code>string accountName = 2;</code>
      */
     public java.lang.String getAccountName() {
       java.lang.Object ref = accountName_;
@@ -1013,14 +1122,12 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          accountName_ = s;
-        }
+        accountName_ = s;
         return s;
       }
     }
     /**
-     * <code>required string accountName = 2;</code>
+     * <code>string accountName = 2;</code>
      */
     public com.google.protobuf.ByteString
         getAccountNameBytes() {
@@ -1036,65 +1143,92 @@ public final class Ga {
       }
     }
 
-    private void initFields() {
-      code_ = "";
-      accountName_ = "";
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
-      if (!hasCode()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasAccountName()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getCodeBytes());
+      if (!getCodeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, code_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getAccountNameBytes());
+      if (!getAccountNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountName_);
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getCodeBytes());
+      if (!getCodeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, code_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getAccountNameBytes());
+      if (!getAccountNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountName_);
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ga.Ga.ValidationCode)) {
+        return super.equals(obj);
+      }
+      ga.Ga.ValidationCode other = (ga.Ga.ValidationCode) obj;
+
+      boolean result = true;
+      result = result && getCode()
+          .equals(other.getCode());
+      result = result && getAccountName()
+          .equals(other.getAccountName());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CODE_FIELD_NUMBER;
+      hash = (53 * hash) + getCode().hashCode();
+      hash = (37 * hash) + ACCOUNTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountName().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ga.Ga.ValidationCode parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ga.Ga.ValidationCode parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static ga.Ga.ValidationCode parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1118,46 +1252,59 @@ public final class Ga {
     }
     public static ga.Ga.ValidationCode parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.ValidationCode parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.ValidationCode parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static ga.Ga.ValidationCode parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.ValidationCode parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.ValidationCode parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ga.Ga.ValidationCode prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(ga.Ga.ValidationCode prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1165,14 +1312,16 @@ public final class Ga {
      * Protobuf type {@code ga.ValidationCode}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ga.Ga.ValidationCodeOrBuilder {
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ga.ValidationCode)
+        ga.Ga.ValidationCodeOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return ga.Ga.internal_static_ga_ValidationCode_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return ga.Ga.internal_static_ga_ValidationCode_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1185,40 +1334,37 @@ public final class Ga {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         code_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         accountName_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
+
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return ga.Ga.internal_static_ga_ValidationCode_descriptor;
       }
 
+      @java.lang.Override
       public ga.Ga.ValidationCode getDefaultInstanceForType() {
         return ga.Ga.ValidationCode.getDefaultInstance();
       }
 
+      @java.lang.Override
       public ga.Ga.ValidationCode build() {
         ga.Ga.ValidationCode result = buildPartial();
         if (!result.isInitialized()) {
@@ -1227,23 +1373,48 @@ public final class Ga {
         return result;
       }
 
+      @java.lang.Override
       public ga.Ga.ValidationCode buildPartial() {
         ga.Ga.ValidationCode result = new ga.Ga.ValidationCode(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.code_ = code_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
         result.accountName_ = accountName_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ga.Ga.ValidationCode) {
           return mergeFrom((ga.Ga.ValidationCode)other);
@@ -1255,32 +1426,25 @@ public final class Ga {
 
       public Builder mergeFrom(ga.Ga.ValidationCode other) {
         if (other == ga.Ga.ValidationCode.getDefaultInstance()) return this;
-        if (other.hasCode()) {
-          bitField0_ |= 0x00000001;
+        if (!other.getCode().isEmpty()) {
           code_ = other.code_;
           onChanged();
         }
-        if (other.hasAccountName()) {
-          bitField0_ |= 0x00000002;
+        if (!other.getAccountName().isEmpty()) {
           accountName_ = other.accountName_;
           onChanged();
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasCode()) {
-          
-          return false;
-        }
-        if (!hasAccountName()) {
-          
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1290,7 +1454,7 @@ public final class Ga {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (ga.Ga.ValidationCode) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -1298,24 +1462,17 @@ public final class Ga {
         }
         return this;
       }
-      private int bitField0_;
 
-      // required string code = 1;
       private java.lang.Object code_ = "";
       /**
-       * <code>required string code = 1;</code>
-       */
-      public boolean hasCode() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string code = 1;</code>
+       * <code>string code = 1;</code>
        */
       public java.lang.String getCode() {
         java.lang.Object ref = code_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           code_ = s;
           return s;
         } else {
@@ -1323,7 +1480,7 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string code = 1;</code>
+       * <code>string code = 1;</code>
        */
       public com.google.protobuf.ByteString
           getCodeBytes() {
@@ -1339,57 +1496,52 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string code = 1;</code>
+       * <code>string code = 1;</code>
        */
       public Builder setCode(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  
         code_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string code = 1;</code>
+       * <code>string code = 1;</code>
        */
       public Builder clearCode() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         code_ = getDefaultInstance().getCode();
         onChanged();
         return this;
       }
       /**
-       * <code>required string code = 1;</code>
+       * <code>string code = 1;</code>
        */
       public Builder setCodeBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  checkByteStringIsUtf8(value);
+        
         code_ = value;
         onChanged();
         return this;
       }
 
-      // required string accountName = 2;
       private java.lang.Object accountName_ = "";
       /**
-       * <code>required string accountName = 2;</code>
-       */
-      public boolean hasAccountName() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required string accountName = 2;</code>
+       * <code>string accountName = 2;</code>
        */
       public java.lang.String getAccountName() {
         java.lang.Object ref = accountName_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           accountName_ = s;
           return s;
         } else {
@@ -1397,7 +1549,7 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string accountName = 2;</code>
+       * <code>string accountName = 2;</code>
        */
       public com.google.protobuf.ByteString
           getAccountNameBytes() {
@@ -1413,107 +1565,141 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string accountName = 2;</code>
+       * <code>string accountName = 2;</code>
        */
       public Builder setAccountName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  
         accountName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string accountName = 2;</code>
+       * <code>string accountName = 2;</code>
        */
       public Builder clearAccountName() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        
         accountName_ = getDefaultInstance().getAccountName();
         onChanged();
         return this;
       }
       /**
-       * <code>required string accountName = 2;</code>
+       * <code>string accountName = 2;</code>
        */
       public Builder setAccountNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  checkByteStringIsUtf8(value);
+        
         accountName_ = value;
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:ga.ValidationCode)
     }
 
+    // @@protoc_insertion_point(class_scope:ga.ValidationCode)
+    private static final ga.Ga.ValidationCode DEFAULT_INSTANCE;
     static {
-      defaultInstance = new ValidationCode(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new ga.Ga.ValidationCode();
     }
 
-    // @@protoc_insertion_point(class_scope:ga.ValidationCode)
+    public static ga.Ga.ValidationCode getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ValidationCode>
+        PARSER = new com.google.protobuf.AbstractParser<ValidationCode>() {
+      @java.lang.Override
+      public ValidationCode parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ValidationCode(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ValidationCode> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ValidationCode> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ga.Ga.ValidationCode getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
-  public interface KickOffOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface KickOffOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ga.KickOff)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required string id = 1;
     /**
-     * <code>required string id = 1;</code>
-     */
-    boolean hasId();
-    /**
-     * <code>required string id = 1;</code>
+     * <code>string id = 1;</code>
      */
     java.lang.String getId();
     /**
-     * <code>required string id = 1;</code>
+     * <code>string id = 1;</code>
      */
     com.google.protobuf.ByteString
         getIdBytes();
   }
   /**
-   * Protobuf type {@code ga.KickOff}
-   *
    * <pre>
    * GM part
    * </pre>
+   *
+   * Protobuf type {@code ga.KickOff}
    */
-  public static final class KickOff extends
-      com.google.protobuf.GeneratedMessage
-      implements KickOffOrBuilder {
+  public  static final class KickOff extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ga.KickOff)
+      KickOffOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use KickOff.newBuilder() to construct.
-    private KickOff(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private KickOff(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private KickOff(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final KickOff defaultInstance;
-    public static KickOff getDefaultInstance() {
-      return defaultInstance;
+    private KickOff() {
+      id_ = "";
     }
 
-    public KickOff getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private KickOff(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -1525,16 +1711,17 @@ public final class Ga {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              id_ = s;
               break;
             }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              id_ = input.readBytes();
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -1543,7 +1730,7 @@ public final class Ga {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -1554,40 +1741,18 @@ public final class Ga {
       return ga.Ga.internal_static_ga_KickOff_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return ga.Ga.internal_static_ga_KickOff_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               ga.Ga.KickOff.class, ga.Ga.KickOff.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<KickOff> PARSER =
-        new com.google.protobuf.AbstractParser<KickOff>() {
-      public KickOff parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new KickOff(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<KickOff> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required string id = 1;
     public static final int ID_FIELD_NUMBER = 1;
-    private java.lang.Object id_;
+    private volatile java.lang.Object id_;
     /**
-     * <code>required string id = 1;</code>
-     */
-    public boolean hasId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string id = 1;</code>
+     * <code>string id = 1;</code>
      */
     public java.lang.String getId() {
       java.lang.Object ref = id_;
@@ -1597,14 +1762,12 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          id_ = s;
-        }
+        id_ = s;
         return s;
       }
     }
     /**
-     * <code>required string id = 1;</code>
+     * <code>string id = 1;</code>
      */
     public com.google.protobuf.ByteString
         getIdBytes() {
@@ -1620,53 +1783,82 @@ public final class Ga {
       }
     }
 
-    private void initFields() {
-      id_ = "";
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
-      if (!hasId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getIdBytes());
+      if (!getIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getIdBytes());
+      if (!getIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ga.Ga.KickOff)) {
+        return super.equals(obj);
+      }
+      ga.Ga.KickOff other = (ga.Ga.KickOff) obj;
+
+      boolean result = true;
+      result = result && getId()
+          .equals(other.getId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ga.Ga.KickOff parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ga.Ga.KickOff parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static ga.Ga.KickOff parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1690,65 +1882,80 @@ public final class Ga {
     }
     public static ga.Ga.KickOff parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.KickOff parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.KickOff parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static ga.Ga.KickOff parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.KickOff parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.KickOff parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ga.Ga.KickOff prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(ga.Ga.KickOff prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code ga.KickOff}
-     *
      * <pre>
      * GM part
      * </pre>
+     *
+     * Protobuf type {@code ga.KickOff}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ga.Ga.KickOffOrBuilder {
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ga.KickOff)
+        ga.Ga.KickOffOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return ga.Ga.internal_static_ga_KickOff_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return ga.Ga.internal_static_ga_KickOff_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1761,38 +1968,35 @@ public final class Ga {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         id_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return ga.Ga.internal_static_ga_KickOff_descriptor;
       }
 
+      @java.lang.Override
       public ga.Ga.KickOff getDefaultInstanceForType() {
         return ga.Ga.KickOff.getDefaultInstance();
       }
 
+      @java.lang.Override
       public ga.Ga.KickOff build() {
         ga.Ga.KickOff result = buildPartial();
         if (!result.isInitialized()) {
@@ -1801,19 +2005,47 @@ public final class Ga {
         return result;
       }
 
+      @java.lang.Override
       public ga.Ga.KickOff buildPartial() {
         ga.Ga.KickOff result = new ga.Ga.KickOff(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.id_ = id_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ga.Ga.KickOff) {
           return mergeFrom((ga.Ga.KickOff)other);
@@ -1825,23 +2057,21 @@ public final class Ga {
 
       public Builder mergeFrom(ga.Ga.KickOff other) {
         if (other == ga.Ga.KickOff.getDefaultInstance()) return this;
-        if (other.hasId()) {
-          bitField0_ |= 0x00000001;
+        if (!other.getId().isEmpty()) {
           id_ = other.id_;
           onChanged();
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasId()) {
-          
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1851,7 +2081,7 @@ public final class Ga {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (ga.Ga.KickOff) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -1859,24 +2089,17 @@ public final class Ga {
         }
         return this;
       }
-      private int bitField0_;
 
-      // required string id = 1;
       private java.lang.Object id_ = "";
       /**
-       * <code>required string id = 1;</code>
-       */
-      public boolean hasId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string id = 1;</code>
+       * <code>string id = 1;</code>
        */
       public java.lang.String getId() {
         java.lang.Object ref = id_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           id_ = s;
           return s;
         } else {
@@ -1884,7 +2107,7 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string id = 1;</code>
+       * <code>string id = 1;</code>
        */
       public com.google.protobuf.ByteString
           getIdBytes() {
@@ -1900,81 +2123,114 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string id = 1;</code>
+       * <code>string id = 1;</code>
        */
       public Builder setId(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  
         id_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string id = 1;</code>
+       * <code>string id = 1;</code>
        */
       public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
       }
       /**
-       * <code>required string id = 1;</code>
+       * <code>string id = 1;</code>
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  checkByteStringIsUtf8(value);
+        
         id_ = value;
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:ga.KickOff)
     }
 
+    // @@protoc_insertion_point(class_scope:ga.KickOff)
+    private static final ga.Ga.KickOff DEFAULT_INSTANCE;
     static {
-      defaultInstance = new KickOff(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new ga.Ga.KickOff();
     }
 
-    // @@protoc_insertion_point(class_scope:ga.KickOff)
+    public static ga.Ga.KickOff getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<KickOff>
+        PARSER = new com.google.protobuf.AbstractParser<KickOff>() {
+      @java.lang.Override
+      public KickOff parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new KickOff(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<KickOff> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<KickOff> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ga.Ga.KickOff getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
-  public interface QueryRoleOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface QueryRoleOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ga.QueryRole)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required string sessionId = 1;
     /**
-     * <code>required string sessionId = 1;</code>
-     */
-    boolean hasSessionId();
-    /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     java.lang.String getSessionId();
     /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     com.google.protobuf.ByteString
         getSessionIdBytes();
 
-    // required string roleName = 2;
     /**
-     * <code>required string roleName = 2;</code>
-     */
-    boolean hasRoleName();
-    /**
-     * <code>required string roleName = 2;</code>
+     * <code>string roleName = 2;</code>
      */
     java.lang.String getRoleName();
     /**
-     * <code>required string roleName = 2;</code>
+     * <code>string roleName = 2;</code>
      */
     com.google.protobuf.ByteString
         getRoleNameBytes();
@@ -1982,36 +2238,33 @@ public final class Ga {
   /**
    * Protobuf type {@code ga.QueryRole}
    */
-  public static final class QueryRole extends
-      com.google.protobuf.GeneratedMessage
-      implements QueryRoleOrBuilder {
+  public  static final class QueryRole extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ga.QueryRole)
+      QueryRoleOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use QueryRole.newBuilder() to construct.
-    private QueryRole(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private QueryRole(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private QueryRole(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final QueryRole defaultInstance;
-    public static QueryRole getDefaultInstance() {
-      return defaultInstance;
+    private QueryRole() {
+      sessionId_ = "";
+      roleName_ = "";
     }
 
-    public QueryRole getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private QueryRole(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -2023,21 +2276,23 @@ public final class Ga {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
-              bitField0_ |= 0x00000001;
-              sessionId_ = input.readBytes();
+              java.lang.String s = input.readStringRequireUtf8();
+
+              sessionId_ = s;
               break;
             }
             case 18: {
-              bitField0_ |= 0x00000002;
-              roleName_ = input.readBytes();
+              java.lang.String s = input.readStringRequireUtf8();
+
+              roleName_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -2046,7 +2301,7 @@ public final class Ga {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -2057,40 +2312,18 @@ public final class Ga {
       return ga.Ga.internal_static_ga_QueryRole_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return ga.Ga.internal_static_ga_QueryRole_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               ga.Ga.QueryRole.class, ga.Ga.QueryRole.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<QueryRole> PARSER =
-        new com.google.protobuf.AbstractParser<QueryRole>() {
-      public QueryRole parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new QueryRole(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<QueryRole> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required string sessionId = 1;
     public static final int SESSIONID_FIELD_NUMBER = 1;
-    private java.lang.Object sessionId_;
+    private volatile java.lang.Object sessionId_;
     /**
-     * <code>required string sessionId = 1;</code>
-     */
-    public boolean hasSessionId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     public java.lang.String getSessionId() {
       java.lang.Object ref = sessionId_;
@@ -2100,14 +2333,12 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          sessionId_ = s;
-        }
+        sessionId_ = s;
         return s;
       }
     }
     /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     public com.google.protobuf.ByteString
         getSessionIdBytes() {
@@ -2123,17 +2354,10 @@ public final class Ga {
       }
     }
 
-    // required string roleName = 2;
     public static final int ROLENAME_FIELD_NUMBER = 2;
-    private java.lang.Object roleName_;
+    private volatile java.lang.Object roleName_;
     /**
-     * <code>required string roleName = 2;</code>
-     */
-    public boolean hasRoleName() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required string roleName = 2;</code>
+     * <code>string roleName = 2;</code>
      */
     public java.lang.String getRoleName() {
       java.lang.Object ref = roleName_;
@@ -2143,14 +2367,12 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          roleName_ = s;
-        }
+        roleName_ = s;
         return s;
       }
     }
     /**
-     * <code>required string roleName = 2;</code>
+     * <code>string roleName = 2;</code>
      */
     public com.google.protobuf.ByteString
         getRoleNameBytes() {
@@ -2166,65 +2388,92 @@ public final class Ga {
       }
     }
 
-    private void initFields() {
-      sessionId_ = "";
-      roleName_ = "";
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
-      if (!hasSessionId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasRoleName()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getSessionIdBytes());
+      if (!getSessionIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, sessionId_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getRoleNameBytes());
+      if (!getRoleNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, roleName_);
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getSessionIdBytes());
+      if (!getSessionIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, sessionId_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getRoleNameBytes());
+      if (!getRoleNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, roleName_);
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ga.Ga.QueryRole)) {
+        return super.equals(obj);
+      }
+      ga.Ga.QueryRole other = (ga.Ga.QueryRole) obj;
+
+      boolean result = true;
+      result = result && getSessionId()
+          .equals(other.getSessionId());
+      result = result && getRoleName()
+          .equals(other.getRoleName());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SESSIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getSessionId().hashCode();
+      hash = (37 * hash) + ROLENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getRoleName().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ga.Ga.QueryRole parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ga.Ga.QueryRole parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static ga.Ga.QueryRole parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2248,46 +2497,59 @@ public final class Ga {
     }
     public static ga.Ga.QueryRole parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.QueryRole parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.QueryRole parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static ga.Ga.QueryRole parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.QueryRole parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.QueryRole parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ga.Ga.QueryRole prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(ga.Ga.QueryRole prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -2295,14 +2557,16 @@ public final class Ga {
      * Protobuf type {@code ga.QueryRole}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ga.Ga.QueryRoleOrBuilder {
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ga.QueryRole)
+        ga.Ga.QueryRoleOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return ga.Ga.internal_static_ga_QueryRole_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return ga.Ga.internal_static_ga_QueryRole_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2315,40 +2579,37 @@ public final class Ga {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         sessionId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         roleName_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
+
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return ga.Ga.internal_static_ga_QueryRole_descriptor;
       }
 
+      @java.lang.Override
       public ga.Ga.QueryRole getDefaultInstanceForType() {
         return ga.Ga.QueryRole.getDefaultInstance();
       }
 
+      @java.lang.Override
       public ga.Ga.QueryRole build() {
         ga.Ga.QueryRole result = buildPartial();
         if (!result.isInitialized()) {
@@ -2357,23 +2618,48 @@ public final class Ga {
         return result;
       }
 
+      @java.lang.Override
       public ga.Ga.QueryRole buildPartial() {
         ga.Ga.QueryRole result = new ga.Ga.QueryRole(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.sessionId_ = sessionId_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
         result.roleName_ = roleName_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ga.Ga.QueryRole) {
           return mergeFrom((ga.Ga.QueryRole)other);
@@ -2385,32 +2671,25 @@ public final class Ga {
 
       public Builder mergeFrom(ga.Ga.QueryRole other) {
         if (other == ga.Ga.QueryRole.getDefaultInstance()) return this;
-        if (other.hasSessionId()) {
-          bitField0_ |= 0x00000001;
+        if (!other.getSessionId().isEmpty()) {
           sessionId_ = other.sessionId_;
           onChanged();
         }
-        if (other.hasRoleName()) {
-          bitField0_ |= 0x00000002;
+        if (!other.getRoleName().isEmpty()) {
           roleName_ = other.roleName_;
           onChanged();
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasSessionId()) {
-          
-          return false;
-        }
-        if (!hasRoleName()) {
-          
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2420,7 +2699,7 @@ public final class Ga {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (ga.Ga.QueryRole) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -2428,24 +2707,17 @@ public final class Ga {
         }
         return this;
       }
-      private int bitField0_;
 
-      // required string sessionId = 1;
       private java.lang.Object sessionId_ = "";
       /**
-       * <code>required string sessionId = 1;</code>
-       */
-      public boolean hasSessionId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public java.lang.String getSessionId() {
         java.lang.Object ref = sessionId_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           sessionId_ = s;
           return s;
         } else {
@@ -2453,7 +2725,7 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public com.google.protobuf.ByteString
           getSessionIdBytes() {
@@ -2469,57 +2741,52 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public Builder setSessionId(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  
         sessionId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public Builder clearSessionId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         sessionId_ = getDefaultInstance().getSessionId();
         onChanged();
         return this;
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public Builder setSessionIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  checkByteStringIsUtf8(value);
+        
         sessionId_ = value;
         onChanged();
         return this;
       }
 
-      // required string roleName = 2;
       private java.lang.Object roleName_ = "";
       /**
-       * <code>required string roleName = 2;</code>
-       */
-      public boolean hasRoleName() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required string roleName = 2;</code>
+       * <code>string roleName = 2;</code>
        */
       public java.lang.String getRoleName() {
         java.lang.Object ref = roleName_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           roleName_ = s;
           return s;
         } else {
@@ -2527,7 +2794,7 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string roleName = 2;</code>
+       * <code>string roleName = 2;</code>
        */
       public com.google.protobuf.ByteString
           getRoleNameBytes() {
@@ -2543,142 +2810,162 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string roleName = 2;</code>
+       * <code>string roleName = 2;</code>
        */
       public Builder setRoleName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  
         roleName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string roleName = 2;</code>
+       * <code>string roleName = 2;</code>
        */
       public Builder clearRoleName() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        
         roleName_ = getDefaultInstance().getRoleName();
         onChanged();
         return this;
       }
       /**
-       * <code>required string roleName = 2;</code>
+       * <code>string roleName = 2;</code>
        */
       public Builder setRoleNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  checkByteStringIsUtf8(value);
+        
         roleName_ = value;
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:ga.QueryRole)
     }
 
+    // @@protoc_insertion_point(class_scope:ga.QueryRole)
+    private static final ga.Ga.QueryRole DEFAULT_INSTANCE;
     static {
-      defaultInstance = new QueryRole(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new ga.Ga.QueryRole();
     }
 
-    // @@protoc_insertion_point(class_scope:ga.QueryRole)
+    public static ga.Ga.QueryRole getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<QueryRole>
+        PARSER = new com.google.protobuf.AbstractParser<QueryRole>() {
+      @java.lang.Override
+      public QueryRole parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QueryRole(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<QueryRole> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QueryRole> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ga.Ga.QueryRole getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
-  public interface QueryRoleACKOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface QueryRoleACKOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ga.QueryRoleACK)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required string sessionId = 1;
     /**
-     * <code>required string sessionId = 1;</code>
-     */
-    boolean hasSessionId();
-    /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     java.lang.String getSessionId();
     /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     com.google.protobuf.ByteString
         getSessionIdBytes();
 
-    // required bool online = 2;
     /**
-     * <code>required bool online = 2;</code>
-     */
-    boolean hasOnline();
-    /**
-     * <code>required bool online = 2;</code>
+     * <code>bool online = 2;</code>
      */
     boolean getOnline();
 
-    // required string accName = 3;
     /**
-     * <code>required string accName = 3;</code>
-     */
-    boolean hasAccName();
-    /**
-     * <code>required string accName = 3;</code>
+     * <pre>
+     *gs.Role info = 4;
+     * </pre>
+     *
+     * <code>string accName = 3;</code>
      */
     java.lang.String getAccName();
     /**
-     * <code>required string accName = 3;</code>
+     * <pre>
+     *gs.Role info = 4;
+     * </pre>
+     *
+     * <code>string accName = 3;</code>
      */
     com.google.protobuf.ByteString
         getAccNameBytes();
-
-    // required .gs.Role info = 4;
-    /**
-     * <code>required .gs.Role info = 4;</code>
-     */
-    boolean hasInfo();
-    /**
-     * <code>required .gs.Role info = 4;</code>
-     */
-    gs.Gs.Role getInfo();
-    /**
-     * <code>required .gs.Role info = 4;</code>
-     */
-    gs.Gs.RoleOrBuilder getInfoOrBuilder();
   }
   /**
    * Protobuf type {@code ga.QueryRoleACK}
    */
-  public static final class QueryRoleACK extends
-      com.google.protobuf.GeneratedMessage
-      implements QueryRoleACKOrBuilder {
+  public  static final class QueryRoleACK extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ga.QueryRoleACK)
+      QueryRoleACKOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use QueryRoleACK.newBuilder() to construct.
-    private QueryRoleACK(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private QueryRoleACK(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private QueryRoleACK(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final QueryRoleACK defaultInstance;
-    public static QueryRoleACK getDefaultInstance() {
-      return defaultInstance;
+    private QueryRoleACK() {
+      sessionId_ = "";
+      online_ = false;
+      accName_ = "";
     }
 
-    public QueryRoleACK getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private QueryRoleACK(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -2690,39 +2977,28 @@ public final class Ga {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
-              bitField0_ |= 0x00000001;
-              sessionId_ = input.readBytes();
+              java.lang.String s = input.readStringRequireUtf8();
+
+              sessionId_ = s;
               break;
             }
             case 16: {
-              bitField0_ |= 0x00000002;
+
               online_ = input.readBool();
               break;
             }
             case 26: {
-              bitField0_ |= 0x00000004;
-              accName_ = input.readBytes();
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accName_ = s;
               break;
             }
-            case 34: {
-              gs.Gs.Role.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
-                subBuilder = info_.toBuilder();
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
               }
-              info_ = input.readMessage(gs.Gs.Role.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(info_);
-                info_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000008;
               break;
             }
           }
@@ -2731,7 +3007,7 @@ public final class Ga {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -2742,40 +3018,18 @@ public final class Ga {
       return ga.Ga.internal_static_ga_QueryRoleACK_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return ga.Ga.internal_static_ga_QueryRoleACK_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               ga.Ga.QueryRoleACK.class, ga.Ga.QueryRoleACK.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<QueryRoleACK> PARSER =
-        new com.google.protobuf.AbstractParser<QueryRoleACK>() {
-      public QueryRoleACK parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new QueryRoleACK(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<QueryRoleACK> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required string sessionId = 1;
     public static final int SESSIONID_FIELD_NUMBER = 1;
-    private java.lang.Object sessionId_;
+    private volatile java.lang.Object sessionId_;
     /**
-     * <code>required string sessionId = 1;</code>
-     */
-    public boolean hasSessionId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     public java.lang.String getSessionId() {
       java.lang.Object ref = sessionId_;
@@ -2785,14 +3039,12 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          sessionId_ = s;
-        }
+        sessionId_ = s;
         return s;
       }
     }
     /**
-     * <code>required string sessionId = 1;</code>
+     * <code>string sessionId = 1;</code>
      */
     public com.google.protobuf.ByteString
         getSessionIdBytes() {
@@ -2808,33 +3060,23 @@ public final class Ga {
       }
     }
 
-    // required bool online = 2;
     public static final int ONLINE_FIELD_NUMBER = 2;
     private boolean online_;
     /**
-     * <code>required bool online = 2;</code>
-     */
-    public boolean hasOnline() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required bool online = 2;</code>
+     * <code>bool online = 2;</code>
      */
     public boolean getOnline() {
       return online_;
     }
 
-    // required string accName = 3;
     public static final int ACCNAME_FIELD_NUMBER = 3;
-    private java.lang.Object accName_;
+    private volatile java.lang.Object accName_;
     /**
-     * <code>required string accName = 3;</code>
-     */
-    public boolean hasAccName() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>required string accName = 3;</code>
+     * <pre>
+     *gs.Role info = 4;
+     * </pre>
+     *
+     * <code>string accName = 3;</code>
      */
     public java.lang.String getAccName() {
       java.lang.Object ref = accName_;
@@ -2844,14 +3086,16 @@ public final class Ga {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          accName_ = s;
-        }
+        accName_ = s;
         return s;
       }
     }
     /**
-     * <code>required string accName = 3;</code>
+     * <pre>
+     *gs.Role info = 4;
+     * </pre>
+     *
+     * <code>string accName = 3;</code>
      */
     public com.google.protobuf.ByteString
         getAccNameBytes() {
@@ -2867,115 +3111,104 @@ public final class Ga {
       }
     }
 
-    // required .gs.Role info = 4;
-    public static final int INFO_FIELD_NUMBER = 4;
-    private gs.Gs.Role info_;
-    /**
-     * <code>required .gs.Role info = 4;</code>
-     */
-    public boolean hasInfo() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>required .gs.Role info = 4;</code>
-     */
-    public gs.Gs.Role getInfo() {
-      return info_;
-    }
-    /**
-     * <code>required .gs.Role info = 4;</code>
-     */
-    public gs.Gs.RoleOrBuilder getInfoOrBuilder() {
-      return info_;
-    }
-
-    private void initFields() {
-      sessionId_ = "";
-      online_ = false;
-      accName_ = "";
-      info_ = gs.Gs.Role.getDefaultInstance();
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
-      if (!hasSessionId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasOnline()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasAccName()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasInfo()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getInfo().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getSessionIdBytes());
+      if (!getSessionIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, sessionId_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (online_ != false) {
         output.writeBool(2, online_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getAccNameBytes());
+      if (!getAccNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accName_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, info_);
-      }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getSessionIdBytes());
+      if (!getSessionIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, sessionId_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (online_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, online_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getAccNameBytes());
+      if (!getAccNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accName_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, info_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ga.Ga.QueryRoleACK)) {
+        return super.equals(obj);
+      }
+      ga.Ga.QueryRoleACK other = (ga.Ga.QueryRoleACK) obj;
+
+      boolean result = true;
+      result = result && getSessionId()
+          .equals(other.getSessionId());
+      result = result && (getOnline()
+          == other.getOnline());
+      result = result && getAccName()
+          .equals(other.getAccName());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SESSIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getSessionId().hashCode();
+      hash = (37 * hash) + ONLINE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getOnline());
+      hash = (37 * hash) + ACCNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getAccName().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ga.Ga.QueryRoleACK parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ga.Ga.QueryRoleACK parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static ga.Ga.QueryRoleACK parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2999,46 +3232,59 @@ public final class Ga {
     }
     public static ga.Ga.QueryRoleACK parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.QueryRoleACK parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.QueryRoleACK parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static ga.Ga.QueryRoleACK parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static ga.Ga.QueryRoleACK parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static ga.Ga.QueryRoleACK parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ga.Ga.QueryRoleACK prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(ga.Ga.QueryRoleACK prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -3046,14 +3292,16 @@ public final class Ga {
      * Protobuf type {@code ga.QueryRoleACK}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ga.Ga.QueryRoleACKOrBuilder {
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ga.QueryRoleACK)
+        ga.Ga.QueryRoleACKOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return ga.Ga.internal_static_ga_QueryRoleACK_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return ga.Ga.internal_static_ga_QueryRoleACK_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -3066,49 +3314,39 @@ public final class Ga {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getInfoFieldBuilder();
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         sessionId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         online_ = false;
-        bitField0_ = (bitField0_ & ~0x00000002);
+
         accName_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
-        if (infoBuilder_ == null) {
-          info_ = gs.Gs.Role.getDefaultInstance();
-        } else {
-          infoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
+
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return ga.Ga.internal_static_ga_QueryRoleACK_descriptor;
       }
 
+      @java.lang.Override
       public ga.Ga.QueryRoleACK getDefaultInstanceForType() {
         return ga.Ga.QueryRoleACK.getDefaultInstance();
       }
 
+      @java.lang.Override
       public ga.Ga.QueryRoleACK build() {
         ga.Ga.QueryRoleACK result = buildPartial();
         if (!result.isInitialized()) {
@@ -3117,35 +3355,49 @@ public final class Ga {
         return result;
       }
 
+      @java.lang.Override
       public ga.Ga.QueryRoleACK buildPartial() {
         ga.Ga.QueryRoleACK result = new ga.Ga.QueryRoleACK(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.sessionId_ = sessionId_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
         result.online_ = online_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
         result.accName_ = accName_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        if (infoBuilder_ == null) {
-          result.info_ = info_;
-        } else {
-          result.info_ = infoBuilder_.build();
-        }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ga.Ga.QueryRoleACK) {
           return mergeFrom((ga.Ga.QueryRoleACK)other);
@@ -3157,50 +3409,28 @@ public final class Ga {
 
       public Builder mergeFrom(ga.Ga.QueryRoleACK other) {
         if (other == ga.Ga.QueryRoleACK.getDefaultInstance()) return this;
-        if (other.hasSessionId()) {
-          bitField0_ |= 0x00000001;
+        if (!other.getSessionId().isEmpty()) {
           sessionId_ = other.sessionId_;
           onChanged();
         }
-        if (other.hasOnline()) {
+        if (other.getOnline() != false) {
           setOnline(other.getOnline());
         }
-        if (other.hasAccName()) {
-          bitField0_ |= 0x00000004;
+        if (!other.getAccName().isEmpty()) {
           accName_ = other.accName_;
           onChanged();
         }
-        if (other.hasInfo()) {
-          mergeInfo(other.getInfo());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasSessionId()) {
-          
-          return false;
-        }
-        if (!hasOnline()) {
-          
-          return false;
-        }
-        if (!hasAccName()) {
-          
-          return false;
-        }
-        if (!hasInfo()) {
-          
-          return false;
-        }
-        if (!getInfo().isInitialized()) {
-          
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3210,7 +3440,7 @@ public final class Ga {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (ga.Ga.QueryRoleACK) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -3218,24 +3448,17 @@ public final class Ga {
         }
         return this;
       }
-      private int bitField0_;
 
-      // required string sessionId = 1;
       private java.lang.Object sessionId_ = "";
       /**
-       * <code>required string sessionId = 1;</code>
-       */
-      public boolean hasSessionId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public java.lang.String getSessionId() {
         java.lang.Object ref = sessionId_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           sessionId_ = s;
           return s;
         } else {
@@ -3243,7 +3466,7 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public com.google.protobuf.ByteString
           getSessionIdBytes() {
@@ -3259,90 +3482,82 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public Builder setSessionId(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  
         sessionId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public Builder clearSessionId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         sessionId_ = getDefaultInstance().getSessionId();
         onChanged();
         return this;
       }
       /**
-       * <code>required string sessionId = 1;</code>
+       * <code>string sessionId = 1;</code>
        */
       public Builder setSessionIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  checkByteStringIsUtf8(value);
+        
         sessionId_ = value;
         onChanged();
         return this;
       }
 
-      // required bool online = 2;
       private boolean online_ ;
       /**
-       * <code>required bool online = 2;</code>
-       */
-      public boolean hasOnline() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required bool online = 2;</code>
+       * <code>bool online = 2;</code>
        */
       public boolean getOnline() {
         return online_;
       }
       /**
-       * <code>required bool online = 2;</code>
+       * <code>bool online = 2;</code>
        */
       public Builder setOnline(boolean value) {
-        bitField0_ |= 0x00000002;
+        
         online_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required bool online = 2;</code>
+       * <code>bool online = 2;</code>
        */
       public Builder clearOnline() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        
         online_ = false;
         onChanged();
         return this;
       }
 
-      // required string accName = 3;
       private java.lang.Object accName_ = "";
       /**
-       * <code>required string accName = 3;</code>
-       */
-      public boolean hasAccName() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required string accName = 3;</code>
+       * <pre>
+       *gs.Role info = 4;
+       * </pre>
+       *
+       * <code>string accName = 3;</code>
        */
       public java.lang.String getAccName() {
         java.lang.Object ref = accName_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
           accName_ = s;
           return s;
         } else {
@@ -3350,7 +3565,11 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string accName = 3;</code>
+       * <pre>
+       *gs.Role info = 4;
+       * </pre>
+       *
+       * <code>string accName = 3;</code>
        */
       public com.google.protobuf.ByteString
           getAccNameBytes() {
@@ -3366,266 +3585,201 @@ public final class Ga {
         }
       }
       /**
-       * <code>required string accName = 3;</code>
+       * <pre>
+       *gs.Role info = 4;
+       * </pre>
+       *
+       * <code>string accName = 3;</code>
        */
       public Builder setAccName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  
         accName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string accName = 3;</code>
+       * <pre>
+       *gs.Role info = 4;
+       * </pre>
+       *
+       * <code>string accName = 3;</code>
        */
       public Builder clearAccName() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        
         accName_ = getDefaultInstance().getAccName();
         onChanged();
         return this;
       }
       /**
-       * <code>required string accName = 3;</code>
+       * <pre>
+       *gs.Role info = 4;
+       * </pre>
+       *
+       * <code>string accName = 3;</code>
        */
       public Builder setAccNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  checkByteStringIsUtf8(value);
+        
         accName_ = value;
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
 
-      // required .gs.Role info = 4;
-      private gs.Gs.Role info_ = gs.Gs.Role.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.Role, gs.Gs.Role.Builder, gs.Gs.RoleOrBuilder> infoBuilder_;
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public boolean hasInfo() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
       }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public gs.Gs.Role getInfo() {
-        if (infoBuilder_ == null) {
-          return info_;
-        } else {
-          return infoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public Builder setInfo(gs.Gs.Role value) {
-        if (infoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          info_ = value;
-          onChanged();
-        } else {
-          infoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public Builder setInfo(
-          gs.Gs.Role.Builder builderForValue) {
-        if (infoBuilder_ == null) {
-          info_ = builderForValue.build();
-          onChanged();
-        } else {
-          infoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public Builder mergeInfo(gs.Gs.Role value) {
-        if (infoBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
-              info_ != gs.Gs.Role.getDefaultInstance()) {
-            info_ =
-              gs.Gs.Role.newBuilder(info_).mergeFrom(value).buildPartial();
-          } else {
-            info_ = value;
-          }
-          onChanged();
-        } else {
-          infoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public Builder clearInfo() {
-        if (infoBuilder_ == null) {
-          info_ = gs.Gs.Role.getDefaultInstance();
-          onChanged();
-        } else {
-          infoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        return this;
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public gs.Gs.Role.Builder getInfoBuilder() {
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return getInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      public gs.Gs.RoleOrBuilder getInfoOrBuilder() {
-        if (infoBuilder_ != null) {
-          return infoBuilder_.getMessageOrBuilder();
-        } else {
-          return info_;
-        }
-      }
-      /**
-       * <code>required .gs.Role info = 4;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.Role, gs.Gs.Role.Builder, gs.Gs.RoleOrBuilder> 
-          getInfoFieldBuilder() {
-        if (infoBuilder_ == null) {
-          infoBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              gs.Gs.Role, gs.Gs.Role.Builder, gs.Gs.RoleOrBuilder>(
-                  info_,
-                  getParentForChildren(),
-                  isClean());
-          info_ = null;
-        }
-        return infoBuilder_;
-      }
+
 
       // @@protoc_insertion_point(builder_scope:ga.QueryRoleACK)
     }
 
+    // @@protoc_insertion_point(class_scope:ga.QueryRoleACK)
+    private static final ga.Ga.QueryRoleACK DEFAULT_INSTANCE;
     static {
-      defaultInstance = new QueryRoleACK(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new ga.Ga.QueryRoleACK();
     }
 
-    // @@protoc_insertion_point(class_scope:ga.QueryRoleACK)
+    public static ga.Ga.QueryRoleACK getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<QueryRoleACK>
+        PARSER = new com.google.protobuf.AbstractParser<QueryRoleACK>() {
+      @java.lang.Override
+      public QueryRoleACK parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QueryRoleACK(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<QueryRoleACK> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QueryRoleACK> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ga.Ga.QueryRoleACK getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ga_Login_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ga_Login_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ga_StateReport_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ga_StateReport_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ga_ValidationCode_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ga_ValidationCode_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ga_KickOff_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ga_KickOff_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ga_QueryRole_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ga_QueryRole_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ga_QueryRoleACK_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ga_QueryRoleACK_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
   }
-  private static com.google.protobuf.Descriptors.FileDescriptor
+  private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\010ga.proto\022\002ga\032\010gs.proto\"\023\n\005Login\022\n\n\002id\030" +
-      "\001 \002(\005\"\"\n\013StateReport\022\023\n\013onlineCount\030\001 \002(" +
-      "\005\"3\n\016ValidationCode\022\014\n\004code\030\001 \002(\t\022\023\n\013acc" +
-      "ountName\030\002 \002(\t\"\025\n\007KickOff\022\n\n\002id\030\001 \002(\t\"0\n" +
-      "\tQueryRole\022\021\n\tsessionId\030\001 \002(\t\022\020\n\010roleNam" +
-      "e\030\002 \002(\t\"Z\n\014QueryRoleACK\022\021\n\tsessionId\030\001 \002" +
-      "(\t\022\016\n\006online\030\002 \002(\010\022\017\n\007accName\030\003 \002(\t\022\026\n\004i" +
-      "nfo\030\004 \002(\0132\010.gs.Role"
+      "\n\010ga.proto\022\002ga\"\023\n\005Login\022\n\n\002id\030\001 \001(\005\"\"\n\013S" +
+      "tateReport\022\023\n\013onlineCount\030\001 \001(\005\"3\n\016Valid" +
+      "ationCode\022\014\n\004code\030\001 \001(\t\022\023\n\013accountName\030\002" +
+      " \001(\t\"\025\n\007KickOff\022\n\n\002id\030\001 \001(\t\"0\n\tQueryRole" +
+      "\022\021\n\tsessionId\030\001 \001(\t\022\020\n\010roleName\030\002 \001(\t\"B\n" +
+      "\014QueryRoleACK\022\021\n\tsessionId\030\001 \001(\t\022\016\n\006onli" +
+      "ne\030\002 \001(\010\022\017\n\007accName\030\003 \001(\tb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_ga_Login_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_ga_Login_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ga_Login_descriptor,
-              new java.lang.String[] { "Id", });
-          internal_static_ga_StateReport_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_ga_StateReport_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ga_StateReport_descriptor,
-              new java.lang.String[] { "OnlineCount", });
-          internal_static_ga_ValidationCode_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_ga_ValidationCode_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ga_ValidationCode_descriptor,
-              new java.lang.String[] { "Code", "AccountName", });
-          internal_static_ga_KickOff_descriptor =
-            getDescriptor().getMessageTypes().get(3);
-          internal_static_ga_KickOff_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ga_KickOff_descriptor,
-              new java.lang.String[] { "Id", });
-          internal_static_ga_QueryRole_descriptor =
-            getDescriptor().getMessageTypes().get(4);
-          internal_static_ga_QueryRole_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ga_QueryRole_descriptor,
-              new java.lang.String[] { "SessionId", "RoleName", });
-          internal_static_ga_QueryRoleACK_descriptor =
-            getDescriptor().getMessageTypes().get(5);
-          internal_static_ga_QueryRoleACK_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ga_QueryRoleACK_descriptor,
-              new java.lang.String[] { "SessionId", "Online", "AccName", "Info", });
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          gs.Gs.getDescriptor(),
         }, assigner);
+    internal_static_ga_Login_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_ga_Login_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ga_Login_descriptor,
+        new java.lang.String[] { "Id", });
+    internal_static_ga_StateReport_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_ga_StateReport_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ga_StateReport_descriptor,
+        new java.lang.String[] { "OnlineCount", });
+    internal_static_ga_ValidationCode_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_ga_ValidationCode_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ga_ValidationCode_descriptor,
+        new java.lang.String[] { "Code", "AccountName", });
+    internal_static_ga_KickOff_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_ga_KickOff_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ga_KickOff_descriptor,
+        new java.lang.String[] { "Id", });
+    internal_static_ga_QueryRole_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_ga_QueryRole_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ga_QueryRole_descriptor,
+        new java.lang.String[] { "SessionId", "RoleName", });
+    internal_static_ga_QueryRoleACK_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_ga_QueryRoleACK_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ga_QueryRoleACK_descriptor,
+        new java.lang.String[] { "SessionId", "Online", "AccName", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

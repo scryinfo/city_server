@@ -29,6 +29,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.detailMaterialFactory_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailMaterialFactory"));
 			table.put((short) GsCode.OpCode.setRent_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"setRent"));
 			table.put((short) GsCode.OpCode.setSalary_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"setSalary"));
+			table.put((short) GsCode.OpCode.addLine_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"addLine"));
+			table.put((short) GsCode.OpCode.changeLine_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"changeLine"));
 
 
 			if(GlobalConfig.debug()){

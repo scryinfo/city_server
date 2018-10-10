@@ -21,6 +21,9 @@ public class PublicFacility extends Building {
     @Transient
     private HashMap<ObjectId, List<Contract>> contract = new HashMap<ObjectId, List<Contract>>();
 
+    public PublicFacility() {
+    }
+
     @PostLoad
     private void _1() {
         this.meta = MetaData.getPublicFacility(this._d.metaId);
@@ -30,6 +33,11 @@ public class PublicFacility extends Building {
     @Override
     public Message detailProto() {
         return null;
+    }
+
+    @Override
+    protected void _update(long diffNano) {
+
     }
 
     class Contract {

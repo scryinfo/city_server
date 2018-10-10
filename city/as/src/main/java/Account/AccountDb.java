@@ -60,6 +60,8 @@ public class AccountDb {
 			conn = DriverManager.getConnection(url, DatabaseInfo.Game.USERNAME, DatabaseInfo.Game.PASSWORD);
 			gameDbConns.put(url, conn);
 		}
+		// can not use jpa meta class here, the problem is you can not change the package which the
+		// meta class belong to. Even you put the *_ classes in Shared, the package still is Game. So refer them is trouble.
 		String sql = String.format("SELECT %s, %s, %s FROM %s WHERE %s = ?",
 				DatabaseInfo.Game.Player.Id,
 				DatabaseInfo.Game.Player.Name,

@@ -81,7 +81,7 @@ public final class GsCode {
      * <code>detailApartment = 1020;</code>
      *
      * <pre>
-     *c
+     *c 建筑物详情界面关闭也必须发送此消息！
      * </pre>
      */
     detailApartment(8, 1020),
@@ -126,21 +126,13 @@ public final class GsCode {
      */
     closeDetail(13, 1025),
     /**
-     * <code>lineCountInform = 1026;</code>
-     *
-     * <pre>
-     *s
-     * </pre>
-     */
-    lineCountInform(14, 1026),
-    /**
      * <code>setRent = 1027;</code>
      *
      * <pre>
      *c 设置房租
      * </pre>
      */
-    setRent(15, 1027),
+    setRent(14, 1027),
     /**
      * <code>setSalary = 1028;</code>
      *
@@ -148,7 +140,31 @@ public final class GsCode {
      *c 设置薪水
      * </pre>
      */
-    setSalary(16, 1028),
+    setSalary(15, 1028),
+    /**
+     * <code>addLine = 1029;</code>
+     *
+     * <pre>
+     *c 增加加工厂生产线
+     * </pre>
+     */
+    addLine(16, 1029),
+    /**
+     * <code>lineChangeInform = 1032;</code>
+     *
+     * <pre>
+     *s 生产线变化推送
+     * </pre>
+     */
+    lineChangeInform(17, 1032),
+    /**
+     * <code>changeLine = 1033;</code>
+     *
+     * <pre>
+     *c 改变生成线员工数量或目标产量
+     * </pre>
+     */
+    changeLine(18, 1033),
     /**
      * <code>addBuilding = 1050;</code>
      *
@@ -156,7 +172,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    addBuilding(17, 1050),
+    addBuilding(19, 1050),
     /**
      * <code>delBuilding = 1051;</code>
      *
@@ -164,7 +180,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    delBuilding(18, 1051),
+    delBuilding(20, 1051),
     /**
      * <code>queryGroundAuction = 1100;</code>
      *
@@ -172,7 +188,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    queryGroundAuction(19, 1100),
+    queryGroundAuction(21, 1100),
     /**
      * <code>bidGround = 1101;</code>
      *
@@ -180,7 +196,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    bidGround(20, 1101),
+    bidGround(22, 1101),
     /**
      * <code>queryMetaGroundAuction = 1102;</code>
      *
@@ -188,7 +204,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    queryMetaGroundAuction(21, 1102),
+    queryMetaGroundAuction(23, 1102),
     /**
      * <code>registGroundBidInform = 1103;</code>
      *
@@ -196,7 +212,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    registGroundBidInform(22, 1103),
+    registGroundBidInform(24, 1103),
     /**
      * <code>unregistGroundBidInform = 1104;</code>
      *
@@ -204,7 +220,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    unregistGroundBidInform(23, 1104),
+    unregistGroundBidInform(25, 1104),
     /**
      * <code>bidChangeInform = 1105;</code>
      *
@@ -212,7 +228,7 @@ public final class GsCode {
      *s
      * </pre>
      */
-    bidChangeInform(24, 1105),
+    bidChangeInform(26, 1105),
     /**
      * <code>auctionEnd = 1106;</code>
      *
@@ -220,7 +236,7 @@ public final class GsCode {
      *s  when a auction's end time reached, server send this to inform this auction is dealed
      * </pre>
      */
-    auctionEnd(25, 1106),
+    auctionEnd(27, 1106),
     /**
      * <code>metaGroundAuctionAddInform = 1107;</code>
      *
@@ -228,7 +244,7 @@ public final class GsCode {
      *s  this inform message might send after client login to game server but not yet do roleLogin
      * </pre>
      */
-    metaGroundAuctionAddInform(26, 1107),
+    metaGroundAuctionAddInform(28, 1107),
     /**
      * <code>bidFailInform = 1108;</code>
      *
@@ -236,7 +252,7 @@ public final class GsCode {
      *s  other player bid a higher price
      * </pre>
      */
-    bidFailInform(27, 1108),
+    bidFailInform(29, 1108),
     /**
      * <code>bidWinInform = 1109;</code>
      *
@@ -244,7 +260,7 @@ public final class GsCode {
      *s  you win this auction
      * </pre>
      */
-    bidWinInform(28, 1109),
+    bidWinInform(30, 1109),
     ;
 
     /**
@@ -315,7 +331,7 @@ public final class GsCode {
      * <code>detailApartment = 1020;</code>
      *
      * <pre>
-     *c
+     *c 建筑物详情界面关闭也必须发送此消息！
      * </pre>
      */
     public static final int detailApartment_VALUE = 1020;
@@ -360,14 +376,6 @@ public final class GsCode {
      */
     public static final int closeDetail_VALUE = 1025;
     /**
-     * <code>lineCountInform = 1026;</code>
-     *
-     * <pre>
-     *s
-     * </pre>
-     */
-    public static final int lineCountInform_VALUE = 1026;
-    /**
      * <code>setRent = 1027;</code>
      *
      * <pre>
@@ -383,6 +391,30 @@ public final class GsCode {
      * </pre>
      */
     public static final int setSalary_VALUE = 1028;
+    /**
+     * <code>addLine = 1029;</code>
+     *
+     * <pre>
+     *c 增加加工厂生产线
+     * </pre>
+     */
+    public static final int addLine_VALUE = 1029;
+    /**
+     * <code>lineChangeInform = 1032;</code>
+     *
+     * <pre>
+     *s 生产线变化推送
+     * </pre>
+     */
+    public static final int lineChangeInform_VALUE = 1032;
+    /**
+     * <code>changeLine = 1033;</code>
+     *
+     * <pre>
+     *c 改变生成线员工数量或目标产量
+     * </pre>
+     */
+    public static final int changeLine_VALUE = 1033;
     /**
      * <code>addBuilding = 1050;</code>
      *
@@ -499,9 +531,11 @@ public final class GsCode {
         case 1023: return detailRetailShop;
         case 1024: return detailLaboratory;
         case 1025: return closeDetail;
-        case 1026: return lineCountInform;
         case 1027: return setRent;
         case 1028: return setSalary;
+        case 1029: return addLine;
+        case 1032: return lineChangeInform;
+        case 1033: return changeLine;
         case 1050: return addBuilding;
         case 1051: return delBuilding;
         case 1100: return queryGroundAuction;
@@ -574,22 +608,23 @@ public final class GsCode {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gsCode.proto\022\006gscode*\335\004\n\006OpCode\022\n\n\005log" +
+      "\n\014gsCode.proto\022\006gscode*\375\004\n\006OpCode\022\n\n\005log" +
       "in\020\350\007\022\016\n\theartBeat\020\351\007\022\016\n\troleLogin\020\352\007\022\017\n" +
       "\ncreateRole\020\353\007\022\t\n\004move\020\354\007\022\017\n\nunitCreate\020" +
       "\355\007\022\017\n\nunitRemove\020\356\007\022\017\n\nunitChange\020\357\007\022\024\n\017" +
       "detailApartment\020\374\007\022\032\n\025detailMaterialFact" +
       "ory\020\375\007\022\037\n\032detailProductingDepartment\020\376\007\022" +
       "\025\n\020detailRetailShop\020\377\007\022\025\n\020detailLaborato" +
-      "ry\020\200\010\022\020\n\013closeDetail\020\201\010\022\024\n\017lineCountInfo" +
-      "rm\020\202\010\022\014\n\007setRent\020\203\010\022\016\n\tsetSalary\020\204\010\022\020\n\013a" +
-      "ddBuilding\020\232\010\022\020\n\013delBuilding\020\233\010\022\027\n\022query",
-      "GroundAuction\020\314\010\022\016\n\tbidGround\020\315\010\022\033\n\026quer" +
-      "yMetaGroundAuction\020\316\010\022\032\n\025registGroundBid" +
-      "Inform\020\317\010\022\034\n\027unregistGroundBidInform\020\320\010\022" +
-      "\024\n\017bidChangeInform\020\321\010\022\017\n\nauctionEnd\020\322\010\022\037" +
-      "\n\032metaGroundAuctionAddInform\020\323\010\022\022\n\rbidFa" +
-      "ilInform\020\324\010\022\021\n\014bidWinInform\020\325\010"
+      "ry\020\200\010\022\020\n\013closeDetail\020\201\010\022\014\n\007setRent\020\203\010\022\016\n" +
+      "\tsetSalary\020\204\010\022\014\n\007addLine\020\205\010\022\025\n\020lineChang" +
+      "eInform\020\210\010\022\017\n\nchangeLine\020\211\010\022\020\n\013addBuildi",
+      "ng\020\232\010\022\020\n\013delBuilding\020\233\010\022\027\n\022queryGroundAu" +
+      "ction\020\314\010\022\016\n\tbidGround\020\315\010\022\033\n\026queryMetaGro" +
+      "undAuction\020\316\010\022\032\n\025registGroundBidInform\020\317" +
+      "\010\022\034\n\027unregistGroundBidInform\020\320\010\022\024\n\017bidCh" +
+      "angeInform\020\321\010\022\017\n\nauctionEnd\020\322\010\022\037\n\032metaGr" +
+      "oundAuctionAddInform\020\323\010\022\022\n\rbidFailInform" +
+      "\020\324\010\022\021\n\014bidWinInform\020\325\010"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

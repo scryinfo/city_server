@@ -15,6 +15,10 @@ public class Laboratory extends Building {
     public Laboratory(MetaLaboratory meta, Coord pos, UUID ownerId) {
         super(meta, pos, ownerId);
     }
+
+    public Laboratory() {
+    }
+
     @PostLoad
     private void _1() {
         this.meta = MetaData.getLaboratory(this._d.metaId);
@@ -23,5 +27,9 @@ public class Laboratory extends Building {
     @Override
     public Message detailProto() {
         return null;
+    }
+    @Override
+    protected void _update(long diffNano) {
+
     }
 }

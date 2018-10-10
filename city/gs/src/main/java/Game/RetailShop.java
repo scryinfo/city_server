@@ -17,6 +17,9 @@ public class RetailShop extends Building {
     @Transient
     private MetaRetailShop meta;
 
+    public RetailShop() {
+    }
+
     @PostLoad
     private void _1() {
         this.meta = MetaData.getRetailShop(this._d.metaId);
@@ -26,5 +29,10 @@ public class RetailShop extends Building {
     @Override
     public Message detailProto() {
         return null;
+    }
+
+    @Override
+    protected void _update(long diffNano) {
+
     }
 }

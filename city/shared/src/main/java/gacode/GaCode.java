@@ -6,7 +6,13 @@ package gacode;
 public final class GaCode {
   private GaCode() {}
   public static void registerAllExtensions(
+      com.google.protobuf.ExtensionRegistryLite registry) {
+  }
+
+  public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions(
+        (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   /**
    * Protobuf enum {@code gacode.OpCode}
@@ -14,51 +20,60 @@ public final class GaCode {
   public enum OpCode
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
+     * <code>error = 0;</code>
+     */
+    error(0),
+    /**
      * <code>login = 1;</code>
      */
-    login(0, 1),
+    login(1),
     /**
      * <code>serverInfo = 2;</code>
      */
-    serverInfo(1, 2),
+    serverInfo(2),
     /**
      * <code>stateReport = 3;</code>
      */
-    stateReport(2, 3),
+    stateReport(3),
     /**
-     * <code>validateAck = 4;</code>
-     *
      * <pre>
      * ack of AccountToGameOpCode::validate_info 
      * </pre>
+     *
+     * <code>validateAck = 4;</code>
      */
-    validateAck(3, 4),
+    validateAck(4),
     /**
      * <code>validateInfo = 11;</code>
      */
-    validateInfo(4, 11),
+    validateInfo(11),
     /**
      * <code>chargeInform = 12;</code>
      */
-    chargeInform(5, 12),
+    chargeInform(12),
     /**
      * <code>sendMail = 13;</code>
      */
-    sendMail(6, 13),
+    sendMail(13),
     /**
      * <code>banChat = 14;</code>
      */
-    banChat(7, 14),
+    banChat(14),
     /**
      * <code>announcement = 15;</code>
      */
-    announcement(8, 15),
+    announcement(15),
     /**
      * <code>kickAllRole = 16;</code>
      */
-    kickAllRole(9, 16),
+    kickAllRole(16),
+    UNRECOGNIZED(-1),
     ;
 
+    /**
+     * <code>error = 0;</code>
+     */
+    public static final int error_VALUE = 0;
     /**
      * <code>login = 1;</code>
      */
@@ -72,11 +87,11 @@ public final class GaCode {
      */
     public static final int stateReport_VALUE = 3;
     /**
-     * <code>validateAck = 4;</code>
-     *
      * <pre>
      * ack of AccountToGameOpCode::validate_info 
      * </pre>
+     *
+     * <code>validateAck = 4;</code>
      */
     public static final int validateAck_VALUE = 4;
     /**
@@ -105,10 +120,25 @@ public final class GaCode {
     public static final int kickAllRole_VALUE = 16;
 
 
-    public final int getNumber() { return value; }
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
 
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
     public static OpCode valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static OpCode forNumber(int value) {
       switch (value) {
+        case 0: return error;
         case 1: return login;
         case 2: return serverInfo;
         case 3: return stateReport;
@@ -127,17 +157,17 @@ public final class GaCode {
         internalGetValueMap() {
       return internalValueMap;
     }
-    private static com.google.protobuf.Internal.EnumLiteMap<OpCode>
-        internalValueMap =
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        OpCode> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<OpCode>() {
             public OpCode findValueByNumber(int number) {
-              return OpCode.valueOf(number);
+              return OpCode.forNumber(number);
             }
           };
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
-      return getDescriptor().getValues().get(index);
+      return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
@@ -156,14 +186,15 @@ public final class GaCode {
         throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
       }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
       return VALUES[desc.getIndex()];
     }
 
-    private final int index;
     private final int value;
 
-    private OpCode(int index, int value) {
-      this.index = index;
+    private OpCode(int value) {
       this.value = value;
     }
 
@@ -175,24 +206,25 @@ public final class GaCode {
       getDescriptor() {
     return descriptor;
   }
-  private static com.google.protobuf.Descriptors.FileDescriptor
+  private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gaCode.proto\022\006gacode*\247\001\n\006OpCode\022\t\n\005log" +
-      "in\020\001\022\016\n\nserverInfo\020\002\022\017\n\013stateReport\020\003\022\017\n" +
-      "\013validateAck\020\004\022\020\n\014validateInfo\020\013\022\020\n\014char" +
-      "geInform\020\014\022\014\n\010sendMail\020\r\022\013\n\007banChat\020\016\022\020\n" +
-      "\014announcement\020\017\022\017\n\013kickAllRole\020\020"
+      "\n\014gaCode.proto\022\006gacode*\262\001\n\006OpCode\022\t\n\005err" +
+      "or\020\000\022\t\n\005login\020\001\022\016\n\nserverInfo\020\002\022\017\n\013state" +
+      "Report\020\003\022\017\n\013validateAck\020\004\022\020\n\014validateInf" +
+      "o\020\013\022\020\n\014chargeInform\020\014\022\014\n\010sendMail\020\r\022\013\n\007b" +
+      "anChat\020\016\022\020\n\014announcement\020\017\022\017\n\013kickAllRol" +
+      "e\020\020b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {

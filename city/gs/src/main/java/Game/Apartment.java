@@ -27,6 +27,9 @@ public class Apartment extends Building {
     @Transient
     private Deque<Integer> incomingHistory = new ArrayDeque<>();
 
+    public Apartment() {
+    }
+
     @PostLoad
     private void _1() {
         this.meta = MetaData.getApartment(this._d.metaId);
@@ -53,5 +56,9 @@ public class Apartment extends Building {
                 .setRenter(guest.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
                 .build();
+    }
+    @Override
+    protected void _update(long diffNano) {
+
     }
 }

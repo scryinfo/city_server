@@ -1,9 +1,15 @@
 package Game;
 
+import DB.Db;
 import Shared.Util;
 import com.google.common.collect.EvictingQueue;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import gs.Gs;
+import io.netty.channel.ChannelId;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.bson.Document;
 
 import javax.persistence.*;
@@ -11,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +29,10 @@ import java.util.stream.Stream;
 public abstract class Building {
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
+
+    protected Building() {
+    }
+
     public int type() {
         return MetaBuilding.type(metaBuilding.id);
     }
@@ -49,12 +60,23 @@ public abstract class Building {
     @Transient
     protected MetaBuilding metaBuilding;
 
+    public void watchDetailInfo(GameSession s) {
+        if(detailWatchers.contains(s.channelId()))
+            detailWatchers.remove(s.channelId());
+        else
+            detailWatchers.add(s.channelId());
+    }
+    @Transient
+    Set<ChannelId> detailWatchers = new HashSet<>();
     @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class _D {
         @Column(name = "mid", updatable = false, nullable = false)
         protected int metaId;
         @Column(name = "flowHistory")
         private byte[] flowHistoryBinary;
+        void dirty() {
+            this.flowHistoryBinary = null;
+        }
     }
     @Embedded
     protected final _D _d = new _D();
@@ -64,16 +86,14 @@ public abstract class Building {
     @PrePersist
     @PreUpdate
     private void _base1() {
-        Document d = new Document();
-        d.append("1",  this.flowHistory.stream().flatMap(f -> Stream.of(f.n, f.ts)).collect(Collectors.toList()));
-        this._d.flowHistoryBinary = Util.toBytes(d);
+        Db.FlowHistory.Builder builder = Db.FlowHistory.newBuilder();
+        this.flowHistory.forEach(f -> builder.addI(Db.FlowHistory.Info.newBuilder().setTs(f.ts).setN(f.n)));
+        this._d.flowHistoryBinary = builder.build().toByteArray();
     }
     @PostLoad
-    private void _base2() {
-        Document d = Util.toDocument(this._d.flowHistoryBinary);
-        List<Integer> l = (List<Integer>) d.get("1");
-        for(int i = 0; i < l.size(); i+=2) {
-            this.flowHistory.add(new FlowInfo(l.get(i), l.get(i+1)));
+    private void _base2() throws InvalidProtocolBufferException {
+        for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this._d.flowHistoryBinary).getIList()) {
+            this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
         }
     }
     @Id
@@ -220,7 +240,9 @@ public abstract class Building {
                 .build();
     }
     void update(long diffNano) {
+        this._update(diffNano);
     }
+    protected abstract void _update(long diffNano);
     void timeSectionTick(int newIdx, int nowHour, int hours) {
 
     }
@@ -233,6 +255,7 @@ public abstract class Building {
         flow = flowCount;
         flowCount = 0;
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
+        this._d.dirty(); // dirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(nowHour == PAYMENT_HOUR && !this.allNpc.isEmpty()) {
             Player p = GameDb.getPlayer(ownerId);
