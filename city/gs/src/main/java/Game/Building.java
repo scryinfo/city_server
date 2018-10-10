@@ -7,20 +7,14 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import gs.Gs;
 import io.netty.channel.ChannelId;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.util.concurrent.GlobalEventExecutor;
-import org.bson.Document;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 // this is better. 1, all building will in memory all time, so there is no requirement for
 // reference building in other class maintain by hibernate. 2, performance is better due to each
@@ -45,7 +39,7 @@ public abstract class Building {
             case MetaBuilding.MATERIAL:
                 return new MaterialFactory(MetaData.getMaterialFactory(id), pos, ownerId);
             case MetaBuilding.PRODUCTING:
-                return new ProductingDepartment(MetaData.getProductingDepartment(id), pos, ownerId);
+                return new ProduceDepartment(MetaData.getProductingDepartment(id), pos, ownerId);
             case MetaBuilding.RETAIL:
                 return new RetailShop(MetaData.getRetailShop(id), pos, ownerId);
             case MetaBuilding.APARTMENT:

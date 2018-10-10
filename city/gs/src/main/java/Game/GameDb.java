@@ -112,12 +112,12 @@ public class GameDb {
 		session.close();
 		return res;
 	}
-	public static Collection<ProductingDepartment> getAllProductingDepartment() {
-		Collection<ProductingDepartment> res;
+	public static Collection<ProduceDepartment> getAllProductingDepartment() {
+		Collection<ProduceDepartment> res;
 		Session session = sessionFactory.openSession();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<ProductingDepartment> criteria = builder.createQuery(ProductingDepartment.class);
-		criteria.from(ProductingDepartment.class);
+		CriteriaQuery<ProduceDepartment> criteria = builder.createQuery(ProduceDepartment.class);
+		criteria.from(ProduceDepartment.class);
 		res = session.createQuery(criteria).list();
 		session.close();
 		return res;
@@ -397,10 +397,10 @@ public class GameDb {
 ////		return res;
 ////	}
 ////
-////	public static HashMap<ObjectId, ProductingDepartment> getAllProductingDepartment() {
-////		HashMap<ObjectId, ProductingDepartment> res = new HashMap<>();
+////	public static HashMap<ObjectId, ProduceDepartment> getAllProductingDepartment() {
+////		HashMap<ObjectId, ProduceDepartment> res = new HashMap<>();
 ////		productingDepartmentCol.find().forEach((Block<Document>) doc -> {
-////			ProductingDepartment m = new ProductingDepartment(doc);
+////			ProduceDepartment m = new ProduceDepartment(doc);
 ////			res.put(m.id(), m);
 ////		});
 ////		return res;

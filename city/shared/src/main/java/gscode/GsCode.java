@@ -94,13 +94,13 @@ public final class GsCode {
      */
     detailMaterialFactory(9, 1021),
     /**
-     * <code>detailProductingDepartment = 1022;</code>
+     * <code>detailProduceDepartment = 1022;</code>
      *
      * <pre>
      *c
      * </pre>
      */
-    detailProductingDepartment(10, 1022),
+    detailProduceDepartment(10, 1022),
     /**
      * <code>detailRetailShop = 1023;</code>
      *
@@ -344,13 +344,13 @@ public final class GsCode {
      */
     public static final int detailMaterialFactory_VALUE = 1021;
     /**
-     * <code>detailProductingDepartment = 1022;</code>
+     * <code>detailProduceDepartment = 1022;</code>
      *
      * <pre>
      *c
      * </pre>
      */
-    public static final int detailProductingDepartment_VALUE = 1022;
+    public static final int detailProduceDepartment_VALUE = 1022;
     /**
      * <code>detailRetailShop = 1023;</code>
      *
@@ -527,7 +527,7 @@ public final class GsCode {
         case 1007: return unitChange;
         case 1020: return detailApartment;
         case 1021: return detailMaterialFactory;
-        case 1022: return detailProductingDepartment;
+        case 1022: return detailProduceDepartment;
         case 1023: return detailRetailShop;
         case 1024: return detailLaboratory;
         case 1025: return closeDetail;
@@ -608,23 +608,23 @@ public final class GsCode {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gsCode.proto\022\006gscode*\375\004\n\006OpCode\022\n\n\005log" +
+      "\n\014gsCode.proto\022\006gscode*\372\004\n\006OpCode\022\n\n\005log" +
       "in\020\350\007\022\016\n\theartBeat\020\351\007\022\016\n\troleLogin\020\352\007\022\017\n" +
       "\ncreateRole\020\353\007\022\t\n\004move\020\354\007\022\017\n\nunitCreate\020" +
       "\355\007\022\017\n\nunitRemove\020\356\007\022\017\n\nunitChange\020\357\007\022\024\n\017" +
       "detailApartment\020\374\007\022\032\n\025detailMaterialFact" +
-      "ory\020\375\007\022\037\n\032detailProductingDepartment\020\376\007\022" +
-      "\025\n\020detailRetailShop\020\377\007\022\025\n\020detailLaborato" +
-      "ry\020\200\010\022\020\n\013closeDetail\020\201\010\022\014\n\007setRent\020\203\010\022\016\n" +
-      "\tsetSalary\020\204\010\022\014\n\007addLine\020\205\010\022\025\n\020lineChang" +
-      "eInform\020\210\010\022\017\n\nchangeLine\020\211\010\022\020\n\013addBuildi",
-      "ng\020\232\010\022\020\n\013delBuilding\020\233\010\022\027\n\022queryGroundAu" +
-      "ction\020\314\010\022\016\n\tbidGround\020\315\010\022\033\n\026queryMetaGro" +
-      "undAuction\020\316\010\022\032\n\025registGroundBidInform\020\317" +
-      "\010\022\034\n\027unregistGroundBidInform\020\320\010\022\024\n\017bidCh" +
-      "angeInform\020\321\010\022\017\n\nauctionEnd\020\322\010\022\037\n\032metaGr" +
-      "oundAuctionAddInform\020\323\010\022\022\n\rbidFailInform" +
-      "\020\324\010\022\021\n\014bidWinInform\020\325\010"
+      "ory\020\375\007\022\034\n\027detailProduceDepartment\020\376\007\022\025\n\020" +
+      "detailRetailShop\020\377\007\022\025\n\020detailLaboratory\020" +
+      "\200\010\022\020\n\013closeDetail\020\201\010\022\014\n\007setRent\020\203\010\022\016\n\tse" +
+      "tSalary\020\204\010\022\014\n\007addLine\020\205\010\022\025\n\020lineChangeIn" +
+      "form\020\210\010\022\017\n\nchangeLine\020\211\010\022\020\n\013addBuilding\020",
+      "\232\010\022\020\n\013delBuilding\020\233\010\022\027\n\022queryGroundAucti" +
+      "on\020\314\010\022\016\n\tbidGround\020\315\010\022\033\n\026queryMetaGround" +
+      "Auction\020\316\010\022\032\n\025registGroundBidInform\020\317\010\022\034" +
+      "\n\027unregistGroundBidInform\020\320\010\022\024\n\017bidChang" +
+      "eInform\020\321\010\022\017\n\nauctionEnd\020\322\010\022\037\n\032metaGroun" +
+      "dAuctionAddInform\020\323\010\022\022\n\rbidFailInform\020\324\010" +
+      "\022\021\n\014bidWinInform\020\325\010"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

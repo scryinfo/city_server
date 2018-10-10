@@ -21375,7 +21375,7 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.MaterialFactoryInfo)
   }
 
-  public interface ProductingDepartmentInfoOrBuilder
+  public interface ProduceDepartmentInfoOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
     // required .gs.BuildingDetailCommon common = 1;
@@ -21554,31 +21554,31 @@ public final class Gs {
         int index);
   }
   /**
-   * Protobuf type {@code gs.ProductingDepartmentInfo}
+   * Protobuf type {@code gs.ProduceDepartmentInfo}
    *
    * <pre>
-   * detailProductingDepartment
+   * detailProduceDepartment
    * c
    * Id
    * s
    * </pre>
    */
-  public static final class ProductingDepartmentInfo extends
+  public static final class ProduceDepartmentInfo extends
       com.google.protobuf.GeneratedMessage
-      implements ProductingDepartmentInfoOrBuilder {
-    // Use ProductingDepartmentInfo.newBuilder() to construct.
-    private ProductingDepartmentInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements ProduceDepartmentInfoOrBuilder {
+    // Use ProduceDepartmentInfo.newBuilder() to construct.
+    private ProduceDepartmentInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private ProductingDepartmentInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private ProduceDepartmentInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final ProductingDepartmentInfo defaultInstance;
-    public static ProductingDepartmentInfo getDefaultInstance() {
+    private static final ProduceDepartmentInfo defaultInstance;
+    public static ProduceDepartmentInfo getDefaultInstance() {
       return defaultInstance;
     }
 
-    public ProductingDepartmentInfo getDefaultInstanceForType() {
+    public ProduceDepartmentInfo getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -21588,7 +21588,7 @@ public final class Gs {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private ProductingDepartmentInfo(
+    private ProduceDepartmentInfo(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -21684,28 +21684,28 @@ public final class Gs {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gs.Gs.internal_static_gs_ProductingDepartmentInfo_descriptor;
+      return gs.Gs.internal_static_gs_ProduceDepartmentInfo_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gs.Gs.internal_static_gs_ProductingDepartmentInfo_fieldAccessorTable
+      return gs.Gs.internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gs.Gs.ProductingDepartmentInfo.class, gs.Gs.ProductingDepartmentInfo.Builder.class);
+              gs.Gs.ProduceDepartmentInfo.class, gs.Gs.ProduceDepartmentInfo.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<ProductingDepartmentInfo> PARSER =
-        new com.google.protobuf.AbstractParser<ProductingDepartmentInfo>() {
-      public ProductingDepartmentInfo parsePartialFrom(
+    public static com.google.protobuf.Parser<ProduceDepartmentInfo> PARSER =
+        new com.google.protobuf.AbstractParser<ProduceDepartmentInfo>() {
+      public ProduceDepartmentInfo parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ProductingDepartmentInfo(input, extensionRegistry);
+        return new ProduceDepartmentInfo(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ProductingDepartmentInfo> getParserForType() {
+    public com.google.protobuf.Parser<ProduceDepartmentInfo> getParserForType() {
       return PARSER;
     }
 
@@ -22039,53 +22039,53 @@ public final class Gs {
       return super.writeReplace();
     }
 
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(byte[] data)
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(java.io.InputStream input)
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseDelimitedFrom(java.io.InputStream input)
+    public static gs.Gs.ProduceDepartmentInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseDelimitedFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.ProductingDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartmentInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -22094,7 +22094,7 @@ public final class Gs {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(gs.Gs.ProductingDepartmentInfo prototype) {
+    public static Builder newBuilder(gs.Gs.ProduceDepartmentInfo prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -22106,10 +22106,10 @@ public final class Gs {
       return builder;
     }
     /**
-     * Protobuf type {@code gs.ProductingDepartmentInfo}
+     * Protobuf type {@code gs.ProduceDepartmentInfo}
      *
      * <pre>
-     * detailProductingDepartment
+     * detailProduceDepartment
      * c
      * Id
      * s
@@ -22117,20 +22117,20 @@ public final class Gs {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements gs.Gs.ProductingDepartmentInfoOrBuilder {
+       implements gs.Gs.ProduceDepartmentInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gs.Gs.internal_static_gs_ProductingDepartmentInfo_descriptor;
+        return gs.Gs.internal_static_gs_ProduceDepartmentInfo_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_ProductingDepartmentInfo_fieldAccessorTable
+        return gs.Gs.internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gs.Gs.ProductingDepartmentInfo.class, gs.Gs.ProductingDepartmentInfo.Builder.class);
+                gs.Gs.ProduceDepartmentInfo.class, gs.Gs.ProduceDepartmentInfo.Builder.class);
       }
 
-      // Construct using gs.Gs.ProductingDepartmentInfo.newBuilder()
+      // Construct using gs.Gs.ProduceDepartmentInfo.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -22194,23 +22194,23 @@ public final class Gs {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gs.Gs.internal_static_gs_ProductingDepartmentInfo_descriptor;
+        return gs.Gs.internal_static_gs_ProduceDepartmentInfo_descriptor;
       }
 
-      public gs.Gs.ProductingDepartmentInfo getDefaultInstanceForType() {
-        return gs.Gs.ProductingDepartmentInfo.getDefaultInstance();
+      public gs.Gs.ProduceDepartmentInfo getDefaultInstanceForType() {
+        return gs.Gs.ProduceDepartmentInfo.getDefaultInstance();
       }
 
-      public gs.Gs.ProductingDepartmentInfo build() {
-        gs.Gs.ProductingDepartmentInfo result = buildPartial();
+      public gs.Gs.ProduceDepartmentInfo build() {
+        gs.Gs.ProduceDepartmentInfo result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gs.Gs.ProductingDepartmentInfo buildPartial() {
-        gs.Gs.ProductingDepartmentInfo result = new gs.Gs.ProductingDepartmentInfo(this);
+      public gs.Gs.ProduceDepartmentInfo buildPartial() {
+        gs.Gs.ProduceDepartmentInfo result = new gs.Gs.ProduceDepartmentInfo(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -22262,16 +22262,16 @@ public final class Gs {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gs.Gs.ProductingDepartmentInfo) {
-          return mergeFrom((gs.Gs.ProductingDepartmentInfo)other);
+        if (other instanceof gs.Gs.ProduceDepartmentInfo) {
+          return mergeFrom((gs.Gs.ProduceDepartmentInfo)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gs.Gs.ProductingDepartmentInfo other) {
-        if (other == gs.Gs.ProductingDepartmentInfo.getDefaultInstance()) return this;
+      public Builder mergeFrom(gs.Gs.ProduceDepartmentInfo other) {
+        if (other == gs.Gs.ProduceDepartmentInfo.getDefaultInstance()) return this;
         if (other.hasCommon()) {
           mergeCommon(other.getCommon());
         }
@@ -22398,11 +22398,11 @@ public final class Gs {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gs.Gs.ProductingDepartmentInfo parsedMessage = null;
+        gs.Gs.ProduceDepartmentInfo parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gs.Gs.ProductingDepartmentInfo) e.getUnfinishedMessage();
+          parsedMessage = (gs.Gs.ProduceDepartmentInfo) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -23619,15 +23619,15 @@ public final class Gs {
         return lineBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:gs.ProductingDepartmentInfo)
+      // @@protoc_insertion_point(builder_scope:gs.ProduceDepartmentInfo)
     }
 
     static {
-      defaultInstance = new ProductingDepartmentInfo(true);
+      defaultInstance = new ProduceDepartmentInfo(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:gs.ProductingDepartmentInfo)
+    // @@protoc_insertion_point(class_scope:gs.ProduceDepartmentInfo)
   }
 
   public interface AddLineOrBuilder
@@ -25939,10 +25939,10 @@ public final class Gs {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_MaterialFactoryInfo_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_ProductingDepartmentInfo_descriptor;
+    internal_static_gs_ProduceDepartmentInfo_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_ProductingDepartmentInfo_fieldAccessorTable;
+      internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_AddLine_descriptor;
   private static
@@ -26011,18 +26011,18 @@ public final class Gs {
       "FactoryInfo\022(\n\006common\030\001 \002(\0132\030.gs.Buildin" +
       "gDetailCommon\022\031\n\005store\030\002 \003(\0132\n.gs.IntNum" +
       "\022\031\n\005shelf\030\003 \003(\0132\n.gs.IntNum\022\027\n\005chart\030\004 \002" +
-      "(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010.gs.Line\"\253\001\n" +
-      "\030ProductingDepartmentInfo\022(\n\006common\030\001 \002(" +
-      "\0132\030.gs.BuildingDetailCommon\022\031\n\005store\030\002 \003" +
-      "(\0132\n.gs.IntNum\022\031\n\005shelf\030\003 \003(\0132\n.gs.IntNu" +
-      "m\022\027\n\005chart\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\013" +
-      "2\010.gs.Line\"K\n\007AddLine\022\n\n\002id\030\001 \002(\014\022\016\n\006ite",
-      "mId\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021\n\tworkerNu" +
-      "m\030\004 \002(\005\"V\n\nChangeLine\022\022\n\nbuildingId\030\001 \002(" +
-      "\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\t" +
-      "targetNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022" +
-      "\020\n\010nowCount\030\002 \001(\005\022\023\n\013targetCount\030\003 \001(\005\022\021" +
-      "\n\tworkerNum\030\004 \001(\005"
+      "(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010.gs.Line\"\250\001\n" +
+      "\025ProduceDepartmentInfo\022(\n\006common\030\001 \002(\0132\030" +
+      ".gs.BuildingDetailCommon\022\031\n\005store\030\002 \003(\0132" +
+      "\n.gs.IntNum\022\031\n\005shelf\030\003 \003(\0132\n.gs.IntNum\022\027" +
+      "\n\005chart\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010." +
+      "gs.Line\"K\n\007AddLine\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId",
+      "\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021\n\tworkerNum\030\004" +
+      " \002(\005\"V\n\nChangeLine\022\022\n\nbuildingId\030\001 \002(\014\022\016" +
+      "\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\ttar" +
+      "getNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022\020\n\010" +
+      "nowCount\030\002 \001(\005\022\023\n\013targetCount\030\003 \001(\005\022\021\n\tw" +
+      "orkerNum\030\004 \001(\005"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -26215,11 +26215,11 @@ public final class Gs {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_MaterialFactoryInfo_descriptor,
               new java.lang.String[] { "Common", "Store", "Shelf", "Chart", "Line", });
-          internal_static_gs_ProductingDepartmentInfo_descriptor =
+          internal_static_gs_ProduceDepartmentInfo_descriptor =
             getDescriptor().getMessageTypes().get(28);
-          internal_static_gs_ProductingDepartmentInfo_fieldAccessorTable = new
+          internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_ProductingDepartmentInfo_descriptor,
+              internal_static_gs_ProduceDepartmentInfo_descriptor,
               new java.lang.String[] { "Common", "Store", "Shelf", "Chart", "Line", });
           internal_static_gs_AddLine_descriptor =
             getDescriptor().getMessageTypes().get(29);

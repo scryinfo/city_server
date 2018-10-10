@@ -52,7 +52,7 @@ public class City {
 //    private HashMap<ObjectId, TrivialBuilding> allTrivialBuilding = new HashMap<>();
 //    private HashMap<ObjectId, Apartment> allApartment;
 //    private HashMap<ObjectId, PublicFacility> allPublicFacility;
-//    private HashMap<ObjectId, ProductingDepartment> allProductingDepartment;
+//    private HashMap<ObjectId, ProduceDepartment> allProductingDepartment;
 //    private HashMap<ObjectId, Laboratory> allLaboratory;
 //    private HashMap<ObjectId, MaterialFactory> allMaterialFactory;
 //    private HashMap<ObjectId, RetailShop> allRetailShop;

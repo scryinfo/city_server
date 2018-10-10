@@ -144,9 +144,9 @@ class MetaMaterialFactory extends MetaFactoryBase {
         super(d);
     }
 }
-class MetaProductingDepartment extends MetaFactoryBase {
+class MetaProduceDepartment extends MetaFactoryBase {
 
-    MetaProductingDepartment(Document d) {
+    MetaProduceDepartment(Document d) {
         super(d);
     }
 }
@@ -217,7 +217,7 @@ public class MetaData {
 	private static final String cityColName = "City";
     private static final String apartmentColName = "Apartment";
     private static final String materialFactoryColName = "MaterialFactory";
-    private static final String productingDepartmentColName = "ProductingDepartment";
+    private static final String produceDepartmentColName = "ProduceDepartment";
     private static final String retailShopColName = "RetailShop";
     private static final String laboratoryColName = "Laboratory";
     private static final String publicFacilityColName = "PublicFacility";
@@ -230,7 +230,7 @@ public class MetaData {
 	private static final TreeMap<Integer, MetaNpc> npc = new TreeMap<>();
     private static final TreeMap<Integer, MetaBuilding> trivial = new TreeMap<>();
     private static final TreeMap<Integer, MetaApartment> apartment = new TreeMap<>();
-    private static final TreeMap<Integer, MetaProductingDepartment> productingDepartment = new TreeMap<>();
+    private static final TreeMap<Integer, MetaProduceDepartment> produceDepartment = new TreeMap<>();
     private static final TreeMap<Integer, MetaRetailShop> retailShop = new TreeMap<>();
     private static final TreeMap<Integer, MetaLaboratory> laboratory = new TreeMap<>();
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
@@ -257,8 +257,8 @@ public class MetaData {
     public static MetaRetailShop getRetailShop(int id) {
         return retailShop.get(id);
     }
-    public static MetaProductingDepartment getProductingDepartment(int id) {
-        return productingDepartment.get(id);
+    public static MetaProduceDepartment getProductingDepartment(int id) {
+        return produceDepartment.get(id);
     }
     public static class InitialBuildingInfo {
         public InitialBuildingInfo(Document d) {
@@ -353,9 +353,9 @@ public class MetaData {
             MetaMaterialFactory m = new MetaMaterialFactory(doc);
             materialFactory.put(m.id, m);
         });
-        mongoClient.getDatabase(dbName).getCollection(productingDepartmentColName).find().forEach((Block<Document>) doc -> {
-            MetaProductingDepartment m = new MetaProductingDepartment(doc);
-            productingDepartment.put(m.id, m);
+        mongoClient.getDatabase(dbName).getCollection(produceDepartmentColName).find().forEach((Block<Document>) doc -> {
+            MetaProduceDepartment m = new MetaProduceDepartment(doc);
+            produceDepartment.put(m.id, m);
         });
         mongoClient.getDatabase(dbName).getCollection(retailShopColName).find().forEach((Block<Document>) doc -> {
             MetaRetailShop m = new MetaRetailShop(doc);

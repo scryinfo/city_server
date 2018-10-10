@@ -8,17 +8,17 @@ import gs.Gs;
 import javax.persistence.*;
 import java.util.UUID;
 
-@Entity(name = "ProductingDepartment")
-public class ProductingDepartment extends FactoryBase {
+@Entity(name = "ProduceDepartment")
+public class ProduceDepartment extends FactoryBase {
     @Transient
-    private MetaProductingDepartment meta;
+    private MetaProduceDepartment meta;
 
-    public ProductingDepartment(MetaProductingDepartment meta, Coord pos, UUID ownerId) {
+    public ProduceDepartment(MetaProduceDepartment meta, Coord pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
     }
 
-    public ProductingDepartment() {
+    public ProduceDepartment() {
     }
 
     protected boolean isDirty() {
@@ -68,7 +68,7 @@ public class ProductingDepartment extends FactoryBase {
     }
     @Override
     public Message detailProto() {
-        Gs.ProductingDepartmentInfo.Builder builder = Gs.ProductingDepartmentInfo.newBuilder().setCommon(super.commonProto());
+        Gs.ProduceDepartmentInfo.Builder builder = Gs.ProduceDepartmentInfo.newBuilder().setCommon(super.commonProto());
         builder.addAllStore(this.store.toProto());
         builder.addAllShelf(this.shelf.toProto());
         this.lines.values().forEach(line -> builder.addLine(line.toProto()));

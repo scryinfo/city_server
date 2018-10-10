@@ -258,6 +258,7 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
+        b.watchDetailInfo(this);
 		this.write(Package.create(cmd, ((MaterialFactory)b).detailProto()));
 	}
 	public void setSalary(short cmd, Message message) {
