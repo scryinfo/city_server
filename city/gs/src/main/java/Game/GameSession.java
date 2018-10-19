@@ -224,10 +224,61 @@ public class GameSession {
 		GroundAuction.instance().unregist(this.channelId);
 	}
 
+//	public void addBuilding(short cmd, Message message) {
+//		Gs.AddBuilding c = (Gs.AddBuilding) message;
+//		int id = c.getId();
+//		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
+//			return;
+//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coord(c.getPos()), player.id());
+//		boolean ok = City.instance().addVirtualBuilding(building);
+//		if(!ok)
+//			this.write(Package.fail(cmd));
+//		else
+//			this.write(Package.create(cmd));
+//	}
+//	public void construct(short cmd, Message message) {
+//		Gs.Bytes c = (Gs.Bytes)message;
+//		UUID id = Util.toUuid(c.toByteArray());
+//		Building b = City.instance().getBuilding(id);
+//		if(b == null || b.type() != MetaBuilding.VIRTUAL || !b.ownerId().equals(player.id()))
+//			return;
+//		VirtualBuilding a = (VirtualBuilding)b;
+//		if(a.construct())
+//			a.broadcastChange();
+//	}
+//	public void startBusiness(short cmd, Message message) {
+//		Gs.Bytes c = (Gs.Bytes)message;
+//		UUID id = Util.toUuid(c.toByteArray());
+//		Building b = City.instance().getBuilding(id);
+//		if(b == null || b.type() != MetaBuilding.VIRTUAL || !b.ownerId().equals(player.id()))
+//			return;
+//		VirtualBuilding a = (VirtualBuilding)b;
+//		if(a.startBusiness()) {
+//			City.instance().delBuilding(a);
+//			Building building = Building.create(a.linkBuildingId(), a.coordinate(), player.id());
+//			building.state = Gs.BuildingState.WAITING_OPEN_VALUE;
+//			City.instance().addBuilding(building);
+//		}
+//	}
+//	public void addBuilding(short cmd, Message message) {
+//		Gs.AddBuilding c = (Gs.AddBuilding) message;
+//		int id = c.getId();
+//		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
+//			return;
+//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coord(c.getPos()), player.id());
+//		boolean ok = City.instance().addVirtualBuilding(building);
+//		if(!ok)
+//			this.write(Package.fail(cmd));
+//		else
+//			this.write(Package.create(cmd));
+//	}
 	public void addBuilding(short cmd, Message message) {
 		Gs.AddBuilding c = (Gs.AddBuilding) message;
 		int id = c.getId();
-		boolean ok = City.instance().addBuilding(id, new Coord(c.getPos()), player);
+		if(MetaBuilding.type(id) == MetaBuilding.TRIVIAL)
+			return;
+		Building building = Building.create(id, new Coord(c.getPos()), player.id());
+		boolean ok = City.instance().addBuilding(building);
 		if(!ok)
 			this.write(Package.fail(cmd));
 		else
@@ -236,13 +287,86 @@ public class GameSession {
 	public void delBuilding(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
-		boolean ok = City.instance().delBuilding(id, player);
-		if(!ok)
-			this.write(Package.fail(cmd));
-		else
-			this.write(Package.create(cmd));
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() == MetaBuilding.VIRTUAL || !b.ownerId().equals(player.id()))
+			return;
+		City.instance().delBuilding(b);
 	}
+	public void exchangeItemList(short cmd, Message message) {
+		this.write(Package.create(cmd, Exchange.instance().getItemList()));
+	}
+	public void exchangeBuy(short cmd, Message message) {
+		Gs.ExchangeBuy c = (Gs.ExchangeBuy) message;
+		if(c.getPrice() <= 0 || c.getNum() <= 0)
+			return;
+		MetaItem mi = MetaData.getItem(c.getItemId());
+		if(mi == null)
+			return;
+		long cost = c.getPrice() * c.getNum();
+		if(player.money() < cost)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !building.haveUseRight(player.id()) || !(building instanceof Storagable))
+			return;
+		Storagable s = (Storagable)building;
+		if(!s.reserve(mi, c.getNum()))
+			return;
 
+		UUID orderId = Exchange.instance().addBuyOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), building.id());
+		player.lockMoney(orderId, cost);
+		s.markOrder(orderId);
+		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, building));
+		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
+	}
+	public void exchangeSell(short cmd, Message message) {
+		Gs.ExchangeSell c = (Gs.ExchangeSell) message;
+		if(c.getPrice() <= 0 || c.getNum() <= 0)
+			return;
+		MetaItem mi = MetaData.getItem(c.getItemId());
+		if(mi == null)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !building.haveUseRight(player.id()) || !(building instanceof Storagable))
+			return;
+		Storagable s = (Storagable)building;
+		if(!s.lock(mi, c.getNum()))
+			return;
+
+		UUID orderId = Exchange.instance().addSellOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), building.id());
+		s.markOrder(orderId);
+		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, building));
+		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
+	}
+	public void exchangeCancel(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		UUID buildingId = Exchange.instance().cancelOrder(player.id(), id);
+		if(buildingId == null) {
+			this.write(Package.fail(cmd));
+			return;
+		}
+		Building building = City.instance().getBuilding(buildingId);
+		if(building == null) {
+			logger.fatal("building not exist" + buildingId);
+			return;
+		}
+		if(!(building instanceof Storagable)) {
+			logger.fatal("building is not storagable" + building.type() + " " + building.id());
+			return;
+		}
+		((Storagable)building).clearOrder(id);
+		this.write(Package.create(cmd));
+	}
+	public void exchangeStopWatch(short cmd, Message message) {
+		Exchange.instance().stopWatch(this.channelId);
+	}
+	public void exchangeWatch(short cmd, Message message) {
+		Gs.Num c = (Gs.Num) message;
+		Gs.ExchangeItemDetail detail = Exchange.instance().watch(this.channelId, c.getNum());
+		this.write(Package.create(cmd, detail));
+	}
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
@@ -261,7 +385,35 @@ public class GameSession {
         b.watchDetailInfo(this);
 		this.write(Package.create(cmd, ((MaterialFactory)b).detailProto()));
 	}
-	public void setSalary(short cmd, Message message) {
+    public void detailProduceDepartment(short cmd, Message message) {
+        Gs.Id c = (Gs.Id) message;
+        UUID id = Util.toUuid(c.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.type() != MetaBuilding.PRODUCE)
+            return;
+        b.watchDetailInfo(this);
+        this.write(Package.create(cmd, ((ProduceDepartment)b).detailProto()));
+    }
+    public void detailLaboratory(short cmd, Message message) {
+        Gs.Id c = (Gs.Id) message;
+        UUID id = Util.toUuid(c.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.type() != MetaBuilding.LAB)
+            return;
+        b.watchDetailInfo(this);
+        this.write(Package.create(cmd, ((Laboratory)b).detailProto()));
+    }
+    public void detailRetailShop(short cmd, Message message) {
+        Gs.Id c = (Gs.Id) message;
+        UUID id = Util.toUuid(c.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.type() != MetaBuilding.RETAIL)
+            return;
+        b.watchDetailInfo(this);
+        this.write(Package.create(cmd, ((RetailShop)b).detailProto()));
+    }
+
+    public void setSalary(short cmd, Message message) {
 		Gs.ByteNum c = (Gs.ByteNum) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
@@ -289,7 +441,7 @@ public class GameSession {
 		Gs.AddLine c = (Gs.AddLine) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || (b.type() != MetaBuilding.PRODUCTING && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+		if(b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		MetaItem m = MetaData.getItem(c.getItemId());
 		if (m == null)
@@ -305,7 +457,7 @@ public class GameSession {
 		Gs.ChangeLine c = (Gs.ChangeLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if (b == null || (b.type() != MetaBuilding.PRODUCTING && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+		if (b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		ObjectId lineId = new ObjectId(c.getLineId().toByteArray());
         FactoryBase f = (FactoryBase) b;
@@ -317,4 +469,7 @@ public class GameSession {
         else
             this.write(Package.fail(cmd));
 	}
+
+
+
 }

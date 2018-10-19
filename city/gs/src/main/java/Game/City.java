@@ -275,39 +275,38 @@ public class City {
     public void mount(UUID id, Collection<Coord> area) {
         //this.ground.getOrDefault(id, new ArrayList);
     }
-    public boolean delBuilding(UUID id, Player player) {
-        Building b = this.allBuilding.get(id);
-        if(b == null || b.ownerId() != player.id())
-            return false;
-        NpcManager.instance().delete(b.getAllNpc());
-        b.readyForDestory();
-        this.allBuilding.remove(id);
-        this.playerBuilding.getOrDefault(player.id(), new HashMap<>()).remove(id);
-
-        GameDb.delete(b);
-
-        return true;
+    public void delBuilding(Building building) {
+        building.destroy();
+        this.allBuilding.remove(building.id());
+        Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
+        assert buildings != null;
+        buildings.remove(building.id());
+        building.broadcastDelete();
+        GameDb.delete(building);
     }
-    public boolean addBuilding(int id, Coord pos, Player owner) {
-        Building b = Building.create(id, pos, owner.id()); // pass owner into it???
-        if(!this.canBuild(b))
-            return false;
-        int cost = 100;
-        if(owner.money() < cost)
-            return false;
-        take(b);
-        owner.decMoney(cost);
-        GameDb.saveOrUpdate(Arrays.asList(owner, b));
-
-        GridIndexPair gip = pos.toGridIndex().toSyncRange();
-        Package pack = Package.create(GsCode.OpCode.unitCreate_VALUE, Gs.UnitCreate.newBuilder().addInfo(b.toProto()).build());
-        for(int x = gip.l.x; x < gip.r.x; ++x) {
-            for (int y = gip.l.y; x < gip.r.y; ++y) {
+    public void send(GridIndexPair range, Package pack) {
+        for(int x = range.l.x; x < range.r.x; ++x) {
+            for (int y = range.l.y; x < range.r.y; ++y) {
                 grids[x][y].send(pack);
             }
         }
+    }
+    public boolean addBuilding(Building b) {
+        if(!this.canBuild(b))
+            return false;
+        take(b);
+        GameDb.saveOrUpdate(b);
+        b.broadcastCreate();
         return true;
     }
+//    public boolean addVirtualBuilding(VirtualBuilding b) {
+//        if(!this.canBuild(b))
+//            return false;
+//        take(b);
+//        GameDb.saveOrUpdate(b);
+//        b.broadcastCreate();
+//        return true;
+//    }
     private boolean canBuild(Building building) {
         for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {

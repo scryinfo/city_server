@@ -10,7 +10,7 @@ public class Npc {
     private UUID id;
 
     @Transient
-    private Building building;
+    private Building born;
 
     @Transient
     private Building tempBuilding;
@@ -36,26 +36,26 @@ public class Npc {
     @PrePersist
     @PreUpdate
     private void _1() {
-        this.adapterData.buildingId = building.id();
+        this.adapterData.buildingId = born.id();
         this.adapterData.tempBuildingId = tempBuilding==null?null:tempBuilding.id();
         this.adapterData.apartmentId = apartment==null?null:apartment.id();
     }
     @PostLoad
     private void _2() {
-        this.building = City.instance().getBuilding(this.adapterData.buildingId);
+        this.born = City.instance().getBuilding(this.adapterData.buildingId);
         this.tempBuilding = this.adapterData.tempBuildingId==null?null:City.instance().getBuilding(this.adapterData.tempBuildingId);
         this.apartment = this.adapterData.apartmentId==null?null: (Apartment) City.instance().getBuilding(this.adapterData.apartmentId);
     }
     public Npc(Building building, int salary) {
         this.id = UUID.randomUUID();
-        this.building = building;
+        this.born = building;
         this.money = salary;
         this.tempBuilding = null;
     }
 //    public Npc(Document doc) {
 //        this.id = doc.getObjectId("_id");
 //        this.city = City.instance();
-//        this.building = city.getBuilding(doc.getObjectId("b"));
+//        this.born = city.getBuilding(doc.getObjectId("b"));
 //        this.money = doc.getInteger("m");
 //        ObjectId tmpBuildingId = doc.getObjectId("t");
 //        this.tempBuilding = tmpBuildingId == Util.NullOid?null:city.getBuilding(tmpBuildingId);
@@ -68,13 +68,13 @@ public class Npc {
 //    Document toBson() {
 //        Document doc = new Document()
 //                .append("_id", this.id)
-//                .append("b", this.building.id())
+//                .append("b", this.born.id())
 //                .append("t", this.tempBuilding == null? Util.NullOid:this.tempBuilding.id())
 //                .append("m", this.money);
 //        return doc;
 //    }
     public Coord coordinate() {
-        return this.tempBuilding == null? this.building.coordinate():this.tempBuilding.coordinate();
+        return this.tempBuilding == null? this.born.coordinate():this.tempBuilding.coordinate();
     }
     public UUID id() {
         return id;
@@ -90,15 +90,15 @@ public class Npc {
     }
 
     // where the npc is are not important, location change can not persist to db
-    // after server restarted, all npc will return to its owner building
+    // after server restarted, all npc will return to its owner born
     public void visit(Building building) {
         building.enter(this);
-        if(building == this.building) {
+        if(building == this.born) {
             this.tempBuilding.leave(this);
             this.tempBuilding = null;
         }
         else {
-            this.building.leave(this);
+            this.born.leave(this);
             this.tempBuilding = building;
         }
     }
@@ -115,10 +115,16 @@ public class Npc {
     }
 
     public Building building() {
-        return this.building;
+        return this.born;
     }
 
-    public void readyForDestory() {
-        this.visit(this.building);
+    public void readyForDestroy() {
+        this.visit(this.born);
+    }
+    public void backHome() {
+        if(apartment == null)
+            this.visit(born);
+        else
+            this.visit(apartment);
     }
 }

@@ -1,5 +1,3 @@
-syntax = "proto3";
-
 package gacode;
 
 enum OpCode{

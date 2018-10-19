@@ -31,18 +31,13 @@ public class MaterialFactory extends FactoryBase {
 
     @Transient
     private MetaMaterialFactory meta;
-    protected boolean isDirty() {
-        return super.isDirty() && _d.dirty();
-    }
+
     @Embeddable
-    private static class _D {
+    protected static class _D { // private will cause JPA meta class generate fail
         @Column(name = "line")
         private byte[] lineBinary;
         void dirtyLine() {
             lineBinary = null;
-        }
-        boolean dirty() {
-            return lineBinary == null;
         }
     }
     @Embedded
@@ -50,11 +45,9 @@ public class MaterialFactory extends FactoryBase {
     @PrePersist
     @PreUpdate
     protected void _2() {
-        super._2();
-
         Db.Lines.Builder builder = Db.Lines.newBuilder();
         this.lines.forEach((k, v)->{
-            builder.addLines(v.toDbProto());
+            builder.addLine(v.toDbProto());
         });
         this._d.lineBinary = builder.build().toByteArray();
     }
@@ -62,14 +55,14 @@ public class MaterialFactory extends FactoryBase {
     protected void _1() throws InvalidProtocolBufferException {
         super._1();
 
-        for(Db.Lines.Line l : Db.Lines.parseFrom((this._d.lineBinary)).getLinesList()) {
+        for(Db.Lines.Line l : Db.Lines.parseFrom((this._d.lineBinary)).getLineList()) {
             MaterialFactory.Line line = new MaterialFactory.Line(l);
             this.lines.put(line.id, line);
         }
     }
     @Override
     public Message detailProto() {
-        Gs.MaterialFactoryInfo.Builder builder = Gs.MaterialFactoryInfo.newBuilder().setCommon(super.commonProto());
+        Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setCommon(super.commonProto());
         builder.addAllStore(this.store.toProto());
         builder.addAllShelf(this.shelf.toProto());
         this.lines.values().forEach(line -> builder.addLine(line.toProto()));

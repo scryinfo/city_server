@@ -1,32 +1,31 @@
-syntax = "proto3";
-//import "gs.proto";
+import "gs.proto";
 package ga;
 
 message Login {
-	int32 id = 1;
+	required int32 id = 1;
 }
 
 message StateReport {
-	int32 onlineCount = 1;
+	required int32 onlineCount = 1;
 }
 message ValidationCode {
-	string code = 1;
-	string accountName = 2;
+	required string code = 1;
+	required string accountName = 2;
 }
 
 // GM part
 message KickOff {
-	string id = 1;
+	required string id = 1;
 }
 
 message QueryRole {
-	string sessionId = 1;
-	string roleName = 2;
+	required string sessionId = 1;
+	required string roleName = 2;
 }
 
 message QueryRoleACK {
-	string sessionId = 1;
-	bool online = 2;
-	string accName = 3;
-	//gs.Role info = 4;
+	required string sessionId = 1;
+	required bool online = 2;
+	required string accName = 3;
+	required gs.Role info = 4;
 }

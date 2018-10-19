@@ -11,7 +11,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    compile 'com.google.protobuf:protobuf-java:3.6.1'
+    //compile 'com.google.protobuf:protobuf-java:3.6.1'
 }
 sourceSets {
     main.java.srcDirs += 'src/jpaModelgen/generated'

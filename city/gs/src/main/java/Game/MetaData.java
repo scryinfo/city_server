@@ -96,11 +96,13 @@ final class MetaGood extends MetaItem {
 class MetaBuilding {
     public static final int TRIVIAL = 10;
     public static final int MATERIAL = 11;
-    public static final int PRODUCTING = 12;
+    public static final int PRODUCE = 12;
     public static final int RETAIL = 13;
     public static final int APARTMENT = 14;
     public static final int LAB = 15;
     public static final int PUBLIC = 16;
+    public static final int VIRTUAL = 17;
+
     public static int type(int id) {
         return id/100000;
     }
@@ -116,6 +118,40 @@ class MetaBuilding {
 	public int y;
 	public int maxWorkerNum;
 	public int effectRange;
+}
+class MetaVirtualBuilding {
+    MetaVirtualBuilding(Document d) throws Exception {
+        this.id = d.getInteger("_id");
+        this.constructSec = d.getInteger("constructSec");
+        this.deconstructSec = d.getInteger("deconstructSec");
+        this.meta = MetaData.getBuilding(d.getInteger("buildingId"));
+        List<Integer> l = (List<Integer>)d.get("material");
+        assert l.size() % 2 == 0;
+        for(int i = 0; i < l.size(); i+=2) {
+            MetaMaterial m = MetaData.getMaterial(l.get(i));
+            if(m == null)
+                throw new Exception("can not find Material id: "+l.get(i));
+            int n = l.get(i+1);
+            material.put(m, n);
+        }
+    }
+    boolean valid(MetaMaterial m) {
+        return material.containsKey(m);
+    }
+    int id;
+    Map<MetaMaterial, Integer> material;
+    int constructSec;
+    int deconstructSec;
+    MetaBuilding meta;
+
+    public int totalCapacity() {
+        return material.entrySet().stream().mapToInt(e -> e.getKey().size*e.getValue()).reduce(Integer::sum).getAsInt();
+    }
+
+    public int size(MetaMaterial m) {
+        Integer n = material.get(m);
+        return n==null?0:n;
+    }
 }
 class MetaApartment extends MetaBuilding {
     MetaApartment(Document d) {
@@ -235,6 +271,7 @@ public class MetaData {
     private static final TreeMap<Integer, MetaLaboratory> laboratory = new TreeMap<>();
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
     private static final TreeMap<Integer, MetaMaterialFactory> materialFactory = new TreeMap<>();
+    private static final TreeMap<Integer, MetaVirtualBuilding> virtualBuilding = new TreeMap<>();
 
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
     private static final HashMap<Integer, MetaGood> good = new HashMap<>();
@@ -259,6 +296,29 @@ public class MetaData {
     }
     public static MetaProduceDepartment getProductingDepartment(int id) {
         return produceDepartment.get(id);
+    }
+
+    public static MetaVirtualBuilding getVirtualBuilding(int id) {
+        return virtualBuilding.get(id);
+    }
+    public static MetaBuilding getBuilding(int id) {
+        switch(MetaBuilding.type(id)) {
+            case MetaBuilding.TRIVIAL:
+                return trivial.get(id);
+            case MetaBuilding.MATERIAL:
+                return materialFactory.get(id);
+            case MetaBuilding.PRODUCE:
+                return produceDepartment.get(id);
+            case MetaBuilding.RETAIL:
+                return retailShop.get(id);
+            case MetaBuilding.APARTMENT:
+                return apartment.get(id);
+            case MetaBuilding.LAB:
+                return laboratory.get(id);
+            case MetaBuilding.PUBLIC:
+                return publicFacility.get(id);
+        }
+        return null;
     }
     public static class InitialBuildingInfo {
         public InitialBuildingInfo(Document d) {

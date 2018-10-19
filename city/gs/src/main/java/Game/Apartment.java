@@ -49,8 +49,8 @@ public class Apartment extends Building {
         guest.put(npc.id(), npc);
     }
 
-    public Gs.ApartmentInfo detailProto() {
-        return Gs.ApartmentInfo.newBuilder()
+    public Gs.Apartment detailProto() {
+        return Gs.Apartment.newBuilder()
                 .setCommon(this.commonProto())
                 .setRent(this.rent)
                 .setRenter(guest.size())

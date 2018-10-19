@@ -12,7 +12,7 @@ public class AccountServerEventDispatcher extends DispatcherBase {
 
 	private AccountServerEventDispatcher() {
 		try {
-			table.put((short) GaCode.OpCode.validateInfo_VALUE,  Wrapper.newWithMessage(Ga.ValidationCode.parser(), AccountServerSession.class,"validationCode"));
+			table.put((short) GaCode.OpCode.validateInfo_VALUE,  Wrapper.newWithMessage(Ga.ValidationCode.PARSER, AccountServerSession.class,"validationCode"));
 			table.put((short) GaCode.OpCode.login_VALUE,  Wrapper.newOnlyOpcode(AccountServerSession.class,"loginACK"));
 			table.put((short) Common.OpCode.error_VALUE,  Wrapper.newWithMessage(Common.Fail.PARSER, AccountServerSession.class,"handleError"));
 			if (GlobalConfig.debug()) {

@@ -100,10 +100,10 @@ public class GroundAuction {
                 // no need through GameSession
                 Player bider = GameDb.getPlayer(a.biderId);
                 bider.addGround(a.meta.area);
-                int p = bider.spentLockMoney(a.meta.id);
+                long p = bider.spentLockMoney(a.meta.id);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this));
 
-                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(p).build()));
+                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());
                 this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
                     if(channel.id().equals(cId))
@@ -123,7 +123,7 @@ public class GroundAuction {
 //    public Document toBson() {
 //        List<Document> ba = new ArrayList<>();
 //        for(Entry e : auctions.values()) {
-//            ba.add(e.toBson());
+//            ba.consumeReserve(e.toBson());
 //        }
 //        Document doc = new Document()
 //                .append("_id", GameServer.gsInfo.getId())

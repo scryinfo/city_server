@@ -21,22 +21,17 @@ public class ProduceDepartment extends FactoryBase {
     public ProduceDepartment() {
     }
 
-    protected boolean isDirty() {
-        return super.isDirty() && _d.dirty();
-    }
     public final class Line extends LineBase {
-
         public Line(Db.Lines.Line d) {
             super(d);
         }
-
         public Line(MetaGood item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
         }
     }
 
     @Embeddable
-    private static class _D {
+    protected static class _D { // private will cause JPA meta class generate fail
         @Column(name = "line")
         private byte[] lineBinary;
         void dirtyLine() {
@@ -51,24 +46,22 @@ public class ProduceDepartment extends FactoryBase {
     @PrePersist
     @PreUpdate
     protected void _2() {
-        super._2();
-
         Db.Lines.Builder builder = Db.Lines.newBuilder();
-        this.lines.forEach((k, v)->builder.addLines(v.toDbProto()));
+        this.lines.forEach((k, v)->builder.addLine(v.toDbProto()));
         this._d.lineBinary = builder.build().toByteArray();
     }
     @PostLoad
     protected void _1() throws InvalidProtocolBufferException {
         super._1();
 
-        for(Db.Lines.Line l : Db.Lines.parseFrom((this._d.lineBinary)).getLinesList()) {
+        for(Db.Lines.Line l : Db.Lines.parseFrom((this._d.lineBinary)).getLineList()) {
             Line line = new Line(l);
             this.lines.put(line.id, line);
         }
     }
     @Override
     public Message detailProto() {
-        Gs.ProduceDepartmentInfo.Builder builder = Gs.ProduceDepartmentInfo.newBuilder().setCommon(super.commonProto());
+        Gs.ProduceDepartment.Builder builder = Gs.ProduceDepartment.newBuilder().setCommon(super.commonProto());
         builder.addAllStore(this.store.toProto());
         builder.addAllShelf(this.shelf.toProto());
         this.lines.values().forEach(line -> builder.addLine(line.toProto()));

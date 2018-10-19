@@ -77,11 +77,22 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+	public static void initExchange() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(Exchange.class, Exchange.ID) == null)
+			statelessSession.insert(new Exchange());
+		transaction.commit();
+		statelessSession.close();
+	}
 	public static GroundAuction getGroundAction() {
 		Session session = sessionFactory.openSession();
 		return session.get(GroundAuction.class, GroundAuction.ID);
 	}
-
+	public static Exchange getExchange() {
+		Session session = sessionFactory.openSession();
+		return session.get(Exchange.class, Exchange.ID);
+	}
 	public static Collection<Building> getAllBuilding() {
 		List<Building> res = new ArrayList<>();
 		res.addAll(getAllLaboratory());
@@ -351,7 +362,7 @@ public class GameDb {
 //	public static List<RoleBriefInfo> getPlayerInfo(String account) {
 //		List<RoleBriefInfo> res = new ArrayList<>();
 //		playerCol.find(Filters.eq(DatabaseInfo.AccountName, account)).projection(fields(include(RoleBriefInfo.queryFieldsName()))).forEach((Block<Document>) doc -> {
-//			res.add(new RoleBriefInfo(doc));
+//			res.consumeReserve(new RoleBriefInfo(doc));
 //		});
 //		return res;
 //	}
@@ -376,7 +387,7 @@ public class GameDb {
 //		Set<Building> res = new HashSet<>();
 //		buildingCol.find().forEach((Block<Document>) doc -> {
 //			Building b = Building.create(doc);
-//			res.add(b);
+//			res.consumeReserve(b);
 //		});
 //		return res;
 //	}
@@ -446,14 +457,14 @@ public class GameDb {
 //		Set<Npc> res = new HashSet<>();
 //		npcCol.find().forEach((Block<Document>) doc -> {
 //			Npc npc = new Npc(doc);
-//			res.add(npc);
+//			res.consumeReserve(npc);
 //		});
 //		return res;
 //    }
 //
 ////	public static void paySalary(Player p, Set<Npc> allNpc, int salary) {
 ////		ArrayList<ObjectId> ids = new ArrayList<>(allNpc.size());
-////		allNpc.forEach(npc->ids.add(npc.id()));
+////		allNpc.forEach(npc->ids.consumeReserve(npc.id()));
 ////		ClientSession s = mongoClient.startSession();
 ////		s.startTransaction();
 ////		playerCol.updateOne(Filters.eq(p.id()), Updates.inc(DatabaseInfo.Money, -salary*allNpc.size()));

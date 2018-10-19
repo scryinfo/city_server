@@ -1,11 +1,13 @@
 package Game;
 
 import DB.Db;
+import Shared.Package;
 import Shared.Util;
 import com.google.common.collect.EvictingQueue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import gs.Gs;
+import gscode.GsCode;
 import io.netty.channel.ChannelId;
 
 import javax.persistence.*;
@@ -26,7 +28,9 @@ public abstract class Building {
 
     protected Building() {
     }
-
+    boolean haveUseRight(UUID userId) {
+        return ownerId.equals(userId);
+    }
     public int type() {
         return MetaBuilding.type(metaBuilding.id);
     }
@@ -38,7 +42,7 @@ public abstract class Building {
                 return new TrivialBuilding(MetaData.getTrivialBuilding(id), pos, ownerId);
             case MetaBuilding.MATERIAL:
                 return new MaterialFactory(MetaData.getMaterialFactory(id), pos, ownerId);
-            case MetaBuilding.PRODUCTING:
+            case MetaBuilding.PRODUCE:
                 return new ProduceDepartment(MetaData.getProductingDepartment(id), pos, ownerId);
             case MetaBuilding.RETAIL:
                 return new RetailShop(MetaData.getRetailShop(id), pos, ownerId);
@@ -48,6 +52,8 @@ public abstract class Building {
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
+//            case MetaBuilding.VIRTUAL:
+//                return new VirtualBuilding(MetaData.getVirtualBuilding(id), pos, ownerId);
         }
         return null;
     }
@@ -62,6 +68,22 @@ public abstract class Building {
     }
     @Transient
     Set<ChannelId> detailWatchers = new HashSet<>();
+
+    public void broadcastCreate() {
+        GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
+        Package pack = Package.create(GsCode.OpCode.unitCreate_VALUE, Gs.UnitCreate.newBuilder().addInfo(this.toProto()).build());
+        City.instance().send(gip, pack);
+    }
+    public void broadcastChange() {
+        GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
+        Package pack = Package.create(GsCode.OpCode.unitChange_VALUE, Gs.UnitChange.newBuilder().setInfo(this.toProto()).build());
+        City.instance().send(gip, pack);
+    }
+    public void broadcastDelete() {
+        GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
+        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.UnitRemove.newBuilder().addId(Util.toByteString(id)).build());
+        City.instance().send(gip, pack);
+    }
     @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class _D {
         @Column(name = "mid", updatable = false, nullable = false)
@@ -145,9 +167,9 @@ public abstract class Building {
     Set<Npc> getAllNpc() {
         return allNpc;
     }
-    public final void readyForDestory() {
+    public final void destroy() {
+        NpcManager.instance().delete(allNpc);
         allNpc.clear();
-
     }
     protected void destoryImpl(){}
 //    public Building(MetaBuilding meta, Document doc) {
@@ -162,7 +184,7 @@ public abstract class Building {
 //        for(Document _d : (List<Document>) doc.get("flowHis")) {
 //            long ts = _d.getLong("t");
 //            int n = _d.getInteger("n");
-//            this.flowHistory.add(new FlowInfo(ts, n));
+//            this.flowHistory.consumeReserve(new FlowInfo(ts, n));
 //            lastFlow = n;
 //        }
 //        this.flow = lastFlow; // don't blame me, java's silly design, no rbegin
@@ -194,7 +216,7 @@ public abstract class Building {
 //            Document _d = new Document();
 //            _d.append("t", i.ts);
 //            _d.append("n", i.n);
-//            flowHistoryArr.add(_d);
+//            flowHistoryArr.consumeReserve(_d);
 //        }
 //        res.append("flowHis", flowHistoryArr);
 //        return res;
@@ -209,11 +231,12 @@ public abstract class Building {
                 .setPos(Gs.MiniIndex.newBuilder()
                         .setX(this.coord.x)
                         .setY(this.coord.y))
-                .setData(Gs.BuildingInfo.MutableData.newBuilder()
-                        .setOwnerId(Util.toByteString(ownerId))
-                        .build())
+                .setOwnerId(Util.toByteString(ownerId))
+                .setNpcFlow(this.flow)
+                .setState(Gs.BuildingState.valueOf(state))
                 .build();
     }
+    protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
     public abstract Message detailProto();
     // there is no need to remember which npc is in this building now
     public void enter(Npc npc) {
@@ -249,7 +272,7 @@ public abstract class Building {
         flow = flowCount;
         flowCount = 0;
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
-        this._d.dirty(); // dirty the field, or else hibernate won't update this field!!!
+        this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(nowHour == PAYMENT_HOUR && !this.allNpc.isEmpty()) {
             Player p = GameDb.getPlayer(ownerId);

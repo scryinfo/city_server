@@ -63,7 +63,7 @@ public class NpcManager {
     }
     public void delete(Set<Npc> npc) {
         npc.forEach(n->{
-            n.readyForDestory();
+            n.readyForDestroy();
             allNpc.remove(n.id());
         });
         GameDb.delete(npc);
@@ -76,7 +76,6 @@ public class NpcManager {
             res.add(npc);
             addImpl(npc);
         }
-        GameDb.saveOrUpdate(res);
         return res;
     }
     private void addImpl(Npc npc) {

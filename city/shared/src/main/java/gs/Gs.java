@@ -8,6 +8,193 @@ public final class Gs {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  /**
+   * Protobuf enum {@code gs.BuildingState}
+   *
+   * <pre>
+   * 0,1,2,6只可能属于VirtualBuilding
+   * </pre>
+   */
+  public enum BuildingState
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>COLLECT_MATERIAL = 0;</code>
+     *
+     * <pre>
+     *原料运输中
+     * </pre>
+     */
+    COLLECT_MATERIAL(0, 0),
+    /**
+     * <code>WAITING_CONSTRUCT = 1;</code>
+     *
+     * <pre>
+     *原料已满，等待建造
+     * </pre>
+     */
+    WAITING_CONSTRUCT(1, 1),
+    /**
+     * <code>CONSTRUCTING = 2;</code>
+     *
+     * <pre>
+     *建造中
+     * </pre>
+     */
+    CONSTRUCTING(2, 2),
+    /**
+     * <code>WAITING_OPEN = 3;</code>
+     *
+     * <pre>
+     *等待开业
+     * </pre>
+     */
+    WAITING_OPEN(3, 3),
+    /**
+     * <code>WAITING_OPERATE = 4;</code>
+     *
+     * <pre>
+     *等待正常运作
+     * </pre>
+     */
+    WAITING_OPERATE(4, 4),
+    /**
+     * <code>OPERATE = 5;</code>
+     *
+     * <pre>
+     *正常运作
+     * </pre>
+     */
+    OPERATE(5, 5),
+    /**
+     * <code>DECONSTRUCT = 6;</code>
+     *
+     * <pre>
+     *拆除
+     * </pre>
+     */
+    DECONSTRUCT(6, 6),
+    ;
+
+    /**
+     * <code>COLLECT_MATERIAL = 0;</code>
+     *
+     * <pre>
+     *原料运输中
+     * </pre>
+     */
+    public static final int COLLECT_MATERIAL_VALUE = 0;
+    /**
+     * <code>WAITING_CONSTRUCT = 1;</code>
+     *
+     * <pre>
+     *原料已满，等待建造
+     * </pre>
+     */
+    public static final int WAITING_CONSTRUCT_VALUE = 1;
+    /**
+     * <code>CONSTRUCTING = 2;</code>
+     *
+     * <pre>
+     *建造中
+     * </pre>
+     */
+    public static final int CONSTRUCTING_VALUE = 2;
+    /**
+     * <code>WAITING_OPEN = 3;</code>
+     *
+     * <pre>
+     *等待开业
+     * </pre>
+     */
+    public static final int WAITING_OPEN_VALUE = 3;
+    /**
+     * <code>WAITING_OPERATE = 4;</code>
+     *
+     * <pre>
+     *等待正常运作
+     * </pre>
+     */
+    public static final int WAITING_OPERATE_VALUE = 4;
+    /**
+     * <code>OPERATE = 5;</code>
+     *
+     * <pre>
+     *正常运作
+     * </pre>
+     */
+    public static final int OPERATE_VALUE = 5;
+    /**
+     * <code>DECONSTRUCT = 6;</code>
+     *
+     * <pre>
+     *拆除
+     * </pre>
+     */
+    public static final int DECONSTRUCT_VALUE = 6;
+
+
+    public final int getNumber() { return value; }
+
+    public static BuildingState valueOf(int value) {
+      switch (value) {
+        case 0: return COLLECT_MATERIAL;
+        case 1: return WAITING_CONSTRUCT;
+        case 2: return CONSTRUCTING;
+        case 3: return WAITING_OPEN;
+        case 4: return WAITING_OPERATE;
+        case 5: return OPERATE;
+        case 6: return DECONSTRUCT;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<BuildingState>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<BuildingState>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<BuildingState>() {
+            public BuildingState findValueByNumber(int number) {
+              return BuildingState.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gs.Gs.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final BuildingState[] VALUES = values();
+
+    public static BuildingState valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private BuildingState(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gs.BuildingState)
+  }
+
   public interface IdOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -5155,19 +5342,53 @@ public final class Gs {
      */
     gs.Gs.MiniIndexOrBuilder getPosOrBuilder();
 
-    // required .gs.BuildingInfo.MutableData data = 4;
+    // optional bytes ownerId = 4;
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+     * <code>optional bytes ownerId = 4;</code>
      */
-    boolean hasData();
+    boolean hasOwnerId();
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+     * <code>optional bytes ownerId = 4;</code>
      */
-    gs.Gs.BuildingInfo.MutableData getData();
+    com.google.protobuf.ByteString getOwnerId();
+
+    // optional int32 npcFlow = 5;
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+     * <code>optional int32 npcFlow = 5;</code>
      */
-    gs.Gs.BuildingInfo.MutableDataOrBuilder getDataOrBuilder();
+    boolean hasNpcFlow();
+    /**
+     * <code>optional int32 npcFlow = 5;</code>
+     */
+    int getNpcFlow();
+
+    // required .gs.BuildingState state = 6;
+    /**
+     * <code>required .gs.BuildingState state = 6;</code>
+     */
+    boolean hasState();
+    /**
+     * <code>required .gs.BuildingState state = 6;</code>
+     */
+    gs.Gs.BuildingState getState();
+
+    // optional int32 constructCompleteTs = 7;
+    /**
+     * <code>optional int32 constructCompleteTs = 7;</code>
+     *
+     * <pre>
+     *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+     * </pre>
+     */
+    boolean hasConstructCompleteTs();
+    /**
+     * <code>optional int32 constructCompleteTs = 7;</code>
+     *
+     * <pre>
+     *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+     * </pre>
+     */
+    int getConstructCompleteTs();
   }
   /**
    * Protobuf type {@code gs.BuildingInfo}
@@ -5244,16 +5465,29 @@ public final class Gs {
               break;
             }
             case 34: {
-              gs.Gs.BuildingInfo.MutableData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
-                subBuilder = data_.toBuilder();
-              }
-              data_ = input.readMessage(gs.Gs.BuildingInfo.MutableData.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(data_);
-                data_ = subBuilder.buildPartial();
-              }
               bitField0_ |= 0x00000008;
+              ownerId_ = input.readBytes();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              npcFlow_ = input.readInt32();
+              break;
+            }
+            case 48: {
+              int rawValue = input.readEnum();
+              gs.Gs.BuildingState value = gs.Gs.BuildingState.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(6, rawValue);
+              } else {
+                bitField0_ |= 0x00000020;
+                state_ = value;
+              }
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              constructCompleteTs_ = input.readInt32();
               break;
             }
           }
@@ -5293,486 +5527,6 @@ public final class Gs {
     @java.lang.Override
     public com.google.protobuf.Parser<BuildingInfo> getParserForType() {
       return PARSER;
-    }
-
-    public interface MutableDataOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-
-      // optional bytes ownerId = 1;
-      /**
-       * <code>optional bytes ownerId = 1;</code>
-       */
-      boolean hasOwnerId();
-      /**
-       * <code>optional bytes ownerId = 1;</code>
-       */
-      com.google.protobuf.ByteString getOwnerId();
-
-      // optional int32 npcFlow = 2;
-      /**
-       * <code>optional int32 npcFlow = 2;</code>
-       */
-      boolean hasNpcFlow();
-      /**
-       * <code>optional int32 npcFlow = 2;</code>
-       */
-      int getNpcFlow();
-    }
-    /**
-     * Protobuf type {@code gs.BuildingInfo.MutableData}
-     */
-    public static final class MutableData extends
-        com.google.protobuf.GeneratedMessage
-        implements MutableDataOrBuilder {
-      // Use MutableData.newBuilder() to construct.
-      private MutableData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-        super(builder);
-        this.unknownFields = builder.getUnknownFields();
-      }
-      private MutableData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-      private static final MutableData defaultInstance;
-      public static MutableData getDefaultInstance() {
-        return defaultInstance;
-      }
-
-      public MutableData getDefaultInstanceForType() {
-        return defaultInstance;
-      }
-
-      private final com.google.protobuf.UnknownFieldSet unknownFields;
-      @java.lang.Override
-      public final com.google.protobuf.UnknownFieldSet
-          getUnknownFields() {
-        return this.unknownFields;
-      }
-      private MutableData(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        initFields();
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                ownerId_ = input.readBytes();
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                npcFlow_ = input.readInt32();
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
-      }
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gs.Gs.internal_static_gs_BuildingInfo_MutableData_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_BuildingInfo_MutableData_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gs.Gs.BuildingInfo.MutableData.class, gs.Gs.BuildingInfo.MutableData.Builder.class);
-      }
-
-      public static com.google.protobuf.Parser<MutableData> PARSER =
-          new com.google.protobuf.AbstractParser<MutableData>() {
-        public MutableData parsePartialFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          return new MutableData(input, extensionRegistry);
-        }
-      };
-
-      @java.lang.Override
-      public com.google.protobuf.Parser<MutableData> getParserForType() {
-        return PARSER;
-      }
-
-      private int bitField0_;
-      // optional bytes ownerId = 1;
-      public static final int OWNERID_FIELD_NUMBER = 1;
-      private com.google.protobuf.ByteString ownerId_;
-      /**
-       * <code>optional bytes ownerId = 1;</code>
-       */
-      public boolean hasOwnerId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>optional bytes ownerId = 1;</code>
-       */
-      public com.google.protobuf.ByteString getOwnerId() {
-        return ownerId_;
-      }
-
-      // optional int32 npcFlow = 2;
-      public static final int NPCFLOW_FIELD_NUMBER = 2;
-      private int npcFlow_;
-      /**
-       * <code>optional int32 npcFlow = 2;</code>
-       */
-      public boolean hasNpcFlow() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional int32 npcFlow = 2;</code>
-       */
-      public int getNpcFlow() {
-        return npcFlow_;
-      }
-
-      private void initFields() {
-        ownerId_ = com.google.protobuf.ByteString.EMPTY;
-        npcFlow_ = 0;
-      }
-      private byte memoizedIsInitialized = -1;
-      public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-
-        memoizedIsInitialized = 1;
-        return true;
-      }
-
-      public void writeTo(com.google.protobuf.CodedOutputStream output)
-                          throws java.io.IOException {
-        getSerializedSize();
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeBytes(1, ownerId_);
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          output.writeInt32(2, npcFlow_);
-        }
-        getUnknownFields().writeTo(output);
-      }
-
-      private int memoizedSerializedSize = -1;
-      public int getSerializedSize() {
-        int size = memoizedSerializedSize;
-        if (size != -1) return size;
-
-        size = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(1, ownerId_);
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(2, npcFlow_);
-        }
-        size += getUnknownFields().getSerializedSize();
-        memoizedSerializedSize = size;
-        return size;
-      }
-
-      private static final long serialVersionUID = 0L;
-      @java.lang.Override
-      protected java.lang.Object writeReplace()
-          throws java.io.ObjectStreamException {
-        return super.writeReplace();
-      }
-
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(
-          com.google.protobuf.ByteString data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(
-          com.google.protobuf.ByteString data,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(byte[] data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(
-          byte[] data,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(java.io.InputStream input)
-          throws java.io.IOException {
-        return PARSER.parseFrom(input);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(
-          java.io.InputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseDelimitedFrom(java.io.InputStream input)
-          throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseDelimitedFrom(
-          java.io.InputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input, extensionRegistry);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(
-          com.google.protobuf.CodedInputStream input)
-          throws java.io.IOException {
-        return PARSER.parseFrom(input);
-      }
-      public static gs.Gs.BuildingInfo.MutableData parseFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
-      }
-
-      public static Builder newBuilder() { return Builder.create(); }
-      public Builder newBuilderForType() { return newBuilder(); }
-      public static Builder newBuilder(gs.Gs.BuildingInfo.MutableData prototype) {
-        return newBuilder().mergeFrom(prototype);
-      }
-      public Builder toBuilder() { return newBuilder(this); }
-
-      @java.lang.Override
-      protected Builder newBuilderForType(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-      }
-      /**
-       * Protobuf type {@code gs.BuildingInfo.MutableData}
-       */
-      public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements gs.Gs.BuildingInfo.MutableDataOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-          return gs.Gs.internal_static_gs_BuildingInfo_MutableData_descriptor;
-        }
-
-        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-          return gs.Gs.internal_static_gs_BuildingInfo_MutableData_fieldAccessorTable
-              .ensureFieldAccessorsInitialized(
-                  gs.Gs.BuildingInfo.MutableData.class, gs.Gs.BuildingInfo.MutableData.Builder.class);
-        }
-
-        // Construct using gs.Gs.BuildingInfo.MutableData.newBuilder()
-        private Builder() {
-          maybeForceBuilderInitialization();
-        }
-
-        private Builder(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-          super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          }
-        }
-        private static Builder create() {
-          return new Builder();
-        }
-
-        public Builder clear() {
-          super.clear();
-          ownerId_ = com.google.protobuf.ByteString.EMPTY;
-          bitField0_ = (bitField0_ & ~0x00000001);
-          npcFlow_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000002);
-          return this;
-        }
-
-        public Builder clone() {
-          return create().mergeFrom(buildPartial());
-        }
-
-        public com.google.protobuf.Descriptors.Descriptor
-            getDescriptorForType() {
-          return gs.Gs.internal_static_gs_BuildingInfo_MutableData_descriptor;
-        }
-
-        public gs.Gs.BuildingInfo.MutableData getDefaultInstanceForType() {
-          return gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
-        }
-
-        public gs.Gs.BuildingInfo.MutableData build() {
-          gs.Gs.BuildingInfo.MutableData result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(result);
-          }
-          return result;
-        }
-
-        public gs.Gs.BuildingInfo.MutableData buildPartial() {
-          gs.Gs.BuildingInfo.MutableData result = new gs.Gs.BuildingInfo.MutableData(this);
-          int from_bitField0_ = bitField0_;
-          int to_bitField0_ = 0;
-          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-            to_bitField0_ |= 0x00000001;
-          }
-          result.ownerId_ = ownerId_;
-          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-            to_bitField0_ |= 0x00000002;
-          }
-          result.npcFlow_ = npcFlow_;
-          result.bitField0_ = to_bitField0_;
-          onBuilt();
-          return result;
-        }
-
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-          if (other instanceof gs.Gs.BuildingInfo.MutableData) {
-            return mergeFrom((gs.Gs.BuildingInfo.MutableData)other);
-          } else {
-            super.mergeFrom(other);
-            return this;
-          }
-        }
-
-        public Builder mergeFrom(gs.Gs.BuildingInfo.MutableData other) {
-          if (other == gs.Gs.BuildingInfo.MutableData.getDefaultInstance()) return this;
-          if (other.hasOwnerId()) {
-            setOwnerId(other.getOwnerId());
-          }
-          if (other.hasNpcFlow()) {
-            setNpcFlow(other.getNpcFlow());
-          }
-          this.mergeUnknownFields(other.getUnknownFields());
-          return this;
-        }
-
-        public final boolean isInitialized() {
-          return true;
-        }
-
-        public Builder mergeFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-          gs.Gs.BuildingInfo.MutableData parsedMessage = null;
-          try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (gs.Gs.BuildingInfo.MutableData) e.getUnfinishedMessage();
-            throw e;
-          } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
-          return this;
-        }
-        private int bitField0_;
-
-        // optional bytes ownerId = 1;
-        private com.google.protobuf.ByteString ownerId_ = com.google.protobuf.ByteString.EMPTY;
-        /**
-         * <code>optional bytes ownerId = 1;</code>
-         */
-        public boolean hasOwnerId() {
-          return ((bitField0_ & 0x00000001) == 0x00000001);
-        }
-        /**
-         * <code>optional bytes ownerId = 1;</code>
-         */
-        public com.google.protobuf.ByteString getOwnerId() {
-          return ownerId_;
-        }
-        /**
-         * <code>optional bytes ownerId = 1;</code>
-         */
-        public Builder setOwnerId(com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-          ownerId_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>optional bytes ownerId = 1;</code>
-         */
-        public Builder clearOwnerId() {
-          bitField0_ = (bitField0_ & ~0x00000001);
-          ownerId_ = getDefaultInstance().getOwnerId();
-          onChanged();
-          return this;
-        }
-
-        // optional int32 npcFlow = 2;
-        private int npcFlow_ ;
-        /**
-         * <code>optional int32 npcFlow = 2;</code>
-         */
-        public boolean hasNpcFlow() {
-          return ((bitField0_ & 0x00000002) == 0x00000002);
-        }
-        /**
-         * <code>optional int32 npcFlow = 2;</code>
-         */
-        public int getNpcFlow() {
-          return npcFlow_;
-        }
-        /**
-         * <code>optional int32 npcFlow = 2;</code>
-         */
-        public Builder setNpcFlow(int value) {
-          bitField0_ |= 0x00000002;
-          npcFlow_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>optional int32 npcFlow = 2;</code>
-         */
-        public Builder clearNpcFlow() {
-          bitField0_ = (bitField0_ & ~0x00000002);
-          npcFlow_ = 0;
-          onChanged();
-          return this;
-        }
-
-        // @@protoc_insertion_point(builder_scope:gs.BuildingInfo.MutableData)
-      }
-
-      static {
-        defaultInstance = new MutableData(true);
-        defaultInstance.initFields();
-      }
-
-      // @@protoc_insertion_point(class_scope:gs.BuildingInfo.MutableData)
     }
 
     private int bitField0_;
@@ -5830,33 +5584,86 @@ public final class Gs {
       return pos_;
     }
 
-    // required .gs.BuildingInfo.MutableData data = 4;
-    public static final int DATA_FIELD_NUMBER = 4;
-    private gs.Gs.BuildingInfo.MutableData data_;
+    // optional bytes ownerId = 4;
+    public static final int OWNERID_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString ownerId_;
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+     * <code>optional bytes ownerId = 4;</code>
      */
-    public boolean hasData() {
+    public boolean hasOwnerId() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+     * <code>optional bytes ownerId = 4;</code>
      */
-    public gs.Gs.BuildingInfo.MutableData getData() {
-      return data_;
+    public com.google.protobuf.ByteString getOwnerId() {
+      return ownerId_;
+    }
+
+    // optional int32 npcFlow = 5;
+    public static final int NPCFLOW_FIELD_NUMBER = 5;
+    private int npcFlow_;
+    /**
+     * <code>optional int32 npcFlow = 5;</code>
+     */
+    public boolean hasNpcFlow() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+     * <code>optional int32 npcFlow = 5;</code>
      */
-    public gs.Gs.BuildingInfo.MutableDataOrBuilder getDataOrBuilder() {
-      return data_;
+    public int getNpcFlow() {
+      return npcFlow_;
+    }
+
+    // required .gs.BuildingState state = 6;
+    public static final int STATE_FIELD_NUMBER = 6;
+    private gs.Gs.BuildingState state_;
+    /**
+     * <code>required .gs.BuildingState state = 6;</code>
+     */
+    public boolean hasState() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>required .gs.BuildingState state = 6;</code>
+     */
+    public gs.Gs.BuildingState getState() {
+      return state_;
+    }
+
+    // optional int32 constructCompleteTs = 7;
+    public static final int CONSTRUCTCOMPLETETS_FIELD_NUMBER = 7;
+    private int constructCompleteTs_;
+    /**
+     * <code>optional int32 constructCompleteTs = 7;</code>
+     *
+     * <pre>
+     *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+     * </pre>
+     */
+    public boolean hasConstructCompleteTs() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional int32 constructCompleteTs = 7;</code>
+     *
+     * <pre>
+     *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+     * </pre>
+     */
+    public int getConstructCompleteTs() {
+      return constructCompleteTs_;
     }
 
     private void initFields() {
       id_ = com.google.protobuf.ByteString.EMPTY;
       mId_ = 0;
       pos_ = gs.Gs.MiniIndex.getDefaultInstance();
-      data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
+      ownerId_ = com.google.protobuf.ByteString.EMPTY;
+      npcFlow_ = 0;
+      state_ = gs.Gs.BuildingState.COLLECT_MATERIAL;
+      constructCompleteTs_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5875,7 +5682,7 @@ public final class Gs {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasData()) {
+      if (!hasState()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -5900,7 +5707,16 @@ public final class Gs {
         output.writeMessage(3, pos_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, data_);
+        output.writeBytes(4, ownerId_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(5, npcFlow_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeEnum(6, state_.getNumber());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeInt32(7, constructCompleteTs_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -5925,7 +5741,19 @@ public final class Gs {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, data_);
+          .computeBytesSize(4, ownerId_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, npcFlow_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, state_.getNumber());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, constructCompleteTs_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -6036,7 +5864,6 @@ public final class Gs {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getPosFieldBuilder();
-          getDataFieldBuilder();
         }
       }
       private static Builder create() {
@@ -6055,12 +5882,14 @@ public final class Gs {
           posBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000004);
-        if (dataBuilder_ == null) {
-          data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
-        } else {
-          dataBuilder_.clear();
-        }
+        ownerId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000008);
+        npcFlow_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        state_ = gs.Gs.BuildingState.COLLECT_MATERIAL;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        constructCompleteTs_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -6108,11 +5937,19 @@ public final class Gs {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        if (dataBuilder_ == null) {
-          result.data_ = data_;
-        } else {
-          result.data_ = dataBuilder_.build();
+        result.ownerId_ = ownerId_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
         }
+        result.npcFlow_ = npcFlow_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.state_ = state_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.constructCompleteTs_ = constructCompleteTs_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6138,8 +5975,17 @@ public final class Gs {
         if (other.hasPos()) {
           mergePos(other.getPos());
         }
-        if (other.hasData()) {
-          mergeData(other.getData());
+        if (other.hasOwnerId()) {
+          setOwnerId(other.getOwnerId());
+        }
+        if (other.hasNpcFlow()) {
+          setNpcFlow(other.getNpcFlow());
+        }
+        if (other.hasState()) {
+          setState(other.getState());
+        }
+        if (other.hasConstructCompleteTs()) {
+          setConstructCompleteTs(other.getConstructCompleteTs());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -6158,7 +6004,7 @@ public final class Gs {
           
           return false;
         }
-        if (!hasData()) {
+        if (!hasState()) {
           
           return false;
         }
@@ -6374,121 +6220,158 @@ public final class Gs {
         return posBuilder_;
       }
 
-      // required .gs.BuildingInfo.MutableData data = 4;
-      private gs.Gs.BuildingInfo.MutableData data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.BuildingInfo.MutableData, gs.Gs.BuildingInfo.MutableData.Builder, gs.Gs.BuildingInfo.MutableDataOrBuilder> dataBuilder_;
+      // optional bytes ownerId = 4;
+      private com.google.protobuf.ByteString ownerId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+       * <code>optional bytes ownerId = 4;</code>
        */
-      public boolean hasData() {
+      public boolean hasOwnerId() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+       * <code>optional bytes ownerId = 4;</code>
        */
-      public gs.Gs.BuildingInfo.MutableData getData() {
-        if (dataBuilder_ == null) {
-          return data_;
-        } else {
-          return dataBuilder_.getMessage();
-        }
+      public com.google.protobuf.ByteString getOwnerId() {
+        return ownerId_;
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+       * <code>optional bytes ownerId = 4;</code>
        */
-      public Builder setData(gs.Gs.BuildingInfo.MutableData value) {
-        if (dataBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          data_ = value;
-          onChanged();
-        } else {
-          dataBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
-       */
-      public Builder setData(
-          gs.Gs.BuildingInfo.MutableData.Builder builderForValue) {
-        if (dataBuilder_ == null) {
-          data_ = builderForValue.build();
-          onChanged();
-        } else {
-          dataBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
-       */
-      public Builder mergeData(gs.Gs.BuildingInfo.MutableData value) {
-        if (dataBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
-              data_ != gs.Gs.BuildingInfo.MutableData.getDefaultInstance()) {
-            data_ =
-              gs.Gs.BuildingInfo.MutableData.newBuilder(data_).mergeFrom(value).buildPartial();
-          } else {
-            data_ = value;
-          }
-          onChanged();
-        } else {
-          dataBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
-       */
-      public Builder clearData() {
-        if (dataBuilder_ == null) {
-          data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
-          onChanged();
-        } else {
-          dataBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        return this;
-      }
-      /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
-       */
-      public gs.Gs.BuildingInfo.MutableData.Builder getDataBuilder() {
-        bitField0_ |= 0x00000008;
+      public Builder setOwnerId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        ownerId_ = value;
         onChanged();
-        return getDataFieldBuilder().getBuilder();
+        return this;
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+       * <code>optional bytes ownerId = 4;</code>
        */
-      public gs.Gs.BuildingInfo.MutableDataOrBuilder getDataOrBuilder() {
-        if (dataBuilder_ != null) {
-          return dataBuilder_.getMessageOrBuilder();
-        } else {
-          return data_;
-        }
+      public Builder clearOwnerId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        ownerId_ = getDefaultInstance().getOwnerId();
+        onChanged();
+        return this;
+      }
+
+      // optional int32 npcFlow = 5;
+      private int npcFlow_ ;
+      /**
+       * <code>optional int32 npcFlow = 5;</code>
+       */
+      public boolean hasNpcFlow() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 4;</code>
+       * <code>optional int32 npcFlow = 5;</code>
        */
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.BuildingInfo.MutableData, gs.Gs.BuildingInfo.MutableData.Builder, gs.Gs.BuildingInfo.MutableDataOrBuilder> 
-          getDataFieldBuilder() {
-        if (dataBuilder_ == null) {
-          dataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              gs.Gs.BuildingInfo.MutableData, gs.Gs.BuildingInfo.MutableData.Builder, gs.Gs.BuildingInfo.MutableDataOrBuilder>(
-                  data_,
-                  getParentForChildren(),
-                  isClean());
-          data_ = null;
+      public int getNpcFlow() {
+        return npcFlow_;
+      }
+      /**
+       * <code>optional int32 npcFlow = 5;</code>
+       */
+      public Builder setNpcFlow(int value) {
+        bitField0_ |= 0x00000010;
+        npcFlow_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 npcFlow = 5;</code>
+       */
+      public Builder clearNpcFlow() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        npcFlow_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required .gs.BuildingState state = 6;
+      private gs.Gs.BuildingState state_ = gs.Gs.BuildingState.COLLECT_MATERIAL;
+      /**
+       * <code>required .gs.BuildingState state = 6;</code>
+       */
+      public boolean hasState() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>required .gs.BuildingState state = 6;</code>
+       */
+      public gs.Gs.BuildingState getState() {
+        return state_;
+      }
+      /**
+       * <code>required .gs.BuildingState state = 6;</code>
+       */
+      public Builder setState(gs.Gs.BuildingState value) {
+        if (value == null) {
+          throw new NullPointerException();
         }
-        return dataBuilder_;
+        bitField0_ |= 0x00000020;
+        state_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .gs.BuildingState state = 6;</code>
+       */
+      public Builder clearState() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        state_ = gs.Gs.BuildingState.COLLECT_MATERIAL;
+        onChanged();
+        return this;
+      }
+
+      // optional int32 constructCompleteTs = 7;
+      private int constructCompleteTs_ ;
+      /**
+       * <code>optional int32 constructCompleteTs = 7;</code>
+       *
+       * <pre>
+       *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+       * </pre>
+       */
+      public boolean hasConstructCompleteTs() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional int32 constructCompleteTs = 7;</code>
+       *
+       * <pre>
+       *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+       * </pre>
+       */
+      public int getConstructCompleteTs() {
+        return constructCompleteTs_;
+      }
+      /**
+       * <code>optional int32 constructCompleteTs = 7;</code>
+       *
+       * <pre>
+       *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+       * </pre>
+       */
+      public Builder setConstructCompleteTs(int value) {
+        bitField0_ |= 0x00000040;
+        constructCompleteTs_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 constructCompleteTs = 7;</code>
+       *
+       * <pre>
+       *has value if state == 1  this value will not change, once client get unitcreate it will tick on this
+       * </pre>
+       */
+      public Builder clearConstructCompleteTs() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        constructCompleteTs_ = 0;
+        onChanged();
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:gs.BuildingInfo)
@@ -10762,6 +10645,81 @@ public final class Gs {
      * <code>required .gs.GridIndex position = 6;</code>
      */
     gs.Gs.GridIndexOrBuilder getPositionOrBuilder();
+
+    // repeated .gs.Apartment apartment = 7;
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    java.util.List<gs.Gs.Apartment> 
+        getApartmentList();
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    gs.Gs.Apartment getApartment(int index);
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    int getApartmentCount();
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    java.util.List<? extends gs.Gs.ApartmentOrBuilder> 
+        getApartmentOrBuilderList();
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    gs.Gs.ApartmentOrBuilder getApartmentOrBuilder(
+        int index);
+
+    // repeated .gs.MaterialFactory materialFactory = 8;
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    java.util.List<gs.Gs.MaterialFactory> 
+        getMaterialFactoryList();
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    gs.Gs.MaterialFactory getMaterialFactory(int index);
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    int getMaterialFactoryCount();
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    java.util.List<? extends gs.Gs.MaterialFactoryOrBuilder> 
+        getMaterialFactoryOrBuilderList();
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    gs.Gs.MaterialFactoryOrBuilder getMaterialFactoryOrBuilder(
+        int index);
+
+    // repeated .gs.ProduceDepartment produceDepartment = 9;
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    java.util.List<gs.Gs.ProduceDepartment> 
+        getProduceDepartmentList();
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    gs.Gs.ProduceDepartment getProduceDepartment(int index);
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    int getProduceDepartmentCount();
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    java.util.List<? extends gs.Gs.ProduceDepartmentOrBuilder> 
+        getProduceDepartmentOrBuilderList();
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    gs.Gs.ProduceDepartmentOrBuilder getProduceDepartmentOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code gs.Role}
@@ -10859,6 +10817,30 @@ public final class Gs {
               bitField0_ |= 0x00000020;
               break;
             }
+            case 58: {
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+                apartment_ = new java.util.ArrayList<gs.Gs.Apartment>();
+                mutable_bitField0_ |= 0x00000040;
+              }
+              apartment_.add(input.readMessage(gs.Gs.Apartment.PARSER, extensionRegistry));
+              break;
+            }
+            case 66: {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+                materialFactory_ = new java.util.ArrayList<gs.Gs.MaterialFactory>();
+                mutable_bitField0_ |= 0x00000080;
+              }
+              materialFactory_.add(input.readMessage(gs.Gs.MaterialFactory.PARSER, extensionRegistry));
+              break;
+            }
+            case 74: {
+              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+                produceDepartment_ = new java.util.ArrayList<gs.Gs.ProduceDepartment>();
+                mutable_bitField0_ |= 0x00000100;
+              }
+              produceDepartment_.add(input.readMessage(gs.Gs.ProduceDepartment.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -10867,6 +10849,15 @@ public final class Gs {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+          apartment_ = java.util.Collections.unmodifiableList(apartment_);
+        }
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+          materialFactory_ = java.util.Collections.unmodifiableList(materialFactory_);
+        }
+        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+          produceDepartment_ = java.util.Collections.unmodifiableList(produceDepartment_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -11028,6 +11019,114 @@ public final class Gs {
       return position_;
     }
 
+    // repeated .gs.Apartment apartment = 7;
+    public static final int APARTMENT_FIELD_NUMBER = 7;
+    private java.util.List<gs.Gs.Apartment> apartment_;
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    public java.util.List<gs.Gs.Apartment> getApartmentList() {
+      return apartment_;
+    }
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    public java.util.List<? extends gs.Gs.ApartmentOrBuilder> 
+        getApartmentOrBuilderList() {
+      return apartment_;
+    }
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    public int getApartmentCount() {
+      return apartment_.size();
+    }
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    public gs.Gs.Apartment getApartment(int index) {
+      return apartment_.get(index);
+    }
+    /**
+     * <code>repeated .gs.Apartment apartment = 7;</code>
+     */
+    public gs.Gs.ApartmentOrBuilder getApartmentOrBuilder(
+        int index) {
+      return apartment_.get(index);
+    }
+
+    // repeated .gs.MaterialFactory materialFactory = 8;
+    public static final int MATERIALFACTORY_FIELD_NUMBER = 8;
+    private java.util.List<gs.Gs.MaterialFactory> materialFactory_;
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    public java.util.List<gs.Gs.MaterialFactory> getMaterialFactoryList() {
+      return materialFactory_;
+    }
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    public java.util.List<? extends gs.Gs.MaterialFactoryOrBuilder> 
+        getMaterialFactoryOrBuilderList() {
+      return materialFactory_;
+    }
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    public int getMaterialFactoryCount() {
+      return materialFactory_.size();
+    }
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    public gs.Gs.MaterialFactory getMaterialFactory(int index) {
+      return materialFactory_.get(index);
+    }
+    /**
+     * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+     */
+    public gs.Gs.MaterialFactoryOrBuilder getMaterialFactoryOrBuilder(
+        int index) {
+      return materialFactory_.get(index);
+    }
+
+    // repeated .gs.ProduceDepartment produceDepartment = 9;
+    public static final int PRODUCEDEPARTMENT_FIELD_NUMBER = 9;
+    private java.util.List<gs.Gs.ProduceDepartment> produceDepartment_;
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    public java.util.List<gs.Gs.ProduceDepartment> getProduceDepartmentList() {
+      return produceDepartment_;
+    }
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    public java.util.List<? extends gs.Gs.ProduceDepartmentOrBuilder> 
+        getProduceDepartmentOrBuilderList() {
+      return produceDepartment_;
+    }
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    public int getProduceDepartmentCount() {
+      return produceDepartment_.size();
+    }
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    public gs.Gs.ProduceDepartment getProduceDepartment(int index) {
+      return produceDepartment_.get(index);
+    }
+    /**
+     * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+     */
+    public gs.Gs.ProduceDepartmentOrBuilder getProduceDepartmentOrBuilder(
+        int index) {
+      return produceDepartment_.get(index);
+    }
+
     private void initFields() {
       id_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
@@ -11035,6 +11134,9 @@ public final class Gs {
       lockedMoney_ = 0;
       offlineTs_ = 0L;
       position_ = gs.Gs.GridIndex.getDefaultInstance();
+      apartment_ = java.util.Collections.emptyList();
+      materialFactory_ = java.util.Collections.emptyList();
+      produceDepartment_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -11069,6 +11171,24 @@ public final class Gs {
         memoizedIsInitialized = 0;
         return false;
       }
+      for (int i = 0; i < getApartmentCount(); i++) {
+        if (!getApartment(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getMaterialFactoryCount(); i++) {
+        if (!getMaterialFactory(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getProduceDepartmentCount(); i++) {
+        if (!getProduceDepartment(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -11093,6 +11213,15 @@ public final class Gs {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeMessage(6, position_);
+      }
+      for (int i = 0; i < apartment_.size(); i++) {
+        output.writeMessage(7, apartment_.get(i));
+      }
+      for (int i = 0; i < materialFactory_.size(); i++) {
+        output.writeMessage(8, materialFactory_.get(i));
+      }
+      for (int i = 0; i < produceDepartment_.size(); i++) {
+        output.writeMessage(9, produceDepartment_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -11126,6 +11255,18 @@ public final class Gs {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, position_);
+      }
+      for (int i = 0; i < apartment_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, apartment_.get(i));
+      }
+      for (int i = 0; i < materialFactory_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, materialFactory_.get(i));
+      }
+      for (int i = 0; i < produceDepartment_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(9, produceDepartment_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -11243,6 +11384,9 @@ public final class Gs {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getPositionFieldBuilder();
+          getApartmentFieldBuilder();
+          getMaterialFactoryFieldBuilder();
+          getProduceDepartmentFieldBuilder();
         }
       }
       private static Builder create() {
@@ -11267,6 +11411,24 @@ public final class Gs {
           positionBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000020);
+        if (apartmentBuilder_ == null) {
+          apartment_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000040);
+        } else {
+          apartmentBuilder_.clear();
+        }
+        if (materialFactoryBuilder_ == null) {
+          materialFactory_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000080);
+        } else {
+          materialFactoryBuilder_.clear();
+        }
+        if (produceDepartmentBuilder_ == null) {
+          produceDepartment_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000100);
+        } else {
+          produceDepartmentBuilder_.clear();
+        }
         return this;
       }
 
@@ -11323,6 +11485,33 @@ public final class Gs {
         } else {
           result.position_ = positionBuilder_.build();
         }
+        if (apartmentBuilder_ == null) {
+          if (((bitField0_ & 0x00000040) == 0x00000040)) {
+            apartment_ = java.util.Collections.unmodifiableList(apartment_);
+            bitField0_ = (bitField0_ & ~0x00000040);
+          }
+          result.apartment_ = apartment_;
+        } else {
+          result.apartment_ = apartmentBuilder_.build();
+        }
+        if (materialFactoryBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) == 0x00000080)) {
+            materialFactory_ = java.util.Collections.unmodifiableList(materialFactory_);
+            bitField0_ = (bitField0_ & ~0x00000080);
+          }
+          result.materialFactory_ = materialFactory_;
+        } else {
+          result.materialFactory_ = materialFactoryBuilder_.build();
+        }
+        if (produceDepartmentBuilder_ == null) {
+          if (((bitField0_ & 0x00000100) == 0x00000100)) {
+            produceDepartment_ = java.util.Collections.unmodifiableList(produceDepartment_);
+            bitField0_ = (bitField0_ & ~0x00000100);
+          }
+          result.produceDepartment_ = produceDepartment_;
+        } else {
+          result.produceDepartment_ = produceDepartmentBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -11359,6 +11548,84 @@ public final class Gs {
         if (other.hasPosition()) {
           mergePosition(other.getPosition());
         }
+        if (apartmentBuilder_ == null) {
+          if (!other.apartment_.isEmpty()) {
+            if (apartment_.isEmpty()) {
+              apartment_ = other.apartment_;
+              bitField0_ = (bitField0_ & ~0x00000040);
+            } else {
+              ensureApartmentIsMutable();
+              apartment_.addAll(other.apartment_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.apartment_.isEmpty()) {
+            if (apartmentBuilder_.isEmpty()) {
+              apartmentBuilder_.dispose();
+              apartmentBuilder_ = null;
+              apartment_ = other.apartment_;
+              bitField0_ = (bitField0_ & ~0x00000040);
+              apartmentBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getApartmentFieldBuilder() : null;
+            } else {
+              apartmentBuilder_.addAllMessages(other.apartment_);
+            }
+          }
+        }
+        if (materialFactoryBuilder_ == null) {
+          if (!other.materialFactory_.isEmpty()) {
+            if (materialFactory_.isEmpty()) {
+              materialFactory_ = other.materialFactory_;
+              bitField0_ = (bitField0_ & ~0x00000080);
+            } else {
+              ensureMaterialFactoryIsMutable();
+              materialFactory_.addAll(other.materialFactory_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.materialFactory_.isEmpty()) {
+            if (materialFactoryBuilder_.isEmpty()) {
+              materialFactoryBuilder_.dispose();
+              materialFactoryBuilder_ = null;
+              materialFactory_ = other.materialFactory_;
+              bitField0_ = (bitField0_ & ~0x00000080);
+              materialFactoryBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getMaterialFactoryFieldBuilder() : null;
+            } else {
+              materialFactoryBuilder_.addAllMessages(other.materialFactory_);
+            }
+          }
+        }
+        if (produceDepartmentBuilder_ == null) {
+          if (!other.produceDepartment_.isEmpty()) {
+            if (produceDepartment_.isEmpty()) {
+              produceDepartment_ = other.produceDepartment_;
+              bitField0_ = (bitField0_ & ~0x00000100);
+            } else {
+              ensureProduceDepartmentIsMutable();
+              produceDepartment_.addAll(other.produceDepartment_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.produceDepartment_.isEmpty()) {
+            if (produceDepartmentBuilder_.isEmpty()) {
+              produceDepartmentBuilder_.dispose();
+              produceDepartmentBuilder_ = null;
+              produceDepartment_ = other.produceDepartment_;
+              bitField0_ = (bitField0_ & ~0x00000100);
+              produceDepartmentBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getProduceDepartmentFieldBuilder() : null;
+            } else {
+              produceDepartmentBuilder_.addAllMessages(other.produceDepartment_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -11391,6 +11658,24 @@ public final class Gs {
         if (!getPosition().isInitialized()) {
           
           return false;
+        }
+        for (int i = 0; i < getApartmentCount(); i++) {
+          if (!getApartment(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getMaterialFactoryCount(); i++) {
+          if (!getMaterialFactory(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getProduceDepartmentCount(); i++) {
+          if (!getProduceDepartment(i).isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -11740,6 +12025,726 @@ public final class Gs {
         return positionBuilder_;
       }
 
+      // repeated .gs.Apartment apartment = 7;
+      private java.util.List<gs.Gs.Apartment> apartment_ =
+        java.util.Collections.emptyList();
+      private void ensureApartmentIsMutable() {
+        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+          apartment_ = new java.util.ArrayList<gs.Gs.Apartment>(apartment_);
+          bitField0_ |= 0x00000040;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.Apartment, gs.Gs.Apartment.Builder, gs.Gs.ApartmentOrBuilder> apartmentBuilder_;
+
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public java.util.List<gs.Gs.Apartment> getApartmentList() {
+        if (apartmentBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(apartment_);
+        } else {
+          return apartmentBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public int getApartmentCount() {
+        if (apartmentBuilder_ == null) {
+          return apartment_.size();
+        } else {
+          return apartmentBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public gs.Gs.Apartment getApartment(int index) {
+        if (apartmentBuilder_ == null) {
+          return apartment_.get(index);
+        } else {
+          return apartmentBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder setApartment(
+          int index, gs.Gs.Apartment value) {
+        if (apartmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApartmentIsMutable();
+          apartment_.set(index, value);
+          onChanged();
+        } else {
+          apartmentBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder setApartment(
+          int index, gs.Gs.Apartment.Builder builderForValue) {
+        if (apartmentBuilder_ == null) {
+          ensureApartmentIsMutable();
+          apartment_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          apartmentBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder addApartment(gs.Gs.Apartment value) {
+        if (apartmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApartmentIsMutable();
+          apartment_.add(value);
+          onChanged();
+        } else {
+          apartmentBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder addApartment(
+          int index, gs.Gs.Apartment value) {
+        if (apartmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApartmentIsMutable();
+          apartment_.add(index, value);
+          onChanged();
+        } else {
+          apartmentBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder addApartment(
+          gs.Gs.Apartment.Builder builderForValue) {
+        if (apartmentBuilder_ == null) {
+          ensureApartmentIsMutable();
+          apartment_.add(builderForValue.build());
+          onChanged();
+        } else {
+          apartmentBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder addApartment(
+          int index, gs.Gs.Apartment.Builder builderForValue) {
+        if (apartmentBuilder_ == null) {
+          ensureApartmentIsMutable();
+          apartment_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          apartmentBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder addAllApartment(
+          java.lang.Iterable<? extends gs.Gs.Apartment> values) {
+        if (apartmentBuilder_ == null) {
+          ensureApartmentIsMutable();
+          super.addAll(values, apartment_);
+          onChanged();
+        } else {
+          apartmentBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder clearApartment() {
+        if (apartmentBuilder_ == null) {
+          apartment_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000040);
+          onChanged();
+        } else {
+          apartmentBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public Builder removeApartment(int index) {
+        if (apartmentBuilder_ == null) {
+          ensureApartmentIsMutable();
+          apartment_.remove(index);
+          onChanged();
+        } else {
+          apartmentBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public gs.Gs.Apartment.Builder getApartmentBuilder(
+          int index) {
+        return getApartmentFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public gs.Gs.ApartmentOrBuilder getApartmentOrBuilder(
+          int index) {
+        if (apartmentBuilder_ == null) {
+          return apartment_.get(index);  } else {
+          return apartmentBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public java.util.List<? extends gs.Gs.ApartmentOrBuilder> 
+           getApartmentOrBuilderList() {
+        if (apartmentBuilder_ != null) {
+          return apartmentBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(apartment_);
+        }
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public gs.Gs.Apartment.Builder addApartmentBuilder() {
+        return getApartmentFieldBuilder().addBuilder(
+            gs.Gs.Apartment.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public gs.Gs.Apartment.Builder addApartmentBuilder(
+          int index) {
+        return getApartmentFieldBuilder().addBuilder(
+            index, gs.Gs.Apartment.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.Apartment apartment = 7;</code>
+       */
+      public java.util.List<gs.Gs.Apartment.Builder> 
+           getApartmentBuilderList() {
+        return getApartmentFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.Apartment, gs.Gs.Apartment.Builder, gs.Gs.ApartmentOrBuilder> 
+          getApartmentFieldBuilder() {
+        if (apartmentBuilder_ == null) {
+          apartmentBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.Apartment, gs.Gs.Apartment.Builder, gs.Gs.ApartmentOrBuilder>(
+                  apartment_,
+                  ((bitField0_ & 0x00000040) == 0x00000040),
+                  getParentForChildren(),
+                  isClean());
+          apartment_ = null;
+        }
+        return apartmentBuilder_;
+      }
+
+      // repeated .gs.MaterialFactory materialFactory = 8;
+      private java.util.List<gs.Gs.MaterialFactory> materialFactory_ =
+        java.util.Collections.emptyList();
+      private void ensureMaterialFactoryIsMutable() {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
+          materialFactory_ = new java.util.ArrayList<gs.Gs.MaterialFactory>(materialFactory_);
+          bitField0_ |= 0x00000080;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.MaterialFactory, gs.Gs.MaterialFactory.Builder, gs.Gs.MaterialFactoryOrBuilder> materialFactoryBuilder_;
+
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public java.util.List<gs.Gs.MaterialFactory> getMaterialFactoryList() {
+        if (materialFactoryBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(materialFactory_);
+        } else {
+          return materialFactoryBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public int getMaterialFactoryCount() {
+        if (materialFactoryBuilder_ == null) {
+          return materialFactory_.size();
+        } else {
+          return materialFactoryBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public gs.Gs.MaterialFactory getMaterialFactory(int index) {
+        if (materialFactoryBuilder_ == null) {
+          return materialFactory_.get(index);
+        } else {
+          return materialFactoryBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder setMaterialFactory(
+          int index, gs.Gs.MaterialFactory value) {
+        if (materialFactoryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.set(index, value);
+          onChanged();
+        } else {
+          materialFactoryBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder setMaterialFactory(
+          int index, gs.Gs.MaterialFactory.Builder builderForValue) {
+        if (materialFactoryBuilder_ == null) {
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          materialFactoryBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder addMaterialFactory(gs.Gs.MaterialFactory value) {
+        if (materialFactoryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.add(value);
+          onChanged();
+        } else {
+          materialFactoryBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder addMaterialFactory(
+          int index, gs.Gs.MaterialFactory value) {
+        if (materialFactoryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.add(index, value);
+          onChanged();
+        } else {
+          materialFactoryBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder addMaterialFactory(
+          gs.Gs.MaterialFactory.Builder builderForValue) {
+        if (materialFactoryBuilder_ == null) {
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.add(builderForValue.build());
+          onChanged();
+        } else {
+          materialFactoryBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder addMaterialFactory(
+          int index, gs.Gs.MaterialFactory.Builder builderForValue) {
+        if (materialFactoryBuilder_ == null) {
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          materialFactoryBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder addAllMaterialFactory(
+          java.lang.Iterable<? extends gs.Gs.MaterialFactory> values) {
+        if (materialFactoryBuilder_ == null) {
+          ensureMaterialFactoryIsMutable();
+          super.addAll(values, materialFactory_);
+          onChanged();
+        } else {
+          materialFactoryBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder clearMaterialFactory() {
+        if (materialFactoryBuilder_ == null) {
+          materialFactory_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000080);
+          onChanged();
+        } else {
+          materialFactoryBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public Builder removeMaterialFactory(int index) {
+        if (materialFactoryBuilder_ == null) {
+          ensureMaterialFactoryIsMutable();
+          materialFactory_.remove(index);
+          onChanged();
+        } else {
+          materialFactoryBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public gs.Gs.MaterialFactory.Builder getMaterialFactoryBuilder(
+          int index) {
+        return getMaterialFactoryFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public gs.Gs.MaterialFactoryOrBuilder getMaterialFactoryOrBuilder(
+          int index) {
+        if (materialFactoryBuilder_ == null) {
+          return materialFactory_.get(index);  } else {
+          return materialFactoryBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public java.util.List<? extends gs.Gs.MaterialFactoryOrBuilder> 
+           getMaterialFactoryOrBuilderList() {
+        if (materialFactoryBuilder_ != null) {
+          return materialFactoryBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(materialFactory_);
+        }
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public gs.Gs.MaterialFactory.Builder addMaterialFactoryBuilder() {
+        return getMaterialFactoryFieldBuilder().addBuilder(
+            gs.Gs.MaterialFactory.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public gs.Gs.MaterialFactory.Builder addMaterialFactoryBuilder(
+          int index) {
+        return getMaterialFactoryFieldBuilder().addBuilder(
+            index, gs.Gs.MaterialFactory.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.MaterialFactory materialFactory = 8;</code>
+       */
+      public java.util.List<gs.Gs.MaterialFactory.Builder> 
+           getMaterialFactoryBuilderList() {
+        return getMaterialFactoryFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.MaterialFactory, gs.Gs.MaterialFactory.Builder, gs.Gs.MaterialFactoryOrBuilder> 
+          getMaterialFactoryFieldBuilder() {
+        if (materialFactoryBuilder_ == null) {
+          materialFactoryBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.MaterialFactory, gs.Gs.MaterialFactory.Builder, gs.Gs.MaterialFactoryOrBuilder>(
+                  materialFactory_,
+                  ((bitField0_ & 0x00000080) == 0x00000080),
+                  getParentForChildren(),
+                  isClean());
+          materialFactory_ = null;
+        }
+        return materialFactoryBuilder_;
+      }
+
+      // repeated .gs.ProduceDepartment produceDepartment = 9;
+      private java.util.List<gs.Gs.ProduceDepartment> produceDepartment_ =
+        java.util.Collections.emptyList();
+      private void ensureProduceDepartmentIsMutable() {
+        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+          produceDepartment_ = new java.util.ArrayList<gs.Gs.ProduceDepartment>(produceDepartment_);
+          bitField0_ |= 0x00000100;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.ProduceDepartment, gs.Gs.ProduceDepartment.Builder, gs.Gs.ProduceDepartmentOrBuilder> produceDepartmentBuilder_;
+
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public java.util.List<gs.Gs.ProduceDepartment> getProduceDepartmentList() {
+        if (produceDepartmentBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(produceDepartment_);
+        } else {
+          return produceDepartmentBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public int getProduceDepartmentCount() {
+        if (produceDepartmentBuilder_ == null) {
+          return produceDepartment_.size();
+        } else {
+          return produceDepartmentBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public gs.Gs.ProduceDepartment getProduceDepartment(int index) {
+        if (produceDepartmentBuilder_ == null) {
+          return produceDepartment_.get(index);
+        } else {
+          return produceDepartmentBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder setProduceDepartment(
+          int index, gs.Gs.ProduceDepartment value) {
+        if (produceDepartmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.set(index, value);
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder setProduceDepartment(
+          int index, gs.Gs.ProduceDepartment.Builder builderForValue) {
+        if (produceDepartmentBuilder_ == null) {
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder addProduceDepartment(gs.Gs.ProduceDepartment value) {
+        if (produceDepartmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.add(value);
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder addProduceDepartment(
+          int index, gs.Gs.ProduceDepartment value) {
+        if (produceDepartmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.add(index, value);
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder addProduceDepartment(
+          gs.Gs.ProduceDepartment.Builder builderForValue) {
+        if (produceDepartmentBuilder_ == null) {
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.add(builderForValue.build());
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder addProduceDepartment(
+          int index, gs.Gs.ProduceDepartment.Builder builderForValue) {
+        if (produceDepartmentBuilder_ == null) {
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder addAllProduceDepartment(
+          java.lang.Iterable<? extends gs.Gs.ProduceDepartment> values) {
+        if (produceDepartmentBuilder_ == null) {
+          ensureProduceDepartmentIsMutable();
+          super.addAll(values, produceDepartment_);
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder clearProduceDepartment() {
+        if (produceDepartmentBuilder_ == null) {
+          produceDepartment_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000100);
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public Builder removeProduceDepartment(int index) {
+        if (produceDepartmentBuilder_ == null) {
+          ensureProduceDepartmentIsMutable();
+          produceDepartment_.remove(index);
+          onChanged();
+        } else {
+          produceDepartmentBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public gs.Gs.ProduceDepartment.Builder getProduceDepartmentBuilder(
+          int index) {
+        return getProduceDepartmentFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public gs.Gs.ProduceDepartmentOrBuilder getProduceDepartmentOrBuilder(
+          int index) {
+        if (produceDepartmentBuilder_ == null) {
+          return produceDepartment_.get(index);  } else {
+          return produceDepartmentBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public java.util.List<? extends gs.Gs.ProduceDepartmentOrBuilder> 
+           getProduceDepartmentOrBuilderList() {
+        if (produceDepartmentBuilder_ != null) {
+          return produceDepartmentBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(produceDepartment_);
+        }
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public gs.Gs.ProduceDepartment.Builder addProduceDepartmentBuilder() {
+        return getProduceDepartmentFieldBuilder().addBuilder(
+            gs.Gs.ProduceDepartment.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public gs.Gs.ProduceDepartment.Builder addProduceDepartmentBuilder(
+          int index) {
+        return getProduceDepartmentFieldBuilder().addBuilder(
+            index, gs.Gs.ProduceDepartment.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.ProduceDepartment produceDepartment = 9;</code>
+       */
+      public java.util.List<gs.Gs.ProduceDepartment.Builder> 
+           getProduceDepartmentBuilderList() {
+        return getProduceDepartmentFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.ProduceDepartment, gs.Gs.ProduceDepartment.Builder, gs.Gs.ProduceDepartmentOrBuilder> 
+          getProduceDepartmentFieldBuilder() {
+        if (produceDepartmentBuilder_ == null) {
+          produceDepartmentBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.ProduceDepartment, gs.Gs.ProduceDepartment.Builder, gs.Gs.ProduceDepartmentOrBuilder>(
+                  produceDepartment_,
+                  ((bitField0_ & 0x00000100) == 0x00000100),
+                  getParentForChildren(),
+                  isClean());
+          produceDepartment_ = null;
+        }
+        return produceDepartmentBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:gs.Role)
     }
 
@@ -11783,6 +12788,7 @@ public final class Gs {
    * Protobuf type {@code gs.UnitCreate}
    *
    * <pre>
+   * those broadcast message is not designed as a container which as MMO because the change happen rarely compare with MMO
    * unitCreate
    * </pre>
    */
@@ -12039,6 +13045,7 @@ public final class Gs {
      * Protobuf type {@code gs.UnitCreate}
      *
      * <pre>
+     * those broadcast message is not designed as a container which as MMO because the change happen rarely compare with MMO
      * unitCreate
      * </pre>
      */
@@ -12918,29 +13925,19 @@ public final class Gs {
   public interface UnitChangeOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required bytes id = 1;
+    // required .gs.BuildingInfo info = 1;
     /**
-     * <code>required bytes id = 1;</code>
+     * <code>required .gs.BuildingInfo info = 1;</code>
      */
-    boolean hasId();
+    boolean hasInfo();
     /**
-     * <code>required bytes id = 1;</code>
+     * <code>required .gs.BuildingInfo info = 1;</code>
      */
-    com.google.protobuf.ByteString getId();
-
-    // required .gs.BuildingInfo.MutableData data = 2;
+    gs.Gs.BuildingInfo getInfo();
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+     * <code>required .gs.BuildingInfo info = 1;</code>
      */
-    boolean hasData();
-    /**
-     * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
-     */
-    gs.Gs.BuildingInfo.MutableData getData();
-    /**
-     * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
-     */
-    gs.Gs.BuildingInfo.MutableDataOrBuilder getDataOrBuilder();
+    gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder();
   }
   /**
    * Protobuf type {@code gs.UnitChange}
@@ -12998,21 +13995,16 @@ public final class Gs {
               break;
             }
             case 10: {
-              bitField0_ |= 0x00000001;
-              id_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              gs.Gs.BuildingInfo.MutableData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
-                subBuilder = data_.toBuilder();
+              gs.Gs.BuildingInfo.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = info_.toBuilder();
               }
-              data_ = input.readMessage(gs.Gs.BuildingInfo.MutableData.PARSER, extensionRegistry);
+              info_ = input.readMessage(gs.Gs.BuildingInfo.PARSER, extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(data_);
-                data_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(info_);
+                info_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000001;
               break;
             }
           }
@@ -13055,58 +14047,41 @@ public final class Gs {
     }
 
     private int bitField0_;
-    // required bytes id = 1;
-    public static final int ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString id_;
+    // required .gs.BuildingInfo info = 1;
+    public static final int INFO_FIELD_NUMBER = 1;
+    private gs.Gs.BuildingInfo info_;
     /**
-     * <code>required bytes id = 1;</code>
+     * <code>required .gs.BuildingInfo info = 1;</code>
      */
-    public boolean hasId() {
+    public boolean hasInfo() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required bytes id = 1;</code>
+     * <code>required .gs.BuildingInfo info = 1;</code>
      */
-    public com.google.protobuf.ByteString getId() {
-      return id_;
-    }
-
-    // required .gs.BuildingInfo.MutableData data = 2;
-    public static final int DATA_FIELD_NUMBER = 2;
-    private gs.Gs.BuildingInfo.MutableData data_;
-    /**
-     * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
-     */
-    public boolean hasData() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+    public gs.Gs.BuildingInfo getInfo() {
+      return info_;
     }
     /**
-     * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+     * <code>required .gs.BuildingInfo info = 1;</code>
      */
-    public gs.Gs.BuildingInfo.MutableData getData() {
-      return data_;
-    }
-    /**
-     * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
-     */
-    public gs.Gs.BuildingInfo.MutableDataOrBuilder getDataOrBuilder() {
-      return data_;
+    public gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder() {
+      return info_;
     }
 
     private void initFields() {
-      id_ = com.google.protobuf.ByteString.EMPTY;
-      data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
+      info_ = gs.Gs.BuildingInfo.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasId()) {
+      if (!hasInfo()) {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasData()) {
+      if (!getInfo().isInitialized()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -13118,10 +14093,7 @@ public final class Gs {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, id_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(2, data_);
+        output.writeMessage(1, info_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -13134,11 +14106,7 @@ public final class Gs {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, id_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, data_);
+          .computeMessageSize(1, info_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -13252,7 +14220,7 @@ public final class Gs {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getDataFieldBuilder();
+          getInfoFieldBuilder();
         }
       }
       private static Builder create() {
@@ -13261,14 +14229,12 @@ public final class Gs {
 
       public Builder clear() {
         super.clear();
-        id_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        if (dataBuilder_ == null) {
-          data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
+        if (infoBuilder_ == null) {
+          info_ = gs.Gs.BuildingInfo.getDefaultInstance();
         } else {
-          dataBuilder_.clear();
+          infoBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -13300,14 +14266,10 @@ public final class Gs {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.id_ = id_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        if (dataBuilder_ == null) {
-          result.data_ = data_;
+        if (infoBuilder_ == null) {
+          result.info_ = info_;
         } else {
-          result.data_ = dataBuilder_.build();
+          result.info_ = infoBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -13325,22 +14287,19 @@ public final class Gs {
 
       public Builder mergeFrom(gs.Gs.UnitChange other) {
         if (other == gs.Gs.UnitChange.getDefaultInstance()) return this;
-        if (other.hasId()) {
-          setId(other.getId());
-        }
-        if (other.hasData()) {
-          mergeData(other.getData());
+        if (other.hasInfo()) {
+          mergeInfo(other.getInfo());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasId()) {
+        if (!hasInfo()) {
           
           return false;
         }
-        if (!hasData()) {
+        if (!getInfo().isInitialized()) {
           
           return false;
         }
@@ -13366,157 +14325,121 @@ public final class Gs {
       }
       private int bitField0_;
 
-      // required bytes id = 1;
-      private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
+      // required .gs.BuildingInfo info = 1;
+      private gs.Gs.BuildingInfo info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder> infoBuilder_;
       /**
-       * <code>required bytes id = 1;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public boolean hasId() {
+      public boolean hasInfo() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required bytes id = 1;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public com.google.protobuf.ByteString getId() {
-        return id_;
-      }
-      /**
-       * <code>required bytes id = 1;</code>
-       */
-      public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        id_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required bytes id = 1;</code>
-       */
-      public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = getDefaultInstance().getId();
-        onChanged();
-        return this;
-      }
-
-      // required .gs.BuildingInfo.MutableData data = 2;
-      private gs.Gs.BuildingInfo.MutableData data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.BuildingInfo.MutableData, gs.Gs.BuildingInfo.MutableData.Builder, gs.Gs.BuildingInfo.MutableDataOrBuilder> dataBuilder_;
-      /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
-       */
-      public boolean hasData() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
-       */
-      public gs.Gs.BuildingInfo.MutableData getData() {
-        if (dataBuilder_ == null) {
-          return data_;
+      public gs.Gs.BuildingInfo getInfo() {
+        if (infoBuilder_ == null) {
+          return info_;
         } else {
-          return dataBuilder_.getMessage();
+          return infoBuilder_.getMessage();
         }
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public Builder setData(gs.Gs.BuildingInfo.MutableData value) {
-        if (dataBuilder_ == null) {
+      public Builder setInfo(gs.Gs.BuildingInfo value) {
+        if (infoBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          data_ = value;
+          info_ = value;
           onChanged();
         } else {
-          dataBuilder_.setMessage(value);
+          infoBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public Builder setData(
-          gs.Gs.BuildingInfo.MutableData.Builder builderForValue) {
-        if (dataBuilder_ == null) {
-          data_ = builderForValue.build();
+      public Builder setInfo(
+          gs.Gs.BuildingInfo.Builder builderForValue) {
+        if (infoBuilder_ == null) {
+          info_ = builderForValue.build();
           onChanged();
         } else {
-          dataBuilder_.setMessage(builderForValue.build());
+          infoBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public Builder mergeData(gs.Gs.BuildingInfo.MutableData value) {
-        if (dataBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              data_ != gs.Gs.BuildingInfo.MutableData.getDefaultInstance()) {
-            data_ =
-              gs.Gs.BuildingInfo.MutableData.newBuilder(data_).mergeFrom(value).buildPartial();
+      public Builder mergeInfo(gs.Gs.BuildingInfo value) {
+        if (infoBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              info_ != gs.Gs.BuildingInfo.getDefaultInstance()) {
+            info_ =
+              gs.Gs.BuildingInfo.newBuilder(info_).mergeFrom(value).buildPartial();
           } else {
-            data_ = value;
+            info_ = value;
           }
           onChanged();
         } else {
-          dataBuilder_.mergeFrom(value);
+          infoBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public Builder clearData() {
-        if (dataBuilder_ == null) {
-          data_ = gs.Gs.BuildingInfo.MutableData.getDefaultInstance();
+      public Builder clearInfo() {
+        if (infoBuilder_ == null) {
+          info_ = gs.Gs.BuildingInfo.getDefaultInstance();
           onChanged();
         } else {
-          dataBuilder_.clear();
+          infoBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public gs.Gs.BuildingInfo.MutableData.Builder getDataBuilder() {
-        bitField0_ |= 0x00000002;
+      public gs.Gs.BuildingInfo.Builder getInfoBuilder() {
+        bitField0_ |= 0x00000001;
         onChanged();
-        return getDataFieldBuilder().getBuilder();
+        return getInfoFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
-      public gs.Gs.BuildingInfo.MutableDataOrBuilder getDataOrBuilder() {
-        if (dataBuilder_ != null) {
-          return dataBuilder_.getMessageOrBuilder();
+      public gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder() {
+        if (infoBuilder_ != null) {
+          return infoBuilder_.getMessageOrBuilder();
         } else {
-          return data_;
+          return info_;
         }
       }
       /**
-       * <code>required .gs.BuildingInfo.MutableData data = 2;</code>
+       * <code>required .gs.BuildingInfo info = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.BuildingInfo.MutableData, gs.Gs.BuildingInfo.MutableData.Builder, gs.Gs.BuildingInfo.MutableDataOrBuilder> 
-          getDataFieldBuilder() {
-        if (dataBuilder_ == null) {
-          dataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              gs.Gs.BuildingInfo.MutableData, gs.Gs.BuildingInfo.MutableData.Builder, gs.Gs.BuildingInfo.MutableDataOrBuilder>(
-                  data_,
+          gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder> 
+          getInfoFieldBuilder() {
+        if (infoBuilder_ == null) {
+          infoBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder>(
+                  info_,
                   getParentForChildren(),
                   isClean());
-          data_ = null;
+          info_ = null;
         }
-        return dataBuilder_;
+        return infoBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:gs.UnitChange)
@@ -16544,10 +17467,18 @@ public final class Gs {
     // required int32 id = 1;
     /**
      * <code>required int32 id = 1;</code>
+     *
+     * <pre>
+     *只能是虚拟建筑
+     * </pre>
      */
     boolean hasId();
     /**
      * <code>required int32 id = 1;</code>
+     *
+     * <pre>
+     *只能是虚拟建筑
+     * </pre>
      */
     int getId();
 
@@ -16683,12 +17614,20 @@ public final class Gs {
     private int id_;
     /**
      * <code>required int32 id = 1;</code>
+     *
+     * <pre>
+     *只能是虚拟建筑
+     * </pre>
      */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>required int32 id = 1;</code>
+     *
+     * <pre>
+     *只能是虚拟建筑
+     * </pre>
      */
     public int getId() {
       return id_;
@@ -17001,18 +17940,30 @@ public final class Gs {
       private int id_ ;
       /**
        * <code>required int32 id = 1;</code>
+       *
+       * <pre>
+       *只能是虚拟建筑
+       * </pre>
        */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>required int32 id = 1;</code>
+       *
+       * <pre>
+       *只能是虚拟建筑
+       * </pre>
        */
       public int getId() {
         return id_;
       }
       /**
        * <code>required int32 id = 1;</code>
+       *
+       * <pre>
+       *只能是虚拟建筑
+       * </pre>
        */
       public Builder setId(int value) {
         bitField0_ |= 0x00000001;
@@ -17022,6 +17973,10 @@ public final class Gs {
       }
       /**
        * <code>required int32 id = 1;</code>
+       *
+       * <pre>
+       *只能是虚拟建筑
+       * </pre>
        */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -17158,7 +18113,710 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.AddBuilding)
   }
 
-  public interface ApartmentInfoOrBuilder
+  public interface TransferItemOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes src = 1;
+    /**
+     * <code>optional bytes src = 1;</code>
+     *
+     * <pre>
+     * null means your bag or building id
+     * </pre>
+     */
+    boolean hasSrc();
+    /**
+     * <code>optional bytes src = 1;</code>
+     *
+     * <pre>
+     * null means your bag or building id
+     * </pre>
+     */
+    com.google.protobuf.ByteString getSrc();
+
+    // optional bytes dst = 2;
+    /**
+     * <code>optional bytes dst = 2;</code>
+     */
+    boolean hasDst();
+    /**
+     * <code>optional bytes dst = 2;</code>
+     */
+    com.google.protobuf.ByteString getDst();
+
+    // required int32 itemId = 3;
+    /**
+     * <code>required int32 itemId = 3;</code>
+     */
+    boolean hasItemId();
+    /**
+     * <code>required int32 itemId = 3;</code>
+     */
+    int getItemId();
+
+    // required int32 n = 4;
+    /**
+     * <code>required int32 n = 4;</code>
+     */
+    boolean hasN();
+    /**
+     * <code>required int32 n = 4;</code>
+     */
+    int getN();
+  }
+  /**
+   * Protobuf type {@code gs.TransferItem}
+   *
+   * <pre>
+   * transferItem
+   * c
+   * </pre>
+   */
+  public static final class TransferItem extends
+      com.google.protobuf.GeneratedMessage
+      implements TransferItemOrBuilder {
+    // Use TransferItem.newBuilder() to construct.
+    private TransferItem(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private TransferItem(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final TransferItem defaultInstance;
+    public static TransferItem getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public TransferItem getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TransferItem(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              src_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              dst_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              itemId_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              n_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_TransferItem_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_TransferItem_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.TransferItem.class, gs.Gs.TransferItem.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<TransferItem> PARSER =
+        new com.google.protobuf.AbstractParser<TransferItem>() {
+      public TransferItem parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TransferItem(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TransferItem> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes src = 1;
+    public static final int SRC_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString src_;
+    /**
+     * <code>optional bytes src = 1;</code>
+     *
+     * <pre>
+     * null means your bag or building id
+     * </pre>
+     */
+    public boolean hasSrc() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes src = 1;</code>
+     *
+     * <pre>
+     * null means your bag or building id
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getSrc() {
+      return src_;
+    }
+
+    // optional bytes dst = 2;
+    public static final int DST_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString dst_;
+    /**
+     * <code>optional bytes dst = 2;</code>
+     */
+    public boolean hasDst() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes dst = 2;</code>
+     */
+    public com.google.protobuf.ByteString getDst() {
+      return dst_;
+    }
+
+    // required int32 itemId = 3;
+    public static final int ITEMID_FIELD_NUMBER = 3;
+    private int itemId_;
+    /**
+     * <code>required int32 itemId = 3;</code>
+     */
+    public boolean hasItemId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 itemId = 3;</code>
+     */
+    public int getItemId() {
+      return itemId_;
+    }
+
+    // required int32 n = 4;
+    public static final int N_FIELD_NUMBER = 4;
+    private int n_;
+    /**
+     * <code>required int32 n = 4;</code>
+     */
+    public boolean hasN() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int32 n = 4;</code>
+     */
+    public int getN() {
+      return n_;
+    }
+
+    private void initFields() {
+      src_ = com.google.protobuf.ByteString.EMPTY;
+      dst_ = com.google.protobuf.ByteString.EMPTY;
+      itemId_ = 0;
+      n_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasItemId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasN()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, src_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, dst_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, itemId_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(4, n_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, src_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, dst_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, itemId_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, n_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.TransferItem parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.TransferItem parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.TransferItem parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.TransferItem parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.TransferItem parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.TransferItem parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.TransferItem parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.TransferItem parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.TransferItem parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.TransferItem parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.TransferItem prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.TransferItem}
+     *
+     * <pre>
+     * transferItem
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.TransferItemOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_TransferItem_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_TransferItem_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.TransferItem.class, gs.Gs.TransferItem.Builder.class);
+      }
+
+      // Construct using gs.Gs.TransferItem.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        src_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        dst_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        itemId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        n_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_TransferItem_descriptor;
+      }
+
+      public gs.Gs.TransferItem getDefaultInstanceForType() {
+        return gs.Gs.TransferItem.getDefaultInstance();
+      }
+
+      public gs.Gs.TransferItem build() {
+        gs.Gs.TransferItem result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.TransferItem buildPartial() {
+        gs.Gs.TransferItem result = new gs.Gs.TransferItem(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.src_ = src_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.dst_ = dst_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.itemId_ = itemId_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.n_ = n_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.TransferItem) {
+          return mergeFrom((gs.Gs.TransferItem)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.TransferItem other) {
+        if (other == gs.Gs.TransferItem.getDefaultInstance()) return this;
+        if (other.hasSrc()) {
+          setSrc(other.getSrc());
+        }
+        if (other.hasDst()) {
+          setDst(other.getDst());
+        }
+        if (other.hasItemId()) {
+          setItemId(other.getItemId());
+        }
+        if (other.hasN()) {
+          setN(other.getN());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasItemId()) {
+          
+          return false;
+        }
+        if (!hasN()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.TransferItem parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.TransferItem) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes src = 1;
+      private com.google.protobuf.ByteString src_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes src = 1;</code>
+       *
+       * <pre>
+       * null means your bag or building id
+       * </pre>
+       */
+      public boolean hasSrc() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes src = 1;</code>
+       *
+       * <pre>
+       * null means your bag or building id
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getSrc() {
+        return src_;
+      }
+      /**
+       * <code>optional bytes src = 1;</code>
+       *
+       * <pre>
+       * null means your bag or building id
+       * </pre>
+       */
+      public Builder setSrc(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        src_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes src = 1;</code>
+       *
+       * <pre>
+       * null means your bag or building id
+       * </pre>
+       */
+      public Builder clearSrc() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        src_ = getDefaultInstance().getSrc();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes dst = 2;
+      private com.google.protobuf.ByteString dst_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes dst = 2;</code>
+       */
+      public boolean hasDst() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes dst = 2;</code>
+       */
+      public com.google.protobuf.ByteString getDst() {
+        return dst_;
+      }
+      /**
+       * <code>optional bytes dst = 2;</code>
+       */
+      public Builder setDst(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        dst_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes dst = 2;</code>
+       */
+      public Builder clearDst() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        dst_ = getDefaultInstance().getDst();
+        onChanged();
+        return this;
+      }
+
+      // required int32 itemId = 3;
+      private int itemId_ ;
+      /**
+       * <code>required int32 itemId = 3;</code>
+       */
+      public boolean hasItemId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 itemId = 3;</code>
+       */
+      public int getItemId() {
+        return itemId_;
+      }
+      /**
+       * <code>required int32 itemId = 3;</code>
+       */
+      public Builder setItemId(int value) {
+        bitField0_ |= 0x00000004;
+        itemId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 itemId = 3;</code>
+       */
+      public Builder clearItemId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 n = 4;
+      private int n_ ;
+      /**
+       * <code>required int32 n = 4;</code>
+       */
+      public boolean hasN() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 n = 4;</code>
+       */
+      public int getN() {
+        return n_;
+      }
+      /**
+       * <code>required int32 n = 4;</code>
+       */
+      public Builder setN(int value) {
+        bitField0_ |= 0x00000008;
+        n_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 n = 4;</code>
+       */
+      public Builder clearN() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        n_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.TransferItem)
+    }
+
+    static {
+      defaultInstance = new TransferItem(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.TransferItem)
+  }
+
+  public interface ApartmentOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
     // required .gs.BuildingDetailCommon common = 1;
@@ -17238,7 +18896,7 @@ public final class Gs {
     gs.Gs.NumsOrBuilder getChartOrBuilder();
   }
   /**
-   * Protobuf type {@code gs.ApartmentInfo}
+   * Protobuf type {@code gs.Apartment}
    *
    * <pre>
    * detailApartment
@@ -17247,22 +18905,22 @@ public final class Gs {
    * s
    * </pre>
    */
-  public static final class ApartmentInfo extends
+  public static final class Apartment extends
       com.google.protobuf.GeneratedMessage
-      implements ApartmentInfoOrBuilder {
-    // Use ApartmentInfo.newBuilder() to construct.
-    private ApartmentInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements ApartmentOrBuilder {
+    // Use Apartment.newBuilder() to construct.
+    private Apartment(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private ApartmentInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private Apartment(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final ApartmentInfo defaultInstance;
-    public static ApartmentInfo getDefaultInstance() {
+    private static final Apartment defaultInstance;
+    public static Apartment getDefaultInstance() {
       return defaultInstance;
     }
 
-    public ApartmentInfo getDefaultInstanceForType() {
+    public Apartment getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -17272,7 +18930,7 @@ public final class Gs {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private ApartmentInfo(
+    private Apartment(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -17345,28 +19003,28 @@ public final class Gs {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gs.Gs.internal_static_gs_ApartmentInfo_descriptor;
+      return gs.Gs.internal_static_gs_Apartment_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gs.Gs.internal_static_gs_ApartmentInfo_fieldAccessorTable
+      return gs.Gs.internal_static_gs_Apartment_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gs.Gs.ApartmentInfo.class, gs.Gs.ApartmentInfo.Builder.class);
+              gs.Gs.Apartment.class, gs.Gs.Apartment.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<ApartmentInfo> PARSER =
-        new com.google.protobuf.AbstractParser<ApartmentInfo>() {
-      public ApartmentInfo parsePartialFrom(
+    public static com.google.protobuf.Parser<Apartment> PARSER =
+        new com.google.protobuf.AbstractParser<Apartment>() {
+      public Apartment parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ApartmentInfo(input, extensionRegistry);
+        return new Apartment(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ApartmentInfo> getParserForType() {
+    public com.google.protobuf.Parser<Apartment> getParserForType() {
       return PARSER;
     }
 
@@ -17562,53 +19220,53 @@ public final class Gs {
       return super.writeReplace();
     }
 
-    public static gs.Gs.ApartmentInfo parseFrom(
+    public static gs.Gs.Apartment parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(
+    public static gs.Gs.Apartment parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(byte[] data)
+    public static gs.Gs.Apartment parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(
+    public static gs.Gs.Apartment parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(java.io.InputStream input)
+    public static gs.Gs.Apartment parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(
+    public static gs.Gs.Apartment parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static gs.Gs.ApartmentInfo parseDelimitedFrom(java.io.InputStream input)
+    public static gs.Gs.Apartment parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static gs.Gs.ApartmentInfo parseDelimitedFrom(
+    public static gs.Gs.Apartment parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(
+    public static gs.Gs.Apartment parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.ApartmentInfo parseFrom(
+    public static gs.Gs.Apartment parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -17617,7 +19275,7 @@ public final class Gs {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(gs.Gs.ApartmentInfo prototype) {
+    public static Builder newBuilder(gs.Gs.Apartment prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -17629,7 +19287,7 @@ public final class Gs {
       return builder;
     }
     /**
-     * Protobuf type {@code gs.ApartmentInfo}
+     * Protobuf type {@code gs.Apartment}
      *
      * <pre>
      * detailApartment
@@ -17640,20 +19298,20 @@ public final class Gs {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements gs.Gs.ApartmentInfoOrBuilder {
+       implements gs.Gs.ApartmentOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gs.Gs.internal_static_gs_ApartmentInfo_descriptor;
+        return gs.Gs.internal_static_gs_Apartment_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_ApartmentInfo_fieldAccessorTable
+        return gs.Gs.internal_static_gs_Apartment_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gs.Gs.ApartmentInfo.class, gs.Gs.ApartmentInfo.Builder.class);
+                gs.Gs.Apartment.class, gs.Gs.Apartment.Builder.class);
       }
 
-      // Construct using gs.Gs.ApartmentInfo.newBuilder()
+      // Construct using gs.Gs.Apartment.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -17700,23 +19358,23 @@ public final class Gs {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gs.Gs.internal_static_gs_ApartmentInfo_descriptor;
+        return gs.Gs.internal_static_gs_Apartment_descriptor;
       }
 
-      public gs.Gs.ApartmentInfo getDefaultInstanceForType() {
-        return gs.Gs.ApartmentInfo.getDefaultInstance();
+      public gs.Gs.Apartment getDefaultInstanceForType() {
+        return gs.Gs.Apartment.getDefaultInstance();
       }
 
-      public gs.Gs.ApartmentInfo build() {
-        gs.Gs.ApartmentInfo result = buildPartial();
+      public gs.Gs.Apartment build() {
+        gs.Gs.Apartment result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gs.Gs.ApartmentInfo buildPartial() {
-        gs.Gs.ApartmentInfo result = new gs.Gs.ApartmentInfo(this);
+      public gs.Gs.Apartment buildPartial() {
+        gs.Gs.Apartment result = new gs.Gs.Apartment(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -17749,16 +19407,16 @@ public final class Gs {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gs.Gs.ApartmentInfo) {
-          return mergeFrom((gs.Gs.ApartmentInfo)other);
+        if (other instanceof gs.Gs.Apartment) {
+          return mergeFrom((gs.Gs.Apartment)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gs.Gs.ApartmentInfo other) {
-        if (other == gs.Gs.ApartmentInfo.getDefaultInstance()) return this;
+      public Builder mergeFrom(gs.Gs.Apartment other) {
+        if (other == gs.Gs.Apartment.getDefaultInstance()) return this;
         if (other.hasCommon()) {
           mergeCommon(other.getCommon());
         }
@@ -17803,11 +19461,11 @@ public final class Gs {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gs.Gs.ApartmentInfo parsedMessage = null;
+        gs.Gs.Apartment parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gs.Gs.ApartmentInfo) e.getUnfinishedMessage();
+          parsedMessage = (gs.Gs.Apartment) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -18186,15 +19844,15 @@ public final class Gs {
         return chartBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:gs.ApartmentInfo)
+      // @@protoc_insertion_point(builder_scope:gs.Apartment)
     }
 
     static {
-      defaultInstance = new ApartmentInfo(true);
+      defaultInstance = new Apartment(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:gs.ApartmentInfo)
+    // @@protoc_insertion_point(class_scope:gs.Apartment)
   }
 
   public interface LineOrBuilder
@@ -19120,7 +20778,7 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.Line)
   }
 
-  public interface MaterialFactoryInfoOrBuilder
+  public interface MaterialFactoryOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
     // required .gs.BuildingDetailCommon common = 1;
@@ -19299,7 +20957,7 @@ public final class Gs {
         int index);
   }
   /**
-   * Protobuf type {@code gs.MaterialFactoryInfo}
+   * Protobuf type {@code gs.MaterialFactory}
    *
    * <pre>
    * detailMaterialFactory
@@ -19308,22 +20966,22 @@ public final class Gs {
    * s
    * </pre>
    */
-  public static final class MaterialFactoryInfo extends
+  public static final class MaterialFactory extends
       com.google.protobuf.GeneratedMessage
-      implements MaterialFactoryInfoOrBuilder {
-    // Use MaterialFactoryInfo.newBuilder() to construct.
-    private MaterialFactoryInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements MaterialFactoryOrBuilder {
+    // Use MaterialFactory.newBuilder() to construct.
+    private MaterialFactory(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private MaterialFactoryInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private MaterialFactory(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final MaterialFactoryInfo defaultInstance;
-    public static MaterialFactoryInfo getDefaultInstance() {
+    private static final MaterialFactory defaultInstance;
+    public static MaterialFactory getDefaultInstance() {
       return defaultInstance;
     }
 
-    public MaterialFactoryInfo getDefaultInstanceForType() {
+    public MaterialFactory getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -19333,7 +20991,7 @@ public final class Gs {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private MaterialFactoryInfo(
+    private MaterialFactory(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -19429,28 +21087,28 @@ public final class Gs {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gs.Gs.internal_static_gs_MaterialFactoryInfo_descriptor;
+      return gs.Gs.internal_static_gs_MaterialFactory_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gs.Gs.internal_static_gs_MaterialFactoryInfo_fieldAccessorTable
+      return gs.Gs.internal_static_gs_MaterialFactory_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gs.Gs.MaterialFactoryInfo.class, gs.Gs.MaterialFactoryInfo.Builder.class);
+              gs.Gs.MaterialFactory.class, gs.Gs.MaterialFactory.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<MaterialFactoryInfo> PARSER =
-        new com.google.protobuf.AbstractParser<MaterialFactoryInfo>() {
-      public MaterialFactoryInfo parsePartialFrom(
+    public static com.google.protobuf.Parser<MaterialFactory> PARSER =
+        new com.google.protobuf.AbstractParser<MaterialFactory>() {
+      public MaterialFactory parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MaterialFactoryInfo(input, extensionRegistry);
+        return new MaterialFactory(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<MaterialFactoryInfo> getParserForType() {
+    public com.google.protobuf.Parser<MaterialFactory> getParserForType() {
       return PARSER;
     }
 
@@ -19784,53 +21442,53 @@ public final class Gs {
       return super.writeReplace();
     }
 
-    public static gs.Gs.MaterialFactoryInfo parseFrom(
+    public static gs.Gs.MaterialFactory parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(
+    public static gs.Gs.MaterialFactory parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(byte[] data)
+    public static gs.Gs.MaterialFactory parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(
+    public static gs.Gs.MaterialFactory parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(java.io.InputStream input)
+    public static gs.Gs.MaterialFactory parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(
+    public static gs.Gs.MaterialFactory parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static gs.Gs.MaterialFactoryInfo parseDelimitedFrom(java.io.InputStream input)
+    public static gs.Gs.MaterialFactory parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static gs.Gs.MaterialFactoryInfo parseDelimitedFrom(
+    public static gs.Gs.MaterialFactory parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(
+    public static gs.Gs.MaterialFactory parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.MaterialFactoryInfo parseFrom(
+    public static gs.Gs.MaterialFactory parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -19839,7 +21497,7 @@ public final class Gs {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(gs.Gs.MaterialFactoryInfo prototype) {
+    public static Builder newBuilder(gs.Gs.MaterialFactory prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -19851,7 +21509,7 @@ public final class Gs {
       return builder;
     }
     /**
-     * Protobuf type {@code gs.MaterialFactoryInfo}
+     * Protobuf type {@code gs.MaterialFactory}
      *
      * <pre>
      * detailMaterialFactory
@@ -19862,20 +21520,20 @@ public final class Gs {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements gs.Gs.MaterialFactoryInfoOrBuilder {
+       implements gs.Gs.MaterialFactoryOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gs.Gs.internal_static_gs_MaterialFactoryInfo_descriptor;
+        return gs.Gs.internal_static_gs_MaterialFactory_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_MaterialFactoryInfo_fieldAccessorTable
+        return gs.Gs.internal_static_gs_MaterialFactory_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gs.Gs.MaterialFactoryInfo.class, gs.Gs.MaterialFactoryInfo.Builder.class);
+                gs.Gs.MaterialFactory.class, gs.Gs.MaterialFactory.Builder.class);
       }
 
-      // Construct using gs.Gs.MaterialFactoryInfo.newBuilder()
+      // Construct using gs.Gs.MaterialFactory.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -19939,23 +21597,23 @@ public final class Gs {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gs.Gs.internal_static_gs_MaterialFactoryInfo_descriptor;
+        return gs.Gs.internal_static_gs_MaterialFactory_descriptor;
       }
 
-      public gs.Gs.MaterialFactoryInfo getDefaultInstanceForType() {
-        return gs.Gs.MaterialFactoryInfo.getDefaultInstance();
+      public gs.Gs.MaterialFactory getDefaultInstanceForType() {
+        return gs.Gs.MaterialFactory.getDefaultInstance();
       }
 
-      public gs.Gs.MaterialFactoryInfo build() {
-        gs.Gs.MaterialFactoryInfo result = buildPartial();
+      public gs.Gs.MaterialFactory build() {
+        gs.Gs.MaterialFactory result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gs.Gs.MaterialFactoryInfo buildPartial() {
-        gs.Gs.MaterialFactoryInfo result = new gs.Gs.MaterialFactoryInfo(this);
+      public gs.Gs.MaterialFactory buildPartial() {
+        gs.Gs.MaterialFactory result = new gs.Gs.MaterialFactory(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -20007,16 +21665,16 @@ public final class Gs {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gs.Gs.MaterialFactoryInfo) {
-          return mergeFrom((gs.Gs.MaterialFactoryInfo)other);
+        if (other instanceof gs.Gs.MaterialFactory) {
+          return mergeFrom((gs.Gs.MaterialFactory)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gs.Gs.MaterialFactoryInfo other) {
-        if (other == gs.Gs.MaterialFactoryInfo.getDefaultInstance()) return this;
+      public Builder mergeFrom(gs.Gs.MaterialFactory other) {
+        if (other == gs.Gs.MaterialFactory.getDefaultInstance()) return this;
         if (other.hasCommon()) {
           mergeCommon(other.getCommon());
         }
@@ -20143,11 +21801,11 @@ public final class Gs {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gs.Gs.MaterialFactoryInfo parsedMessage = null;
+        gs.Gs.MaterialFactory parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gs.Gs.MaterialFactoryInfo) e.getUnfinishedMessage();
+          parsedMessage = (gs.Gs.MaterialFactory) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -21364,18 +23022,18 @@ public final class Gs {
         return lineBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:gs.MaterialFactoryInfo)
+      // @@protoc_insertion_point(builder_scope:gs.MaterialFactory)
     }
 
     static {
-      defaultInstance = new MaterialFactoryInfo(true);
+      defaultInstance = new MaterialFactory(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:gs.MaterialFactoryInfo)
+    // @@protoc_insertion_point(class_scope:gs.MaterialFactory)
   }
 
-  public interface ProduceDepartmentInfoOrBuilder
+  public interface ProduceDepartmentOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
     // required .gs.BuildingDetailCommon common = 1;
@@ -21554,7 +23212,7 @@ public final class Gs {
         int index);
   }
   /**
-   * Protobuf type {@code gs.ProduceDepartmentInfo}
+   * Protobuf type {@code gs.ProduceDepartment}
    *
    * <pre>
    * detailProduceDepartment
@@ -21563,22 +23221,22 @@ public final class Gs {
    * s
    * </pre>
    */
-  public static final class ProduceDepartmentInfo extends
+  public static final class ProduceDepartment extends
       com.google.protobuf.GeneratedMessage
-      implements ProduceDepartmentInfoOrBuilder {
-    // Use ProduceDepartmentInfo.newBuilder() to construct.
-    private ProduceDepartmentInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements ProduceDepartmentOrBuilder {
+    // Use ProduceDepartment.newBuilder() to construct.
+    private ProduceDepartment(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private ProduceDepartmentInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private ProduceDepartment(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final ProduceDepartmentInfo defaultInstance;
-    public static ProduceDepartmentInfo getDefaultInstance() {
+    private static final ProduceDepartment defaultInstance;
+    public static ProduceDepartment getDefaultInstance() {
       return defaultInstance;
     }
 
-    public ProduceDepartmentInfo getDefaultInstanceForType() {
+    public ProduceDepartment getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -21588,7 +23246,7 @@ public final class Gs {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private ProduceDepartmentInfo(
+    private ProduceDepartment(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -21684,28 +23342,28 @@ public final class Gs {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gs.Gs.internal_static_gs_ProduceDepartmentInfo_descriptor;
+      return gs.Gs.internal_static_gs_ProduceDepartment_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gs.Gs.internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable
+      return gs.Gs.internal_static_gs_ProduceDepartment_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gs.Gs.ProduceDepartmentInfo.class, gs.Gs.ProduceDepartmentInfo.Builder.class);
+              gs.Gs.ProduceDepartment.class, gs.Gs.ProduceDepartment.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<ProduceDepartmentInfo> PARSER =
-        new com.google.protobuf.AbstractParser<ProduceDepartmentInfo>() {
-      public ProduceDepartmentInfo parsePartialFrom(
+    public static com.google.protobuf.Parser<ProduceDepartment> PARSER =
+        new com.google.protobuf.AbstractParser<ProduceDepartment>() {
+      public ProduceDepartment parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ProduceDepartmentInfo(input, extensionRegistry);
+        return new ProduceDepartment(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ProduceDepartmentInfo> getParserForType() {
+    public com.google.protobuf.Parser<ProduceDepartment> getParserForType() {
       return PARSER;
     }
 
@@ -22039,53 +23697,53 @@ public final class Gs {
       return super.writeReplace();
     }
 
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartment parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartment parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(byte[] data)
+    public static gs.Gs.ProduceDepartment parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartment parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(java.io.InputStream input)
+    public static gs.Gs.ProduceDepartment parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartment parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseDelimitedFrom(java.io.InputStream input)
+    public static gs.Gs.ProduceDepartment parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseDelimitedFrom(
+    public static gs.Gs.ProduceDepartment parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartment parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.ProduceDepartmentInfo parseFrom(
+    public static gs.Gs.ProduceDepartment parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -22094,7 +23752,7 @@ public final class Gs {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(gs.Gs.ProduceDepartmentInfo prototype) {
+    public static Builder newBuilder(gs.Gs.ProduceDepartment prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -22106,7 +23764,7 @@ public final class Gs {
       return builder;
     }
     /**
-     * Protobuf type {@code gs.ProduceDepartmentInfo}
+     * Protobuf type {@code gs.ProduceDepartment}
      *
      * <pre>
      * detailProduceDepartment
@@ -22117,20 +23775,20 @@ public final class Gs {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements gs.Gs.ProduceDepartmentInfoOrBuilder {
+       implements gs.Gs.ProduceDepartmentOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gs.Gs.internal_static_gs_ProduceDepartmentInfo_descriptor;
+        return gs.Gs.internal_static_gs_ProduceDepartment_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable
+        return gs.Gs.internal_static_gs_ProduceDepartment_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gs.Gs.ProduceDepartmentInfo.class, gs.Gs.ProduceDepartmentInfo.Builder.class);
+                gs.Gs.ProduceDepartment.class, gs.Gs.ProduceDepartment.Builder.class);
       }
 
-      // Construct using gs.Gs.ProduceDepartmentInfo.newBuilder()
+      // Construct using gs.Gs.ProduceDepartment.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -22194,23 +23852,23 @@ public final class Gs {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gs.Gs.internal_static_gs_ProduceDepartmentInfo_descriptor;
+        return gs.Gs.internal_static_gs_ProduceDepartment_descriptor;
       }
 
-      public gs.Gs.ProduceDepartmentInfo getDefaultInstanceForType() {
-        return gs.Gs.ProduceDepartmentInfo.getDefaultInstance();
+      public gs.Gs.ProduceDepartment getDefaultInstanceForType() {
+        return gs.Gs.ProduceDepartment.getDefaultInstance();
       }
 
-      public gs.Gs.ProduceDepartmentInfo build() {
-        gs.Gs.ProduceDepartmentInfo result = buildPartial();
+      public gs.Gs.ProduceDepartment build() {
+        gs.Gs.ProduceDepartment result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gs.Gs.ProduceDepartmentInfo buildPartial() {
-        gs.Gs.ProduceDepartmentInfo result = new gs.Gs.ProduceDepartmentInfo(this);
+      public gs.Gs.ProduceDepartment buildPartial() {
+        gs.Gs.ProduceDepartment result = new gs.Gs.ProduceDepartment(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -22262,16 +23920,16 @@ public final class Gs {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gs.Gs.ProduceDepartmentInfo) {
-          return mergeFrom((gs.Gs.ProduceDepartmentInfo)other);
+        if (other instanceof gs.Gs.ProduceDepartment) {
+          return mergeFrom((gs.Gs.ProduceDepartment)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gs.Gs.ProduceDepartmentInfo other) {
-        if (other == gs.Gs.ProduceDepartmentInfo.getDefaultInstance()) return this;
+      public Builder mergeFrom(gs.Gs.ProduceDepartment other) {
+        if (other == gs.Gs.ProduceDepartment.getDefaultInstance()) return this;
         if (other.hasCommon()) {
           mergeCommon(other.getCommon());
         }
@@ -22398,11 +24056,11 @@ public final class Gs {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gs.Gs.ProduceDepartmentInfo parsedMessage = null;
+        gs.Gs.ProduceDepartment parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gs.Gs.ProduceDepartmentInfo) e.getUnfinishedMessage();
+          parsedMessage = (gs.Gs.ProduceDepartment) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -23619,15 +25277,913 @@ public final class Gs {
         return lineBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:gs.ProduceDepartmentInfo)
+      // @@protoc_insertion_point(builder_scope:gs.ProduceDepartment)
     }
 
     static {
-      defaultInstance = new ProduceDepartmentInfo(true);
+      defaultInstance = new ProduceDepartment(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:gs.ProduceDepartmentInfo)
+    // @@protoc_insertion_point(class_scope:gs.ProduceDepartment)
+  }
+
+  public interface VirtualInfoOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 id = 1;
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    boolean hasId();
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    int getId();
+
+    // repeated .gs.IntNum store = 2;
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    java.util.List<gs.Gs.IntNum> 
+        getStoreList();
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    gs.Gs.IntNum getStore(int index);
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    int getStoreCount();
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+        getStoreOrBuilderList();
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    gs.Gs.IntNumOrBuilder getStoreOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code gs.VirtualInfo}
+   *
+   * <pre>
+   * detailVirtual
+   * </pre>
+   */
+  public static final class VirtualInfo extends
+      com.google.protobuf.GeneratedMessage
+      implements VirtualInfoOrBuilder {
+    // Use VirtualInfo.newBuilder() to construct.
+    private VirtualInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private VirtualInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final VirtualInfo defaultInstance;
+    public static VirtualInfo getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public VirtualInfo getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private VirtualInfo(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              id_ = input.readInt32();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                store_ = new java.util.ArrayList<gs.Gs.IntNum>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              store_.add(input.readMessage(gs.Gs.IntNum.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          store_ = java.util.Collections.unmodifiableList(store_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_VirtualInfo_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_VirtualInfo_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.VirtualInfo.class, gs.Gs.VirtualInfo.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<VirtualInfo> PARSER =
+        new com.google.protobuf.AbstractParser<VirtualInfo>() {
+      public VirtualInfo parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new VirtualInfo(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<VirtualInfo> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 id = 1;
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_;
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    public int getId() {
+      return id_;
+    }
+
+    // repeated .gs.IntNum store = 2;
+    public static final int STORE_FIELD_NUMBER = 2;
+    private java.util.List<gs.Gs.IntNum> store_;
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    public java.util.List<gs.Gs.IntNum> getStoreList() {
+      return store_;
+    }
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+        getStoreOrBuilderList() {
+      return store_;
+    }
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    public int getStoreCount() {
+      return store_.size();
+    }
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    public gs.Gs.IntNum getStore(int index) {
+      return store_.get(index);
+    }
+    /**
+     * <code>repeated .gs.IntNum store = 2;</code>
+     *
+     * <pre>
+     *仓库
+     * </pre>
+     */
+    public gs.Gs.IntNumOrBuilder getStoreOrBuilder(
+        int index) {
+      return store_.get(index);
+    }
+
+    private void initFields() {
+      id_ = 0;
+      store_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getStoreCount(); i++) {
+        if (!getStore(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, id_);
+      }
+      for (int i = 0; i < store_.size(); i++) {
+        output.writeMessage(2, store_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, id_);
+      }
+      for (int i = 0; i < store_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, store_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.VirtualInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.VirtualInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.VirtualInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.VirtualInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.VirtualInfo prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.VirtualInfo}
+     *
+     * <pre>
+     * detailVirtual
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.VirtualInfoOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_VirtualInfo_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_VirtualInfo_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.VirtualInfo.class, gs.Gs.VirtualInfo.Builder.class);
+      }
+
+      // Construct using gs.Gs.VirtualInfo.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getStoreFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        id_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (storeBuilder_ == null) {
+          store_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          storeBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_VirtualInfo_descriptor;
+      }
+
+      public gs.Gs.VirtualInfo getDefaultInstanceForType() {
+        return gs.Gs.VirtualInfo.getDefaultInstance();
+      }
+
+      public gs.Gs.VirtualInfo build() {
+        gs.Gs.VirtualInfo result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.VirtualInfo buildPartial() {
+        gs.Gs.VirtualInfo result = new gs.Gs.VirtualInfo(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.id_ = id_;
+        if (storeBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+            store_ = java.util.Collections.unmodifiableList(store_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.store_ = store_;
+        } else {
+          result.store_ = storeBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.VirtualInfo) {
+          return mergeFrom((gs.Gs.VirtualInfo)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.VirtualInfo other) {
+        if (other == gs.Gs.VirtualInfo.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (storeBuilder_ == null) {
+          if (!other.store_.isEmpty()) {
+            if (store_.isEmpty()) {
+              store_ = other.store_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureStoreIsMutable();
+              store_.addAll(other.store_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.store_.isEmpty()) {
+            if (storeBuilder_.isEmpty()) {
+              storeBuilder_.dispose();
+              storeBuilder_ = null;
+              store_ = other.store_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              storeBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getStoreFieldBuilder() : null;
+            } else {
+              storeBuilder_.addAllMessages(other.store_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasId()) {
+          
+          return false;
+        }
+        for (int i = 0; i < getStoreCount(); i++) {
+          if (!getStore(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.VirtualInfo parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.VirtualInfo) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 id = 1;
+      private int id_ ;
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public Builder setId(int value) {
+        bitField0_ |= 0x00000001;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // repeated .gs.IntNum store = 2;
+      private java.util.List<gs.Gs.IntNum> store_ =
+        java.util.Collections.emptyList();
+      private void ensureStoreIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          store_ = new java.util.ArrayList<gs.Gs.IntNum>(store_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder> storeBuilder_;
+
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public java.util.List<gs.Gs.IntNum> getStoreList() {
+        if (storeBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(store_);
+        } else {
+          return storeBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public int getStoreCount() {
+        if (storeBuilder_ == null) {
+          return store_.size();
+        } else {
+          return storeBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public gs.Gs.IntNum getStore(int index) {
+        if (storeBuilder_ == null) {
+          return store_.get(index);
+        } else {
+          return storeBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder setStore(
+          int index, gs.Gs.IntNum value) {
+        if (storeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureStoreIsMutable();
+          store_.set(index, value);
+          onChanged();
+        } else {
+          storeBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder setStore(
+          int index, gs.Gs.IntNum.Builder builderForValue) {
+        if (storeBuilder_ == null) {
+          ensureStoreIsMutable();
+          store_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          storeBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder addStore(gs.Gs.IntNum value) {
+        if (storeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureStoreIsMutable();
+          store_.add(value);
+          onChanged();
+        } else {
+          storeBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder addStore(
+          int index, gs.Gs.IntNum value) {
+        if (storeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureStoreIsMutable();
+          store_.add(index, value);
+          onChanged();
+        } else {
+          storeBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder addStore(
+          gs.Gs.IntNum.Builder builderForValue) {
+        if (storeBuilder_ == null) {
+          ensureStoreIsMutable();
+          store_.add(builderForValue.build());
+          onChanged();
+        } else {
+          storeBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder addStore(
+          int index, gs.Gs.IntNum.Builder builderForValue) {
+        if (storeBuilder_ == null) {
+          ensureStoreIsMutable();
+          store_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          storeBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder addAllStore(
+          java.lang.Iterable<? extends gs.Gs.IntNum> values) {
+        if (storeBuilder_ == null) {
+          ensureStoreIsMutable();
+          super.addAll(values, store_);
+          onChanged();
+        } else {
+          storeBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder clearStore() {
+        if (storeBuilder_ == null) {
+          store_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          storeBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public Builder removeStore(int index) {
+        if (storeBuilder_ == null) {
+          ensureStoreIsMutable();
+          store_.remove(index);
+          onChanged();
+        } else {
+          storeBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public gs.Gs.IntNum.Builder getStoreBuilder(
+          int index) {
+        return getStoreFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public gs.Gs.IntNumOrBuilder getStoreOrBuilder(
+          int index) {
+        if (storeBuilder_ == null) {
+          return store_.get(index);  } else {
+          return storeBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+           getStoreOrBuilderList() {
+        if (storeBuilder_ != null) {
+          return storeBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(store_);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public gs.Gs.IntNum.Builder addStoreBuilder() {
+        return getStoreFieldBuilder().addBuilder(
+            gs.Gs.IntNum.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public gs.Gs.IntNum.Builder addStoreBuilder(
+          int index) {
+        return getStoreFieldBuilder().addBuilder(
+            index, gs.Gs.IntNum.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.IntNum store = 2;</code>
+       *
+       * <pre>
+       *仓库
+       * </pre>
+       */
+      public java.util.List<gs.Gs.IntNum.Builder> 
+           getStoreBuilderList() {
+        return getStoreFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder> 
+          getStoreFieldBuilder() {
+        if (storeBuilder_ == null) {
+          storeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder>(
+                  store_,
+                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  getParentForChildren(),
+                  isClean());
+          store_ = null;
+        }
+        return storeBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.VirtualInfo)
+    }
+
+    static {
+      defaultInstance = new VirtualInfo(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.VirtualInfo)
   }
 
   public interface AddLineOrBuilder
@@ -25783,6 +28339,4844 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.LineInfo)
   }
 
+  public interface ExchangeItemSummaryOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 itemId = 1;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    boolean hasItemId();
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    int getItemId();
+
+    // optional int32 lowPrice = 2;
+    /**
+     * <code>optional int32 lowPrice = 2;</code>
+     */
+    boolean hasLowPrice();
+    /**
+     * <code>optional int32 lowPrice = 2;</code>
+     */
+    int getLowPrice();
+
+    // optional int32 highPrice = 3;
+    /**
+     * <code>optional int32 highPrice = 3;</code>
+     */
+    boolean hasHighPrice();
+    /**
+     * <code>optional int32 highPrice = 3;</code>
+     */
+    int getHighPrice();
+
+    // optional int32 nowPrice = 4;
+    /**
+     * <code>optional int32 nowPrice = 4;</code>
+     */
+    boolean hasNowPrice();
+    /**
+     * <code>optional int32 nowPrice = 4;</code>
+     */
+    int getNowPrice();
+
+    // optional int64 sumDealedPrice = 5;
+    /**
+     * <code>optional int64 sumDealedPrice = 5;</code>
+     */
+    boolean hasSumDealedPrice();
+    /**
+     * <code>optional int64 sumDealedPrice = 5;</code>
+     */
+    long getSumDealedPrice();
+  }
+  /**
+   * Protobuf type {@code gs.ExchangeItemSummary}
+   */
+  public static final class ExchangeItemSummary extends
+      com.google.protobuf.GeneratedMessage
+      implements ExchangeItemSummaryOrBuilder {
+    // Use ExchangeItemSummary.newBuilder() to construct.
+    private ExchangeItemSummary(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ExchangeItemSummary(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ExchangeItemSummary defaultInstance;
+    public static ExchangeItemSummary getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ExchangeItemSummary getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ExchangeItemSummary(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              itemId_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              lowPrice_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              highPrice_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              nowPrice_ = input.readInt32();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              sumDealedPrice_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_ExchangeItemSummary_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_ExchangeItemSummary_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.ExchangeItemSummary.class, gs.Gs.ExchangeItemSummary.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ExchangeItemSummary> PARSER =
+        new com.google.protobuf.AbstractParser<ExchangeItemSummary>() {
+      public ExchangeItemSummary parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ExchangeItemSummary(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExchangeItemSummary> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 itemId = 1;
+    public static final int ITEMID_FIELD_NUMBER = 1;
+    private int itemId_;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public boolean hasItemId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public int getItemId() {
+      return itemId_;
+    }
+
+    // optional int32 lowPrice = 2;
+    public static final int LOWPRICE_FIELD_NUMBER = 2;
+    private int lowPrice_;
+    /**
+     * <code>optional int32 lowPrice = 2;</code>
+     */
+    public boolean hasLowPrice() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int32 lowPrice = 2;</code>
+     */
+    public int getLowPrice() {
+      return lowPrice_;
+    }
+
+    // optional int32 highPrice = 3;
+    public static final int HIGHPRICE_FIELD_NUMBER = 3;
+    private int highPrice_;
+    /**
+     * <code>optional int32 highPrice = 3;</code>
+     */
+    public boolean hasHighPrice() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int32 highPrice = 3;</code>
+     */
+    public int getHighPrice() {
+      return highPrice_;
+    }
+
+    // optional int32 nowPrice = 4;
+    public static final int NOWPRICE_FIELD_NUMBER = 4;
+    private int nowPrice_;
+    /**
+     * <code>optional int32 nowPrice = 4;</code>
+     */
+    public boolean hasNowPrice() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int32 nowPrice = 4;</code>
+     */
+    public int getNowPrice() {
+      return nowPrice_;
+    }
+
+    // optional int64 sumDealedPrice = 5;
+    public static final int SUMDEALEDPRICE_FIELD_NUMBER = 5;
+    private long sumDealedPrice_;
+    /**
+     * <code>optional int64 sumDealedPrice = 5;</code>
+     */
+    public boolean hasSumDealedPrice() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int64 sumDealedPrice = 5;</code>
+     */
+    public long getSumDealedPrice() {
+      return sumDealedPrice_;
+    }
+
+    private void initFields() {
+      itemId_ = 0;
+      lowPrice_ = 0;
+      highPrice_ = 0;
+      nowPrice_ = 0;
+      sumDealedPrice_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasItemId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, lowPrice_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, highPrice_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(4, nowPrice_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt64(5, sumDealedPrice_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, lowPrice_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, highPrice_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, nowPrice_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, sumDealedPrice_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.ExchangeItemSummary parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemSummary parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.ExchangeItemSummary parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeItemSummary parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.ExchangeItemSummary prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.ExchangeItemSummary}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.ExchangeItemSummaryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_ExchangeItemSummary_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_ExchangeItemSummary_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.ExchangeItemSummary.class, gs.Gs.ExchangeItemSummary.Builder.class);
+      }
+
+      // Construct using gs.Gs.ExchangeItemSummary.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        itemId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        lowPrice_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        highPrice_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        nowPrice_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        sumDealedPrice_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_ExchangeItemSummary_descriptor;
+      }
+
+      public gs.Gs.ExchangeItemSummary getDefaultInstanceForType() {
+        return gs.Gs.ExchangeItemSummary.getDefaultInstance();
+      }
+
+      public gs.Gs.ExchangeItemSummary build() {
+        gs.Gs.ExchangeItemSummary result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.ExchangeItemSummary buildPartial() {
+        gs.Gs.ExchangeItemSummary result = new gs.Gs.ExchangeItemSummary(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.itemId_ = itemId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.lowPrice_ = lowPrice_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.highPrice_ = highPrice_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.nowPrice_ = nowPrice_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.sumDealedPrice_ = sumDealedPrice_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.ExchangeItemSummary) {
+          return mergeFrom((gs.Gs.ExchangeItemSummary)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.ExchangeItemSummary other) {
+        if (other == gs.Gs.ExchangeItemSummary.getDefaultInstance()) return this;
+        if (other.hasItemId()) {
+          setItemId(other.getItemId());
+        }
+        if (other.hasLowPrice()) {
+          setLowPrice(other.getLowPrice());
+        }
+        if (other.hasHighPrice()) {
+          setHighPrice(other.getHighPrice());
+        }
+        if (other.hasNowPrice()) {
+          setNowPrice(other.getNowPrice());
+        }
+        if (other.hasSumDealedPrice()) {
+          setSumDealedPrice(other.getSumDealedPrice());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasItemId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.ExchangeItemSummary parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.ExchangeItemSummary) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 itemId = 1;
+      private int itemId_ ;
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public boolean hasItemId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public int getItemId() {
+        return itemId_;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder setItemId(int value) {
+        bitField0_ |= 0x00000001;
+        itemId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder clearItemId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int32 lowPrice = 2;
+      private int lowPrice_ ;
+      /**
+       * <code>optional int32 lowPrice = 2;</code>
+       */
+      public boolean hasLowPrice() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int32 lowPrice = 2;</code>
+       */
+      public int getLowPrice() {
+        return lowPrice_;
+      }
+      /**
+       * <code>optional int32 lowPrice = 2;</code>
+       */
+      public Builder setLowPrice(int value) {
+        bitField0_ |= 0x00000002;
+        lowPrice_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 lowPrice = 2;</code>
+       */
+      public Builder clearLowPrice() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        lowPrice_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int32 highPrice = 3;
+      private int highPrice_ ;
+      /**
+       * <code>optional int32 highPrice = 3;</code>
+       */
+      public boolean hasHighPrice() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int32 highPrice = 3;</code>
+       */
+      public int getHighPrice() {
+        return highPrice_;
+      }
+      /**
+       * <code>optional int32 highPrice = 3;</code>
+       */
+      public Builder setHighPrice(int value) {
+        bitField0_ |= 0x00000004;
+        highPrice_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 highPrice = 3;</code>
+       */
+      public Builder clearHighPrice() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        highPrice_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int32 nowPrice = 4;
+      private int nowPrice_ ;
+      /**
+       * <code>optional int32 nowPrice = 4;</code>
+       */
+      public boolean hasNowPrice() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int32 nowPrice = 4;</code>
+       */
+      public int getNowPrice() {
+        return nowPrice_;
+      }
+      /**
+       * <code>optional int32 nowPrice = 4;</code>
+       */
+      public Builder setNowPrice(int value) {
+        bitField0_ |= 0x00000008;
+        nowPrice_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 nowPrice = 4;</code>
+       */
+      public Builder clearNowPrice() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        nowPrice_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int64 sumDealedPrice = 5;
+      private long sumDealedPrice_ ;
+      /**
+       * <code>optional int64 sumDealedPrice = 5;</code>
+       */
+      public boolean hasSumDealedPrice() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int64 sumDealedPrice = 5;</code>
+       */
+      public long getSumDealedPrice() {
+        return sumDealedPrice_;
+      }
+      /**
+       * <code>optional int64 sumDealedPrice = 5;</code>
+       */
+      public Builder setSumDealedPrice(long value) {
+        bitField0_ |= 0x00000010;
+        sumDealedPrice_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 sumDealedPrice = 5;</code>
+       */
+      public Builder clearSumDealedPrice() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        sumDealedPrice_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.ExchangeItemSummary)
+    }
+
+    static {
+      defaultInstance = new ExchangeItemSummary(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.ExchangeItemSummary)
+  }
+
+  public interface ExchangeItemListOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated .gs.ExchangeItemSummary summary = 1;
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    java.util.List<gs.Gs.ExchangeItemSummary> 
+        getSummaryList();
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    gs.Gs.ExchangeItemSummary getSummary(int index);
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    int getSummaryCount();
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.ExchangeItemSummaryOrBuilder> 
+        getSummaryOrBuilderList();
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    gs.Gs.ExchangeItemSummaryOrBuilder getSummaryOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code gs.ExchangeItemList}
+   *
+   * <pre>
+   * exchangeItemList
+   * s
+   * </pre>
+   */
+  public static final class ExchangeItemList extends
+      com.google.protobuf.GeneratedMessage
+      implements ExchangeItemListOrBuilder {
+    // Use ExchangeItemList.newBuilder() to construct.
+    private ExchangeItemList(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ExchangeItemList(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ExchangeItemList defaultInstance;
+    public static ExchangeItemList getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ExchangeItemList getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ExchangeItemList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                summary_ = new java.util.ArrayList<gs.Gs.ExchangeItemSummary>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              summary_.add(input.readMessage(gs.Gs.ExchangeItemSummary.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          summary_ = java.util.Collections.unmodifiableList(summary_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_ExchangeItemList_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_ExchangeItemList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.ExchangeItemList.class, gs.Gs.ExchangeItemList.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ExchangeItemList> PARSER =
+        new com.google.protobuf.AbstractParser<ExchangeItemList>() {
+      public ExchangeItemList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ExchangeItemList(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExchangeItemList> getParserForType() {
+      return PARSER;
+    }
+
+    // repeated .gs.ExchangeItemSummary summary = 1;
+    public static final int SUMMARY_FIELD_NUMBER = 1;
+    private java.util.List<gs.Gs.ExchangeItemSummary> summary_;
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    public java.util.List<gs.Gs.ExchangeItemSummary> getSummaryList() {
+      return summary_;
+    }
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.ExchangeItemSummaryOrBuilder> 
+        getSummaryOrBuilderList() {
+      return summary_;
+    }
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    public int getSummaryCount() {
+      return summary_.size();
+    }
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    public gs.Gs.ExchangeItemSummary getSummary(int index) {
+      return summary_.get(index);
+    }
+    /**
+     * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+     *
+     * <pre>
+     * contain all rows
+     * </pre>
+     */
+    public gs.Gs.ExchangeItemSummaryOrBuilder getSummaryOrBuilder(
+        int index) {
+      return summary_.get(index);
+    }
+
+    private void initFields() {
+      summary_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      for (int i = 0; i < getSummaryCount(); i++) {
+        if (!getSummary(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < summary_.size(); i++) {
+        output.writeMessage(1, summary_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < summary_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, summary_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.ExchangeItemList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.ExchangeItemList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeItemList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.ExchangeItemList prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.ExchangeItemList}
+     *
+     * <pre>
+     * exchangeItemList
+     * s
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.ExchangeItemListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_ExchangeItemList_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_ExchangeItemList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.ExchangeItemList.class, gs.Gs.ExchangeItemList.Builder.class);
+      }
+
+      // Construct using gs.Gs.ExchangeItemList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getSummaryFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (summaryBuilder_ == null) {
+          summary_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          summaryBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_ExchangeItemList_descriptor;
+      }
+
+      public gs.Gs.ExchangeItemList getDefaultInstanceForType() {
+        return gs.Gs.ExchangeItemList.getDefaultInstance();
+      }
+
+      public gs.Gs.ExchangeItemList build() {
+        gs.Gs.ExchangeItemList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.ExchangeItemList buildPartial() {
+        gs.Gs.ExchangeItemList result = new gs.Gs.ExchangeItemList(this);
+        int from_bitField0_ = bitField0_;
+        if (summaryBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            summary_ = java.util.Collections.unmodifiableList(summary_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.summary_ = summary_;
+        } else {
+          result.summary_ = summaryBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.ExchangeItemList) {
+          return mergeFrom((gs.Gs.ExchangeItemList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.ExchangeItemList other) {
+        if (other == gs.Gs.ExchangeItemList.getDefaultInstance()) return this;
+        if (summaryBuilder_ == null) {
+          if (!other.summary_.isEmpty()) {
+            if (summary_.isEmpty()) {
+              summary_ = other.summary_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureSummaryIsMutable();
+              summary_.addAll(other.summary_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.summary_.isEmpty()) {
+            if (summaryBuilder_.isEmpty()) {
+              summaryBuilder_.dispose();
+              summaryBuilder_ = null;
+              summary_ = other.summary_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              summaryBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getSummaryFieldBuilder() : null;
+            } else {
+              summaryBuilder_.addAllMessages(other.summary_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        for (int i = 0; i < getSummaryCount(); i++) {
+          if (!getSummary(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.ExchangeItemList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.ExchangeItemList) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // repeated .gs.ExchangeItemSummary summary = 1;
+      private java.util.List<gs.Gs.ExchangeItemSummary> summary_ =
+        java.util.Collections.emptyList();
+      private void ensureSummaryIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          summary_ = new java.util.ArrayList<gs.Gs.ExchangeItemSummary>(summary_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.ExchangeItemSummary, gs.Gs.ExchangeItemSummary.Builder, gs.Gs.ExchangeItemSummaryOrBuilder> summaryBuilder_;
+
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public java.util.List<gs.Gs.ExchangeItemSummary> getSummaryList() {
+        if (summaryBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(summary_);
+        } else {
+          return summaryBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public int getSummaryCount() {
+        if (summaryBuilder_ == null) {
+          return summary_.size();
+        } else {
+          return summaryBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public gs.Gs.ExchangeItemSummary getSummary(int index) {
+        if (summaryBuilder_ == null) {
+          return summary_.get(index);
+        } else {
+          return summaryBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder setSummary(
+          int index, gs.Gs.ExchangeItemSummary value) {
+        if (summaryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSummaryIsMutable();
+          summary_.set(index, value);
+          onChanged();
+        } else {
+          summaryBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder setSummary(
+          int index, gs.Gs.ExchangeItemSummary.Builder builderForValue) {
+        if (summaryBuilder_ == null) {
+          ensureSummaryIsMutable();
+          summary_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          summaryBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder addSummary(gs.Gs.ExchangeItemSummary value) {
+        if (summaryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSummaryIsMutable();
+          summary_.add(value);
+          onChanged();
+        } else {
+          summaryBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder addSummary(
+          int index, gs.Gs.ExchangeItemSummary value) {
+        if (summaryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSummaryIsMutable();
+          summary_.add(index, value);
+          onChanged();
+        } else {
+          summaryBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder addSummary(
+          gs.Gs.ExchangeItemSummary.Builder builderForValue) {
+        if (summaryBuilder_ == null) {
+          ensureSummaryIsMutable();
+          summary_.add(builderForValue.build());
+          onChanged();
+        } else {
+          summaryBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder addSummary(
+          int index, gs.Gs.ExchangeItemSummary.Builder builderForValue) {
+        if (summaryBuilder_ == null) {
+          ensureSummaryIsMutable();
+          summary_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          summaryBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder addAllSummary(
+          java.lang.Iterable<? extends gs.Gs.ExchangeItemSummary> values) {
+        if (summaryBuilder_ == null) {
+          ensureSummaryIsMutable();
+          super.addAll(values, summary_);
+          onChanged();
+        } else {
+          summaryBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder clearSummary() {
+        if (summaryBuilder_ == null) {
+          summary_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          summaryBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public Builder removeSummary(int index) {
+        if (summaryBuilder_ == null) {
+          ensureSummaryIsMutable();
+          summary_.remove(index);
+          onChanged();
+        } else {
+          summaryBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public gs.Gs.ExchangeItemSummary.Builder getSummaryBuilder(
+          int index) {
+        return getSummaryFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public gs.Gs.ExchangeItemSummaryOrBuilder getSummaryOrBuilder(
+          int index) {
+        if (summaryBuilder_ == null) {
+          return summary_.get(index);  } else {
+          return summaryBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.ExchangeItemSummaryOrBuilder> 
+           getSummaryOrBuilderList() {
+        if (summaryBuilder_ != null) {
+          return summaryBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(summary_);
+        }
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public gs.Gs.ExchangeItemSummary.Builder addSummaryBuilder() {
+        return getSummaryFieldBuilder().addBuilder(
+            gs.Gs.ExchangeItemSummary.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public gs.Gs.ExchangeItemSummary.Builder addSummaryBuilder(
+          int index) {
+        return getSummaryFieldBuilder().addBuilder(
+            index, gs.Gs.ExchangeItemSummary.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.ExchangeItemSummary summary = 1;</code>
+       *
+       * <pre>
+       * contain all rows
+       * </pre>
+       */
+      public java.util.List<gs.Gs.ExchangeItemSummary.Builder> 
+           getSummaryBuilderList() {
+        return getSummaryFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.ExchangeItemSummary, gs.Gs.ExchangeItemSummary.Builder, gs.Gs.ExchangeItemSummaryOrBuilder> 
+          getSummaryFieldBuilder() {
+        if (summaryBuilder_ == null) {
+          summaryBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.ExchangeItemSummary, gs.Gs.ExchangeItemSummary.Builder, gs.Gs.ExchangeItemSummaryOrBuilder>(
+                  summary_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          summary_ = null;
+        }
+        return summaryBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.ExchangeItemList)
+    }
+
+    static {
+      defaultInstance = new ExchangeItemList(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.ExchangeItemList)
+  }
+
+  public interface ExchangeBuyOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 itemId = 1;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    boolean hasItemId();
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    int getItemId();
+
+    // required int32 num = 2;
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    boolean hasNum();
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    int getNum();
+
+    // required int32 price = 3;
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    boolean hasPrice();
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    int getPrice();
+
+    // required bytes buildingId = 4;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building you gonna put the items
+     * </pre>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building you gonna put the items
+     * </pre>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+  }
+  /**
+   * Protobuf type {@code gs.ExchangeBuy}
+   *
+   * <pre>
+   * exchangeBuy
+   * c
+   * </pre>
+   */
+  public static final class ExchangeBuy extends
+      com.google.protobuf.GeneratedMessage
+      implements ExchangeBuyOrBuilder {
+    // Use ExchangeBuy.newBuilder() to construct.
+    private ExchangeBuy(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ExchangeBuy(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ExchangeBuy defaultInstance;
+    public static ExchangeBuy getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ExchangeBuy getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ExchangeBuy(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              itemId_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              num_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              price_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              buildingId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_ExchangeBuy_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_ExchangeBuy_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.ExchangeBuy.class, gs.Gs.ExchangeBuy.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ExchangeBuy> PARSER =
+        new com.google.protobuf.AbstractParser<ExchangeBuy>() {
+      public ExchangeBuy parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ExchangeBuy(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExchangeBuy> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 itemId = 1;
+    public static final int ITEMID_FIELD_NUMBER = 1;
+    private int itemId_;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public boolean hasItemId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public int getItemId() {
+      return itemId_;
+    }
+
+    // required int32 num = 2;
+    public static final int NUM_FIELD_NUMBER = 2;
+    private int num_;
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    public boolean hasNum() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    public int getNum() {
+      return num_;
+    }
+
+    // required int32 price = 3;
+    public static final int PRICE_FIELD_NUMBER = 3;
+    private int price_;
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    public boolean hasPrice() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    public int getPrice() {
+      return price_;
+    }
+
+    // required bytes buildingId = 4;
+    public static final int BUILDINGID_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building you gonna put the items
+     * </pre>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building you gonna put the items
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    private void initFields() {
+      itemId_ = 0;
+      num_ = 0;
+      price_ = 0;
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasItemId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasNum()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPrice()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, num_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, price_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, buildingId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, num_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, price_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, buildingId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.ExchangeBuy parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeBuy parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.ExchangeBuy parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeBuy parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.ExchangeBuy prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.ExchangeBuy}
+     *
+     * <pre>
+     * exchangeBuy
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.ExchangeBuyOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_ExchangeBuy_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_ExchangeBuy_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.ExchangeBuy.class, gs.Gs.ExchangeBuy.Builder.class);
+      }
+
+      // Construct using gs.Gs.ExchangeBuy.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        itemId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        num_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        price_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_ExchangeBuy_descriptor;
+      }
+
+      public gs.Gs.ExchangeBuy getDefaultInstanceForType() {
+        return gs.Gs.ExchangeBuy.getDefaultInstance();
+      }
+
+      public gs.Gs.ExchangeBuy build() {
+        gs.Gs.ExchangeBuy result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.ExchangeBuy buildPartial() {
+        gs.Gs.ExchangeBuy result = new gs.Gs.ExchangeBuy(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.itemId_ = itemId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.num_ = num_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.price_ = price_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.buildingId_ = buildingId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.ExchangeBuy) {
+          return mergeFrom((gs.Gs.ExchangeBuy)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.ExchangeBuy other) {
+        if (other == gs.Gs.ExchangeBuy.getDefaultInstance()) return this;
+        if (other.hasItemId()) {
+          setItemId(other.getItemId());
+        }
+        if (other.hasNum()) {
+          setNum(other.getNum());
+        }
+        if (other.hasPrice()) {
+          setPrice(other.getPrice());
+        }
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasItemId()) {
+          
+          return false;
+        }
+        if (!hasNum()) {
+          
+          return false;
+        }
+        if (!hasPrice()) {
+          
+          return false;
+        }
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.ExchangeBuy parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.ExchangeBuy) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 itemId = 1;
+      private int itemId_ ;
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public boolean hasItemId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public int getItemId() {
+        return itemId_;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder setItemId(int value) {
+        bitField0_ |= 0x00000001;
+        itemId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder clearItemId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 num = 2;
+      private int num_ ;
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public boolean hasNum() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public int getNum() {
+        return num_;
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public Builder setNum(int value) {
+        bitField0_ |= 0x00000002;
+        num_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public Builder clearNum() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        num_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 price = 3;
+      private int price_ ;
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public boolean hasPrice() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public int getPrice() {
+        return price_;
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public Builder setPrice(int value) {
+        bitField0_ |= 0x00000004;
+        price_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public Builder clearPrice() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        price_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required bytes buildingId = 4;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building you gonna put the items
+       * </pre>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building you gonna put the items
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building you gonna put the items
+       * </pre>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building you gonna put the items
+       * </pre>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.ExchangeBuy)
+    }
+
+    static {
+      defaultInstance = new ExchangeBuy(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.ExchangeBuy)
+  }
+
+  public interface ExchangeSellOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 itemId = 1;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    boolean hasItemId();
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    int getItemId();
+
+    // required int32 num = 2;
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    boolean hasNum();
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    int getNum();
+
+    // required int32 price = 3;
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    boolean hasPrice();
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    int getPrice();
+
+    // required bytes buildingId = 4;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building the selling items holds
+     * </pre>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building the selling items holds
+     * </pre>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+  }
+  /**
+   * Protobuf type {@code gs.ExchangeSell}
+   *
+   * <pre>
+   * exchangeSell
+   * c
+   * </pre>
+   */
+  public static final class ExchangeSell extends
+      com.google.protobuf.GeneratedMessage
+      implements ExchangeSellOrBuilder {
+    // Use ExchangeSell.newBuilder() to construct.
+    private ExchangeSell(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ExchangeSell(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ExchangeSell defaultInstance;
+    public static ExchangeSell getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ExchangeSell getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ExchangeSell(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              itemId_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              num_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              price_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              buildingId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_ExchangeSell_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_ExchangeSell_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.ExchangeSell.class, gs.Gs.ExchangeSell.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ExchangeSell> PARSER =
+        new com.google.protobuf.AbstractParser<ExchangeSell>() {
+      public ExchangeSell parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ExchangeSell(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExchangeSell> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 itemId = 1;
+    public static final int ITEMID_FIELD_NUMBER = 1;
+    private int itemId_;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public boolean hasItemId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public int getItemId() {
+      return itemId_;
+    }
+
+    // required int32 num = 2;
+    public static final int NUM_FIELD_NUMBER = 2;
+    private int num_;
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    public boolean hasNum() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    public int getNum() {
+      return num_;
+    }
+
+    // required int32 price = 3;
+    public static final int PRICE_FIELD_NUMBER = 3;
+    private int price_;
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    public boolean hasPrice() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    public int getPrice() {
+      return price_;
+    }
+
+    // required bytes buildingId = 4;
+    public static final int BUILDINGID_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building the selling items holds
+     * </pre>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     *
+     * <pre>
+     * which building the selling items holds
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    private void initFields() {
+      itemId_ = 0;
+      num_ = 0;
+      price_ = 0;
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasItemId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasNum()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPrice()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, num_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, price_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, buildingId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, num_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, price_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, buildingId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.ExchangeSell parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeSell parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.ExchangeSell parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeSell parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.ExchangeSell prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.ExchangeSell}
+     *
+     * <pre>
+     * exchangeSell
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.ExchangeSellOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_ExchangeSell_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_ExchangeSell_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.ExchangeSell.class, gs.Gs.ExchangeSell.Builder.class);
+      }
+
+      // Construct using gs.Gs.ExchangeSell.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        itemId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        num_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        price_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_ExchangeSell_descriptor;
+      }
+
+      public gs.Gs.ExchangeSell getDefaultInstanceForType() {
+        return gs.Gs.ExchangeSell.getDefaultInstance();
+      }
+
+      public gs.Gs.ExchangeSell build() {
+        gs.Gs.ExchangeSell result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.ExchangeSell buildPartial() {
+        gs.Gs.ExchangeSell result = new gs.Gs.ExchangeSell(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.itemId_ = itemId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.num_ = num_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.price_ = price_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.buildingId_ = buildingId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.ExchangeSell) {
+          return mergeFrom((gs.Gs.ExchangeSell)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.ExchangeSell other) {
+        if (other == gs.Gs.ExchangeSell.getDefaultInstance()) return this;
+        if (other.hasItemId()) {
+          setItemId(other.getItemId());
+        }
+        if (other.hasNum()) {
+          setNum(other.getNum());
+        }
+        if (other.hasPrice()) {
+          setPrice(other.getPrice());
+        }
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasItemId()) {
+          
+          return false;
+        }
+        if (!hasNum()) {
+          
+          return false;
+        }
+        if (!hasPrice()) {
+          
+          return false;
+        }
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.ExchangeSell parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.ExchangeSell) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 itemId = 1;
+      private int itemId_ ;
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public boolean hasItemId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public int getItemId() {
+        return itemId_;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder setItemId(int value) {
+        bitField0_ |= 0x00000001;
+        itemId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder clearItemId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 num = 2;
+      private int num_ ;
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public boolean hasNum() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public int getNum() {
+        return num_;
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public Builder setNum(int value) {
+        bitField0_ |= 0x00000002;
+        num_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public Builder clearNum() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        num_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 price = 3;
+      private int price_ ;
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public boolean hasPrice() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public int getPrice() {
+        return price_;
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public Builder setPrice(int value) {
+        bitField0_ |= 0x00000004;
+        price_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public Builder clearPrice() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        price_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required bytes buildingId = 4;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building the selling items holds
+       * </pre>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building the selling items holds
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building the selling items holds
+       * </pre>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       *
+       * <pre>
+       * which building the selling items holds
+       * </pre>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.ExchangeSell)
+    }
+
+    static {
+      defaultInstance = new ExchangeSell(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.ExchangeSell)
+  }
+
+  public interface ExchangeItemDetailOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated .gs.IntNum buy = 1;
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    java.util.List<gs.Gs.IntNum> 
+        getBuyList();
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    gs.Gs.IntNum getBuy(int index);
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    int getBuyCount();
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+        getBuyOrBuilderList();
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    gs.Gs.IntNumOrBuilder getBuyOrBuilder(
+        int index);
+
+    // repeated .gs.IntNum sell = 2;
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    java.util.List<gs.Gs.IntNum> 
+        getSellList();
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    gs.Gs.IntNum getSell(int index);
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    int getSellCount();
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+        getSellOrBuilderList();
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    gs.Gs.IntNumOrBuilder getSellOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code gs.ExchangeItemDetail}
+   *
+   * <pre>
+   * exchangeWatchItemDetail
+   * c
+   * Num   //item id
+   * s
+   * </pre>
+   */
+  public static final class ExchangeItemDetail extends
+      com.google.protobuf.GeneratedMessage
+      implements ExchangeItemDetailOrBuilder {
+    // Use ExchangeItemDetail.newBuilder() to construct.
+    private ExchangeItemDetail(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ExchangeItemDetail(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ExchangeItemDetail defaultInstance;
+    public static ExchangeItemDetail getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ExchangeItemDetail getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ExchangeItemDetail(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                buy_ = new java.util.ArrayList<gs.Gs.IntNum>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              buy_.add(input.readMessage(gs.Gs.IntNum.PARSER, extensionRegistry));
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                sell_ = new java.util.ArrayList<gs.Gs.IntNum>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              sell_.add(input.readMessage(gs.Gs.IntNum.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          buy_ = java.util.Collections.unmodifiableList(buy_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          sell_ = java.util.Collections.unmodifiableList(sell_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_ExchangeItemDetail_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_ExchangeItemDetail_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.ExchangeItemDetail.class, gs.Gs.ExchangeItemDetail.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ExchangeItemDetail> PARSER =
+        new com.google.protobuf.AbstractParser<ExchangeItemDetail>() {
+      public ExchangeItemDetail parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ExchangeItemDetail(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExchangeItemDetail> getParserForType() {
+      return PARSER;
+    }
+
+    // repeated .gs.IntNum buy = 1;
+    public static final int BUY_FIELD_NUMBER = 1;
+    private java.util.List<gs.Gs.IntNum> buy_;
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    public java.util.List<gs.Gs.IntNum> getBuyList() {
+      return buy_;
+    }
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+        getBuyOrBuilderList() {
+      return buy_;
+    }
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    public int getBuyCount() {
+      return buy_.size();
+    }
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    public gs.Gs.IntNum getBuy(int index) {
+      return buy_.get(index);
+    }
+    /**
+     * <code>repeated .gs.IntNum buy = 1;</code>
+     *
+     * <pre>
+     * id is price, num is amount
+     * </pre>
+     */
+    public gs.Gs.IntNumOrBuilder getBuyOrBuilder(
+        int index) {
+      return buy_.get(index);
+    }
+
+    // repeated .gs.IntNum sell = 2;
+    public static final int SELL_FIELD_NUMBER = 2;
+    private java.util.List<gs.Gs.IntNum> sell_;
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    public java.util.List<gs.Gs.IntNum> getSellList() {
+      return sell_;
+    }
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+        getSellOrBuilderList() {
+      return sell_;
+    }
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    public int getSellCount() {
+      return sell_.size();
+    }
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    public gs.Gs.IntNum getSell(int index) {
+      return sell_.get(index);
+    }
+    /**
+     * <code>repeated .gs.IntNum sell = 2;</code>
+     */
+    public gs.Gs.IntNumOrBuilder getSellOrBuilder(
+        int index) {
+      return sell_.get(index);
+    }
+
+    private void initFields() {
+      buy_ = java.util.Collections.emptyList();
+      sell_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      for (int i = 0; i < getBuyCount(); i++) {
+        if (!getBuy(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getSellCount(); i++) {
+        if (!getSell(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < buy_.size(); i++) {
+        output.writeMessage(1, buy_.get(i));
+      }
+      for (int i = 0; i < sell_.size(); i++) {
+        output.writeMessage(2, sell_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < buy_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, buy_.get(i));
+      }
+      for (int i = 0; i < sell_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, sell_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.ExchangeItemDetail parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemDetail parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.ExchangeItemDetail parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeItemDetail parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.ExchangeItemDetail prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.ExchangeItemDetail}
+     *
+     * <pre>
+     * exchangeWatchItemDetail
+     * c
+     * Num   //item id
+     * s
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.ExchangeItemDetailOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_ExchangeItemDetail_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_ExchangeItemDetail_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.ExchangeItemDetail.class, gs.Gs.ExchangeItemDetail.Builder.class);
+      }
+
+      // Construct using gs.Gs.ExchangeItemDetail.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getBuyFieldBuilder();
+          getSellFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (buyBuilder_ == null) {
+          buy_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          buyBuilder_.clear();
+        }
+        if (sellBuilder_ == null) {
+          sell_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          sellBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_ExchangeItemDetail_descriptor;
+      }
+
+      public gs.Gs.ExchangeItemDetail getDefaultInstanceForType() {
+        return gs.Gs.ExchangeItemDetail.getDefaultInstance();
+      }
+
+      public gs.Gs.ExchangeItemDetail build() {
+        gs.Gs.ExchangeItemDetail result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.ExchangeItemDetail buildPartial() {
+        gs.Gs.ExchangeItemDetail result = new gs.Gs.ExchangeItemDetail(this);
+        int from_bitField0_ = bitField0_;
+        if (buyBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            buy_ = java.util.Collections.unmodifiableList(buy_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.buy_ = buy_;
+        } else {
+          result.buy_ = buyBuilder_.build();
+        }
+        if (sellBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+            sell_ = java.util.Collections.unmodifiableList(sell_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.sell_ = sell_;
+        } else {
+          result.sell_ = sellBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.ExchangeItemDetail) {
+          return mergeFrom((gs.Gs.ExchangeItemDetail)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.ExchangeItemDetail other) {
+        if (other == gs.Gs.ExchangeItemDetail.getDefaultInstance()) return this;
+        if (buyBuilder_ == null) {
+          if (!other.buy_.isEmpty()) {
+            if (buy_.isEmpty()) {
+              buy_ = other.buy_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureBuyIsMutable();
+              buy_.addAll(other.buy_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.buy_.isEmpty()) {
+            if (buyBuilder_.isEmpty()) {
+              buyBuilder_.dispose();
+              buyBuilder_ = null;
+              buy_ = other.buy_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              buyBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getBuyFieldBuilder() : null;
+            } else {
+              buyBuilder_.addAllMessages(other.buy_);
+            }
+          }
+        }
+        if (sellBuilder_ == null) {
+          if (!other.sell_.isEmpty()) {
+            if (sell_.isEmpty()) {
+              sell_ = other.sell_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureSellIsMutable();
+              sell_.addAll(other.sell_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.sell_.isEmpty()) {
+            if (sellBuilder_.isEmpty()) {
+              sellBuilder_.dispose();
+              sellBuilder_ = null;
+              sell_ = other.sell_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              sellBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getSellFieldBuilder() : null;
+            } else {
+              sellBuilder_.addAllMessages(other.sell_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        for (int i = 0; i < getBuyCount(); i++) {
+          if (!getBuy(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getSellCount(); i++) {
+          if (!getSell(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.ExchangeItemDetail parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.ExchangeItemDetail) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // repeated .gs.IntNum buy = 1;
+      private java.util.List<gs.Gs.IntNum> buy_ =
+        java.util.Collections.emptyList();
+      private void ensureBuyIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          buy_ = new java.util.ArrayList<gs.Gs.IntNum>(buy_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder> buyBuilder_;
+
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public java.util.List<gs.Gs.IntNum> getBuyList() {
+        if (buyBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(buy_);
+        } else {
+          return buyBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public int getBuyCount() {
+        if (buyBuilder_ == null) {
+          return buy_.size();
+        } else {
+          return buyBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public gs.Gs.IntNum getBuy(int index) {
+        if (buyBuilder_ == null) {
+          return buy_.get(index);
+        } else {
+          return buyBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder setBuy(
+          int index, gs.Gs.IntNum value) {
+        if (buyBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBuyIsMutable();
+          buy_.set(index, value);
+          onChanged();
+        } else {
+          buyBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder setBuy(
+          int index, gs.Gs.IntNum.Builder builderForValue) {
+        if (buyBuilder_ == null) {
+          ensureBuyIsMutable();
+          buy_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          buyBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder addBuy(gs.Gs.IntNum value) {
+        if (buyBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBuyIsMutable();
+          buy_.add(value);
+          onChanged();
+        } else {
+          buyBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder addBuy(
+          int index, gs.Gs.IntNum value) {
+        if (buyBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBuyIsMutable();
+          buy_.add(index, value);
+          onChanged();
+        } else {
+          buyBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder addBuy(
+          gs.Gs.IntNum.Builder builderForValue) {
+        if (buyBuilder_ == null) {
+          ensureBuyIsMutable();
+          buy_.add(builderForValue.build());
+          onChanged();
+        } else {
+          buyBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder addBuy(
+          int index, gs.Gs.IntNum.Builder builderForValue) {
+        if (buyBuilder_ == null) {
+          ensureBuyIsMutable();
+          buy_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          buyBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder addAllBuy(
+          java.lang.Iterable<? extends gs.Gs.IntNum> values) {
+        if (buyBuilder_ == null) {
+          ensureBuyIsMutable();
+          super.addAll(values, buy_);
+          onChanged();
+        } else {
+          buyBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder clearBuy() {
+        if (buyBuilder_ == null) {
+          buy_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          buyBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public Builder removeBuy(int index) {
+        if (buyBuilder_ == null) {
+          ensureBuyIsMutable();
+          buy_.remove(index);
+          onChanged();
+        } else {
+          buyBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public gs.Gs.IntNum.Builder getBuyBuilder(
+          int index) {
+        return getBuyFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public gs.Gs.IntNumOrBuilder getBuyOrBuilder(
+          int index) {
+        if (buyBuilder_ == null) {
+          return buy_.get(index);  } else {
+          return buyBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+           getBuyOrBuilderList() {
+        if (buyBuilder_ != null) {
+          return buyBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(buy_);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public gs.Gs.IntNum.Builder addBuyBuilder() {
+        return getBuyFieldBuilder().addBuilder(
+            gs.Gs.IntNum.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public gs.Gs.IntNum.Builder addBuyBuilder(
+          int index) {
+        return getBuyFieldBuilder().addBuilder(
+            index, gs.Gs.IntNum.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.IntNum buy = 1;</code>
+       *
+       * <pre>
+       * id is price, num is amount
+       * </pre>
+       */
+      public java.util.List<gs.Gs.IntNum.Builder> 
+           getBuyBuilderList() {
+        return getBuyFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder> 
+          getBuyFieldBuilder() {
+        if (buyBuilder_ == null) {
+          buyBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder>(
+                  buy_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          buy_ = null;
+        }
+        return buyBuilder_;
+      }
+
+      // repeated .gs.IntNum sell = 2;
+      private java.util.List<gs.Gs.IntNum> sell_ =
+        java.util.Collections.emptyList();
+      private void ensureSellIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          sell_ = new java.util.ArrayList<gs.Gs.IntNum>(sell_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder> sellBuilder_;
+
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public java.util.List<gs.Gs.IntNum> getSellList() {
+        if (sellBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(sell_);
+        } else {
+          return sellBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public int getSellCount() {
+        if (sellBuilder_ == null) {
+          return sell_.size();
+        } else {
+          return sellBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public gs.Gs.IntNum getSell(int index) {
+        if (sellBuilder_ == null) {
+          return sell_.get(index);
+        } else {
+          return sellBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder setSell(
+          int index, gs.Gs.IntNum value) {
+        if (sellBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSellIsMutable();
+          sell_.set(index, value);
+          onChanged();
+        } else {
+          sellBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder setSell(
+          int index, gs.Gs.IntNum.Builder builderForValue) {
+        if (sellBuilder_ == null) {
+          ensureSellIsMutable();
+          sell_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          sellBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder addSell(gs.Gs.IntNum value) {
+        if (sellBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSellIsMutable();
+          sell_.add(value);
+          onChanged();
+        } else {
+          sellBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder addSell(
+          int index, gs.Gs.IntNum value) {
+        if (sellBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSellIsMutable();
+          sell_.add(index, value);
+          onChanged();
+        } else {
+          sellBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder addSell(
+          gs.Gs.IntNum.Builder builderForValue) {
+        if (sellBuilder_ == null) {
+          ensureSellIsMutable();
+          sell_.add(builderForValue.build());
+          onChanged();
+        } else {
+          sellBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder addSell(
+          int index, gs.Gs.IntNum.Builder builderForValue) {
+        if (sellBuilder_ == null) {
+          ensureSellIsMutable();
+          sell_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          sellBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder addAllSell(
+          java.lang.Iterable<? extends gs.Gs.IntNum> values) {
+        if (sellBuilder_ == null) {
+          ensureSellIsMutable();
+          super.addAll(values, sell_);
+          onChanged();
+        } else {
+          sellBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder clearSell() {
+        if (sellBuilder_ == null) {
+          sell_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          sellBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public Builder removeSell(int index) {
+        if (sellBuilder_ == null) {
+          ensureSellIsMutable();
+          sell_.remove(index);
+          onChanged();
+        } else {
+          sellBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public gs.Gs.IntNum.Builder getSellBuilder(
+          int index) {
+        return getSellFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public gs.Gs.IntNumOrBuilder getSellOrBuilder(
+          int index) {
+        if (sellBuilder_ == null) {
+          return sell_.get(index);  } else {
+          return sellBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
+           getSellOrBuilderList() {
+        if (sellBuilder_ != null) {
+          return sellBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(sell_);
+        }
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public gs.Gs.IntNum.Builder addSellBuilder() {
+        return getSellFieldBuilder().addBuilder(
+            gs.Gs.IntNum.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public gs.Gs.IntNum.Builder addSellBuilder(
+          int index) {
+        return getSellFieldBuilder().addBuilder(
+            index, gs.Gs.IntNum.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.IntNum sell = 2;</code>
+       */
+      public java.util.List<gs.Gs.IntNum.Builder> 
+           getSellBuilderList() {
+        return getSellFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder> 
+          getSellFieldBuilder() {
+        if (sellBuilder_ == null) {
+          sellBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder>(
+                  sell_,
+                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  getParentForChildren(),
+                  isClean());
+          sell_ = null;
+        }
+        return sellBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.ExchangeItemDetail)
+    }
+
+    static {
+      defaultInstance = new ExchangeItemDetail(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.ExchangeItemDetail)
+  }
+
+  public interface ExchangeDealOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 itemId = 1;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    boolean hasItemId();
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    int getItemId();
+
+    // required int32 num = 2;
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    boolean hasNum();
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    int getNum();
+
+    // required int32 price = 3;
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    boolean hasPrice();
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    int getPrice();
+
+    // required bytes buildingId = 4;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+  }
+  /**
+   * Protobuf type {@code gs.ExchangeDeal}
+   *
+   * <pre>
+   * exchangeDealInform
+   * s
+   * </pre>
+   */
+  public static final class ExchangeDeal extends
+      com.google.protobuf.GeneratedMessage
+      implements ExchangeDealOrBuilder {
+    // Use ExchangeDeal.newBuilder() to construct.
+    private ExchangeDeal(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ExchangeDeal(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ExchangeDeal defaultInstance;
+    public static ExchangeDeal getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ExchangeDeal getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ExchangeDeal(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              itemId_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              num_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              price_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              buildingId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_ExchangeDeal_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_ExchangeDeal_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.ExchangeDeal.class, gs.Gs.ExchangeDeal.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ExchangeDeal> PARSER =
+        new com.google.protobuf.AbstractParser<ExchangeDeal>() {
+      public ExchangeDeal parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ExchangeDeal(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExchangeDeal> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 itemId = 1;
+    public static final int ITEMID_FIELD_NUMBER = 1;
+    private int itemId_;
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public boolean hasItemId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 itemId = 1;</code>
+     */
+    public int getItemId() {
+      return itemId_;
+    }
+
+    // required int32 num = 2;
+    public static final int NUM_FIELD_NUMBER = 2;
+    private int num_;
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    public boolean hasNum() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 num = 2;</code>
+     */
+    public int getNum() {
+      return num_;
+    }
+
+    // required int32 price = 3;
+    public static final int PRICE_FIELD_NUMBER = 3;
+    private int price_;
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    public boolean hasPrice() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 price = 3;</code>
+     */
+    public int getPrice() {
+      return price_;
+    }
+
+    // required bytes buildingId = 4;
+    public static final int BUILDINGID_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    private void initFields() {
+      itemId_ = 0;
+      num_ = 0;
+      price_ = 0;
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasItemId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasNum()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPrice()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, num_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, price_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, buildingId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, itemId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, num_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, price_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, buildingId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.ExchangeDeal parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeDeal parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.ExchangeDeal parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.ExchangeDeal parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.ExchangeDeal prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.ExchangeDeal}
+     *
+     * <pre>
+     * exchangeDealInform
+     * s
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.ExchangeDealOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_ExchangeDeal_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_ExchangeDeal_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.ExchangeDeal.class, gs.Gs.ExchangeDeal.Builder.class);
+      }
+
+      // Construct using gs.Gs.ExchangeDeal.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        itemId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        num_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        price_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_ExchangeDeal_descriptor;
+      }
+
+      public gs.Gs.ExchangeDeal getDefaultInstanceForType() {
+        return gs.Gs.ExchangeDeal.getDefaultInstance();
+      }
+
+      public gs.Gs.ExchangeDeal build() {
+        gs.Gs.ExchangeDeal result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.ExchangeDeal buildPartial() {
+        gs.Gs.ExchangeDeal result = new gs.Gs.ExchangeDeal(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.itemId_ = itemId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.num_ = num_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.price_ = price_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.buildingId_ = buildingId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.ExchangeDeal) {
+          return mergeFrom((gs.Gs.ExchangeDeal)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.ExchangeDeal other) {
+        if (other == gs.Gs.ExchangeDeal.getDefaultInstance()) return this;
+        if (other.hasItemId()) {
+          setItemId(other.getItemId());
+        }
+        if (other.hasNum()) {
+          setNum(other.getNum());
+        }
+        if (other.hasPrice()) {
+          setPrice(other.getPrice());
+        }
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasItemId()) {
+          
+          return false;
+        }
+        if (!hasNum()) {
+          
+          return false;
+        }
+        if (!hasPrice()) {
+          
+          return false;
+        }
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.ExchangeDeal parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.ExchangeDeal) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 itemId = 1;
+      private int itemId_ ;
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public boolean hasItemId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public int getItemId() {
+        return itemId_;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder setItemId(int value) {
+        bitField0_ |= 0x00000001;
+        itemId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 itemId = 1;</code>
+       */
+      public Builder clearItemId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 num = 2;
+      private int num_ ;
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public boolean hasNum() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public int getNum() {
+        return num_;
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public Builder setNum(int value) {
+        bitField0_ |= 0x00000002;
+        num_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 num = 2;</code>
+       */
+      public Builder clearNum() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        num_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 price = 3;
+      private int price_ ;
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public boolean hasPrice() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public int getPrice() {
+        return price_;
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public Builder setPrice(int value) {
+        bitField0_ |= 0x00000004;
+        price_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 price = 3;</code>
+       */
+      public Builder clearPrice() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        price_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required bytes buildingId = 4;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.ExchangeDeal)
+    }
+
+    static {
+      defaultInstance = new ExchangeDeal(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.ExchangeDeal)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_Id_descriptor;
   private static
@@ -25843,11 +33237,6 @@ public final class Gs {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_BuildingInfo_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_BuildingInfo_MutableData_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_BuildingInfo_MutableData_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_BuildingDetailCommon_descriptor;
   private static
@@ -25924,25 +33313,35 @@ public final class Gs {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_AddBuilding_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_ApartmentInfo_descriptor;
+    internal_static_gs_TransferItem_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_ApartmentInfo_fieldAccessorTable;
+      internal_static_gs_TransferItem_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_Apartment_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_Apartment_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_Line_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_Line_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_MaterialFactoryInfo_descriptor;
+    internal_static_gs_MaterialFactory_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_MaterialFactoryInfo_fieldAccessorTable;
+      internal_static_gs_MaterialFactory_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_ProduceDepartmentInfo_descriptor;
+    internal_static_gs_ProduceDepartment_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable;
+      internal_static_gs_ProduceDepartment_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_VirtualInfo_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_VirtualInfo_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_AddLine_descriptor;
   private static
@@ -25958,6 +33357,36 @@ public final class Gs {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_LineInfo_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_ExchangeItemSummary_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_ExchangeItemSummary_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_ExchangeItemList_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_ExchangeItemList_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_ExchangeBuy_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_ExchangeBuy_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_ExchangeSell_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_ExchangeSell_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_ExchangeItemDetail_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_ExchangeItemDetail_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_ExchangeDeal_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_ExchangeDeal_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -25974,55 +33403,76 @@ public final class Gs {
       "ids\030\001 \003(\014\"\"\n\007ByteNum\022\n\n\002id\030\001 \002(\014\022\013\n\003num\030" +
       "\002 \002(\005\"!\n\006IntNum\022\n\n\002id\030\001 \002(\005\022\013\n\003num\030\002 \002(\005" +
       "\"!\n\tGridIndex\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 \002(\005\"!\n\tM" +
-      "iniIndex\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 \002(\005\"\240\001\n\014Build" +
+      "iniIndex\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 \002(\005\"\244\001\n\014Build" +
       "ingInfo\022\n\n\002id\030\001 \002(\014\022\013\n\003mId\030\002 \002(\005\022\032\n\003pos\030" +
-      "\003 \002(\0132\r.gs.MiniIndex\022*\n\004data\030\004 \002(\0132\034.gs.",
-      "BuildingInfo.MutableData\032/\n\013MutableData\022" +
-      "\017\n\007ownerId\030\001 \001(\014\022\017\n\007npcFlow\030\002 \001(\005\"|\n\024Bui" +
-      "ldingDetailCommon\022\n\n\002id\030\001 \002(\014\022\017\n\007ownerId" +
-      "\030\002 \002(\014\022\016\n\006salary\030\003 \002(\005\022\r\n\005happy\030\004 \002(\005\022\032\n" +
-      "\003pos\030\005 \002(\0132\r.gs.MiniIndex\022\014\n\004flow\030\006 \002(\005\"" +
-      "\027\n\tHeartBeat\022\n\n\002ts\030\001 \002(\003\"2\n\014HeartBeatACK" +
-      "\022\020\n\010clientTs\030\001 \002(\003\022\020\n\010serverTs\030\002 \002(\003\"$\n\010" +
-      "RoleInfo\022\n\n\002id\030\001 \002(\014\022\014\n\004name\030\002 \002(\t\"\'\n\005Lo" +
-      "gin\022\017\n\007account\030\001 \002(\t\022\r\n\005token\030\002 \002(\t\"2\n\010L" +
-      "oginACK\022\032\n\004info\030\001 \003(\0132\014.gs.RoleInfo\022\n\n\002t",
-      "s\030\002 \002(\003\"x\n\004Role\022\n\n\002id\030\001 \002(\014\022\014\n\004name\030\002 \002(" +
-      "\t\022\r\n\005money\030\003 \002(\003\022\023\n\013lockedMoney\030\004 \002(\005\022\021\n" +
-      "\tofflineTs\030\005 \002(\003\022\037\n\010position\030\006 \002(\0132\r.gs." +
-      "GridIndex\",\n\nUnitCreate\022\036\n\004info\030\001 \003(\0132\020." +
-      "gs.BuildingInfo\"\030\n\nUnitRemove\022\n\n\002id\030\001 \003(" +
-      "\014\"D\n\nUnitChange\022\n\n\002id\030\001 \002(\014\022*\n\004data\030\002 \002(" +
-      "\0132\034.gs.BuildingInfo.MutableData\"p\n\rGroun" +
-      "dAuction\022)\n\007auction\030\001 \003(\0132\030.gs.GroundAuc" +
-      "tion.Target\0324\n\006Target\022\n\n\002id\030\001 \002(\014\022\017\n\007bid" +
-      "erId\030\002 \001(\014\022\r\n\005price\030\003 \001(\005\"\260\001\n\021MetaGround",
-      "Auction\022-\n\007auction\030\001 \003(\0132\034.gs.MetaGround" +
-      "Auction.Target\032l\n\006Target\022\n\n\002id\030\001 \002(\014\022\033\n\004" +
-      "area\030\002 \003(\0132\r.gs.MiniIndex\022\021\n\tbeginTime\030\003" +
-      " \002(\003\022\023\n\013durationSec\030\004 \002(\005\022\021\n\tbasePrice\030\005" +
-      " \002(\005\"5\n\013AddBuilding\022\n\n\002id\030\001 \002(\005\022\032\n\003pos\030\002" +
-      " \002(\0132\r.gs.MiniIndex\"p\n\rApartmentInfo\022(\n\006" +
-      "common\030\001 \002(\0132\030.gs.BuildingDetailCommon\022\014" +
-      "\n\004rent\030\002 \002(\005\022\016\n\006renter\030\003 \002(\005\022\027\n\005chart\030\004 " +
-      "\002(\0132\010.gs.Nums\"\\\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006ite" +
-      "mId\030\002 \002(\005\022\020\n\010nowCount\030\003 \002(\005\022\023\n\013targetCou",
-      "nt\030\004 \002(\005\022\021\n\tworkerNum\030\005 \002(\005\"\246\001\n\023Material" +
-      "FactoryInfo\022(\n\006common\030\001 \002(\0132\030.gs.Buildin" +
-      "gDetailCommon\022\031\n\005store\030\002 \003(\0132\n.gs.IntNum" +
-      "\022\031\n\005shelf\030\003 \003(\0132\n.gs.IntNum\022\027\n\005chart\030\004 \002" +
-      "(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010.gs.Line\"\250\001\n" +
-      "\025ProduceDepartmentInfo\022(\n\006common\030\001 \002(\0132\030" +
-      ".gs.BuildingDetailCommon\022\031\n\005store\030\002 \003(\0132" +
-      "\n.gs.IntNum\022\031\n\005shelf\030\003 \003(\0132\n.gs.IntNum\022\027" +
-      "\n\005chart\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010." +
-      "gs.Line\"K\n\007AddLine\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId",
-      "\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021\n\tworkerNum\030\004" +
-      " \002(\005\"V\n\nChangeLine\022\022\n\nbuildingId\030\001 \002(\014\022\016" +
-      "\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\ttar" +
-      "getNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022\020\n\010" +
-      "nowCount\030\002 \001(\005\022\023\n\013targetCount\030\003 \001(\005\022\021\n\tw" +
-      "orkerNum\030\004 \001(\005"
+      "\003 \002(\0132\r.gs.MiniIndex\022\017\n\007ownerId\030\004 \001(\014\022\017\n",
+      "\007npcFlow\030\005 \001(\005\022 \n\005state\030\006 \002(\0162\021.gs.Build" +
+      "ingState\022\033\n\023constructCompleteTs\030\007 \001(\005\"|\n" +
+      "\024BuildingDetailCommon\022\n\n\002id\030\001 \002(\014\022\017\n\007own" +
+      "erId\030\002 \002(\014\022\016\n\006salary\030\003 \002(\005\022\r\n\005happy\030\004 \002(" +
+      "\005\022\032\n\003pos\030\005 \002(\0132\r.gs.MiniIndex\022\014\n\004flow\030\006 " +
+      "\002(\005\"\027\n\tHeartBeat\022\n\n\002ts\030\001 \002(\003\"2\n\014HeartBea" +
+      "tACK\022\020\n\010clientTs\030\001 \002(\003\022\020\n\010serverTs\030\002 \002(\003" +
+      "\"$\n\010RoleInfo\022\n\n\002id\030\001 \002(\014\022\014\n\004name\030\002 \002(\t\"\'" +
+      "\n\005Login\022\017\n\007account\030\001 \002(\t\022\r\n\005token\030\002 \002(\t\"" +
+      "2\n\010LoginACK\022\032\n\004info\030\001 \003(\0132\014.gs.RoleInfo\022",
+      "\n\n\002ts\030\002 \002(\003\"\372\001\n\004Role\022\n\n\002id\030\001 \002(\014\022\014\n\004name" +
+      "\030\002 \002(\t\022\r\n\005money\030\003 \002(\003\022\023\n\013lockedMoney\030\004 \002" +
+      "(\005\022\021\n\tofflineTs\030\005 \002(\003\022\037\n\010position\030\006 \002(\0132" +
+      "\r.gs.GridIndex\022 \n\tapartment\030\007 \003(\0132\r.gs.A" +
+      "partment\022,\n\017materialFactory\030\010 \003(\0132\023.gs.M" +
+      "aterialFactory\0220\n\021produceDepartment\030\t \003(" +
+      "\0132\025.gs.ProduceDepartment\",\n\nUnitCreate\022\036" +
+      "\n\004info\030\001 \003(\0132\020.gs.BuildingInfo\"\030\n\nUnitRe" +
+      "move\022\n\n\002id\030\001 \003(\014\",\n\nUnitChange\022\036\n\004info\030\001" +
+      " \002(\0132\020.gs.BuildingInfo\"p\n\rGroundAuction\022",
+      ")\n\007auction\030\001 \003(\0132\030.gs.GroundAuction.Targ" +
+      "et\0324\n\006Target\022\n\n\002id\030\001 \002(\014\022\017\n\007biderId\030\002 \001(" +
+      "\014\022\r\n\005price\030\003 \001(\005\"\260\001\n\021MetaGroundAuction\022-" +
+      "\n\007auction\030\001 \003(\0132\034.gs.MetaGroundAuction.T" +
+      "arget\032l\n\006Target\022\n\n\002id\030\001 \002(\014\022\033\n\004area\030\002 \003(" +
+      "\0132\r.gs.MiniIndex\022\021\n\tbeginTime\030\003 \002(\003\022\023\n\013d" +
+      "urationSec\030\004 \002(\005\022\021\n\tbasePrice\030\005 \002(\005\"5\n\013A" +
+      "ddBuilding\022\n\n\002id\030\001 \002(\005\022\032\n\003pos\030\002 \002(\0132\r.gs" +
+      ".MiniIndex\"C\n\014TransferItem\022\013\n\003src\030\001 \001(\014\022" +
+      "\013\n\003dst\030\002 \001(\014\022\016\n\006itemId\030\003 \002(\005\022\t\n\001n\030\004 \002(\005\"",
+      "l\n\tApartment\022(\n\006common\030\001 \002(\0132\030.gs.Buildi" +
+      "ngDetailCommon\022\014\n\004rent\030\002 \002(\005\022\016\n\006renter\030\003" +
+      " \002(\005\022\027\n\005chart\030\004 \002(\0132\010.gs.Nums\"\\\n\004Line\022\n\n" +
+      "\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\020\n\010nowCount\030\003 " +
+      "\002(\005\022\023\n\013targetCount\030\004 \002(\005\022\021\n\tworkerNum\030\005 " +
+      "\002(\005\"\242\001\n\017MaterialFactory\022(\n\006common\030\001 \002(\0132" +
+      "\030.gs.BuildingDetailCommon\022\031\n\005store\030\002 \003(\013" +
+      "2\n.gs.IntNum\022\031\n\005shelf\030\003 \003(\0132\n.gs.IntNum\022" +
+      "\027\n\005chart\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010" +
+      ".gs.Line\"\244\001\n\021ProduceDepartment\022(\n\006common",
+      "\030\001 \002(\0132\030.gs.BuildingDetailCommon\022\031\n\005stor" +
+      "e\030\002 \003(\0132\n.gs.IntNum\022\031\n\005shelf\030\003 \003(\0132\n.gs." +
+      "IntNum\022\027\n\005chart\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030" +
+      "\005 \003(\0132\010.gs.Line\"4\n\013VirtualInfo\022\n\n\002id\030\001 \002" +
+      "(\005\022\031\n\005store\030\002 \003(\0132\n.gs.IntNum\"K\n\007AddLine" +
+      "\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttargetNu" +
+      "m\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"V\n\nChangeLine" +
+      "\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\t" +
+      "workerNum\030\003 \001(\005\022\021\n\ttargetNum\030\004 \001(\005\"P\n\010Li" +
+      "neInfo\022\n\n\002id\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(\005\022\023\n\013",
+      "targetCount\030\003 \001(\005\022\021\n\tworkerNum\030\004 \001(\005\"t\n\023" +
+      "ExchangeItemSummary\022\016\n\006itemId\030\001 \002(\005\022\020\n\010l" +
+      "owPrice\030\002 \001(\005\022\021\n\thighPrice\030\003 \001(\005\022\020\n\010nowP" +
+      "rice\030\004 \001(\005\022\026\n\016sumDealedPrice\030\005 \001(\003\"<\n\020Ex" +
+      "changeItemList\022(\n\007summary\030\001 \003(\0132\027.gs.Exc" +
+      "hangeItemSummary\"M\n\013ExchangeBuy\022\016\n\006itemI" +
+      "d\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nb" +
+      "uildingId\030\004 \002(\014\"N\n\014ExchangeSell\022\016\n\006itemI" +
+      "d\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nb" +
+      "uildingId\030\004 \002(\014\"G\n\022ExchangeItemDetail\022\027\n",
+      "\003buy\030\001 \003(\0132\n.gs.IntNum\022\030\n\004sell\030\002 \003(\0132\n.g" +
+      "s.IntNum\"N\n\014ExchangeDeal\022\016\n\006itemId\030\001 \002(\005" +
+      "\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuilding" +
+      "Id\030\004 \002(\014*\223\001\n\rBuildingState\022\024\n\020COLLECT_MA" +
+      "TERIAL\020\000\022\025\n\021WAITING_CONSTRUCT\020\001\022\020\n\014CONST" +
+      "RUCTING\020\002\022\020\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_O" +
+      "PERATE\020\004\022\013\n\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -26100,13 +33550,7 @@ public final class Gs {
           internal_static_gs_BuildingInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_BuildingInfo_descriptor,
-              new java.lang.String[] { "Id", "MId", "Pos", "Data", });
-          internal_static_gs_BuildingInfo_MutableData_descriptor =
-            internal_static_gs_BuildingInfo_descriptor.getNestedTypes().get(0);
-          internal_static_gs_BuildingInfo_MutableData_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_BuildingInfo_MutableData_descriptor,
-              new java.lang.String[] { "OwnerId", "NpcFlow", });
+              new java.lang.String[] { "Id", "MId", "Pos", "OwnerId", "NpcFlow", "State", "ConstructCompleteTs", });
           internal_static_gs_BuildingDetailCommon_descriptor =
             getDescriptor().getMessageTypes().get(12);
           internal_static_gs_BuildingDetailCommon_fieldAccessorTable = new
@@ -26148,7 +33592,7 @@ public final class Gs {
           internal_static_gs_Role_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Role_descriptor,
-              new java.lang.String[] { "Id", "Name", "Money", "LockedMoney", "OfflineTs", "Position", });
+              new java.lang.String[] { "Id", "Name", "Money", "LockedMoney", "OfflineTs", "Position", "Apartment", "MaterialFactory", "ProduceDepartment", });
           internal_static_gs_UnitCreate_descriptor =
             getDescriptor().getMessageTypes().get(19);
           internal_static_gs_UnitCreate_fieldAccessorTable = new
@@ -26166,7 +33610,7 @@ public final class Gs {
           internal_static_gs_UnitChange_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_UnitChange_descriptor,
-              new java.lang.String[] { "Id", "Data", });
+              new java.lang.String[] { "Info", });
           internal_static_gs_GroundAuction_descriptor =
             getDescriptor().getMessageTypes().get(22);
           internal_static_gs_GroundAuction_fieldAccessorTable = new
@@ -26197,48 +33641,96 @@ public final class Gs {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddBuilding_descriptor,
               new java.lang.String[] { "Id", "Pos", });
-          internal_static_gs_ApartmentInfo_descriptor =
+          internal_static_gs_TransferItem_descriptor =
             getDescriptor().getMessageTypes().get(25);
-          internal_static_gs_ApartmentInfo_fieldAccessorTable = new
+          internal_static_gs_TransferItem_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_ApartmentInfo_descriptor,
+              internal_static_gs_TransferItem_descriptor,
+              new java.lang.String[] { "Src", "Dst", "ItemId", "N", });
+          internal_static_gs_Apartment_descriptor =
+            getDescriptor().getMessageTypes().get(26);
+          internal_static_gs_Apartment_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_Apartment_descriptor,
               new java.lang.String[] { "Common", "Rent", "Renter", "Chart", });
           internal_static_gs_Line_descriptor =
-            getDescriptor().getMessageTypes().get(26);
+            getDescriptor().getMessageTypes().get(27);
           internal_static_gs_Line_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Line_descriptor,
               new java.lang.String[] { "Id", "ItemId", "NowCount", "TargetCount", "WorkerNum", });
-          internal_static_gs_MaterialFactoryInfo_descriptor =
-            getDescriptor().getMessageTypes().get(27);
-          internal_static_gs_MaterialFactoryInfo_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_MaterialFactoryInfo_descriptor,
-              new java.lang.String[] { "Common", "Store", "Shelf", "Chart", "Line", });
-          internal_static_gs_ProduceDepartmentInfo_descriptor =
+          internal_static_gs_MaterialFactory_descriptor =
             getDescriptor().getMessageTypes().get(28);
-          internal_static_gs_ProduceDepartmentInfo_fieldAccessorTable = new
+          internal_static_gs_MaterialFactory_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_ProduceDepartmentInfo_descriptor,
+              internal_static_gs_MaterialFactory_descriptor,
               new java.lang.String[] { "Common", "Store", "Shelf", "Chart", "Line", });
-          internal_static_gs_AddLine_descriptor =
+          internal_static_gs_ProduceDepartment_descriptor =
             getDescriptor().getMessageTypes().get(29);
+          internal_static_gs_ProduceDepartment_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ProduceDepartment_descriptor,
+              new java.lang.String[] { "Common", "Store", "Shelf", "Chart", "Line", });
+          internal_static_gs_VirtualInfo_descriptor =
+            getDescriptor().getMessageTypes().get(30);
+          internal_static_gs_VirtualInfo_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_VirtualInfo_descriptor,
+              new java.lang.String[] { "Id", "Store", });
+          internal_static_gs_AddLine_descriptor =
+            getDescriptor().getMessageTypes().get(31);
           internal_static_gs_AddLine_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddLine_descriptor,
               new java.lang.String[] { "Id", "ItemId", "TargetNum", "WorkerNum", });
           internal_static_gs_ChangeLine_descriptor =
-            getDescriptor().getMessageTypes().get(30);
+            getDescriptor().getMessageTypes().get(32);
           internal_static_gs_ChangeLine_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ChangeLine_descriptor,
               new java.lang.String[] { "BuildingId", "LineId", "WorkerNum", "TargetNum", });
           internal_static_gs_LineInfo_descriptor =
-            getDescriptor().getMessageTypes().get(31);
+            getDescriptor().getMessageTypes().get(33);
           internal_static_gs_LineInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_LineInfo_descriptor,
               new java.lang.String[] { "Id", "NowCount", "TargetCount", "WorkerNum", });
+          internal_static_gs_ExchangeItemSummary_descriptor =
+            getDescriptor().getMessageTypes().get(34);
+          internal_static_gs_ExchangeItemSummary_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ExchangeItemSummary_descriptor,
+              new java.lang.String[] { "ItemId", "LowPrice", "HighPrice", "NowPrice", "SumDealedPrice", });
+          internal_static_gs_ExchangeItemList_descriptor =
+            getDescriptor().getMessageTypes().get(35);
+          internal_static_gs_ExchangeItemList_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ExchangeItemList_descriptor,
+              new java.lang.String[] { "Summary", });
+          internal_static_gs_ExchangeBuy_descriptor =
+            getDescriptor().getMessageTypes().get(36);
+          internal_static_gs_ExchangeBuy_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ExchangeBuy_descriptor,
+              new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
+          internal_static_gs_ExchangeSell_descriptor =
+            getDescriptor().getMessageTypes().get(37);
+          internal_static_gs_ExchangeSell_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ExchangeSell_descriptor,
+              new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
+          internal_static_gs_ExchangeItemDetail_descriptor =
+            getDescriptor().getMessageTypes().get(38);
+          internal_static_gs_ExchangeItemDetail_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ExchangeItemDetail_descriptor,
+              new java.lang.String[] { "Buy", "Sell", });
+          internal_static_gs_ExchangeDeal_descriptor =
+            getDescriptor().getMessageTypes().get(39);
+          internal_static_gs_ExchangeDeal_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_ExchangeDeal_descriptor,
+              new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
           return null;
         }
       };

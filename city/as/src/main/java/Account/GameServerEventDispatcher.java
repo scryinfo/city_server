@@ -12,9 +12,9 @@ public class GameServerEventDispatcher extends DispatcherBase {
 	private GameServerEventDispatcher(){
 		try {
 			Class<?> type = Package.class;
-			table.put((short)GaCode.OpCode.login_VALUE, Wrapper.newWithMessage(Ga.Login.parser(), GameServerSession.class,"login"));
-			table.put((short)GaCode.OpCode.stateReport_VALUE, Wrapper.newWithMessage(Ga.StateReport.parser(), GameServerSession.class,"stateReport"));
-			table.put((short)GaCode.OpCode.validateAck_VALUE, Wrapper.newWithMessage(Ga.ValidationCode.parser(), GameServerSession.class,"validateAck"));
+			table.put((short)GaCode.OpCode.login_VALUE, Wrapper.newWithMessage(Ga.Login.PARSER, GameServerSession.class,"login"));
+			table.put((short)GaCode.OpCode.stateReport_VALUE, Wrapper.newWithMessage(Ga.StateReport.PARSER, GameServerSession.class,"stateReport"));
+			table.put((short)GaCode.OpCode.validateAck_VALUE, Wrapper.newWithMessage(Ga.ValidationCode.PARSER, GameServerSession.class,"validateAck"));
 		}catch (Exception e) {
 			e.printStackTrace();
 		}

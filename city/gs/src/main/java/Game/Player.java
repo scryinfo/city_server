@@ -3,7 +3,6 @@ package Game;
 import Shared.DatabaseInfo;
 import Shared.Package;
 import Shared.Util;
-import com.google.protobuf.ByteString;
 import gs.Gs;
 import gscode.GsCode;
 import org.hibernate.annotations.MapKeyType;
@@ -56,7 +55,7 @@ public class Player {
     @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
     @MapKeyColumn(name = "transaction_id")
     @Column(name="money", nullable = false)
-    private Map<UUID, Integer> lockedMoney = new HashMap<>();
+    private Map<UUID, Long> lockedMoney = new HashMap<>();
 
     @Transient
     private GameSession session;
@@ -89,8 +88,8 @@ public class Player {
         return this.lockedMoney.values().stream().mapToInt(Number::intValue).sum();
     }
 
-    public double money() {
-        return money;
+    public long money() {
+        return money - lockedMoney();
     }
     public void setCity(City city) {
         this.city = city;
@@ -146,8 +145,8 @@ public class Player {
             e.printStackTrace();
         }
     }
-    public void lockMoney(UUID transactionId, int price) {
-        Integer p = lockedMoney.get(transactionId);
+    public void lockMoney(UUID transactionId, long price) {
+        Long p = lockedMoney.get(transactionId);
         if(p != null) {
             this.money += (p - price);
         }
@@ -156,8 +155,8 @@ public class Player {
             lockedMoney.put(transactionId, price);
         }
     }
-    public int unlockMoney(UUID transactionId) {
-        Integer p = lockedMoney.get(transactionId);
+    public long unlockMoney(UUID transactionId) {
+        Long p = lockedMoney.get(transactionId);
         if(p != null) {
             this.money += p;
             return p;
@@ -167,21 +166,23 @@ public class Player {
         }
     }
     // should not warp db flush in function due to if an decMoney on player means there must has
-    // addMoney on others units. Those dec add should in an transaction, which means, db class
+    // addMoney on others units. Those dec consumeReserve should in an transaction, which means, db class
     // will has many function to cope with those different situation?
-    public boolean decMoney(int cost) {
+    public boolean decMoney(long cost) {
         if(cost > this.money)
             return false;
         this.money -= cost;
         return true;
     }
-
-    public int spentLockMoney(UUID id) {
+    public void addMoney(long cost) {
+        this.money += cost;
+    }
+    public long spentLockMoney(UUID id) {
         return this.lockedMoney.remove(id);
     }
 
     public void groundBidingFail(UUID id, GroundAuction.Entry a) {
-        int m = this.unlockMoney(a.meta.id);
+        int m = (int) this.unlockMoney(a.meta.id);
         GameDb.saveOrUpdate(this);
         this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(m).build()));
     }

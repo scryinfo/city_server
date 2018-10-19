@@ -14,7 +14,7 @@ import java.util.OptionalInt;
 import java.util.UUID;
 
 @MappedSuperclass
-public abstract class FactoryBase extends Building {
+public abstract class FactoryBase extends Building implements Storagable {
     public FactoryBase(MetaFactoryBase meta, Coord pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
@@ -27,13 +27,43 @@ public abstract class FactoryBase extends Building {
 
     public abstract LineBase addLine(MetaItem m);
 
+    @Override
+    public boolean reserve(MetaItem m, int n) {
+        return store.reserve(m, n);
+    }
+
+    @Override
+    public boolean lock(MetaItem m, int n) {
+        return store.lock(m, n);
+    }
+
+    @Override
+    public void consumeLock(MetaItem m, int n) {
+        store.consumeLock(m, n);
+    }
+
+    @Override
+    public void consumeReserve(MetaItem m, int n) {
+        store.consumeReserve(m, n);
+    }
+
+    @Override
+    public void markOrder(UUID orderId) {
+        store.markOrder(orderId);
+    }
+
+    @Override
+    public void clearOrder(UUID orderId) {
+        store.clearOrder(orderId);
+    }
+
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(30000, 30000);
 
-    @Transient
+    @Embedded
     protected Storage store;
 
-    @Transient
+    @Embedded
     protected Storage shelf;
 
     @Transient
@@ -44,15 +74,12 @@ public abstract class FactoryBase extends Building {
     public int freeWorkerNum() {
         return this.meta.maxWorkerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
     }
-    protected boolean isDirty() {
-        return _d.dirty();
-    }
+
     protected void _update(long diffNano) {
         this.lines.values().forEach(l -> {
             int add = l.update(diffNano);
             if(add > 0) {
                 this.store.offset(l.item, add);
-                this._d.dirtyStore();
                 Gs.LineInfo i = Gs.LineInfo.newBuilder()
                         .setId(Util.toByteString(l.id))
                         .setNowCount(l.count)
@@ -61,8 +88,8 @@ public abstract class FactoryBase extends Building {
             }
         });
 
-        if(this.dbTimer.update(diffNano) && isDirty()) {
-            GameDb.saveOrUpdate(this);
+        if(this.dbTimer.update(diffNano)) {
+            GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
     }
     @Transient
@@ -74,7 +101,7 @@ public abstract class FactoryBase extends Building {
             return false;
         if(targetNum.isPresent()) {
             int t = targetNum.getAsInt();
-            if(t < 0 || t > this.store.availSize())
+            if(t < 0 || t > this.store.availableSize())
                 return false;
             line.targetNum = t;
         }
@@ -87,34 +114,9 @@ public abstract class FactoryBase extends Building {
         return true;
     }
 
-    @Embeddable
-    private static class _D {
-        @Column(name = "store")
-        private byte[] storeBinary;
-        @Column(name = "shelf")
-        private byte[] shelfBinary;
-
-        void dirtyStore() {
-            storeBinary = null;
-        }
-        void dirtyShelf() {
-            shelfBinary = null;
-        }
-        boolean dirty() {
-            return shelfBinary == null || storeBinary == null;
-        }
-    }
-    @Embedded
-    private final _D _d = new _D();
-    @PrePersist
-    @PreUpdate
-    protected void _2() {
-        this._d.storeBinary = this.store.binary();
-        this._d.shelfBinary = this.shelf.binary();
-    }
     @PostLoad
     protected void _1() throws InvalidProtocolBufferException {
-        this.store = new Storage(this._d.storeBinary, meta.storeCapacity);
-        this.shelf = new Storage(this._d.shelfBinary, meta.shelfCapacity);
+        this.store.setCap(meta.storeCapacity); // this is hibernate design problem...
+        this.shelf.setCap(meta.shelfCapacity);
     }
 }

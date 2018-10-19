@@ -1,27 +1,30 @@
-syntax = "proto3";
-
 package DB;
 
 message Lines {
 	message Line {
-		bytes id = 1;
-		int32 itemId = 2;
-		int32 nowCount = 3;
-		int32 targetCount = 4;
-		int32 workerNum = 5;
-		int64 sumNano = 6;
+		required bytes id = 1;
+		required int32 itemId = 2;
+		required int32 nowCount = 3;
+		required int32 targetCount = 4;
+		required int32 workerNum = 5;
 	}
 	repeated Line line = 1;
 }
 
 message Store {
-	map<int32, int32> store = 1;
+	message Cargo {
+		required int32 id = 1;
+		required int32 n = 2;
+	}
+	repeated Cargo existing = 1;
+	repeated Cargo reserved = 2;
+	repeated Cargo locked = 3;
 }
 
 message FlowHistory {
 	message Info {
-		int32 ts = 1;
-		int32 n = 2;
+		required int32 ts = 1;
+		required int32 n = 2;
 	}
 	repeated Info i = 1;
 }
