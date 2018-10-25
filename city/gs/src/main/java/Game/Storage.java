@@ -1,34 +1,48 @@
 package Game;
 
-import DB.Db;
-import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 
 import javax.persistence.*;
 import java.util.*;
 
+//@Entity
 @Embeddable
-public class Storage implements Storagable {
+public class Storage implements IStorage {
     public Storage(int capacity) {
         this.capacity = capacity;
     }
 
     public Storage() {
     }
-
-    private byte[] binary() {
-        Db.Store.Builder builder = Db.Store.newBuilder();
-        this.inHand.forEach((k, v)->builder.addExisting(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
-        this.reserved.forEach((k, v)->builder.addReserved(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
-        this.locked.forEach((k, v)->builder.addLocked(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
-        return builder.build().toByteArray();
-    }
-    public Collection<Gs.IntNum> toProto() {
-        Collection<Gs.IntNum> res = new ArrayList<>();
+    //@Id
+   // @Column(name = "id", updatable = false, nullable = false)
+   // private UUID id = UUID.randomUUID();  // because we map this class to entity rather than Embeddable, so must have a id
+//    private byte[] binary() {
+//        Db.Store.Builder builder = Db.Store.newBuilder();
+//        this.inHand.forEach((k, v)->builder.addExisting(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
+//        this.reserved.forEach((k, v)->builder.addReserved(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
+//        this.locked.forEach((k, v)->builder.addLocked(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
+//        return builder.build().toByteArray();
+//    }
+//    public Collection<Gs.IntNum> toProto() {
+//        Collection<Gs.IntNum> res = new ArrayList<>();
+//        this.inHand.forEach((k, v)->{
+//            res.add(Gs.IntNum.newBuilder().setId(k.id).setNum(v).build());
+//        });
+//        return res;
+//    }
+    public Gs.Store toProto() {
+        Gs.Store.Builder builder = Gs.Store.newBuilder();
         this.inHand.forEach((k, v)->{
-            res.add(Gs.IntNum.newBuilder().setId(k.id).setNum(v).build());
+            builder.addInHand(Gs.IntNum.newBuilder().setId(k.id).setNum(v));
         });
-        return res;
+        this.reserved.forEach((k, v)->{
+            builder.addReserved(Gs.IntNum.newBuilder().setId(k.id).setNum(v));
+        });
+        this.locked.forEach((k, v)->{
+            builder.addLocked(Gs.IntNum.newBuilder().setId(k.id).setNum(v));
+        });
+        return builder.build();
     }
     public boolean offset(MetaItem item, final int n) {
         if(n == 0)
@@ -44,19 +58,22 @@ public class Storage implements Storagable {
                 return false;
             this.inHand.put(item, c+n);
         }
-        this._d.dirty();
+        //this._d.dirty();
         return true;
     }
     @Transient
     private int capacity;
-    @Transient
+    @ElementCollection
+    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
     private Map<MetaItem, Integer> inHand = new HashMap<>();
-    @Transient
+    @ElementCollection
+    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
     private Map<MetaItem, Integer> reserved = new HashMap<>();
-    @Transient
+    @ElementCollection
+    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
     private Map<MetaItem, Integer> locked = new HashMap<>();
 
-    void setCap(int capacity) {
+    void setCapacity(int capacity) {
         this.capacity = capacity;
     }
 
@@ -73,6 +90,16 @@ public class Storage implements Storagable {
         if(!has(m, n))
             return false;
         locked.put(m, reserved.getOrDefault(m, 0) + n);
+        return true;
+    }
+
+    @Override
+    public boolean unLock(MetaItem m, int n) {
+        Integer i = this.locked.get(m);
+        if(i == null || i < n)
+            return false;
+        this.locked.put(m, i-n);
+        this.inHand.put(m, this.inHand.getOrDefault(m, 0) + n);
         return true;
     }
 
@@ -105,29 +132,29 @@ public class Storage implements Storagable {
     }
     @Transient
     Set<UUID> order = new HashSet<>();
-    @Embeddable
-    protected static class _D { // private will cause JPA meta class generate fail
-        @Column(name = "storageBin")
-        private byte[] binary;
-
-        void dirty() {
-            binary = null;
-        }
-    }
-    @Embedded
-    private final _D _d = new _D();
-    @PrePersist
-    @PreUpdate
-    protected void _2() {
-        this._d.binary = this.binary();
-    }
-    @PostLoad
-    protected void _1() throws InvalidProtocolBufferException {
-        Db.Store store = Db.Store.parseFrom(this._d.binary);
-        store.getExistingList().forEach(c->this.inHand.put(MetaData.getItem(c.getId()), c.getN()));
-        store.getReservedList().forEach(c->this.reserved.put(MetaData.getItem(c.getId()), c.getN()));
-        store.getLockedList().forEach(c->this.locked.put(MetaData.getItem(c.getId()), c.getN()));
-    }
+//    @Embeddable
+//    protected static class _D { // private will cause JPA meta class generate fail
+//        @Column(name = "storageBin")
+//        private byte[] binary;
+//
+//        void dirty() {
+//            binary = null;
+//        }
+//    }
+//    @Embedded
+//    private final _D _d = new _D();
+//    @PrePersist
+//    @PreUpdate
+//    protected void _2() {
+//        this._d.binary = this.binary();
+//    }
+//    @PostLoad
+//    protected void _1() throws InvalidProtocolBufferException {
+//        Db.Store store = Db.Store.parseFrom(this._d.binary);
+//        store.getExistingList().forEach(c->this.inHand.put(MetaData.getItem(c.getId()), c.getN()));
+//        store.getReservedList().forEach(c->this.reserved.put(MetaData.getItem(c.getId()), c.getN()));
+//        store.getLockedList().forEach(c->this.locked.put(MetaData.getItem(c.getId()), c.getN()));
+//    }
     public int usedSize() {
         return inHand.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
     }

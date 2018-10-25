@@ -8,7 +8,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 import java.util.*;
 
-@Entity(name = "Apartment")
+@Entity(name = "apartment")
 public class Apartment extends Building {
 
     public Apartment(MetaApartment meta, Coord pos, UUID ownerId) {
@@ -18,7 +18,7 @@ public class Apartment extends Building {
     @Transient
     private MetaApartment meta;
 
-    @Column(name = "rent", nullable = false)
+    @Column(nullable = false)
     private int rent;
 
     @Transient
@@ -32,8 +32,9 @@ public class Apartment extends Building {
 
     @PostLoad
     private void _1() {
-        this.meta = MetaData.getApartment(this._d.metaId);
-        this.metaBuilding = this.meta;
+        //this.meta = MetaData.getApartment(this._d.metaId);
+        this.meta = (MetaApartment) super.metaBuilding;
+        //this.metaBuilding = this.meta;
     }
 
     public void setRent(int n) {
@@ -51,11 +52,14 @@ public class Apartment extends Building {
 
     public Gs.Apartment detailProto() {
         return Gs.Apartment.newBuilder()
-                .setCommon(this.commonProto())
+                .setInfo(super.toProto())
                 .setRent(this.rent)
                 .setRenter(guest.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
                 .build();
+    }
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+        builder.addApartment(this.detailProto());
     }
     @Override
     protected void _update(long diffNano) {

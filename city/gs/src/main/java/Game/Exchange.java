@@ -12,7 +12,7 @@ import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-@Entity
+@Entity(name = "exchange")
 public class Exchange {
     private static Exchange instance = new Exchange();
     public static Exchange instance() {
@@ -32,18 +32,52 @@ public class Exchange {
     public final int id = ID;
     public Gs.ExchangeItemList getItemList() {
         Gs.ExchangeItemList.Builder builder = Gs.ExchangeItemList.newBuilder();
-        info.forEach((itemId, info)->{
+        itemStat.forEach((itemId, info)->{
             builder.addSummary(Gs.ExchangeItemSummary.newBuilder()
                     .setItemId(itemId)
                     .setNowPrice(info.nowPrice())
-                    .setLowPrice(info.stat.lowPrice)
-                    .setHighPrice(info.stat.highPrice)
-                    .setSumDealedPrice(info.stat.sumDealedPrice)
+                    .setLowPrice(info.lowPrice)
+                    .setHighPrice(info.highPrice)
+                    .setSumDealedPrice(info.sumDealedPrice)
+                    .setPriceChange(info.priceChange())
             );
         });
         return builder.build();
     }
 
+    public Gs.ExchangeOrders getOrder(UUID id) {
+        Gs.ExchangeOrders.Builder builder = Gs.ExchangeOrders.newBuilder();
+        Map<UUID, Order> o = orders.get(id);
+        if(o != null) {
+            o.forEach((k,v)->
+                builder.addOrder(Gs.ExchangeOrder.newBuilder()
+                        .setId(Util.toByteString(v.id))
+                        .setItemId(v.itemId)
+                        .setDealed(v.n)
+                        .setTotal(v.total)
+                        .setPrice(v.price)
+                        .setTs(v.ts)
+                        .setSell(v.sell)
+                )
+            );
+        }
+        return builder.build();
+    }
+
+    public Gs.ItemDealHistory getItemDealHistory(int itemId) {
+        Gs.ItemDealHistory.Builder builder = Gs.ItemDealHistory.newBuilder();
+        Stat stat = this.itemStat.get(itemId);
+        if(stat != null) {
+            stat.histories.forEach(log->
+                builder.addLog(Gs.ItemDealHistoryElement.newBuilder()
+                        .setAmount(log.n)
+                        .setPrice(log.price)
+                        .setTs(log.ts)
+                )
+            );
+        }
+        return builder.build();
+    }
 
 
     @Entity
@@ -66,33 +100,30 @@ public class Exchange {
         int n;
         @Column(nullable = false)
         boolean sell;
-
+        @Column(nullable = false)
+        final int total;
         public Order(UUID playerId, int price, int itemId, int n, UUID buildingId, boolean sell) {
             this.playerId = playerId;
             this.buildingId = buildingId;
             this.price = price;
             this.itemId = itemId;
             this.n = n;
+            this.total = n;
             this.sell = sell;
             this.ts = System.currentTimeMillis();
         }
     }
 
-    @Entity
-    @Table(name = "exchange_trading")
-    protected static final class Trading { // private will cause JPA meta class generate fail
-        @OneToMany
-        @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-        SortedSet<Order> buy = new TreeSet<>(Comparator.comparingInt(o -> o.price));
 
-        @OneToMany
-        @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-        SortedSet<Order> sell = new TreeSet<>(Comparator.comparingInt(o -> o.price));
+    protected static final class Trading { // private will cause JPA meta class generate fail
+        TreeSet<Order> buy = new TreeSet<>(Comparator.comparingInt(o -> o.price));
+        TreeSet<Order> sell = new TreeSet<>(Comparator.comparingInt(o -> o.price));
     }
     public UUID addSellOrder(UUID who, int itemId, int price, int n, UUID buildingId) {
         Order order = new Order(who, price, itemId, n, buildingId,true);
         tradings.getOrDefault(itemId, new Trading()).sell.add(order);
         orders.getOrDefault(who, new HashMap<>()).put(order.id, order);
+        _orderData.add(order);
         this.watcher.sendTo(itemId);
         return order.id;
     }
@@ -100,6 +131,7 @@ public class Exchange {
         Order order = new Order(who, price, itemId, n, buildingId,false);
         tradings.getOrDefault(itemId, new Trading()).buy.add(order);
         orders.getOrDefault(who, new HashMap<>()).put(order.id, order);
+        _orderData.add(order);
         this.watcher.sendTo(itemId);
         return order.id;
     }
@@ -112,9 +144,10 @@ public class Exchange {
             return null;
         Trading trading = tradings.get(o.itemId);
         if(o.sell)
-            trading.sell.removeIf(order -> order.id.equals(orderId));
+            trading.sell.remove(o);
         else
-            trading.buy.removeIf(order -> order.id.equals(orderId));
+            trading.buy.remove(o);
+        _orderData.remove(o);
         this.watcher.sendTo(o.itemId);
         return o.buildingId;
     }
@@ -175,23 +208,25 @@ public class Exchange {
         seller.addMoney(cost);
         buyer.spentLockMoney(b.id);
         Building out = City.instance().getBuilding(s.buildingId);
-        if(out == null || !(out instanceof Storagable))
+        if(out == null || !(out instanceof IStorage))
             return;
 
         Building in = City.instance().getBuilding(b.buildingId);
-        if(in == null || !(in instanceof Storagable))
+        if(in == null || !(in instanceof IStorage))
             return;
 
-        Storagable outs = (Storagable)out;
+        IStorage outs = (IStorage)out;
         outs.clearOrder(s.id);
         outs.consumeLock(mi, n);
 
-        Storagable ins = (Storagable)in;
+        IStorage ins = (IStorage)in;
         ins.clearOrder(b.id);
         ins.consumeReserve(mi, n);
 
         DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, s.price);
-        Collection<Object> updates = Arrays.asList(buyer, seller, in, out, log);
+        this.itemStat.getOrDefault(mi.id, new Stat(mi.id)).histories.add(log);
+        this._dealHistoryData.add(log);
+        Collection<Object> updates = Arrays.asList(buyer, seller, in, out, log, this);
         GameDb.saveOrUpdate(updates);
 
         // send notify to client if they are online
@@ -207,13 +242,15 @@ public class Exchange {
                 .setPrice(s.price)
                 .setBuildingId(Util.toByteString(b.buildingId))
                 .build()));
+        this.watcher.sendTo(mi.id);
     }
     @Entity
     @Table(name = "exchange_deal_log", indexes = {
             @Index(name = "SELLER_IDX", columnList = "seller"),
             @Index(name = "BUYER_IDX", columnList = "buyer")
     })
-    final static public class DealLog {
+    public final static class DealLog {
+        public static final int ROWS_IN_ONE_PAGE = 10;
         public DealLog(UUID buyer, UUID seller, int itemId, int n, int price) {
             this.buyer = buyer;
             this.seller = seller;
@@ -222,6 +259,10 @@ public class Exchange {
             this.price = price;
             ts = System.currentTimeMillis();
         }
+        @Id
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        @Column(name = "id", updatable = false, nullable = false)
+        long id;
         @Column(name = "buyer")
         UUID buyer;
         @Column(name = "seller")
@@ -230,69 +271,147 @@ public class Exchange {
         int n;
         int price;
         long ts;
-    }
-    final static protected class Info {// private will cause JPA meta class generate fail
-        final static private class Stat {
-            int amount = 0;
-            int lowPrice = Integer.MAX_VALUE;
-            int highPrice = Integer.MIN_VALUE;
-            float avgPrice = 0;
-            long sumDealedPrice = 0;
+
+        public DealLog() {
         }
+
+        Gs.ExchangeDealLog toProto() {
+            return Gs.ExchangeDealLog.newBuilder()
+                    .setBuyerId(Util.toByteString(this.buyer))
+                    .setSellerId(Util.toByteString(this.seller))
+                    .setItemId(this.itemId)
+                    .setDealed(this.n)
+                    .setPrice(this.price)
+                    .setTs(this.ts)
+                    .build();
+        }
+    }
+    @Entity
+    public final static class Stat {
+        @Id
+        int itemId;
+        int amount = 0;
+        int lowPrice = Integer.MAX_VALUE;
+        int highPrice = Integer.MIN_VALUE;
+        float avgPrice = 0;
+        long sumDealedPrice = 0;
+
+        public Stat(int itemId) {
+            this.itemId = itemId;
+        }
+
         int nowPrice() {
-            return histories.isEmpty()?-1:histories.get(histories.size()-1).dealPrice;
+            return histories.isEmpty()?-1:histories.last().price;
         }
         void calcuStat(int durationHours) {
             int sumPrice = 0;
             int deals = 0;
             long now = System.currentTimeMillis();
-            for(History h : histories) {
+            for(DealLog h : histories) {
                 if(now - h.ts > TimeUnit.HOURS.toMillis(durationHours)) {
                     break;
                 }
-                stat.amount += h.amount;
-                sumPrice += h.dealPrice;
-                if(h.dealPrice < stat.lowPrice)
-                    stat.lowPrice = h.dealPrice;
-                if(h.dealPrice > stat.highPrice)
-                    stat.highPrice = h.dealPrice;
+                this.amount += h.n;
+                sumPrice += h.price;
+                if(h.price < this.lowPrice)
+                    this.lowPrice = h.price;
+                if(h.price > this.highPrice)
+                    this.highPrice = h.price;
                 deals++;
             }
-            stat.avgPrice = deals == 0?0:sumPrice / deals;
-            stat.sumDealedPrice = sumPrice;
+            this.avgPrice = deals == 0?0:sumPrice / deals;
+            this.sumDealedPrice = sumPrice;
         }
+        @Transient
+        // recent at last
+        TreeSet<DealLog> histories = new TreeSet<>(Comparator.comparing(log->log.ts));
 
-        final static private class History {
-            int dealPrice;
-            int amount;
-            long ts;
+        public int priceChange() {
+            if(histories.isEmpty())
+                return 0;
+            long now = System.currentTimeMillis();
+            DealLog l = new DealLog();
+            l.ts = now - TimeUnit.HOURS.toMillis(24);
+            DealLog old = histories.ceiling(l); // least key greater than or equal to l.ts, can prove this will not return null
+            return (int) ((nowPrice() - old.price)/(double)old.price*1000);
         }
-        Stat stat = new Stat();
-        private List<History> histories = new ArrayList<>();
     }
+
     public void update(long nanoDiff) {
         matchmaking();
+
+        final long now = System.currentTimeMillis();
         if(updateTimer.update(nanoDiff)) {
-            info.forEach((k,v)->v.calcuStat(24));
+            itemStat.forEach((k,v)-> {
+                v.calcuStat(24);
+                removeOutdatedDealLog(v.histories, now);
+            });
+            removeOutdatedDealLog((TreeSet<DealLog>) _dealHistoryData, now);
         }
+
     }
 
-    @OneToMany
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKey(name = "itemId")
+    @Transient
     private Map<Integer, Trading> tradings = new HashMap<>();
-
-    @OneToMany
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKey(name = "itemId")
-    private Map<Integer, Info> info = new HashMap<>();
-
-    // cache
     @Transient
     private Map<UUID, Map<UUID, Order>> orders = new HashMap<>();
-
     @Transient
     private PeriodicTimer updateTimer = new PeriodicTimer(20000);
+    //@Transient
+    //private Map<Integer, Info> info = new HashMap<>();
+    @OneToMany
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @JoinColumn(name = "exchange_id")
+    @MapKey(name = "itemId")
+    private Map<Integer, Stat> itemStat = new HashMap<>();
+
+    //==============plain data, DO NOT use them directly======================
+    @OneToMany
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @JoinColumn(name = "exchange_id")
+    private Set<Order> _orderData = new HashSet<>();
+    @OneToMany
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @JoinColumn(name = "exchange_id")
+    @OrderBy("ts ASC")
+    private SortedSet<DealLog> _dealHistoryData = new TreeSet<>(Comparator.comparing(h -> h.ts));
+    //========================================================================
+
+    // in real stock exchange, the log is always there, however, the query of myself log has limitation of duration which
+    // can not longer than 30 days
+    private static final long DEAL_LOG_MAX_PRESERVE_MS =  TimeUnit.DAYS.toMillis(31+10);
+    @PostLoad
+    void _init() {
+        final long now = System.currentTimeMillis();
+        for(Order order : _orderData) {
+            Trading trading = tradings.getOrDefault(order.itemId, new Trading());
+            if(order.sell)
+                trading.sell.add(order);
+            else
+                trading.buy.add(order);
+            orders.getOrDefault(order.playerId, new HashMap<>()).put(order.id, order);
+        }
+
+        {
+            // this will be too fucking slow
+            // _dealHistoryData.removeIf(h->now - h.ts > DEAL_LOG_MAX_PRESERVE_MS);
+
+            TreeSet<DealLog> deals = (TreeSet<DealLog>) _dealHistoryData;
+            removeOutdatedDealLog(deals, now);
+
+            deals.descendingSet().forEach(l->this.itemStat.getOrDefault(l.itemId, new Stat(l.itemId)).histories.add(l));
+        }
+    }
+    private void removeOutdatedDealLog(TreeSet<DealLog> deals, long now) {
+        Iterator<DealLog> iterator = deals.descendingIterator();
+        while(iterator.hasNext()) {
+            DealLog h = iterator.next();
+            if(now - h.ts > DEAL_LOG_MAX_PRESERVE_MS)
+                iterator.remove();
+            else
+                break;
+        }
+    }
 
     public Gs.ExchangeItemDetail watch(ChannelId id, int itemId) {
         this.watcher.put(id, itemId);
@@ -304,6 +423,8 @@ public class Exchange {
         Trading trading = this.tradings.get(itemId);
         trading.buy.forEach(o->builder.addBuy(Gs.IntNum.newBuilder().setId(o.price).setNum(o.n)));
         trading.sell.forEach(o->builder.addSell(Gs.IntNum.newBuilder().setId(o.price).setNum(o.n)));
+        builder.setNowPrice(this.itemStat.get(itemId).nowPrice());
+        builder.setPriceChange(this.itemStat.get(itemId).priceChange());
         return builder.build();
     }
 

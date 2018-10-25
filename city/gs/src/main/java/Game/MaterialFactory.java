@@ -13,11 +13,12 @@ public class MaterialFactory extends FactoryBase {
     public MaterialFactory() {
     }
 
-    public final class Line extends LineBase {
+    @Entity
+    public final static class Line extends LineBase {
 
-        public Line(Db.Lines.Line d) {
-            super(d);
-        }
+//        public Line(Db.Lines.Line d) {
+//            super(d);
+//        }
 
         public Line(MetaMaterial item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
@@ -32,48 +33,53 @@ public class MaterialFactory extends FactoryBase {
     @Transient
     private MetaMaterialFactory meta;
 
-    @Embeddable
-    protected static class _D { // private will cause JPA meta class generate fail
-        @Column(name = "line")
-        private byte[] lineBinary;
-        void dirtyLine() {
-            lineBinary = null;
-        }
-    }
-    @Embedded
-    private final _D _d = new _D();
+//    @Embeddable
+//    protected static class _D { // private will cause JPA meta class generate fail
+//        @Column(name = "line")
+//        private byte[] lineBinary;
+//        void dirtyLine() {
+//            lineBinary = null;
+//        }
+//    }
+//    @Embedded
+//    private final _D _d = new _D();
     @PrePersist
     @PreUpdate
     protected void _2() {
-        Db.Lines.Builder builder = Db.Lines.newBuilder();
-        this.lines.forEach((k, v)->{
-            builder.addLine(v.toDbProto());
-        });
-        this._d.lineBinary = builder.build().toByteArray();
+//        Db.Lines.Builder builder = Db.Lines.newBuilder();
+//        this.lines.forEach((k, v)->{
+//            builder.addLine(v.toDbProto());
+//        });
+//        this._d.lineBinary = builder.build().toByteArray();
     }
     @PostLoad
     protected void _1() throws InvalidProtocolBufferException {
         super._1();
-
-        for(Db.Lines.Line l : Db.Lines.parseFrom((this._d.lineBinary)).getLineList()) {
-            MaterialFactory.Line line = new MaterialFactory.Line(l);
-            this.lines.put(line.id, line);
-        }
+        this.meta = (MetaMaterialFactory) super.metaBuilding;
+//        for(Db.Lines.Line l : Db.Lines.parseFrom((this._d.lineBinary)).getLineList()) {
+//            MaterialFactory.Line line = new MaterialFactory.Line(l);
+//            this.lines.put(line.id, line);
+//        }
     }
     @Override
-    public Message detailProto() {
-        Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setCommon(super.commonProto());
-        builder.addAllStore(this.store.toProto());
-        builder.addAllShelf(this.shelf.toProto());
+    public Gs.MaterialFactory detailProto() {
+        Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setInfo(super.toProto());
+        builder.setStore(this.store.toProto());
+        builder.setShelf(this.shelf.toProto());
         this.lines.values().forEach(line -> builder.addLine(line.toProto()));
         return builder.build();
     }
+    @Override
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+        builder.addMaterialFactory(this.detailProto());
+    }
+    @Override
     public LineBase addLine(MetaItem item) {
         if(item instanceof MetaMaterial)
             return null;
         Line line = new Line((MetaMaterial)item,0,0);
         lines.put(line.id, line);
-        _d.dirtyLine();
+       // _d.dirtyLine();
         return line;
     }
     protected void _update(long diffNano) {

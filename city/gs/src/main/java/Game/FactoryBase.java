@@ -6,6 +6,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 import gscode.GsCode;
 import org.bson.types.ObjectId;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.HashMap;
@@ -13,13 +16,13 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.UUID;
 
-@MappedSuperclass
-public abstract class FactoryBase extends Building implements Storagable {
+@Entity
+public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public FactoryBase(MetaFactoryBase meta, Coord pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
         this.store = new Storage(meta.storeCapacity);
-        this.shelf = new Storage(meta.shelfCapacity);
+        this.shelf = new Shelf(meta.shelfCapacity);
     }
 
     protected FactoryBase() {
@@ -35,6 +38,11 @@ public abstract class FactoryBase extends Building implements Storagable {
     @Override
     public boolean lock(MetaItem m, int n) {
         return store.lock(m, n);
+    }
+
+    @Override
+    public boolean unLock(MetaItem m, int n) {
+        return store.unLock(m, n);
     }
 
     @Override
@@ -60,14 +68,22 @@ public abstract class FactoryBase extends Building implements Storagable {
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(30000, 30000);
 
+    //@OneToOne
+    //@JoinColumn(name="STORE_ID", unique=true, nullable=false, updatable=false)
     @Embedded
     protected Storage store;
 
+    //@OneToOne
+    //@JoinColumn(name="SHELF_ID", unique=true, nullable=false, updatable=false)
     @Embedded
-    protected Storage shelf;
+    protected Shelf shelf;
 
-    @Transient
-    Map<ObjectId, LineBase> lines = new HashMap<>();
+    @OneToMany
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
+    @MapKeyColumn(name = "line_id")
+    Map<UUID, LineBase> lines = new HashMap<>();
+
     public boolean lineFull() {
         return lines.size() >= meta.lineNum;
     }
@@ -116,7 +132,48 @@ public abstract class FactoryBase extends Building implements Storagable {
 
     @PostLoad
     protected void _1() throws InvalidProtocolBufferException {
-        this.store.setCap(meta.storeCapacity); // this is hibernate design problem...
-        this.shelf.setCap(meta.shelfCapacity);
+        this.meta = (MetaFactoryBase) this.metaBuilding;
+        this.store.setCapacity(meta.storeCapacity); // this is hibernate design problem...
+        this.shelf.setCapacity(meta.shelfCapacity);
+    }
+
+    @Override
+    public UUID addshelf(MetaItem mi, int num, int price) {
+        if(!this.store.lock(mi, num))
+            return null;
+        return this.shelf.add(mi, num, price);
+    }
+
+    @Override
+    public boolean delshelf(UUID id) {
+        Shelf.ItemInfo i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        this.store.unLock(i.item, i.n);
+        this.shelf.del(id);
+        return true;
+    }
+
+    @Override
+    public boolean setNum(UUID id, int num) {
+        Shelf.ItemInfo i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        int delta = num - i.n;
+        boolean ok = false;
+        if(delta > 0)
+            ok = this.store.lock(i.item, delta);
+        else if(delta < 0)
+            ok = this.store.unLock(i.item, delta);
+
+        if(ok) {
+            i.n += delta;
+        }
+        return ok;
+    }
+
+    @Override
+    public Shelf.ItemInfo getContent(UUID id) {
+        return this.shelf.getContent(id);
     }
 }

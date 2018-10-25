@@ -234,6 +234,12 @@ public class City {
                 grids[x][y].forAllBuilding(f);
         }
     }
+    public void forEachBuilding(UUID playerId, Consumer<Building> f) {
+        HashMap<UUID, Building> bs = playerBuilding.get(playerId);
+        if(bs != null) {
+            bs.values().forEach(f);
+        }
+    }
     private void updateVisibilityRelocate(Player p, GridIndex old) {
         GridDiffs diffs = this.diff(p.getPosition().toSyncRange(), old.toSyncRange());
         ArrayList<GridIndex> goingGrids = diffs.l;

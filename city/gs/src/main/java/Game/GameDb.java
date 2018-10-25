@@ -5,10 +5,9 @@ import Shared.RoleBriefInfo;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
-import org.hibernate.Transaction;
+import com.google.common.collect.ImmutableMap;
+import gs.Gs;
+import org.hibernate.*;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -19,10 +18,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class GameDb {
 	private static SessionFactory sessionFactory;
@@ -39,20 +36,51 @@ public class GameDb {
 		}
 	}
 
-	private static LoadingCache<UUID, Player> graphs = CacheBuilder.newBuilder()
+	private static LoadingCache<UUID, Player> playerCache = CacheBuilder.newBuilder()
+			.concurrencyLevel(1)
 			.weakValues()
 			.build(
 					new CacheLoader<UUID, Player>() {
 						public Player load(UUID id) {
 							Session session = sessionFactory.openSession();
-							return session.get(Player.class, id);
+							Player res = session.get(Player.class, id);
+							session.close();
+							return res;
 						}
 					});
 
+	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
+			.concurrencyLevel(1)
+			.maximumSize(10240)
+			.build(
+					new CacheLoader<UUID, Player.Info>() {
+						@Override
+						public Player.Info load(UUID key) {
+							StatelessSession session = sessionFactory.openStatelessSession();
+							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id = :x");
+							q.setParameter("x", key);
+							List<Player.Info> l = q.list();
+							session.close();
+							return l.isEmpty()?null:l.get(0);
+						}
+						@Override
+						public Map<UUID, Player.Info> loadAll(Iterable<? extends UUID> keys) {
+							StatelessSession session = sessionFactory.openStatelessSession();
+							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
+							q.setParameter("x", keys);
+							List<Player.Info> list = q.list();
+							Map<UUID, Player.Info> res = new HashMap<>(list.size());
+							list.forEach(i->res.put(i.id, i));
+							session.close();
+							return res;
+						}
+					});
 	public static Player getPlayer(UUID id) {
-		return graphs.getUnchecked(id);
+		return playerCache.getUnchecked(id);
 	}
-
+	public static ImmutableMap<UUID, Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
+		return playerInfoCache.getAll(ids);
+	}
 	public static boolean createPlayer(Player p) {
 		boolean success = false;
 		Session session = sessionFactory.openSession();
@@ -284,6 +312,27 @@ public class GameDb {
 		HIBERNATE_CFG_PATH = arg;
 		sessionFactory = buildSessionFactory();
 	}
+
+    public static Gs.ExchangeDealLogs getExchangeDealLog(UUID id) {
+		Gs.ExchangeDealLogs.Builder builder = Gs.ExchangeDealLogs.newBuilder();
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Query<Exchange.DealLog> q = session.createQuery("from Exchange$DealLog where seller= :x or buyer= :x", Exchange.DealLog.class);
+		q.setParameter("x", id);
+		q.list().forEach(l -> builder.addLog(l.toProto()));
+		session.close();
+		return builder.build();
+    }
+
+	public static Gs.ExchangeDealLogs getExchangeDealLog(int page) {
+		Gs.ExchangeDealLogs.Builder builder = Gs.ExchangeDealLogs.newBuilder();
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Criteria criteria = session.createCriteria(Exchange.DealLog.class);
+		criteria.setFirstResult(page);
+		criteria.setMaxResults(Exchange.DealLog.ROWS_IN_ONE_PAGE);
+		criteria.list().forEach(l -> builder.addLog(((Exchange.DealLog)l).toProto()));
+		session.close();
+		return builder.build();
+	}
 }
 //public class GameDb {
 //	private static final Logger logger = Logger.getLogger(GameDb.class);
@@ -327,7 +376,7 @@ public class GameDb {
 ////	private static MongoCollection<Document> publicFacilityCol;
 //
 //	private static MongoCollection<Document> buildingCol;
-//	private static LoadingCache<ObjectId, Player> graphs = CacheBuilder.newBuilder()
+//	private static LoadingCache<ObjectId, Player> playerCache = CacheBuilder.newBuilder()
 //			.weakValues()
 //			.build(
 //					new CacheLoader<ObjectId, Player>() {
@@ -339,7 +388,7 @@ public class GameDb {
 //						}
 //					});
 //	public static Player getPlayer(ObjectId id) {
-//		return graphs.getUnchecked(id);
+//		return playerCache.getUnchecked(id);
 //	}
 //
 //	public static boolean createPlayer(Player p)

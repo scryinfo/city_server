@@ -49,10 +49,10 @@ public class GroundAuction {
                 b.setBiderId(Util.toByteString(biderId));
             return b.build();
         }
-        @Transient
+        @Transient //@Convert can not apply on @Id
         MetaGroundAuction meta;
         @Id
-        @Column(name = "metaId", nullable = false)
+        @Column(name = "id", nullable = false)
         UUID metaId;
         @Column(name = "biderId", nullable = false)
         UUID biderId;
@@ -70,6 +70,7 @@ public class GroundAuction {
     @OneToMany
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKey(name = "metaId")
+    @JoinColumn(name = "ground_auction_id")
     private Map<UUID, Entry> auctions = new HashMap<>();
     public void loadMore() {
         Set<MetaGroundAuction> m = MetaData.getNonFinishedGroundAuction();

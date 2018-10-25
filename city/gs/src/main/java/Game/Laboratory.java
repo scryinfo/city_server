@@ -1,6 +1,7 @@
 package Game;
 
 import com.google.protobuf.Message;
+import gs.Gs;
 
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
@@ -21,13 +22,20 @@ public class Laboratory extends Building {
 
     @PostLoad
     private void _1() {
-        this.meta = MetaData.getLaboratory(this._d.metaId);
-        this.metaBuilding = this.meta;
+        //this.meta = MetaData.getLaboratory(this._d.metaId);
+       // this.metaBuilding = this.meta;
+        this.meta = (MetaLaboratory) super.metaBuilding;
     }
     @Override
     public Message detailProto() {
         return null;
     }
+
+    @Override
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+
+    }
+
     @Override
     protected void _update(long diffNano) {
 

@@ -28,3 +28,7 @@ message FlowHistory {
 	}
 	repeated Info i = 1;
 }
+
+message Int32Array {
+	repeated int32 i = 1;
+}

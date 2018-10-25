@@ -18,17 +18,15 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-// this is better. 1, all building will in memory all time, so there is no requirement for
-// reference building in other class maintain by hibernate. 2, performance is better due to each
-// subclass has its own table
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Building {
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
 
     protected Building() {
     }
-    boolean haveUseRight(UUID userId) {
+    boolean canUseBy(UUID userId) {
         return ownerId.equals(userId);
     }
     public int type() {
@@ -57,7 +55,8 @@ public abstract class Building {
         }
         return null;
     }
-    @Transient
+    @Column(name = "metaId", updatable = false, nullable = false)
+    @Convert(converter = MetaBuilding.Converter.class)
     protected MetaBuilding metaBuilding;
 
     public void watchDetailInfo(GameSession s) {
@@ -84,34 +83,32 @@ public abstract class Building {
         Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.UnitRemove.newBuilder().addId(Util.toByteString(id)).build());
         City.instance().send(gip, pack);
     }
-    @Embeddable //hide those members, the only purpose is to mapping to the table
-    protected static class _D {
-        @Column(name = "mid", updatable = false, nullable = false)
-        protected int metaId;
-        @Column(name = "flowHistory")
-        private byte[] flowHistoryBinary;
-        void dirty() {
-            this.flowHistoryBinary = null;
-        }
-    }
-    @Embedded
-    protected final _D _d = new _D();
-
-    // don't override this in subclass, or else this function will not gets called unless call super._base1()
-    // so I name this function names strange in purpose
-    @PrePersist
-    @PreUpdate
-    private void _base1() {
-        Db.FlowHistory.Builder builder = Db.FlowHistory.newBuilder();
-        this.flowHistory.forEach(f -> builder.addI(Db.FlowHistory.Info.newBuilder().setTs(f.ts).setN(f.n)));
-        this._d.flowHistoryBinary = builder.build().toByteArray();
-    }
-    @PostLoad
-    private void _base2() throws InvalidProtocolBufferException {
-        for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this._d.flowHistoryBinary).getIList()) {
-            this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
-        }
-    }
+//    @Embeddable //hide those members, the only purpose is to mapping to the table
+//    protected static class _D {
+//        @Column(name = "flowHistory")
+//        private byte[] flowHistoryBinary;
+//        void dirty() {
+//            this.flowHistoryBinary = null;
+//        }
+//    }
+//    @Embedded
+//    protected final _D _d = new _D();
+//
+//    // don't override this in subclass, or else this function will not gets called unless call super._base1()
+//    // so I name this function names strange in purpose
+//    @PrePersist
+//    @PreUpdate
+//    private void _base1() {
+//        Db.FlowHistory.Builder builder = Db.FlowHistory.newBuilder();
+//        this.flowHistory.forEach(f -> builder.addI(Db.FlowHistory.Info.newBuilder().setTs(f.ts).setN(f.n)));
+//        this._d.flowHistoryBinary = builder.build().toByteArray();
+//    }
+//    @PostLoad
+//    private void _base2() throws InvalidProtocolBufferException {
+//        for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this._d.flowHistoryBinary).getIList()) {
+//            this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
+//        }
+//    }
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
@@ -146,10 +143,32 @@ public abstract class Building {
             this.n = n;
         }
     }
-    @Transient
+    @Column
+    @Convert(converter = FlowHistoryConverter.class)
     private EvictingQueue<FlowInfo> flowHistory = EvictingQueue.create(MAX_FLOW_SIZE);
 
+    public static final class FlowHistoryConverter implements AttributeConverter<EvictingQueue<FlowInfo>, byte[]> {
 
+        @Override
+        public byte[] convertToDatabaseColumn(EvictingQueue<FlowInfo> attribute) {
+            Db.FlowHistory.Builder builder = Db.FlowHistory.newBuilder();
+            attribute.forEach(f -> builder.addI(Db.FlowHistory.Info.newBuilder().setTs(f.ts).setN(f.n)));
+            return builder.build().toByteArray();
+        }
+
+        @Override
+        public EvictingQueue<FlowInfo> convertToEntityAttribute(byte[] dbData) {
+            EvictingQueue<FlowInfo> res = EvictingQueue.create(MAX_FLOW_SIZE);
+            try {
+                for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(dbData).getIList()) {
+                    res.add(new FlowInfo(i.getTs(), i.getN()));
+                }
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+            return res;
+        }
+    }
 
     public UUID id() {
         return id;
@@ -162,7 +181,6 @@ public abstract class Building {
         this.ownerId = ownerId;
         this.coord = pos;
         this.metaBuilding = meta;
-        this._d.metaId = meta.id;
     }
     Set<Npc> getAllNpc() {
         return allNpc;
@@ -234,10 +252,13 @@ public abstract class Building {
                 .setOwnerId(Util.toByteString(ownerId))
                 .setNpcFlow(this.flow)
                 .setState(Gs.BuildingState.valueOf(state))
+                .setSalary(salary)
+                .setHappy(happy)
                 .build();
     }
     protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
     public abstract Message detailProto();
+    public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
     // there is no need to remember which npc is in this building now
     public void enter(Npc npc) {
         allNpc.add(npc);
@@ -245,16 +266,6 @@ public abstract class Building {
     }
     public void leave(Npc npc) {
         allNpc.remove(npc);
-    }
-    protected Gs.BuildingDetailCommon commonProto() {
-        return Gs.BuildingDetailCommon.newBuilder()
-                .setId(Util.toByteString(id()))
-                .setOwnerId(Util.toByteString(ownerId()))
-                .setFlow(flow)
-                .setPos(coord.toProto())
-                .setSalary(salary)
-                .setHappy(happy)
-                .build();
     }
     void update(long diffNano) {
         this._update(diffNano);
@@ -272,7 +283,7 @@ public abstract class Building {
         flow = flowCount;
         flowCount = 0;
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
-        this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
+        //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(nowHour == PAYMENT_HOUR && !this.allNpc.isEmpty()) {
             Player p = GameDb.getPlayer(ownerId);

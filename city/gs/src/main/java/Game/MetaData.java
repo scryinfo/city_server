@@ -9,6 +9,7 @@ import gs.Gs;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
+import javax.persistence.AttributeConverter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -79,6 +80,18 @@ abstract class MetaItem {
     int id;
     double n;
     int size;
+
+    public static final class Converter implements AttributeConverter<MetaItem, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(MetaItem attribute) {
+            return attribute.id;
+        }
+
+        @Override
+        public MetaItem convertToEntityAttribute(Integer dbData) {
+            return MetaData.getItem(dbData);
+        }
+    }
 }
 final class MetaMaterial extends MetaItem {
     MetaMaterial(Document d) {
@@ -118,6 +131,18 @@ class MetaBuilding {
 	public int y;
 	public int maxWorkerNum;
 	public int effectRange;
+
+    public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(MetaBuilding attribute) {
+            return attribute.id;
+        }
+
+        @Override
+        public MetaBuilding convertToEntityAttribute(Integer dbData) {
+            return MetaData.getBuilding(dbData);
+        }
+    }
 }
 class MetaVirtualBuilding {
     MetaVirtualBuilding(Document d) throws Exception {
@@ -213,6 +238,17 @@ class MetaPublicFacility extends MetaBuilding {
     }
 }
 class MetaGroundAuction {
+    public static final class Converter implements AttributeConverter<MetaGroundAuction, UUID> {
+        @Override
+        public UUID convertToDatabaseColumn(MetaGroundAuction attribute) {
+            return attribute.id;
+        }
+
+        @Override
+        public MetaGroundAuction convertToEntityAttribute(UUID dbData) {
+            return MetaData.getGroundAuction(dbData);
+        }
+    }
     MetaGroundAuction(Document d) {
         this.id = Util.toUuid(d.getObjectId("_id"));
         List<Integer> index = (List<Integer>) d.get("area");

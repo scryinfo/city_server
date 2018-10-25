@@ -9,10 +9,7 @@ import org.hibernate.annotations.MapKeyType;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = DatabaseInfo.Game.Player.Table, indexes = {
@@ -21,6 +18,15 @@ import java.util.UUID;
     }
 )
 public class Player {
+    public static final class Info {
+        public Info(UUID id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        UUID id;
+        String name;
+    }
     @Id
     //@GeneratedValue(generator = "uuid2")
     //@GenericGenerator(name = "id", strategy = "uuid2")
@@ -74,14 +80,17 @@ public class Player {
     }
 
     public Gs.Role toProto() {
-        return Gs.Role.newBuilder()
-                .setId(Util.toByteString(id()))
-                .setName(this.name)
-                .setMoney(this.money)
-                .setLockedMoney(this.lockedMoney())
-                .setPosition(this.position.toProto())
-                .setOfflineTs(this.offlineTs)
-            .build();
+        Gs.Role.Builder builder = Gs.Role.newBuilder();
+        builder.setId(Util.toByteString(id()))
+            .setName(this.name)
+            .setMoney(this.money)
+            .setLockedMoney(this.lockedMoney())
+            .setPosition(this.position.toProto())
+            .setOfflineTs(this.offlineTs);
+        city.forEachBuilding(id, (Building b)->{
+            b.appendDetailProto(builder.getBuysBuilder());
+        });
+        return builder.build();
     }
 
     private int lockedMoney() {
@@ -190,4 +199,14 @@ public class Player {
     public String getName() {
         return this.name;
     }
+
+    public void collectExchangeItem(int itemId) {
+        exchangeCollection.add(itemId);
+    }
+    public void unCollectExchangeItem(int itemId) {
+        exchangeCollection.remove(itemId);
+    }
+
+    @ElementCollection
+    private Set<Integer> exchangeCollection = new TreeSet<>();
 }

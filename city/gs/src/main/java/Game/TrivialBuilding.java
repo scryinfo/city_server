@@ -1,6 +1,7 @@
 package Game;
 
 import com.google.protobuf.Message;
+import gs.Gs;
 
 import java.util.UUID;
 
@@ -14,6 +15,11 @@ public class TrivialBuilding extends Building {
     @Override
     public Message detailProto() {
         return null;
+    }
+
+    @Override
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+
     }
 
     @Override

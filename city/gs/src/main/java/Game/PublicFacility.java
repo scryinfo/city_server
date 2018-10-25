@@ -1,6 +1,7 @@
 package Game;
 
 import com.google.protobuf.Message;
+import gs.Gs;
 import org.bson.types.ObjectId;
 
 import javax.persistence.Entity;
@@ -26,13 +27,20 @@ public class PublicFacility extends Building {
 
     @PostLoad
     private void _1() {
-        this.meta = MetaData.getPublicFacility(this._d.metaId);
-        this.metaBuilding = this.meta;
+        //this.meta = MetaData.getPublicFacility(this._d.metaId);
+        //this.metaBuilding = this.meta;
+
+        this.meta = (MetaPublicFacility) super.metaBuilding;
     }
 
     @Override
     public Message detailProto() {
         return null;
+    }
+
+    @Override
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+
     }
 
     @Override

@@ -2,9 +2,11 @@ package Game;
 
 import Shared.*;
 import Shared.Package;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
+import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -14,6 +16,7 @@ import org.bson.types.ObjectId;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -168,9 +171,6 @@ public class GameSession {
 
 		player.setSession(this);
 		GameServer.allGameSessions.putIfAbsent(player.id(), this);
-		this.write(Package.create(cmd, player.toProto()));
-		loginState = LoginState.ROLE_LOGIN;
-		logger.debug("account: " + this.accountName + " login");
 
 		// due to almost all data of this player is keeping run, we need let
 		// city to do data retrieve, and register this player then any data modification
@@ -178,6 +178,10 @@ public class GameSession {
 		// REV seems nothing to assign?
 		City.instance().add(player);
 		player.online();
+		loginState = LoginState.ROLE_LOGIN;
+		logger.debug("account: " + this.accountName + " login");
+
+		this.write(Package.create(cmd, player.toProto()));
 	}
 
 	public void createRole(short cmd, Message message) {
@@ -272,6 +276,22 @@ public class GameSession {
 //		else
 //			this.write(Package.create(cmd));
 //	}
+	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
+		Gs.Bytes c = (Gs.Bytes) message;
+		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
+			return;
+		List<UUID> ids = new ArrayList<>(c.getIdsCount());
+		for(ByteString bs : c.getIdsList()) {
+			ids.add(Util.toUuid(bs.toByteArray()));
+		}
+		Map<UUID, Player.Info> infos = GameDb.getPlayerInfo(ids);
+		if(ids.size() != infos.size()) {
+			// send false data, kick this one ?
+		}
+		Gs.RoleInfos.Builder builder = Gs.RoleInfos.newBuilder();
+		infos.forEach((k,v)->builder.addInfo(Gs.RoleInfo.newBuilder().setId(Util.toByteString(k)).setName(v.name)));
+		this.write(Package.create(cmd, builder.build()));
+	}
 	public void addBuilding(short cmd, Message message) {
 		Gs.AddBuilding c = (Gs.AddBuilding) message;
 		int id = c.getId();
@@ -288,12 +308,119 @@ public class GameSession {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.type() == MetaBuilding.VIRTUAL || !b.ownerId().equals(player.id()))
+		if(b == null || b.type() == MetaBuilding.VIRTUAL || !b.canUseBy(player.id()))
 			return;
 		City.instance().delBuilding(b);
 	}
-	public void exchangeItemList(short cmd, Message message) {
+	public void shelfAdd(short cmd, Message message) {
+		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
+		if(c.getNum() <= 0 || c.getPrice() <= 0)
+			return;
+		MetaItem mi = MetaData.getItem(c.getItemId());
+		if(mi == null)
+			return;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(id);
+		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+			return;
+		IShelf s = (IShelf)building;
+		UUID cid = s.addshelf(mi, c.getNum(), c.getPrice());
+		if(cid != null)
+			this.write(Package.create(cmd, Gs.Shelf.Content.newBuilder()
+					.setId(Util.toByteString(cid))
+					.setItemId(mi.id)
+					.setNum(c.getNum())
+					.setPrice(c.getPrice()).build()
+			));
+		else
+			this.write(Package.fail(cmd));
+	}
+	public void shelfDel(short cmd, Message message) {
+		Gs.ShelfDel c = (Gs.ShelfDel)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		UUID cid = Util.toUuid(c.getContentId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+			return;
+		IShelf s = (IShelf)building;
+		if(s.delshelf(cid))
+			this.write(Package.create(cmd, c));
+		else
+			this.write(Package.fail(cmd));
+	}
+	public void shelfSet(short cmd, Message message) {
+		Gs.ShelfSet c = (Gs.ShelfSet)message;
+		if(c.getNum() < 0 || c.getPrice() <= 0)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		UUID cid = Util.toUuid(c.getContentId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+			return;
+		IShelf shelf = (IShelf)building;
+		Shelf.ItemInfo i = shelf.getContent(cid);
+		if(i == null) {
+			this.write(Package.fail(cmd));
+			return;
+		}
+		if(i.n != c.getNum()) {
+			if(shelf.setNum(cid, c.getNum())) {
+				i.price = c.getPrice();
+				this.write(Package.create(cmd, c));
+			}
+			else
+				this.write(Package.fail(cmd));
+		}
+		else if(i.price != c.getPrice()) {
+			i.price = c.getPrice();
+			this.write(Package.create(cmd, c));
+		}
+		else
+			this.write(Package.create(cmd, c));
+	}
+
+	public void buyInShelf(short cmd, Message message) {
+		Gs.BuyInShelf c = (Gs.BuyInShelf)message;
+		if(c.getNum() <= 0 || c.getPrice() <= 0)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		UUID wid = Util.toUuid(c.getWareHouseId().toByteArray());
+		UUID cid = Util.toUuid(c.getContentId().toByteArray());
+		Building sellBuilding = City.instance().getBuilding(bid);
+		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || sellBuilding.canUseBy(player.id()))
+			return;
+		Building buyBuilding = City.instance().getBuilding(wid);
+		if(buyBuilding == null || !(buyBuilding instanceof IStorage) || !buyBuilding.canUseBy(player.id()))
+			return;
+		IShelf shelf = (IShelf)sellBuilding;
+		Shelf.ItemInfo i = shelf.getContent(cid);
+		if(i == null || i.price != c.getPrice() || i.n < c.getNum()) {
+			this.write(Package.fail(cmd));
+			return;
+		}
+		long cost = c.getNum()*c.getPrice();
+		if(player.money() < cost)
+			return;
+
+		// begin do modify
+		IStorage store = (IStorage)buyBuilding;
+		if(!store.reserve(i.item, c.getNum()))
+			return;
+		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
+		seller.addMoney(cost);
+		player.decMoney(cost);
+		store.consumeReserve(i.item, c.getNum());
+		shelf.setNum(cid, i.n - c.getNum());
+
+		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyBuilding, sellBuilding));
+	}
+	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
+	}
+
+	public void exchangeGetItemDealHistory(short cmd, Message message) {
+		Gs.Num c = (Gs.Num) message;
+		Exchange.instance().getItemDealHistory(c.getNum());
 	}
 	public void exchangeBuy(short cmd, Message message) {
 		Gs.ExchangeBuy c = (Gs.ExchangeBuy) message;
@@ -307,9 +434,9 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !building.haveUseRight(player.id()) || !(building instanceof Storagable))
+		if(building == null || !building.canUseBy(player.id()) || !(building instanceof IStorage))
 			return;
-		Storagable s = (Storagable)building;
+		IStorage s = (IStorage)building;
 		if(!s.reserve(mi, c.getNum()))
 			return;
 
@@ -328,9 +455,9 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !building.haveUseRight(player.id()) || !(building instanceof Storagable))
+		if(building == null || !building.canUseBy(player.id()) || !(building instanceof IStorage))
 			return;
-		Storagable s = (Storagable)building;
+		IStorage s = (IStorage)building;
 		if(!s.lock(mi, c.getNum()))
 			return;
 
@@ -352,20 +479,49 @@ public class GameSession {
 			logger.fatal("building not exist" + buildingId);
 			return;
 		}
-		if(!(building instanceof Storagable)) {
+		if(!(building instanceof IStorage)) {
 			logger.fatal("building is not storagable" + building.type() + " " + building.id());
 			return;
 		}
-		((Storagable)building).clearOrder(id);
+		((IStorage)building).clearOrder(id);
 		this.write(Package.create(cmd));
 	}
-	public void exchangeStopWatch(short cmd, Message message) {
+	public void exchangeStopWatch(short cmd) {
 		Exchange.instance().stopWatch(this.channelId);
 	}
 	public void exchangeWatch(short cmd, Message message) {
 		Gs.Num c = (Gs.Num) message;
 		Gs.ExchangeItemDetail detail = Exchange.instance().watch(this.channelId, c.getNum());
 		this.write(Package.create(cmd, detail));
+	}
+	public void exchangeMyOrder(short cmd) {
+		this.write(Package.create(cmd, Exchange.instance().getOrder(player.id())));
+	}
+	public void exchangeMyDealLog(short cmd) {
+		// get from Exchange?
+		GameDb.getExchangeDealLog(player.id());
+	}
+	public void exchangeAllDealLog(short cmd, Message message) {
+		Gs.Num c = (Gs.Num) message;
+		int page = c.getNum();
+		if(page < 0)
+			return;
+		// get from Exchange?
+		GameDb.getExchangeDealLog(page);
+	}
+	public void exchangeCollect(short cmd, Message message) {
+		Gs.Num c = (Gs.Num) message;
+		int itemId = c.getNum();
+		if(MetaData.getItem(itemId) == null)
+			return;
+		player.collectExchangeItem(itemId);
+	}
+	public void exchangeUnCollect(short cmd, Message message) {
+		Gs.Num c = (Gs.Num) message;
+		int itemId = c.getNum();
+		if(MetaData.getItem(itemId) == null)
+			return;
+		player.unCollectExchangeItem(itemId);
 	}
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
@@ -374,7 +530,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
 		b.watchDetailInfo(this);
-		this.write(Package.create(cmd, ((Apartment)b).detailProto()));
+		this.write(Package.create(cmd, b.detailProto()));
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
@@ -383,7 +539,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
         b.watchDetailInfo(this);
-		this.write(Package.create(cmd, ((MaterialFactory)b).detailProto()));
+		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailProduceDepartment(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
@@ -392,7 +548,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.PRODUCE)
             return;
         b.watchDetailInfo(this);
-        this.write(Package.create(cmd, ((ProduceDepartment)b).detailProto()));
+        this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailLaboratory(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
@@ -401,7 +557,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.LAB)
             return;
         b.watchDetailInfo(this);
-        this.write(Package.create(cmd, ((Laboratory)b).detailProto()));
+        this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
@@ -410,7 +566,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.RETAIL)
             return;
         b.watchDetailInfo(this);
-        this.write(Package.create(cmd, ((RetailShop)b).detailProto()));
+        this.write(Package.create(cmd, b.detailProto()));
     }
 
     public void setSalary(short cmd, Message message) {
