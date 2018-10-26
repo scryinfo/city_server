@@ -78,7 +78,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @Embedded
     protected Shelf shelf;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
     @MapKeyColumn(name = "line_id")

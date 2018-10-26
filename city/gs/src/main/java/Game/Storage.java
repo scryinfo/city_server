@@ -5,7 +5,6 @@ import gs.Gs;
 import javax.persistence.*;
 import java.util.*;
 
-//@Entity
 @Embeddable
 public class Storage implements IStorage {
     public Storage(int capacity) {
@@ -63,13 +62,13 @@ public class Storage implements IStorage {
     }
     @Transient
     private int capacity;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = MetaItem.Converter.class, attributeName = "key")
     private Map<MetaItem, Integer> inHand = new HashMap<>();
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = MetaItem.Converter.class, attributeName = "key")
     private Map<MetaItem, Integer> reserved = new HashMap<>();
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = MetaItem.Converter.class, attributeName = "key")
     private Map<MetaItem, Integer> locked = new HashMap<>();
 

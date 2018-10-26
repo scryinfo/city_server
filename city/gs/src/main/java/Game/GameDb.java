@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 public class GameDb {
 	private static SessionFactory sessionFactory;
+	private static Session session;
 	private static final int BATCH_SIZE = 25;
 	private static String HIBERNATE_CFG_PATH;
 	private static SessionFactory buildSessionFactory() {
@@ -36,54 +37,63 @@ public class GameDb {
 		}
 	}
 
-	private static LoadingCache<UUID, Player> playerCache = CacheBuilder.newBuilder()
-			.concurrencyLevel(1)
-			.weakValues()
-			.build(
-					new CacheLoader<UUID, Player>() {
-						public Player load(UUID id) {
-							Session session = sessionFactory.openSession();
-							Player res = session.get(Player.class, id);
-							session.close();
-							return res;
-						}
-					});
-
-	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
-			.concurrencyLevel(1)
-			.maximumSize(10240)
-			.build(
-					new CacheLoader<UUID, Player.Info>() {
-						@Override
-						public Player.Info load(UUID key) {
-							StatelessSession session = sessionFactory.openStatelessSession();
-							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id = :x");
-							q.setParameter("x", key);
-							List<Player.Info> l = q.list();
-							session.close();
-							return l.isEmpty()?null:l.get(0);
-						}
-						@Override
-						public Map<UUID, Player.Info> loadAll(Iterable<? extends UUID> keys) {
-							StatelessSession session = sessionFactory.openStatelessSession();
-							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
-							q.setParameter("x", keys);
-							List<Player.Info> list = q.list();
-							Map<UUID, Player.Info> res = new HashMap<>(list.size());
-							list.forEach(i->res.put(i.id, i));
-							session.close();
-							return res;
-						}
-					});
+//	private static LoadingCache<UUID, Player> playerCache = CacheBuilder.newBuilder()
+//			.concurrencyLevel(1)
+//			.weakValues()
+//			.build(
+//					new CacheLoader<UUID, Player>() {
+//						public Player load(UUID id) {
+//							Session session = sessionFactory.openSession();
+//							Player res = session.get(Player.class, id);
+//							session.close();
+//							return res;
+//						}
+//					});
+//
+//	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
+//			.concurrencyLevel(1)
+//			.maximumSize(10240)
+//			.build(
+//					new CacheLoader<UUID, Player.Info>() {
+//						@Override
+//						public Player.Info load(UUID key) {
+//							StatelessSession session = sessionFactory.openStatelessSession();
+//							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id = :x");
+//							q.setParameter("x", key);
+//							List<Player.Info> l = q.list();
+//							session.close();
+//							return l.isEmpty()?null:l.get(0);
+//						}
+//						@Override
+//						public Map<UUID, Player.Info> loadAll(Iterable<? extends UUID> keys) {
+//							StatelessSession session = sessionFactory.openStatelessSession();
+//							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
+//							q.setParameter("x", keys);
+//							List<Player.Info> list = q.list();
+//							Map<UUID, Player.Info> res = new HashMap<>(list.size());
+//							list.forEach(i->res.put(i.id, i));
+//							session.close();
+//							return res;
+//						}
+//					});
 	public static Player getPlayer(UUID id) {
-		return playerCache.getUnchecked(id);
+		Transaction transaction = session.beginTransaction();
+		Player res = session.get(Player.class, id);
+		transaction.commit();
+		return res;
 	}
-	public static ImmutableMap<UUID, Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
-		return playerInfoCache.getAll(ids);
+	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		org.hibernate.Query q = statelessSession.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
+		q.setParameter("x", ids);
+		List<Player.Info> list = q.list();
+		transaction.commit();
+		statelessSession.close();
+		return list;
 	}
 	public static boolean createPlayer(Player p) {
 		boolean success = false;
-		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		try {
 			session.save(p);
@@ -92,8 +102,6 @@ public class GameDb {
 		} catch (RuntimeException e) { // the exception is complex, may be javax.PersistenceException, or HibernateException, or jdbc exception ...
 			transaction.rollback();
 			e.printStackTrace();
-		} finally {
-			session.close();
 		}
 		return success;
 	}
@@ -114,85 +122,27 @@ public class GameDb {
 		statelessSession.close();
 	}
 	public static GroundAuction getGroundAction() {
-		Session session = sessionFactory.openSession();
-		return session.get(GroundAuction.class, GroundAuction.ID);
+		Transaction transaction = session.beginTransaction();
+		GroundAuction res = session.get(GroundAuction.class, GroundAuction.ID);
+		transaction.commit();
+		return res;
 	}
 	public static Exchange getExchange() {
-		Session session = sessionFactory.openSession();
-		return session.get(Exchange.class, Exchange.ID);
-	}
-	public static Collection<Building> getAllBuilding() {
-		List<Building> res = new ArrayList<>();
-		res.addAll(getAllLaboratory());
-		res.addAll(getAllMaterialFactory());
-		res.addAll(getAllProductingDepartment());
-		res.addAll(getAllPublicFacility());
-		res.addAll(getAllRetailShop());
-		res.addAll(getAllApartment());
+		Transaction transaction = session.beginTransaction();
+		Exchange res = session.get(Exchange.class, Exchange.ID);
+		transaction.commit();
 		return res;
 	}
-	public static Collection<Laboratory> getAllLaboratory() {
-		Collection<Laboratory> res;
-		Session session = sessionFactory.openSession();
+	public static List<Building> getAllBuilding() {
+		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Laboratory> criteria = builder.createQuery(Laboratory.class);
-		criteria.from(Laboratory.class);
-		res = session.createQuery(criteria).list();
-		session.close();
-		return res;
-	}
-	public static Collection<MaterialFactory> getAllMaterialFactory() {
-		Collection<MaterialFactory> res;
-		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<MaterialFactory> criteria = builder.createQuery(MaterialFactory.class);
-		criteria.from(MaterialFactory.class);
-		res = session.createQuery(criteria).list();
-		session.close();
-		return res;
-	}
-	public static Collection<ProduceDepartment> getAllProductingDepartment() {
-		Collection<ProduceDepartment> res;
-		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<ProduceDepartment> criteria = builder.createQuery(ProduceDepartment.class);
-		criteria.from(ProduceDepartment.class);
-		res = session.createQuery(criteria).list();
-		session.close();
-		return res;
-	}
-	public static Collection<PublicFacility> getAllPublicFacility() {
-		Collection<PublicFacility> res;
-		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<PublicFacility> criteria = builder.createQuery(PublicFacility.class);
-		criteria.from(PublicFacility.class);
-		res = session.createQuery(criteria).list();
-		session.close();
-		return res;
-	}
-	public static Collection<RetailShop> getAllRetailShop() {
-		Collection<RetailShop> res;
-		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<RetailShop> criteria = builder.createQuery(RetailShop.class);
-		criteria.from(RetailShop.class);
-		res = session.createQuery(criteria).list();
-		session.close();
-		return res;
-	}
-	public static Collection<Apartment> getAllApartment() {
-		Collection<Apartment> res;
-		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Apartment> criteria = builder.createQuery(Apartment.class);
-		criteria.from(Apartment.class);
-		res = session.createQuery(criteria).list();
-		session.close();
+		CriteriaQuery<Building> criteria = builder.createQuery(Building.class);
+		criteria.from(Building.class);
+		List<Building> res = session.createQuery(criteria).list();
+		transaction.commit();
 		return res;
 	}
 	public static void saveOrUpdate(Collection objs) {
-		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		try {
 			int i = 0;
@@ -201,19 +151,16 @@ public class GameDb {
 				++i;
 				if (i % BATCH_SIZE == 0) {
 					session.flush();
-					session.clear();
 				}
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
 		} finally {
-			session.close();
 		}
 	}
 
 	public static void saveOrUpdate(Object o) {
-		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		try {
 			session.saveOrUpdate(o);
@@ -221,24 +168,23 @@ public class GameDb {
 		} catch (RuntimeException e) {
 			transaction.rollback();
 		} finally {
-			session.close();
+
 		}
 	}
 
 	public static List<RoleBriefInfo> getPlayerInfo(String account) {
-		Session session = sessionFactory.openSession();
-		//Transaction transaction = session.beginTransaction();
+		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 		CriteriaQuery<RoleBriefInfo> criteriaQuery = criteriaBuilder.createQuery(RoleBriefInfo.class);
 		Root<Player> root = criteriaQuery.from(Player.class);
 		criteriaQuery.multiselect(root.get(Player_.id), root.get(Player_.account), root.get(Player_.offlineTs));
 		criteriaQuery.where(criteriaBuilder.equal(root.get(Player_.account), account));
 		Query<RoleBriefInfo> query = session.createQuery(criteriaQuery);
+		transaction.commit();
 		return query.getResultList();
 	}
 
 	public static void delete(Object o) {
-		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		try {
 			session.delete(o);
@@ -248,11 +194,10 @@ public class GameDb {
 			transaction.rollback();
 		}
 		finally {
-			session.close();
+
 		}
 	}
 	public static void delete(Collection objs) {
-		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		try {
 			int i = 0;
@@ -268,18 +213,16 @@ public class GameDb {
 		} catch (RuntimeException e) {
 			transaction.rollback();
 		} finally {
-			session.close();
+
 		}
 	}
 	public static void saveOrUpdateAndDelete(Collection saveOrUpdates, Collection deletes) {
-		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		try {
 			int i = 0;
 			for (Object o : saveOrUpdates) {
 				session.saveOrUpdate(o);
 				++i;
-
 			}
 			for (Object o : deletes) {
 				session.delete(o);
@@ -287,38 +230,43 @@ public class GameDb {
 			}
 			if (i % BATCH_SIZE == 0) {
 				session.flush();
-				session.clear();
+				//session.clear();
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
 		} finally {
-			session.close();
+			//session.close();
 		}
 	}
 
-	public static Collection<Npc> getAllNpc() {
-		Collection<Npc> res;
-		Session session = sessionFactory.openSession();
+	public static List<Npc> getAllNpc() {
+		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Npc> criteria = builder.createQuery(Npc.class);
 		criteria.from(Npc.class);
-		res = session.createQuery(criteria).list();
-		session.close();
+		List<Npc> res = session.createQuery(criteria).list();
+		transaction.commit();
 		return res;
 	}
 
-	public static void init(String arg) {
+	public static void startUp(String arg) {
 		HIBERNATE_CFG_PATH = arg;
 		sessionFactory = buildSessionFactory();
+		session = sessionFactory.openSession();
 	}
-
+	public static void shutDown() {
+		session.close();
+		sessionFactory.close();
+	}
     public static Gs.ExchangeDealLogs getExchangeDealLog(UUID id) {
 		Gs.ExchangeDealLogs.Builder builder = Gs.ExchangeDealLogs.newBuilder();
 		StatelessSession session = sessionFactory.openStatelessSession();
+		Transaction transaction = session.beginTransaction();
 		Query<Exchange.DealLog> q = session.createQuery("from Exchange$DealLog where seller= :x or buyer= :x", Exchange.DealLog.class);
 		q.setParameter("x", id);
 		q.list().forEach(l -> builder.addLog(l.toProto()));
+		transaction.commit();
 		session.close();
 		return builder.build();
     }
@@ -326,17 +274,19 @@ public class GameDb {
 	public static Gs.ExchangeDealLogs getExchangeDealLog(int page) {
 		Gs.ExchangeDealLogs.Builder builder = Gs.ExchangeDealLogs.newBuilder();
 		StatelessSession session = sessionFactory.openStatelessSession();
+		Transaction transaction = session.beginTransaction();
 		Criteria criteria = session.createCriteria(Exchange.DealLog.class);
 		criteria.setFirstResult(page);
 		criteria.setMaxResults(Exchange.DealLog.ROWS_IN_ONE_PAGE);
 		criteria.list().forEach(l -> builder.addLog(((Exchange.DealLog)l).toProto()));
+		transaction.commit();
 		session.close();
 		return builder.build();
 	}
 }
 //public class GameDb {
 //	private static final Logger logger = Logger.getLogger(GameDb.class);
-//	public static void init(String url) { //"mongodb://localhost:27017"
+//	public static void startUp(String url) { //"mongodb://localhost:27017"
 //		connectionString = new MongoClientURI(url);
 //	}
 //	public static void startUp() {

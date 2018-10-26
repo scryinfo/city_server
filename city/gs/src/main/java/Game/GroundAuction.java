@@ -67,7 +67,7 @@ public class GroundAuction {
         }
     }
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKey(name = "metaId")
     @JoinColumn(name = "ground_auction_id")

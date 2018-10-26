@@ -2,15 +2,23 @@ package Game;
 
 import Shared.Util;
 import gs.Gs;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
+@Embeddable
 public class Shelf {
+    @Transient
     private int capacity;
 
     public Shelf(int shelfCapacity) {
         this.capacity = shelfCapacity;
+    }
+
+    public Shelf() {
     }
 
     void setCapacity(int capacity) {
@@ -23,9 +31,10 @@ public class Shelf {
     ItemInfo getContent(UUID id) {
         return slots.get(id);
     }
-    @Embeddable
-    public class ItemInfo {
-        UUID id = UUID.randomUUID();
+    @Entity
+    public static final class ItemInfo {
+        @Id
+        final UUID id = UUID.randomUUID();
         @Column(name = "itemId")
         @Convert(converter = MetaItem.Converter.class)
         MetaItem item;
@@ -37,13 +46,14 @@ public class Shelf {
             this.price = price;
         }
 
-        private ItemInfo() {
+        protected ItemInfo() {
         }
     }
 
-    @ElementCollection
+    @OneToMany(fetch = FetchType.EAGER)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKey(name = "id")
-    private Map<UUID, ItemInfo> slots = new TreeMap<>();
+    private Map<UUID, ItemInfo> slots = new HashMap<>();
 
     public UUID add(MetaItem item, int n, int price) {
         if(full())

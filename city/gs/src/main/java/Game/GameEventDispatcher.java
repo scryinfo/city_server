@@ -27,10 +27,10 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.bidGround_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"bidGround"));
 			table.put((short) GsCode.OpCode.addBuilding_VALUE, Wrapper.newWithMessageAsync(Gs.AddBuilding.PARSER, GameSession.class,"addBuilding"));
 			table.put((short) GsCode.OpCode.delBuilding_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"delBuilding"));
-			table.put((short) GsCode.OpCode.construct_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"construct"));
-			table.put((short) GsCode.OpCode.startBusiness_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"startBusiness"));
-			table.put((short) GsCode.OpCode.transform_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"transform"));
-			table.put((short) GsCode.OpCode.transferItem_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"transferItem"));
+			//table.put((short) GsCode.OpCode.construct_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"construct"));
+			//table.put((short) GsCode.OpCode.startBusiness_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"startBusiness"));
+			//table.put((short) GsCode.OpCode.transform_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"transform"));
+			//table.put((short) GsCode.OpCode.transferItem_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"transferItem"));
 			table.put((short) GsCode.OpCode.shelfAdd_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfAdd.PARSER, GameSession.class,"shelfAdd"));
 			table.put((short) GsCode.OpCode.shelfDel_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfDel.PARSER, GameSession.class,"shelfDel"));
 			table.put((short) GsCode.OpCode.shelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfSet.PARSER, GameSession.class,"shelfSet"));

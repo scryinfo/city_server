@@ -284,12 +284,12 @@ public class GameSession {
 		for(ByteString bs : c.getIdsList()) {
 			ids.add(Util.toUuid(bs.toByteArray()));
 		}
-		Map<UUID, Player.Info> infos = GameDb.getPlayerInfo(ids);
+		List<Player.Info> infos = GameDb.getPlayerInfo(ids);
 		if(ids.size() != infos.size()) {
 			// send false data, kick this one ?
 		}
 		Gs.RoleInfos.Builder builder = Gs.RoleInfos.newBuilder();
-		infos.forEach((k,v)->builder.addInfo(Gs.RoleInfo.newBuilder().setId(Util.toByteString(k)).setName(v.name)));
+		infos.forEach((i)->builder.addInfo(Gs.RoleInfo.newBuilder().setId(Util.toByteString(i.id)).setName(i.name)));
 		this.write(Package.create(cmd, builder.build()));
 	}
 	public void addBuilding(short cmd, Message message) {
@@ -308,7 +308,7 @@ public class GameSession {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.type() == MetaBuilding.VIRTUAL || !b.canUseBy(player.id()))
+		if(b == null || b.type() == MetaBuilding.TRIVIAL || !b.canUseBy(player.id()))
 			return;
 		City.instance().delBuilding(b);
 	}

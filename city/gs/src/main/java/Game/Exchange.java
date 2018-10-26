@@ -359,18 +359,18 @@ public class Exchange {
     private PeriodicTimer updateTimer = new PeriodicTimer(20000);
     //@Transient
     //private Map<Integer, Info> info = new HashMap<>();
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "exchange_id")
     @MapKey(name = "itemId")
     private Map<Integer, Stat> itemStat = new HashMap<>();
 
     //==============plain data, DO NOT use them directly======================
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "exchange_id")
     private Set<Order> _orderData = new HashSet<>();
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "exchange_id")
     @OrderBy("ts ASC")

@@ -56,11 +56,10 @@ public class Player {
     @Transient
     private City city;
 
-    @ElementCollection
-    @CollectionTable(name="locked_money", joinColumns=@JoinColumn(name="player_id",referencedColumnName="id"))
-    @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
+    @ElementCollection(fetch = FetchType.EAGER)
+    //@CollectionTable(name="locked_money", joinColumns=@JoinColumn(name="player_id",referencedColumnName="id"))
     @MapKeyColumn(name = "transaction_id")
-    @Column(name="money", nullable = false)
+    //@Column(name="money", nullable = false)
     private Map<UUID, Long> lockedMoney = new HashMap<>();
 
     @Transient

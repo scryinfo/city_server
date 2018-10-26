@@ -10,7 +10,6 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelMatcher;
-import io.netty.channel.group.ChannelMatchers;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -65,7 +64,7 @@ public class GameServer {
         MetaData.startUp();
 
         // db info is in hibernate.xml now
-        //GameDb.init(gsInfo.getGameDbUrl());
+        //GameDb.startUp(gsInfo.getGameDbUrl());
         //GameDb.startUp();
     }
 
@@ -76,7 +75,7 @@ public class GameServer {
         System.out.println("login to account server");
     }
     public void run() throws Exception {
-        City.init(MetaData.getCity()); // some other object depend on city, so init it first
+        City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
 
@@ -136,7 +135,7 @@ public class GameServer {
         // By default, logging is enabled via the popular SLF4J API. The use of SLF4J is optional; the driver will use SLF4J if the driver detects the presence of SLF4J in the classpath. Otherwise, the driver will fall back to JUL (java.util.logging)
         java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
         GlobalConfig.init(args[0]);
-        GameDb.init(args[1]);
+        GameDb.startUp(args[1]);
         new GameServer().run();
     }
 }

@@ -46,7 +46,7 @@ public class City {
     public static final int TERRIAN_PLAYER = 0x00000002;
     public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
 
-    private short[][] terrian;
+    private short[][] terrain;
     private HashMap<UUID, Building> allBuilding = new HashMap<>();
 
 //    private HashMap<ObjectId, TrivialBuilding> allTrivialBuilding = new HashMap<>();
@@ -78,7 +78,7 @@ public class City {
             for(int j = 0; j < GridMaxY; ++j)
                 grids[i][j] = new Grid(i,j);
         }
-        terrian = new short[meta.x][meta.y];
+        terrain = new short[meta.x][meta.y];
         this.currentTimeSectionIdx = meta.indexOfHour(this.localTime().getHour());
         // load initial buildings
         loadSysBuildings();
@@ -99,7 +99,7 @@ public class City {
                 continue;
             }
             Building b = Building.create(i.id, new Coord(i.x, i.y), SysRoleId);
-            this.calcuTerrian(b);
+            this.calcuTerrain(b);
             // b is useless, discard it
         }
     }
@@ -128,7 +128,7 @@ public class City {
         });
     }
     public void run() {
-        // init metaBuilding?
+        // startUp metaBuilding?
         // calcu parameters
         e.scheduleAtFixedRate(() -> {
             final long now = System.nanoTime();
@@ -316,7 +316,7 @@ public class City {
     private boolean canBuild(Building building) {
         for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
-                if(terrian[x][y] != TERRIAN_NONE)
+                if(terrain[x][y] != TERRIAN_NONE)
                     return false;
             }
         }
@@ -324,19 +324,19 @@ public class City {
     }
     private void take(Building building) {
         assert building.type() != MetaBuilding.TRIVIAL;
-        calcuTerrian(building);
+        calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         HashMap<UUID, Building> bs = this.playerBuilding.getOrDefault(building.ownerId(), new HashMap<>());
         bs.put(building.id(), building);
     }
 
-    private void calcuTerrian(Building building) {
+    private void calcuTerrain(Building building) {
         for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
                 if(building.type() == MetaBuilding.TRIVIAL)
-                    terrian[x][y] = TERRIAN_TRIVIAL;
+                    terrain[x][y] = TERRIAN_TRIVIAL;
                 else
-                    terrian[x][y] = TERRIAN_PLAYER;
+                    terrain[x][y] = TERRIAN_PLAYER;
             }
         }
     }
