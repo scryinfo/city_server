@@ -18051,18 +18051,10 @@ public final class Gs {
     // required int32 id = 1;
     /**
      * <code>required int32 id = 1;</code>
-     *
-     * <pre>
-     *只能是虚拟建筑
-     * </pre>
      */
     boolean hasId();
     /**
      * <code>required int32 id = 1;</code>
-     *
-     * <pre>
-     *只能是虚拟建筑
-     * </pre>
      */
     int getId();
 
@@ -18198,20 +18190,12 @@ public final class Gs {
     private int id_;
     /**
      * <code>required int32 id = 1;</code>
-     *
-     * <pre>
-     *只能是虚拟建筑
-     * </pre>
      */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>required int32 id = 1;</code>
-     *
-     * <pre>
-     *只能是虚拟建筑
-     * </pre>
      */
     public int getId() {
       return id_;
@@ -18524,30 +18508,18 @@ public final class Gs {
       private int id_ ;
       /**
        * <code>required int32 id = 1;</code>
-       *
-       * <pre>
-       *只能是虚拟建筑
-       * </pre>
        */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>required int32 id = 1;</code>
-       *
-       * <pre>
-       *只能是虚拟建筑
-       * </pre>
        */
       public int getId() {
         return id_;
       }
       /**
        * <code>required int32 id = 1;</code>
-       *
-       * <pre>
-       *只能是虚拟建筑
-       * </pre>
        */
       public Builder setId(int value) {
         bitField0_ |= 0x00000001;
@@ -18557,10 +18529,6 @@ public final class Gs {
       }
       /**
        * <code>required int32 id = 1;</code>
-       *
-       * <pre>
-       *只能是虚拟建筑
-       * </pre>
        */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -24561,35 +24529,9 @@ public final class Gs {
      */
     gs.Gs.ShelfOrBuilder getShelfOrBuilder();
 
-    // required .gs.Nums chart = 4;
+    // repeated .gs.Line line = 4;
     /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    boolean hasChart();
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    gs.Gs.Nums getChart();
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    gs.Gs.NumsOrBuilder getChartOrBuilder();
-
-    // repeated .gs.Line line = 5;
-    /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24598,7 +24540,7 @@ public final class Gs {
     java.util.List<gs.Gs.Line> 
         getLineList();
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24606,7 +24548,7 @@ public final class Gs {
      */
     gs.Gs.Line getLine(int index);
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24614,7 +24556,7 @@ public final class Gs {
      */
     int getLineCount();
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24623,7 +24565,7 @@ public final class Gs {
     java.util.List<? extends gs.Gs.LineOrBuilder> 
         getLineOrBuilderList();
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24730,22 +24672,9 @@ public final class Gs {
               break;
             }
             case 34: {
-              gs.Gs.Nums.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
-                subBuilder = chart_.toBuilder();
-              }
-              chart_ = input.readMessage(gs.Gs.Nums.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(chart_);
-                chart_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000008;
-              break;
-            }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 line_ = new java.util.ArrayList<gs.Gs.Line>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000008;
               }
               line_.add(input.readMessage(gs.Gs.Line.PARSER, extensionRegistry));
               break;
@@ -24758,7 +24687,7 @@ public final class Gs {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           line_ = java.util.Collections.unmodifiableList(line_);
         }
         this.unknownFields = unknownFields.build();
@@ -24883,45 +24812,11 @@ public final class Gs {
       return shelf_;
     }
 
-    // required .gs.Nums chart = 4;
-    public static final int CHART_FIELD_NUMBER = 4;
-    private gs.Gs.Nums chart_;
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    public boolean hasChart() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    public gs.Gs.Nums getChart() {
-      return chart_;
-    }
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    public gs.Gs.NumsOrBuilder getChartOrBuilder() {
-      return chart_;
-    }
-
-    // repeated .gs.Line line = 5;
-    public static final int LINE_FIELD_NUMBER = 5;
+    // repeated .gs.Line line = 4;
+    public static final int LINE_FIELD_NUMBER = 4;
     private java.util.List<gs.Gs.Line> line_;
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24931,7 +24826,7 @@ public final class Gs {
       return line_;
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24942,7 +24837,7 @@ public final class Gs {
       return line_;
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24952,7 +24847,7 @@ public final class Gs {
       return line_.size();
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24962,7 +24857,7 @@ public final class Gs {
       return line_.get(index);
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -24977,7 +24872,6 @@ public final class Gs {
       info_ = gs.Gs.BuildingInfo.getDefaultInstance();
       store_ = gs.Gs.Store.getDefaultInstance();
       shelf_ = gs.Gs.Shelf.getDefaultInstance();
-      chart_ = gs.Gs.Nums.getDefaultInstance();
       line_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
@@ -24994,10 +24888,6 @@ public final class Gs {
         return false;
       }
       if (!hasShelf()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasChart()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -25035,11 +24925,8 @@ public final class Gs {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeMessage(3, shelf_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, chart_);
-      }
       for (int i = 0; i < line_.size(); i++) {
-        output.writeMessage(5, line_.get(i));
+        output.writeMessage(4, line_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -25062,13 +24949,9 @@ public final class Gs {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, shelf_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, chart_);
-      }
       for (int i = 0; i < line_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, line_.get(i));
+          .computeMessageSize(4, line_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -25188,7 +25071,6 @@ public final class Gs {
           getInfoFieldBuilder();
           getStoreFieldBuilder();
           getShelfFieldBuilder();
-          getChartFieldBuilder();
           getLineFieldBuilder();
         }
       }
@@ -25216,15 +25098,9 @@ public final class Gs {
           shelfBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000004);
-        if (chartBuilder_ == null) {
-          chart_ = gs.Gs.Nums.getDefaultInstance();
-        } else {
-          chartBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
         if (lineBuilder_ == null) {
           line_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           lineBuilder_.clear();
         }
@@ -25280,18 +25156,10 @@ public final class Gs {
         } else {
           result.shelf_ = shelfBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        if (chartBuilder_ == null) {
-          result.chart_ = chart_;
-        } else {
-          result.chart_ = chartBuilder_.build();
-        }
         if (lineBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
             line_ = java.util.Collections.unmodifiableList(line_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.line_ = line_;
         } else {
@@ -25322,14 +25190,11 @@ public final class Gs {
         if (other.hasShelf()) {
           mergeShelf(other.getShelf());
         }
-        if (other.hasChart()) {
-          mergeChart(other.getChart());
-        }
         if (lineBuilder_ == null) {
           if (!other.line_.isEmpty()) {
             if (line_.isEmpty()) {
               line_ = other.line_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensureLineIsMutable();
               line_.addAll(other.line_);
@@ -25342,7 +25207,7 @@ public final class Gs {
               lineBuilder_.dispose();
               lineBuilder_ = null;
               line_ = other.line_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000008);
               lineBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getLineFieldBuilder() : null;
@@ -25365,10 +25230,6 @@ public final class Gs {
           return false;
         }
         if (!hasShelf()) {
-          
-          return false;
-        }
-        if (!hasChart()) {
           
           return false;
         }
@@ -25835,166 +25696,13 @@ public final class Gs {
         return shelfBuilder_;
       }
 
-      // required .gs.Nums chart = 4;
-      private gs.Gs.Nums chart_ = gs.Gs.Nums.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.Nums, gs.Gs.Nums.Builder, gs.Gs.NumsOrBuilder> chartBuilder_;
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public boolean hasChart() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public gs.Gs.Nums getChart() {
-        if (chartBuilder_ == null) {
-          return chart_;
-        } else {
-          return chartBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder setChart(gs.Gs.Nums value) {
-        if (chartBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          chart_ = value;
-          onChanged();
-        } else {
-          chartBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder setChart(
-          gs.Gs.Nums.Builder builderForValue) {
-        if (chartBuilder_ == null) {
-          chart_ = builderForValue.build();
-          onChanged();
-        } else {
-          chartBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder mergeChart(gs.Gs.Nums value) {
-        if (chartBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
-              chart_ != gs.Gs.Nums.getDefaultInstance()) {
-            chart_ =
-              gs.Gs.Nums.newBuilder(chart_).mergeFrom(value).buildPartial();
-          } else {
-            chart_ = value;
-          }
-          onChanged();
-        } else {
-          chartBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder clearChart() {
-        if (chartBuilder_ == null) {
-          chart_ = gs.Gs.Nums.getDefaultInstance();
-          onChanged();
-        } else {
-          chartBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public gs.Gs.Nums.Builder getChartBuilder() {
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return getChartFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public gs.Gs.NumsOrBuilder getChartOrBuilder() {
-        if (chartBuilder_ != null) {
-          return chartBuilder_.getMessageOrBuilder();
-        } else {
-          return chart_;
-        }
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.Nums, gs.Gs.Nums.Builder, gs.Gs.NumsOrBuilder> 
-          getChartFieldBuilder() {
-        if (chartBuilder_ == null) {
-          chartBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              gs.Gs.Nums, gs.Gs.Nums.Builder, gs.Gs.NumsOrBuilder>(
-                  chart_,
-                  getParentForChildren(),
-                  isClean());
-          chart_ = null;
-        }
-        return chartBuilder_;
-      }
-
-      // repeated .gs.Line line = 5;
+      // repeated .gs.Line line = 4;
       private java.util.List<gs.Gs.Line> line_ =
         java.util.Collections.emptyList();
       private void ensureLineIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           line_ = new java.util.ArrayList<gs.Gs.Line>(line_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000008;
          }
       }
 
@@ -26002,7 +25710,7 @@ public final class Gs {
           gs.Gs.Line, gs.Gs.Line.Builder, gs.Gs.LineOrBuilder> lineBuilder_;
 
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26016,7 +25724,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26030,7 +25738,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26044,7 +25752,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26065,7 +25773,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26083,7 +25791,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26103,7 +25811,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26124,7 +25832,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26142,7 +25850,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26160,7 +25868,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26178,7 +25886,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26187,7 +25895,7 @@ public final class Gs {
       public Builder clearLine() {
         if (lineBuilder_ == null) {
           line_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           lineBuilder_.clear();
@@ -26195,7 +25903,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26212,7 +25920,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26223,7 +25931,7 @@ public final class Gs {
         return getLineFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26237,7 +25945,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26252,7 +25960,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26263,7 +25971,7 @@ public final class Gs {
             gs.Gs.Line.getDefaultInstance());
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26275,7 +25983,7 @@ public final class Gs {
             index, gs.Gs.Line.getDefaultInstance());
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -26292,7 +26000,7 @@ public final class Gs {
           lineBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               gs.Gs.Line, gs.Gs.Line.Builder, gs.Gs.LineOrBuilder>(
                   line_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           line_ = null;
@@ -26380,35 +26088,9 @@ public final class Gs {
      */
     gs.Gs.ShelfOrBuilder getShelfOrBuilder();
 
-    // required .gs.Nums chart = 4;
+    // repeated .gs.Line line = 4;
     /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    boolean hasChart();
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    gs.Gs.Nums getChart();
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    gs.Gs.NumsOrBuilder getChartOrBuilder();
-
-    // repeated .gs.Line line = 5;
-    /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26417,7 +26099,7 @@ public final class Gs {
     java.util.List<gs.Gs.Line> 
         getLineList();
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26425,7 +26107,7 @@ public final class Gs {
      */
     gs.Gs.Line getLine(int index);
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26433,7 +26115,7 @@ public final class Gs {
      */
     int getLineCount();
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26442,7 +26124,7 @@ public final class Gs {
     java.util.List<? extends gs.Gs.LineOrBuilder> 
         getLineOrBuilderList();
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26549,22 +26231,9 @@ public final class Gs {
               break;
             }
             case 34: {
-              gs.Gs.Nums.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
-                subBuilder = chart_.toBuilder();
-              }
-              chart_ = input.readMessage(gs.Gs.Nums.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(chart_);
-                chart_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000008;
-              break;
-            }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 line_ = new java.util.ArrayList<gs.Gs.Line>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000008;
               }
               line_.add(input.readMessage(gs.Gs.Line.PARSER, extensionRegistry));
               break;
@@ -26577,7 +26246,7 @@ public final class Gs {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           line_ = java.util.Collections.unmodifiableList(line_);
         }
         this.unknownFields = unknownFields.build();
@@ -26702,45 +26371,11 @@ public final class Gs {
       return shelf_;
     }
 
-    // required .gs.Nums chart = 4;
-    public static final int CHART_FIELD_NUMBER = 4;
-    private gs.Gs.Nums chart_;
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    public boolean hasChart() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    public gs.Gs.Nums getChart() {
-      return chart_;
-    }
-    /**
-     * <code>required .gs.Nums chart = 4;</code>
-     *
-     * <pre>
-     *走势图 size is 30*24
-     * </pre>
-     */
-    public gs.Gs.NumsOrBuilder getChartOrBuilder() {
-      return chart_;
-    }
-
-    // repeated .gs.Line line = 5;
-    public static final int LINE_FIELD_NUMBER = 5;
+    // repeated .gs.Line line = 4;
+    public static final int LINE_FIELD_NUMBER = 4;
     private java.util.List<gs.Gs.Line> line_;
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26750,7 +26385,7 @@ public final class Gs {
       return line_;
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26761,7 +26396,7 @@ public final class Gs {
       return line_;
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26771,7 +26406,7 @@ public final class Gs {
       return line_.size();
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26781,7 +26416,7 @@ public final class Gs {
       return line_.get(index);
     }
     /**
-     * <code>repeated .gs.Line line = 5;</code>
+     * <code>repeated .gs.Line line = 4;</code>
      *
      * <pre>
      *生产线
@@ -26796,7 +26431,6 @@ public final class Gs {
       info_ = gs.Gs.BuildingInfo.getDefaultInstance();
       store_ = gs.Gs.Store.getDefaultInstance();
       shelf_ = gs.Gs.Shelf.getDefaultInstance();
-      chart_ = gs.Gs.Nums.getDefaultInstance();
       line_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
@@ -26813,10 +26447,6 @@ public final class Gs {
         return false;
       }
       if (!hasShelf()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasChart()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -26854,11 +26484,8 @@ public final class Gs {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeMessage(3, shelf_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, chart_);
-      }
       for (int i = 0; i < line_.size(); i++) {
-        output.writeMessage(5, line_.get(i));
+        output.writeMessage(4, line_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -26881,13 +26508,9 @@ public final class Gs {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, shelf_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, chart_);
-      }
       for (int i = 0; i < line_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, line_.get(i));
+          .computeMessageSize(4, line_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -27007,7 +26630,6 @@ public final class Gs {
           getInfoFieldBuilder();
           getStoreFieldBuilder();
           getShelfFieldBuilder();
-          getChartFieldBuilder();
           getLineFieldBuilder();
         }
       }
@@ -27035,15 +26657,9 @@ public final class Gs {
           shelfBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000004);
-        if (chartBuilder_ == null) {
-          chart_ = gs.Gs.Nums.getDefaultInstance();
-        } else {
-          chartBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
         if (lineBuilder_ == null) {
           line_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           lineBuilder_.clear();
         }
@@ -27099,18 +26715,10 @@ public final class Gs {
         } else {
           result.shelf_ = shelfBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        if (chartBuilder_ == null) {
-          result.chart_ = chart_;
-        } else {
-          result.chart_ = chartBuilder_.build();
-        }
         if (lineBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
             line_ = java.util.Collections.unmodifiableList(line_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.line_ = line_;
         } else {
@@ -27141,14 +26749,11 @@ public final class Gs {
         if (other.hasShelf()) {
           mergeShelf(other.getShelf());
         }
-        if (other.hasChart()) {
-          mergeChart(other.getChart());
-        }
         if (lineBuilder_ == null) {
           if (!other.line_.isEmpty()) {
             if (line_.isEmpty()) {
               line_ = other.line_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensureLineIsMutable();
               line_.addAll(other.line_);
@@ -27161,7 +26766,7 @@ public final class Gs {
               lineBuilder_.dispose();
               lineBuilder_ = null;
               line_ = other.line_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000008);
               lineBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getLineFieldBuilder() : null;
@@ -27184,10 +26789,6 @@ public final class Gs {
           return false;
         }
         if (!hasShelf()) {
-          
-          return false;
-        }
-        if (!hasChart()) {
           
           return false;
         }
@@ -27654,166 +27255,13 @@ public final class Gs {
         return shelfBuilder_;
       }
 
-      // required .gs.Nums chart = 4;
-      private gs.Gs.Nums chart_ = gs.Gs.Nums.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.Nums, gs.Gs.Nums.Builder, gs.Gs.NumsOrBuilder> chartBuilder_;
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public boolean hasChart() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public gs.Gs.Nums getChart() {
-        if (chartBuilder_ == null) {
-          return chart_;
-        } else {
-          return chartBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder setChart(gs.Gs.Nums value) {
-        if (chartBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          chart_ = value;
-          onChanged();
-        } else {
-          chartBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder setChart(
-          gs.Gs.Nums.Builder builderForValue) {
-        if (chartBuilder_ == null) {
-          chart_ = builderForValue.build();
-          onChanged();
-        } else {
-          chartBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder mergeChart(gs.Gs.Nums value) {
-        if (chartBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
-              chart_ != gs.Gs.Nums.getDefaultInstance()) {
-            chart_ =
-              gs.Gs.Nums.newBuilder(chart_).mergeFrom(value).buildPartial();
-          } else {
-            chart_ = value;
-          }
-          onChanged();
-        } else {
-          chartBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public Builder clearChart() {
-        if (chartBuilder_ == null) {
-          chart_ = gs.Gs.Nums.getDefaultInstance();
-          onChanged();
-        } else {
-          chartBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        return this;
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public gs.Gs.Nums.Builder getChartBuilder() {
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return getChartFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      public gs.Gs.NumsOrBuilder getChartOrBuilder() {
-        if (chartBuilder_ != null) {
-          return chartBuilder_.getMessageOrBuilder();
-        } else {
-          return chart_;
-        }
-      }
-      /**
-       * <code>required .gs.Nums chart = 4;</code>
-       *
-       * <pre>
-       *走势图 size is 30*24
-       * </pre>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.Nums, gs.Gs.Nums.Builder, gs.Gs.NumsOrBuilder> 
-          getChartFieldBuilder() {
-        if (chartBuilder_ == null) {
-          chartBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              gs.Gs.Nums, gs.Gs.Nums.Builder, gs.Gs.NumsOrBuilder>(
-                  chart_,
-                  getParentForChildren(),
-                  isClean());
-          chart_ = null;
-        }
-        return chartBuilder_;
-      }
-
-      // repeated .gs.Line line = 5;
+      // repeated .gs.Line line = 4;
       private java.util.List<gs.Gs.Line> line_ =
         java.util.Collections.emptyList();
       private void ensureLineIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           line_ = new java.util.ArrayList<gs.Gs.Line>(line_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000008;
          }
       }
 
@@ -27821,7 +27269,7 @@ public final class Gs {
           gs.Gs.Line, gs.Gs.Line.Builder, gs.Gs.LineOrBuilder> lineBuilder_;
 
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27835,7 +27283,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27849,7 +27297,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27863,7 +27311,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27884,7 +27332,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27902,7 +27350,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27922,7 +27370,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27943,7 +27391,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27961,7 +27409,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27979,7 +27427,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -27997,7 +27445,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28006,7 +27454,7 @@ public final class Gs {
       public Builder clearLine() {
         if (lineBuilder_ == null) {
           line_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           lineBuilder_.clear();
@@ -28014,7 +27462,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28031,7 +27479,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28042,7 +27490,7 @@ public final class Gs {
         return getLineFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28056,7 +27504,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28071,7 +27519,7 @@ public final class Gs {
         }
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28082,7 +27530,7 @@ public final class Gs {
             gs.Gs.Line.getDefaultInstance());
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28094,7 +27542,7 @@ public final class Gs {
             index, gs.Gs.Line.getDefaultInstance());
       }
       /**
-       * <code>repeated .gs.Line line = 5;</code>
+       * <code>repeated .gs.Line line = 4;</code>
        *
        * <pre>
        *生产线
@@ -28111,7 +27559,7 @@ public final class Gs {
           lineBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               gs.Gs.Line, gs.Gs.Line.Builder, gs.Gs.LineOrBuilder>(
                   line_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           line_ = null;
@@ -43085,57 +42533,56 @@ public final class Gs {
       "locked\030\003 \003(\0132\n.gs.IntNum\"k\n\005Shelf\022\037\n\004goo" +
       "d\030\001 \003(\0132\021.gs.Shelf.Content\032A\n\007Content\022\n\n",
       "\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\013\n\003num\030\003 \002(\005\022\r" +
-      "\n\005price\030\004 \002(\005\"\226\001\n\017MaterialFactory\022\036\n\004inf" +
-      "o\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 \002(\013" +
-      "2\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\027\n" +
-      "\005chart\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010.g" +
-      "s.Line\"\230\001\n\021ProduceDepartment\022\036\n\004info\030\001 \002" +
-      "(\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 \002(\0132\t.gs" +
-      ".Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\027\n\005char" +
-      "t\030\004 \002(\0132\010.gs.Nums\022\026\n\004line\030\005 \003(\0132\010.gs.Lin" +
-      "e\"J\n\010ShelfAdd\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006ite",
-      "mId\030\002 \002(\005\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\"1\n" +
-      "\010ShelfDel\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcontent" +
-      "Id\030\002 \002(\014\"M\n\010ShelfSet\022\022\n\nbuildingId\030\001 \002(\014" +
-      "\022\021\n\tcontentId\030\002 \002(\014\022\013\n\003num\030\003 \002(\005\022\r\n\005pric" +
-      "e\030\004 \002(\005\"d\n\nBuyInShelf\022\022\n\nbuildingId\030\001 \002(" +
-      "\014\022\021\n\tcontentId\030\002 \002(\014\022\013\n\003num\030\003 \002(\005\022\r\n\005pri" +
-      "ce\030\004 \002(\005\022\023\n\013wareHouseId\030\005 \002(\014\"K\n\007AddLine" +
-      "\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttargetNu" +
-      "m\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"V\n\nChangeLine" +
-      "\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\t",
-      "workerNum\030\003 \001(\005\022\021\n\ttargetNum\030\004 \001(\005\"P\n\010Li" +
-      "neInfo\022\n\n\002id\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(\005\022\023\n\013" +
-      "targetCount\030\003 \001(\005\022\021\n\tworkerNum\030\004 \001(\005\"\211\001\n" +
-      "\023ExchangeItemSummary\022\016\n\006itemId\030\001 \002(\005\022\020\n\010" +
-      "lowPrice\030\002 \001(\005\022\021\n\thighPrice\030\003 \001(\005\022\020\n\010now" +
-      "Price\030\004 \001(\005\022\026\n\016sumDealedPrice\030\005 \001(\003\022\023\n\013p" +
-      "riceChange\030\006 \001(\021\"<\n\020ExchangeItemList\022(\n\007" +
-      "summary\030\001 \003(\0132\027.gs.ExchangeItemSummary\"C" +
-      "\n\026ItemDealHistoryElement\022\r\n\005price\030\001 \002(\005\022" +
-      "\016\n\006amount\030\002 \002(\005\022\n\n\002ts\030\003 \002(\003\":\n\017ItemDealH",
-      "istory\022\'\n\003log\030\001 \003(\0132\032.gs.ItemDealHistory" +
-      "Element\"M\n\013ExchangeBuy\022\016\n\006itemId\030\001 \002(\005\022\013" +
-      "\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId" +
-      "\030\004 \002(\014\"N\n\014ExchangeSell\022\016\n\006itemId\030\001 \002(\005\022\013" +
-      "\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId" +
-      "\030\004 \002(\014\"n\n\022ExchangeItemDetail\022\027\n\003buy\030\001 \003(" +
-      "\0132\n.gs.IntNum\022\030\n\004sell\030\002 \003(\0132\n.gs.IntNum\022" +
-      "\020\n\010nowPrice\030\003 \002(\005\022\023\n\013priceChange\030\004 \002(\005\"w" +
-      "\n\014ExchangeDeal\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 " +
-      "\002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\022\022",
-      "\n\nbuyOrderId\030\005 \002(\014\022\023\n\013sellOrderId\030\006 \002(\014\"" +
-      "s\n\rExchangeOrder\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002" +
-      " \002(\005\022\016\n\006dealed\030\003 \002(\005\022\r\n\005total\030\004 \002(\005\022\r\n\005p" +
-      "rice\030\005 \002(\005\022\n\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002(\010\"2\n\016" +
-      "ExchangeOrders\022 \n\005order\030\001 \003(\0132\021.gs.Excha" +
-      "ngeOrder\"o\n\017ExchangeDealLog\022\020\n\010sellerId\030" +
-      "\001 \002(\014\022\017\n\007buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005pr" +
-      "ice\030\004 \002(\005\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemId\030\006 \002(" +
-      "\005\"4\n\020ExchangeDealLogs\022 \n\003log\030\001 \003(\0132\023.gs." +
-      "ExchangeDealLog*f\n\rBuildingState\022\020\n\014CONS",
-      "TRUCTING\020\002\022\020\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_" +
-      "OPERATE\020\004\022\013\n\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
+      "\n\005price\030\004 \002(\005\"}\n\017MaterialFactory\022\036\n\004info" +
+      "\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 \002(\0132" +
+      "\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\026\n\004" +
+      "line\030\004 \003(\0132\010.gs.Line\"\177\n\021ProduceDepartmen" +
+      "t\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005sto" +
+      "re\030\002 \002(\0132\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs." +
+      "Shelf\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"J\n\010ShelfAd" +
+      "d\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\013\n" +
+      "\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\"1\n\010ShelfDel\022\022\n",
+      "\nbuildingId\030\001 \002(\014\022\021\n\tcontentId\030\002 \002(\014\"M\n\010" +
+      "ShelfSet\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcontentI" +
+      "d\030\002 \002(\014\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\"d\n\nB" +
+      "uyInShelf\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcontent" +
+      "Id\030\002 \002(\014\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\022\023\n\013" +
+      "wareHouseId\030\005 \002(\014\"K\n\007AddLine\022\n\n\002id\030\001 \002(\014" +
+      "\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021\n\tw" +
+      "orkerNum\030\004 \002(\005\"V\n\nChangeLine\022\022\n\nbuilding" +
+      "Id\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum\030\003 " +
+      "\001(\005\022\021\n\ttargetNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n\002id",
+      "\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(\005\022\023\n\013targetCount\030" +
+      "\003 \001(\005\022\021\n\tworkerNum\030\004 \001(\005\"\211\001\n\023ExchangeIte" +
+      "mSummary\022\016\n\006itemId\030\001 \002(\005\022\020\n\010lowPrice\030\002 \001" +
+      "(\005\022\021\n\thighPrice\030\003 \001(\005\022\020\n\010nowPrice\030\004 \001(\005\022" +
+      "\026\n\016sumDealedPrice\030\005 \001(\003\022\023\n\013priceChange\030\006" +
+      " \001(\021\"<\n\020ExchangeItemList\022(\n\007summary\030\001 \003(" +
+      "\0132\027.gs.ExchangeItemSummary\"C\n\026ItemDealHi" +
+      "storyElement\022\r\n\005price\030\001 \002(\005\022\016\n\006amount\030\002 " +
+      "\002(\005\022\n\n\002ts\030\003 \002(\003\":\n\017ItemDealHistory\022\'\n\003lo" +
+      "g\030\001 \003(\0132\032.gs.ItemDealHistoryElement\"M\n\013E",
+      "xchangeBuy\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022" +
+      "\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"N\n\014Ex" +
+      "changeSell\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022" +
+      "\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"n\n\022Ex" +
+      "changeItemDetail\022\027\n\003buy\030\001 \003(\0132\n.gs.IntNu" +
+      "m\022\030\n\004sell\030\002 \003(\0132\n.gs.IntNum\022\020\n\010nowPrice\030" +
+      "\003 \002(\005\022\023\n\013priceChange\030\004 \002(\005\"w\n\014ExchangeDe" +
+      "al\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price" +
+      "\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\022\022\n\nbuyOrderId" +
+      "\030\005 \002(\014\022\023\n\013sellOrderId\030\006 \002(\014\"s\n\rExchangeO",
+      "rder\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\016\n\006deal" +
+      "ed\030\003 \002(\005\022\r\n\005total\030\004 \002(\005\022\r\n\005price\030\005 \002(\005\022\n" +
+      "\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002(\010\"2\n\016ExchangeOrde" +
+      "rs\022 \n\005order\030\001 \003(\0132\021.gs.ExchangeOrder\"o\n\017" +
+      "ExchangeDealLog\022\020\n\010sellerId\030\001 \002(\014\022\017\n\007buy" +
+      "erId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030\004 \002(\005\022\016\n" +
+      "\006dealed\030\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\"4\n\020Exchang" +
+      "eDealLogs\022 \n\003log\030\001 \003(\0132\023.gs.ExchangeDeal" +
+      "Log*f\n\rBuildingState\022\020\n\014CONSTRUCTING\020\002\022\020" +
+      "\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_OPERATE\020\004\022\013\n",
+      "\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -43351,13 +42798,13 @@ public final class Gs {
           internal_static_gs_MaterialFactory_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_MaterialFactory_descriptor,
-              new java.lang.String[] { "Info", "Store", "Shelf", "Chart", "Line", });
+              new java.lang.String[] { "Info", "Store", "Shelf", "Line", });
           internal_static_gs_ProduceDepartment_descriptor =
             getDescriptor().getMessageTypes().get(32);
           internal_static_gs_ProduceDepartment_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ProduceDepartment_descriptor,
-              new java.lang.String[] { "Info", "Store", "Shelf", "Chart", "Line", });
+              new java.lang.String[] { "Info", "Store", "Shelf", "Line", });
           internal_static_gs_ShelfAdd_descriptor =
             getDescriptor().getMessageTypes().get(33);
           internal_static_gs_ShelfAdd_fieldAccessorTable = new

@@ -121,16 +121,16 @@ public class Exchange {
     }
     public UUID addSellOrder(UUID who, int itemId, int price, int n, UUID buildingId) {
         Order order = new Order(who, price, itemId, n, buildingId,true);
-        tradings.getOrDefault(itemId, new Trading()).sell.add(order);
-        orders.getOrDefault(who, new HashMap<>()).put(order.id, order);
+        tradings.computeIfAbsent(itemId, k->new Trading()).sell.add(order);
+        orders.computeIfAbsent(who, k->new HashMap<>()).put(order.id, order);
         _orderData.add(order);
         this.watcher.sendTo(itemId);
         return order.id;
     }
     public UUID addBuyOrder(UUID who, int itemId, int price, int n, UUID buildingId) {
         Order order = new Order(who, price, itemId, n, buildingId,false);
-        tradings.getOrDefault(itemId, new Trading()).buy.add(order);
-        orders.getOrDefault(who, new HashMap<>()).put(order.id, order);
+        tradings.computeIfAbsent(itemId, k->new Trading()).buy.add(order);
+        orders.computeIfAbsent(who, k->new HashMap<>()).put(order.id, order);
         _orderData.add(order);
         this.watcher.sendTo(itemId);
         return order.id;
@@ -153,8 +153,8 @@ public class Exchange {
     }
     private void buildOrderCache() {
         tradings.forEach((k,v)-> {
-            v.sell.forEach(o -> orders.getOrDefault(o.playerId, new HashMap<>()).put(o.id, o));
-            v.buy.forEach(o -> orders.getOrDefault(o.playerId, new HashMap<>()).put(o.id, o));
+            v.sell.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
+            v.buy.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
         });
     }
 
@@ -224,7 +224,7 @@ public class Exchange {
         ins.consumeReserve(mi, n);
 
         DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, s.price);
-        this.itemStat.getOrDefault(mi.id, new Stat(mi.id)).histories.add(log);
+        this.itemStat.computeIfAbsent(mi.id, k->new Stat(mi.id)).histories.add(log);
         this._dealHistoryData.add(log);
         Collection<Object> updates = Arrays.asList(buyer, seller, in, out, log, this);
         GameDb.saveOrUpdate(updates);
@@ -384,12 +384,12 @@ public class Exchange {
     void _init() {
         final long now = System.currentTimeMillis();
         for(Order order : _orderData) {
-            Trading trading = tradings.getOrDefault(order.itemId, new Trading());
+            Trading trading = tradings.computeIfAbsent(order.itemId, k->new Trading());
             if(order.sell)
                 trading.sell.add(order);
             else
                 trading.buy.add(order);
-            orders.getOrDefault(order.playerId, new HashMap<>()).put(order.id, order);
+            orders.computeIfAbsent(order.playerId, k->new HashMap<>()).put(order.id, order);
         }
 
         {
@@ -399,7 +399,7 @@ public class Exchange {
             TreeSet<DealLog> deals = (TreeSet<DealLog>) _dealHistoryData;
             removeOutdatedDealLog(deals, now);
 
-            deals.descendingSet().forEach(l->this.itemStat.getOrDefault(l.itemId, new Stat(l.itemId)).histories.add(l));
+            deals.descendingSet().forEach(l->this.itemStat.computeIfAbsent(l.itemId, k->new Stat(l.itemId)).histories.add(l));
         }
     }
     private void removeOutdatedDealLog(TreeSet<DealLog> deals, long now) {
@@ -436,7 +436,7 @@ public class Exchange {
     private class Watcher {
         void put(ChannelId channelId, Integer itemId) {
             channelIdKey.put(channelId, itemId);
-            itemIdKey.getOrDefault(itemId, new HashSet<>()).add(channelId);
+            itemIdKey.computeIfAbsent(itemId, k->new HashSet<>()).add(channelId);
         }
         void remove(ChannelId channelId) {
             Integer itemId = channelIdKey.get(channelId);

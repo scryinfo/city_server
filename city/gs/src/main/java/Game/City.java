@@ -292,7 +292,7 @@ public class City {
     }
     public void send(GridIndexPair range, Package pack) {
         for(int x = range.l.x; x < range.r.x; ++x) {
-            for (int y = range.l.y; x < range.r.y; ++y) {
+            for (int y = range.l.y; y < range.r.y; ++y) {
                 grids[x][y].send(pack);
             }
         }
@@ -326,8 +326,7 @@ public class City {
         assert building.type() != MetaBuilding.TRIVIAL;
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
-        HashMap<UUID, Building> bs = this.playerBuilding.getOrDefault(building.ownerId(), new HashMap<>());
-        bs.put(building.id(), building);
+        this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
     }
 
     private void calcuTerrain(Building building) {

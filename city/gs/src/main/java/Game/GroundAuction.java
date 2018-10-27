@@ -54,7 +54,7 @@ public class GroundAuction {
         @Id
         @Column(name = "id", nullable = false)
         UUID metaId;
-        @Column(name = "biderId", nullable = false)
+        @Column(name = "biderId")
         UUID biderId;
         @Column(name = "price", nullable = false)
         int price = 0;

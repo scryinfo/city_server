@@ -24,6 +24,10 @@ public class Coord implements Comparable<Coord> {
         this.x = i.getX();
         this.y = i.getY();
     }
+
+    protected Coord() {
+    }
+
     GridIndex toGridIndex() {
         return new GridIndex(x/City.GridMaxX, y/City.GridMaxY);
     }

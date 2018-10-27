@@ -155,6 +155,7 @@ public class GameDb {
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
+			e.printStackTrace();
 			transaction.rollback();
 		} finally {
 		}
@@ -166,6 +167,7 @@ public class GameDb {
 			session.saveOrUpdate(o);
 			transaction.commit();
 		} catch (RuntimeException e) {
+			e.printStackTrace();
 			transaction.rollback();
 		} finally {
 

@@ -188,14 +188,14 @@ class MetaApartment extends MetaBuilding {
 
 abstract class MetaFactoryBase extends MetaBuilding {
     public int lineNum;
-    public int workerMaxNumInOneLine;
+    public int lineMaxWorkerNum;
     public int storeCapacity;
     public int shelfCapacity;
 
     MetaFactoryBase(Document d) {
         super(d);
         this.lineNum = d.getInteger("lineNum");
-        this.workerMaxNumInOneLine = d.getInteger("workerMaxNumInOneLine");
+        this.lineMaxWorkerNum = d.getInteger("lineMaxWorkerNum");
         this.storeCapacity = d.getInteger("storeCapacity");
         this.shelfCapacity = d.getInteger("shelfCapacity");
     }
@@ -481,7 +481,7 @@ public class MetaData {
     public static void startUp() throws Exception {
 		initCity();
 		//initNpc();
-		//initBuilding();
+		initBuilding();
         reloadGroundAuction();
 	}
 }

@@ -80,14 +80,14 @@ public class PublicFacility extends Building {
     public boolean adBuilding(ObjectId buildingId, ObjectId roleId, int days) {
         if(this.leftAdNum() == 0)
             return false;
-        List<Contract> cs = this.contract.getOrDefault(roleId, new ArrayList<>());
+        List<Contract> cs = this.contract.computeIfAbsent(roleId, k->new ArrayList<>());
         cs.add(new BuildingContract(days, buildingId));
         return true;
     }
     public boolean adGood(int goodId, ObjectId roleId, int days) {
         if(this.leftAdNum() == 0)
             return false;
-        List<Contract> cs = this.contract.getOrDefault(roleId, new ArrayList<>());
+        List<Contract> cs = this.contract.computeIfAbsent(roleId, k->new ArrayList<>());
         cs.add(new GoodContract(days, goodId));
         return true;
     }
