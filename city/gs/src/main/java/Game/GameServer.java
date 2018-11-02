@@ -78,6 +78,7 @@ public class GameServer {
         City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
+        Exchange.init();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();

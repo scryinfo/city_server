@@ -13,19 +13,20 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Entity(name = "exchange")
-public class Exchange {
-    private static Exchange instance = new Exchange();
+public class Exchange implements ISessionCache {
+    private static Exchange instance;
     public static Exchange instance() {
         return instance;
     }
     public static final int ID = 0;
 
-    Exchange() {
-        buildOrderCache();
+    protected Exchange() {
+        //buildOrderCache();
     }
     public static void init() {
         GameDb.initExchange();
         instance = GameDb.getExchange();
+        //instance.buildOrderCache();
     }
 
     @Id
@@ -50,14 +51,16 @@ public class Exchange {
         Map<UUID, Order> o = orders.get(id);
         if(o != null) {
             o.forEach((k,v)->
-                builder.addOrder(Gs.ExchangeOrder.newBuilder()
+                builder.addOrder(Gs.ExchangeOrders.Order.newBuilder()
                         .setId(Util.toByteString(v.id))
                         .setItemId(v.itemId)
-                        .setDealed(v.n)
-                        .setTotal(v.total)
+                        .setDealedAmount(v.total-v.n)
+                        .setTotalAmount(v.total)
                         .setPrice(v.price)
                         .setTs(v.ts)
                         .setSell(v.sell)
+                        .setDealedPrice(v.dealedPrice)
+                        .setBuildingId(Util.toByteString(v.buildingId))
                 )
             );
         }
@@ -79,10 +82,14 @@ public class Exchange {
         return builder.build();
     }
 
+    @Override
+    public CacheType getCacheType() {
+        return CacheType.LongLiving;
+    }
 
     @Entity
     @Table(name = "exchange_order")
-    final class Order {
+    final static class Order {
         @Id
         @Column(name = "id", nullable = false)
         UUID id = UUID.randomUUID();
@@ -101,7 +108,9 @@ public class Exchange {
         @Column(nullable = false)
         boolean sell;
         @Column(nullable = false)
-        final int total;
+        int total;
+        @Column(nullable = false)
+        int dealedPrice;
         public Order(UUID playerId, int price, int itemId, int n, UUID buildingId, boolean sell) {
             this.playerId = playerId;
             this.buildingId = buildingId;
@@ -111,6 +120,23 @@ public class Exchange {
             this.total = n;
             this.sell = sell;
             this.ts = System.currentTimeMillis();
+            this.dealedPrice = 0;
+        }
+
+        public Order() {
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Order order = (Order) o;
+            return Objects.equals(id, order.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id);
         }
     }
 
@@ -147,16 +173,17 @@ public class Exchange {
             trading.sell.remove(o);
         else
             trading.buy.remove(o);
+        recordingMap.remove(orderId);
         _orderData.remove(o);
         this.watcher.sendTo(o.itemId);
         return o.buildingId;
     }
-    private void buildOrderCache() {
-        tradings.forEach((k,v)-> {
-            v.sell.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
-            v.buy.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
-        });
-    }
+//    private void buildOrderCache() {
+//        tradings.forEach((k,v)-> {
+//            v.sell.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
+//            v.buy.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
+//        });
+//    }
 
     private void matchmaking() {
         tradings.forEach((k,v)->{
@@ -192,8 +219,8 @@ public class Exchange {
         MetaItem mi = MetaData.getItem(s.itemId);
         if(mi == null)
             return;
-        Player seller = GameDb.getPlayer(s.playerId);
-        Player buyer = GameDb.getPlayer(b.playerId);
+        Player seller = GameDb.queryPlayer(s.playerId);
+        Player buyer = GameDb.queryPlayer(b.playerId);
 
         int n = 0;
         if(b.n <= s.n) {
@@ -207,26 +234,26 @@ public class Exchange {
         long cost = n*s.price;
         seller.addMoney(cost);
         buyer.spentLockMoney(b.id);
-        Building out = City.instance().getBuilding(s.buildingId);
-        if(out == null || !(out instanceof IStorage))
+        b.dealedPrice += cost;
+        s.dealedPrice += cost;
+
+        IStorage out = IStorage.get(s.buildingId, seller);
+        if(out == null)
+            return;
+        IStorage in = IStorage.get(b.buildingId, buyer);
+        if(in == null)
             return;
 
-        Building in = City.instance().getBuilding(b.buildingId);
-        if(in == null || !(in instanceof IStorage))
-            return;
+        out.clearOrder(s.id);
+        out.consumeLock(mi, n);
 
-        IStorage outs = (IStorage)out;
-        outs.clearOrder(s.id);
-        outs.consumeLock(mi, n);
-
-        IStorage ins = (IStorage)in;
-        ins.clearOrder(b.id);
-        ins.consumeReserve(mi, n);
+        in.clearOrder(b.id);
+        in.consumeReserve(mi, n);
 
         DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, s.price);
         this.itemStat.computeIfAbsent(mi.id, k->new Stat(mi.id)).histories.add(log);
         this._dealHistoryData.add(log);
-        Collection<Object> updates = Arrays.asList(buyer, seller, in, out, log, this);
+        Collection<ISessionCache> updates = Arrays.asList(buyer, seller, (ISessionCache)in, (ISessionCache)out, log, this);
         GameDb.saveOrUpdate(updates);
 
         // send notify to client if they are online
@@ -249,7 +276,7 @@ public class Exchange {
             @Index(name = "SELLER_IDX", columnList = "seller"),
             @Index(name = "BUYER_IDX", columnList = "buyer")
     })
-    public final static class DealLog {
+    public final static class DealLog implements ISessionCache {
         public static final int ROWS_IN_ONE_PAGE = 10;
         public DealLog(UUID buyer, UUID seller, int itemId, int n, int price) {
             this.buyer = buyer;
@@ -285,6 +312,11 @@ public class Exchange {
                     .setTs(this.ts)
                     .build();
         }
+
+        @Override
+        public CacheType getCacheType() {
+            return CacheType.Temporary;
+        }
     }
     @Entity
     public final static class Stat {
@@ -298,6 +330,9 @@ public class Exchange {
 
         public Stat(int itemId) {
             this.itemId = itemId;
+        }
+
+        protected Stat() {
         }
 
         int nowPrice() {
@@ -382,7 +417,6 @@ public class Exchange {
     private static final long DEAL_LOG_MAX_PRESERVE_MS =  TimeUnit.DAYS.toMillis(31+10);
     @PostLoad
     void _init() {
-        final long now = System.currentTimeMillis();
         for(Order order : _orderData) {
             Trading trading = tradings.computeIfAbsent(order.itemId, k->new Trading());
             if(order.sell)
@@ -396,10 +430,11 @@ public class Exchange {
             // this will be too fucking slow
             // _dealHistoryData.removeIf(h->now - h.ts > DEAL_LOG_MAX_PRESERVE_MS);
 
-            TreeSet<DealLog> deals = (TreeSet<DealLog>) _dealHistoryData;
-            removeOutdatedDealLog(deals, now);
+            final long now = System.currentTimeMillis();
+            //TreeSet<DealLog> deals = (TreeSet<DealLog>) _dealHistoryData;
+            //removeOutdatedDealLog(deals, now);
 
-            deals.descendingSet().forEach(l->this.itemStat.computeIfAbsent(l.itemId, k->new Stat(l.itemId)).histories.add(l));
+            //deals.descendingSet().forEach(l->this.itemStat.computeIfAbsent(l.itemId, k-
         }
     }
     private void removeOutdatedDealLog(TreeSet<DealLog> deals, long now) {
@@ -421,10 +456,19 @@ public class Exchange {
     private Gs.ExchangeItemDetail genItemDetail(int itemId) {
         Gs.ExchangeItemDetail.Builder builder = Gs.ExchangeItemDetail.newBuilder();
         Trading trading = this.tradings.get(itemId);
-        trading.buy.forEach(o->builder.addBuy(Gs.IntNum.newBuilder().setId(o.price).setNum(o.n)));
-        trading.sell.forEach(o->builder.addSell(Gs.IntNum.newBuilder().setId(o.price).setNum(o.n)));
-        builder.setNowPrice(this.itemStat.get(itemId).nowPrice());
-        builder.setPriceChange(this.itemStat.get(itemId).priceChange());
+        if(trading != null) {
+            trading.buy.forEach(o -> builder.addBuy(Gs.IntNum.newBuilder().setId(o.price).setNum(o.n)));
+            trading.sell.forEach(o -> builder.addSell(Gs.IntNum.newBuilder().setId(o.price).setNum(o.n)));
+        }
+        Stat stat = this.itemStat.get(itemId);
+        if(stat == null) {
+            builder.setNowPrice(0);
+            builder.setPriceChange(0);
+        }
+        else {
+            builder.setNowPrice(stat.nowPrice());
+            builder.setPriceChange(stat.priceChange());
+        }
         return builder.build();
     }
 
@@ -440,11 +484,15 @@ public class Exchange {
         }
         void remove(ChannelId channelId) {
             Integer itemId = channelIdKey.get(channelId);
-            channelIdKey.remove(channelId);
-            itemIdKey.get(itemId).remove(channelId);
+            if(itemId != null) {
+                channelIdKey.remove(channelId);
+                itemIdKey.get(itemId).remove(channelId);
+            }
         }
         void sendTo(int itemId) {
-            GameServer.sendTo(itemIdKey.get(itemId), Package.create(GsCode.OpCode.exchangeItemDetailInform_VALUE, genItemDetail(itemId)));
+            Set<ChannelId> channelIds = itemIdKey.get(itemId);
+            if(channelIds != null)
+                GameServer.sendTo(channelIds, Package.create(GsCode.OpCode.exchangeItemDetailInform_VALUE, genItemDetail(itemId)));
         }
         Map<ChannelId, Integer> channelIdKey = new HashMap();
         Map<Integer, Set<ChannelId>> itemIdKey = new HashMap();

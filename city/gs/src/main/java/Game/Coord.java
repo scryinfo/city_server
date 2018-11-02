@@ -5,9 +5,10 @@ import org.bson.Document;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.util.Objects;
 
 @Embeddable
-public class Coord implements Comparable<Coord> {
+public class Coord {
     @Column(name = "x", nullable = false)
     public int x;
     @Column(name = "y", nullable = false)
@@ -66,28 +67,19 @@ public class Coord implements Comparable<Coord> {
         }
         return new Coord(fx, fy);
     }
+
     @Override
-    public final boolean equals(Object obj) {
-        if(obj instanceof Coord)
-            return this.compareTo((Coord)obj) == 0;
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coord coord = (Coord) o;
+        return x == coord.x &&
+                y == coord.y;
     }
 
     @Override
-    public int compareTo(Coord o) {
-        if(this.x < o.x)
-            return -1;
-        else if(this.x == o.x)
-        {
-            if(this.y < o.y)
-                return -1;
-            else if(this.y == o.y)
-                return 0;
-            else
-                return 1;
-        }
-        else
-            return 1;
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 
     Gs.MiniIndex toProto() {

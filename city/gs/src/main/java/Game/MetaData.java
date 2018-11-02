@@ -74,13 +74,14 @@ class MetaCity {
 }
 abstract class MetaItem {
     MetaItem(Document d) {
-        this.id = d.getInteger("id");
+        this.id = d.getInteger("_id");
         this.n = d.getDouble("numOneSec");
+        this.useDirectly = d.getBoolean("default");
     }
     int id;
     double n;
     int size;
-
+    boolean useDirectly;
     public static final class Converter implements AttributeConverter<MetaItem, Integer> {
         @Override
         public Integer convertToDatabaseColumn(MetaItem attribute) {
@@ -123,13 +124,13 @@ class MetaBuilding {
         this.id = d.getInteger("_id");
         this.x = d.getInteger("x");
         this.y = d.getInteger("y");
-        this.maxWorkerNum = d.getInteger("maxWorkerNum");
-        this.effectRange = d.getInteger("effectRange");
+        this.workerNum = d.containsKey("workerNum")?d.getInteger("workerNum"):0;
+        this.effectRange = d.containsKey("effectRange")?d.getInteger("effectRange"):0;
     }
 	public int id;
 	public int x;
 	public int y;
-	public int maxWorkerNum;
+	public int workerNum;
 	public int effectRange;
 
     public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
@@ -213,12 +214,14 @@ class MetaProduceDepartment extends MetaFactoryBase {
 }
 class MetaRetailShop extends MetaBuilding {
     public int saleTypeNum;
-    public int capacity;
+    public int storeCapacity;
+    public int shelfCapacity;
 
     MetaRetailShop(Document d) {
         super(d);
         this.saleTypeNum = d.getInteger("saleTypeNum");
-        this.capacity = d.getInteger("capacity");
+        this.storeCapacity = d.getInteger("storeCapacity");
+        this.shelfCapacity = d.getInteger("shelfCapacity");
     }
 }
 class MetaLaboratory extends MetaBuilding {
@@ -226,7 +229,7 @@ class MetaLaboratory extends MetaBuilding {
 
     MetaLaboratory(Document d) {
         super(d);
-        this.techNum = d.getInteger("techNum");
+       // this.techNum = d.getInteger("techNum");
     }
 }
 class MetaPublicFacility extends MetaBuilding {
@@ -275,10 +278,19 @@ class MetaGroundAuction {
         return b.build();
     }
     UUID id;    // use to check this data has been changed or not, compare it with player db(if anyone bid it)
-    Set<Coord> area = new TreeSet<>();
+    Set<Coord> area = new HashSet<>();
     long beginTime;
     long endTime;
     int price;
+}
+
+class SysPara {
+    public SysPara(Document d) {
+        this.playerBagCapcaity = d.getInteger("playerBagCapacity");
+        this.bagCapacityDelta = d.getInteger("bagCapacityDelta");
+    }
+    int playerBagCapcaity;
+    int bagCapacityDelta;
 }
 public class MetaData {
 	private static final Logger logger = Logger.getLogger(MetaData.class);
@@ -296,7 +308,11 @@ public class MetaData {
     private static final String groundAuctionColName = "GroundAuction";
     private static final String initialBuildingColName = "InitialBuilding";
     private static final String trivialBuildingColName = "TrivialBuilding";
+    private static final String sysParaColName = "SysPara";
+    private static final String materialColName = "Material";
+    private static final String goodColName = "Good";
     //global field
+    private static SysPara sysPara;
 	private static MetaCity city;
     private static final HashMap<UUID, MetaGroundAuction> groundAuction = new HashMap<>();
 	private static final TreeMap<Integer, MetaNpc> npc = new TreeMap<>();
@@ -416,6 +432,12 @@ public class MetaData {
 			throw new Exception("city table is empty!");
 		city = new MetaCity(d);
 	}
+    private static void initSysPara() throws Exception {
+        Document d = mongoClient.getDatabase(dbName).getCollection(sysParaColName).find().first();
+        if(d == null)
+            throw new Exception("SysPara table is empty!");
+        sysPara = new SysPara(d);
+    }
 //	public static void initNpc() {
 //		mongoClient.getDatabase(dbName).getCollection(npcColName).find().forEach((Block<Document>) doc -> {
 //			MetaNpc m = new MetaNpc(doc);
@@ -433,6 +455,19 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(groundAuctionColName).find().forEach((Block<Document>) doc -> {
             MetaGroundAuction m = new MetaGroundAuction(doc);
             groundAuction.put(m.id, m);
+        });
+    }
+
+    public static void initMaterial() {
+        mongoClient.getDatabase(dbName).getCollection(materialColName).find().forEach((Block<Document>) doc -> {
+            MetaMaterial m = new MetaMaterial(doc);
+            material.put(m.id, m);
+        });
+    }
+    public static void initGood() {
+        mongoClient.getDatabase(dbName).getCollection(goodColName).find().forEach((Block<Document>) doc -> {
+            MetaGood m = new MetaGood(doc);
+            good.put(m.id, m);
         });
     }
     public static void initBuilding() {
@@ -478,9 +513,15 @@ public class MetaData {
 	public static MetaCity getCity() {
 		return city;
 	}
+	public static SysPara getSysPara() {
+        return sysPara;
+    }
     public static void startUp() throws Exception {
+        initSysPara();
 		initCity();
 		//initNpc();
+        initMaterial();
+        initGood();
 		initBuilding();
         reloadGroundAuction();
 	}

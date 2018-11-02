@@ -5,17 +5,14 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Embeddable
 public class Ground {
-    // this can apply Convert, however, @Convert can not use with @Type together, so it only can be cast to byte[]
-    @ElementCollection
-    private Set<Coord> coords = new TreeSet<>();
+    // this can apply Convert, however, @Convert can not use with @CacheType together, so it only can be cast to byte[]
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Coord> coords = new HashSet<>();
 
 //    @TypeDef(
 //            name = "int-array",
@@ -23,7 +20,7 @@ public class Ground {
 //    )
 //    @Embeddable
 //    protected static class _D {
-//        @Type( type = "int-array" )
+//        @CacheType( type = "int-array" )
 //        @Column(
 //                name = "ground",
 //                columnDefinition = "integer[]"

@@ -213,14 +213,13 @@ public class City {
         return Util.getLocalTime(this.meta.timeZone);
     }
     public void add(Player p) {
-        // according to p's property ids, get the objects
-        p.setCity(this);
+        this.grids[p.gridIndex().x][p.gridIndex().y].playerComing(p.id());
         this.updateVisibilityCreate(p);
     }
 
     public void relocation(Player p, GridIndex old) {
         this.grids[old.x][old.y].playerLeaving(p.id());
-        this.grids[p.getPosition().x][p.getPosition().y].playerComing(p.id());
+        this.grids[p.gridIndex().x][p.gridIndex().y].playerComing(p.id());
         this.updateVisibilityRelocate(p, old);
     }
     public void forEachBuilding(List<GridIndex> index, Consumer<Building> f) {
@@ -241,7 +240,7 @@ public class City {
         }
     }
     private void updateVisibilityRelocate(Player p, GridIndex old) {
-        GridDiffs diffs = this.diff(p.getPosition().toSyncRange(), old.toSyncRange());
+        GridDiffs diffs = this.diff(p.gridIndex().toSyncRange(), old.toSyncRange());
         ArrayList<GridIndex> goingGrids = diffs.l;
         ArrayList<GridIndex> leavingGrids = diffs.r;
         Gs.UnitCreate.Builder ucb = Gs.UnitCreate.newBuilder();
@@ -258,7 +257,7 @@ public class City {
     }
     private void updateVisibilityCreate(Player p) {
         Gs.UnitCreate.Builder ucb = Gs.UnitCreate.newBuilder();
-        this.forEachBuilding(p.getPosition().toSyncRange(), (Building b)->{
+        this.forEachBuilding(p.gridIndex().toSyncRange(), (Building b)->{
             ucb.addInfo(b.toProto());
         });
         p.send(Package.create(GsCode.OpCode.unitCreate_VALUE, ucb.build()));

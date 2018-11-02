@@ -5,7 +5,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "NPC")
-public class Npc {
+public class Npc implements ISessionCache {
     @Id
     private UUID id;
 
@@ -20,6 +20,15 @@ public class Npc {
 
     @Column(name = "money", nullable = false)
     private long money;
+
+    protected Npc() {
+    }
+
+    @Override
+    public CacheType getCacheType() {
+        return CacheType.LongLiving;
+    }
+
 
     @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class AdapterData {

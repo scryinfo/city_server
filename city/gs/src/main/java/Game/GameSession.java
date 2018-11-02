@@ -6,7 +6,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
-import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -101,7 +100,7 @@ public class GameSession {
 						m.invoke(this, cmd);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							System.out.println("pb data is unwanted!!");
+							e.printStackTrace();
 						else
 							this.close();
 					}
@@ -111,7 +110,7 @@ public class GameSession {
 						m.invoke(this, cmd, message);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							System.out.println("no pb data!!");
+							e.printStackTrace();
 						else
 							this.close();
 					}
@@ -172,21 +171,20 @@ public class GameSession {
 		player.setSession(this);
 		GameServer.allGameSessions.putIfAbsent(player.id(), this);
 
-		// due to almost all data of this player is keeping run, we need let
-		// city to do data retrieve, and register this player then any data modification
-		// will push to its client
-		// REV seems nothing to assign?
-		City.instance().add(player);
-		player.online();
+		player.setCity(City.instance()); // toProto will use Player.city
 		loginState = LoginState.ROLE_LOGIN;
 		logger.debug("account: " + this.accountName + " login");
 
 		this.write(Package.create(cmd, player.toProto()));
+
+		City.instance().add(player); // will send UnitCreate
+		player.online();
 	}
 
 	public void createRole(short cmd, Message message) {
 		Gs.Str c = (Gs.Str)message;
 		Player p = new Player(c.getStr(), this.accountName);
+		p.addMoney(999999999);
 		if(!GameDb.createPlayer(p)) {
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
 		}
@@ -312,6 +310,11 @@ public class GameSession {
 			return;
 		City.instance().delBuilding(b);
 	}
+
+	public void extendBag(short cmd) {
+		if(player.extendBag())
+			this.write(Package.create(cmd));
+	}
 	public void shelfAdd(short cmd, Message message) {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
 		if(c.getNum() <= 0 || c.getPrice() <= 0)
@@ -389,11 +392,11 @@ public class GameSession {
 		Building sellBuilding = City.instance().getBuilding(bid);
 		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || sellBuilding.canUseBy(player.id()))
 			return;
-		Building buyBuilding = City.instance().getBuilding(wid);
-		if(buyBuilding == null || !(buyBuilding instanceof IStorage) || !buyBuilding.canUseBy(player.id()))
-			return;
-		IShelf shelf = (IShelf)sellBuilding;
-		Shelf.ItemInfo i = shelf.getContent(cid);
+        IStorage buyStore = IStorage.get(wid, player);
+		if(buyStore == null)
+		    return;
+		IShelf sellShelf = (IShelf)sellBuilding;
+		Shelf.ItemInfo i = sellShelf.getContent(cid);
 		if(i == null || i.price != c.getPrice() || i.n < c.getNum()) {
 			this.write(Package.fail(cmd));
 			return;
@@ -403,16 +406,15 @@ public class GameSession {
 			return;
 
 		// begin do modify
-		IStorage store = (IStorage)buyBuilding;
-		if(!store.reserve(i.item, c.getNum()))
+		if(!buyStore.reserve(i.item, c.getNum()))
 			return;
-		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
+		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
-		store.consumeReserve(i.item, c.getNum());
-		shelf.setNum(cid, i.n - c.getNum());
+		buyStore.consumeReserve(i.item, c.getNum());
+		sellShelf.setNum(cid, i.n - c.getNum());
 
-		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyBuilding, sellBuilding));
+		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
@@ -433,17 +435,13 @@ public class GameSession {
 		if(player.money() < cost)
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building == null || !building.canUseBy(player.id()) || !(building instanceof IStorage))
+		IStorage s = IStorage.get(bid, player);
+		if (s == null || !s.reserve(mi, c.getNum()))
 			return;
-		IStorage s = (IStorage)building;
-		if(!s.reserve(mi, c.getNum()))
-			return;
-
-		UUID orderId = Exchange.instance().addBuyOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), building.id());
+		UUID orderId = Exchange.instance().addBuyOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), bid);
 		player.lockMoney(orderId, cost);
 		s.markOrder(orderId);
-		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, building));
+		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
 		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
 	}
 	public void exchangeSell(short cmd, Message message) {
@@ -454,36 +452,28 @@ public class GameSession {
 		if(mi == null)
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building == null || !building.canUseBy(player.id()) || !(building instanceof IStorage))
+		IStorage s = IStorage.get(bid, player);
+		if (s == null || !s.lock(mi, c.getNum()))
 			return;
-		IStorage s = (IStorage)building;
-		if(!s.lock(mi, c.getNum()))
-			return;
-
-		UUID orderId = Exchange.instance().addSellOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), building.id());
+		UUID orderId = Exchange.instance().addSellOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), bid);
 		s.markOrder(orderId);
-		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, building));
+		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
 		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
 	}
 	public void exchangeCancel(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
-		UUID buildingId = Exchange.instance().cancelOrder(player.id(), id);
-		if(buildingId == null) {
+		UUID bid = Exchange.instance().cancelOrder(player.id(), id);
+		if(bid == null) {
 			this.write(Package.fail(cmd));
 			return;
 		}
-		Building building = City.instance().getBuilding(buildingId);
-		if(building == null) {
-			logger.fatal("building not exist" + buildingId);
+		IStorage s = IStorage.get(bid, player);
+		if(s == null) {
+			logger.fatal("building not exist" + bid);
 			return;
 		}
-		if(!(building instanceof IStorage)) {
-			logger.fatal("building is not storagable" + building.type() + " " + building.id());
-			return;
-		}
-		((IStorage)building).clearOrder(id);
+		s.clearOrder(id);
 		this.write(Package.create(cmd));
 	}
 	public void exchangeStopWatch(short cmd) {
@@ -498,16 +488,14 @@ public class GameSession {
 		this.write(Package.create(cmd, Exchange.instance().getOrder(player.id())));
 	}
 	public void exchangeMyDealLog(short cmd) {
-		// get from Exchange?
-		GameDb.getExchangeDealLog(player.id());
+		this.write(Package.create(cmd, GameDb.getExchangeDealLog(player.id())));
 	}
 	public void exchangeAllDealLog(short cmd, Message message) {
 		Gs.Num c = (Gs.Num) message;
 		int page = c.getNum();
 		if(page < 0)
 			return;
-		// get from Exchange?
-		GameDb.getExchangeDealLog(page);
+		this.write(Package.create(cmd, GameDb.getExchangeDealLog(page)));
 	}
 	public void exchangeCollect(short cmd, Message message) {
 		Gs.Num c = (Gs.Num) message;
@@ -600,7 +588,7 @@ public class GameSession {
 		if(b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		MetaItem m = MetaData.getItem(c.getItemId());
-		if (m == null)
+		if(m == null || (!m.useDirectly && !player.canProduce(m.id)))
 			return;
 		FactoryBase f = (FactoryBase) b;
 		if (f.freeWorkerNum() < c.getWorkerNum() || f.lineFull())

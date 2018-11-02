@@ -17,7 +17,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "ground_auction")
-public class GroundAuction {
+public class GroundAuction implements ISessionCache {
     public static final int ID = 0;
     private static final Logger logger = Logger.getLogger(GroundAuction.class);
     private static GroundAuction instance;
@@ -28,6 +28,11 @@ public class GroundAuction {
         GameDb.initGroundAction();
         instance = GameDb.getGroundAction();
         instance.loadMore();
+    }
+    protected GroundAuction() {}
+    @Override
+    public CacheType getCacheType() {
+        return CacheType.LongLiving;
     }
     @Id
     public final int id = ID;
@@ -85,7 +90,7 @@ public class GroundAuction {
             }
             builder.addAuction(v.toProto());
         });
-        GameDb.saveOrUpdate(newAdds);
+        GameDb.saveOrUpdate(this);
         GameServer.allClientChannels.writeAndFlush(Package.create(GsCode.OpCode.metaGroundAuctionAddInform_VALUE, builder.build()));
     }
 
@@ -99,7 +104,7 @@ public class GroundAuction {
             {
                 iter.remove();
                 // no need through GameSession
-                Player bider = GameDb.getPlayer(a.biderId);
+                Player bider = GameDb.queryPlayer(a.biderId);
                 bider.addGround(a.meta.area);
                 long p = bider.spentLockMoney(a.meta.id);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this));
@@ -144,7 +149,7 @@ public class GroundAuction {
             // unlock its money
             GameSession biderSession = GameServer.allGameSessions.get(a.biderId);
             if(biderSession == null) {
-                GameDb.getPlayer(a.biderId).groundBidingFail(bider.id(), a);
+                GameDb.queryPlayer(a.biderId).groundBidingFail(bider.id(), a);
             }
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
@@ -153,7 +158,7 @@ public class GroundAuction {
         a.price = price;
         a.biderId = bider.id();
         bider.lockMoney(id, price);
-        GameDb.saveOrUpdate(Arrays.asList(bider, a));
+        GameDb.saveOrUpdate(Arrays.asList(bider, this));
         Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(id)).setNum(price).build());
         this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
             if(channel.id().equals(cId))

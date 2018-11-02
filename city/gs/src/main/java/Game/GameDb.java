@@ -7,21 +7,35 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import gs.Gs;
+import org.apache.log4j.Logger;
 import org.hibernate.*;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.transform.Transformers;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.io.File;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+
+// there are 2 ways:
+// 1. use only one session, so all object state will not be detached. It will reduce re-query db times when object re-connect with session
+// however, the problem is, we can not control the behavior of session level cache like weak reference. And, if get player who is other one
+// coder can not forget to evict it from session, this is tough issue. But the good news is this way can enable lazy load
+// 2. use session as normal way. but the problem is: there is no such standard procedure for this game. there is no conversation so called in
+// http manner. so the session will closed right after we done the operation of database rather than the business logic. that will cause object
+// be state of detached in most of time. when it needs update, it will have a transient duration of persist state. this will making hibernate
+// do additional select
 public class GameDb {
+	private static final Logger logger = Logger.getLogger(GameDb.class);
 	private static SessionFactory sessionFactory;
 	private static Session session;
 	private static final int BATCH_SIZE = 25;
@@ -37,65 +51,99 @@ public class GameDb {
 		}
 	}
 
-//	private static LoadingCache<UUID, Player> playerCache = CacheBuilder.newBuilder()
-//			.concurrencyLevel(1)
-//			.weakValues()
-//			.build(
-//					new CacheLoader<UUID, Player>() {
-//						public Player load(UUID id) {
-//							Session session = sessionFactory.openSession();
-//							Player res = session.get(Player.class, id);
-//							session.close();
-//							return res;
-//						}
-//					});
-//
-//	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
-//			.concurrencyLevel(1)
-//			.maximumSize(10240)
-//			.build(
-//					new CacheLoader<UUID, Player.Info>() {
-//						@Override
-//						public Player.Info load(UUID key) {
-//							StatelessSession session = sessionFactory.openStatelessSession();
-//							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id = :x");
-//							q.setParameter("x", key);
-//							List<Player.Info> l = q.list();
-//							session.close();
-//							return l.isEmpty()?null:l.get(0);
-//						}
-//						@Override
-//						public Map<UUID, Player.Info> loadAll(Iterable<? extends UUID> keys) {
-//							StatelessSession session = sessionFactory.openStatelessSession();
-//							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
-//							q.setParameter("x", keys);
-//							List<Player.Info> list = q.list();
-//							Map<UUID, Player.Info> res = new HashMap<>(list.size());
-//							list.forEach(i->res.put(i.id, i));
-//							session.close();
-//							return res;
-//						}
-//					});
+	private static LoadingCache<UUID, Player> playerCache = CacheBuilder.newBuilder()
+			.concurrencyLevel(1)
+			.weakValues()
+			.build(
+					new CacheLoader<UUID, Player>() {
+						public Player load(UUID id) {
+							Transaction transaction = session.beginTransaction();
+							Player res = session.get(Player.class, id);
+							transaction.commit();
+							return res;
+						}
+					});
+	private static LoadingCache<UUID, Player> tmpPlayerCache = CacheBuilder.newBuilder()
+			.concurrencyLevel(1)
+			.expireAfterWrite(Duration.ofMinutes(2))
+			.maximumSize(2560)
+			.build(
+					new CacheLoader<UUID, Player>() {
+						public Player load(UUID id) {
+							StatelessSession s = sessionFactory.openStatelessSession();
+							Transaction transaction = s.beginTransaction();
+							Player res = (Player) s.get(Player.class, id);
+							transaction.commit();
+							s.close();
+							res.setCacheType(ISessionCache.CacheType.Temporary);
+							return res;
+						}
+					});
+	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
+			.concurrencyLevel(1)
+			.maximumSize(10240)
+			.build(
+					new CacheLoader<UUID, Player.Info>() {
+						@Override
+						public Player.Info load(UUID key) {
+							StatelessSession session = sessionFactory.openStatelessSession();
+							Transaction transaction = session.beginTransaction();
+							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id = :x");
+							q.setParameter("x", key);
+							List<Player.Info> l = q.list();
+							transaction.commit();
+							session.close();
+							return l.isEmpty()?null:l.get(0);
+						}
+						@Override
+						public Map<UUID, Player.Info> loadAll(Iterable<? extends UUID> keys) {
+							StatelessSession session = sessionFactory.openStatelessSession();
+							Transaction transaction = session.beginTransaction();
+							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
+							q.setParameter("x", keys);
+							List<Player.Info> list = q.list();
+							Map<UUID, Player.Info> res = new HashMap<>(list.size());
+							list.forEach(i->res.put(i.id, i));
+							transaction.commit();
+							session.close();
+							return res;
+						}
+					});
 	public static Player getPlayer(UUID id) {
-		Transaction transaction = session.beginTransaction();
-		Player res = session.get(Player.class, id);
-		transaction.commit();
+		tmpPlayerCache.invalidate(id);
+		return playerCache.getUnchecked(id);
+	}
+	public static Player queryPlayer(UUID id) {
+		Player res = playerCache.getIfPresent(id);
+		if(res == null) {
+			res = tmpPlayerCache.getUnchecked(id);
+		}
 		return res;
 	}
-	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) {
-		StatelessSession statelessSession = sessionFactory.openStatelessSession();
-		Transaction transaction = statelessSession.beginTransaction();
-		org.hibernate.Query q = statelessSession.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
-		q.setParameter("x", ids);
-		List<Player.Info> list = q.list();
+	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
+		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);
+		return map.values().asList();
+	}
+	public static List<RoleBriefInfo> getPlayerInfo(String account) {
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Transaction transaction = session.beginTransaction();
+		Criteria q = session.createCriteria(Player.class)
+				.setProjection(Projections.projectionList()
+						.add(Projections.property("name"), "name")
+						.add(Projections.property("onlineTs"), "lastLoginTs")
+						.add(Projections.property("id"), "id"))
+				.setResultTransformer(Transformers.aliasToBean(RoleBriefInfo.class)).add(Restrictions.eq("account", account));
+		// 	q.setParameter("x", account);
+		List<RoleBriefInfo> l = q.list();
 		transaction.commit();
-		statelessSession.close();
-		return list;
+		session.close();
+		return l;
 	}
 	public static boolean createPlayer(Player p) {
 		boolean success = false;
-		Transaction transaction = session.beginTransaction();
+		Transaction transaction = null;
 		try {
+			transaction = session.beginTransaction();
 			session.save(p);
 			transaction.commit();
 			success = true;
@@ -142,16 +190,21 @@ public class GameDb {
 		transaction.commit();
 		return res;
 	}
-	public static void saveOrUpdate(Collection objs) {
-		Transaction transaction = session.beginTransaction();
+	public static void saveOrUpdate(Collection<ISessionCache> objs) {
+		Transaction transaction = null;
 		try {
+			transaction = session.beginTransaction();
 			int i = 0;
-			for (Object o : objs) {
+			for (ISessionCache o : objs) {
+				if(o.getCacheType() == ISessionCache.CacheType.NoCache)
+					continue;
 				session.saveOrUpdate(o);
 				++i;
 				if (i % BATCH_SIZE == 0) {
 					session.flush();
 				}
+				if(o.getCacheType() == ISessionCache.CacheType.Temporary)
+					session.evict(o);
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
@@ -161,11 +214,16 @@ public class GameDb {
 		}
 	}
 
-	public static void saveOrUpdate(Object o) {
-		Transaction transaction = session.beginTransaction();
+	public static void saveOrUpdate(ISessionCache o) {
+		if(o.getCacheType() == ISessionCache.CacheType.NoCache)
+			return;
+		Transaction transaction = null;
 		try {
+			transaction = session.beginTransaction();
 			session.saveOrUpdate(o);
 			transaction.commit();
+			if(o.getCacheType() == ISessionCache.CacheType.Temporary)
+				session.evict(o);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			transaction.rollback();
@@ -174,21 +232,10 @@ public class GameDb {
 		}
 	}
 
-	public static List<RoleBriefInfo> getPlayerInfo(String account) {
-		Transaction transaction = session.beginTransaction();
-		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-		CriteriaQuery<RoleBriefInfo> criteriaQuery = criteriaBuilder.createQuery(RoleBriefInfo.class);
-		Root<Player> root = criteriaQuery.from(Player.class);
-		criteriaQuery.multiselect(root.get(Player_.id), root.get(Player_.account), root.get(Player_.offlineTs));
-		criteriaQuery.where(criteriaBuilder.equal(root.get(Player_.account), account));
-		Query<RoleBriefInfo> query = session.createQuery(criteriaQuery);
-		transaction.commit();
-		return query.getResultList();
-	}
-
 	public static void delete(Object o) {
-		Transaction transaction = session.beginTransaction();
+		Transaction transaction = null;
 		try {
+			transaction = session.beginTransaction();
 			session.delete(o);
 			transaction.commit();
 		}
@@ -199,16 +246,18 @@ public class GameDb {
 
 		}
 	}
-	public static void delete(Collection objs) {
-		Transaction transaction = session.beginTransaction();
+	public static void delete(Collection<ISessionCache> objs) {
+		Transaction transaction = null;
 		try {
+			transaction = session.beginTransaction();
 			int i = 0;
-			for (Object o : objs) {
+			for (ISessionCache o : objs) {
+				if(o.getCacheType() == ISessionCache.CacheType.NoCache)
+					continue;
 				session.delete(o);
 				++i;
 				if (i % BATCH_SIZE == 0) {
 					session.flush();
-					session.clear();
 				}
 			}
 			transaction.commit();
@@ -218,13 +267,19 @@ public class GameDb {
 
 		}
 	}
-	public static void saveOrUpdateAndDelete(Collection saveOrUpdates, Collection deletes) {
-		Transaction transaction = session.beginTransaction();
+	public static void saveOrUpdateAndDelete(Collection<ISessionCache> saveOrUpdates, Collection deletes) {
+		Transaction transaction = null;
 		try {
+			transaction = session.beginTransaction();
 			int i = 0;
-			for (Object o : saveOrUpdates) {
+			for (ISessionCache o : saveOrUpdates) {
+				if(o.getCacheType() == ISessionCache.CacheType.NoCache)
+					continue;
 				session.saveOrUpdate(o);
 				++i;
+
+				if(o.getCacheType() == ISessionCache.CacheType.Temporary)
+					session.evict(o);
 			}
 			for (Object o : deletes) {
 				session.delete(o);

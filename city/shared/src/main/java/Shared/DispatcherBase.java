@@ -86,7 +86,7 @@ public class DispatcherBase {
                     o.method.invoke(session, opcode);
                 } catch (IllegalArgumentException e) {
                     if(GlobalConfig.debug())
-                        System.out.println("pb data is unwanted!!");
+                        e.printStackTrace();
                     return false;
                 }
             } else {
@@ -94,7 +94,7 @@ public class DispatcherBase {
                     o.method.invoke(session, opcode, o.message);
                 } catch (IllegalArgumentException e) {
                     if(GlobalConfig.debug())
-                        System.out.println("no pb data!!");
+                        e.printStackTrace();
                     return false;
                 }
             }

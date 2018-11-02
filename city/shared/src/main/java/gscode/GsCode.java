@@ -86,13 +86,21 @@ public final class GsCode {
      */
     queryPlayerInfo(8, 1010),
     /**
+     * <code>extendBag = 1015;</code>
+     *
+     * <pre>
+     *c 扩充中心仓库容量
+     * </pre>
+     */
+    extendBag(9, 1015),
+    /**
      * <code>detailApartment = 1020;</code>
      *
      * <pre>
      *c 建筑物详情界面关闭也必须发送此消息！
      * </pre>
      */
-    detailApartment(9, 1020),
+    detailApartment(10, 1020),
     /**
      * <code>detailMaterialFactory = 1021;</code>
      *
@@ -100,7 +108,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    detailMaterialFactory(10, 1021),
+    detailMaterialFactory(11, 1021),
     /**
      * <code>detailProduceDepartment = 1022;</code>
      *
@@ -108,7 +116,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    detailProduceDepartment(11, 1022),
+    detailProduceDepartment(12, 1022),
     /**
      * <code>detailRetailShop = 1023;</code>
      *
@@ -116,7 +124,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    detailRetailShop(12, 1023),
+    detailRetailShop(13, 1023),
     /**
      * <code>detailLaboratory = 1024;</code>
      *
@@ -124,7 +132,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    detailLaboratory(13, 1024),
+    detailLaboratory(14, 1024),
     /**
      * <code>detailVirtual = 1025;</code>
      *
@@ -132,7 +140,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    detailVirtual(14, 1025),
+    detailVirtual(15, 1025),
     /**
      * <code>setRent = 1027;</code>
      *
@@ -140,7 +148,7 @@ public final class GsCode {
      *c 设置房租
      * </pre>
      */
-    setRent(15, 1027),
+    setRent(16, 1027),
     /**
      * <code>setSalary = 1028;</code>
      *
@@ -148,15 +156,15 @@ public final class GsCode {
      *c 设置薪水
      * </pre>
      */
-    setSalary(16, 1028),
+    setSalary(17, 1028),
     /**
      * <code>addLine = 1029;</code>
      *
      * <pre>
-     *c 增加加工厂生产线
+     *c 增加生产线
      * </pre>
      */
-    addLine(17, 1029),
+    addLine(18, 1029),
     /**
      * <code>lineChangeInform = 1032;</code>
      *
@@ -164,7 +172,7 @@ public final class GsCode {
      *s 生产线变化推送
      * </pre>
      */
-    lineChangeInform(18, 1032),
+    lineChangeInform(19, 1032),
     /**
      * <code>changeLine = 1033;</code>
      *
@@ -172,7 +180,7 @@ public final class GsCode {
      *c 改变生成线员工数量或目标产量
      * </pre>
      */
-    changeLine(19, 1033),
+    changeLine(20, 1033),
     /**
      * <code>addBuilding = 1050;</code>
      *
@@ -180,7 +188,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    addBuilding(20, 1050),
+    addBuilding(21, 1050),
     /**
      * <code>delBuilding = 1051;</code>
      *
@@ -188,7 +196,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    delBuilding(21, 1051),
+    delBuilding(22, 1051),
     /**
      * <code>construct = 1052;</code>
      *
@@ -196,7 +204,7 @@ public final class GsCode {
      *c 建造
      * </pre>
      */
-    construct(22, 1052),
+    construct(23, 1052),
     /**
      * <code>transform = 1053;</code>
      *
@@ -204,7 +212,7 @@ public final class GsCode {
      *c 把虚拟建筑转换为真实建筑
      * </pre>
      */
-    transform(23, 1053),
+    transform(24, 1053),
     /**
      * <code>startBusiness = 1054;</code>
      *
@@ -212,7 +220,7 @@ public final class GsCode {
      *c 开业
      * </pre>
      */
-    startBusiness(24, 1054),
+    startBusiness(25, 1054),
     /**
      * <code>transferItem = 1055;</code>
      *
@@ -220,7 +228,7 @@ public final class GsCode {
      *c 运输
      * </pre>
      */
-    transferItem(25, 1055),
+    transferItem(26, 1055),
     /**
      * <code>shelfAdd = 1056;</code>
      *
@@ -228,7 +236,7 @@ public final class GsCode {
      *c 上架
      * </pre>
      */
-    shelfAdd(26, 1056),
+    shelfAdd(27, 1056),
     /**
      * <code>shelfDel = 1057;</code>
      *
@@ -236,7 +244,7 @@ public final class GsCode {
      *c 下架
      * </pre>
      */
-    shelfDel(27, 1057),
+    shelfDel(28, 1057),
     /**
      * <code>shelfSet = 1058;</code>
      *
@@ -244,7 +252,7 @@ public final class GsCode {
      *c 改变货架商品数量价格
      * </pre>
      */
-    shelfSet(28, 1058),
+    shelfSet(29, 1058),
     /**
      * <code>buyInShelf = 1059;</code>
      *
@@ -252,7 +260,7 @@ public final class GsCode {
      *c 购买货架商品
      * </pre>
      */
-    buyInShelf(29, 1059),
+    buyInShelf(30, 1059),
     /**
      * <code>exchangeItemList = 1070;</code>
      *
@@ -260,7 +268,7 @@ public final class GsCode {
      *c 交易所主界面
      * </pre>
      */
-    exchangeItemList(30, 1070),
+    exchangeItemList(31, 1070),
     /**
      * <code>exchangeBuy = 1071;</code>
      *
@@ -268,7 +276,7 @@ public final class GsCode {
      *c 挂买单
      * </pre>
      */
-    exchangeBuy(31, 1071),
+    exchangeBuy(32, 1071),
     /**
      * <code>exchangeSell = 1072;</code>
      *
@@ -276,7 +284,7 @@ public final class GsCode {
      *c 挂卖单
      * </pre>
      */
-    exchangeSell(32, 1072),
+    exchangeSell(33, 1072),
     /**
      * <code>exchangeCancel = 1073;</code>
      *
@@ -284,7 +292,7 @@ public final class GsCode {
      *c 撤单
      * </pre>
      */
-    exchangeCancel(33, 1073),
+    exchangeCancel(34, 1073),
     /**
      * <code>exchangeWatchItemDetail = 1074;</code>
      *
@@ -292,7 +300,7 @@ public final class GsCode {
      *c 交易物品详情
      * </pre>
      */
-    exchangeWatchItemDetail(34, 1074),
+    exchangeWatchItemDetail(35, 1074),
     /**
      * <code>exchangeItemDetailInform = 1075;</code>
      *
@@ -300,7 +308,7 @@ public final class GsCode {
      *s 详情改变推送
      * </pre>
      */
-    exchangeItemDetailInform(35, 1075),
+    exchangeItemDetailInform(36, 1075),
     /**
      * <code>exchangeStopWatchItemDetail = 1076;</code>
      *
@@ -308,7 +316,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    exchangeStopWatchItemDetail(36, 1076),
+    exchangeStopWatchItemDetail(37, 1076),
     /**
      * <code>exchangeDealInform = 1077;</code>
      *
@@ -316,7 +324,7 @@ public final class GsCode {
      *s 成交通知
      * </pre>
      */
-    exchangeDealInform(37, 1077),
+    exchangeDealInform(38, 1077),
     /**
      * <code>exchangeMyOrder = 1078;</code>
      *
@@ -324,7 +332,7 @@ public final class GsCode {
      *c 获取自己的挂单
      * </pre>
      */
-    exchangeMyOrder(38, 1078),
+    exchangeMyOrder(39, 1078),
     /**
      * <code>exchangeMyDealLog = 1079;</code>
      *
@@ -332,7 +340,7 @@ public final class GsCode {
      *c 获取自己的成交历史
      * </pre>
      */
-    exchangeMyDealLog(39, 1079),
+    exchangeMyDealLog(40, 1079),
     /**
      * <code>exchangeAllDealLog = 1080;</code>
      *
@@ -340,7 +348,7 @@ public final class GsCode {
      *c 获取所有的成交历史
      * </pre>
      */
-    exchangeAllDealLog(40, 1080),
+    exchangeAllDealLog(41, 1080),
     /**
      * <code>exchangeCollect = 1081;</code>
      *
@@ -348,7 +356,7 @@ public final class GsCode {
      *c 收藏
      * </pre>
      */
-    exchangeCollect(41, 1081),
+    exchangeCollect(42, 1081),
     /**
      * <code>exchangeUnCollect = 1082;</code>
      *
@@ -356,7 +364,7 @@ public final class GsCode {
      *c 收藏
      * </pre>
      */
-    exchangeUnCollect(42, 1082),
+    exchangeUnCollect(43, 1082),
     /**
      * <code>exchangeGetItemDealHistory = 1083;</code>
      *
@@ -364,7 +372,7 @@ public final class GsCode {
      *c 获取道具成交历史
      * </pre>
      */
-    exchangeGetItemDealHistory(43, 1083),
+    exchangeGetItemDealHistory(44, 1083),
     /**
      * <code>queryGroundAuction = 1100;</code>
      *
@@ -372,7 +380,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    queryGroundAuction(44, 1100),
+    queryGroundAuction(45, 1100),
     /**
      * <code>bidGround = 1101;</code>
      *
@@ -380,7 +388,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    bidGround(45, 1101),
+    bidGround(46, 1101),
     /**
      * <code>queryMetaGroundAuction = 1102;</code>
      *
@@ -388,7 +396,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    queryMetaGroundAuction(46, 1102),
+    queryMetaGroundAuction(47, 1102),
     /**
      * <code>registGroundBidInform = 1103;</code>
      *
@@ -396,7 +404,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    registGroundBidInform(47, 1103),
+    registGroundBidInform(48, 1103),
     /**
      * <code>unregistGroundBidInform = 1104;</code>
      *
@@ -404,7 +412,7 @@ public final class GsCode {
      *c
      * </pre>
      */
-    unregistGroundBidInform(48, 1104),
+    unregistGroundBidInform(49, 1104),
     /**
      * <code>bidChangeInform = 1105;</code>
      *
@@ -412,7 +420,7 @@ public final class GsCode {
      *s
      * </pre>
      */
-    bidChangeInform(49, 1105),
+    bidChangeInform(50, 1105),
     /**
      * <code>auctionEnd = 1106;</code>
      *
@@ -420,7 +428,7 @@ public final class GsCode {
      *s  when a auction's end time reached, server send this to inform this auction is dealed
      * </pre>
      */
-    auctionEnd(50, 1106),
+    auctionEnd(51, 1106),
     /**
      * <code>metaGroundAuctionAddInform = 1107;</code>
      *
@@ -428,7 +436,7 @@ public final class GsCode {
      *s  this inform message might send after client login to game server but not yet do roleLogin
      * </pre>
      */
-    metaGroundAuctionAddInform(51, 1107),
+    metaGroundAuctionAddInform(52, 1107),
     /**
      * <code>bidFailInform = 1108;</code>
      *
@@ -436,7 +444,7 @@ public final class GsCode {
      *s  other player bid a higher price
      * </pre>
      */
-    bidFailInform(52, 1108),
+    bidFailInform(53, 1108),
     /**
      * <code>bidWinInform = 1109;</code>
      *
@@ -444,7 +452,7 @@ public final class GsCode {
      *s  you win this auction
      * </pre>
      */
-    bidWinInform(53, 1109),
+    bidWinInform(54, 1109),
     ;
 
     /**
@@ -520,6 +528,14 @@ public final class GsCode {
      */
     public static final int queryPlayerInfo_VALUE = 1010;
     /**
+     * <code>extendBag = 1015;</code>
+     *
+     * <pre>
+     *c 扩充中心仓库容量
+     * </pre>
+     */
+    public static final int extendBag_VALUE = 1015;
+    /**
      * <code>detailApartment = 1020;</code>
      *
      * <pre>
@@ -587,7 +603,7 @@ public final class GsCode {
      * <code>addLine = 1029;</code>
      *
      * <pre>
-     *c 增加加工厂生产线
+     *c 增加生产线
      * </pre>
      */
     public static final int addLine_VALUE = 1029;
@@ -894,6 +910,7 @@ public final class GsCode {
         case 1006: return unitRemove;
         case 1007: return unitChange;
         case 1010: return queryPlayerInfo;
+        case 1015: return extendBag;
         case 1020: return detailApartment;
         case 1021: return detailMaterialFactory;
         case 1022: return detailProduceDepartment;
@@ -999,36 +1016,36 @@ public final class GsCode {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gsCode.proto\022\006gscode*\366\010\n\006OpCode\022\n\n\005log" +
+      "\n\014gsCode.proto\022\006gscode*\206\t\n\006OpCode\022\n\n\005log" +
       "in\020\350\007\022\016\n\theartBeat\020\351\007\022\016\n\troleLogin\020\352\007\022\017\n" +
       "\ncreateRole\020\353\007\022\t\n\004move\020\354\007\022\017\n\nunitCreate\020" +
       "\355\007\022\017\n\nunitRemove\020\356\007\022\017\n\nunitChange\020\357\007\022\024\n\017" +
-      "queryPlayerInfo\020\362\007\022\024\n\017detailApartment\020\374\007" +
-      "\022\032\n\025detailMaterialFactory\020\375\007\022\034\n\027detailPr" +
-      "oduceDepartment\020\376\007\022\025\n\020detailRetailShop\020\377" +
-      "\007\022\025\n\020detailLaboratory\020\200\010\022\022\n\rdetailVirtua" +
-      "l\020\201\010\022\014\n\007setRent\020\203\010\022\016\n\tsetSalary\020\204\010\022\014\n\007ad" +
-      "dLine\020\205\010\022\025\n\020lineChangeInform\020\210\010\022\017\n\nchang",
-      "eLine\020\211\010\022\020\n\013addBuilding\020\232\010\022\020\n\013delBuildin" +
-      "g\020\233\010\022\016\n\tconstruct\020\234\010\022\016\n\ttransform\020\235\010\022\022\n\r" +
-      "startBusiness\020\236\010\022\021\n\014transferItem\020\237\010\022\r\n\010s" +
-      "helfAdd\020\240\010\022\r\n\010shelfDel\020\241\010\022\r\n\010shelfSet\020\242\010" +
-      "\022\017\n\nbuyInShelf\020\243\010\022\025\n\020exchangeItemList\020\256\010" +
-      "\022\020\n\013exchangeBuy\020\257\010\022\021\n\014exchangeSell\020\260\010\022\023\n" +
-      "\016exchangeCancel\020\261\010\022\034\n\027exchangeWatchItemD" +
-      "etail\020\262\010\022\035\n\030exchangeItemDetailInform\020\263\010\022" +
-      " \n\033exchangeStopWatchItemDetail\020\264\010\022\027\n\022exc" +
-      "hangeDealInform\020\265\010\022\024\n\017exchangeMyOrder\020\266\010",
-      "\022\026\n\021exchangeMyDealLog\020\267\010\022\027\n\022exchangeAllD" +
-      "ealLog\020\270\010\022\024\n\017exchangeCollect\020\271\010\022\026\n\021excha" +
-      "ngeUnCollect\020\272\010\022\037\n\032exchangeGetItemDealHi" +
-      "story\020\273\010\022\027\n\022queryGroundAuction\020\314\010\022\016\n\tbid" +
-      "Ground\020\315\010\022\033\n\026queryMetaGroundAuction\020\316\010\022\032" +
-      "\n\025registGroundBidInform\020\317\010\022\034\n\027unregistGr" +
-      "oundBidInform\020\320\010\022\024\n\017bidChangeInform\020\321\010\022\017" +
-      "\n\nauctionEnd\020\322\010\022\037\n\032metaGroundAuctionAddI" +
-      "nform\020\323\010\022\022\n\rbidFailInform\020\324\010\022\021\n\014bidWinIn" +
-      "form\020\325\010"
+      "queryPlayerInfo\020\362\007\022\016\n\textendBag\020\367\007\022\024\n\017de" +
+      "tailApartment\020\374\007\022\032\n\025detailMaterialFactor" +
+      "y\020\375\007\022\034\n\027detailProduceDepartment\020\376\007\022\025\n\020de" +
+      "tailRetailShop\020\377\007\022\025\n\020detailLaboratory\020\200\010" +
+      "\022\022\n\rdetailVirtual\020\201\010\022\014\n\007setRent\020\203\010\022\016\n\tse" +
+      "tSalary\020\204\010\022\014\n\007addLine\020\205\010\022\025\n\020lineChangeIn",
+      "form\020\210\010\022\017\n\nchangeLine\020\211\010\022\020\n\013addBuilding\020" +
+      "\232\010\022\020\n\013delBuilding\020\233\010\022\016\n\tconstruct\020\234\010\022\016\n\t" +
+      "transform\020\235\010\022\022\n\rstartBusiness\020\236\010\022\021\n\014tran" +
+      "sferItem\020\237\010\022\r\n\010shelfAdd\020\240\010\022\r\n\010shelfDel\020\241" +
+      "\010\022\r\n\010shelfSet\020\242\010\022\017\n\nbuyInShelf\020\243\010\022\025\n\020exc" +
+      "hangeItemList\020\256\010\022\020\n\013exchangeBuy\020\257\010\022\021\n\014ex" +
+      "changeSell\020\260\010\022\023\n\016exchangeCancel\020\261\010\022\034\n\027ex" +
+      "changeWatchItemDetail\020\262\010\022\035\n\030exchangeItem" +
+      "DetailInform\020\263\010\022 \n\033exchangeStopWatchItem" +
+      "Detail\020\264\010\022\027\n\022exchangeDealInform\020\265\010\022\024\n\017ex",
+      "changeMyOrder\020\266\010\022\026\n\021exchangeMyDealLog\020\267\010" +
+      "\022\027\n\022exchangeAllDealLog\020\270\010\022\024\n\017exchangeCol" +
+      "lect\020\271\010\022\026\n\021exchangeUnCollect\020\272\010\022\037\n\032excha" +
+      "ngeGetItemDealHistory\020\273\010\022\027\n\022queryGroundA" +
+      "uction\020\314\010\022\016\n\tbidGround\020\315\010\022\033\n\026queryMetaGr" +
+      "oundAuction\020\316\010\022\032\n\025registGroundBidInform\020" +
+      "\317\010\022\034\n\027unregistGroundBidInform\020\320\010\022\024\n\017bidC" +
+      "hangeInform\020\321\010\022\017\n\nauctionEnd\020\322\010\022\037\n\032metaG" +
+      "roundAuctionAddInform\020\323\010\022\022\n\rbidFailInfor" +
+      "m\020\324\010\022\021\n\014bidWinInform\020\325\010"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

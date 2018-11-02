@@ -8,7 +8,6 @@ import gscode.GsCode;
 import org.bson.types.ObjectId;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.HashMap;
@@ -80,7 +79,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyType(value=@Type(type="org.hibernate.type.PostgresUUIDType"))
     @MapKeyColumn(name = "line_id")
     Map<UUID, LineBase> lines = new HashMap<>();
 
@@ -88,7 +86,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return lines.size() >= meta.lineNum;
     }
     public int freeWorkerNum() {
-        return this.meta.maxWorkerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
+        return this.meta.workerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
     }
 
     protected void _update(long diffNano) {

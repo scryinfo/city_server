@@ -56,7 +56,7 @@ public class Validator {
 		if (v == null) {
 			logger.debug("haven't found the account");
 		}
-		if (v.code.equals(code)) {
+		else if (v.code.equals(code)) {
 			data.remove(accountName);
 		} else {
 			logger.debug("the code has been overwirtten");

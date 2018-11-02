@@ -5,8 +5,6 @@ import Shared.Package;
 import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.*;
@@ -17,7 +15,28 @@ import java.util.*;
         @Index(name = "ACCNAME_IDX", columnList = DatabaseInfo.Game.Player.AccountName)
     }
 )
-public class Player {
+public class Player implements ISessionCache {
+    @ElementCollection(fetch = FetchType.EAGER)
+    Set<Integer> itemIdCanProduce;
+    public boolean canProduce(int id) {
+        return itemIdCanProduce.contains(id);
+    }
+    public void learnItem(int id) {
+        itemIdCanProduce.add(id);
+    }
+
+
+    public void setCacheType(CacheType t) {
+        this.cacheType = t;
+    }
+    @Transient
+    CacheType cacheType = CacheType.LongLiving;
+
+    @Override
+    public CacheType getCacheType() {
+        return cacheType;
+    }
+
     public static final class Info {
         public Info(UUID id, String name) {
             this.id = id;
@@ -56,8 +75,14 @@ public class Player {
     @Transient
     private City city;
 
+    @Embedded
+    private Storage bag;
+
+    @Column(name = "bagCapacity", nullable = false)
+    private int bagCapacity;
+
     @ElementCollection(fetch = FetchType.EAGER)
-    //@CollectionTable(name="locked_money", joinColumns=@JoinColumn(name="player_id",referencedColumnName="id"))
+    @CollectionTable(name="locked_money", joinColumns=@JoinColumn(name="player_id",referencedColumnName="id"))
     @MapKeyColumn(name = "transaction_id")
     //@Column(name="money", nullable = false)
     private Map<UUID, Long> lockedMoney = new HashMap<>();
@@ -73,11 +98,27 @@ public class Player {
         this.money = 0;
         this.position = new GridIndex(0,0);
         this.ground = new Ground();
+        this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
+        this.bag = new Storage(bagCapacity);
+        this.itemIdCanProduce = new TreeSet<>();
     }
-
+    @PostLoad
+    void _init() {
+        this.bag.setCapacity(this.bagCapacity);
+    }
     public Player() {
     }
-
+    boolean extendBag() {
+        int cost = 100;
+        if(this.decMoney(100)) {
+            this.bagCapacity += MetaData.getSysPara().bagCapacityDelta;
+            return true;
+        }
+        return false;
+    }
+    IStorage getBag() {
+        return bag;
+    }
     public Gs.Role toProto() {
         Gs.Role.Builder builder = Gs.Role.newBuilder();
         builder.setId(Util.toByteString(id()))
@@ -89,6 +130,10 @@ public class Player {
         city.forEachBuilding(id, (Building b)->{
             b.appendDetailProto(builder.getBuysBuilder());
         });
+        builder.setBag(bag.toProto());
+        builder.setBagCapacity(bagCapacity);
+        this.itemIdCanProduce.forEach(id->builder.addItemIdCanProduce(id));
+        this.exchangeFavoriteItem.forEach(id->builder.addExchangeCollectedItem(id));
         return builder.build();
     }
 
@@ -133,7 +178,7 @@ public class Player {
         city.relocation(this, old);
         return true;
     }
-    public GridIndex getPosition() {
+    public GridIndex gridIndex() {
         return this.position;
     }
 
@@ -200,12 +245,13 @@ public class Player {
     }
 
     public void collectExchangeItem(int itemId) {
-        exchangeCollection.add(itemId);
+        exchangeFavoriteItem.add(itemId);
     }
     public void unCollectExchangeItem(int itemId) {
-        exchangeCollection.remove(itemId);
+        exchangeFavoriteItem.remove(itemId);
     }
 
-    @ElementCollection
-    private Set<Integer> exchangeCollection = new TreeSet<>();
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "player_exchange_favorite", joinColumns = @JoinColumn(name = "player_id"))
+    private Set<Integer> exchangeFavoriteItem = new TreeSet<>();
 }

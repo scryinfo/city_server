@@ -11,19 +11,19 @@ import gscode.GsCode;
 import io.netty.channel.ChannelId;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class Building {
+public abstract class Building implements ISessionCache {
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
-
+    @Override
+    public CacheType getCacheType() {
+        return CacheType.LongLiving;
+    }
     protected Building() {
     }
     boolean canUseBy(UUID userId) {
@@ -32,7 +32,9 @@ public abstract class Building {
     public int type() {
         return MetaBuilding.type(metaBuilding.id);
     }
-
+    public boolean outOfBusiness() {
+        return true; // according to employee satisfication
+    }
     public static Building create(int id, Coord pos, UUID ownerId) {
         switch(MetaBuilding.type(id))
         {
@@ -82,6 +84,26 @@ public abstract class Building {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
         Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.UnitRemove.newBuilder().addId(Util.toByteString(id)).build());
         City.instance().send(gip, pack);
+    }
+
+    Set<Building> getAllBuildingInEffectRange() {
+        Set<Building> res = new TreeSet<>();
+        GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
+        CoordPair thisRange = this.effectRange();
+        City.instance().forEachBuilding(gip, building -> {
+            if(CoordPair.overlap(building.area(), thisRange))
+                res.add(building);
+        });
+        return res;
+    }
+    Set<Building> getAllBuildingEffectMe() {
+        Set<Building> res = new TreeSet<>();
+        GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
+        City.instance().forEachBuilding(gip, building -> {
+            if(CoordPair.overlap(building.effectRange(), this.area()))
+                res.add(building);
+        });
+        return res;
     }
 //    @Embeddable //hide those members, the only purpose is to mapping to the table
 //    protected static class _D {
@@ -208,7 +230,7 @@ public abstract class Building {
 //        this.flow = lastFlow; // don't blame me, java's silly design, no rbegin
 //    }
     public void hireNpc(int initSalary) {
-        for(Npc npc : NpcManager.instance().create(this.metaBuilding.maxWorkerNum, this, initSalary))
+        for(Npc npc : NpcManager.instance().create(this.metaBuilding.workerNum, this, initSalary))
         {
             npc.visit(this);
         }
@@ -268,6 +290,8 @@ public abstract class Building {
         allNpc.remove(npc);
     }
     void update(long diffNano) {
+        if(this.outOfBusiness())
+            return;
         this._update(diffNano);
     }
     protected abstract void _update(long diffNano);
@@ -286,11 +310,11 @@ public abstract class Building {
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(nowHour == PAYMENT_HOUR && !this.allNpc.isEmpty()) {
-            Player p = GameDb.getPlayer(ownerId);
+            Player p = GameDb.queryPlayer(ownerId);
             if(p != null) {
                 if(p.decMoney(this.salary * this.allNpc.size())) {
                     allNpc.forEach(npc -> npc.addMoney(this.salary));
-                    List<Object> updates = allNpc.stream().map(Object.class::cast).collect(Collectors.toList());
+                    List<ISessionCache> updates = allNpc.stream().map(ISessionCache.class::cast).collect(Collectors.toList());
                     updates.add(p);
                     GameDb.saveOrUpdate(updates);
                 }

@@ -172,4 +172,9 @@ public class Storage implements IStorage {
     public boolean full() {
         return capacity == usedSize();
     }
+
+    @Override
+    public CacheType getCacheType() { //let hibernate session omit this object because this is not an entity
+        return CacheType.NoCache;
+    }
 }
