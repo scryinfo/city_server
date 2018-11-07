@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Exceptions.GroundAlreadySoldException;
 import Game.Timers.DateTimeTracker;
 import Shared.Package;
 import Shared.Util;
@@ -25,7 +26,7 @@ public class GroundAuction implements ISessionCache {
         return instance;
     }
     public static void init() {
-        GameDb.initGroundAction();
+        GameDb.initGroundAuction();
         instance = GameDb.getGroundAction();
         instance.loadMore();
     }
@@ -103,9 +104,14 @@ public class GroundAuction implements ISessionCache {
             if(a.timer.passed())
             {
                 iter.remove();
-                // no need through GameSession
+
                 Player bider = GameDb.queryPlayer(a.biderId);
-                bider.addGround(a.meta.area);
+                try {
+                    bider.addGround(a.meta.area);
+                } catch (GroundAlreadySoldException e) {
+                    e.printStackTrace();
+                    continue;
+                }
                 long p = bider.spentLockMoney(a.meta.id);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this));
 

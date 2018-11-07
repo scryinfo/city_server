@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Exceptions.GroundAlreadySoldException;
 import Shared.*;
 import Shared.Package;
 import com.google.protobuf.ByteString;
@@ -64,6 +65,7 @@ public class GameSession {
 		}
 		GroundAuction.instance().unregist(this.channelId);
 		player.offline();
+		GameDb.evict(player);
 		//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
 		//offline action of validate
 		Validator.getInstance().unRegist(accountName, token);
@@ -122,6 +124,81 @@ public class GameSession {
 					this.close();
 			}
 		});
+	}
+	public void cheat(short cmd, Message message) {
+		Gs.Str c = (Gs.Str)message;
+		Cheat cheat = _parseCheatString(c.getStr());
+		if(cheat != null)
+			_runCheat(cheat);
+	}
+	private static class Cheat {
+		enum Type {
+			addmoney,
+			additem,
+			addground
+		}
+		Type cmd;
+		int[] paras;
+	}
+	private void _runCheat(Cheat cheat) {
+		switch (cheat.cmd) {
+			case addmoney: {
+				int n = Integer.valueOf(cheat.paras[0]);
+				if(n <= 0)
+					return;
+				player.addMoney(n);
+			}
+			case additem: {
+				int id = cheat.paras[0];
+				int n = cheat.paras[1];
+				MetaItem mi = MetaData.getItem(id);
+				if (mi == null)
+					return;
+				if (n <= 0)
+					return;
+				if(player.getBag().reserve(mi, n))
+					player.getBag().consumeReserve(mi, n);
+			}
+			case addground: {
+				int x1 = cheat.paras[0];
+				int y1 = cheat.paras[1];
+				int x2 = cheat.paras[2];
+				int y2 = cheat.paras[3];
+				if(x1 > x2) {
+					int z = x1;
+					x1 = x2;
+					x2 = z;
+				}
+				if(y1 > y2) {
+					int z = y1;
+					y1 = y2;
+					y2 = z;
+				}
+				CoordPair cp = new CoordPair(new Coordinate(x1, y1), new Coordinate(x2, y2));
+				try {
+					player.addGround(cp);
+				} catch (GroundAlreadySoldException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	private Cheat _parseCheatString(String str) {
+		Cheat res = new Cheat();
+		String[] sa = str.split(" ");
+		if(sa.length == 0)
+			return null;
+		try {
+			res.cmd = Cheat.Type.valueOf(sa[0]);
+		}
+		catch(IllegalArgumentException e) {
+			return null;
+		}
+		res.paras = new int[sa.length-1];
+		for(int i = 1; i < sa.length; ++i) {
+			res.paras[i-1] = Integer.valueOf(sa[i]);
+		}
+		return res;
 	}
 	public void login(short cmd, Message message) {
 		if(this.loginFailed)
@@ -231,7 +308,7 @@ public class GameSession {
 //		int id = c.getId();
 //		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
 //			return;
-//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coord(c.getPos()), player.id());
+//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coordinate(c.getPos()), player.id());
 //		boolean ok = City.instance().addVirtualBuilding(building);
 //		if(!ok)
 //			this.write(Package.fail(cmd));
@@ -267,7 +344,7 @@ public class GameSession {
 //		int id = c.getId();
 //		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
 //			return;
-//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coord(c.getPos()), player.id());
+//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coordinate(c.getPos()), player.id());
 //		boolean ok = City.instance().addVirtualBuilding(building);
 //		if(!ok)
 //			this.write(Package.fail(cmd));
@@ -292,10 +369,14 @@ public class GameSession {
 	}
 	public void addBuilding(short cmd, Message message) {
 		Gs.AddBuilding c = (Gs.AddBuilding) message;
-		int id = c.getId();
-		if(MetaBuilding.type(id) == MetaBuilding.TRIVIAL)
+		int mid = c.getId();
+		if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
 			return;
-		Building building = Building.create(id, new Coord(c.getPos()), player.id());
+		MetaBuilding m = MetaData.getBuilding(mid);
+		Coordinate ul = new Coordinate(c.getPos());
+		if(!GroundManager.instance().canBuild(player.id(), new CoordPair(ul, ul.offset(m.x, m.y))))
+			return;
+		Building building = Building.create(mid, ul, player.id());
 		boolean ok = City.instance().addBuilding(building);
 		if(!ok)
 			this.write(Package.fail(cmd));
@@ -613,7 +694,226 @@ public class GameSession {
         else
             this.write(Package.fail(cmd));
 	}
+	public void adAddSlot(short cmd, Message message) {
+		Gs.AddSlot c = (Gs.AddSlot)message;
+		if(c.getMaxDayToRent() < c.getMinDayToRent() || c.getRentPreDay() <= 0 || c.getDeposit() <= 0)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
+			return;
+		PublicFacility pf = (PublicFacility)building;
+		PublicFacility.Slot slot = pf.addSlot(c.getMaxDayToRent(), c.getMinDayToRent(), c.getRentPreDay(), c.getDeposit());
+		this.write(Package.create(cmd, slot.toProto()));
+	}
+	public void adDelSlot(short cmd, Message message) {
+		Gs.AdDelSlot c = (Gs.AdDelSlot)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
+			return;
+		UUID slotId = Util.toUuid(c.getSlotId().toByteArray());
+		PublicFacility pf = (PublicFacility)building;
+		if(pf.delSlot(slotId))
+			this.write(Package.create(cmd, c));
+		else
+			this.write(Package.fail(cmd));
+	}
+	public void adPutAdToSlot(short cmd, Message message) {
+		Gs.AddAd c = (Gs.AddAd)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility))
+			return;
 
+		PublicFacility pf = (PublicFacility)building;
+		PublicFacility.SlotRent sr = null;
+		if(c.hasId()) {
+			if(building.canUseBy(player.id()))
+				return;
+			UUID slotId = Util.toUuid(c.getId().toByteArray());
+			sr = pf.getRentSlot(slotId);
+			if(sr == null || !sr.renterId.equals(player.id()) || pf.hasAd(slotId))
+				return;
+		}
+		else {
+			if(!building.canUseBy(player.id()))
+				return;
+		}
+		if(c.getType() == Gs.PublicFacility.Ad.Type.GOOD) {
+			MetaItem m = MetaData.getItem(c.getMetaId());
+			if(m == null)
+				return;
+			pf.addAd(sr, m);
+		}
+		else if(c.getType() == Gs.PublicFacility.Ad.Type.BUILDING) {
+			MetaBuilding m = MetaData.getBuilding(c.getMetaId());
+			if(m == null)
+				return;
+			pf.addAd(sr, m);
+		}
+		else
+			return;
+		GameDb.saveOrUpdate(pf);
+		this.write(Package.create(cmd));
+	}
 
-
+	public void adDelAdFromSlot(short cmd, Message message) {
+		Gs.AdDelAdFromSlot c = (Gs.AdDelAdFromSlot)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility))
+			return;
+		UUID adId = Util.toUuid(c.getAdId().toByteArray());
+		PublicFacility pf = (PublicFacility)building;
+		PublicFacility.Ad ad = pf.getAd(adId);
+		if(ad == null)
+			return;
+		if(ad.sr == null && !pf.canUseBy(player.id()))
+			return;
+		if(ad.sr != null && !ad.sr.renterId.equals(player.id()))
+			return;
+		pf.delAd(adId);
+		GameDb.saveOrUpdate(pf);
+		this.write(Package.create(cmd, c));
+	}
+	public void adBuySlot(short cmd, Message message) {
+		Gs.AdBuySlot c = (Gs.AdBuySlot)message;
+		if(c.getDay() <= 0)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility) || building.canUseBy(player.id()))
+			return;
+		UUID slotId = Util.toUuid(c.getSlotId().toByteArray());
+		PublicFacility pf = (PublicFacility)building;
+		if(!pf.slotCanBuy(slotId))
+			return;
+		PublicFacility.Slot slot = pf.getSlot(slotId);
+		if(c.getDay() > slot.maxDayToRent || c.getDay() < slot.minDayToRent)
+			return;
+		int cost = slot.rentPreDay + slot.deposit;
+		if(player.money() < cost)
+			return;
+		player.decMoney(slot.rentPreDay);
+		player.lockMoney(slot.id, slot.deposit);
+		pf.buySlot(slotId, c.getDay(), player.id());
+		GameDb.saveOrUpdate(Arrays.asList(pf, player));
+		this.write(Package.create(cmd));
+	}
+	public void detailPublicFacility(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.PUBLIC)
+			return;
+		b.watchDetailInfo(this);
+		this.write(Package.create(cmd, b.detailProto()));
+	}
+	public void delItem(short cmd, Message message) {
+		Gs.DelItem c = (Gs.DelItem)message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		IStorage storage = IStorage.get(id, player);
+		if(storage == null)
+			return;
+		MetaItem mi = MetaData.getItem(c.getItemId());
+		if(mi == null)
+			return;
+		if(storage.delItem(mi))
+		{
+			GameDb.saveOrUpdate(storage);
+			this.write(Package.create(cmd, c));
+		}
+		else
+			this.write(Package.fail(cmd));
+	}
+	public void transferItem(short cmd, Message message) {
+		Gs.TransferItem c = (Gs.TransferItem)message;
+		UUID srcId = Util.toUuid(c.getSrc().toByteArray());
+		UUID dstId = Util.toUuid(c.getDst().toByteArray());
+		IStorage src = IStorage.get(srcId, player);
+		IStorage dst = IStorage.get(dstId, player);
+		if(src == null || dst == null)
+			return;
+		MetaItem mi = MetaData.getItem(c.getItemId());
+		if(mi == null)
+			return;
+		if(src.lock(mi, c.getN())) {
+			this.write(Package.fail(cmd));
+			return;
+		}
+		if(dst.reserve(mi, c.getN())) {
+			src.unLock(mi, c.getN());
+			this.write(Package.fail(cmd));
+			return;
+		}
+		src.consumeLock(mi, c.getN());
+		dst.consumeReserve(mi, c.getN());
+		GameDb.saveOrUpdate(Arrays.asList(src, dst));
+		this.write(Package.create(cmd, c));
+	}
+	public void rentOutGround(short cmd, Message message) {
+		Gs.GroundRent c = (Gs.GroundRent)message;
+		RentPara rentPara = new RentPara(c.getRentPreDay(), c.getPaymentCycleDays(), c.getDeposit(), c.getRentDays());
+		if(!rentPara.valid())
+			return;
+		List<Coordinate> coordinates = new ArrayList<>(c.getCoordCount());
+		for(Gs.MiniIndex i : c.getCoordList()) {
+			coordinates.add(new Coordinate(i));
+		}
+		if(GroundManager.instance().rentOutGround(player.id(), coordinates, rentPara)) {
+			this.write(Package.create(cmd, c));
+		}
+	}
+	public void rentGround(short cmd, Message message) {
+		Gs.GroundRent c = (Gs.GroundRent)message;
+		RentPara rentPara = new RentPara(c.getRentPreDay(), c.getPaymentCycleDays(), c.getDeposit(), c.getRentDays());
+		if(!rentPara.valid())
+			return;
+		List<Coordinate> coordinates = new ArrayList<>(c.getCoordCount());
+		for(Gs.MiniIndex i : c.getCoordList()) {
+			coordinates.add(new Coordinate(i));
+		}
+		int cost = c.getRentPreDay() * c.getPaymentCycleDays() + c.getDeposit();
+		if(player.money() < cost)
+			return;
+		UUID transactionId = GroundManager.instance().rentGround(player, coordinates, rentPara);
+		if(transactionId != null) {
+			player.decMoney(c.getRentPreDay() * c.getPaymentCycleDays());
+			player.lockMoney(transactionId, c.getDeposit());
+			this.write(Package.create(cmd, c));
+		}
+		else
+			this.write(Package.fail(cmd));
+	}
+	public void sellGround(short cmd, Message message) {
+		Gs.GroundSale c = (Gs.GroundSale)message;
+		if(c.getPrice() <= 0)
+			return;
+		Set<Coordinate> coordinates = new HashSet<>();
+		for(Gs.MiniIndex i : c.getCoordList()) {
+			coordinates.add(new Coordinate(i));
+		}
+		if(coordinates.size() != c.getCoordCount())
+			return;
+		if(GroundManager.instance().sellGround(player.id(), coordinates, c.getPrice()))
+			this.write(Package.create(cmd));
+		else
+			this.write(Package.fail(cmd));
+	}
+	public void buyGround(short cmd, Message message) {
+		Gs.GroundSale c = (Gs.GroundSale)message;
+		if(c.getPrice() <= 0)
+			return;
+		Set<Coordinate> coordinates = new HashSet<>();
+		for(Gs.MiniIndex i : c.getCoordList()) {
+			coordinates.add(new Coordinate(i));
+		}
+		if(coordinates.size() != c.getCoordCount())
+			return;
+		if(GroundManager.instance().buyGround(player, coordinates, c.getPrice()))
+			this.write(Package.create(cmd));
+		else
+			this.write(Package.fail(cmd));
+	}
 }

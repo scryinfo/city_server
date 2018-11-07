@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 public class RetailShop extends Building {
-    public RetailShop(MetaRetailShop meta, Coord pos, UUID ownerId) {
+    public RetailShop(MetaRetailShop meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
     }

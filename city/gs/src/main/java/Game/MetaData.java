@@ -260,7 +260,7 @@ class MetaGroundAuction {
             System.exit(-1);
         }
         for(int i = 0; i < index.size(); i+=2)
-            this.area.add(new Coord(index.get(i), index.get(i+1)));
+            this.area.add(new Coordinate(index.get(i), index.get(i+1)));
         this.beginTime = TimeUnit.SECONDS.toMillis(d.getLong("time"));
         this.endTime = this.beginTime + TimeUnit.SECONDS.toMillis(d.getInteger("duration"));
         this.price = d.getInteger("price");
@@ -272,13 +272,13 @@ class MetaGroundAuction {
                 .setBeginTime(beginTime)
                 .setDurationSec((int) (endTime - beginTime))
                 .setBasePrice(price);
-        for(Coord c : area) {
+        for(Coordinate c : area) {
             b.addArea(c.toProto());
         }
         return b.build();
     }
     UUID id;    // use to check this data has been changed or not, compare it with player db(if anyone bid it)
-    Set<Coord> area = new HashSet<>();
+    Set<Coordinate> area = new HashSet<>();
     long beginTime;
     long endTime;
     int price;

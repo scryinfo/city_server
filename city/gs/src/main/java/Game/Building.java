@@ -35,7 +35,7 @@ public abstract class Building implements ISessionCache {
     public boolean outOfBusiness() {
         return true; // according to employee satisfication
     }
-    public static Building create(int id, Coord pos, UUID ownerId) {
+    public static Building create(int id, Coordinate pos, UUID ownerId) {
         switch(MetaBuilding.type(id))
         {
             case MetaBuilding.TRIVIAL:
@@ -77,12 +77,12 @@ public abstract class Building implements ISessionCache {
     }
     public void broadcastChange() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
-        Package pack = Package.create(GsCode.OpCode.unitChange_VALUE, Gs.UnitChange.newBuilder().setInfo(this.toProto()).build());
+        Package pack = Package.create(GsCode.OpCode.unitChange_VALUE, this.toProto());
         City.instance().send(gip, pack);
     }
     public void broadcastDelete() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
-        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.UnitRemove.newBuilder().addId(Util.toByteString(id)).build());
+        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.Bytes.newBuilder().addIds(Util.toByteString(id)).build());
         City.instance().send(gip, pack);
     }
 
@@ -139,7 +139,7 @@ public abstract class Building implements ISessionCache {
     private UUID ownerId;
 
     @Embedded
-    private Coord coord;
+    private Coordinate coordinate;
 
     @Transient
     private int flow = 0;
@@ -198,10 +198,10 @@ public abstract class Building implements ISessionCache {
     public UUID ownerId() {
         return ownerId;
     }
-    public Building(MetaBuilding meta, Coord pos, UUID ownerId) {
+    public Building(MetaBuilding meta, Coordinate pos, UUID ownerId) {
         this.id = UUID.randomUUID();
         this.ownerId = ownerId;
-        this.coord = pos;
+        this.coordinate = pos;
         this.metaBuilding = meta;
     }
     Set<Npc> getAllNpc() {
@@ -215,7 +215,7 @@ public abstract class Building implements ISessionCache {
 //    public Building(MetaBuilding meta, Document doc) {
 //        this.id = doc.getObjectId("id");
 //        this.ownerId = doc.getObjectId("owner");
-//        this.coord = new Coord((Document) doc.get("coord"));
+//        this.coordinate = new Coordinate((Document) doc.get("coordinate"));
 //        this.metaBuilding = meta;
 //        this.salary = doc.getInteger("salary");
 //        this.happy = doc.getInteger("happy");
@@ -236,18 +236,18 @@ public abstract class Building implements ISessionCache {
         }
     }
     public CoordPair effectRange() {
-        Coord l = coord.shiftLU(this.metaBuilding.effectRange);
-        Coord r = coord.offset(this.metaBuilding.x, this.metaBuilding.y).shiftRB(this.metaBuilding.effectRange);
+        Coordinate l = coordinate.shiftLU(this.metaBuilding.effectRange);
+        Coordinate r = coordinate.offset(this.metaBuilding.x, this.metaBuilding.y).shiftRB(this.metaBuilding.effectRange);
        return new CoordPair(l, r);
     }
     public CoordPair area() {
-        return new CoordPair(coord, coord.offset(metaBuilding.x, metaBuilding.y));
+        return new CoordPair(coordinate, coordinate.offset(metaBuilding.x, metaBuilding.y));
     }
 //    public Document toBson() {
 //        Document res = new Document();
 //        res.append("id", id);
 //        res.append("ownerId", ownerId());
-//        res.append("coord", coord.toBson());
+//        res.append("coordinate", coordinate.toBson());
 //        res.append("salary", salary);
 //        res.append("happy", happy);
 //
@@ -261,16 +261,16 @@ public abstract class Building implements ISessionCache {
 //        res.append("flowHis", flowHistoryArr);
 //        return res;
 //    }
-    public Coord coordinate() {
-        return coord;
+    public Coordinate coordinate() {
+        return coordinate;
     }
     public Gs.BuildingInfo toProto() {
         return Gs.BuildingInfo.newBuilder()
                 .setId(Util.toByteString(id))
                 .setMId(metaBuilding.id)
                 .setPos(Gs.MiniIndex.newBuilder()
-                        .setX(this.coord.x)
-                        .setY(this.coord.y))
+                        .setX(this.coordinate.x)
+                        .setY(this.coordinate.y))
                 .setOwnerId(Util.toByteString(ownerId))
                 .setNpcFlow(this.flow)
                 .setState(Gs.BuildingState.valueOf(state))

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class TrivialBuilding extends Building {
     private MetaBuilding meta;
-    public TrivialBuilding(MetaBuilding meta, Coord pos, UUID ownerId) {
+    public TrivialBuilding(MetaBuilding meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
     }

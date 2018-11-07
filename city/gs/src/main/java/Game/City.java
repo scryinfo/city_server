@@ -46,21 +46,17 @@ public class City {
     public static final int TERRIAN_PLAYER = 0x00000002;
     public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
 
+    public static final class TerrianInfo {
+        UUID ownerId;
+        enum State {
+
+        }
+    }
     private short[][] terrain;
     private HashMap<UUID, Building> allBuilding = new HashMap<>();
 
-//    private HashMap<ObjectId, TrivialBuilding> allTrivialBuilding = new HashMap<>();
-//    private HashMap<ObjectId, Apartment> allApartment;
-//    private HashMap<ObjectId, PublicFacility> allPublicFacility;
-//    private HashMap<ObjectId, ProduceDepartment> allProductingDepartment;
-//    private HashMap<ObjectId, Laboratory> allLaboratory;
-//    private HashMap<ObjectId, MaterialFactory> allMaterialFactory;
-//    private HashMap<ObjectId, RetailShop> allRetailShop;
-    // almost all of player's data are shared all the time
-    // like building, ground, product. This requires and index to
-    // retrieve those things according to player id
     private HashMap<UUID, HashMap<UUID, Building>> playerBuilding = new HashMap<>();
-    //private HashMap<ObjectId, Ground> ground = new HashMap<>();
+    private HashMap<UUID, Ground> playerGround = new HashMap<>();
     public static void init(MetaCity meta) {
         instance = new City(meta);
     }
@@ -98,7 +94,7 @@ public class City {
                 logger.error("InitialBuilding contain no trivial building! id: " + i.id);
                 continue;
             }
-            Building b = Building.create(i.id, new Coord(i.x, i.y), SysRoleId);
+            Building b = Building.create(i.id, new Coordinate(i.x, i.y), SysRoleId);
             this.calcuTerrain(b);
             // b is useless, discard it
         }
@@ -249,9 +245,9 @@ public class City {
         });
         p.send(Package.create(GsCode.OpCode.unitCreate_VALUE, ucb.build()));
 
-        Gs.UnitRemove.Builder urb = Gs.UnitRemove.newBuilder();
+        Gs.Bytes.Builder urb = Gs.Bytes.newBuilder();
         this.forEachBuilding(leavingGrids, (Building b)->{
-            urb.addId(ByteString.copyFrom(Util.toBytes(b.id())));
+            urb.addIds(ByteString.copyFrom(Util.toBytes(b.id())));
         });
         p.send(Package.create(GsCode.OpCode.unitRemove_VALUE, urb.build()));
     }
@@ -277,7 +273,7 @@ public class City {
     public void mount(UUID id, CoordPair area) {
         //this.ground.getOrDefault(id, new ArrayList);
     }
-    public void mount(UUID id, Collection<Coord> area) {
+    public void mount(UUID id, Collection<Coordinate> area) {
         //this.ground.getOrDefault(id, new ArrayList);
     }
     public void delBuilding(Building building) {

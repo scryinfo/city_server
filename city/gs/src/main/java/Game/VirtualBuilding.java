@@ -12,7 +12,7 @@
 //
 //@Entity(name = "VirtualBuilding")
 //public class VirtualBuilding extends Building {
-//    public VirtualBuilding(MetaVirtualBuilding meta, Coord pos, UUID ownerId) {
+//    public VirtualBuilding(MetaVirtualBuilding meta, Coordinate pos, UUID ownerId) {
 //        super(meta.meta, pos, ownerId);
 //        this.meta = meta;
 //        this.store = new Storage(meta.totalCapacity());

@@ -11,7 +11,7 @@ import java.util.*;
 @Entity(name = "apartment")
 public class Apartment extends Building {
 
-    public Apartment(MetaApartment meta, Coord pos, UUID ownerId) {
+    public Apartment(MetaApartment meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
     }

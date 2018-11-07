@@ -6586,6 +6586,2323 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.BuildingInfo)
   }
 
+  public interface GroundInfoOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes ownerId = 1;
+    /**
+     * <code>optional bytes ownerId = 1;</code>
+     *
+     * <pre>
+     * null if owner is system
+     * </pre>
+     */
+    boolean hasOwnerId();
+    /**
+     * <code>optional bytes ownerId = 1;</code>
+     *
+     * <pre>
+     * null if owner is system
+     * </pre>
+     */
+    com.google.protobuf.ByteString getOwnerId();
+
+    // required int32 x = 2;
+    /**
+     * <code>required int32 x = 2;</code>
+     */
+    boolean hasX();
+    /**
+     * <code>required int32 x = 2;</code>
+     */
+    int getX();
+
+    // required int32 y = 3;
+    /**
+     * <code>required int32 y = 3;</code>
+     */
+    boolean hasY();
+    /**
+     * <code>required int32 y = 3;</code>
+     */
+    int getY();
+
+    // optional .gs.GroundInfo.Rent rent = 4;
+    /**
+     * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+     *
+     * <pre>
+     *rent和sell不会都有值，要么租要么卖
+     * </pre>
+     */
+    boolean hasRent();
+    /**
+     * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+     *
+     * <pre>
+     *rent和sell不会都有值，要么租要么卖
+     * </pre>
+     */
+    gs.Gs.GroundInfo.Rent getRent();
+    /**
+     * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+     *
+     * <pre>
+     *rent和sell不会都有值，要么租要么卖
+     * </pre>
+     */
+    gs.Gs.GroundInfo.RentOrBuilder getRentOrBuilder();
+
+    // optional .gs.GroundInfo.Sell sell = 5;
+    /**
+     * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+     */
+    boolean hasSell();
+    /**
+     * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+     */
+    gs.Gs.GroundInfo.Sell getSell();
+    /**
+     * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+     */
+    gs.Gs.GroundInfo.SellOrBuilder getSellOrBuilder();
+  }
+  /**
+   * Protobuf type {@code gs.GroundInfo}
+   */
+  public static final class GroundInfo extends
+      com.google.protobuf.GeneratedMessage
+      implements GroundInfoOrBuilder {
+    // Use GroundInfo.newBuilder() to construct.
+    private GroundInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private GroundInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final GroundInfo defaultInstance;
+    public static GroundInfo getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public GroundInfo getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GroundInfo(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              ownerId_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              x_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              y_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              gs.Gs.GroundInfo.Rent.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = rent_.toBuilder();
+              }
+              rent_ = input.readMessage(gs.Gs.GroundInfo.Rent.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(rent_);
+                rent_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
+              break;
+            }
+            case 42: {
+              gs.Gs.GroundInfo.Sell.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                subBuilder = sell_.toBuilder();
+              }
+              sell_ = input.readMessage(gs.Gs.GroundInfo.Sell.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(sell_);
+                sell_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000010;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_GroundInfo_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_GroundInfo_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.GroundInfo.class, gs.Gs.GroundInfo.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<GroundInfo> PARSER =
+        new com.google.protobuf.AbstractParser<GroundInfo>() {
+      public GroundInfo parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GroundInfo(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GroundInfo> getParserForType() {
+      return PARSER;
+    }
+
+    public interface RentOrBuilder
+        extends com.google.protobuf.MessageOrBuilder {
+
+      // required int32 rentPreDay = 1;
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      boolean hasRentPreDay();
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      int getRentPreDay();
+
+      // required int32 paymentCycleDays = 2;
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      boolean hasPaymentCycleDays();
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      int getPaymentCycleDays();
+
+      // required int32 deposit = 3;
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      boolean hasDeposit();
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      int getDeposit();
+
+      // required int32 rentDays = 4;
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      boolean hasRentDays();
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      int getRentDays();
+
+      // optional bytes renterId = 5;
+      /**
+       * <code>optional bytes renterId = 5;</code>
+       */
+      boolean hasRenterId();
+      /**
+       * <code>optional bytes renterId = 5;</code>
+       */
+      com.google.protobuf.ByteString getRenterId();
+
+      // optional int64 rentBeginTs = 6;
+      /**
+       * <code>optional int64 rentBeginTs = 6;</code>
+       */
+      boolean hasRentBeginTs();
+      /**
+       * <code>optional int64 rentBeginTs = 6;</code>
+       */
+      long getRentBeginTs();
+    }
+    /**
+     * Protobuf type {@code gs.GroundInfo.Rent}
+     */
+    public static final class Rent extends
+        com.google.protobuf.GeneratedMessage
+        implements RentOrBuilder {
+      // Use Rent.newBuilder() to construct.
+      private Rent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Rent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Rent defaultInstance;
+      public static Rent getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Rent getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Rent(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                rentPreDay_ = input.readInt32();
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                paymentCycleDays_ = input.readInt32();
+                break;
+              }
+              case 24: {
+                bitField0_ |= 0x00000004;
+                deposit_ = input.readInt32();
+                break;
+              }
+              case 32: {
+                bitField0_ |= 0x00000008;
+                rentDays_ = input.readInt32();
+                break;
+              }
+              case 42: {
+                bitField0_ |= 0x00000010;
+                renterId_ = input.readBytes();
+                break;
+              }
+              case 48: {
+                bitField0_ |= 0x00000020;
+                rentBeginTs_ = input.readInt64();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_GroundInfo_Rent_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_GroundInfo_Rent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.GroundInfo.Rent.class, gs.Gs.GroundInfo.Rent.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Rent> PARSER =
+          new com.google.protobuf.AbstractParser<Rent>() {
+        public Rent parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Rent(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Rent> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      // required int32 rentPreDay = 1;
+      public static final int RENTPREDAY_FIELD_NUMBER = 1;
+      private int rentPreDay_;
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      public boolean hasRentPreDay() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      public int getRentPreDay() {
+        return rentPreDay_;
+      }
+
+      // required int32 paymentCycleDays = 2;
+      public static final int PAYMENTCYCLEDAYS_FIELD_NUMBER = 2;
+      private int paymentCycleDays_;
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      public boolean hasPaymentCycleDays() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      public int getPaymentCycleDays() {
+        return paymentCycleDays_;
+      }
+
+      // required int32 deposit = 3;
+      public static final int DEPOSIT_FIELD_NUMBER = 3;
+      private int deposit_;
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      public boolean hasDeposit() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      public int getDeposit() {
+        return deposit_;
+      }
+
+      // required int32 rentDays = 4;
+      public static final int RENTDAYS_FIELD_NUMBER = 4;
+      private int rentDays_;
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      public boolean hasRentDays() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      public int getRentDays() {
+        return rentDays_;
+      }
+
+      // optional bytes renterId = 5;
+      public static final int RENTERID_FIELD_NUMBER = 5;
+      private com.google.protobuf.ByteString renterId_;
+      /**
+       * <code>optional bytes renterId = 5;</code>
+       */
+      public boolean hasRenterId() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional bytes renterId = 5;</code>
+       */
+      public com.google.protobuf.ByteString getRenterId() {
+        return renterId_;
+      }
+
+      // optional int64 rentBeginTs = 6;
+      public static final int RENTBEGINTS_FIELD_NUMBER = 6;
+      private long rentBeginTs_;
+      /**
+       * <code>optional int64 rentBeginTs = 6;</code>
+       */
+      public boolean hasRentBeginTs() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional int64 rentBeginTs = 6;</code>
+       */
+      public long getRentBeginTs() {
+        return rentBeginTs_;
+      }
+
+      private void initFields() {
+        rentPreDay_ = 0;
+        paymentCycleDays_ = 0;
+        deposit_ = 0;
+        rentDays_ = 0;
+        renterId_ = com.google.protobuf.ByteString.EMPTY;
+        rentBeginTs_ = 0L;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasRentPreDay()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasPaymentCycleDays()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasDeposit()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasRentDays()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeInt32(1, rentPreDay_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt32(2, paymentCycleDays_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeInt32(3, deposit_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeInt32(4, rentDays_);
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          output.writeBytes(5, renterId_);
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          output.writeInt64(6, rentBeginTs_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(1, rentPreDay_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, paymentCycleDays_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(3, deposit_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(4, rentDays_);
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(5, renterId_);
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(6, rentBeginTs_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static gs.Gs.GroundInfo.Rent parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Rent parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static gs.Gs.GroundInfo.Rent parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.GroundInfo.Rent parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(gs.Gs.GroundInfo.Rent prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code gs.GroundInfo.Rent}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder>
+         implements gs.Gs.GroundInfo.RentOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return gs.Gs.internal_static_gs_GroundInfo_Rent_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return gs.Gs.internal_static_gs_GroundInfo_Rent_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  gs.Gs.GroundInfo.Rent.class, gs.Gs.GroundInfo.Rent.Builder.class);
+        }
+
+        // Construct using gs.Gs.GroundInfo.Rent.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          rentPreDay_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          paymentCycleDays_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          deposit_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          rentDays_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          renterId_ = com.google.protobuf.ByteString.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000010);
+          rentBeginTs_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000020);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return gs.Gs.internal_static_gs_GroundInfo_Rent_descriptor;
+        }
+
+        public gs.Gs.GroundInfo.Rent getDefaultInstanceForType() {
+          return gs.Gs.GroundInfo.Rent.getDefaultInstance();
+        }
+
+        public gs.Gs.GroundInfo.Rent build() {
+          gs.Gs.GroundInfo.Rent result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public gs.Gs.GroundInfo.Rent buildPartial() {
+          gs.Gs.GroundInfo.Rent result = new gs.Gs.GroundInfo.Rent(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.rentPreDay_ = rentPreDay_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.paymentCycleDays_ = paymentCycleDays_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.deposit_ = deposit_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.rentDays_ = rentDays_;
+          if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+            to_bitField0_ |= 0x00000010;
+          }
+          result.renterId_ = renterId_;
+          if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+            to_bitField0_ |= 0x00000020;
+          }
+          result.rentBeginTs_ = rentBeginTs_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof gs.Gs.GroundInfo.Rent) {
+            return mergeFrom((gs.Gs.GroundInfo.Rent)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(gs.Gs.GroundInfo.Rent other) {
+          if (other == gs.Gs.GroundInfo.Rent.getDefaultInstance()) return this;
+          if (other.hasRentPreDay()) {
+            setRentPreDay(other.getRentPreDay());
+          }
+          if (other.hasPaymentCycleDays()) {
+            setPaymentCycleDays(other.getPaymentCycleDays());
+          }
+          if (other.hasDeposit()) {
+            setDeposit(other.getDeposit());
+          }
+          if (other.hasRentDays()) {
+            setRentDays(other.getRentDays());
+          }
+          if (other.hasRenterId()) {
+            setRenterId(other.getRenterId());
+          }
+          if (other.hasRentBeginTs()) {
+            setRentBeginTs(other.getRentBeginTs());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasRentPreDay()) {
+            
+            return false;
+          }
+          if (!hasPaymentCycleDays()) {
+            
+            return false;
+          }
+          if (!hasDeposit()) {
+            
+            return false;
+          }
+          if (!hasRentDays()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          gs.Gs.GroundInfo.Rent parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (gs.Gs.GroundInfo.Rent) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // required int32 rentPreDay = 1;
+        private int rentPreDay_ ;
+        /**
+         * <code>required int32 rentPreDay = 1;</code>
+         */
+        public boolean hasRentPreDay() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required int32 rentPreDay = 1;</code>
+         */
+        public int getRentPreDay() {
+          return rentPreDay_;
+        }
+        /**
+         * <code>required int32 rentPreDay = 1;</code>
+         */
+        public Builder setRentPreDay(int value) {
+          bitField0_ |= 0x00000001;
+          rentPreDay_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 rentPreDay = 1;</code>
+         */
+        public Builder clearRentPreDay() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          rentPreDay_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 paymentCycleDays = 2;
+        private int paymentCycleDays_ ;
+        /**
+         * <code>required int32 paymentCycleDays = 2;</code>
+         */
+        public boolean hasPaymentCycleDays() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required int32 paymentCycleDays = 2;</code>
+         */
+        public int getPaymentCycleDays() {
+          return paymentCycleDays_;
+        }
+        /**
+         * <code>required int32 paymentCycleDays = 2;</code>
+         */
+        public Builder setPaymentCycleDays(int value) {
+          bitField0_ |= 0x00000002;
+          paymentCycleDays_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 paymentCycleDays = 2;</code>
+         */
+        public Builder clearPaymentCycleDays() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          paymentCycleDays_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 deposit = 3;
+        private int deposit_ ;
+        /**
+         * <code>required int32 deposit = 3;</code>
+         */
+        public boolean hasDeposit() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required int32 deposit = 3;</code>
+         */
+        public int getDeposit() {
+          return deposit_;
+        }
+        /**
+         * <code>required int32 deposit = 3;</code>
+         */
+        public Builder setDeposit(int value) {
+          bitField0_ |= 0x00000004;
+          deposit_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 deposit = 3;</code>
+         */
+        public Builder clearDeposit() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          deposit_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 rentDays = 4;
+        private int rentDays_ ;
+        /**
+         * <code>required int32 rentDays = 4;</code>
+         */
+        public boolean hasRentDays() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>required int32 rentDays = 4;</code>
+         */
+        public int getRentDays() {
+          return rentDays_;
+        }
+        /**
+         * <code>required int32 rentDays = 4;</code>
+         */
+        public Builder setRentDays(int value) {
+          bitField0_ |= 0x00000008;
+          rentDays_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 rentDays = 4;</code>
+         */
+        public Builder clearRentDays() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          rentDays_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // optional bytes renterId = 5;
+        private com.google.protobuf.ByteString renterId_ = com.google.protobuf.ByteString.EMPTY;
+        /**
+         * <code>optional bytes renterId = 5;</code>
+         */
+        public boolean hasRenterId() {
+          return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        /**
+         * <code>optional bytes renterId = 5;</code>
+         */
+        public com.google.protobuf.ByteString getRenterId() {
+          return renterId_;
+        }
+        /**
+         * <code>optional bytes renterId = 5;</code>
+         */
+        public Builder setRenterId(com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+          renterId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional bytes renterId = 5;</code>
+         */
+        public Builder clearRenterId() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          renterId_ = getDefaultInstance().getRenterId();
+          onChanged();
+          return this;
+        }
+
+        // optional int64 rentBeginTs = 6;
+        private long rentBeginTs_ ;
+        /**
+         * <code>optional int64 rentBeginTs = 6;</code>
+         */
+        public boolean hasRentBeginTs() {
+          return ((bitField0_ & 0x00000020) == 0x00000020);
+        }
+        /**
+         * <code>optional int64 rentBeginTs = 6;</code>
+         */
+        public long getRentBeginTs() {
+          return rentBeginTs_;
+        }
+        /**
+         * <code>optional int64 rentBeginTs = 6;</code>
+         */
+        public Builder setRentBeginTs(long value) {
+          bitField0_ |= 0x00000020;
+          rentBeginTs_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional int64 rentBeginTs = 6;</code>
+         */
+        public Builder clearRentBeginTs() {
+          bitField0_ = (bitField0_ & ~0x00000020);
+          rentBeginTs_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:gs.GroundInfo.Rent)
+      }
+
+      static {
+        defaultInstance = new Rent(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:gs.GroundInfo.Rent)
+    }
+
+    public interface SellOrBuilder
+        extends com.google.protobuf.MessageOrBuilder {
+
+      // required int32 price = 1;
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      boolean hasPrice();
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      int getPrice();
+    }
+    /**
+     * Protobuf type {@code gs.GroundInfo.Sell}
+     */
+    public static final class Sell extends
+        com.google.protobuf.GeneratedMessage
+        implements SellOrBuilder {
+      // Use Sell.newBuilder() to construct.
+      private Sell(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Sell(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Sell defaultInstance;
+      public static Sell getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Sell getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Sell(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                price_ = input.readInt32();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_GroundInfo_Sell_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_GroundInfo_Sell_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.GroundInfo.Sell.class, gs.Gs.GroundInfo.Sell.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Sell> PARSER =
+          new com.google.protobuf.AbstractParser<Sell>() {
+        public Sell parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Sell(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Sell> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      // required int32 price = 1;
+      public static final int PRICE_FIELD_NUMBER = 1;
+      private int price_;
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      public boolean hasPrice() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      public int getPrice() {
+        return price_;
+      }
+
+      private void initFields() {
+        price_ = 0;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasPrice()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeInt32(1, price_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(1, price_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static gs.Gs.GroundInfo.Sell parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Sell parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static gs.Gs.GroundInfo.Sell parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.GroundInfo.Sell parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(gs.Gs.GroundInfo.Sell prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code gs.GroundInfo.Sell}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder>
+         implements gs.Gs.GroundInfo.SellOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return gs.Gs.internal_static_gs_GroundInfo_Sell_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return gs.Gs.internal_static_gs_GroundInfo_Sell_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  gs.Gs.GroundInfo.Sell.class, gs.Gs.GroundInfo.Sell.Builder.class);
+        }
+
+        // Construct using gs.Gs.GroundInfo.Sell.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          price_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return gs.Gs.internal_static_gs_GroundInfo_Sell_descriptor;
+        }
+
+        public gs.Gs.GroundInfo.Sell getDefaultInstanceForType() {
+          return gs.Gs.GroundInfo.Sell.getDefaultInstance();
+        }
+
+        public gs.Gs.GroundInfo.Sell build() {
+          gs.Gs.GroundInfo.Sell result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public gs.Gs.GroundInfo.Sell buildPartial() {
+          gs.Gs.GroundInfo.Sell result = new gs.Gs.GroundInfo.Sell(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.price_ = price_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof gs.Gs.GroundInfo.Sell) {
+            return mergeFrom((gs.Gs.GroundInfo.Sell)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(gs.Gs.GroundInfo.Sell other) {
+          if (other == gs.Gs.GroundInfo.Sell.getDefaultInstance()) return this;
+          if (other.hasPrice()) {
+            setPrice(other.getPrice());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasPrice()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          gs.Gs.GroundInfo.Sell parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (gs.Gs.GroundInfo.Sell) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // required int32 price = 1;
+        private int price_ ;
+        /**
+         * <code>required int32 price = 1;</code>
+         */
+        public boolean hasPrice() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required int32 price = 1;</code>
+         */
+        public int getPrice() {
+          return price_;
+        }
+        /**
+         * <code>required int32 price = 1;</code>
+         */
+        public Builder setPrice(int value) {
+          bitField0_ |= 0x00000001;
+          price_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 price = 1;</code>
+         */
+        public Builder clearPrice() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          price_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:gs.GroundInfo.Sell)
+      }
+
+      static {
+        defaultInstance = new Sell(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:gs.GroundInfo.Sell)
+    }
+
+    private int bitField0_;
+    // optional bytes ownerId = 1;
+    public static final int OWNERID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString ownerId_;
+    /**
+     * <code>optional bytes ownerId = 1;</code>
+     *
+     * <pre>
+     * null if owner is system
+     * </pre>
+     */
+    public boolean hasOwnerId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes ownerId = 1;</code>
+     *
+     * <pre>
+     * null if owner is system
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getOwnerId() {
+      return ownerId_;
+    }
+
+    // required int32 x = 2;
+    public static final int X_FIELD_NUMBER = 2;
+    private int x_;
+    /**
+     * <code>required int32 x = 2;</code>
+     */
+    public boolean hasX() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 x = 2;</code>
+     */
+    public int getX() {
+      return x_;
+    }
+
+    // required int32 y = 3;
+    public static final int Y_FIELD_NUMBER = 3;
+    private int y_;
+    /**
+     * <code>required int32 y = 3;</code>
+     */
+    public boolean hasY() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 y = 3;</code>
+     */
+    public int getY() {
+      return y_;
+    }
+
+    // optional .gs.GroundInfo.Rent rent = 4;
+    public static final int RENT_FIELD_NUMBER = 4;
+    private gs.Gs.GroundInfo.Rent rent_;
+    /**
+     * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+     *
+     * <pre>
+     *rent和sell不会都有值，要么租要么卖
+     * </pre>
+     */
+    public boolean hasRent() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+     *
+     * <pre>
+     *rent和sell不会都有值，要么租要么卖
+     * </pre>
+     */
+    public gs.Gs.GroundInfo.Rent getRent() {
+      return rent_;
+    }
+    /**
+     * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+     *
+     * <pre>
+     *rent和sell不会都有值，要么租要么卖
+     * </pre>
+     */
+    public gs.Gs.GroundInfo.RentOrBuilder getRentOrBuilder() {
+      return rent_;
+    }
+
+    // optional .gs.GroundInfo.Sell sell = 5;
+    public static final int SELL_FIELD_NUMBER = 5;
+    private gs.Gs.GroundInfo.Sell sell_;
+    /**
+     * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+     */
+    public boolean hasSell() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+     */
+    public gs.Gs.GroundInfo.Sell getSell() {
+      return sell_;
+    }
+    /**
+     * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+     */
+    public gs.Gs.GroundInfo.SellOrBuilder getSellOrBuilder() {
+      return sell_;
+    }
+
+    private void initFields() {
+      ownerId_ = com.google.protobuf.ByteString.EMPTY;
+      x_ = 0;
+      y_ = 0;
+      rent_ = gs.Gs.GroundInfo.Rent.getDefaultInstance();
+      sell_ = gs.Gs.GroundInfo.Sell.getDefaultInstance();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasX()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasY()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (hasRent()) {
+        if (!getRent().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasSell()) {
+        if (!getSell().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, ownerId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, x_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, y_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeMessage(4, rent_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeMessage(5, sell_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, ownerId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, x_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, y_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, rent_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, sell_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.GroundInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.GroundInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.GroundInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.GroundInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.GroundInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.GroundInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.GroundInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.GroundInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.GroundInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.GroundInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.GroundInfo prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.GroundInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.GroundInfoOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_GroundInfo_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_GroundInfo_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.GroundInfo.class, gs.Gs.GroundInfo.Builder.class);
+      }
+
+      // Construct using gs.Gs.GroundInfo.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getRentFieldBuilder();
+          getSellFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        ownerId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        x_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        y_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (rentBuilder_ == null) {
+          rent_ = gs.Gs.GroundInfo.Rent.getDefaultInstance();
+        } else {
+          rentBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        if (sellBuilder_ == null) {
+          sell_ = gs.Gs.GroundInfo.Sell.getDefaultInstance();
+        } else {
+          sellBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000010);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_GroundInfo_descriptor;
+      }
+
+      public gs.Gs.GroundInfo getDefaultInstanceForType() {
+        return gs.Gs.GroundInfo.getDefaultInstance();
+      }
+
+      public gs.Gs.GroundInfo build() {
+        gs.Gs.GroundInfo result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.GroundInfo buildPartial() {
+        gs.Gs.GroundInfo result = new gs.Gs.GroundInfo(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.ownerId_ = ownerId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.x_ = x_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.y_ = y_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        if (rentBuilder_ == null) {
+          result.rent_ = rent_;
+        } else {
+          result.rent_ = rentBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        if (sellBuilder_ == null) {
+          result.sell_ = sell_;
+        } else {
+          result.sell_ = sellBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.GroundInfo) {
+          return mergeFrom((gs.Gs.GroundInfo)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.GroundInfo other) {
+        if (other == gs.Gs.GroundInfo.getDefaultInstance()) return this;
+        if (other.hasOwnerId()) {
+          setOwnerId(other.getOwnerId());
+        }
+        if (other.hasX()) {
+          setX(other.getX());
+        }
+        if (other.hasY()) {
+          setY(other.getY());
+        }
+        if (other.hasRent()) {
+          mergeRent(other.getRent());
+        }
+        if (other.hasSell()) {
+          mergeSell(other.getSell());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasX()) {
+          
+          return false;
+        }
+        if (!hasY()) {
+          
+          return false;
+        }
+        if (hasRent()) {
+          if (!getRent().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasSell()) {
+          if (!getSell().isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.GroundInfo parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.GroundInfo) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes ownerId = 1;
+      private com.google.protobuf.ByteString ownerId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes ownerId = 1;</code>
+       *
+       * <pre>
+       * null if owner is system
+       * </pre>
+       */
+      public boolean hasOwnerId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes ownerId = 1;</code>
+       *
+       * <pre>
+       * null if owner is system
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getOwnerId() {
+        return ownerId_;
+      }
+      /**
+       * <code>optional bytes ownerId = 1;</code>
+       *
+       * <pre>
+       * null if owner is system
+       * </pre>
+       */
+      public Builder setOwnerId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        ownerId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes ownerId = 1;</code>
+       *
+       * <pre>
+       * null if owner is system
+       * </pre>
+       */
+      public Builder clearOwnerId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        ownerId_ = getDefaultInstance().getOwnerId();
+        onChanged();
+        return this;
+      }
+
+      // required int32 x = 2;
+      private int x_ ;
+      /**
+       * <code>required int32 x = 2;</code>
+       */
+      public boolean hasX() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 x = 2;</code>
+       */
+      public int getX() {
+        return x_;
+      }
+      /**
+       * <code>required int32 x = 2;</code>
+       */
+      public Builder setX(int value) {
+        bitField0_ |= 0x00000002;
+        x_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 x = 2;</code>
+       */
+      public Builder clearX() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        x_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 y = 3;
+      private int y_ ;
+      /**
+       * <code>required int32 y = 3;</code>
+       */
+      public boolean hasY() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 y = 3;</code>
+       */
+      public int getY() {
+        return y_;
+      }
+      /**
+       * <code>required int32 y = 3;</code>
+       */
+      public Builder setY(int value) {
+        bitField0_ |= 0x00000004;
+        y_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 y = 3;</code>
+       */
+      public Builder clearY() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        y_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional .gs.GroundInfo.Rent rent = 4;
+      private gs.Gs.GroundInfo.Rent rent_ = gs.Gs.GroundInfo.Rent.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.GroundInfo.Rent, gs.Gs.GroundInfo.Rent.Builder, gs.Gs.GroundInfo.RentOrBuilder> rentBuilder_;
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public boolean hasRent() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public gs.Gs.GroundInfo.Rent getRent() {
+        if (rentBuilder_ == null) {
+          return rent_;
+        } else {
+          return rentBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public Builder setRent(gs.Gs.GroundInfo.Rent value) {
+        if (rentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          rent_ = value;
+          onChanged();
+        } else {
+          rentBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public Builder setRent(
+          gs.Gs.GroundInfo.Rent.Builder builderForValue) {
+        if (rentBuilder_ == null) {
+          rent_ = builderForValue.build();
+          onChanged();
+        } else {
+          rentBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public Builder mergeRent(gs.Gs.GroundInfo.Rent value) {
+        if (rentBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              rent_ != gs.Gs.GroundInfo.Rent.getDefaultInstance()) {
+            rent_ =
+              gs.Gs.GroundInfo.Rent.newBuilder(rent_).mergeFrom(value).buildPartial();
+          } else {
+            rent_ = value;
+          }
+          onChanged();
+        } else {
+          rentBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public Builder clearRent() {
+        if (rentBuilder_ == null) {
+          rent_ = gs.Gs.GroundInfo.Rent.getDefaultInstance();
+          onChanged();
+        } else {
+          rentBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public gs.Gs.GroundInfo.Rent.Builder getRentBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getRentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      public gs.Gs.GroundInfo.RentOrBuilder getRentOrBuilder() {
+        if (rentBuilder_ != null) {
+          return rentBuilder_.getMessageOrBuilder();
+        } else {
+          return rent_;
+        }
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Rent rent = 4;</code>
+       *
+       * <pre>
+       *rent和sell不会都有值，要么租要么卖
+       * </pre>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.GroundInfo.Rent, gs.Gs.GroundInfo.Rent.Builder, gs.Gs.GroundInfo.RentOrBuilder> 
+          getRentFieldBuilder() {
+        if (rentBuilder_ == null) {
+          rentBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              gs.Gs.GroundInfo.Rent, gs.Gs.GroundInfo.Rent.Builder, gs.Gs.GroundInfo.RentOrBuilder>(
+                  rent_,
+                  getParentForChildren(),
+                  isClean());
+          rent_ = null;
+        }
+        return rentBuilder_;
+      }
+
+      // optional .gs.GroundInfo.Sell sell = 5;
+      private gs.Gs.GroundInfo.Sell sell_ = gs.Gs.GroundInfo.Sell.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.GroundInfo.Sell, gs.Gs.GroundInfo.Sell.Builder, gs.Gs.GroundInfo.SellOrBuilder> sellBuilder_;
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public boolean hasSell() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public gs.Gs.GroundInfo.Sell getSell() {
+        if (sellBuilder_ == null) {
+          return sell_;
+        } else {
+          return sellBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public Builder setSell(gs.Gs.GroundInfo.Sell value) {
+        if (sellBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          sell_ = value;
+          onChanged();
+        } else {
+          sellBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public Builder setSell(
+          gs.Gs.GroundInfo.Sell.Builder builderForValue) {
+        if (sellBuilder_ == null) {
+          sell_ = builderForValue.build();
+          onChanged();
+        } else {
+          sellBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public Builder mergeSell(gs.Gs.GroundInfo.Sell value) {
+        if (sellBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) == 0x00000010) &&
+              sell_ != gs.Gs.GroundInfo.Sell.getDefaultInstance()) {
+            sell_ =
+              gs.Gs.GroundInfo.Sell.newBuilder(sell_).mergeFrom(value).buildPartial();
+          } else {
+            sell_ = value;
+          }
+          onChanged();
+        } else {
+          sellBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public Builder clearSell() {
+        if (sellBuilder_ == null) {
+          sell_ = gs.Gs.GroundInfo.Sell.getDefaultInstance();
+          onChanged();
+        } else {
+          sellBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000010);
+        return this;
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public gs.Gs.GroundInfo.Sell.Builder getSellBuilder() {
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return getSellFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      public gs.Gs.GroundInfo.SellOrBuilder getSellOrBuilder() {
+        if (sellBuilder_ != null) {
+          return sellBuilder_.getMessageOrBuilder();
+        } else {
+          return sell_;
+        }
+      }
+      /**
+       * <code>optional .gs.GroundInfo.Sell sell = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.GroundInfo.Sell, gs.Gs.GroundInfo.Sell.Builder, gs.Gs.GroundInfo.SellOrBuilder> 
+          getSellFieldBuilder() {
+        if (sellBuilder_ == null) {
+          sellBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              gs.Gs.GroundInfo.Sell, gs.Gs.GroundInfo.Sell.Builder, gs.Gs.GroundInfo.SellOrBuilder>(
+                  sell_,
+                  getParentForChildren(),
+                  isClean());
+          sell_ = null;
+        }
+        return sellBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.GroundInfo)
+    }
+
+    static {
+      defaultInstance = new GroundInfo(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.GroundInfo)
+  }
+
   public interface HeartBeatOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -9589,7 +11906,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     java.util.List<gs.Gs.IntNum> 
@@ -9598,7 +11915,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     gs.Gs.IntNum getInHand(int index);
@@ -9606,7 +11923,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     int getInHandCount();
@@ -9614,7 +11931,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     java.util.List<? extends gs.Gs.IntNumOrBuilder> 
@@ -9623,7 +11940,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     gs.Gs.IntNumOrBuilder getInHandOrBuilder(
@@ -9849,7 +12166,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     public java.util.List<gs.Gs.IntNum> getInHandList() {
@@ -9859,7 +12176,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
@@ -9870,7 +12187,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     public int getInHandCount() {
@@ -9880,7 +12197,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     public gs.Gs.IntNum getInHand(int index) {
@@ -9890,7 +12207,7 @@ public final class Gs {
      * <code>repeated .gs.IntNum inHand = 1;</code>
      *
      * <pre>
-     *可用
+     *已用
      * </pre>
      */
     public gs.Gs.IntNumOrBuilder getInHandOrBuilder(
@@ -10421,7 +12738,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public java.util.List<gs.Gs.IntNum> getInHandList() {
@@ -10435,7 +12752,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public int getInHandCount() {
@@ -10449,7 +12766,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public gs.Gs.IntNum getInHand(int index) {
@@ -10463,7 +12780,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder setInHand(
@@ -10484,7 +12801,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder setInHand(
@@ -10502,7 +12819,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder addInHand(gs.Gs.IntNum value) {
@@ -10522,7 +12839,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder addInHand(
@@ -10543,7 +12860,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder addInHand(
@@ -10561,7 +12878,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder addInHand(
@@ -10579,7 +12896,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder addAllInHand(
@@ -10597,7 +12914,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder clearInHand() {
@@ -10614,7 +12931,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public Builder removeInHand(int index) {
@@ -10631,7 +12948,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public gs.Gs.IntNum.Builder getInHandBuilder(
@@ -10642,7 +12959,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public gs.Gs.IntNumOrBuilder getInHandOrBuilder(
@@ -10656,7 +12973,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public java.util.List<? extends gs.Gs.IntNumOrBuilder> 
@@ -10671,7 +12988,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public gs.Gs.IntNum.Builder addInHandBuilder() {
@@ -10682,7 +12999,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public gs.Gs.IntNum.Builder addInHandBuilder(
@@ -10694,7 +13011,7 @@ public final class Gs {
        * <code>repeated .gs.IntNum inHand = 1;</code>
        *
        * <pre>
-       *可用
+       *已用
        * </pre>
        */
       public java.util.List<gs.Gs.IntNum.Builder> 
@@ -11428,6 +13745,31 @@ public final class Gs {
      */
     gs.Gs.ProduceDepartmentOrBuilder getProduceDepartmentOrBuilder(
         int index);
+
+    // repeated .gs.PublicFacility publicFacility = 4;
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    java.util.List<gs.Gs.PublicFacility> 
+        getPublicFacilityList();
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    gs.Gs.PublicFacility getPublicFacility(int index);
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    int getPublicFacilityCount();
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    java.util.List<? extends gs.Gs.PublicFacilityOrBuilder> 
+        getPublicFacilityOrBuilderList();
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    gs.Gs.PublicFacilityOrBuilder getPublicFacilityOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code gs.BuildingSet}
@@ -11504,6 +13846,14 @@ public final class Gs {
               produceDepartment_.add(input.readMessage(gs.Gs.ProduceDepartment.PARSER, extensionRegistry));
               break;
             }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                publicFacility_ = new java.util.ArrayList<gs.Gs.PublicFacility>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              publicFacility_.add(input.readMessage(gs.Gs.PublicFacility.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -11520,6 +13870,9 @@ public final class Gs {
         }
         if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           produceDepartment_ = java.util.Collections.unmodifiableList(produceDepartment_);
+        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          publicFacility_ = java.util.Collections.unmodifiableList(publicFacility_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -11660,10 +14013,47 @@ public final class Gs {
       return produceDepartment_.get(index);
     }
 
+    // repeated .gs.PublicFacility publicFacility = 4;
+    public static final int PUBLICFACILITY_FIELD_NUMBER = 4;
+    private java.util.List<gs.Gs.PublicFacility> publicFacility_;
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    public java.util.List<gs.Gs.PublicFacility> getPublicFacilityList() {
+      return publicFacility_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    public java.util.List<? extends gs.Gs.PublicFacilityOrBuilder> 
+        getPublicFacilityOrBuilderList() {
+      return publicFacility_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    public int getPublicFacilityCount() {
+      return publicFacility_.size();
+    }
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    public gs.Gs.PublicFacility getPublicFacility(int index) {
+      return publicFacility_.get(index);
+    }
+    /**
+     * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+     */
+    public gs.Gs.PublicFacilityOrBuilder getPublicFacilityOrBuilder(
+        int index) {
+      return publicFacility_.get(index);
+    }
+
     private void initFields() {
       apartment_ = java.util.Collections.emptyList();
       materialFactory_ = java.util.Collections.emptyList();
       produceDepartment_ = java.util.Collections.emptyList();
+      publicFacility_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -11688,6 +14078,12 @@ public final class Gs {
           return false;
         }
       }
+      for (int i = 0; i < getPublicFacilityCount(); i++) {
+        if (!getPublicFacility(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -11703,6 +14099,9 @@ public final class Gs {
       }
       for (int i = 0; i < produceDepartment_.size(); i++) {
         output.writeMessage(3, produceDepartment_.get(i));
+      }
+      for (int i = 0; i < publicFacility_.size(); i++) {
+        output.writeMessage(4, publicFacility_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -11724,6 +14123,10 @@ public final class Gs {
       for (int i = 0; i < produceDepartment_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, produceDepartment_.get(i));
+      }
+      for (int i = 0; i < publicFacility_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, publicFacility_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -11836,6 +14239,7 @@ public final class Gs {
           getApartmentFieldBuilder();
           getMaterialFactoryFieldBuilder();
           getProduceDepartmentFieldBuilder();
+          getPublicFacilityFieldBuilder();
         }
       }
       private static Builder create() {
@@ -11861,6 +14265,12 @@ public final class Gs {
           bitField0_ = (bitField0_ & ~0x00000004);
         } else {
           produceDepartmentBuilder_.clear();
+        }
+        if (publicFacilityBuilder_ == null) {
+          publicFacility_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          publicFacilityBuilder_.clear();
         }
         return this;
       }
@@ -11915,6 +14325,15 @@ public final class Gs {
           result.produceDepartment_ = produceDepartment_;
         } else {
           result.produceDepartment_ = produceDepartmentBuilder_.build();
+        }
+        if (publicFacilityBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+            publicFacility_ = java.util.Collections.unmodifiableList(publicFacility_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.publicFacility_ = publicFacility_;
+        } else {
+          result.publicFacility_ = publicFacilityBuilder_.build();
         }
         onBuilt();
         return result;
@@ -12009,6 +14428,32 @@ public final class Gs {
             }
           }
         }
+        if (publicFacilityBuilder_ == null) {
+          if (!other.publicFacility_.isEmpty()) {
+            if (publicFacility_.isEmpty()) {
+              publicFacility_ = other.publicFacility_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensurePublicFacilityIsMutable();
+              publicFacility_.addAll(other.publicFacility_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.publicFacility_.isEmpty()) {
+            if (publicFacilityBuilder_.isEmpty()) {
+              publicFacilityBuilder_.dispose();
+              publicFacilityBuilder_ = null;
+              publicFacility_ = other.publicFacility_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              publicFacilityBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getPublicFacilityFieldBuilder() : null;
+            } else {
+              publicFacilityBuilder_.addAllMessages(other.publicFacility_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -12028,6 +14473,12 @@ public final class Gs {
         }
         for (int i = 0; i < getProduceDepartmentCount(); i++) {
           if (!getProduceDepartment(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getPublicFacilityCount(); i++) {
+          if (!getPublicFacility(i).isInitialized()) {
             
             return false;
           }
@@ -12774,6 +15225,246 @@ public final class Gs {
         return produceDepartmentBuilder_;
       }
 
+      // repeated .gs.PublicFacility publicFacility = 4;
+      private java.util.List<gs.Gs.PublicFacility> publicFacility_ =
+        java.util.Collections.emptyList();
+      private void ensurePublicFacilityIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          publicFacility_ = new java.util.ArrayList<gs.Gs.PublicFacility>(publicFacility_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility, gs.Gs.PublicFacility.Builder, gs.Gs.PublicFacilityOrBuilder> publicFacilityBuilder_;
+
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public java.util.List<gs.Gs.PublicFacility> getPublicFacilityList() {
+        if (publicFacilityBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(publicFacility_);
+        } else {
+          return publicFacilityBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public int getPublicFacilityCount() {
+        if (publicFacilityBuilder_ == null) {
+          return publicFacility_.size();
+        } else {
+          return publicFacilityBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public gs.Gs.PublicFacility getPublicFacility(int index) {
+        if (publicFacilityBuilder_ == null) {
+          return publicFacility_.get(index);
+        } else {
+          return publicFacilityBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder setPublicFacility(
+          int index, gs.Gs.PublicFacility value) {
+        if (publicFacilityBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePublicFacilityIsMutable();
+          publicFacility_.set(index, value);
+          onChanged();
+        } else {
+          publicFacilityBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder setPublicFacility(
+          int index, gs.Gs.PublicFacility.Builder builderForValue) {
+        if (publicFacilityBuilder_ == null) {
+          ensurePublicFacilityIsMutable();
+          publicFacility_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          publicFacilityBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder addPublicFacility(gs.Gs.PublicFacility value) {
+        if (publicFacilityBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePublicFacilityIsMutable();
+          publicFacility_.add(value);
+          onChanged();
+        } else {
+          publicFacilityBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder addPublicFacility(
+          int index, gs.Gs.PublicFacility value) {
+        if (publicFacilityBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePublicFacilityIsMutable();
+          publicFacility_.add(index, value);
+          onChanged();
+        } else {
+          publicFacilityBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder addPublicFacility(
+          gs.Gs.PublicFacility.Builder builderForValue) {
+        if (publicFacilityBuilder_ == null) {
+          ensurePublicFacilityIsMutable();
+          publicFacility_.add(builderForValue.build());
+          onChanged();
+        } else {
+          publicFacilityBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder addPublicFacility(
+          int index, gs.Gs.PublicFacility.Builder builderForValue) {
+        if (publicFacilityBuilder_ == null) {
+          ensurePublicFacilityIsMutable();
+          publicFacility_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          publicFacilityBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder addAllPublicFacility(
+          java.lang.Iterable<? extends gs.Gs.PublicFacility> values) {
+        if (publicFacilityBuilder_ == null) {
+          ensurePublicFacilityIsMutable();
+          super.addAll(values, publicFacility_);
+          onChanged();
+        } else {
+          publicFacilityBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder clearPublicFacility() {
+        if (publicFacilityBuilder_ == null) {
+          publicFacility_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          publicFacilityBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public Builder removePublicFacility(int index) {
+        if (publicFacilityBuilder_ == null) {
+          ensurePublicFacilityIsMutable();
+          publicFacility_.remove(index);
+          onChanged();
+        } else {
+          publicFacilityBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public gs.Gs.PublicFacility.Builder getPublicFacilityBuilder(
+          int index) {
+        return getPublicFacilityFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public gs.Gs.PublicFacilityOrBuilder getPublicFacilityOrBuilder(
+          int index) {
+        if (publicFacilityBuilder_ == null) {
+          return publicFacility_.get(index);  } else {
+          return publicFacilityBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public java.util.List<? extends gs.Gs.PublicFacilityOrBuilder> 
+           getPublicFacilityOrBuilderList() {
+        if (publicFacilityBuilder_ != null) {
+          return publicFacilityBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(publicFacility_);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public gs.Gs.PublicFacility.Builder addPublicFacilityBuilder() {
+        return getPublicFacilityFieldBuilder().addBuilder(
+            gs.Gs.PublicFacility.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public gs.Gs.PublicFacility.Builder addPublicFacilityBuilder(
+          int index) {
+        return getPublicFacilityFieldBuilder().addBuilder(
+            index, gs.Gs.PublicFacility.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility publicFacility = 4;</code>
+       */
+      public java.util.List<gs.Gs.PublicFacility.Builder> 
+           getPublicFacilityBuilderList() {
+        return getPublicFacilityFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility, gs.Gs.PublicFacility.Builder, gs.Gs.PublicFacilityOrBuilder> 
+          getPublicFacilityFieldBuilder() {
+        if (publicFacilityBuilder_ == null) {
+          publicFacilityBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.PublicFacility, gs.Gs.PublicFacility.Builder, gs.Gs.PublicFacilityOrBuilder>(
+                  publicFacility_,
+                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  getParentForChildren(),
+                  isClean());
+          publicFacility_ = null;
+        }
+        return publicFacilityBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:gs.BuildingSet)
     }
 
@@ -12948,6 +15639,51 @@ public final class Gs {
      * <code>repeated int32 exchangeCollectedItem = 20;</code>
      */
     int getExchangeCollectedItem(int index);
+
+    // repeated .gs.GroundInfo ground = 30;
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    java.util.List<gs.Gs.GroundInfo> 
+        getGroundList();
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    gs.Gs.GroundInfo getGround(int index);
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    int getGroundCount();
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.GroundInfoOrBuilder> 
+        getGroundOrBuilderList();
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    gs.Gs.GroundInfoOrBuilder getGroundOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code gs.Role}
@@ -13131,6 +15867,14 @@ public final class Gs {
               input.popLimit(limit);
               break;
             }
+            case 242: {
+              if (!((mutable_bitField0_ & 0x00001000) == 0x00001000)) {
+                ground_ = new java.util.ArrayList<gs.Gs.GroundInfo>();
+                mutable_bitField0_ |= 0x00001000;
+              }
+              ground_.add(input.readMessage(gs.Gs.GroundInfo.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -13144,6 +15888,9 @@ public final class Gs {
         }
         if (((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
           exchangeCollectedItem_ = java.util.Collections.unmodifiableList(exchangeCollectedItem_);
+        }
+        if (((mutable_bitField0_ & 0x00001000) == 0x00001000)) {
+          ground_ = java.util.Collections.unmodifiableList(ground_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -13446,6 +16193,62 @@ public final class Gs {
       return exchangeCollectedItem_.get(index);
     }
 
+    // repeated .gs.GroundInfo ground = 30;
+    public static final int GROUND_FIELD_NUMBER = 30;
+    private java.util.List<gs.Gs.GroundInfo> ground_;
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    public java.util.List<gs.Gs.GroundInfo> getGroundList() {
+      return ground_;
+    }
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.GroundInfoOrBuilder> 
+        getGroundOrBuilderList() {
+      return ground_;
+    }
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    public int getGroundCount() {
+      return ground_.size();
+    }
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    public gs.Gs.GroundInfo getGround(int index) {
+      return ground_.get(index);
+    }
+    /**
+     * <code>repeated .gs.GroundInfo ground = 30;</code>
+     *
+     * <pre>
+     *所拥有的地
+     * </pre>
+     */
+    public gs.Gs.GroundInfoOrBuilder getGroundOrBuilder(
+        int index) {
+      return ground_.get(index);
+    }
+
     private void initFields() {
       id_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
@@ -13459,6 +16262,7 @@ public final class Gs {
       bagCapacity_ = 0;
       itemIdCanProduce_ = java.util.Collections.emptyList();
       exchangeCollectedItem_ = java.util.Collections.emptyList();
+      ground_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -13517,6 +16321,12 @@ public final class Gs {
         memoizedIsInitialized = 0;
         return false;
       }
+      for (int i = 0; i < getGroundCount(); i++) {
+        if (!getGround(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -13559,6 +16369,9 @@ public final class Gs {
       }
       for (int i = 0; i < exchangeCollectedItem_.size(); i++) {
         output.writeInt32(20, exchangeCollectedItem_.get(i));
+      }
+      for (int i = 0; i < ground_.size(); i++) {
+        output.writeMessage(30, ground_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -13626,6 +16439,10 @@ public final class Gs {
         }
         size += dataSize;
         size += 2 * getExchangeCollectedItemList().size();
+      }
+      for (int i = 0; i < ground_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(30, ground_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -13746,6 +16563,7 @@ public final class Gs {
           getBuysFieldBuilder();
           getRentsFieldBuilder();
           getBagFieldBuilder();
+          getGroundFieldBuilder();
         }
       }
       private static Builder create() {
@@ -13794,6 +16612,12 @@ public final class Gs {
         bitField0_ = (bitField0_ & ~0x00000400);
         exchangeCollectedItem_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000800);
+        if (groundBuilder_ == null) {
+          ground_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00001000);
+        } else {
+          groundBuilder_.clear();
+        }
         return this;
       }
 
@@ -13888,6 +16712,15 @@ public final class Gs {
           bitField0_ = (bitField0_ & ~0x00000800);
         }
         result.exchangeCollectedItem_ = exchangeCollectedItem_;
+        if (groundBuilder_ == null) {
+          if (((bitField0_ & 0x00001000) == 0x00001000)) {
+            ground_ = java.util.Collections.unmodifiableList(ground_);
+            bitField0_ = (bitField0_ & ~0x00001000);
+          }
+          result.ground_ = ground_;
+        } else {
+          result.ground_ = groundBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -13956,6 +16789,32 @@ public final class Gs {
           }
           onChanged();
         }
+        if (groundBuilder_ == null) {
+          if (!other.ground_.isEmpty()) {
+            if (ground_.isEmpty()) {
+              ground_ = other.ground_;
+              bitField0_ = (bitField0_ & ~0x00001000);
+            } else {
+              ensureGroundIsMutable();
+              ground_.addAll(other.ground_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.ground_.isEmpty()) {
+            if (groundBuilder_.isEmpty()) {
+              groundBuilder_.dispose();
+              groundBuilder_ = null;
+              ground_ = other.ground_;
+              bitField0_ = (bitField0_ & ~0x00001000);
+              groundBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getGroundFieldBuilder() : null;
+            } else {
+              groundBuilder_.addAllMessages(other.ground_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -14012,6 +16871,12 @@ public final class Gs {
         if (!getBag().isInitialized()) {
           
           return false;
+        }
+        for (int i = 0; i < getGroundCount(); i++) {
+          if (!getGround(i).isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -14905,6 +17770,318 @@ public final class Gs {
         return this;
       }
 
+      // repeated .gs.GroundInfo ground = 30;
+      private java.util.List<gs.Gs.GroundInfo> ground_ =
+        java.util.Collections.emptyList();
+      private void ensureGroundIsMutable() {
+        if (!((bitField0_ & 0x00001000) == 0x00001000)) {
+          ground_ = new java.util.ArrayList<gs.Gs.GroundInfo>(ground_);
+          bitField0_ |= 0x00001000;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder> groundBuilder_;
+
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public java.util.List<gs.Gs.GroundInfo> getGroundList() {
+        if (groundBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(ground_);
+        } else {
+          return groundBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public int getGroundCount() {
+        if (groundBuilder_ == null) {
+          return ground_.size();
+        } else {
+          return groundBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public gs.Gs.GroundInfo getGround(int index) {
+        if (groundBuilder_ == null) {
+          return ground_.get(index);
+        } else {
+          return groundBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder setGround(
+          int index, gs.Gs.GroundInfo value) {
+        if (groundBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureGroundIsMutable();
+          ground_.set(index, value);
+          onChanged();
+        } else {
+          groundBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder setGround(
+          int index, gs.Gs.GroundInfo.Builder builderForValue) {
+        if (groundBuilder_ == null) {
+          ensureGroundIsMutable();
+          ground_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          groundBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder addGround(gs.Gs.GroundInfo value) {
+        if (groundBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureGroundIsMutable();
+          ground_.add(value);
+          onChanged();
+        } else {
+          groundBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder addGround(
+          int index, gs.Gs.GroundInfo value) {
+        if (groundBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureGroundIsMutable();
+          ground_.add(index, value);
+          onChanged();
+        } else {
+          groundBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder addGround(
+          gs.Gs.GroundInfo.Builder builderForValue) {
+        if (groundBuilder_ == null) {
+          ensureGroundIsMutable();
+          ground_.add(builderForValue.build());
+          onChanged();
+        } else {
+          groundBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder addGround(
+          int index, gs.Gs.GroundInfo.Builder builderForValue) {
+        if (groundBuilder_ == null) {
+          ensureGroundIsMutable();
+          ground_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          groundBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder addAllGround(
+          java.lang.Iterable<? extends gs.Gs.GroundInfo> values) {
+        if (groundBuilder_ == null) {
+          ensureGroundIsMutable();
+          super.addAll(values, ground_);
+          onChanged();
+        } else {
+          groundBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder clearGround() {
+        if (groundBuilder_ == null) {
+          ground_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00001000);
+          onChanged();
+        } else {
+          groundBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public Builder removeGround(int index) {
+        if (groundBuilder_ == null) {
+          ensureGroundIsMutable();
+          ground_.remove(index);
+          onChanged();
+        } else {
+          groundBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public gs.Gs.GroundInfo.Builder getGroundBuilder(
+          int index) {
+        return getGroundFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public gs.Gs.GroundInfoOrBuilder getGroundOrBuilder(
+          int index) {
+        if (groundBuilder_ == null) {
+          return ground_.get(index);  } else {
+          return groundBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.GroundInfoOrBuilder> 
+           getGroundOrBuilderList() {
+        if (groundBuilder_ != null) {
+          return groundBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(ground_);
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public gs.Gs.GroundInfo.Builder addGroundBuilder() {
+        return getGroundFieldBuilder().addBuilder(
+            gs.Gs.GroundInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public gs.Gs.GroundInfo.Builder addGroundBuilder(
+          int index) {
+        return getGroundFieldBuilder().addBuilder(
+            index, gs.Gs.GroundInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.GroundInfo ground = 30;</code>
+       *
+       * <pre>
+       *所拥有的地
+       * </pre>
+       */
+      public java.util.List<gs.Gs.GroundInfo.Builder> 
+           getGroundBuilderList() {
+        return getGroundFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder> 
+          getGroundFieldBuilder() {
+        if (groundBuilder_ == null) {
+          groundBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder>(
+                  ground_,
+                  ((bitField0_ & 0x00001000) == 0x00001000),
+                  getParentForChildren(),
+                  isClean());
+          ground_ = null;
+        }
+        return groundBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:gs.Role)
     }
 
@@ -14948,7 +18125,6 @@ public final class Gs {
    * Protobuf type {@code gs.UnitCreate}
    *
    * <pre>
-   * those broadcast message is not designed as a container which as MMO because the change happen rarely compare with MMO
    * unitCreate
    * </pre>
    */
@@ -15205,7 +18381,6 @@ public final class Gs {
      * Protobuf type {@code gs.UnitCreate}
      *
      * <pre>
-     * those broadcast message is not designed as a container which as MMO because the change happen rarely compare with MMO
      * unitCreate
      * </pre>
      */
@@ -15612,46 +18787,57 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.UnitCreate)
   }
 
-  public interface UnitRemoveOrBuilder
+  public interface GroundChangeOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // repeated bytes id = 1;
+    // repeated .gs.GroundInfo info = 2;
     /**
-     * <code>repeated bytes id = 1;</code>
+     * <code>repeated .gs.GroundInfo info = 2;</code>
      */
-    java.util.List<com.google.protobuf.ByteString> getIdList();
+    java.util.List<gs.Gs.GroundInfo> 
+        getInfoList();
     /**
-     * <code>repeated bytes id = 1;</code>
+     * <code>repeated .gs.GroundInfo info = 2;</code>
      */
-    int getIdCount();
+    gs.Gs.GroundInfo getInfo(int index);
     /**
-     * <code>repeated bytes id = 1;</code>
+     * <code>repeated .gs.GroundInfo info = 2;</code>
      */
-    com.google.protobuf.ByteString getId(int index);
+    int getInfoCount();
+    /**
+     * <code>repeated .gs.GroundInfo info = 2;</code>
+     */
+    java.util.List<? extends gs.Gs.GroundInfoOrBuilder> 
+        getInfoOrBuilderList();
+    /**
+     * <code>repeated .gs.GroundInfo info = 2;</code>
+     */
+    gs.Gs.GroundInfoOrBuilder getInfoOrBuilder(
+        int index);
   }
   /**
-   * Protobuf type {@code gs.UnitRemove}
+   * Protobuf type {@code gs.GroundChange}
    *
    * <pre>
-   * unitRemove
+   * groundChange
    * </pre>
    */
-  public static final class UnitRemove extends
+  public static final class GroundChange extends
       com.google.protobuf.GeneratedMessage
-      implements UnitRemoveOrBuilder {
-    // Use UnitRemove.newBuilder() to construct.
-    private UnitRemove(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements GroundChangeOrBuilder {
+    // Use GroundChange.newBuilder() to construct.
+    private GroundChange(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private UnitRemove(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private GroundChange(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final UnitRemove defaultInstance;
-    public static UnitRemove getDefaultInstance() {
+    private static final GroundChange defaultInstance;
+    public static GroundChange getDefaultInstance() {
       return defaultInstance;
     }
 
-    public UnitRemove getDefaultInstanceForType() {
+    public GroundChange getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -15661,7 +18847,7 @@ public final class Gs {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private UnitRemove(
+    private GroundChange(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -15684,12 +18870,12 @@ public final class Gs {
               }
               break;
             }
-            case 10: {
+            case 18: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                id_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                info_ = new java.util.ArrayList<gs.Gs.GroundInfo>();
                 mutable_bitField0_ |= 0x00000001;
               }
-              id_.add(input.readBytes());
+              info_.add(input.readMessage(gs.Gs.GroundInfo.PARSER, extensionRegistry));
               break;
             }
           }
@@ -15701,7 +18887,7 @@ public final class Gs {
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          id_ = java.util.Collections.unmodifiableList(id_);
+          info_ = java.util.Collections.unmodifiableList(info_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -15709,62 +18895,81 @@ public final class Gs {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gs.Gs.internal_static_gs_UnitRemove_descriptor;
+      return gs.Gs.internal_static_gs_GroundChange_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gs.Gs.internal_static_gs_UnitRemove_fieldAccessorTable
+      return gs.Gs.internal_static_gs_GroundChange_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gs.Gs.UnitRemove.class, gs.Gs.UnitRemove.Builder.class);
+              gs.Gs.GroundChange.class, gs.Gs.GroundChange.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<UnitRemove> PARSER =
-        new com.google.protobuf.AbstractParser<UnitRemove>() {
-      public UnitRemove parsePartialFrom(
+    public static com.google.protobuf.Parser<GroundChange> PARSER =
+        new com.google.protobuf.AbstractParser<GroundChange>() {
+      public GroundChange parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnitRemove(input, extensionRegistry);
+        return new GroundChange(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<UnitRemove> getParserForType() {
+    public com.google.protobuf.Parser<GroundChange> getParserForType() {
       return PARSER;
     }
 
-    // repeated bytes id = 1;
-    public static final int ID_FIELD_NUMBER = 1;
-    private java.util.List<com.google.protobuf.ByteString> id_;
+    // repeated .gs.GroundInfo info = 2;
+    public static final int INFO_FIELD_NUMBER = 2;
+    private java.util.List<gs.Gs.GroundInfo> info_;
     /**
-     * <code>repeated bytes id = 1;</code>
+     * <code>repeated .gs.GroundInfo info = 2;</code>
      */
-    public java.util.List<com.google.protobuf.ByteString>
-        getIdList() {
-      return id_;
+    public java.util.List<gs.Gs.GroundInfo> getInfoList() {
+      return info_;
     }
     /**
-     * <code>repeated bytes id = 1;</code>
+     * <code>repeated .gs.GroundInfo info = 2;</code>
      */
-    public int getIdCount() {
-      return id_.size();
+    public java.util.List<? extends gs.Gs.GroundInfoOrBuilder> 
+        getInfoOrBuilderList() {
+      return info_;
     }
     /**
-     * <code>repeated bytes id = 1;</code>
+     * <code>repeated .gs.GroundInfo info = 2;</code>
      */
-    public com.google.protobuf.ByteString getId(int index) {
-      return id_.get(index);
+    public int getInfoCount() {
+      return info_.size();
+    }
+    /**
+     * <code>repeated .gs.GroundInfo info = 2;</code>
+     */
+    public gs.Gs.GroundInfo getInfo(int index) {
+      return info_.get(index);
+    }
+    /**
+     * <code>repeated .gs.GroundInfo info = 2;</code>
+     */
+    public gs.Gs.GroundInfoOrBuilder getInfoOrBuilder(
+        int index) {
+      return info_.get(index);
     }
 
     private void initFields() {
-      id_ = java.util.Collections.emptyList();
+      info_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      for (int i = 0; i < getInfoCount(); i++) {
+        if (!getInfo(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -15772,8 +18977,8 @@ public final class Gs {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < id_.size(); i++) {
-        output.writeBytes(1, id_.get(i));
+      for (int i = 0; i < info_.size(); i++) {
+        output.writeMessage(2, info_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -15784,489 +18989,9 @@ public final class Gs {
       if (size != -1) return size;
 
       size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < id_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(id_.get(i));
-        }
-        size += dataSize;
-        size += 1 * getIdList().size();
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    public static gs.Gs.UnitRemove parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gs.Gs.UnitRemove parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gs.Gs.UnitRemove parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gs.Gs.UnitRemove parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gs.Gs.UnitRemove parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static gs.Gs.UnitRemove parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static gs.Gs.UnitRemove parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static gs.Gs.UnitRemove parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static gs.Gs.UnitRemove parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static gs.Gs.UnitRemove parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(gs.Gs.UnitRemove prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code gs.UnitRemove}
-     *
-     * <pre>
-     * unitRemove
-     * </pre>
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements gs.Gs.UnitRemoveOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gs.Gs.internal_static_gs_UnitRemove_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_UnitRemove_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gs.Gs.UnitRemove.class, gs.Gs.UnitRemove.Builder.class);
-      }
-
-      // Construct using gs.Gs.UnitRemove.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        id_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gs.Gs.internal_static_gs_UnitRemove_descriptor;
-      }
-
-      public gs.Gs.UnitRemove getDefaultInstanceForType() {
-        return gs.Gs.UnitRemove.getDefaultInstance();
-      }
-
-      public gs.Gs.UnitRemove build() {
-        gs.Gs.UnitRemove result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gs.Gs.UnitRemove buildPartial() {
-        gs.Gs.UnitRemove result = new gs.Gs.UnitRemove(this);
-        int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          id_ = java.util.Collections.unmodifiableList(id_);
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.id_ = id_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gs.Gs.UnitRemove) {
-          return mergeFrom((gs.Gs.UnitRemove)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gs.Gs.UnitRemove other) {
-        if (other == gs.Gs.UnitRemove.getDefaultInstance()) return this;
-        if (!other.id_.isEmpty()) {
-          if (id_.isEmpty()) {
-            id_ = other.id_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureIdIsMutable();
-            id_.addAll(other.id_);
-          }
-          onChanged();
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gs.Gs.UnitRemove parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gs.Gs.UnitRemove) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      // repeated bytes id = 1;
-      private java.util.List<com.google.protobuf.ByteString> id_ = java.util.Collections.emptyList();
-      private void ensureIdIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          id_ = new java.util.ArrayList<com.google.protobuf.ByteString>(id_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public java.util.List<com.google.protobuf.ByteString>
-          getIdList() {
-        return java.util.Collections.unmodifiableList(id_);
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public int getIdCount() {
-        return id_.size();
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public com.google.protobuf.ByteString getId(int index) {
-        return id_.get(index);
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public Builder setId(
-          int index, com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureIdIsMutable();
-        id_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public Builder addId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureIdIsMutable();
-        id_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public Builder addAllId(
-          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
-        ensureIdIsMutable();
-        super.addAll(values, id_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes id = 1;</code>
-       */
-      public Builder clearId() {
-        id_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:gs.UnitRemove)
-    }
-
-    static {
-      defaultInstance = new UnitRemove(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:gs.UnitRemove)
-  }
-
-  public interface UnitChangeOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // required .gs.BuildingInfo info = 1;
-    /**
-     * <code>required .gs.BuildingInfo info = 1;</code>
-     */
-    boolean hasInfo();
-    /**
-     * <code>required .gs.BuildingInfo info = 1;</code>
-     */
-    gs.Gs.BuildingInfo getInfo();
-    /**
-     * <code>required .gs.BuildingInfo info = 1;</code>
-     */
-    gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder();
-  }
-  /**
-   * Protobuf type {@code gs.UnitChange}
-   *
-   * <pre>
-   * unitChange
-   * </pre>
-   */
-  public static final class UnitChange extends
-      com.google.protobuf.GeneratedMessage
-      implements UnitChangeOrBuilder {
-    // Use UnitChange.newBuilder() to construct.
-    private UnitChange(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private UnitChange(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final UnitChange defaultInstance;
-    public static UnitChange getDefaultInstance() {
-      return defaultInstance;
-    }
-
-    public UnitChange getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private UnitChange(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              gs.Gs.BuildingInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
-                subBuilder = info_.toBuilder();
-              }
-              info_ = input.readMessage(gs.Gs.BuildingInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(info_);
-                info_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gs.Gs.internal_static_gs_UnitChange_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gs.Gs.internal_static_gs_UnitChange_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gs.Gs.UnitChange.class, gs.Gs.UnitChange.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<UnitChange> PARSER =
-        new com.google.protobuf.AbstractParser<UnitChange>() {
-      public UnitChange parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnitChange(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<UnitChange> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required .gs.BuildingInfo info = 1;
-    public static final int INFO_FIELD_NUMBER = 1;
-    private gs.Gs.BuildingInfo info_;
-    /**
-     * <code>required .gs.BuildingInfo info = 1;</code>
-     */
-    public boolean hasInfo() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required .gs.BuildingInfo info = 1;</code>
-     */
-    public gs.Gs.BuildingInfo getInfo() {
-      return info_;
-    }
-    /**
-     * <code>required .gs.BuildingInfo info = 1;</code>
-     */
-    public gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder() {
-      return info_;
-    }
-
-    private void initFields() {
-      info_ = gs.Gs.BuildingInfo.getDefaultInstance();
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasInfo()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getInfo().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(1, info_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      for (int i = 0; i < info_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, info_);
+          .computeMessageSize(2, info_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -16280,53 +19005,53 @@ public final class Gs {
       return super.writeReplace();
     }
 
-    public static gs.Gs.UnitChange parseFrom(
+    public static gs.Gs.GroundChange parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.UnitChange parseFrom(
+    public static gs.Gs.GroundChange parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.UnitChange parseFrom(byte[] data)
+    public static gs.Gs.GroundChange parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gs.Gs.UnitChange parseFrom(
+    public static gs.Gs.GroundChange parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gs.Gs.UnitChange parseFrom(java.io.InputStream input)
+    public static gs.Gs.GroundChange parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.UnitChange parseFrom(
+    public static gs.Gs.GroundChange parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static gs.Gs.UnitChange parseDelimitedFrom(java.io.InputStream input)
+    public static gs.Gs.GroundChange parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static gs.Gs.UnitChange parseDelimitedFrom(
+    public static gs.Gs.GroundChange parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static gs.Gs.UnitChange parseFrom(
+    public static gs.Gs.GroundChange parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static gs.Gs.UnitChange parseFrom(
+    public static gs.Gs.GroundChange parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -16335,7 +19060,7 @@ public final class Gs {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(gs.Gs.UnitChange prototype) {
+    public static Builder newBuilder(gs.Gs.GroundChange prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -16347,28 +19072,28 @@ public final class Gs {
       return builder;
     }
     /**
-     * Protobuf type {@code gs.UnitChange}
+     * Protobuf type {@code gs.GroundChange}
      *
      * <pre>
-     * unitChange
+     * groundChange
      * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements gs.Gs.UnitChangeOrBuilder {
+       implements gs.Gs.GroundChangeOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gs.Gs.internal_static_gs_UnitChange_descriptor;
+        return gs.Gs.internal_static_gs_GroundChange_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gs.Gs.internal_static_gs_UnitChange_fieldAccessorTable
+        return gs.Gs.internal_static_gs_GroundChange_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gs.Gs.UnitChange.class, gs.Gs.UnitChange.Builder.class);
+                gs.Gs.GroundChange.class, gs.Gs.GroundChange.Builder.class);
       }
 
-      // Construct using gs.Gs.UnitChange.newBuilder()
+      // Construct using gs.Gs.GroundChange.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -16390,11 +19115,11 @@ public final class Gs {
       public Builder clear() {
         super.clear();
         if (infoBuilder_ == null) {
-          info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+          info_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           infoBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -16404,64 +19129,84 @@ public final class Gs {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gs.Gs.internal_static_gs_UnitChange_descriptor;
+        return gs.Gs.internal_static_gs_GroundChange_descriptor;
       }
 
-      public gs.Gs.UnitChange getDefaultInstanceForType() {
-        return gs.Gs.UnitChange.getDefaultInstance();
+      public gs.Gs.GroundChange getDefaultInstanceForType() {
+        return gs.Gs.GroundChange.getDefaultInstance();
       }
 
-      public gs.Gs.UnitChange build() {
-        gs.Gs.UnitChange result = buildPartial();
+      public gs.Gs.GroundChange build() {
+        gs.Gs.GroundChange result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gs.Gs.UnitChange buildPartial() {
-        gs.Gs.UnitChange result = new gs.Gs.UnitChange(this);
+      public gs.Gs.GroundChange buildPartial() {
+        gs.Gs.GroundChange result = new gs.Gs.GroundChange(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         if (infoBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            info_ = java.util.Collections.unmodifiableList(info_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
           result.info_ = info_;
         } else {
           result.info_ = infoBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gs.Gs.UnitChange) {
-          return mergeFrom((gs.Gs.UnitChange)other);
+        if (other instanceof gs.Gs.GroundChange) {
+          return mergeFrom((gs.Gs.GroundChange)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gs.Gs.UnitChange other) {
-        if (other == gs.Gs.UnitChange.getDefaultInstance()) return this;
-        if (other.hasInfo()) {
-          mergeInfo(other.getInfo());
+      public Builder mergeFrom(gs.Gs.GroundChange other) {
+        if (other == gs.Gs.GroundChange.getDefaultInstance()) return this;
+        if (infoBuilder_ == null) {
+          if (!other.info_.isEmpty()) {
+            if (info_.isEmpty()) {
+              info_ = other.info_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureInfoIsMutable();
+              info_.addAll(other.info_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.info_.isEmpty()) {
+            if (infoBuilder_.isEmpty()) {
+              infoBuilder_.dispose();
+              infoBuilder_ = null;
+              info_ = other.info_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              infoBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getInfoFieldBuilder() : null;
+            } else {
+              infoBuilder_.addAllMessages(other.info_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasInfo()) {
-          
-          return false;
-        }
-        if (!getInfo().isInitialized()) {
-          
-          return false;
+        for (int i = 0; i < getInfoCount(); i++) {
+          if (!getInfo(i).isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -16470,11 +19215,11 @@ public final class Gs {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gs.Gs.UnitChange parsedMessage = null;
+        gs.Gs.GroundChange parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gs.Gs.UnitChange) e.getUnfinishedMessage();
+          parsedMessage = (gs.Gs.GroundChange) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -16485,116 +19230,239 @@ public final class Gs {
       }
       private int bitField0_;
 
-      // required .gs.BuildingInfo info = 1;
-      private gs.Gs.BuildingInfo info_ = gs.Gs.BuildingInfo.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder> infoBuilder_;
-      /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
-       */
-      public boolean hasInfo() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+      // repeated .gs.GroundInfo info = 2;
+      private java.util.List<gs.Gs.GroundInfo> info_ =
+        java.util.Collections.emptyList();
+      private void ensureInfoIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          info_ = new java.util.ArrayList<gs.Gs.GroundInfo>(info_);
+          bitField0_ |= 0x00000001;
+         }
       }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder> infoBuilder_;
+
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
-      public gs.Gs.BuildingInfo getInfo() {
+      public java.util.List<gs.Gs.GroundInfo> getInfoList() {
         if (infoBuilder_ == null) {
-          return info_;
+          return java.util.Collections.unmodifiableList(info_);
         } else {
-          return infoBuilder_.getMessage();
+          return infoBuilder_.getMessageList();
         }
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
-      public Builder setInfo(gs.Gs.BuildingInfo value) {
+      public int getInfoCount() {
+        if (infoBuilder_ == null) {
+          return info_.size();
+        } else {
+          return infoBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public gs.Gs.GroundInfo getInfo(int index) {
+        if (infoBuilder_ == null) {
+          return info_.get(index);
+        } else {
+          return infoBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public Builder setInfo(
+          int index, gs.Gs.GroundInfo value) {
         if (infoBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          info_ = value;
+          ensureInfoIsMutable();
+          info_.set(index, value);
           onChanged();
         } else {
-          infoBuilder_.setMessage(value);
+          infoBuilder_.setMessage(index, value);
         }
-        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
       public Builder setInfo(
-          gs.Gs.BuildingInfo.Builder builderForValue) {
+          int index, gs.Gs.GroundInfo.Builder builderForValue) {
         if (infoBuilder_ == null) {
-          info_ = builderForValue.build();
+          ensureInfoIsMutable();
+          info_.set(index, builderForValue.build());
           onChanged();
         } else {
-          infoBuilder_.setMessage(builderForValue.build());
+          infoBuilder_.setMessage(index, builderForValue.build());
         }
-        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
-      public Builder mergeInfo(gs.Gs.BuildingInfo value) {
+      public Builder addInfo(gs.Gs.GroundInfo value) {
         if (infoBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              info_ != gs.Gs.BuildingInfo.getDefaultInstance()) {
-            info_ =
-              gs.Gs.BuildingInfo.newBuilder(info_).mergeFrom(value).buildPartial();
-          } else {
-            info_ = value;
+          if (value == null) {
+            throw new NullPointerException();
           }
+          ensureInfoIsMutable();
+          info_.add(value);
           onChanged();
         } else {
-          infoBuilder_.mergeFrom(value);
+          infoBuilder_.addMessage(value);
         }
-        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public Builder addInfo(
+          int index, gs.Gs.GroundInfo value) {
+        if (infoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInfoIsMutable();
+          info_.add(index, value);
+          onChanged();
+        } else {
+          infoBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public Builder addInfo(
+          gs.Gs.GroundInfo.Builder builderForValue) {
+        if (infoBuilder_ == null) {
+          ensureInfoIsMutable();
+          info_.add(builderForValue.build());
+          onChanged();
+        } else {
+          infoBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public Builder addInfo(
+          int index, gs.Gs.GroundInfo.Builder builderForValue) {
+        if (infoBuilder_ == null) {
+          ensureInfoIsMutable();
+          info_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          infoBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public Builder addAllInfo(
+          java.lang.Iterable<? extends gs.Gs.GroundInfo> values) {
+        if (infoBuilder_ == null) {
+          ensureInfoIsMutable();
+          super.addAll(values, info_);
+          onChanged();
+        } else {
+          infoBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
       public Builder clearInfo() {
         if (infoBuilder_ == null) {
-          info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+          info_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           infoBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
-      public gs.Gs.BuildingInfo.Builder getInfoBuilder() {
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return getInfoFieldBuilder().getBuilder();
+      public Builder removeInfo(int index) {
+        if (infoBuilder_ == null) {
+          ensureInfoIsMutable();
+          info_.remove(index);
+          onChanged();
+        } else {
+          infoBuilder_.remove(index);
+        }
+        return this;
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
-      public gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder() {
-        if (infoBuilder_ != null) {
-          return infoBuilder_.getMessageOrBuilder();
-        } else {
-          return info_;
+      public gs.Gs.GroundInfo.Builder getInfoBuilder(
+          int index) {
+        return getInfoFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public gs.Gs.GroundInfoOrBuilder getInfoOrBuilder(
+          int index) {
+        if (infoBuilder_ == null) {
+          return info_.get(index);  } else {
+          return infoBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
-       * <code>required .gs.BuildingInfo info = 1;</code>
+       * <code>repeated .gs.GroundInfo info = 2;</code>
        */
-      private com.google.protobuf.SingleFieldBuilder<
-          gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder> 
+      public java.util.List<? extends gs.Gs.GroundInfoOrBuilder> 
+           getInfoOrBuilderList() {
+        if (infoBuilder_ != null) {
+          return infoBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(info_);
+        }
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public gs.Gs.GroundInfo.Builder addInfoBuilder() {
+        return getInfoFieldBuilder().addBuilder(
+            gs.Gs.GroundInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public gs.Gs.GroundInfo.Builder addInfoBuilder(
+          int index) {
+        return getInfoFieldBuilder().addBuilder(
+            index, gs.Gs.GroundInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.GroundInfo info = 2;</code>
+       */
+      public java.util.List<gs.Gs.GroundInfo.Builder> 
+           getInfoBuilderList() {
+        return getInfoFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder> 
           getInfoFieldBuilder() {
         if (infoBuilder_ == null) {
-          infoBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder>(
+          infoBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder>(
                   info_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
                   isClean());
           info_ = null;
@@ -16602,15 +19470,15 @@ public final class Gs {
         return infoBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:gs.UnitChange)
+      // @@protoc_insertion_point(builder_scope:gs.GroundChange)
     }
 
     static {
-      defaultInstance = new UnitChange(true);
+      defaultInstance = new GroundChange(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:gs.UnitChange)
+    // @@protoc_insertion_point(class_scope:gs.GroundChange)
   }
 
   public interface RoleInfosOrBuilder
@@ -17311,6 +20179,512 @@ public final class Gs {
     }
 
     // @@protoc_insertion_point(class_scope:gs.RoleInfos)
+  }
+
+  public interface DelItemOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes buildingId = 1;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+
+    // required int32 itemId = 2;
+    /**
+     * <code>required int32 itemId = 2;</code>
+     */
+    boolean hasItemId();
+    /**
+     * <code>required int32 itemId = 2;</code>
+     */
+    int getItemId();
+  }
+  /**
+   * Protobuf type {@code gs.DelItem}
+   *
+   * <pre>
+   * delItem
+   * c
+   * </pre>
+   */
+  public static final class DelItem extends
+      com.google.protobuf.GeneratedMessage
+      implements DelItemOrBuilder {
+    // Use DelItem.newBuilder() to construct.
+    private DelItem(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private DelItem(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final DelItem defaultInstance;
+    public static DelItem getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public DelItem getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DelItem(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              buildingId_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              itemId_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_DelItem_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_DelItem_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.DelItem.class, gs.Gs.DelItem.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<DelItem> PARSER =
+        new com.google.protobuf.AbstractParser<DelItem>() {
+      public DelItem parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DelItem(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DelItem> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes buildingId = 1;
+    public static final int BUILDINGID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    // required int32 itemId = 2;
+    public static final int ITEMID_FIELD_NUMBER = 2;
+    private int itemId_;
+    /**
+     * <code>required int32 itemId = 2;</code>
+     */
+    public boolean hasItemId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 itemId = 2;</code>
+     */
+    public int getItemId() {
+      return itemId_;
+    }
+
+    private void initFields() {
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      itemId_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasItemId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, itemId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, itemId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.DelItem parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.DelItem parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.DelItem parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.DelItem parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.DelItem parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.DelItem parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.DelItem parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.DelItem parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.DelItem parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.DelItem parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.DelItem prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.DelItem}
+     *
+     * <pre>
+     * delItem
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.DelItemOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_DelItem_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_DelItem_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.DelItem.class, gs.Gs.DelItem.Builder.class);
+      }
+
+      // Construct using gs.Gs.DelItem.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        itemId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_DelItem_descriptor;
+      }
+
+      public gs.Gs.DelItem getDefaultInstanceForType() {
+        return gs.Gs.DelItem.getDefaultInstance();
+      }
+
+      public gs.Gs.DelItem build() {
+        gs.Gs.DelItem result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.DelItem buildPartial() {
+        gs.Gs.DelItem result = new gs.Gs.DelItem(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.buildingId_ = buildingId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.itemId_ = itemId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.DelItem) {
+          return mergeFrom((gs.Gs.DelItem)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.DelItem other) {
+        if (other == gs.Gs.DelItem.getDefaultInstance()) return this;
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        if (other.hasItemId()) {
+          setItemId(other.getItemId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        if (!hasItemId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.DelItem parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.DelItem) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes buildingId = 1;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // required int32 itemId = 2;
+      private int itemId_ ;
+      /**
+       * <code>required int32 itemId = 2;</code>
+       */
+      public boolean hasItemId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 itemId = 2;</code>
+       */
+      public int getItemId() {
+        return itemId_;
+      }
+      /**
+       * <code>required int32 itemId = 2;</code>
+       */
+      public Builder setItemId(int value) {
+        bitField0_ |= 0x00000002;
+        itemId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 itemId = 2;</code>
+       */
+      public Builder clearItemId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.DelItem)
+    }
+
+    static {
+      defaultInstance = new DelItem(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.DelItem)
   }
 
   public interface GroundAuctionOrBuilder
@@ -20353,6 +23727,7 @@ public final class Gs {
    *
    * <pre>
    * addBuilding
+   * c
    * </pre>
    */
   public static final class AddBuilding extends
@@ -20633,6 +24008,7 @@ public final class Gs {
      *
      * <pre>
      * addBuilding
+     * c
      * </pre>
      */
     public static final class Builder extends
@@ -20944,31 +24320,23 @@ public final class Gs {
   public interface TransferItemOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional bytes src = 1;
+    // required bytes src = 1;
     /**
-     * <code>optional bytes src = 1;</code>
-     *
-     * <pre>
-     * null means your bag or building id
-     * </pre>
+     * <code>required bytes src = 1;</code>
      */
     boolean hasSrc();
     /**
-     * <code>optional bytes src = 1;</code>
-     *
-     * <pre>
-     * null means your bag or building id
-     * </pre>
+     * <code>required bytes src = 1;</code>
      */
     com.google.protobuf.ByteString getSrc();
 
-    // optional bytes dst = 2;
+    // required bytes dst = 2;
     /**
-     * <code>optional bytes dst = 2;</code>
+     * <code>required bytes dst = 2;</code>
      */
     boolean hasDst();
     /**
-     * <code>optional bytes dst = 2;</code>
+     * <code>required bytes dst = 2;</code>
      */
     com.google.protobuf.ByteString getDst();
 
@@ -21108,41 +24476,33 @@ public final class Gs {
     }
 
     private int bitField0_;
-    // optional bytes src = 1;
+    // required bytes src = 1;
     public static final int SRC_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString src_;
     /**
-     * <code>optional bytes src = 1;</code>
-     *
-     * <pre>
-     * null means your bag or building id
-     * </pre>
+     * <code>required bytes src = 1;</code>
      */
     public boolean hasSrc() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes src = 1;</code>
-     *
-     * <pre>
-     * null means your bag or building id
-     * </pre>
+     * <code>required bytes src = 1;</code>
      */
     public com.google.protobuf.ByteString getSrc() {
       return src_;
     }
 
-    // optional bytes dst = 2;
+    // required bytes dst = 2;
     public static final int DST_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString dst_;
     /**
-     * <code>optional bytes dst = 2;</code>
+     * <code>required bytes dst = 2;</code>
      */
     public boolean hasDst() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional bytes dst = 2;</code>
+     * <code>required bytes dst = 2;</code>
      */
     public com.google.protobuf.ByteString getDst() {
       return dst_;
@@ -21191,6 +24551,14 @@ public final class Gs {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasSrc()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDst()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       if (!hasItemId()) {
         memoizedIsInitialized = 0;
         return false;
@@ -21449,6 +24817,14 @@ public final class Gs {
       }
 
       public final boolean isInitialized() {
+        if (!hasSrc()) {
+          
+          return false;
+        }
+        if (!hasDst()) {
+          
+          return false;
+        }
         if (!hasItemId()) {
           
           return false;
@@ -21479,34 +24855,22 @@ public final class Gs {
       }
       private int bitField0_;
 
-      // optional bytes src = 1;
+      // required bytes src = 1;
       private com.google.protobuf.ByteString src_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes src = 1;</code>
-       *
-       * <pre>
-       * null means your bag or building id
-       * </pre>
+       * <code>required bytes src = 1;</code>
        */
       public boolean hasSrc() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bytes src = 1;</code>
-       *
-       * <pre>
-       * null means your bag or building id
-       * </pre>
+       * <code>required bytes src = 1;</code>
        */
       public com.google.protobuf.ByteString getSrc() {
         return src_;
       }
       /**
-       * <code>optional bytes src = 1;</code>
-       *
-       * <pre>
-       * null means your bag or building id
-       * </pre>
+       * <code>required bytes src = 1;</code>
        */
       public Builder setSrc(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -21518,11 +24882,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>optional bytes src = 1;</code>
-       *
-       * <pre>
-       * null means your bag or building id
-       * </pre>
+       * <code>required bytes src = 1;</code>
        */
       public Builder clearSrc() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -21531,22 +24891,22 @@ public final class Gs {
         return this;
       }
 
-      // optional bytes dst = 2;
+      // required bytes dst = 2;
       private com.google.protobuf.ByteString dst_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes dst = 2;</code>
+       * <code>required bytes dst = 2;</code>
        */
       public boolean hasDst() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional bytes dst = 2;</code>
+       * <code>required bytes dst = 2;</code>
        */
       public com.google.protobuf.ByteString getDst() {
         return dst_;
       }
       /**
-       * <code>optional bytes dst = 2;</code>
+       * <code>required bytes dst = 2;</code>
        */
       public Builder setDst(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -21558,7 +24918,7 @@ public final class Gs {
         return this;
       }
       /**
-       * <code>optional bytes dst = 2;</code>
+       * <code>required bytes dst = 2;</code>
        */
       public Builder clearDst() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -28082,6 +31442,8065 @@ public final class Gs {
     }
 
     // @@protoc_insertion_point(class_scope:gs.ProduceDepartment)
+  }
+
+  public interface PublicFacilityOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required .gs.BuildingInfo info = 1;
+    /**
+     * <code>required .gs.BuildingInfo info = 1;</code>
+     */
+    boolean hasInfo();
+    /**
+     * <code>required .gs.BuildingInfo info = 1;</code>
+     */
+    gs.Gs.BuildingInfo getInfo();
+    /**
+     * <code>required .gs.BuildingInfo info = 1;</code>
+     */
+    gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder();
+
+    // repeated .gs.PublicFacility.Slot availableSlot = 2;
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    java.util.List<gs.Gs.PublicFacility.Slot> 
+        getAvailableSlotList();
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    gs.Gs.PublicFacility.Slot getAvailableSlot(int index);
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    int getAvailableSlotCount();
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.PublicFacility.SlotOrBuilder> 
+        getAvailableSlotOrBuilderList();
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    gs.Gs.PublicFacility.SlotOrBuilder getAvailableSlotOrBuilder(
+        int index);
+
+    // repeated .gs.PublicFacility.SoldSlot soldSlot = 3;
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    java.util.List<gs.Gs.PublicFacility.SoldSlot> 
+        getSoldSlotList();
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    gs.Gs.PublicFacility.SoldSlot getSoldSlot(int index);
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    int getSoldSlotCount();
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.PublicFacility.SoldSlotOrBuilder> 
+        getSoldSlotOrBuilderList();
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    gs.Gs.PublicFacility.SoldSlotOrBuilder getSoldSlotOrBuilder(
+        int index);
+
+    // repeated .gs.PublicFacility.Ad ad = 4;
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    java.util.List<gs.Gs.PublicFacility.Ad> 
+        getAdList();
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    gs.Gs.PublicFacility.Ad getAd(int index);
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    int getAdCount();
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    java.util.List<? extends gs.Gs.PublicFacility.AdOrBuilder> 
+        getAdOrBuilderList();
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    gs.Gs.PublicFacility.AdOrBuilder getAdOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code gs.PublicFacility}
+   *
+   * <pre>
+   * detailPublicFacility
+   * c
+   * Id
+   * s
+   * </pre>
+   */
+  public static final class PublicFacility extends
+      com.google.protobuf.GeneratedMessage
+      implements PublicFacilityOrBuilder {
+    // Use PublicFacility.newBuilder() to construct.
+    private PublicFacility(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PublicFacility(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PublicFacility defaultInstance;
+    public static PublicFacility getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PublicFacility getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PublicFacility(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              gs.Gs.BuildingInfo.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = info_.toBuilder();
+              }
+              info_ = input.readMessage(gs.Gs.BuildingInfo.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(info_);
+                info_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                availableSlot_ = new java.util.ArrayList<gs.Gs.PublicFacility.Slot>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              availableSlot_.add(input.readMessage(gs.Gs.PublicFacility.Slot.PARSER, extensionRegistry));
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                soldSlot_ = new java.util.ArrayList<gs.Gs.PublicFacility.SoldSlot>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              soldSlot_.add(input.readMessage(gs.Gs.PublicFacility.SoldSlot.PARSER, extensionRegistry));
+              break;
+            }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                ad_ = new java.util.ArrayList<gs.Gs.PublicFacility.Ad>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              ad_.add(input.readMessage(gs.Gs.PublicFacility.Ad.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          availableSlot_ = java.util.Collections.unmodifiableList(availableSlot_);
+        }
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          soldSlot_ = java.util.Collections.unmodifiableList(soldSlot_);
+        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          ad_ = java.util.Collections.unmodifiableList(ad_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_PublicFacility_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_PublicFacility_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.PublicFacility.class, gs.Gs.PublicFacility.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PublicFacility> PARSER =
+        new com.google.protobuf.AbstractParser<PublicFacility>() {
+      public PublicFacility parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PublicFacility(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PublicFacility> getParserForType() {
+      return PARSER;
+    }
+
+    public interface SlotOrBuilder
+        extends com.google.protobuf.MessageOrBuilder {
+
+      // required bytes id = 1;
+      /**
+       * <code>required bytes id = 1;</code>
+       */
+      boolean hasId();
+      /**
+       * <code>required bytes id = 1;</code>
+       */
+      com.google.protobuf.ByteString getId();
+
+      // required int32 minDayToRent = 2;
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      boolean hasMinDayToRent();
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      int getMinDayToRent();
+
+      // required int32 maxDayToRent = 3;
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      boolean hasMaxDayToRent();
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      int getMaxDayToRent();
+
+      // required int32 rentPreDay = 4;
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      boolean hasRentPreDay();
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      int getRentPreDay();
+
+      // required int32 deposit = 5;
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      boolean hasDeposit();
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      int getDeposit();
+    }
+    /**
+     * Protobuf type {@code gs.PublicFacility.Slot}
+     */
+    public static final class Slot extends
+        com.google.protobuf.GeneratedMessage
+        implements SlotOrBuilder {
+      // Use Slot.newBuilder() to construct.
+      private Slot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Slot(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Slot defaultInstance;
+      public static Slot getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Slot getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Slot(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                bitField0_ |= 0x00000001;
+                id_ = input.readBytes();
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                minDayToRent_ = input.readInt32();
+                break;
+              }
+              case 24: {
+                bitField0_ |= 0x00000004;
+                maxDayToRent_ = input.readInt32();
+                break;
+              }
+              case 32: {
+                bitField0_ |= 0x00000008;
+                rentPreDay_ = input.readInt32();
+                break;
+              }
+              case 40: {
+                bitField0_ |= 0x00000010;
+                deposit_ = input.readInt32();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_PublicFacility_Slot_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_PublicFacility_Slot_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.PublicFacility.Slot.class, gs.Gs.PublicFacility.Slot.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Slot> PARSER =
+          new com.google.protobuf.AbstractParser<Slot>() {
+        public Slot parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Slot(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Slot> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      // required bytes id = 1;
+      public static final int ID_FIELD_NUMBER = 1;
+      private com.google.protobuf.ByteString id_;
+      /**
+       * <code>required bytes id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes id = 1;</code>
+       */
+      public com.google.protobuf.ByteString getId() {
+        return id_;
+      }
+
+      // required int32 minDayToRent = 2;
+      public static final int MINDAYTORENT_FIELD_NUMBER = 2;
+      private int minDayToRent_;
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      public boolean hasMinDayToRent() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      public int getMinDayToRent() {
+        return minDayToRent_;
+      }
+
+      // required int32 maxDayToRent = 3;
+      public static final int MAXDAYTORENT_FIELD_NUMBER = 3;
+      private int maxDayToRent_;
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      public boolean hasMaxDayToRent() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      public int getMaxDayToRent() {
+        return maxDayToRent_;
+      }
+
+      // required int32 rentPreDay = 4;
+      public static final int RENTPREDAY_FIELD_NUMBER = 4;
+      private int rentPreDay_;
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      public boolean hasRentPreDay() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      public int getRentPreDay() {
+        return rentPreDay_;
+      }
+
+      // required int32 deposit = 5;
+      public static final int DEPOSIT_FIELD_NUMBER = 5;
+      private int deposit_;
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      public boolean hasDeposit() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      public int getDeposit() {
+        return deposit_;
+      }
+
+      private void initFields() {
+        id_ = com.google.protobuf.ByteString.EMPTY;
+        minDayToRent_ = 0;
+        maxDayToRent_ = 0;
+        rentPreDay_ = 0;
+        deposit_ = 0;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasMinDayToRent()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasMaxDayToRent()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasRentPreDay()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasDeposit()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, id_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt32(2, minDayToRent_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeInt32(3, maxDayToRent_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeInt32(4, rentPreDay_);
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          output.writeInt32(5, deposit_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, id_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, minDayToRent_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(3, maxDayToRent_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(4, rentPreDay_);
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(5, deposit_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static gs.Gs.PublicFacility.Slot parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Slot parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static gs.Gs.PublicFacility.Slot parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.PublicFacility.Slot parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(gs.Gs.PublicFacility.Slot prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code gs.PublicFacility.Slot}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder>
+         implements gs.Gs.PublicFacility.SlotOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return gs.Gs.internal_static_gs_PublicFacility_Slot_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return gs.Gs.internal_static_gs_PublicFacility_Slot_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  gs.Gs.PublicFacility.Slot.class, gs.Gs.PublicFacility.Slot.Builder.class);
+        }
+
+        // Construct using gs.Gs.PublicFacility.Slot.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          id_ = com.google.protobuf.ByteString.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          minDayToRent_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          maxDayToRent_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          rentPreDay_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          deposit_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000010);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return gs.Gs.internal_static_gs_PublicFacility_Slot_descriptor;
+        }
+
+        public gs.Gs.PublicFacility.Slot getDefaultInstanceForType() {
+          return gs.Gs.PublicFacility.Slot.getDefaultInstance();
+        }
+
+        public gs.Gs.PublicFacility.Slot build() {
+          gs.Gs.PublicFacility.Slot result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public gs.Gs.PublicFacility.Slot buildPartial() {
+          gs.Gs.PublicFacility.Slot result = new gs.Gs.PublicFacility.Slot(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.id_ = id_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.minDayToRent_ = minDayToRent_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.maxDayToRent_ = maxDayToRent_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.rentPreDay_ = rentPreDay_;
+          if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+            to_bitField0_ |= 0x00000010;
+          }
+          result.deposit_ = deposit_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof gs.Gs.PublicFacility.Slot) {
+            return mergeFrom((gs.Gs.PublicFacility.Slot)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(gs.Gs.PublicFacility.Slot other) {
+          if (other == gs.Gs.PublicFacility.Slot.getDefaultInstance()) return this;
+          if (other.hasId()) {
+            setId(other.getId());
+          }
+          if (other.hasMinDayToRent()) {
+            setMinDayToRent(other.getMinDayToRent());
+          }
+          if (other.hasMaxDayToRent()) {
+            setMaxDayToRent(other.getMaxDayToRent());
+          }
+          if (other.hasRentPreDay()) {
+            setRentPreDay(other.getRentPreDay());
+          }
+          if (other.hasDeposit()) {
+            setDeposit(other.getDeposit());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasId()) {
+            
+            return false;
+          }
+          if (!hasMinDayToRent()) {
+            
+            return false;
+          }
+          if (!hasMaxDayToRent()) {
+            
+            return false;
+          }
+          if (!hasRentPreDay()) {
+            
+            return false;
+          }
+          if (!hasDeposit()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          gs.Gs.PublicFacility.Slot parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (gs.Gs.PublicFacility.Slot) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // required bytes id = 1;
+        private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
+        /**
+         * <code>required bytes id = 1;</code>
+         */
+        public boolean hasId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required bytes id = 1;</code>
+         */
+        public com.google.protobuf.ByteString getId() {
+          return id_;
+        }
+        /**
+         * <code>required bytes id = 1;</code>
+         */
+        public Builder setId(com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          id_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required bytes id = 1;</code>
+         */
+        public Builder clearId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          id_ = getDefaultInstance().getId();
+          onChanged();
+          return this;
+        }
+
+        // required int32 minDayToRent = 2;
+        private int minDayToRent_ ;
+        /**
+         * <code>required int32 minDayToRent = 2;</code>
+         */
+        public boolean hasMinDayToRent() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required int32 minDayToRent = 2;</code>
+         */
+        public int getMinDayToRent() {
+          return minDayToRent_;
+        }
+        /**
+         * <code>required int32 minDayToRent = 2;</code>
+         */
+        public Builder setMinDayToRent(int value) {
+          bitField0_ |= 0x00000002;
+          minDayToRent_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 minDayToRent = 2;</code>
+         */
+        public Builder clearMinDayToRent() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          minDayToRent_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 maxDayToRent = 3;
+        private int maxDayToRent_ ;
+        /**
+         * <code>required int32 maxDayToRent = 3;</code>
+         */
+        public boolean hasMaxDayToRent() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required int32 maxDayToRent = 3;</code>
+         */
+        public int getMaxDayToRent() {
+          return maxDayToRent_;
+        }
+        /**
+         * <code>required int32 maxDayToRent = 3;</code>
+         */
+        public Builder setMaxDayToRent(int value) {
+          bitField0_ |= 0x00000004;
+          maxDayToRent_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 maxDayToRent = 3;</code>
+         */
+        public Builder clearMaxDayToRent() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          maxDayToRent_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 rentPreDay = 4;
+        private int rentPreDay_ ;
+        /**
+         * <code>required int32 rentPreDay = 4;</code>
+         */
+        public boolean hasRentPreDay() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>required int32 rentPreDay = 4;</code>
+         */
+        public int getRentPreDay() {
+          return rentPreDay_;
+        }
+        /**
+         * <code>required int32 rentPreDay = 4;</code>
+         */
+        public Builder setRentPreDay(int value) {
+          bitField0_ |= 0x00000008;
+          rentPreDay_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 rentPreDay = 4;</code>
+         */
+        public Builder clearRentPreDay() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          rentPreDay_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 deposit = 5;
+        private int deposit_ ;
+        /**
+         * <code>required int32 deposit = 5;</code>
+         */
+        public boolean hasDeposit() {
+          return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        /**
+         * <code>required int32 deposit = 5;</code>
+         */
+        public int getDeposit() {
+          return deposit_;
+        }
+        /**
+         * <code>required int32 deposit = 5;</code>
+         */
+        public Builder setDeposit(int value) {
+          bitField0_ |= 0x00000010;
+          deposit_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 deposit = 5;</code>
+         */
+        public Builder clearDeposit() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          deposit_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:gs.PublicFacility.Slot)
+      }
+
+      static {
+        defaultInstance = new Slot(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:gs.PublicFacility.Slot)
+    }
+
+    public interface SoldSlotOrBuilder
+        extends com.google.protobuf.MessageOrBuilder {
+
+      // required .gs.PublicFacility.Slot s = 1;
+      /**
+       * <code>required .gs.PublicFacility.Slot s = 1;</code>
+       */
+      boolean hasS();
+      /**
+       * <code>required .gs.PublicFacility.Slot s = 1;</code>
+       */
+      gs.Gs.PublicFacility.Slot getS();
+      /**
+       * <code>required .gs.PublicFacility.Slot s = 1;</code>
+       */
+      gs.Gs.PublicFacility.SlotOrBuilder getSOrBuilder();
+
+      // required int64 beginTs = 2;
+      /**
+       * <code>required int64 beginTs = 2;</code>
+       *
+       * <pre>
+       *租赁开始时刻
+       * </pre>
+       */
+      boolean hasBeginTs();
+      /**
+       * <code>required int64 beginTs = 2;</code>
+       *
+       * <pre>
+       *租赁开始时刻
+       * </pre>
+       */
+      long getBeginTs();
+
+      // required int32 days = 3;
+      /**
+       * <code>required int32 days = 3;</code>
+       *
+       * <pre>
+       *租赁天数
+       * </pre>
+       */
+      boolean hasDays();
+      /**
+       * <code>required int32 days = 3;</code>
+       *
+       * <pre>
+       *租赁天数
+       * </pre>
+       */
+      int getDays();
+
+      // required bytes renterId = 4;
+      /**
+       * <code>required bytes renterId = 4;</code>
+       *
+       * <pre>
+       *租赁者id
+       * </pre>
+       */
+      boolean hasRenterId();
+      /**
+       * <code>required bytes renterId = 4;</code>
+       *
+       * <pre>
+       *租赁者id
+       * </pre>
+       */
+      com.google.protobuf.ByteString getRenterId();
+    }
+    /**
+     * Protobuf type {@code gs.PublicFacility.SoldSlot}
+     */
+    public static final class SoldSlot extends
+        com.google.protobuf.GeneratedMessage
+        implements SoldSlotOrBuilder {
+      // Use SoldSlot.newBuilder() to construct.
+      private SoldSlot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private SoldSlot(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final SoldSlot defaultInstance;
+      public static SoldSlot getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public SoldSlot getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private SoldSlot(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                gs.Gs.PublicFacility.Slot.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                  subBuilder = s_.toBuilder();
+                }
+                s_ = input.readMessage(gs.Gs.PublicFacility.Slot.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(s_);
+                  s_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                beginTs_ = input.readInt64();
+                break;
+              }
+              case 24: {
+                bitField0_ |= 0x00000004;
+                days_ = input.readInt32();
+                break;
+              }
+              case 34: {
+                bitField0_ |= 0x00000008;
+                renterId_ = input.readBytes();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_PublicFacility_SoldSlot_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_PublicFacility_SoldSlot_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.PublicFacility.SoldSlot.class, gs.Gs.PublicFacility.SoldSlot.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<SoldSlot> PARSER =
+          new com.google.protobuf.AbstractParser<SoldSlot>() {
+        public SoldSlot parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new SoldSlot(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<SoldSlot> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      // required .gs.PublicFacility.Slot s = 1;
+      public static final int S_FIELD_NUMBER = 1;
+      private gs.Gs.PublicFacility.Slot s_;
+      /**
+       * <code>required .gs.PublicFacility.Slot s = 1;</code>
+       */
+      public boolean hasS() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required .gs.PublicFacility.Slot s = 1;</code>
+       */
+      public gs.Gs.PublicFacility.Slot getS() {
+        return s_;
+      }
+      /**
+       * <code>required .gs.PublicFacility.Slot s = 1;</code>
+       */
+      public gs.Gs.PublicFacility.SlotOrBuilder getSOrBuilder() {
+        return s_;
+      }
+
+      // required int64 beginTs = 2;
+      public static final int BEGINTS_FIELD_NUMBER = 2;
+      private long beginTs_;
+      /**
+       * <code>required int64 beginTs = 2;</code>
+       *
+       * <pre>
+       *租赁开始时刻
+       * </pre>
+       */
+      public boolean hasBeginTs() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int64 beginTs = 2;</code>
+       *
+       * <pre>
+       *租赁开始时刻
+       * </pre>
+       */
+      public long getBeginTs() {
+        return beginTs_;
+      }
+
+      // required int32 days = 3;
+      public static final int DAYS_FIELD_NUMBER = 3;
+      private int days_;
+      /**
+       * <code>required int32 days = 3;</code>
+       *
+       * <pre>
+       *租赁天数
+       * </pre>
+       */
+      public boolean hasDays() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 days = 3;</code>
+       *
+       * <pre>
+       *租赁天数
+       * </pre>
+       */
+      public int getDays() {
+        return days_;
+      }
+
+      // required bytes renterId = 4;
+      public static final int RENTERID_FIELD_NUMBER = 4;
+      private com.google.protobuf.ByteString renterId_;
+      /**
+       * <code>required bytes renterId = 4;</code>
+       *
+       * <pre>
+       *租赁者id
+       * </pre>
+       */
+      public boolean hasRenterId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required bytes renterId = 4;</code>
+       *
+       * <pre>
+       *租赁者id
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getRenterId() {
+        return renterId_;
+      }
+
+      private void initFields() {
+        s_ = gs.Gs.PublicFacility.Slot.getDefaultInstance();
+        beginTs_ = 0L;
+        days_ = 0;
+        renterId_ = com.google.protobuf.ByteString.EMPTY;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasS()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasBeginTs()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasDays()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasRenterId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!getS().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeMessage(1, s_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt64(2, beginTs_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeInt32(3, days_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeBytes(4, renterId_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, s_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(2, beginTs_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(3, days_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(4, renterId_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.PublicFacility.SoldSlot parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(gs.Gs.PublicFacility.SoldSlot prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code gs.PublicFacility.SoldSlot}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder>
+         implements gs.Gs.PublicFacility.SoldSlotOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return gs.Gs.internal_static_gs_PublicFacility_SoldSlot_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return gs.Gs.internal_static_gs_PublicFacility_SoldSlot_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  gs.Gs.PublicFacility.SoldSlot.class, gs.Gs.PublicFacility.SoldSlot.Builder.class);
+        }
+
+        // Construct using gs.Gs.PublicFacility.SoldSlot.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+            getSFieldBuilder();
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          if (sBuilder_ == null) {
+            s_ = gs.Gs.PublicFacility.Slot.getDefaultInstance();
+          } else {
+            sBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          beginTs_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          days_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          renterId_ = com.google.protobuf.ByteString.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return gs.Gs.internal_static_gs_PublicFacility_SoldSlot_descriptor;
+        }
+
+        public gs.Gs.PublicFacility.SoldSlot getDefaultInstanceForType() {
+          return gs.Gs.PublicFacility.SoldSlot.getDefaultInstance();
+        }
+
+        public gs.Gs.PublicFacility.SoldSlot build() {
+          gs.Gs.PublicFacility.SoldSlot result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public gs.Gs.PublicFacility.SoldSlot buildPartial() {
+          gs.Gs.PublicFacility.SoldSlot result = new gs.Gs.PublicFacility.SoldSlot(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          if (sBuilder_ == null) {
+            result.s_ = s_;
+          } else {
+            result.s_ = sBuilder_.build();
+          }
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.beginTs_ = beginTs_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.days_ = days_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.renterId_ = renterId_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof gs.Gs.PublicFacility.SoldSlot) {
+            return mergeFrom((gs.Gs.PublicFacility.SoldSlot)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(gs.Gs.PublicFacility.SoldSlot other) {
+          if (other == gs.Gs.PublicFacility.SoldSlot.getDefaultInstance()) return this;
+          if (other.hasS()) {
+            mergeS(other.getS());
+          }
+          if (other.hasBeginTs()) {
+            setBeginTs(other.getBeginTs());
+          }
+          if (other.hasDays()) {
+            setDays(other.getDays());
+          }
+          if (other.hasRenterId()) {
+            setRenterId(other.getRenterId());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasS()) {
+            
+            return false;
+          }
+          if (!hasBeginTs()) {
+            
+            return false;
+          }
+          if (!hasDays()) {
+            
+            return false;
+          }
+          if (!hasRenterId()) {
+            
+            return false;
+          }
+          if (!getS().isInitialized()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          gs.Gs.PublicFacility.SoldSlot parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (gs.Gs.PublicFacility.SoldSlot) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // required .gs.PublicFacility.Slot s = 1;
+        private gs.Gs.PublicFacility.Slot s_ = gs.Gs.PublicFacility.Slot.getDefaultInstance();
+        private com.google.protobuf.SingleFieldBuilder<
+            gs.Gs.PublicFacility.Slot, gs.Gs.PublicFacility.Slot.Builder, gs.Gs.PublicFacility.SlotOrBuilder> sBuilder_;
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public boolean hasS() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public gs.Gs.PublicFacility.Slot getS() {
+          if (sBuilder_ == null) {
+            return s_;
+          } else {
+            return sBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public Builder setS(gs.Gs.PublicFacility.Slot value) {
+          if (sBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            s_ = value;
+            onChanged();
+          } else {
+            sBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public Builder setS(
+            gs.Gs.PublicFacility.Slot.Builder builderForValue) {
+          if (sBuilder_ == null) {
+            s_ = builderForValue.build();
+            onChanged();
+          } else {
+            sBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public Builder mergeS(gs.Gs.PublicFacility.Slot value) {
+          if (sBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) == 0x00000001) &&
+                s_ != gs.Gs.PublicFacility.Slot.getDefaultInstance()) {
+              s_ =
+                gs.Gs.PublicFacility.Slot.newBuilder(s_).mergeFrom(value).buildPartial();
+            } else {
+              s_ = value;
+            }
+            onChanged();
+          } else {
+            sBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public Builder clearS() {
+          if (sBuilder_ == null) {
+            s_ = gs.Gs.PublicFacility.Slot.getDefaultInstance();
+            onChanged();
+          } else {
+            sBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public gs.Gs.PublicFacility.Slot.Builder getSBuilder() {
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return getSFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        public gs.Gs.PublicFacility.SlotOrBuilder getSOrBuilder() {
+          if (sBuilder_ != null) {
+            return sBuilder_.getMessageOrBuilder();
+          } else {
+            return s_;
+          }
+        }
+        /**
+         * <code>required .gs.PublicFacility.Slot s = 1;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilder<
+            gs.Gs.PublicFacility.Slot, gs.Gs.PublicFacility.Slot.Builder, gs.Gs.PublicFacility.SlotOrBuilder> 
+            getSFieldBuilder() {
+          if (sBuilder_ == null) {
+            sBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                gs.Gs.PublicFacility.Slot, gs.Gs.PublicFacility.Slot.Builder, gs.Gs.PublicFacility.SlotOrBuilder>(
+                    s_,
+                    getParentForChildren(),
+                    isClean());
+            s_ = null;
+          }
+          return sBuilder_;
+        }
+
+        // required int64 beginTs = 2;
+        private long beginTs_ ;
+        /**
+         * <code>required int64 beginTs = 2;</code>
+         *
+         * <pre>
+         *租赁开始时刻
+         * </pre>
+         */
+        public boolean hasBeginTs() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required int64 beginTs = 2;</code>
+         *
+         * <pre>
+         *租赁开始时刻
+         * </pre>
+         */
+        public long getBeginTs() {
+          return beginTs_;
+        }
+        /**
+         * <code>required int64 beginTs = 2;</code>
+         *
+         * <pre>
+         *租赁开始时刻
+         * </pre>
+         */
+        public Builder setBeginTs(long value) {
+          bitField0_ |= 0x00000002;
+          beginTs_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int64 beginTs = 2;</code>
+         *
+         * <pre>
+         *租赁开始时刻
+         * </pre>
+         */
+        public Builder clearBeginTs() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          beginTs_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // required int32 days = 3;
+        private int days_ ;
+        /**
+         * <code>required int32 days = 3;</code>
+         *
+         * <pre>
+         *租赁天数
+         * </pre>
+         */
+        public boolean hasDays() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required int32 days = 3;</code>
+         *
+         * <pre>
+         *租赁天数
+         * </pre>
+         */
+        public int getDays() {
+          return days_;
+        }
+        /**
+         * <code>required int32 days = 3;</code>
+         *
+         * <pre>
+         *租赁天数
+         * </pre>
+         */
+        public Builder setDays(int value) {
+          bitField0_ |= 0x00000004;
+          days_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 days = 3;</code>
+         *
+         * <pre>
+         *租赁天数
+         * </pre>
+         */
+        public Builder clearDays() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          days_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required bytes renterId = 4;
+        private com.google.protobuf.ByteString renterId_ = com.google.protobuf.ByteString.EMPTY;
+        /**
+         * <code>required bytes renterId = 4;</code>
+         *
+         * <pre>
+         *租赁者id
+         * </pre>
+         */
+        public boolean hasRenterId() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>required bytes renterId = 4;</code>
+         *
+         * <pre>
+         *租赁者id
+         * </pre>
+         */
+        public com.google.protobuf.ByteString getRenterId() {
+          return renterId_;
+        }
+        /**
+         * <code>required bytes renterId = 4;</code>
+         *
+         * <pre>
+         *租赁者id
+         * </pre>
+         */
+        public Builder setRenterId(com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          renterId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required bytes renterId = 4;</code>
+         *
+         * <pre>
+         *租赁者id
+         * </pre>
+         */
+        public Builder clearRenterId() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          renterId_ = getDefaultInstance().getRenterId();
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:gs.PublicFacility.SoldSlot)
+      }
+
+      static {
+        defaultInstance = new SoldSlot(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:gs.PublicFacility.SoldSlot)
+    }
+
+    public interface AdOrBuilder
+        extends com.google.protobuf.MessageOrBuilder {
+
+      // optional .gs.PublicFacility.SoldSlot slot = 1;
+      /**
+       * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+       *
+       * <pre>
+       *为空表示此广告是建筑物所有人打的
+       * </pre>
+       */
+      boolean hasSlot();
+      /**
+       * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+       *
+       * <pre>
+       *为空表示此广告是建筑物所有人打的
+       * </pre>
+       */
+      gs.Gs.PublicFacility.SoldSlot getSlot();
+      /**
+       * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+       *
+       * <pre>
+       *为空表示此广告是建筑物所有人打的
+       * </pre>
+       */
+      gs.Gs.PublicFacility.SoldSlotOrBuilder getSlotOrBuilder();
+
+      // required int32 metaId = 2;
+      /**
+       * <code>required int32 metaId = 2;</code>
+       */
+      boolean hasMetaId();
+      /**
+       * <code>required int32 metaId = 2;</code>
+       */
+      int getMetaId();
+
+      // required .gs.PublicFacility.Ad.Type type = 3;
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      boolean hasType();
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      gs.Gs.PublicFacility.Ad.Type getType();
+
+      // required int64 beginTs = 4;
+      /**
+       * <code>required int64 beginTs = 4;</code>
+       *
+       * <pre>
+       *打广告的开始时刻
+       * </pre>
+       */
+      boolean hasBeginTs();
+      /**
+       * <code>required int64 beginTs = 4;</code>
+       *
+       * <pre>
+       *打广告的开始时刻
+       * </pre>
+       */
+      long getBeginTs();
+
+      // required int32 npcFlow = 5;
+      /**
+       * <code>required int32 npcFlow = 5;</code>
+       */
+      boolean hasNpcFlow();
+      /**
+       * <code>required int32 npcFlow = 5;</code>
+       */
+      int getNpcFlow();
+
+      // required int32 brandValue = 6;
+      /**
+       * <code>required int32 brandValue = 6;</code>
+       *
+       * <pre>
+       *广告目标当前品牌值
+       * </pre>
+       */
+      boolean hasBrandValue();
+      /**
+       * <code>required int32 brandValue = 6;</code>
+       *
+       * <pre>
+       *广告目标当前品牌值
+       * </pre>
+       */
+      int getBrandValue();
+
+      // required bytes id = 7;
+      /**
+       * <code>required bytes id = 7;</code>
+       */
+      boolean hasId();
+      /**
+       * <code>required bytes id = 7;</code>
+       */
+      com.google.protobuf.ByteString getId();
+    }
+    /**
+     * Protobuf type {@code gs.PublicFacility.Ad}
+     */
+    public static final class Ad extends
+        com.google.protobuf.GeneratedMessage
+        implements AdOrBuilder {
+      // Use Ad.newBuilder() to construct.
+      private Ad(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Ad(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Ad defaultInstance;
+      public static Ad getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Ad getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Ad(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                gs.Gs.PublicFacility.SoldSlot.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                  subBuilder = slot_.toBuilder();
+                }
+                slot_ = input.readMessage(gs.Gs.PublicFacility.SoldSlot.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(slot_);
+                  slot_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                metaId_ = input.readInt32();
+                break;
+              }
+              case 24: {
+                int rawValue = input.readEnum();
+                gs.Gs.PublicFacility.Ad.Type value = gs.Gs.PublicFacility.Ad.Type.valueOf(rawValue);
+                if (value == null) {
+                  unknownFields.mergeVarintField(3, rawValue);
+                } else {
+                  bitField0_ |= 0x00000004;
+                  type_ = value;
+                }
+                break;
+              }
+              case 32: {
+                bitField0_ |= 0x00000008;
+                beginTs_ = input.readInt64();
+                break;
+              }
+              case 40: {
+                bitField0_ |= 0x00000010;
+                npcFlow_ = input.readInt32();
+                break;
+              }
+              case 48: {
+                bitField0_ |= 0x00000020;
+                brandValue_ = input.readInt32();
+                break;
+              }
+              case 58: {
+                bitField0_ |= 0x00000040;
+                id_ = input.readBytes();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_PublicFacility_Ad_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_PublicFacility_Ad_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.PublicFacility.Ad.class, gs.Gs.PublicFacility.Ad.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Ad> PARSER =
+          new com.google.protobuf.AbstractParser<Ad>() {
+        public Ad parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Ad(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Ad> getParserForType() {
+        return PARSER;
+      }
+
+      /**
+       * Protobuf enum {@code gs.PublicFacility.Ad.Type}
+       */
+      public enum Type
+          implements com.google.protobuf.ProtocolMessageEnum {
+        /**
+         * <code>GOOD = 0;</code>
+         */
+        GOOD(0, 0),
+        /**
+         * <code>BUILDING = 1;</code>
+         */
+        BUILDING(1, 1),
+        ;
+
+        /**
+         * <code>GOOD = 0;</code>
+         */
+        public static final int GOOD_VALUE = 0;
+        /**
+         * <code>BUILDING = 1;</code>
+         */
+        public static final int BUILDING_VALUE = 1;
+
+
+        public final int getNumber() { return value; }
+
+        public static Type valueOf(int value) {
+          switch (value) {
+            case 0: return GOOD;
+            case 1: return BUILDING;
+            default: return null;
+          }
+        }
+
+        public static com.google.protobuf.Internal.EnumLiteMap<Type>
+            internalGetValueMap() {
+          return internalValueMap;
+        }
+        private static com.google.protobuf.Internal.EnumLiteMap<Type>
+            internalValueMap =
+              new com.google.protobuf.Internal.EnumLiteMap<Type>() {
+                public Type findValueByNumber(int number) {
+                  return Type.valueOf(number);
+                }
+              };
+
+        public final com.google.protobuf.Descriptors.EnumValueDescriptor
+            getValueDescriptor() {
+          return getDescriptor().getValues().get(index);
+        }
+        public final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptorForType() {
+          return getDescriptor();
+        }
+        public static final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptor() {
+          return gs.Gs.PublicFacility.Ad.getDescriptor().getEnumTypes().get(0);
+        }
+
+        private static final Type[] VALUES = values();
+
+        public static Type valueOf(
+            com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+          if (desc.getType() != getDescriptor()) {
+            throw new java.lang.IllegalArgumentException(
+              "EnumValueDescriptor is not for this type.");
+          }
+          return VALUES[desc.getIndex()];
+        }
+
+        private final int index;
+        private final int value;
+
+        private Type(int index, int value) {
+          this.index = index;
+          this.value = value;
+        }
+
+        // @@protoc_insertion_point(enum_scope:gs.PublicFacility.Ad.Type)
+      }
+
+      private int bitField0_;
+      // optional .gs.PublicFacility.SoldSlot slot = 1;
+      public static final int SLOT_FIELD_NUMBER = 1;
+      private gs.Gs.PublicFacility.SoldSlot slot_;
+      /**
+       * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+       *
+       * <pre>
+       *为空表示此广告是建筑物所有人打的
+       * </pre>
+       */
+      public boolean hasSlot() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+       *
+       * <pre>
+       *为空表示此广告是建筑物所有人打的
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlot getSlot() {
+        return slot_;
+      }
+      /**
+       * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+       *
+       * <pre>
+       *为空表示此广告是建筑物所有人打的
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlotOrBuilder getSlotOrBuilder() {
+        return slot_;
+      }
+
+      // required int32 metaId = 2;
+      public static final int METAID_FIELD_NUMBER = 2;
+      private int metaId_;
+      /**
+       * <code>required int32 metaId = 2;</code>
+       */
+      public boolean hasMetaId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 metaId = 2;</code>
+       */
+      public int getMetaId() {
+        return metaId_;
+      }
+
+      // required .gs.PublicFacility.Ad.Type type = 3;
+      public static final int TYPE_FIELD_NUMBER = 3;
+      private gs.Gs.PublicFacility.Ad.Type type_;
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      public gs.Gs.PublicFacility.Ad.Type getType() {
+        return type_;
+      }
+
+      // required int64 beginTs = 4;
+      public static final int BEGINTS_FIELD_NUMBER = 4;
+      private long beginTs_;
+      /**
+       * <code>required int64 beginTs = 4;</code>
+       *
+       * <pre>
+       *打广告的开始时刻
+       * </pre>
+       */
+      public boolean hasBeginTs() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int64 beginTs = 4;</code>
+       *
+       * <pre>
+       *打广告的开始时刻
+       * </pre>
+       */
+      public long getBeginTs() {
+        return beginTs_;
+      }
+
+      // required int32 npcFlow = 5;
+      public static final int NPCFLOW_FIELD_NUMBER = 5;
+      private int npcFlow_;
+      /**
+       * <code>required int32 npcFlow = 5;</code>
+       */
+      public boolean hasNpcFlow() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required int32 npcFlow = 5;</code>
+       */
+      public int getNpcFlow() {
+        return npcFlow_;
+      }
+
+      // required int32 brandValue = 6;
+      public static final int BRANDVALUE_FIELD_NUMBER = 6;
+      private int brandValue_;
+      /**
+       * <code>required int32 brandValue = 6;</code>
+       *
+       * <pre>
+       *广告目标当前品牌值
+       * </pre>
+       */
+      public boolean hasBrandValue() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>required int32 brandValue = 6;</code>
+       *
+       * <pre>
+       *广告目标当前品牌值
+       * </pre>
+       */
+      public int getBrandValue() {
+        return brandValue_;
+      }
+
+      // required bytes id = 7;
+      public static final int ID_FIELD_NUMBER = 7;
+      private com.google.protobuf.ByteString id_;
+      /**
+       * <code>required bytes id = 7;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>required bytes id = 7;</code>
+       */
+      public com.google.protobuf.ByteString getId() {
+        return id_;
+      }
+
+      private void initFields() {
+        slot_ = gs.Gs.PublicFacility.SoldSlot.getDefaultInstance();
+        metaId_ = 0;
+        type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+        beginTs_ = 0L;
+        npcFlow_ = 0;
+        brandValue_ = 0;
+        id_ = com.google.protobuf.ByteString.EMPTY;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasMetaId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasType()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasBeginTs()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasNpcFlow()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasBrandValue()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (hasSlot()) {
+          if (!getSlot().isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeMessage(1, slot_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt32(2, metaId_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeEnum(3, type_.getNumber());
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeInt64(4, beginTs_);
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          output.writeInt32(5, npcFlow_);
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          output.writeInt32(6, brandValue_);
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          output.writeBytes(7, id_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, slot_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, metaId_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeEnumSize(3, type_.getNumber());
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(4, beginTs_);
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(5, npcFlow_);
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(6, brandValue_);
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(7, id_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static gs.Gs.PublicFacility.Ad parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Ad parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static gs.Gs.PublicFacility.Ad parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static gs.Gs.PublicFacility.Ad parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(gs.Gs.PublicFacility.Ad prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code gs.PublicFacility.Ad}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder>
+         implements gs.Gs.PublicFacility.AdOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return gs.Gs.internal_static_gs_PublicFacility_Ad_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return gs.Gs.internal_static_gs_PublicFacility_Ad_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  gs.Gs.PublicFacility.Ad.class, gs.Gs.PublicFacility.Ad.Builder.class);
+        }
+
+        // Construct using gs.Gs.PublicFacility.Ad.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+            getSlotFieldBuilder();
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          if (slotBuilder_ == null) {
+            slot_ = gs.Gs.PublicFacility.SoldSlot.getDefaultInstance();
+          } else {
+            slotBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          metaId_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          beginTs_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          npcFlow_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000010);
+          brandValue_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000020);
+          id_ = com.google.protobuf.ByteString.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000040);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return gs.Gs.internal_static_gs_PublicFacility_Ad_descriptor;
+        }
+
+        public gs.Gs.PublicFacility.Ad getDefaultInstanceForType() {
+          return gs.Gs.PublicFacility.Ad.getDefaultInstance();
+        }
+
+        public gs.Gs.PublicFacility.Ad build() {
+          gs.Gs.PublicFacility.Ad result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public gs.Gs.PublicFacility.Ad buildPartial() {
+          gs.Gs.PublicFacility.Ad result = new gs.Gs.PublicFacility.Ad(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          if (slotBuilder_ == null) {
+            result.slot_ = slot_;
+          } else {
+            result.slot_ = slotBuilder_.build();
+          }
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.metaId_ = metaId_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.type_ = type_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.beginTs_ = beginTs_;
+          if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+            to_bitField0_ |= 0x00000010;
+          }
+          result.npcFlow_ = npcFlow_;
+          if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+            to_bitField0_ |= 0x00000020;
+          }
+          result.brandValue_ = brandValue_;
+          if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+            to_bitField0_ |= 0x00000040;
+          }
+          result.id_ = id_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof gs.Gs.PublicFacility.Ad) {
+            return mergeFrom((gs.Gs.PublicFacility.Ad)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(gs.Gs.PublicFacility.Ad other) {
+          if (other == gs.Gs.PublicFacility.Ad.getDefaultInstance()) return this;
+          if (other.hasSlot()) {
+            mergeSlot(other.getSlot());
+          }
+          if (other.hasMetaId()) {
+            setMetaId(other.getMetaId());
+          }
+          if (other.hasType()) {
+            setType(other.getType());
+          }
+          if (other.hasBeginTs()) {
+            setBeginTs(other.getBeginTs());
+          }
+          if (other.hasNpcFlow()) {
+            setNpcFlow(other.getNpcFlow());
+          }
+          if (other.hasBrandValue()) {
+            setBrandValue(other.getBrandValue());
+          }
+          if (other.hasId()) {
+            setId(other.getId());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasMetaId()) {
+            
+            return false;
+          }
+          if (!hasType()) {
+            
+            return false;
+          }
+          if (!hasBeginTs()) {
+            
+            return false;
+          }
+          if (!hasNpcFlow()) {
+            
+            return false;
+          }
+          if (!hasBrandValue()) {
+            
+            return false;
+          }
+          if (!hasId()) {
+            
+            return false;
+          }
+          if (hasSlot()) {
+            if (!getSlot().isInitialized()) {
+              
+              return false;
+            }
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          gs.Gs.PublicFacility.Ad parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (gs.Gs.PublicFacility.Ad) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // optional .gs.PublicFacility.SoldSlot slot = 1;
+        private gs.Gs.PublicFacility.SoldSlot slot_ = gs.Gs.PublicFacility.SoldSlot.getDefaultInstance();
+        private com.google.protobuf.SingleFieldBuilder<
+            gs.Gs.PublicFacility.SoldSlot, gs.Gs.PublicFacility.SoldSlot.Builder, gs.Gs.PublicFacility.SoldSlotOrBuilder> slotBuilder_;
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public boolean hasSlot() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public gs.Gs.PublicFacility.SoldSlot getSlot() {
+          if (slotBuilder_ == null) {
+            return slot_;
+          } else {
+            return slotBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public Builder setSlot(gs.Gs.PublicFacility.SoldSlot value) {
+          if (slotBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            slot_ = value;
+            onChanged();
+          } else {
+            slotBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public Builder setSlot(
+            gs.Gs.PublicFacility.SoldSlot.Builder builderForValue) {
+          if (slotBuilder_ == null) {
+            slot_ = builderForValue.build();
+            onChanged();
+          } else {
+            slotBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public Builder mergeSlot(gs.Gs.PublicFacility.SoldSlot value) {
+          if (slotBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) == 0x00000001) &&
+                slot_ != gs.Gs.PublicFacility.SoldSlot.getDefaultInstance()) {
+              slot_ =
+                gs.Gs.PublicFacility.SoldSlot.newBuilder(slot_).mergeFrom(value).buildPartial();
+            } else {
+              slot_ = value;
+            }
+            onChanged();
+          } else {
+            slotBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public Builder clearSlot() {
+          if (slotBuilder_ == null) {
+            slot_ = gs.Gs.PublicFacility.SoldSlot.getDefaultInstance();
+            onChanged();
+          } else {
+            slotBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public gs.Gs.PublicFacility.SoldSlot.Builder getSlotBuilder() {
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return getSlotFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        public gs.Gs.PublicFacility.SoldSlotOrBuilder getSlotOrBuilder() {
+          if (slotBuilder_ != null) {
+            return slotBuilder_.getMessageOrBuilder();
+          } else {
+            return slot_;
+          }
+        }
+        /**
+         * <code>optional .gs.PublicFacility.SoldSlot slot = 1;</code>
+         *
+         * <pre>
+         *为空表示此广告是建筑物所有人打的
+         * </pre>
+         */
+        private com.google.protobuf.SingleFieldBuilder<
+            gs.Gs.PublicFacility.SoldSlot, gs.Gs.PublicFacility.SoldSlot.Builder, gs.Gs.PublicFacility.SoldSlotOrBuilder> 
+            getSlotFieldBuilder() {
+          if (slotBuilder_ == null) {
+            slotBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                gs.Gs.PublicFacility.SoldSlot, gs.Gs.PublicFacility.SoldSlot.Builder, gs.Gs.PublicFacility.SoldSlotOrBuilder>(
+                    slot_,
+                    getParentForChildren(),
+                    isClean());
+            slot_ = null;
+          }
+          return slotBuilder_;
+        }
+
+        // required int32 metaId = 2;
+        private int metaId_ ;
+        /**
+         * <code>required int32 metaId = 2;</code>
+         */
+        public boolean hasMetaId() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required int32 metaId = 2;</code>
+         */
+        public int getMetaId() {
+          return metaId_;
+        }
+        /**
+         * <code>required int32 metaId = 2;</code>
+         */
+        public Builder setMetaId(int value) {
+          bitField0_ |= 0x00000002;
+          metaId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 metaId = 2;</code>
+         */
+        public Builder clearMetaId() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          metaId_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required .gs.PublicFacility.Ad.Type type = 3;
+        private gs.Gs.PublicFacility.Ad.Type type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+        /**
+         * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+         */
+        public boolean hasType() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+         */
+        public gs.Gs.PublicFacility.Ad.Type getType() {
+          return type_;
+        }
+        /**
+         * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+         */
+        public Builder setType(gs.Gs.PublicFacility.Ad.Type value) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          bitField0_ |= 0x00000004;
+          type_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+         */
+        public Builder clearType() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+          onChanged();
+          return this;
+        }
+
+        // required int64 beginTs = 4;
+        private long beginTs_ ;
+        /**
+         * <code>required int64 beginTs = 4;</code>
+         *
+         * <pre>
+         *打广告的开始时刻
+         * </pre>
+         */
+        public boolean hasBeginTs() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>required int64 beginTs = 4;</code>
+         *
+         * <pre>
+         *打广告的开始时刻
+         * </pre>
+         */
+        public long getBeginTs() {
+          return beginTs_;
+        }
+        /**
+         * <code>required int64 beginTs = 4;</code>
+         *
+         * <pre>
+         *打广告的开始时刻
+         * </pre>
+         */
+        public Builder setBeginTs(long value) {
+          bitField0_ |= 0x00000008;
+          beginTs_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int64 beginTs = 4;</code>
+         *
+         * <pre>
+         *打广告的开始时刻
+         * </pre>
+         */
+        public Builder clearBeginTs() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          beginTs_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // required int32 npcFlow = 5;
+        private int npcFlow_ ;
+        /**
+         * <code>required int32 npcFlow = 5;</code>
+         */
+        public boolean hasNpcFlow() {
+          return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        /**
+         * <code>required int32 npcFlow = 5;</code>
+         */
+        public int getNpcFlow() {
+          return npcFlow_;
+        }
+        /**
+         * <code>required int32 npcFlow = 5;</code>
+         */
+        public Builder setNpcFlow(int value) {
+          bitField0_ |= 0x00000010;
+          npcFlow_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 npcFlow = 5;</code>
+         */
+        public Builder clearNpcFlow() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          npcFlow_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int32 brandValue = 6;
+        private int brandValue_ ;
+        /**
+         * <code>required int32 brandValue = 6;</code>
+         *
+         * <pre>
+         *广告目标当前品牌值
+         * </pre>
+         */
+        public boolean hasBrandValue() {
+          return ((bitField0_ & 0x00000020) == 0x00000020);
+        }
+        /**
+         * <code>required int32 brandValue = 6;</code>
+         *
+         * <pre>
+         *广告目标当前品牌值
+         * </pre>
+         */
+        public int getBrandValue() {
+          return brandValue_;
+        }
+        /**
+         * <code>required int32 brandValue = 6;</code>
+         *
+         * <pre>
+         *广告目标当前品牌值
+         * </pre>
+         */
+        public Builder setBrandValue(int value) {
+          bitField0_ |= 0x00000020;
+          brandValue_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 brandValue = 6;</code>
+         *
+         * <pre>
+         *广告目标当前品牌值
+         * </pre>
+         */
+        public Builder clearBrandValue() {
+          bitField0_ = (bitField0_ & ~0x00000020);
+          brandValue_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required bytes id = 7;
+        private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
+        /**
+         * <code>required bytes id = 7;</code>
+         */
+        public boolean hasId() {
+          return ((bitField0_ & 0x00000040) == 0x00000040);
+        }
+        /**
+         * <code>required bytes id = 7;</code>
+         */
+        public com.google.protobuf.ByteString getId() {
+          return id_;
+        }
+        /**
+         * <code>required bytes id = 7;</code>
+         */
+        public Builder setId(com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+          id_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required bytes id = 7;</code>
+         */
+        public Builder clearId() {
+          bitField0_ = (bitField0_ & ~0x00000040);
+          id_ = getDefaultInstance().getId();
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:gs.PublicFacility.Ad)
+      }
+
+      static {
+        defaultInstance = new Ad(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:gs.PublicFacility.Ad)
+    }
+
+    private int bitField0_;
+    // required .gs.BuildingInfo info = 1;
+    public static final int INFO_FIELD_NUMBER = 1;
+    private gs.Gs.BuildingInfo info_;
+    /**
+     * <code>required .gs.BuildingInfo info = 1;</code>
+     */
+    public boolean hasInfo() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required .gs.BuildingInfo info = 1;</code>
+     */
+    public gs.Gs.BuildingInfo getInfo() {
+      return info_;
+    }
+    /**
+     * <code>required .gs.BuildingInfo info = 1;</code>
+     */
+    public gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder() {
+      return info_;
+    }
+
+    // repeated .gs.PublicFacility.Slot availableSlot = 2;
+    public static final int AVAILABLESLOT_FIELD_NUMBER = 2;
+    private java.util.List<gs.Gs.PublicFacility.Slot> availableSlot_;
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    public java.util.List<gs.Gs.PublicFacility.Slot> getAvailableSlotList() {
+      return availableSlot_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.PublicFacility.SlotOrBuilder> 
+        getAvailableSlotOrBuilderList() {
+      return availableSlot_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    public int getAvailableSlotCount() {
+      return availableSlot_.size();
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    public gs.Gs.PublicFacility.Slot getAvailableSlot(int index) {
+      return availableSlot_.get(index);
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+     *
+     * <pre>
+     *可租赁槽位
+     * </pre>
+     */
+    public gs.Gs.PublicFacility.SlotOrBuilder getAvailableSlotOrBuilder(
+        int index) {
+      return availableSlot_.get(index);
+    }
+
+    // repeated .gs.PublicFacility.SoldSlot soldSlot = 3;
+    public static final int SOLDSLOT_FIELD_NUMBER = 3;
+    private java.util.List<gs.Gs.PublicFacility.SoldSlot> soldSlot_;
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    public java.util.List<gs.Gs.PublicFacility.SoldSlot> getSoldSlotList() {
+      return soldSlot_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.PublicFacility.SoldSlotOrBuilder> 
+        getSoldSlotOrBuilderList() {
+      return soldSlot_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    public int getSoldSlotCount() {
+      return soldSlot_.size();
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    public gs.Gs.PublicFacility.SoldSlot getSoldSlot(int index) {
+      return soldSlot_.get(index);
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+     *
+     * <pre>
+     *所有租赁出去的槽位
+     * </pre>
+     */
+    public gs.Gs.PublicFacility.SoldSlotOrBuilder getSoldSlotOrBuilder(
+        int index) {
+      return soldSlot_.get(index);
+    }
+
+    // repeated .gs.PublicFacility.Ad ad = 4;
+    public static final int AD_FIELD_NUMBER = 4;
+    private java.util.List<gs.Gs.PublicFacility.Ad> ad_;
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    public java.util.List<gs.Gs.PublicFacility.Ad> getAdList() {
+      return ad_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    public java.util.List<? extends gs.Gs.PublicFacility.AdOrBuilder> 
+        getAdOrBuilderList() {
+      return ad_;
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    public int getAdCount() {
+      return ad_.size();
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    public gs.Gs.PublicFacility.Ad getAd(int index) {
+      return ad_.get(index);
+    }
+    /**
+     * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+     *
+     * <pre>
+     *所有广告
+     * </pre>
+     */
+    public gs.Gs.PublicFacility.AdOrBuilder getAdOrBuilder(
+        int index) {
+      return ad_.get(index);
+    }
+
+    private void initFields() {
+      info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+      availableSlot_ = java.util.Collections.emptyList();
+      soldSlot_ = java.util.Collections.emptyList();
+      ad_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasInfo()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!getInfo().isInitialized()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getAvailableSlotCount(); i++) {
+        if (!getAvailableSlot(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getSoldSlotCount(); i++) {
+        if (!getSoldSlot(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getAdCount(); i++) {
+        if (!getAd(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeMessage(1, info_);
+      }
+      for (int i = 0; i < availableSlot_.size(); i++) {
+        output.writeMessage(2, availableSlot_.get(i));
+      }
+      for (int i = 0; i < soldSlot_.size(); i++) {
+        output.writeMessage(3, soldSlot_.get(i));
+      }
+      for (int i = 0; i < ad_.size(); i++) {
+        output.writeMessage(4, ad_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, info_);
+      }
+      for (int i = 0; i < availableSlot_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, availableSlot_.get(i));
+      }
+      for (int i = 0; i < soldSlot_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, soldSlot_.get(i));
+      }
+      for (int i = 0; i < ad_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, ad_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.PublicFacility parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.PublicFacility parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.PublicFacility parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.PublicFacility parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.PublicFacility parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.PublicFacility parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.PublicFacility parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.PublicFacility parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.PublicFacility parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.PublicFacility parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.PublicFacility prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.PublicFacility}
+     *
+     * <pre>
+     * detailPublicFacility
+     * c
+     * Id
+     * s
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.PublicFacilityOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_PublicFacility_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_PublicFacility_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.PublicFacility.class, gs.Gs.PublicFacility.Builder.class);
+      }
+
+      // Construct using gs.Gs.PublicFacility.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getInfoFieldBuilder();
+          getAvailableSlotFieldBuilder();
+          getSoldSlotFieldBuilder();
+          getAdFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (infoBuilder_ == null) {
+          info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+        } else {
+          infoBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (availableSlotBuilder_ == null) {
+          availableSlot_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          availableSlotBuilder_.clear();
+        }
+        if (soldSlotBuilder_ == null) {
+          soldSlot_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          soldSlotBuilder_.clear();
+        }
+        if (adBuilder_ == null) {
+          ad_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          adBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_PublicFacility_descriptor;
+      }
+
+      public gs.Gs.PublicFacility getDefaultInstanceForType() {
+        return gs.Gs.PublicFacility.getDefaultInstance();
+      }
+
+      public gs.Gs.PublicFacility build() {
+        gs.Gs.PublicFacility result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.PublicFacility buildPartial() {
+        gs.Gs.PublicFacility result = new gs.Gs.PublicFacility(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        if (infoBuilder_ == null) {
+          result.info_ = info_;
+        } else {
+          result.info_ = infoBuilder_.build();
+        }
+        if (availableSlotBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+            availableSlot_ = java.util.Collections.unmodifiableList(availableSlot_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.availableSlot_ = availableSlot_;
+        } else {
+          result.availableSlot_ = availableSlotBuilder_.build();
+        }
+        if (soldSlotBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+            soldSlot_ = java.util.Collections.unmodifiableList(soldSlot_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.soldSlot_ = soldSlot_;
+        } else {
+          result.soldSlot_ = soldSlotBuilder_.build();
+        }
+        if (adBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+            ad_ = java.util.Collections.unmodifiableList(ad_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.ad_ = ad_;
+        } else {
+          result.ad_ = adBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.PublicFacility) {
+          return mergeFrom((gs.Gs.PublicFacility)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.PublicFacility other) {
+        if (other == gs.Gs.PublicFacility.getDefaultInstance()) return this;
+        if (other.hasInfo()) {
+          mergeInfo(other.getInfo());
+        }
+        if (availableSlotBuilder_ == null) {
+          if (!other.availableSlot_.isEmpty()) {
+            if (availableSlot_.isEmpty()) {
+              availableSlot_ = other.availableSlot_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureAvailableSlotIsMutable();
+              availableSlot_.addAll(other.availableSlot_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.availableSlot_.isEmpty()) {
+            if (availableSlotBuilder_.isEmpty()) {
+              availableSlotBuilder_.dispose();
+              availableSlotBuilder_ = null;
+              availableSlot_ = other.availableSlot_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              availableSlotBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getAvailableSlotFieldBuilder() : null;
+            } else {
+              availableSlotBuilder_.addAllMessages(other.availableSlot_);
+            }
+          }
+        }
+        if (soldSlotBuilder_ == null) {
+          if (!other.soldSlot_.isEmpty()) {
+            if (soldSlot_.isEmpty()) {
+              soldSlot_ = other.soldSlot_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureSoldSlotIsMutable();
+              soldSlot_.addAll(other.soldSlot_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.soldSlot_.isEmpty()) {
+            if (soldSlotBuilder_.isEmpty()) {
+              soldSlotBuilder_.dispose();
+              soldSlotBuilder_ = null;
+              soldSlot_ = other.soldSlot_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              soldSlotBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getSoldSlotFieldBuilder() : null;
+            } else {
+              soldSlotBuilder_.addAllMessages(other.soldSlot_);
+            }
+          }
+        }
+        if (adBuilder_ == null) {
+          if (!other.ad_.isEmpty()) {
+            if (ad_.isEmpty()) {
+              ad_ = other.ad_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureAdIsMutable();
+              ad_.addAll(other.ad_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.ad_.isEmpty()) {
+            if (adBuilder_.isEmpty()) {
+              adBuilder_.dispose();
+              adBuilder_ = null;
+              ad_ = other.ad_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              adBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getAdFieldBuilder() : null;
+            } else {
+              adBuilder_.addAllMessages(other.ad_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasInfo()) {
+          
+          return false;
+        }
+        if (!getInfo().isInitialized()) {
+          
+          return false;
+        }
+        for (int i = 0; i < getAvailableSlotCount(); i++) {
+          if (!getAvailableSlot(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getSoldSlotCount(); i++) {
+          if (!getSoldSlot(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getAdCount(); i++) {
+          if (!getAd(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.PublicFacility parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.PublicFacility) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required .gs.BuildingInfo info = 1;
+      private gs.Gs.BuildingInfo info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder> infoBuilder_;
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public boolean hasInfo() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public gs.Gs.BuildingInfo getInfo() {
+        if (infoBuilder_ == null) {
+          return info_;
+        } else {
+          return infoBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public Builder setInfo(gs.Gs.BuildingInfo value) {
+        if (infoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          info_ = value;
+          onChanged();
+        } else {
+          infoBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public Builder setInfo(
+          gs.Gs.BuildingInfo.Builder builderForValue) {
+        if (infoBuilder_ == null) {
+          info_ = builderForValue.build();
+          onChanged();
+        } else {
+          infoBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public Builder mergeInfo(gs.Gs.BuildingInfo value) {
+        if (infoBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              info_ != gs.Gs.BuildingInfo.getDefaultInstance()) {
+            info_ =
+              gs.Gs.BuildingInfo.newBuilder(info_).mergeFrom(value).buildPartial();
+          } else {
+            info_ = value;
+          }
+          onChanged();
+        } else {
+          infoBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public Builder clearInfo() {
+        if (infoBuilder_ == null) {
+          info_ = gs.Gs.BuildingInfo.getDefaultInstance();
+          onChanged();
+        } else {
+          infoBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public gs.Gs.BuildingInfo.Builder getInfoBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getInfoFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      public gs.Gs.BuildingInfoOrBuilder getInfoOrBuilder() {
+        if (infoBuilder_ != null) {
+          return infoBuilder_.getMessageOrBuilder();
+        } else {
+          return info_;
+        }
+      }
+      /**
+       * <code>required .gs.BuildingInfo info = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder> 
+          getInfoFieldBuilder() {
+        if (infoBuilder_ == null) {
+          infoBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              gs.Gs.BuildingInfo, gs.Gs.BuildingInfo.Builder, gs.Gs.BuildingInfoOrBuilder>(
+                  info_,
+                  getParentForChildren(),
+                  isClean());
+          info_ = null;
+        }
+        return infoBuilder_;
+      }
+
+      // repeated .gs.PublicFacility.Slot availableSlot = 2;
+      private java.util.List<gs.Gs.PublicFacility.Slot> availableSlot_ =
+        java.util.Collections.emptyList();
+      private void ensureAvailableSlotIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          availableSlot_ = new java.util.ArrayList<gs.Gs.PublicFacility.Slot>(availableSlot_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility.Slot, gs.Gs.PublicFacility.Slot.Builder, gs.Gs.PublicFacility.SlotOrBuilder> availableSlotBuilder_;
+
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public java.util.List<gs.Gs.PublicFacility.Slot> getAvailableSlotList() {
+        if (availableSlotBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(availableSlot_);
+        } else {
+          return availableSlotBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public int getAvailableSlotCount() {
+        if (availableSlotBuilder_ == null) {
+          return availableSlot_.size();
+        } else {
+          return availableSlotBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Slot getAvailableSlot(int index) {
+        if (availableSlotBuilder_ == null) {
+          return availableSlot_.get(index);
+        } else {
+          return availableSlotBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder setAvailableSlot(
+          int index, gs.Gs.PublicFacility.Slot value) {
+        if (availableSlotBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAvailableSlotIsMutable();
+          availableSlot_.set(index, value);
+          onChanged();
+        } else {
+          availableSlotBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder setAvailableSlot(
+          int index, gs.Gs.PublicFacility.Slot.Builder builderForValue) {
+        if (availableSlotBuilder_ == null) {
+          ensureAvailableSlotIsMutable();
+          availableSlot_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          availableSlotBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder addAvailableSlot(gs.Gs.PublicFacility.Slot value) {
+        if (availableSlotBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAvailableSlotIsMutable();
+          availableSlot_.add(value);
+          onChanged();
+        } else {
+          availableSlotBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder addAvailableSlot(
+          int index, gs.Gs.PublicFacility.Slot value) {
+        if (availableSlotBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAvailableSlotIsMutable();
+          availableSlot_.add(index, value);
+          onChanged();
+        } else {
+          availableSlotBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder addAvailableSlot(
+          gs.Gs.PublicFacility.Slot.Builder builderForValue) {
+        if (availableSlotBuilder_ == null) {
+          ensureAvailableSlotIsMutable();
+          availableSlot_.add(builderForValue.build());
+          onChanged();
+        } else {
+          availableSlotBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder addAvailableSlot(
+          int index, gs.Gs.PublicFacility.Slot.Builder builderForValue) {
+        if (availableSlotBuilder_ == null) {
+          ensureAvailableSlotIsMutable();
+          availableSlot_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          availableSlotBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder addAllAvailableSlot(
+          java.lang.Iterable<? extends gs.Gs.PublicFacility.Slot> values) {
+        if (availableSlotBuilder_ == null) {
+          ensureAvailableSlotIsMutable();
+          super.addAll(values, availableSlot_);
+          onChanged();
+        } else {
+          availableSlotBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder clearAvailableSlot() {
+        if (availableSlotBuilder_ == null) {
+          availableSlot_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          availableSlotBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public Builder removeAvailableSlot(int index) {
+        if (availableSlotBuilder_ == null) {
+          ensureAvailableSlotIsMutable();
+          availableSlot_.remove(index);
+          onChanged();
+        } else {
+          availableSlotBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Slot.Builder getAvailableSlotBuilder(
+          int index) {
+        return getAvailableSlotFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SlotOrBuilder getAvailableSlotOrBuilder(
+          int index) {
+        if (availableSlotBuilder_ == null) {
+          return availableSlot_.get(index);  } else {
+          return availableSlotBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.PublicFacility.SlotOrBuilder> 
+           getAvailableSlotOrBuilderList() {
+        if (availableSlotBuilder_ != null) {
+          return availableSlotBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(availableSlot_);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Slot.Builder addAvailableSlotBuilder() {
+        return getAvailableSlotFieldBuilder().addBuilder(
+            gs.Gs.PublicFacility.Slot.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Slot.Builder addAvailableSlotBuilder(
+          int index) {
+        return getAvailableSlotFieldBuilder().addBuilder(
+            index, gs.Gs.PublicFacility.Slot.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Slot availableSlot = 2;</code>
+       *
+       * <pre>
+       *可租赁槽位
+       * </pre>
+       */
+      public java.util.List<gs.Gs.PublicFacility.Slot.Builder> 
+           getAvailableSlotBuilderList() {
+        return getAvailableSlotFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility.Slot, gs.Gs.PublicFacility.Slot.Builder, gs.Gs.PublicFacility.SlotOrBuilder> 
+          getAvailableSlotFieldBuilder() {
+        if (availableSlotBuilder_ == null) {
+          availableSlotBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.PublicFacility.Slot, gs.Gs.PublicFacility.Slot.Builder, gs.Gs.PublicFacility.SlotOrBuilder>(
+                  availableSlot_,
+                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  getParentForChildren(),
+                  isClean());
+          availableSlot_ = null;
+        }
+        return availableSlotBuilder_;
+      }
+
+      // repeated .gs.PublicFacility.SoldSlot soldSlot = 3;
+      private java.util.List<gs.Gs.PublicFacility.SoldSlot> soldSlot_ =
+        java.util.Collections.emptyList();
+      private void ensureSoldSlotIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          soldSlot_ = new java.util.ArrayList<gs.Gs.PublicFacility.SoldSlot>(soldSlot_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility.SoldSlot, gs.Gs.PublicFacility.SoldSlot.Builder, gs.Gs.PublicFacility.SoldSlotOrBuilder> soldSlotBuilder_;
+
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public java.util.List<gs.Gs.PublicFacility.SoldSlot> getSoldSlotList() {
+        if (soldSlotBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(soldSlot_);
+        } else {
+          return soldSlotBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public int getSoldSlotCount() {
+        if (soldSlotBuilder_ == null) {
+          return soldSlot_.size();
+        } else {
+          return soldSlotBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlot getSoldSlot(int index) {
+        if (soldSlotBuilder_ == null) {
+          return soldSlot_.get(index);
+        } else {
+          return soldSlotBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder setSoldSlot(
+          int index, gs.Gs.PublicFacility.SoldSlot value) {
+        if (soldSlotBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSoldSlotIsMutable();
+          soldSlot_.set(index, value);
+          onChanged();
+        } else {
+          soldSlotBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder setSoldSlot(
+          int index, gs.Gs.PublicFacility.SoldSlot.Builder builderForValue) {
+        if (soldSlotBuilder_ == null) {
+          ensureSoldSlotIsMutable();
+          soldSlot_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          soldSlotBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder addSoldSlot(gs.Gs.PublicFacility.SoldSlot value) {
+        if (soldSlotBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSoldSlotIsMutable();
+          soldSlot_.add(value);
+          onChanged();
+        } else {
+          soldSlotBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder addSoldSlot(
+          int index, gs.Gs.PublicFacility.SoldSlot value) {
+        if (soldSlotBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSoldSlotIsMutable();
+          soldSlot_.add(index, value);
+          onChanged();
+        } else {
+          soldSlotBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder addSoldSlot(
+          gs.Gs.PublicFacility.SoldSlot.Builder builderForValue) {
+        if (soldSlotBuilder_ == null) {
+          ensureSoldSlotIsMutable();
+          soldSlot_.add(builderForValue.build());
+          onChanged();
+        } else {
+          soldSlotBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder addSoldSlot(
+          int index, gs.Gs.PublicFacility.SoldSlot.Builder builderForValue) {
+        if (soldSlotBuilder_ == null) {
+          ensureSoldSlotIsMutable();
+          soldSlot_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          soldSlotBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder addAllSoldSlot(
+          java.lang.Iterable<? extends gs.Gs.PublicFacility.SoldSlot> values) {
+        if (soldSlotBuilder_ == null) {
+          ensureSoldSlotIsMutable();
+          super.addAll(values, soldSlot_);
+          onChanged();
+        } else {
+          soldSlotBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder clearSoldSlot() {
+        if (soldSlotBuilder_ == null) {
+          soldSlot_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          soldSlotBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public Builder removeSoldSlot(int index) {
+        if (soldSlotBuilder_ == null) {
+          ensureSoldSlotIsMutable();
+          soldSlot_.remove(index);
+          onChanged();
+        } else {
+          soldSlotBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlot.Builder getSoldSlotBuilder(
+          int index) {
+        return getSoldSlotFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlotOrBuilder getSoldSlotOrBuilder(
+          int index) {
+        if (soldSlotBuilder_ == null) {
+          return soldSlot_.get(index);  } else {
+          return soldSlotBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.PublicFacility.SoldSlotOrBuilder> 
+           getSoldSlotOrBuilderList() {
+        if (soldSlotBuilder_ != null) {
+          return soldSlotBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(soldSlot_);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlot.Builder addSoldSlotBuilder() {
+        return getSoldSlotFieldBuilder().addBuilder(
+            gs.Gs.PublicFacility.SoldSlot.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.SoldSlot.Builder addSoldSlotBuilder(
+          int index) {
+        return getSoldSlotFieldBuilder().addBuilder(
+            index, gs.Gs.PublicFacility.SoldSlot.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.SoldSlot soldSlot = 3;</code>
+       *
+       * <pre>
+       *所有租赁出去的槽位
+       * </pre>
+       */
+      public java.util.List<gs.Gs.PublicFacility.SoldSlot.Builder> 
+           getSoldSlotBuilderList() {
+        return getSoldSlotFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility.SoldSlot, gs.Gs.PublicFacility.SoldSlot.Builder, gs.Gs.PublicFacility.SoldSlotOrBuilder> 
+          getSoldSlotFieldBuilder() {
+        if (soldSlotBuilder_ == null) {
+          soldSlotBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.PublicFacility.SoldSlot, gs.Gs.PublicFacility.SoldSlot.Builder, gs.Gs.PublicFacility.SoldSlotOrBuilder>(
+                  soldSlot_,
+                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  getParentForChildren(),
+                  isClean());
+          soldSlot_ = null;
+        }
+        return soldSlotBuilder_;
+      }
+
+      // repeated .gs.PublicFacility.Ad ad = 4;
+      private java.util.List<gs.Gs.PublicFacility.Ad> ad_ =
+        java.util.Collections.emptyList();
+      private void ensureAdIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          ad_ = new java.util.ArrayList<gs.Gs.PublicFacility.Ad>(ad_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility.Ad, gs.Gs.PublicFacility.Ad.Builder, gs.Gs.PublicFacility.AdOrBuilder> adBuilder_;
+
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public java.util.List<gs.Gs.PublicFacility.Ad> getAdList() {
+        if (adBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(ad_);
+        } else {
+          return adBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public int getAdCount() {
+        if (adBuilder_ == null) {
+          return ad_.size();
+        } else {
+          return adBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Ad getAd(int index) {
+        if (adBuilder_ == null) {
+          return ad_.get(index);
+        } else {
+          return adBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder setAd(
+          int index, gs.Gs.PublicFacility.Ad value) {
+        if (adBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAdIsMutable();
+          ad_.set(index, value);
+          onChanged();
+        } else {
+          adBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder setAd(
+          int index, gs.Gs.PublicFacility.Ad.Builder builderForValue) {
+        if (adBuilder_ == null) {
+          ensureAdIsMutable();
+          ad_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          adBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder addAd(gs.Gs.PublicFacility.Ad value) {
+        if (adBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAdIsMutable();
+          ad_.add(value);
+          onChanged();
+        } else {
+          adBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder addAd(
+          int index, gs.Gs.PublicFacility.Ad value) {
+        if (adBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAdIsMutable();
+          ad_.add(index, value);
+          onChanged();
+        } else {
+          adBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder addAd(
+          gs.Gs.PublicFacility.Ad.Builder builderForValue) {
+        if (adBuilder_ == null) {
+          ensureAdIsMutable();
+          ad_.add(builderForValue.build());
+          onChanged();
+        } else {
+          adBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder addAd(
+          int index, gs.Gs.PublicFacility.Ad.Builder builderForValue) {
+        if (adBuilder_ == null) {
+          ensureAdIsMutable();
+          ad_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          adBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder addAllAd(
+          java.lang.Iterable<? extends gs.Gs.PublicFacility.Ad> values) {
+        if (adBuilder_ == null) {
+          ensureAdIsMutable();
+          super.addAll(values, ad_);
+          onChanged();
+        } else {
+          adBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder clearAd() {
+        if (adBuilder_ == null) {
+          ad_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          adBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public Builder removeAd(int index) {
+        if (adBuilder_ == null) {
+          ensureAdIsMutable();
+          ad_.remove(index);
+          onChanged();
+        } else {
+          adBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Ad.Builder getAdBuilder(
+          int index) {
+        return getAdFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.AdOrBuilder getAdOrBuilder(
+          int index) {
+        if (adBuilder_ == null) {
+          return ad_.get(index);  } else {
+          return adBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public java.util.List<? extends gs.Gs.PublicFacility.AdOrBuilder> 
+           getAdOrBuilderList() {
+        if (adBuilder_ != null) {
+          return adBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(ad_);
+        }
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Ad.Builder addAdBuilder() {
+        return getAdFieldBuilder().addBuilder(
+            gs.Gs.PublicFacility.Ad.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public gs.Gs.PublicFacility.Ad.Builder addAdBuilder(
+          int index) {
+        return getAdFieldBuilder().addBuilder(
+            index, gs.Gs.PublicFacility.Ad.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.PublicFacility.Ad ad = 4;</code>
+       *
+       * <pre>
+       *所有广告
+       * </pre>
+       */
+      public java.util.List<gs.Gs.PublicFacility.Ad.Builder> 
+           getAdBuilderList() {
+        return getAdFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.PublicFacility.Ad, gs.Gs.PublicFacility.Ad.Builder, gs.Gs.PublicFacility.AdOrBuilder> 
+          getAdFieldBuilder() {
+        if (adBuilder_ == null) {
+          adBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.PublicFacility.Ad, gs.Gs.PublicFacility.Ad.Builder, gs.Gs.PublicFacility.AdOrBuilder>(
+                  ad_,
+                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  getParentForChildren(),
+                  isClean());
+          ad_ = null;
+        }
+        return adBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.PublicFacility)
+    }
+
+    static {
+      defaultInstance = new PublicFacility(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.PublicFacility)
+  }
+
+  public interface AddSlotOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes buildingId = 1;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+
+    // required int32 minDayToRent = 2;
+    /**
+     * <code>required int32 minDayToRent = 2;</code>
+     */
+    boolean hasMinDayToRent();
+    /**
+     * <code>required int32 minDayToRent = 2;</code>
+     */
+    int getMinDayToRent();
+
+    // required int32 maxDayToRent = 3;
+    /**
+     * <code>required int32 maxDayToRent = 3;</code>
+     */
+    boolean hasMaxDayToRent();
+    /**
+     * <code>required int32 maxDayToRent = 3;</code>
+     */
+    int getMaxDayToRent();
+
+    // required int32 rentPreDay = 4;
+    /**
+     * <code>required int32 rentPreDay = 4;</code>
+     */
+    boolean hasRentPreDay();
+    /**
+     * <code>required int32 rentPreDay = 4;</code>
+     */
+    int getRentPreDay();
+
+    // required int32 deposit = 5;
+    /**
+     * <code>required int32 deposit = 5;</code>
+     */
+    boolean hasDeposit();
+    /**
+     * <code>required int32 deposit = 5;</code>
+     */
+    int getDeposit();
+  }
+  /**
+   * Protobuf type {@code gs.AddSlot}
+   *
+   * <pre>
+   * adAddSlot
+   * c
+   * </pre>
+   */
+  public static final class AddSlot extends
+      com.google.protobuf.GeneratedMessage
+      implements AddSlotOrBuilder {
+    // Use AddSlot.newBuilder() to construct.
+    private AddSlot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AddSlot(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AddSlot defaultInstance;
+    public static AddSlot getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AddSlot getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AddSlot(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              buildingId_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              minDayToRent_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              maxDayToRent_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              rentPreDay_ = input.readInt32();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              deposit_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_AddSlot_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_AddSlot_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.AddSlot.class, gs.Gs.AddSlot.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AddSlot> PARSER =
+        new com.google.protobuf.AbstractParser<AddSlot>() {
+      public AddSlot parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AddSlot(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AddSlot> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes buildingId = 1;
+    public static final int BUILDINGID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    // required int32 minDayToRent = 2;
+    public static final int MINDAYTORENT_FIELD_NUMBER = 2;
+    private int minDayToRent_;
+    /**
+     * <code>required int32 minDayToRent = 2;</code>
+     */
+    public boolean hasMinDayToRent() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 minDayToRent = 2;</code>
+     */
+    public int getMinDayToRent() {
+      return minDayToRent_;
+    }
+
+    // required int32 maxDayToRent = 3;
+    public static final int MAXDAYTORENT_FIELD_NUMBER = 3;
+    private int maxDayToRent_;
+    /**
+     * <code>required int32 maxDayToRent = 3;</code>
+     */
+    public boolean hasMaxDayToRent() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 maxDayToRent = 3;</code>
+     */
+    public int getMaxDayToRent() {
+      return maxDayToRent_;
+    }
+
+    // required int32 rentPreDay = 4;
+    public static final int RENTPREDAY_FIELD_NUMBER = 4;
+    private int rentPreDay_;
+    /**
+     * <code>required int32 rentPreDay = 4;</code>
+     */
+    public boolean hasRentPreDay() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int32 rentPreDay = 4;</code>
+     */
+    public int getRentPreDay() {
+      return rentPreDay_;
+    }
+
+    // required int32 deposit = 5;
+    public static final int DEPOSIT_FIELD_NUMBER = 5;
+    private int deposit_;
+    /**
+     * <code>required int32 deposit = 5;</code>
+     */
+    public boolean hasDeposit() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required int32 deposit = 5;</code>
+     */
+    public int getDeposit() {
+      return deposit_;
+    }
+
+    private void initFields() {
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      minDayToRent_ = 0;
+      maxDayToRent_ = 0;
+      rentPreDay_ = 0;
+      deposit_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasMinDayToRent()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasMaxDayToRent()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasRentPreDay()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDeposit()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, minDayToRent_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, maxDayToRent_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(4, rentPreDay_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(5, deposit_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, minDayToRent_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, maxDayToRent_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, rentPreDay_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, deposit_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.AddSlot parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AddSlot parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AddSlot parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AddSlot parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AddSlot parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AddSlot parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AddSlot parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.AddSlot parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AddSlot parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AddSlot parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.AddSlot prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.AddSlot}
+     *
+     * <pre>
+     * adAddSlot
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.AddSlotOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_AddSlot_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_AddSlot_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.AddSlot.class, gs.Gs.AddSlot.Builder.class);
+      }
+
+      // Construct using gs.Gs.AddSlot.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        minDayToRent_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        maxDayToRent_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        rentPreDay_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        deposit_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_AddSlot_descriptor;
+      }
+
+      public gs.Gs.AddSlot getDefaultInstanceForType() {
+        return gs.Gs.AddSlot.getDefaultInstance();
+      }
+
+      public gs.Gs.AddSlot build() {
+        gs.Gs.AddSlot result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.AddSlot buildPartial() {
+        gs.Gs.AddSlot result = new gs.Gs.AddSlot(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.buildingId_ = buildingId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.minDayToRent_ = minDayToRent_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.maxDayToRent_ = maxDayToRent_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.rentPreDay_ = rentPreDay_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.deposit_ = deposit_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.AddSlot) {
+          return mergeFrom((gs.Gs.AddSlot)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.AddSlot other) {
+        if (other == gs.Gs.AddSlot.getDefaultInstance()) return this;
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        if (other.hasMinDayToRent()) {
+          setMinDayToRent(other.getMinDayToRent());
+        }
+        if (other.hasMaxDayToRent()) {
+          setMaxDayToRent(other.getMaxDayToRent());
+        }
+        if (other.hasRentPreDay()) {
+          setRentPreDay(other.getRentPreDay());
+        }
+        if (other.hasDeposit()) {
+          setDeposit(other.getDeposit());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        if (!hasMinDayToRent()) {
+          
+          return false;
+        }
+        if (!hasMaxDayToRent()) {
+          
+          return false;
+        }
+        if (!hasRentPreDay()) {
+          
+          return false;
+        }
+        if (!hasDeposit()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.AddSlot parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.AddSlot) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes buildingId = 1;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // required int32 minDayToRent = 2;
+      private int minDayToRent_ ;
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      public boolean hasMinDayToRent() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      public int getMinDayToRent() {
+        return minDayToRent_;
+      }
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      public Builder setMinDayToRent(int value) {
+        bitField0_ |= 0x00000002;
+        minDayToRent_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 minDayToRent = 2;</code>
+       */
+      public Builder clearMinDayToRent() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        minDayToRent_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 maxDayToRent = 3;
+      private int maxDayToRent_ ;
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      public boolean hasMaxDayToRent() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      public int getMaxDayToRent() {
+        return maxDayToRent_;
+      }
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      public Builder setMaxDayToRent(int value) {
+        bitField0_ |= 0x00000004;
+        maxDayToRent_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 maxDayToRent = 3;</code>
+       */
+      public Builder clearMaxDayToRent() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        maxDayToRent_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 rentPreDay = 4;
+      private int rentPreDay_ ;
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      public boolean hasRentPreDay() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      public int getRentPreDay() {
+        return rentPreDay_;
+      }
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      public Builder setRentPreDay(int value) {
+        bitField0_ |= 0x00000008;
+        rentPreDay_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 rentPreDay = 4;</code>
+       */
+      public Builder clearRentPreDay() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        rentPreDay_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 deposit = 5;
+      private int deposit_ ;
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      public boolean hasDeposit() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      public int getDeposit() {
+        return deposit_;
+      }
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      public Builder setDeposit(int value) {
+        bitField0_ |= 0x00000010;
+        deposit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 deposit = 5;</code>
+       */
+      public Builder clearDeposit() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        deposit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.AddSlot)
+    }
+
+    static {
+      defaultInstance = new AddSlot(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.AddSlot)
+  }
+
+  public interface AdDelSlotOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes buildingId = 1;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+
+    // required bytes slotId = 2;
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    boolean hasSlotId();
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    com.google.protobuf.ByteString getSlotId();
+  }
+  /**
+   * Protobuf type {@code gs.AdDelSlot}
+   *
+   * <pre>
+   * adDelSlot
+   * c
+   * </pre>
+   */
+  public static final class AdDelSlot extends
+      com.google.protobuf.GeneratedMessage
+      implements AdDelSlotOrBuilder {
+    // Use AdDelSlot.newBuilder() to construct.
+    private AdDelSlot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AdDelSlot(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AdDelSlot defaultInstance;
+    public static AdDelSlot getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AdDelSlot getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AdDelSlot(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              buildingId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              slotId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_AdDelSlot_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_AdDelSlot_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.AdDelSlot.class, gs.Gs.AdDelSlot.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AdDelSlot> PARSER =
+        new com.google.protobuf.AbstractParser<AdDelSlot>() {
+      public AdDelSlot parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AdDelSlot(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AdDelSlot> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes buildingId = 1;
+    public static final int BUILDINGID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    // required bytes slotId = 2;
+    public static final int SLOTID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString slotId_;
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    public boolean hasSlotId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    public com.google.protobuf.ByteString getSlotId() {
+      return slotId_;
+    }
+
+    private void initFields() {
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      slotId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSlotId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, slotId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, slotId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.AdDelSlot parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AdDelSlot parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.AdDelSlot parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AdDelSlot parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.AdDelSlot prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.AdDelSlot}
+     *
+     * <pre>
+     * adDelSlot
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.AdDelSlotOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_AdDelSlot_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_AdDelSlot_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.AdDelSlot.class, gs.Gs.AdDelSlot.Builder.class);
+      }
+
+      // Construct using gs.Gs.AdDelSlot.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        slotId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_AdDelSlot_descriptor;
+      }
+
+      public gs.Gs.AdDelSlot getDefaultInstanceForType() {
+        return gs.Gs.AdDelSlot.getDefaultInstance();
+      }
+
+      public gs.Gs.AdDelSlot build() {
+        gs.Gs.AdDelSlot result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.AdDelSlot buildPartial() {
+        gs.Gs.AdDelSlot result = new gs.Gs.AdDelSlot(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.buildingId_ = buildingId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.slotId_ = slotId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.AdDelSlot) {
+          return mergeFrom((gs.Gs.AdDelSlot)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.AdDelSlot other) {
+        if (other == gs.Gs.AdDelSlot.getDefaultInstance()) return this;
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        if (other.hasSlotId()) {
+          setSlotId(other.getSlotId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        if (!hasSlotId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.AdDelSlot parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.AdDelSlot) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes buildingId = 1;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // required bytes slotId = 2;
+      private com.google.protobuf.ByteString slotId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public boolean hasSlotId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public com.google.protobuf.ByteString getSlotId() {
+        return slotId_;
+      }
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public Builder setSlotId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        slotId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public Builder clearSlotId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        slotId_ = getDefaultInstance().getSlotId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.AdDelSlot)
+    }
+
+    static {
+      defaultInstance = new AdDelSlot(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.AdDelSlot)
+  }
+
+  public interface AdBuySlotOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes buildingId = 1;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+
+    // required bytes slotId = 2;
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    boolean hasSlotId();
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    com.google.protobuf.ByteString getSlotId();
+
+    // required int32 day = 3;
+    /**
+     * <code>required int32 day = 3;</code>
+     */
+    boolean hasDay();
+    /**
+     * <code>required int32 day = 3;</code>
+     */
+    int getDay();
+  }
+  /**
+   * Protobuf type {@code gs.AdBuySlot}
+   *
+   * <pre>
+   * adBuySlot
+   * c
+   * </pre>
+   */
+  public static final class AdBuySlot extends
+      com.google.protobuf.GeneratedMessage
+      implements AdBuySlotOrBuilder {
+    // Use AdBuySlot.newBuilder() to construct.
+    private AdBuySlot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AdBuySlot(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AdBuySlot defaultInstance;
+    public static AdBuySlot getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AdBuySlot getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AdBuySlot(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              buildingId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              slotId_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              day_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_AdBuySlot_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_AdBuySlot_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.AdBuySlot.class, gs.Gs.AdBuySlot.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AdBuySlot> PARSER =
+        new com.google.protobuf.AbstractParser<AdBuySlot>() {
+      public AdBuySlot parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AdBuySlot(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AdBuySlot> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes buildingId = 1;
+    public static final int BUILDINGID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    // required bytes slotId = 2;
+    public static final int SLOTID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString slotId_;
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    public boolean hasSlotId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes slotId = 2;</code>
+     */
+    public com.google.protobuf.ByteString getSlotId() {
+      return slotId_;
+    }
+
+    // required int32 day = 3;
+    public static final int DAY_FIELD_NUMBER = 3;
+    private int day_;
+    /**
+     * <code>required int32 day = 3;</code>
+     */
+    public boolean hasDay() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 day = 3;</code>
+     */
+    public int getDay() {
+      return day_;
+    }
+
+    private void initFields() {
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      slotId_ = com.google.protobuf.ByteString.EMPTY;
+      day_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSlotId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDay()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, slotId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, day_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, slotId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, day_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.AdBuySlot parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AdBuySlot parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.AdBuySlot parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AdBuySlot parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.AdBuySlot prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.AdBuySlot}
+     *
+     * <pre>
+     * adBuySlot
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.AdBuySlotOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_AdBuySlot_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_AdBuySlot_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.AdBuySlot.class, gs.Gs.AdBuySlot.Builder.class);
+      }
+
+      // Construct using gs.Gs.AdBuySlot.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        slotId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        day_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_AdBuySlot_descriptor;
+      }
+
+      public gs.Gs.AdBuySlot getDefaultInstanceForType() {
+        return gs.Gs.AdBuySlot.getDefaultInstance();
+      }
+
+      public gs.Gs.AdBuySlot build() {
+        gs.Gs.AdBuySlot result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.AdBuySlot buildPartial() {
+        gs.Gs.AdBuySlot result = new gs.Gs.AdBuySlot(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.buildingId_ = buildingId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.slotId_ = slotId_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.day_ = day_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.AdBuySlot) {
+          return mergeFrom((gs.Gs.AdBuySlot)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.AdBuySlot other) {
+        if (other == gs.Gs.AdBuySlot.getDefaultInstance()) return this;
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        if (other.hasSlotId()) {
+          setSlotId(other.getSlotId());
+        }
+        if (other.hasDay()) {
+          setDay(other.getDay());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        if (!hasSlotId()) {
+          
+          return false;
+        }
+        if (!hasDay()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.AdBuySlot parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.AdBuySlot) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes buildingId = 1;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // required bytes slotId = 2;
+      private com.google.protobuf.ByteString slotId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public boolean hasSlotId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public com.google.protobuf.ByteString getSlotId() {
+        return slotId_;
+      }
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public Builder setSlotId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        slotId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes slotId = 2;</code>
+       */
+      public Builder clearSlotId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        slotId_ = getDefaultInstance().getSlotId();
+        onChanged();
+        return this;
+      }
+
+      // required int32 day = 3;
+      private int day_ ;
+      /**
+       * <code>required int32 day = 3;</code>
+       */
+      public boolean hasDay() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 day = 3;</code>
+       */
+      public int getDay() {
+        return day_;
+      }
+      /**
+       * <code>required int32 day = 3;</code>
+       */
+      public Builder setDay(int value) {
+        bitField0_ |= 0x00000004;
+        day_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 day = 3;</code>
+       */
+      public Builder clearDay() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        day_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.AdBuySlot)
+    }
+
+    static {
+      defaultInstance = new AdBuySlot(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.AdBuySlot)
+  }
+
+  public interface AddAdOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes id = 1;
+    /**
+     * <code>optional bytes id = 1;</code>
+     *
+     * <pre>
+     * slot id （如果是建筑物所有人，此字段不赋值）
+     * </pre>
+     */
+    boolean hasId();
+    /**
+     * <code>optional bytes id = 1;</code>
+     *
+     * <pre>
+     * slot id （如果是建筑物所有人，此字段不赋值）
+     * </pre>
+     */
+    com.google.protobuf.ByteString getId();
+
+    // required int32 metaId = 2;
+    /**
+     * <code>required int32 metaId = 2;</code>
+     *
+     * <pre>
+     * 建筑物id或商品id
+     * </pre>
+     */
+    boolean hasMetaId();
+    /**
+     * <code>required int32 metaId = 2;</code>
+     *
+     * <pre>
+     * 建筑物id或商品id
+     * </pre>
+     */
+    int getMetaId();
+
+    // required .gs.PublicFacility.Ad.Type type = 3;
+    /**
+     * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+     */
+    gs.Gs.PublicFacility.Ad.Type getType();
+
+    // required bytes buildingId = 4;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+  }
+  /**
+   * Protobuf type {@code gs.AddAd}
+   *
+   * <pre>
+   * adPutAdToSlot
+   * c
+   * </pre>
+   */
+  public static final class AddAd extends
+      com.google.protobuf.GeneratedMessage
+      implements AddAdOrBuilder {
+    // Use AddAd.newBuilder() to construct.
+    private AddAd(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AddAd(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AddAd defaultInstance;
+    public static AddAd getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AddAd getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AddAd(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              id_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              metaId_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+              gs.Gs.PublicFacility.Ad.Type value = gs.Gs.PublicFacility.Ad.Type.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(3, rawValue);
+              } else {
+                bitField0_ |= 0x00000004;
+                type_ = value;
+              }
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              buildingId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_AddAd_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_AddAd_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.AddAd.class, gs.Gs.AddAd.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AddAd> PARSER =
+        new com.google.protobuf.AbstractParser<AddAd>() {
+      public AddAd parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AddAd(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AddAd> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes id = 1;
+    public static final int ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString id_;
+    /**
+     * <code>optional bytes id = 1;</code>
+     *
+     * <pre>
+     * slot id （如果是建筑物所有人，此字段不赋值）
+     * </pre>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes id = 1;</code>
+     *
+     * <pre>
+     * slot id （如果是建筑物所有人，此字段不赋值）
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getId() {
+      return id_;
+    }
+
+    // required int32 metaId = 2;
+    public static final int METAID_FIELD_NUMBER = 2;
+    private int metaId_;
+    /**
+     * <code>required int32 metaId = 2;</code>
+     *
+     * <pre>
+     * 建筑物id或商品id
+     * </pre>
+     */
+    public boolean hasMetaId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 metaId = 2;</code>
+     *
+     * <pre>
+     * 建筑物id或商品id
+     * </pre>
+     */
+    public int getMetaId() {
+      return metaId_;
+    }
+
+    // required .gs.PublicFacility.Ad.Type type = 3;
+    public static final int TYPE_FIELD_NUMBER = 3;
+    private gs.Gs.PublicFacility.Ad.Type type_;
+    /**
+     * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+     */
+    public gs.Gs.PublicFacility.Ad.Type getType() {
+      return type_;
+    }
+
+    // required bytes buildingId = 4;
+    public static final int BUILDINGID_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required bytes buildingId = 4;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    private void initFields() {
+      id_ = com.google.protobuf.ByteString.EMPTY;
+      metaId_ = 0;
+      type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasMetaId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasType()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, metaId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeEnum(3, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, buildingId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, metaId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, buildingId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.AddAd parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AddAd parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AddAd parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AddAd parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AddAd parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AddAd parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AddAd parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.AddAd parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AddAd parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AddAd parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.AddAd prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.AddAd}
+     *
+     * <pre>
+     * adPutAdToSlot
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.AddAdOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_AddAd_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_AddAd_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.AddAd.class, gs.Gs.AddAd.Builder.class);
+      }
+
+      // Construct using gs.Gs.AddAd.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        id_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        metaId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_AddAd_descriptor;
+      }
+
+      public gs.Gs.AddAd getDefaultInstanceForType() {
+        return gs.Gs.AddAd.getDefaultInstance();
+      }
+
+      public gs.Gs.AddAd build() {
+        gs.Gs.AddAd result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.AddAd buildPartial() {
+        gs.Gs.AddAd result = new gs.Gs.AddAd(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.id_ = id_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.metaId_ = metaId_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.type_ = type_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.buildingId_ = buildingId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.AddAd) {
+          return mergeFrom((gs.Gs.AddAd)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.AddAd other) {
+        if (other == gs.Gs.AddAd.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasMetaId()) {
+          setMetaId(other.getMetaId());
+        }
+        if (other.hasType()) {
+          setType(other.getType());
+        }
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasMetaId()) {
+          
+          return false;
+        }
+        if (!hasType()) {
+          
+          return false;
+        }
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.AddAd parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.AddAd) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes id = 1;
+      private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes id = 1;</code>
+       *
+       * <pre>
+       * slot id （如果是建筑物所有人，此字段不赋值）
+       * </pre>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       *
+       * <pre>
+       * slot id （如果是建筑物所有人，此字段不赋值）
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getId() {
+        return id_;
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       *
+       * <pre>
+       * slot id （如果是建筑物所有人，此字段不赋值）
+       * </pre>
+       */
+      public Builder setId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       *
+       * <pre>
+       * slot id （如果是建筑物所有人，此字段不赋值）
+       * </pre>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+
+      // required int32 metaId = 2;
+      private int metaId_ ;
+      /**
+       * <code>required int32 metaId = 2;</code>
+       *
+       * <pre>
+       * 建筑物id或商品id
+       * </pre>
+       */
+      public boolean hasMetaId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 metaId = 2;</code>
+       *
+       * <pre>
+       * 建筑物id或商品id
+       * </pre>
+       */
+      public int getMetaId() {
+        return metaId_;
+      }
+      /**
+       * <code>required int32 metaId = 2;</code>
+       *
+       * <pre>
+       * 建筑物id或商品id
+       * </pre>
+       */
+      public Builder setMetaId(int value) {
+        bitField0_ |= 0x00000002;
+        metaId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 metaId = 2;</code>
+       *
+       * <pre>
+       * 建筑物id或商品id
+       * </pre>
+       */
+      public Builder clearMetaId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        metaId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required .gs.PublicFacility.Ad.Type type = 3;
+      private gs.Gs.PublicFacility.Ad.Type type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      public gs.Gs.PublicFacility.Ad.Type getType() {
+        return type_;
+      }
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      public Builder setType(gs.Gs.PublicFacility.Ad.Type value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .gs.PublicFacility.Ad.Type type = 3;</code>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        type_ = gs.Gs.PublicFacility.Ad.Type.GOOD;
+        onChanged();
+        return this;
+      }
+
+      // required bytes buildingId = 4;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 4;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.AddAd)
+    }
+
+    static {
+      defaultInstance = new AddAd(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.AddAd)
+  }
+
+  public interface AdDelAdFromSlotOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes buildingId = 1;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+
+    // required bytes adId = 2;
+    /**
+     * <code>required bytes adId = 2;</code>
+     */
+    boolean hasAdId();
+    /**
+     * <code>required bytes adId = 2;</code>
+     */
+    com.google.protobuf.ByteString getAdId();
+  }
+  /**
+   * Protobuf type {@code gs.AdDelAdFromSlot}
+   *
+   * <pre>
+   * adDelAdFromSlot
+   * c
+   * </pre>
+   */
+  public static final class AdDelAdFromSlot extends
+      com.google.protobuf.GeneratedMessage
+      implements AdDelAdFromSlotOrBuilder {
+    // Use AdDelAdFromSlot.newBuilder() to construct.
+    private AdDelAdFromSlot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AdDelAdFromSlot(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AdDelAdFromSlot defaultInstance;
+    public static AdDelAdFromSlot getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AdDelAdFromSlot getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AdDelAdFromSlot(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              buildingId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              adId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_AdDelAdFromSlot_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_AdDelAdFromSlot_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.AdDelAdFromSlot.class, gs.Gs.AdDelAdFromSlot.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AdDelAdFromSlot> PARSER =
+        new com.google.protobuf.AbstractParser<AdDelAdFromSlot>() {
+      public AdDelAdFromSlot parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AdDelAdFromSlot(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AdDelAdFromSlot> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes buildingId = 1;
+    public static final int BUILDINGID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    // required bytes adId = 2;
+    public static final int ADID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString adId_;
+    /**
+     * <code>required bytes adId = 2;</code>
+     */
+    public boolean hasAdId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes adId = 2;</code>
+     */
+    public com.google.protobuf.ByteString getAdId() {
+      return adId_;
+    }
+
+    private void initFields() {
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      adId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasAdId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, adId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, adId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.AdDelAdFromSlot parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.AdDelAdFromSlot parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.AdDelAdFromSlot prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.AdDelAdFromSlot}
+     *
+     * <pre>
+     * adDelAdFromSlot
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.AdDelAdFromSlotOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_AdDelAdFromSlot_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_AdDelAdFromSlot_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.AdDelAdFromSlot.class, gs.Gs.AdDelAdFromSlot.Builder.class);
+      }
+
+      // Construct using gs.Gs.AdDelAdFromSlot.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        adId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_AdDelAdFromSlot_descriptor;
+      }
+
+      public gs.Gs.AdDelAdFromSlot getDefaultInstanceForType() {
+        return gs.Gs.AdDelAdFromSlot.getDefaultInstance();
+      }
+
+      public gs.Gs.AdDelAdFromSlot build() {
+        gs.Gs.AdDelAdFromSlot result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.AdDelAdFromSlot buildPartial() {
+        gs.Gs.AdDelAdFromSlot result = new gs.Gs.AdDelAdFromSlot(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.buildingId_ = buildingId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.adId_ = adId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.AdDelAdFromSlot) {
+          return mergeFrom((gs.Gs.AdDelAdFromSlot)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.AdDelAdFromSlot other) {
+        if (other == gs.Gs.AdDelAdFromSlot.getDefaultInstance()) return this;
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        if (other.hasAdId()) {
+          setAdId(other.getAdId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        if (!hasAdId()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.AdDelAdFromSlot parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.AdDelAdFromSlot) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes buildingId = 1;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // required bytes adId = 2;
+      private com.google.protobuf.ByteString adId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes adId = 2;</code>
+       */
+      public boolean hasAdId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes adId = 2;</code>
+       */
+      public com.google.protobuf.ByteString getAdId() {
+        return adId_;
+      }
+      /**
+       * <code>required bytes adId = 2;</code>
+       */
+      public Builder setAdId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        adId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes adId = 2;</code>
+       */
+      public Builder clearAdId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        adId_ = getDefaultInstance().getAdId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.AdDelAdFromSlot)
+    }
+
+    static {
+      defaultInstance = new AdDelAdFromSlot(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.AdDelAdFromSlot)
   }
 
   public interface ShelfAddOrBuilder
@@ -42885,6 +54304,1849 @@ public final class Gs {
     // @@protoc_insertion_point(class_scope:gs.ExchangeDealLogs)
   }
 
+  public interface GroundRentOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 rentPreDay = 1;
+    /**
+     * <code>required int32 rentPreDay = 1;</code>
+     */
+    boolean hasRentPreDay();
+    /**
+     * <code>required int32 rentPreDay = 1;</code>
+     */
+    int getRentPreDay();
+
+    // required int32 paymentCycleDays = 2;
+    /**
+     * <code>required int32 paymentCycleDays = 2;</code>
+     */
+    boolean hasPaymentCycleDays();
+    /**
+     * <code>required int32 paymentCycleDays = 2;</code>
+     */
+    int getPaymentCycleDays();
+
+    // required int32 deposit = 3;
+    /**
+     * <code>required int32 deposit = 3;</code>
+     */
+    boolean hasDeposit();
+    /**
+     * <code>required int32 deposit = 3;</code>
+     */
+    int getDeposit();
+
+    // required int32 rentDays = 4;
+    /**
+     * <code>required int32 rentDays = 4;</code>
+     */
+    boolean hasRentDays();
+    /**
+     * <code>required int32 rentDays = 4;</code>
+     */
+    int getRentDays();
+
+    // repeated .gs.MiniIndex coord = 5;
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    java.util.List<gs.Gs.MiniIndex> 
+        getCoordList();
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    gs.Gs.MiniIndex getCoord(int index);
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    int getCoordCount();
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    java.util.List<? extends gs.Gs.MiniIndexOrBuilder> 
+        getCoordOrBuilderList();
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    gs.Gs.MiniIndexOrBuilder getCoordOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code gs.GroundRent}
+   *
+   * <pre>
+   * rentOutGround
+   * c
+   * </pre>
+   */
+  public static final class GroundRent extends
+      com.google.protobuf.GeneratedMessage
+      implements GroundRentOrBuilder {
+    // Use GroundRent.newBuilder() to construct.
+    private GroundRent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private GroundRent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final GroundRent defaultInstance;
+    public static GroundRent getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public GroundRent getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GroundRent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              rentPreDay_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              paymentCycleDays_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              deposit_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              rentDays_ = input.readInt32();
+              break;
+            }
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                coord_ = new java.util.ArrayList<gs.Gs.MiniIndex>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              coord_.add(input.readMessage(gs.Gs.MiniIndex.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          coord_ = java.util.Collections.unmodifiableList(coord_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_GroundRent_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_GroundRent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.GroundRent.class, gs.Gs.GroundRent.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<GroundRent> PARSER =
+        new com.google.protobuf.AbstractParser<GroundRent>() {
+      public GroundRent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GroundRent(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GroundRent> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 rentPreDay = 1;
+    public static final int RENTPREDAY_FIELD_NUMBER = 1;
+    private int rentPreDay_;
+    /**
+     * <code>required int32 rentPreDay = 1;</code>
+     */
+    public boolean hasRentPreDay() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 rentPreDay = 1;</code>
+     */
+    public int getRentPreDay() {
+      return rentPreDay_;
+    }
+
+    // required int32 paymentCycleDays = 2;
+    public static final int PAYMENTCYCLEDAYS_FIELD_NUMBER = 2;
+    private int paymentCycleDays_;
+    /**
+     * <code>required int32 paymentCycleDays = 2;</code>
+     */
+    public boolean hasPaymentCycleDays() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required int32 paymentCycleDays = 2;</code>
+     */
+    public int getPaymentCycleDays() {
+      return paymentCycleDays_;
+    }
+
+    // required int32 deposit = 3;
+    public static final int DEPOSIT_FIELD_NUMBER = 3;
+    private int deposit_;
+    /**
+     * <code>required int32 deposit = 3;</code>
+     */
+    public boolean hasDeposit() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 deposit = 3;</code>
+     */
+    public int getDeposit() {
+      return deposit_;
+    }
+
+    // required int32 rentDays = 4;
+    public static final int RENTDAYS_FIELD_NUMBER = 4;
+    private int rentDays_;
+    /**
+     * <code>required int32 rentDays = 4;</code>
+     */
+    public boolean hasRentDays() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int32 rentDays = 4;</code>
+     */
+    public int getRentDays() {
+      return rentDays_;
+    }
+
+    // repeated .gs.MiniIndex coord = 5;
+    public static final int COORD_FIELD_NUMBER = 5;
+    private java.util.List<gs.Gs.MiniIndex> coord_;
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    public java.util.List<gs.Gs.MiniIndex> getCoordList() {
+      return coord_;
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    public java.util.List<? extends gs.Gs.MiniIndexOrBuilder> 
+        getCoordOrBuilderList() {
+      return coord_;
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    public int getCoordCount() {
+      return coord_.size();
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    public gs.Gs.MiniIndex getCoord(int index) {
+      return coord_.get(index);
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 5;</code>
+     */
+    public gs.Gs.MiniIndexOrBuilder getCoordOrBuilder(
+        int index) {
+      return coord_.get(index);
+    }
+
+    private void initFields() {
+      rentPreDay_ = 0;
+      paymentCycleDays_ = 0;
+      deposit_ = 0;
+      rentDays_ = 0;
+      coord_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasRentPreDay()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPaymentCycleDays()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDeposit()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasRentDays()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getCoordCount(); i++) {
+        if (!getCoord(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, rentPreDay_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, paymentCycleDays_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, deposit_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(4, rentDays_);
+      }
+      for (int i = 0; i < coord_.size(); i++) {
+        output.writeMessage(5, coord_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, rentPreDay_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, paymentCycleDays_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, deposit_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, rentDays_);
+      }
+      for (int i = 0; i < coord_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, coord_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.GroundRent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.GroundRent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.GroundRent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.GroundRent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.GroundRent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.GroundRent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.GroundRent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.GroundRent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.GroundRent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.GroundRent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.GroundRent prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.GroundRent}
+     *
+     * <pre>
+     * rentOutGround
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.GroundRentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_GroundRent_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_GroundRent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.GroundRent.class, gs.Gs.GroundRent.Builder.class);
+      }
+
+      // Construct using gs.Gs.GroundRent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getCoordFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        rentPreDay_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        paymentCycleDays_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        deposit_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        rentDays_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        if (coordBuilder_ == null) {
+          coord_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+        } else {
+          coordBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_GroundRent_descriptor;
+      }
+
+      public gs.Gs.GroundRent getDefaultInstanceForType() {
+        return gs.Gs.GroundRent.getDefaultInstance();
+      }
+
+      public gs.Gs.GroundRent build() {
+        gs.Gs.GroundRent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.GroundRent buildPartial() {
+        gs.Gs.GroundRent result = new gs.Gs.GroundRent(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.rentPreDay_ = rentPreDay_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.paymentCycleDays_ = paymentCycleDays_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.deposit_ = deposit_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.rentDays_ = rentDays_;
+        if (coordBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+            coord_ = java.util.Collections.unmodifiableList(coord_);
+            bitField0_ = (bitField0_ & ~0x00000010);
+          }
+          result.coord_ = coord_;
+        } else {
+          result.coord_ = coordBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.GroundRent) {
+          return mergeFrom((gs.Gs.GroundRent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.GroundRent other) {
+        if (other == gs.Gs.GroundRent.getDefaultInstance()) return this;
+        if (other.hasRentPreDay()) {
+          setRentPreDay(other.getRentPreDay());
+        }
+        if (other.hasPaymentCycleDays()) {
+          setPaymentCycleDays(other.getPaymentCycleDays());
+        }
+        if (other.hasDeposit()) {
+          setDeposit(other.getDeposit());
+        }
+        if (other.hasRentDays()) {
+          setRentDays(other.getRentDays());
+        }
+        if (coordBuilder_ == null) {
+          if (!other.coord_.isEmpty()) {
+            if (coord_.isEmpty()) {
+              coord_ = other.coord_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+            } else {
+              ensureCoordIsMutable();
+              coord_.addAll(other.coord_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.coord_.isEmpty()) {
+            if (coordBuilder_.isEmpty()) {
+              coordBuilder_.dispose();
+              coordBuilder_ = null;
+              coord_ = other.coord_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+              coordBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getCoordFieldBuilder() : null;
+            } else {
+              coordBuilder_.addAllMessages(other.coord_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasRentPreDay()) {
+          
+          return false;
+        }
+        if (!hasPaymentCycleDays()) {
+          
+          return false;
+        }
+        if (!hasDeposit()) {
+          
+          return false;
+        }
+        if (!hasRentDays()) {
+          
+          return false;
+        }
+        for (int i = 0; i < getCoordCount(); i++) {
+          if (!getCoord(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.GroundRent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.GroundRent) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 rentPreDay = 1;
+      private int rentPreDay_ ;
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      public boolean hasRentPreDay() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      public int getRentPreDay() {
+        return rentPreDay_;
+      }
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      public Builder setRentPreDay(int value) {
+        bitField0_ |= 0x00000001;
+        rentPreDay_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 rentPreDay = 1;</code>
+       */
+      public Builder clearRentPreDay() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        rentPreDay_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 paymentCycleDays = 2;
+      private int paymentCycleDays_ ;
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      public boolean hasPaymentCycleDays() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      public int getPaymentCycleDays() {
+        return paymentCycleDays_;
+      }
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      public Builder setPaymentCycleDays(int value) {
+        bitField0_ |= 0x00000002;
+        paymentCycleDays_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 paymentCycleDays = 2;</code>
+       */
+      public Builder clearPaymentCycleDays() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        paymentCycleDays_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 deposit = 3;
+      private int deposit_ ;
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      public boolean hasDeposit() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      public int getDeposit() {
+        return deposit_;
+      }
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      public Builder setDeposit(int value) {
+        bitField0_ |= 0x00000004;
+        deposit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 deposit = 3;</code>
+       */
+      public Builder clearDeposit() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        deposit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 rentDays = 4;
+      private int rentDays_ ;
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      public boolean hasRentDays() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      public int getRentDays() {
+        return rentDays_;
+      }
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      public Builder setRentDays(int value) {
+        bitField0_ |= 0x00000008;
+        rentDays_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 rentDays = 4;</code>
+       */
+      public Builder clearRentDays() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        rentDays_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // repeated .gs.MiniIndex coord = 5;
+      private java.util.List<gs.Gs.MiniIndex> coord_ =
+        java.util.Collections.emptyList();
+      private void ensureCoordIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          coord_ = new java.util.ArrayList<gs.Gs.MiniIndex>(coord_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.MiniIndex, gs.Gs.MiniIndex.Builder, gs.Gs.MiniIndexOrBuilder> coordBuilder_;
+
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public java.util.List<gs.Gs.MiniIndex> getCoordList() {
+        if (coordBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(coord_);
+        } else {
+          return coordBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public int getCoordCount() {
+        if (coordBuilder_ == null) {
+          return coord_.size();
+        } else {
+          return coordBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public gs.Gs.MiniIndex getCoord(int index) {
+        if (coordBuilder_ == null) {
+          return coord_.get(index);
+        } else {
+          return coordBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder setCoord(
+          int index, gs.Gs.MiniIndex value) {
+        if (coordBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoordIsMutable();
+          coord_.set(index, value);
+          onChanged();
+        } else {
+          coordBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder setCoord(
+          int index, gs.Gs.MiniIndex.Builder builderForValue) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          coordBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder addCoord(gs.Gs.MiniIndex value) {
+        if (coordBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoordIsMutable();
+          coord_.add(value);
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder addCoord(
+          int index, gs.Gs.MiniIndex value) {
+        if (coordBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoordIsMutable();
+          coord_.add(index, value);
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder addCoord(
+          gs.Gs.MiniIndex.Builder builderForValue) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.add(builderForValue.build());
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder addCoord(
+          int index, gs.Gs.MiniIndex.Builder builderForValue) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder addAllCoord(
+          java.lang.Iterable<? extends gs.Gs.MiniIndex> values) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          super.addAll(values, coord_);
+          onChanged();
+        } else {
+          coordBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder clearCoord() {
+        if (coordBuilder_ == null) {
+          coord_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+          onChanged();
+        } else {
+          coordBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public Builder removeCoord(int index) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.remove(index);
+          onChanged();
+        } else {
+          coordBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public gs.Gs.MiniIndex.Builder getCoordBuilder(
+          int index) {
+        return getCoordFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public gs.Gs.MiniIndexOrBuilder getCoordOrBuilder(
+          int index) {
+        if (coordBuilder_ == null) {
+          return coord_.get(index);  } else {
+          return coordBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public java.util.List<? extends gs.Gs.MiniIndexOrBuilder> 
+           getCoordOrBuilderList() {
+        if (coordBuilder_ != null) {
+          return coordBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(coord_);
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public gs.Gs.MiniIndex.Builder addCoordBuilder() {
+        return getCoordFieldBuilder().addBuilder(
+            gs.Gs.MiniIndex.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public gs.Gs.MiniIndex.Builder addCoordBuilder(
+          int index) {
+        return getCoordFieldBuilder().addBuilder(
+            index, gs.Gs.MiniIndex.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 5;</code>
+       */
+      public java.util.List<gs.Gs.MiniIndex.Builder> 
+           getCoordBuilderList() {
+        return getCoordFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.MiniIndex, gs.Gs.MiniIndex.Builder, gs.Gs.MiniIndexOrBuilder> 
+          getCoordFieldBuilder() {
+        if (coordBuilder_ == null) {
+          coordBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.MiniIndex, gs.Gs.MiniIndex.Builder, gs.Gs.MiniIndexOrBuilder>(
+                  coord_,
+                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  getParentForChildren(),
+                  isClean());
+          coord_ = null;
+        }
+        return coordBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.GroundRent)
+    }
+
+    static {
+      defaultInstance = new GroundRent(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.GroundRent)
+  }
+
+  public interface GroundSaleOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 price = 1;
+    /**
+     * <code>required int32 price = 1;</code>
+     */
+    boolean hasPrice();
+    /**
+     * <code>required int32 price = 1;</code>
+     */
+    int getPrice();
+
+    // repeated .gs.MiniIndex coord = 2;
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    java.util.List<gs.Gs.MiniIndex> 
+        getCoordList();
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    gs.Gs.MiniIndex getCoord(int index);
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    int getCoordCount();
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    java.util.List<? extends gs.Gs.MiniIndexOrBuilder> 
+        getCoordOrBuilderList();
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    gs.Gs.MiniIndexOrBuilder getCoordOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code gs.GroundSale}
+   *
+   * <pre>
+   * sellGround
+   * c
+   * </pre>
+   */
+  public static final class GroundSale extends
+      com.google.protobuf.GeneratedMessage
+      implements GroundSaleOrBuilder {
+    // Use GroundSale.newBuilder() to construct.
+    private GroundSale(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private GroundSale(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final GroundSale defaultInstance;
+    public static GroundSale getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public GroundSale getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GroundSale(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              price_ = input.readInt32();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                coord_ = new java.util.ArrayList<gs.Gs.MiniIndex>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              coord_.add(input.readMessage(gs.Gs.MiniIndex.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          coord_ = java.util.Collections.unmodifiableList(coord_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_GroundSale_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_GroundSale_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.GroundSale.class, gs.Gs.GroundSale.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<GroundSale> PARSER =
+        new com.google.protobuf.AbstractParser<GroundSale>() {
+      public GroundSale parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GroundSale(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GroundSale> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 price = 1;
+    public static final int PRICE_FIELD_NUMBER = 1;
+    private int price_;
+    /**
+     * <code>required int32 price = 1;</code>
+     */
+    public boolean hasPrice() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 price = 1;</code>
+     */
+    public int getPrice() {
+      return price_;
+    }
+
+    // repeated .gs.MiniIndex coord = 2;
+    public static final int COORD_FIELD_NUMBER = 2;
+    private java.util.List<gs.Gs.MiniIndex> coord_;
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    public java.util.List<gs.Gs.MiniIndex> getCoordList() {
+      return coord_;
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    public java.util.List<? extends gs.Gs.MiniIndexOrBuilder> 
+        getCoordOrBuilderList() {
+      return coord_;
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    public int getCoordCount() {
+      return coord_.size();
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    public gs.Gs.MiniIndex getCoord(int index) {
+      return coord_.get(index);
+    }
+    /**
+     * <code>repeated .gs.MiniIndex coord = 2;</code>
+     */
+    public gs.Gs.MiniIndexOrBuilder getCoordOrBuilder(
+        int index) {
+      return coord_.get(index);
+    }
+
+    private void initFields() {
+      price_ = 0;
+      coord_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasPrice()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getCoordCount(); i++) {
+        if (!getCoord(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, price_);
+      }
+      for (int i = 0; i < coord_.size(); i++) {
+        output.writeMessage(2, coord_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, price_);
+      }
+      for (int i = 0; i < coord_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, coord_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.GroundSale parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.GroundSale parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.GroundSale parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.GroundSale parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.GroundSale parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.GroundSale parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.GroundSale parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.GroundSale parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.GroundSale parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.GroundSale parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.GroundSale prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.GroundSale}
+     *
+     * <pre>
+     * sellGround
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.GroundSaleOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_GroundSale_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_GroundSale_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.GroundSale.class, gs.Gs.GroundSale.Builder.class);
+      }
+
+      // Construct using gs.Gs.GroundSale.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getCoordFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        price_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (coordBuilder_ == null) {
+          coord_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          coordBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_GroundSale_descriptor;
+      }
+
+      public gs.Gs.GroundSale getDefaultInstanceForType() {
+        return gs.Gs.GroundSale.getDefaultInstance();
+      }
+
+      public gs.Gs.GroundSale build() {
+        gs.Gs.GroundSale result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.GroundSale buildPartial() {
+        gs.Gs.GroundSale result = new gs.Gs.GroundSale(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.price_ = price_;
+        if (coordBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+            coord_ = java.util.Collections.unmodifiableList(coord_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.coord_ = coord_;
+        } else {
+          result.coord_ = coordBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.GroundSale) {
+          return mergeFrom((gs.Gs.GroundSale)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.GroundSale other) {
+        if (other == gs.Gs.GroundSale.getDefaultInstance()) return this;
+        if (other.hasPrice()) {
+          setPrice(other.getPrice());
+        }
+        if (coordBuilder_ == null) {
+          if (!other.coord_.isEmpty()) {
+            if (coord_.isEmpty()) {
+              coord_ = other.coord_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureCoordIsMutable();
+              coord_.addAll(other.coord_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.coord_.isEmpty()) {
+            if (coordBuilder_.isEmpty()) {
+              coordBuilder_.dispose();
+              coordBuilder_ = null;
+              coord_ = other.coord_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              coordBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getCoordFieldBuilder() : null;
+            } else {
+              coordBuilder_.addAllMessages(other.coord_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasPrice()) {
+          
+          return false;
+        }
+        for (int i = 0; i < getCoordCount(); i++) {
+          if (!getCoord(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.GroundSale parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.GroundSale) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 price = 1;
+      private int price_ ;
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      public boolean hasPrice() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      public int getPrice() {
+        return price_;
+      }
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      public Builder setPrice(int value) {
+        bitField0_ |= 0x00000001;
+        price_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 price = 1;</code>
+       */
+      public Builder clearPrice() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        price_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // repeated .gs.MiniIndex coord = 2;
+      private java.util.List<gs.Gs.MiniIndex> coord_ =
+        java.util.Collections.emptyList();
+      private void ensureCoordIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          coord_ = new java.util.ArrayList<gs.Gs.MiniIndex>(coord_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.MiniIndex, gs.Gs.MiniIndex.Builder, gs.Gs.MiniIndexOrBuilder> coordBuilder_;
+
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public java.util.List<gs.Gs.MiniIndex> getCoordList() {
+        if (coordBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(coord_);
+        } else {
+          return coordBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public int getCoordCount() {
+        if (coordBuilder_ == null) {
+          return coord_.size();
+        } else {
+          return coordBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public gs.Gs.MiniIndex getCoord(int index) {
+        if (coordBuilder_ == null) {
+          return coord_.get(index);
+        } else {
+          return coordBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder setCoord(
+          int index, gs.Gs.MiniIndex value) {
+        if (coordBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoordIsMutable();
+          coord_.set(index, value);
+          onChanged();
+        } else {
+          coordBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder setCoord(
+          int index, gs.Gs.MiniIndex.Builder builderForValue) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          coordBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder addCoord(gs.Gs.MiniIndex value) {
+        if (coordBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoordIsMutable();
+          coord_.add(value);
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder addCoord(
+          int index, gs.Gs.MiniIndex value) {
+        if (coordBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoordIsMutable();
+          coord_.add(index, value);
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder addCoord(
+          gs.Gs.MiniIndex.Builder builderForValue) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.add(builderForValue.build());
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder addCoord(
+          int index, gs.Gs.MiniIndex.Builder builderForValue) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          coordBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder addAllCoord(
+          java.lang.Iterable<? extends gs.Gs.MiniIndex> values) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          super.addAll(values, coord_);
+          onChanged();
+        } else {
+          coordBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder clearCoord() {
+        if (coordBuilder_ == null) {
+          coord_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          coordBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public Builder removeCoord(int index) {
+        if (coordBuilder_ == null) {
+          ensureCoordIsMutable();
+          coord_.remove(index);
+          onChanged();
+        } else {
+          coordBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public gs.Gs.MiniIndex.Builder getCoordBuilder(
+          int index) {
+        return getCoordFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public gs.Gs.MiniIndexOrBuilder getCoordOrBuilder(
+          int index) {
+        if (coordBuilder_ == null) {
+          return coord_.get(index);  } else {
+          return coordBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public java.util.List<? extends gs.Gs.MiniIndexOrBuilder> 
+           getCoordOrBuilderList() {
+        if (coordBuilder_ != null) {
+          return coordBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(coord_);
+        }
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public gs.Gs.MiniIndex.Builder addCoordBuilder() {
+        return getCoordFieldBuilder().addBuilder(
+            gs.Gs.MiniIndex.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public gs.Gs.MiniIndex.Builder addCoordBuilder(
+          int index) {
+        return getCoordFieldBuilder().addBuilder(
+            index, gs.Gs.MiniIndex.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gs.MiniIndex coord = 2;</code>
+       */
+      public java.util.List<gs.Gs.MiniIndex.Builder> 
+           getCoordBuilderList() {
+        return getCoordFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          gs.Gs.MiniIndex, gs.Gs.MiniIndex.Builder, gs.Gs.MiniIndexOrBuilder> 
+          getCoordFieldBuilder() {
+        if (coordBuilder_ == null) {
+          coordBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              gs.Gs.MiniIndex, gs.Gs.MiniIndex.Builder, gs.Gs.MiniIndexOrBuilder>(
+                  coord_,
+                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  getParentForChildren(),
+                  isClean());
+          coord_ = null;
+        }
+        return coordBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.GroundSale)
+    }
+
+    static {
+      defaultInstance = new GroundSale(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.GroundSale)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_Id_descriptor;
   private static
@@ -42946,6 +56208,21 @@ public final class Gs {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_BuildingInfo_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_GroundInfo_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_GroundInfo_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_GroundInfo_Rent_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_GroundInfo_Rent_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_GroundInfo_Sell_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_GroundInfo_Sell_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_HeartBeat_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -42991,20 +56268,20 @@ public final class Gs {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_UnitCreate_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_UnitRemove_descriptor;
+    internal_static_gs_GroundChange_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_UnitRemove_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_gs_UnitChange_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_gs_UnitChange_fieldAccessorTable;
+      internal_static_gs_GroundChange_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_RoleInfos_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_RoleInfos_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_DelItem_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_DelItem_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_GroundAuction_descriptor;
   private static
@@ -43065,6 +56342,51 @@ public final class Gs {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_ProduceDepartment_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_PublicFacility_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_PublicFacility_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_PublicFacility_Slot_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_PublicFacility_Slot_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_PublicFacility_SoldSlot_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_PublicFacility_SoldSlot_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_PublicFacility_Ad_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_PublicFacility_Ad_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_AddSlot_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_AddSlot_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_AdDelSlot_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_AdDelSlot_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_AdBuySlot_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_AdBuySlot_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_AddAd_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_AddAd_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_AdDelAdFromSlot_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_AdDelAdFromSlot_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_ShelfAdd_descriptor;
   private static
@@ -43160,6 +56482,16 @@ public final class Gs {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_ExchangeDealLogs_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_GroundRent_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_GroundRent_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_GroundSale_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_GroundSale_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -43181,98 +56513,136 @@ public final class Gs {
       "\003 \002(\0132\r.gs.MiniIndex\022\017\n\007ownerId\030\004 \001(\014\022\017\n",
       "\007npcFlow\030\005 \001(\005\022 \n\005state\030\006 \002(\0162\021.gs.Build" +
       "ingState\022\033\n\023constructCompleteTs\030\007 \001(\005\022\016\n" +
-      "\006salary\030\010 \001(\005\022\r\n\005happy\030\t \001(\005\"\027\n\tHeartBea" +
-      "t\022\n\n\002ts\030\001 \002(\003\"2\n\014HeartBeatACK\022\020\n\010clientT" +
-      "s\030\001 \002(\003\022\020\n\010serverTs\030\002 \002(\003\"$\n\010RoleInfo\022\n\n" +
-      "\002id\030\001 \002(\014\022\014\n\004name\030\002 \002(\t\"\'\n\005Login\022\017\n\007acco" +
-      "unt\030\001 \002(\t\022\r\n\005token\030\002 \002(\t\"2\n\010LoginACK\022\032\n\004" +
-      "info\030\001 \003(\0132\014.gs.RoleInfo\022\n\n\002ts\030\002 \002(\003\"]\n\005" +
-      "Store\022\032\n\006inHand\030\001 \003(\0132\n.gs.IntNum\022\034\n\010res" +
-      "erved\030\002 \003(\0132\n.gs.IntNum\022\032\n\006locked\030\003 \003(\0132",
-      "\n.gs.IntNum\"\217\001\n\013BuildingSet\022 \n\tapartment" +
-      "\030\001 \003(\0132\r.gs.Apartment\022,\n\017materialFactory" +
-      "\030\002 \003(\0132\023.gs.MaterialFactory\0220\n\021produceDe" +
-      "partment\030\003 \003(\0132\025.gs.ProduceDepartment\"\235\002" +
-      "\n\004Role\022\n\n\002id\030\001 \002(\014\022\014\n\004name\030\002 \002(\t\022\r\n\005mone" +
-      "y\030\003 \002(\003\022\023\n\013lockedMoney\030\004 \002(\005\022\021\n\tofflineT" +
-      "s\030\005 \002(\003\022\037\n\010position\030\006 \002(\0132\r.gs.GridIndex" +
-      "\022\035\n\004buys\030\007 \001(\0132\017.gs.BuildingSet\022\036\n\005rents" +
-      "\030\010 \001(\0132\017.gs.BuildingSet\022\026\n\003bag\030\n \002(\0132\t.g" +
-      "s.Store\022\023\n\013bagCapacity\030\013 \002(\005\022\030\n\020itemIdCa",
-      "nProduce\030\017 \003(\005\022\035\n\025exchangeCollectedItem\030" +
-      "\024 \003(\005\",\n\nUnitCreate\022\036\n\004info\030\001 \003(\0132\020.gs.B" +
-      "uildingInfo\"\030\n\nUnitRemove\022\n\n\002id\030\001 \003(\014\",\n" +
-      "\nUnitChange\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingI" +
-      "nfo\"\'\n\tRoleInfos\022\032\n\004info\030\001 \003(\0132\014.gs.Role" +
-      "Info\"p\n\rGroundAuction\022)\n\007auction\030\001 \003(\0132\030" +
-      ".gs.GroundAuction.Target\0324\n\006Target\022\n\n\002id" +
-      "\030\001 \002(\014\022\017\n\007biderId\030\002 \001(\014\022\r\n\005price\030\003 \001(\005\"\260" +
-      "\001\n\021MetaGroundAuction\022-\n\007auction\030\001 \003(\0132\034." +
-      "gs.MetaGroundAuction.Target\032l\n\006Target\022\n\n",
-      "\002id\030\001 \002(\014\022\033\n\004area\030\002 \003(\0132\r.gs.MiniIndex\022\021" +
-      "\n\tbeginTime\030\003 \002(\003\022\023\n\013durationSec\030\004 \002(\005\022\021" +
-      "\n\tbasePrice\030\005 \002(\005\"5\n\013AddBuilding\022\n\n\002id\030\001" +
-      " \002(\005\022\032\n\003pos\030\002 \002(\0132\r.gs.MiniIndex\"C\n\014Tran" +
-      "sferItem\022\013\n\003src\030\001 \001(\014\022\013\n\003dst\030\002 \001(\014\022\016\n\006it" +
-      "emId\030\003 \002(\005\022\t\n\001n\030\004 \002(\005\"b\n\tApartment\022\036\n\004in" +
-      "fo\030\001 \002(\0132\020.gs.BuildingInfo\022\014\n\004rent\030\002 \002(\005" +
-      "\022\016\n\006renter\030\003 \002(\005\022\027\n\005chart\030\004 \002(\0132\010.gs.Num" +
-      "s\"\\\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\020\n" +
-      "\010nowCount\030\003 \002(\005\022\023\n\013targetCount\030\004 \002(\005\022\021\n\t",
-      "workerNum\030\005 \002(\005\"k\n\005Shelf\022\037\n\004good\030\001 \003(\0132\021" +
-      ".gs.Shelf.Content\032A\n\007Content\022\n\n\002id\030\001 \002(\014" +
-      "\022\016\n\006itemId\030\002 \002(\005\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004" +
-      " \002(\005\"}\n\017MaterialFactory\022\036\n\004info\030\001 \002(\0132\020." +
-      "gs.BuildingInfo\022\030\n\005store\030\002 \002(\0132\t.gs.Stor" +
-      "e\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\026\n\004line\030\004 \003(" +
-      "\0132\010.gs.Line\"\177\n\021ProduceDepartment\022\036\n\004info" +
-      "\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 \002(\0132" +
-      "\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\026\n\004" +
-      "line\030\004 \003(\0132\010.gs.Line\"J\n\010ShelfAdd\022\022\n\nbuil",
-      "dingId\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\013\n\003num\030\003 \002(" +
-      "\005\022\r\n\005price\030\004 \002(\005\"1\n\010ShelfDel\022\022\n\nbuilding" +
-      "Id\030\001 \002(\014\022\021\n\tcontentId\030\002 \002(\014\"M\n\010ShelfSet\022" +
-      "\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcontentId\030\002 \002(\014\022\013" +
-      "\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\"d\n\nBuyInShelf" +
-      "\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcontentId\030\002 \002(\014\022" +
-      "\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\022\023\n\013wareHouse" +
-      "Id\030\005 \002(\014\"K\n\007AddLine\022\n\n\002id\030\001 \002(\014\022\016\n\006itemI" +
-      "d\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021\n\tworkerNum\030" +
-      "\004 \002(\005\"V\n\nChangeLine\022\022\n\nbuildingId\030\001 \002(\014\022",
-      "\016\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\tta" +
-      "rgetNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022\020\n" +
-      "\010nowCount\030\002 \001(\005\022\023\n\013targetCount\030\003 \001(\005\022\021\n\t" +
-      "workerNum\030\004 \001(\005\"\211\001\n\023ExchangeItemSummary\022" +
-      "\016\n\006itemId\030\001 \002(\005\022\020\n\010lowPrice\030\002 \001(\005\022\021\n\thig" +
-      "hPrice\030\003 \001(\005\022\020\n\010nowPrice\030\004 \001(\005\022\026\n\016sumDea" +
-      "ledPrice\030\005 \001(\003\022\023\n\013priceChange\030\006 \001(\021\"<\n\020E" +
-      "xchangeItemList\022(\n\007summary\030\001 \003(\0132\027.gs.Ex" +
-      "changeItemSummary\"C\n\026ItemDealHistoryElem" +
-      "ent\022\r\n\005price\030\001 \002(\005\022\016\n\006amount\030\002 \002(\005\022\n\n\002ts",
-      "\030\003 \002(\003\":\n\017ItemDealHistory\022\'\n\003log\030\001 \003(\0132\032" +
-      ".gs.ItemDealHistoryElement\"M\n\013ExchangeBu" +
-      "y\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030" +
-      "\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"N\n\014ExchangeSel" +
-      "l\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030" +
-      "\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"n\n\022ExchangeIte" +
-      "mDetail\022\027\n\003buy\030\001 \003(\0132\n.gs.IntNum\022\030\n\004sell" +
-      "\030\002 \003(\0132\n.gs.IntNum\022\020\n\010nowPrice\030\003 \002(\005\022\023\n\013" +
-      "priceChange\030\004 \002(\005\"w\n\014ExchangeDeal\022\016\n\006ite" +
-      "mId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n",
-      "\nbuildingId\030\004 \002(\014\022\022\n\nbuyOrderId\030\005 \002(\014\022\023\n" +
-      "\013sellOrderId\030\006 \002(\014\"\334\001\n\016ExchangeOrders\022\'\n" +
-      "\005order\030\001 \003(\0132\030.gs.ExchangeOrders.Order\032\240" +
-      "\001\n\005Order\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\024\n\014" +
-      "dealedAmount\030\003 \002(\005\022\023\n\013totalAmount\030\004 \002(\005\022" +
-      "\r\n\005price\030\005 \002(\005\022\n\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002(\010" +
-      "\022\022\n\nbuildingId\030\010 \002(\014\022\023\n\013dealedPrice\030\t \002(" +
-      "\005\"o\n\017ExchangeDealLog\022\020\n\010sellerId\030\001 \002(\014\022\017" +
-      "\n\007buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030\004 \002" +
-      "(\005\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\"4\n\020Ex",
-      "changeDealLogs\022 \n\003log\030\001 \003(\0132\023.gs.Exchang" +
-      "eDealLog*f\n\rBuildingState\022\020\n\014CONSTRUCTIN" +
-      "G\020\002\022\020\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_OPERATE" +
-      "\020\004\022\013\n\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
+      "\006salary\030\010 \001(\005\022\r\n\005happy\030\t \001(\005\"\220\002\n\nGroundI" +
+      "nfo\022\017\n\007ownerId\030\001 \001(\014\022\t\n\001x\030\002 \002(\005\022\t\n\001y\030\003 \002" +
+      "(\005\022!\n\004rent\030\004 \001(\0132\023.gs.GroundInfo.Rent\022!\n" +
+      "\004sell\030\005 \001(\0132\023.gs.GroundInfo.Sell\032~\n\004Rent" +
+      "\022\022\n\nrentPreDay\030\001 \002(\005\022\030\n\020paymentCycleDays" +
+      "\030\002 \002(\005\022\017\n\007deposit\030\003 \002(\005\022\020\n\010rentDays\030\004 \002(" +
+      "\005\022\020\n\010renterId\030\005 \001(\014\022\023\n\013rentBeginTs\030\006 \001(\003" +
+      "\032\025\n\004Sell\022\r\n\005price\030\001 \002(\005\"\027\n\tHeartBeat\022\n\n\002",
+      "ts\030\001 \002(\003\"2\n\014HeartBeatACK\022\020\n\010clientTs\030\001 \002" +
+      "(\003\022\020\n\010serverTs\030\002 \002(\003\"$\n\010RoleInfo\022\n\n\002id\030\001" +
+      " \002(\014\022\014\n\004name\030\002 \002(\t\"\'\n\005Login\022\017\n\007account\030\001" +
+      " \002(\t\022\r\n\005token\030\002 \002(\t\"2\n\010LoginACK\022\032\n\004info\030" +
+      "\001 \003(\0132\014.gs.RoleInfo\022\n\n\002ts\030\002 \002(\003\"]\n\005Store" +
+      "\022\032\n\006inHand\030\001 \003(\0132\n.gs.IntNum\022\034\n\010reserved" +
+      "\030\002 \003(\0132\n.gs.IntNum\022\032\n\006locked\030\003 \003(\0132\n.gs." +
+      "IntNum\"\273\001\n\013BuildingSet\022 \n\tapartment\030\001 \003(" +
+      "\0132\r.gs.Apartment\022,\n\017materialFactory\030\002 \003(" +
+      "\0132\023.gs.MaterialFactory\0220\n\021produceDepartm",
+      "ent\030\003 \003(\0132\025.gs.ProduceDepartment\022*\n\016publ" +
+      "icFacility\030\004 \003(\0132\022.gs.PublicFacility\"\275\002\n" +
+      "\004Role\022\n\n\002id\030\001 \002(\014\022\014\n\004name\030\002 \002(\t\022\r\n\005money" +
+      "\030\003 \002(\003\022\023\n\013lockedMoney\030\004 \002(\005\022\021\n\tofflineTs" +
+      "\030\005 \002(\003\022\037\n\010position\030\006 \002(\0132\r.gs.GridIndex\022" +
+      "\035\n\004buys\030\007 \001(\0132\017.gs.BuildingSet\022\036\n\005rents\030" +
+      "\010 \001(\0132\017.gs.BuildingSet\022\026\n\003bag\030\n \002(\0132\t.gs" +
+      ".Store\022\023\n\013bagCapacity\030\013 \002(\005\022\030\n\020itemIdCan" +
+      "Produce\030\017 \003(\005\022\035\n\025exchangeCollectedItem\030\024" +
+      " \003(\005\022\036\n\006ground\030\036 \003(\0132\016.gs.GroundInfo\",\n\n",
+      "UnitCreate\022\036\n\004info\030\001 \003(\0132\020.gs.BuildingIn" +
+      "fo\",\n\014GroundChange\022\034\n\004info\030\002 \003(\0132\016.gs.Gr" +
+      "oundInfo\"\'\n\tRoleInfos\022\032\n\004info\030\001 \003(\0132\014.gs" +
+      ".RoleInfo\"-\n\007DelItem\022\022\n\nbuildingId\030\001 \002(\014" +
+      "\022\016\n\006itemId\030\002 \002(\005\"p\n\rGroundAuction\022)\n\007auc" +
+      "tion\030\001 \003(\0132\030.gs.GroundAuction.Target\0324\n\006" +
+      "Target\022\n\n\002id\030\001 \002(\014\022\017\n\007biderId\030\002 \001(\014\022\r\n\005p" +
+      "rice\030\003 \001(\005\"\260\001\n\021MetaGroundAuction\022-\n\007auct" +
+      "ion\030\001 \003(\0132\034.gs.MetaGroundAuction.Target\032" +
+      "l\n\006Target\022\n\n\002id\030\001 \002(\014\022\033\n\004area\030\002 \003(\0132\r.gs",
+      ".MiniIndex\022\021\n\tbeginTime\030\003 \002(\003\022\023\n\013duratio" +
+      "nSec\030\004 \002(\005\022\021\n\tbasePrice\030\005 \002(\005\"5\n\013AddBuil" +
+      "ding\022\n\n\002id\030\001 \002(\005\022\032\n\003pos\030\002 \002(\0132\r.gs.MiniI" +
+      "ndex\"C\n\014TransferItem\022\013\n\003src\030\001 \002(\014\022\013\n\003dst" +
+      "\030\002 \002(\014\022\016\n\006itemId\030\003 \002(\005\022\t\n\001n\030\004 \002(\005\"b\n\tApa" +
+      "rtment\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\014" +
+      "\n\004rent\030\002 \002(\005\022\016\n\006renter\030\003 \002(\005\022\027\n\005chart\030\004 " +
+      "\002(\0132\010.gs.Nums\"\\\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006ite" +
+      "mId\030\002 \002(\005\022\020\n\010nowCount\030\003 \002(\005\022\023\n\013targetCou" +
+      "nt\030\004 \002(\005\022\021\n\tworkerNum\030\005 \002(\005\"k\n\005Shelf\022\037\n\004",
+      "good\030\001 \003(\0132\021.gs.Shelf.Content\032A\n\007Content" +
+      "\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\013\n\003num\030\003 \002(" +
+      "\005\022\r\n\005price\030\004 \002(\005\"}\n\017MaterialFactory\022\036\n\004i" +
+      "nfo\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 \002" +
+      "(\0132\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022" +
+      "\026\n\004line\030\004 \003(\0132\010.gs.Line\"\177\n\021ProduceDepart" +
+      "ment\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005" +
+      "store\030\002 \002(\0132\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t." +
+      "gs.Shelf\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"\306\004\n\016Pub" +
+      "licFacility\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingI",
+      "nfo\022.\n\ravailableSlot\030\002 \003(\0132\027.gs.PublicFa" +
+      "cility.Slot\022-\n\010soldSlot\030\003 \003(\0132\033.gs.Publi" +
+      "cFacility.SoldSlot\022!\n\002ad\030\004 \003(\0132\025.gs.Publ" +
+      "icFacility.Ad\032c\n\004Slot\022\n\n\002id\030\001 \002(\014\022\024\n\014min" +
+      "DayToRent\030\002 \002(\005\022\024\n\014maxDayToRent\030\003 \002(\005\022\022\n" +
+      "\nrentPreDay\030\004 \002(\005\022\017\n\007deposit\030\005 \002(\005\032_\n\010So" +
+      "ldSlot\022\"\n\001s\030\001 \002(\0132\027.gs.PublicFacility.Sl" +
+      "ot\022\017\n\007beginTs\030\002 \002(\003\022\014\n\004days\030\003 \002(\005\022\020\n\010ren" +
+      "terId\030\004 \002(\014\032\313\001\n\002Ad\022)\n\004slot\030\001 \001(\0132\033.gs.Pu" +
+      "blicFacility.SoldSlot\022\016\n\006metaId\030\002 \002(\005\022(\n",
+      "\004type\030\003 \002(\0162\032.gs.PublicFacility.Ad.Type\022" +
+      "\017\n\007beginTs\030\004 \002(\003\022\017\n\007npcFlow\030\005 \002(\005\022\022\n\nbra" +
+      "ndValue\030\006 \002(\005\022\n\n\002id\030\007 \002(\014\"\036\n\004Type\022\010\n\004GOO" +
+      "D\020\000\022\014\n\010BUILDING\020\001\"n\n\007AddSlot\022\022\n\nbuilding" +
+      "Id\030\001 \002(\014\022\024\n\014minDayToRent\030\002 \002(\005\022\024\n\014maxDay" +
+      "ToRent\030\003 \002(\005\022\022\n\nrentPreDay\030\004 \002(\005\022\017\n\007depo" +
+      "sit\030\005 \002(\005\"/\n\tAdDelSlot\022\022\n\nbuildingId\030\001 \002" +
+      "(\014\022\016\n\006slotId\030\002 \002(\014\"<\n\tAdBuySlot\022\022\n\nbuild" +
+      "ingId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\022\013\n\003day\030\003 \002(\005" +
+      "\"a\n\005AddAd\022\n\n\002id\030\001 \001(\014\022\016\n\006metaId\030\002 \002(\005\022(\n",
+      "\004type\030\003 \002(\0162\032.gs.PublicFacility.Ad.Type\022" +
+      "\022\n\nbuildingId\030\004 \002(\014\"3\n\017AdDelAdFromSlot\022\022" +
+      "\n\nbuildingId\030\001 \002(\014\022\014\n\004adId\030\002 \002(\014\"J\n\010Shel" +
+      "fAdd\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005" +
+      "\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\"1\n\010ShelfDel" +
+      "\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcontentId\030\002 \002(\014\"" +
+      "M\n\010ShelfSet\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tconte" +
+      "ntId\030\002 \002(\014\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\"d" +
+      "\n\nBuyInShelf\022\022\n\nbuildingId\030\001 \002(\014\022\021\n\tcont" +
+      "entId\030\002 \002(\014\022\013\n\003num\030\003 \002(\005\022\r\n\005price\030\004 \002(\005\022",
+      "\023\n\013wareHouseId\030\005 \002(\014\"K\n\007AddLine\022\n\n\002id\030\001 " +
+      "\002(\014\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021" +
+      "\n\tworkerNum\030\004 \002(\005\"V\n\nChangeLine\022\022\n\nbuild" +
+      "ingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum" +
+      "\030\003 \001(\005\022\021\n\ttargetNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n" +
+      "\002id\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(\005\022\023\n\013targetCou" +
+      "nt\030\003 \001(\005\022\021\n\tworkerNum\030\004 \001(\005\"\211\001\n\023Exchange" +
+      "ItemSummary\022\016\n\006itemId\030\001 \002(\005\022\020\n\010lowPrice\030" +
+      "\002 \001(\005\022\021\n\thighPrice\030\003 \001(\005\022\020\n\010nowPrice\030\004 \001" +
+      "(\005\022\026\n\016sumDealedPrice\030\005 \001(\003\022\023\n\013priceChang",
+      "e\030\006 \001(\021\"<\n\020ExchangeItemList\022(\n\007summary\030\001" +
+      " \003(\0132\027.gs.ExchangeItemSummary\"C\n\026ItemDea" +
+      "lHistoryElement\022\r\n\005price\030\001 \002(\005\022\016\n\006amount" +
+      "\030\002 \002(\005\022\n\n\002ts\030\003 \002(\003\":\n\017ItemDealHistory\022\'\n" +
+      "\003log\030\001 \003(\0132\032.gs.ItemDealHistoryElement\"M" +
+      "\n\013ExchangeBuy\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002" +
+      "(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"N\n" +
+      "\014ExchangeSell\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002" +
+      "(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"n\n" +
+      "\022ExchangeItemDetail\022\027\n\003buy\030\001 \003(\0132\n.gs.In",
+      "tNum\022\030\n\004sell\030\002 \003(\0132\n.gs.IntNum\022\020\n\010nowPri" +
+      "ce\030\003 \002(\005\022\023\n\013priceChange\030\004 \002(\005\"w\n\014Exchang" +
+      "eDeal\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005pr" +
+      "ice\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\022\022\n\nbuyOrde" +
+      "rId\030\005 \002(\014\022\023\n\013sellOrderId\030\006 \002(\014\"\334\001\n\016Excha" +
+      "ngeOrders\022\'\n\005order\030\001 \003(\0132\030.gs.ExchangeOr" +
+      "ders.Order\032\240\001\n\005Order\022\n\n\002id\030\001 \002(\014\022\016\n\006item" +
+      "Id\030\002 \002(\005\022\024\n\014dealedAmount\030\003 \002(\005\022\023\n\013totalA" +
+      "mount\030\004 \002(\005\022\r\n\005price\030\005 \002(\005\022\n\n\002ts\030\006 \002(\003\022\014" +
+      "\n\004sell\030\007 \002(\010\022\022\n\nbuildingId\030\010 \002(\014\022\023\n\013deal",
+      "edPrice\030\t \002(\005\"o\n\017ExchangeDealLog\022\020\n\010sell" +
+      "erId\030\001 \002(\014\022\017\n\007buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022" +
+      "\r\n\005price\030\004 \002(\005\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemId" +
+      "\030\006 \002(\005\"4\n\020ExchangeDealLogs\022 \n\003log\030\001 \003(\0132" +
+      "\023.gs.ExchangeDealLog\"{\n\nGroundRent\022\022\n\nre" +
+      "ntPreDay\030\001 \002(\005\022\030\n\020paymentCycleDays\030\002 \002(\005" +
+      "\022\017\n\007deposit\030\003 \002(\005\022\020\n\010rentDays\030\004 \002(\005\022\034\n\005c" +
+      "oord\030\005 \003(\0132\r.gs.MiniIndex\"9\n\nGroundSale\022" +
+      "\r\n\005price\030\001 \002(\005\022\034\n\005coord\030\002 \003(\0132\r.gs.MiniI" +
+      "ndex*f\n\rBuildingState\022\020\n\014CONSTRUCTING\020\002\022",
+      "\020\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_OPERATE\020\004\022\013" +
+      "\n\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -43351,71 +56721,83 @@ public final class Gs {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_BuildingInfo_descriptor,
               new java.lang.String[] { "Id", "MId", "Pos", "OwnerId", "NpcFlow", "State", "ConstructCompleteTs", "Salary", "Happy", });
-          internal_static_gs_HeartBeat_descriptor =
+          internal_static_gs_GroundInfo_descriptor =
             getDescriptor().getMessageTypes().get(12);
+          internal_static_gs_GroundInfo_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_GroundInfo_descriptor,
+              new java.lang.String[] { "OwnerId", "X", "Y", "Rent", "Sell", });
+          internal_static_gs_GroundInfo_Rent_descriptor =
+            internal_static_gs_GroundInfo_descriptor.getNestedTypes().get(0);
+          internal_static_gs_GroundInfo_Rent_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_GroundInfo_Rent_descriptor,
+              new java.lang.String[] { "RentPreDay", "PaymentCycleDays", "Deposit", "RentDays", "RenterId", "RentBeginTs", });
+          internal_static_gs_GroundInfo_Sell_descriptor =
+            internal_static_gs_GroundInfo_descriptor.getNestedTypes().get(1);
+          internal_static_gs_GroundInfo_Sell_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_GroundInfo_Sell_descriptor,
+              new java.lang.String[] { "Price", });
+          internal_static_gs_HeartBeat_descriptor =
+            getDescriptor().getMessageTypes().get(13);
           internal_static_gs_HeartBeat_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_HeartBeat_descriptor,
               new java.lang.String[] { "Ts", });
           internal_static_gs_HeartBeatACK_descriptor =
-            getDescriptor().getMessageTypes().get(13);
+            getDescriptor().getMessageTypes().get(14);
           internal_static_gs_HeartBeatACK_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_HeartBeatACK_descriptor,
               new java.lang.String[] { "ClientTs", "ServerTs", });
           internal_static_gs_RoleInfo_descriptor =
-            getDescriptor().getMessageTypes().get(14);
+            getDescriptor().getMessageTypes().get(15);
           internal_static_gs_RoleInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_RoleInfo_descriptor,
               new java.lang.String[] { "Id", "Name", });
           internal_static_gs_Login_descriptor =
-            getDescriptor().getMessageTypes().get(15);
+            getDescriptor().getMessageTypes().get(16);
           internal_static_gs_Login_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Login_descriptor,
               new java.lang.String[] { "Account", "Token", });
           internal_static_gs_LoginACK_descriptor =
-            getDescriptor().getMessageTypes().get(16);
+            getDescriptor().getMessageTypes().get(17);
           internal_static_gs_LoginACK_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_LoginACK_descriptor,
               new java.lang.String[] { "Info", "Ts", });
           internal_static_gs_Store_descriptor =
-            getDescriptor().getMessageTypes().get(17);
+            getDescriptor().getMessageTypes().get(18);
           internal_static_gs_Store_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Store_descriptor,
               new java.lang.String[] { "InHand", "Reserved", "Locked", });
           internal_static_gs_BuildingSet_descriptor =
-            getDescriptor().getMessageTypes().get(18);
+            getDescriptor().getMessageTypes().get(19);
           internal_static_gs_BuildingSet_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_BuildingSet_descriptor,
-              new java.lang.String[] { "Apartment", "MaterialFactory", "ProduceDepartment", });
+              new java.lang.String[] { "Apartment", "MaterialFactory", "ProduceDepartment", "PublicFacility", });
           internal_static_gs_Role_descriptor =
-            getDescriptor().getMessageTypes().get(19);
+            getDescriptor().getMessageTypes().get(20);
           internal_static_gs_Role_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Role_descriptor,
-              new java.lang.String[] { "Id", "Name", "Money", "LockedMoney", "OfflineTs", "Position", "Buys", "Rents", "Bag", "BagCapacity", "ItemIdCanProduce", "ExchangeCollectedItem", });
+              new java.lang.String[] { "Id", "Name", "Money", "LockedMoney", "OfflineTs", "Position", "Buys", "Rents", "Bag", "BagCapacity", "ItemIdCanProduce", "ExchangeCollectedItem", "Ground", });
           internal_static_gs_UnitCreate_descriptor =
-            getDescriptor().getMessageTypes().get(20);
+            getDescriptor().getMessageTypes().get(21);
           internal_static_gs_UnitCreate_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_UnitCreate_descriptor,
               new java.lang.String[] { "Info", });
-          internal_static_gs_UnitRemove_descriptor =
-            getDescriptor().getMessageTypes().get(21);
-          internal_static_gs_UnitRemove_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_UnitRemove_descriptor,
-              new java.lang.String[] { "Id", });
-          internal_static_gs_UnitChange_descriptor =
+          internal_static_gs_GroundChange_descriptor =
             getDescriptor().getMessageTypes().get(22);
-          internal_static_gs_UnitChange_fieldAccessorTable = new
+          internal_static_gs_GroundChange_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_gs_UnitChange_descriptor,
+              internal_static_gs_GroundChange_descriptor,
               new java.lang.String[] { "Info", });
           internal_static_gs_RoleInfos_descriptor =
             getDescriptor().getMessageTypes().get(23);
@@ -43423,8 +56805,14 @@ public final class Gs {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_RoleInfos_descriptor,
               new java.lang.String[] { "Info", });
-          internal_static_gs_GroundAuction_descriptor =
+          internal_static_gs_DelItem_descriptor =
             getDescriptor().getMessageTypes().get(24);
+          internal_static_gs_DelItem_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_DelItem_descriptor,
+              new java.lang.String[] { "BuildingId", "ItemId", });
+          internal_static_gs_GroundAuction_descriptor =
+            getDescriptor().getMessageTypes().get(25);
           internal_static_gs_GroundAuction_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_GroundAuction_descriptor,
@@ -43436,7 +56824,7 @@ public final class Gs {
               internal_static_gs_GroundAuction_Target_descriptor,
               new java.lang.String[] { "Id", "BiderId", "Price", });
           internal_static_gs_MetaGroundAuction_descriptor =
-            getDescriptor().getMessageTypes().get(25);
+            getDescriptor().getMessageTypes().get(26);
           internal_static_gs_MetaGroundAuction_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_MetaGroundAuction_descriptor,
@@ -43448,31 +56836,31 @@ public final class Gs {
               internal_static_gs_MetaGroundAuction_Target_descriptor,
               new java.lang.String[] { "Id", "Area", "BeginTime", "DurationSec", "BasePrice", });
           internal_static_gs_AddBuilding_descriptor =
-            getDescriptor().getMessageTypes().get(26);
+            getDescriptor().getMessageTypes().get(27);
           internal_static_gs_AddBuilding_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddBuilding_descriptor,
               new java.lang.String[] { "Id", "Pos", });
           internal_static_gs_TransferItem_descriptor =
-            getDescriptor().getMessageTypes().get(27);
+            getDescriptor().getMessageTypes().get(28);
           internal_static_gs_TransferItem_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_TransferItem_descriptor,
               new java.lang.String[] { "Src", "Dst", "ItemId", "N", });
           internal_static_gs_Apartment_descriptor =
-            getDescriptor().getMessageTypes().get(28);
+            getDescriptor().getMessageTypes().get(29);
           internal_static_gs_Apartment_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Apartment_descriptor,
               new java.lang.String[] { "Info", "Rent", "Renter", "Chart", });
           internal_static_gs_Line_descriptor =
-            getDescriptor().getMessageTypes().get(29);
+            getDescriptor().getMessageTypes().get(30);
           internal_static_gs_Line_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Line_descriptor,
               new java.lang.String[] { "Id", "ItemId", "NowCount", "TargetCount", "WorkerNum", });
           internal_static_gs_Shelf_descriptor =
-            getDescriptor().getMessageTypes().get(30);
+            getDescriptor().getMessageTypes().get(31);
           internal_static_gs_Shelf_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Shelf_descriptor,
@@ -43484,109 +56872,163 @@ public final class Gs {
               internal_static_gs_Shelf_Content_descriptor,
               new java.lang.String[] { "Id", "ItemId", "Num", "Price", });
           internal_static_gs_MaterialFactory_descriptor =
-            getDescriptor().getMessageTypes().get(31);
+            getDescriptor().getMessageTypes().get(32);
           internal_static_gs_MaterialFactory_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_MaterialFactory_descriptor,
               new java.lang.String[] { "Info", "Store", "Shelf", "Line", });
           internal_static_gs_ProduceDepartment_descriptor =
-            getDescriptor().getMessageTypes().get(32);
+            getDescriptor().getMessageTypes().get(33);
           internal_static_gs_ProduceDepartment_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ProduceDepartment_descriptor,
               new java.lang.String[] { "Info", "Store", "Shelf", "Line", });
+          internal_static_gs_PublicFacility_descriptor =
+            getDescriptor().getMessageTypes().get(34);
+          internal_static_gs_PublicFacility_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_PublicFacility_descriptor,
+              new java.lang.String[] { "Info", "AvailableSlot", "SoldSlot", "Ad", });
+          internal_static_gs_PublicFacility_Slot_descriptor =
+            internal_static_gs_PublicFacility_descriptor.getNestedTypes().get(0);
+          internal_static_gs_PublicFacility_Slot_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_PublicFacility_Slot_descriptor,
+              new java.lang.String[] { "Id", "MinDayToRent", "MaxDayToRent", "RentPreDay", "Deposit", });
+          internal_static_gs_PublicFacility_SoldSlot_descriptor =
+            internal_static_gs_PublicFacility_descriptor.getNestedTypes().get(1);
+          internal_static_gs_PublicFacility_SoldSlot_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_PublicFacility_SoldSlot_descriptor,
+              new java.lang.String[] { "S", "BeginTs", "Days", "RenterId", });
+          internal_static_gs_PublicFacility_Ad_descriptor =
+            internal_static_gs_PublicFacility_descriptor.getNestedTypes().get(2);
+          internal_static_gs_PublicFacility_Ad_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_PublicFacility_Ad_descriptor,
+              new java.lang.String[] { "Slot", "MetaId", "Type", "BeginTs", "NpcFlow", "BrandValue", "Id", });
+          internal_static_gs_AddSlot_descriptor =
+            getDescriptor().getMessageTypes().get(35);
+          internal_static_gs_AddSlot_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_AddSlot_descriptor,
+              new java.lang.String[] { "BuildingId", "MinDayToRent", "MaxDayToRent", "RentPreDay", "Deposit", });
+          internal_static_gs_AdDelSlot_descriptor =
+            getDescriptor().getMessageTypes().get(36);
+          internal_static_gs_AdDelSlot_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_AdDelSlot_descriptor,
+              new java.lang.String[] { "BuildingId", "SlotId", });
+          internal_static_gs_AdBuySlot_descriptor =
+            getDescriptor().getMessageTypes().get(37);
+          internal_static_gs_AdBuySlot_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_AdBuySlot_descriptor,
+              new java.lang.String[] { "BuildingId", "SlotId", "Day", });
+          internal_static_gs_AddAd_descriptor =
+            getDescriptor().getMessageTypes().get(38);
+          internal_static_gs_AddAd_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_AddAd_descriptor,
+              new java.lang.String[] { "Id", "MetaId", "Type", "BuildingId", });
+          internal_static_gs_AdDelAdFromSlot_descriptor =
+            getDescriptor().getMessageTypes().get(39);
+          internal_static_gs_AdDelAdFromSlot_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_AdDelAdFromSlot_descriptor,
+              new java.lang.String[] { "BuildingId", "AdId", });
           internal_static_gs_ShelfAdd_descriptor =
-            getDescriptor().getMessageTypes().get(33);
+            getDescriptor().getMessageTypes().get(40);
           internal_static_gs_ShelfAdd_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ShelfAdd_descriptor,
               new java.lang.String[] { "BuildingId", "ItemId", "Num", "Price", });
           internal_static_gs_ShelfDel_descriptor =
-            getDescriptor().getMessageTypes().get(34);
+            getDescriptor().getMessageTypes().get(41);
           internal_static_gs_ShelfDel_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ShelfDel_descriptor,
               new java.lang.String[] { "BuildingId", "ContentId", });
           internal_static_gs_ShelfSet_descriptor =
-            getDescriptor().getMessageTypes().get(35);
+            getDescriptor().getMessageTypes().get(42);
           internal_static_gs_ShelfSet_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ShelfSet_descriptor,
               new java.lang.String[] { "BuildingId", "ContentId", "Num", "Price", });
           internal_static_gs_BuyInShelf_descriptor =
-            getDescriptor().getMessageTypes().get(36);
+            getDescriptor().getMessageTypes().get(43);
           internal_static_gs_BuyInShelf_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_BuyInShelf_descriptor,
               new java.lang.String[] { "BuildingId", "ContentId", "Num", "Price", "WareHouseId", });
           internal_static_gs_AddLine_descriptor =
-            getDescriptor().getMessageTypes().get(37);
+            getDescriptor().getMessageTypes().get(44);
           internal_static_gs_AddLine_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddLine_descriptor,
               new java.lang.String[] { "Id", "ItemId", "TargetNum", "WorkerNum", });
           internal_static_gs_ChangeLine_descriptor =
-            getDescriptor().getMessageTypes().get(38);
+            getDescriptor().getMessageTypes().get(45);
           internal_static_gs_ChangeLine_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ChangeLine_descriptor,
               new java.lang.String[] { "BuildingId", "LineId", "WorkerNum", "TargetNum", });
           internal_static_gs_LineInfo_descriptor =
-            getDescriptor().getMessageTypes().get(39);
+            getDescriptor().getMessageTypes().get(46);
           internal_static_gs_LineInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_LineInfo_descriptor,
               new java.lang.String[] { "Id", "NowCount", "TargetCount", "WorkerNum", });
           internal_static_gs_ExchangeItemSummary_descriptor =
-            getDescriptor().getMessageTypes().get(40);
+            getDescriptor().getMessageTypes().get(47);
           internal_static_gs_ExchangeItemSummary_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeItemSummary_descriptor,
               new java.lang.String[] { "ItemId", "LowPrice", "HighPrice", "NowPrice", "SumDealedPrice", "PriceChange", });
           internal_static_gs_ExchangeItemList_descriptor =
-            getDescriptor().getMessageTypes().get(41);
+            getDescriptor().getMessageTypes().get(48);
           internal_static_gs_ExchangeItemList_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeItemList_descriptor,
               new java.lang.String[] { "Summary", });
           internal_static_gs_ItemDealHistoryElement_descriptor =
-            getDescriptor().getMessageTypes().get(42);
+            getDescriptor().getMessageTypes().get(49);
           internal_static_gs_ItemDealHistoryElement_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ItemDealHistoryElement_descriptor,
               new java.lang.String[] { "Price", "Amount", "Ts", });
           internal_static_gs_ItemDealHistory_descriptor =
-            getDescriptor().getMessageTypes().get(43);
+            getDescriptor().getMessageTypes().get(50);
           internal_static_gs_ItemDealHistory_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ItemDealHistory_descriptor,
               new java.lang.String[] { "Log", });
           internal_static_gs_ExchangeBuy_descriptor =
-            getDescriptor().getMessageTypes().get(44);
+            getDescriptor().getMessageTypes().get(51);
           internal_static_gs_ExchangeBuy_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeBuy_descriptor,
               new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
           internal_static_gs_ExchangeSell_descriptor =
-            getDescriptor().getMessageTypes().get(45);
+            getDescriptor().getMessageTypes().get(52);
           internal_static_gs_ExchangeSell_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeSell_descriptor,
               new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
           internal_static_gs_ExchangeItemDetail_descriptor =
-            getDescriptor().getMessageTypes().get(46);
+            getDescriptor().getMessageTypes().get(53);
           internal_static_gs_ExchangeItemDetail_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeItemDetail_descriptor,
               new java.lang.String[] { "Buy", "Sell", "NowPrice", "PriceChange", });
           internal_static_gs_ExchangeDeal_descriptor =
-            getDescriptor().getMessageTypes().get(47);
+            getDescriptor().getMessageTypes().get(54);
           internal_static_gs_ExchangeDeal_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDeal_descriptor,
               new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", "BuyOrderId", "SellOrderId", });
           internal_static_gs_ExchangeOrders_descriptor =
-            getDescriptor().getMessageTypes().get(48);
+            getDescriptor().getMessageTypes().get(55);
           internal_static_gs_ExchangeOrders_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeOrders_descriptor,
@@ -43598,17 +57040,29 @@ public final class Gs {
               internal_static_gs_ExchangeOrders_Order_descriptor,
               new java.lang.String[] { "Id", "ItemId", "DealedAmount", "TotalAmount", "Price", "Ts", "Sell", "BuildingId", "DealedPrice", });
           internal_static_gs_ExchangeDealLog_descriptor =
-            getDescriptor().getMessageTypes().get(49);
+            getDescriptor().getMessageTypes().get(56);
           internal_static_gs_ExchangeDealLog_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDealLog_descriptor,
               new java.lang.String[] { "SellerId", "BuyerId", "Ts", "Price", "Dealed", "ItemId", });
           internal_static_gs_ExchangeDealLogs_descriptor =
-            getDescriptor().getMessageTypes().get(50);
+            getDescriptor().getMessageTypes().get(57);
           internal_static_gs_ExchangeDealLogs_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDealLogs_descriptor,
               new java.lang.String[] { "Log", });
+          internal_static_gs_GroundRent_descriptor =
+            getDescriptor().getMessageTypes().get(58);
+          internal_static_gs_GroundRent_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_GroundRent_descriptor,
+              new java.lang.String[] { "RentPreDay", "PaymentCycleDays", "Deposit", "RentDays", "Coord", });
+          internal_static_gs_GroundSale_descriptor =
+            getDescriptor().getMessageTypes().get(59);
+          internal_static_gs_GroundSale_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_GroundSale_descriptor,
+              new java.lang.String[] { "Price", "Coord", });
           return null;
         }
       };

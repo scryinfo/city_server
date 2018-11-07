@@ -82,7 +82,7 @@ public class Npc implements ISessionCache {
 //                .append("m", this.money);
 //        return doc;
 //    }
-    public Coord coordinate() {
+    public Coordinate coordinate() {
         return this.tempBuilding == null? this.born.coordinate():this.tempBuilding.coordinate();
     }
     public UUID id() {

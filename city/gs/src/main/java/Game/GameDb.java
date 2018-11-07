@@ -109,6 +109,10 @@ public class GameDb {
 							return res;
 						}
 					});
+	public static void evict(Player player) {
+		playerCache.invalidate(player.id());
+		session.evict(player);
+	}
 	public static Player getPlayer(UUID id) {
 		tmpPlayerCache.invalidate(id);
 		return playerCache.getUnchecked(id);
@@ -153,11 +157,19 @@ public class GameDb {
 		}
 		return success;
 	}
-	public static void initGroundAction() {
+	public static void initGroundAuction() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
 		if(statelessSession.get(GroundAuction.class, GroundAuction.ID) == null)
 			statelessSession.insert(new GroundAuction());
+		transaction.commit();
+		statelessSession.close();
+	}
+	public static void initGroundManager() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(GroundManager.class, GroundManager.ID) == null)
+			statelessSession.insert(new GroundManager());
 		transaction.commit();
 		statelessSession.close();
 	}
@@ -168,6 +180,12 @@ public class GameDb {
 			statelessSession.insert(new Exchange());
 		transaction.commit();
 		statelessSession.close();
+	}
+	public static GroundManager getGroundManager() {
+		Transaction transaction = session.beginTransaction();
+		GroundManager res = session.get(GroundManager.class, GroundManager.ID);
+		transaction.commit();
+		return res;
 	}
 	public static GroundAuction getGroundAction() {
 		Transaction transaction = session.beginTransaction();

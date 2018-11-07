@@ -24,4 +24,6 @@ public interface IStorage extends ISessionCache {
             return (IStorage) building;
         }
     }
+
+    boolean delItem(MetaItem mi);
 }

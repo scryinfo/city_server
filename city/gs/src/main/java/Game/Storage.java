@@ -5,8 +5,10 @@ import gs.Gs;
 import javax.persistence.*;
 import java.util.*;
 
-@Embeddable
+@Entity
 public class Storage implements IStorage {
+    @Id
+    private UUID id = UUID.randomUUID();
     public Storage(int capacity) {
         this.capacity = capacity;
     }
@@ -129,6 +131,15 @@ public class Storage implements IStorage {
     public void clearOrder(UUID orderId) {
         order.remove(orderId);
     }
+
+    @Override
+    public boolean delItem(MetaItem mi) {
+        if(!this.has(mi, 1))
+            return false;
+        this.inHand.remove(mi);
+        return true;
+    }
+
     @Transient
     Set<UUID> order = new HashSet<>();
 //    @Embeddable
@@ -173,8 +184,12 @@ public class Storage implements IStorage {
         return capacity == usedSize();
     }
 
+    // if a player is queried, it is impossible to pass its bag to GameDb
+    // we always pass the player to db, so make this longLiving is ok
+    // if player is operated by itself, the it is possible to pass its bag
+    // to GameDb directly, due to its bag is a kind of building
     @Override
-    public CacheType getCacheType() { //let hibernate session omit this object because this is not an entity
-        return CacheType.NoCache;
+    public CacheType getCacheType() {
+        return CacheType.LongLiving;
     }
 }

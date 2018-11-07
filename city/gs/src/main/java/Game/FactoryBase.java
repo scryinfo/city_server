@@ -7,23 +7,19 @@ import gs.Gs;
 import gscode.GsCode;
 import org.bson.types.ObjectId;
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.MapKeyType;
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 public abstract class FactoryBase extends Building implements IStorage, IShelf {
-    public FactoryBase(MetaFactoryBase meta, Coord pos, UUID ownerId) {
+    public FactoryBase(MetaFactoryBase meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
         this.store = new Storage(meta.storeCapacity);
         this.shelf = new Shelf(meta.shelfCapacity);
     }
-
+    private static final int DB_UPDATE_INTERVAL_MS = 30000;
     protected FactoryBase() {
     }
 
@@ -64,16 +60,14 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         store.clearOrder(orderId);
     }
 
+    // random delay avoid all factory update itself at same time point
     @Transient
-    protected PeriodicTimer dbTimer = new PeriodicTimer(30000, 30000);
+    protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
 
-    //@OneToOne
-    //@JoinColumn(name="STORE_ID", unique=true, nullable=false, updatable=false)
-    @Embedded
+    @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "store_id")
     protected Storage store;
 
-    //@OneToOne
-    //@JoinColumn(name="SHELF_ID", unique=true, nullable=false, updatable=false)
     @Embedded
     protected Shelf shelf;
 

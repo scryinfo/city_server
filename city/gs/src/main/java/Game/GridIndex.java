@@ -15,7 +15,7 @@ public class GridIndex implements Comparable<GridIndex> {
         this.x = x;
         this.y = y;
     }
-    GridIndex(){}
+    protected GridIndex(){}
     Gs.GridIndex toProto() {
         return Gs.GridIndex.newBuilder().setX(x).setY(y).build();
     }

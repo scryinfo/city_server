@@ -1,13 +1,24 @@
 package Game;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class GridIndexPair {
     public GridIndex l;
     public GridIndex r;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GridIndexPair that = (GridIndexPair) o;
+        return Objects.equals(l, that.l) &&
+                Objects.equals(r, that.r);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(l, r);
+    }
 
     public List<GridIndex> toIndexList() {
         List<GridIndex> res = new ArrayList<>();

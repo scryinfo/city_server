@@ -13,7 +13,7 @@ public class Laboratory extends Building {
     @Transient
     private MetaLaboratory meta;
 
-    public Laboratory(MetaLaboratory meta, Coord pos, UUID ownerId) {
+    public Laboratory(MetaLaboratory meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
     }
 

@@ -1,15 +1,18 @@
 package Game;
 
+import Game.Exceptions.GroundAlreadySoldException;
 import Shared.DatabaseInfo;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.util.*;
 
 @Entity
+@SelectBeforeUpdate(false)
 @Table(name = DatabaseInfo.Game.Player.Table, indexes = {
         @Index(name = "NAME_IDX", columnList = DatabaseInfo.Game.Player.Name),
         @Index(name = "ACCNAME_IDX", columnList = DatabaseInfo.Game.Player.AccountName)
@@ -66,16 +69,18 @@ public class Player implements ISessionCache {
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
 
-    @Embedded
-    private Ground ground;
+    //@Transient
+    //private Ground ground;  it seems useless add this field...
 
+    // for player, it position is GridIndex, Coordinate is too fine-grained
     @Embedded
     private GridIndex position;
 
     @Transient
     private City city;
 
-    @Embedded
+    @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "bag_id")
     private Storage bag;
 
     @Column(name = "bagCapacity", nullable = false)
@@ -97,7 +102,7 @@ public class Player implements ISessionCache {
         this.offlineTs = 0;
         this.money = 0;
         this.position = new GridIndex(0,0);
-        this.ground = new Ground();
+        //this.ground = new Ground();
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
         this.itemIdCanProduce = new TreeSet<>();
@@ -106,8 +111,7 @@ public class Player implements ISessionCache {
     void _init() {
         this.bag.setCapacity(this.bagCapacity);
     }
-    public Player() {
-    }
+    protected Player() {}
     boolean extendBag() {
         int cost = 100;
         if(this.decMoney(100)) {
@@ -134,6 +138,7 @@ public class Player implements ISessionCache {
         builder.setBagCapacity(bagCapacity);
         this.itemIdCanProduce.forEach(id->builder.addItemIdCanProduce(id));
         this.exchangeFavoriteItem.forEach(id->builder.addExchangeCollectedItem(id));
+        builder.addAllGround(GroundManager.instance().getGroundProto(id()));
         return builder.build();
     }
 
@@ -182,21 +187,11 @@ public class Player implements ISessionCache {
         return this.position;
     }
 
-    public void addGround(CoordPair area) {
-        try {
-            ground.add(area);
-            city.mount(id, area);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void addGround(CoordPair area) throws GroundAlreadySoldException {
+        this.addGround(area.toCoordinates());
     }
-    public void addGround(Collection<Coord> area) {
-        try {
-            ground.add(area);
-            city.mount(id, area);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void addGround(Collection<Coordinate> area) throws GroundAlreadySoldException {
+        GroundManager.instance().addGround(id(), area);
     }
     public void lockMoney(UUID transactionId, long price) {
         Long p = lockedMoney.get(transactionId);
