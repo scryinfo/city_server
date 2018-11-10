@@ -34,15 +34,15 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Package msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Package msg) {
         if(!GameEventDispatcher.getInstance().process(msg, session))
             ctx.close();
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        //ctx.close();
-    }
+//    @Override
+//    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+//        cause.printStackTrace();
+//        //ctx.close();
+//    }
     
 }

@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Entity(name = "exchange")
-public class Exchange implements ISessionCache {
+public class Exchange {
     private static Exchange instance;
     public static Exchange instance() {
         return instance;
@@ -82,11 +82,6 @@ public class Exchange implements ISessionCache {
         return builder.build();
     }
 
-    @Override
-    public CacheType getCacheType() {
-        return CacheType.LongLiving;
-    }
-
     @Entity
     @Table(name = "exchange_order")
     final static class Order {
@@ -150,7 +145,7 @@ public class Exchange implements ISessionCache {
         tradings.computeIfAbsent(itemId, k->new Trading()).sell.add(order);
         orders.computeIfAbsent(who, k->new HashMap<>()).put(order.id, order);
         _orderData.add(order);
-        this.watcher.sendTo(itemId);
+        this.watcher.broadcastItemChange(itemId);
         return order.id;
     }
     public UUID addBuyOrder(UUID who, int itemId, int price, int n, UUID buildingId) {
@@ -158,7 +153,7 @@ public class Exchange implements ISessionCache {
         tradings.computeIfAbsent(itemId, k->new Trading()).buy.add(order);
         orders.computeIfAbsent(who, k->new HashMap<>()).put(order.id, order);
         _orderData.add(order);
-        this.watcher.sendTo(itemId);
+        this.watcher.broadcastItemChange(itemId);
         return order.id;
     }
     public UUID cancelOrder(UUID who, UUID orderId) {
@@ -175,7 +170,7 @@ public class Exchange implements ISessionCache {
             trading.buy.remove(o);
         recordingMap.remove(orderId);
         _orderData.remove(o);
-        this.watcher.sendTo(o.itemId);
+        this.watcher.broadcastItemChange(o.itemId);
         return o.buildingId;
     }
 //    private void buildOrderCache() {
@@ -194,9 +189,13 @@ public class Exchange implements ISessionCache {
                 Order b = v.buy.last();
 
                 while(s != null && b != null && s.price <= b.price) {
-                    makeDeal(b, s);
+                    DealResult r = makeDeal(b, s);
+                    if(r == null)
+                        break;
                     if(s.n == 0) {
                         v.sell.remove(s);
+                        _orderData.remove(s);
+                        orders.get(s.playerId).remove(s.id);
                         if(v.sell.isEmpty())
                             s = null;
                         else
@@ -204,45 +203,59 @@ public class Exchange implements ISessionCache {
                     }
                     if(b.n == 0) {
                         v.buy.remove(b);
+                        _orderData.remove(b);
+                        orders.get(b.playerId).remove(b.id);
                         if(v.buy.isEmpty())
                             b = null;
                         else
                             b = v.buy.first();
                     }
+                    GameDb.saveOrUpdate(r.updates);
+                    r.notifyBuyer.run();
+                    r.notifySeller.run();
+                    this.watcher.broadcastItemChange(k);
                 }
             }
         });
     }
 
-    private void makeDeal(Order b, Order s) {
+    private static class DealResult {
+        List updates;
+        Runnable notifyBuyer;
+        Runnable notifySeller;
+    }
+    private DealResult makeDeal(Order b, Order s) {
         assert b.itemId == s.itemId;
         MetaItem mi = MetaData.getItem(s.itemId);
         if(mi == null)
-            return;
+            return null;
         Player seller = GameDb.queryPlayer(s.playerId);
         Player buyer = GameDb.queryPlayer(b.playerId);
 
+        IStorage out = IStorage.get(s.buildingId, seller);
+        if(out == null)
+            return null;
+        IStorage in = IStorage.get(b.buildingId, buyer);
+        if(in == null)
+            return null;
+
+        DealResult res = new DealResult();
         int n = 0;
         if(b.n <= s.n) {
             n = b.n;
             s.n -= b.n;
+            b.n = 0;
         }
         else {
             n = s.n;
             b.n -= s.n;
+            s.n = 0;
         }
         long cost = n*s.price;
         seller.addMoney(cost);
         buyer.spentLockMoney(b.id);
         b.dealedPrice += cost;
         s.dealedPrice += cost;
-
-        IStorage out = IStorage.get(s.buildingId, seller);
-        if(out == null)
-            return;
-        IStorage in = IStorage.get(b.buildingId, buyer);
-        if(in == null)
-            return;
 
         out.clearOrder(s.id);
         out.consumeLock(mi, n);
@@ -253,30 +266,35 @@ public class Exchange implements ISessionCache {
         DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, s.price);
         this.itemStat.computeIfAbsent(mi.id, k->new Stat(mi.id)).histories.add(log);
         this._dealHistoryData.add(log);
-        Collection<ISessionCache> updates = Arrays.asList(buyer, seller, (ISessionCache)in, (ISessionCache)out, log, this);
-        GameDb.saveOrUpdate(updates);
+        res.updates = Arrays.asList(buyer, seller, in, out, log, this);
 
         // send notify to client if they are online
-        seller.send(Package.create(GsCode.OpCode.exchangeDealInform_VALUE, Gs.ExchangeDeal.newBuilder()
+        final int num = n;
+        res.notifySeller = ()->seller.send(Package.create(GsCode.OpCode.exchangeDealInform_VALUE, Gs.ExchangeDeal.newBuilder()
                 .setItemId(mi.id)
-                .setNum(n)
+                .setNum(num)
                 .setPrice(s.price)
                 .setBuildingId(Util.toByteString(s.buildingId))
+                .setBuyOrderId(Util.toByteString(b.id))
+                .setSellOrderId(Util.toByteString(s.id))
                 .build()));
-        buyer.send(Package.create(GsCode.OpCode.exchangeDealInform_VALUE, Gs.ExchangeDeal.newBuilder()
+        res.notifyBuyer = ()->buyer.send(Package.create(GsCode.OpCode.exchangeDealInform_VALUE, Gs.ExchangeDeal.newBuilder()
                 .setItemId(mi.id)
-                .setNum(n)
+                .setNum(num)
                 .setPrice(s.price)
                 .setBuildingId(Util.toByteString(b.buildingId))
+                .setBuyOrderId(Util.toByteString(b.id))
+                .setSellOrderId(Util.toByteString(s.id))
                 .build()));
-        this.watcher.sendTo(mi.id);
+        this.watcher.broadcastItemChange(mi.id);
+        return res;
     }
     @Entity
     @Table(name = "exchange_deal_log", indexes = {
-            @Index(name = "SELLER_IDX", columnList = "seller"),
-            @Index(name = "BUYER_IDX", columnList = "buyer")
+            @Index(name = "SELLER_IDX", columnList = "seller_id"),
+            @Index(name = "BUYER_IDX", columnList = "buyer_id")
     })
-    public final static class DealLog implements ISessionCache {
+    public final static class DealLog implements Comparable<DealLog> {
         public static final int ROWS_IN_ONE_PAGE = 10;
         public DealLog(UUID buyer, UUID seller, int itemId, int n, int price) {
             this.buyer = buyer;
@@ -290,9 +308,9 @@ public class Exchange implements ISessionCache {
         @GeneratedValue(strategy = GenerationType.AUTO)
         @Column(name = "id", updatable = false, nullable = false)
         long id;
-        @Column(name = "buyer")
+        @Column(name = "buyer_id", updatable = false, nullable = false)
         UUID buyer;
-        @Column(name = "seller")
+        @Column(name = "seller_id", updatable = false, nullable = false)
         UUID seller;
         int itemId;
         int n;
@@ -314,8 +332,8 @@ public class Exchange implements ISessionCache {
         }
 
         @Override
-        public CacheType getCacheType() {
-            return CacheType.Temporary;
+        public int compareTo(DealLog o) {
+            return Long.compare(this.ts, o.ts);
         }
     }
     @Entity
@@ -381,7 +399,7 @@ public class Exchange implements ISessionCache {
                 v.calcuStat(24);
                 removeOutdatedDealLog(v.histories, now);
             });
-            removeOutdatedDealLog((TreeSet<DealLog>) _dealHistoryData, now);
+            //removeOutdatedDealLog((TreeSet<DealLog>) _dealHistoryData, now);
         }
 
     }
@@ -408,7 +426,7 @@ public class Exchange implements ISessionCache {
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "exchange_id")
-    @OrderBy("ts ASC")
+    @OrderBy("ts ASC") // require class DealLog implements Comparable<DealLog>, it doesn't know the comparator pass into Set
     private SortedSet<DealLog> _dealHistoryData = new TreeSet<>(Comparator.comparing(h -> h.ts));
     //========================================================================
 
@@ -489,7 +507,7 @@ public class Exchange implements ISessionCache {
                 itemIdKey.get(itemId).remove(channelId);
             }
         }
-        void sendTo(int itemId) {
+        void broadcastItemChange(int itemId) {
             Set<ChannelId> channelIds = itemIdKey.get(itemId);
             if(channelIds != null)
                 GameServer.sendTo(channelIds, Package.create(GsCode.OpCode.exchangeItemDetailInform_VALUE, genItemDetail(itemId)));

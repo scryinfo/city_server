@@ -18,7 +18,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "ground_auction")
-public class GroundAuction implements ISessionCache {
+public class GroundAuction {
     public static final int ID = 0;
     private static final Logger logger = Logger.getLogger(GroundAuction.class);
     private static GroundAuction instance;
@@ -31,10 +31,6 @@ public class GroundAuction implements ISessionCache {
         instance.loadMore();
     }
     protected GroundAuction() {}
-    @Override
-    public CacheType getCacheType() {
-        return CacheType.LongLiving;
-    }
     @Id
     public final int id = ID;
 
@@ -107,13 +103,13 @@ public class GroundAuction implements ISessionCache {
 
                 Player bider = GameDb.queryPlayer(a.biderId);
                 try {
-                    bider.addGround(a.meta.area);
+                    GroundManager.instance().addGround(bider.id(), a.meta.area);
                 } catch (GroundAlreadySoldException e) {
                     e.printStackTrace();
                     continue;
                 }
                 long p = bider.spentLockMoney(a.meta.id);
-                GameDb.saveOrUpdate(Arrays.asList(bider, this));
+                GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance()));
 
                 bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());

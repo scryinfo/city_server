@@ -1,6 +1,7 @@
 package Shared;
 
 import common.Common;
+import gscode.GsCode;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.compression.ZlibEncoder;
 
@@ -8,7 +9,7 @@ import java.util.zip.Deflater;
 
 
 public class Package {
-	private static final int COMPRESS_SIZE = 2048;
+	private static final int COMPRESS_SIZE = 204800000; // disable it until client support this
 	public static Package fail(short opcode, Common.Fail.Reason reason) {
 		Common.Fail.Builder builder = Common.Fail.newBuilder();
 		builder.setOpcode(opcode);
@@ -54,9 +55,12 @@ public class Package {
 			buf.writeShortLE(opcode);
 			buf.writeBytes(body);
 			Deflater compresser = new Deflater();
-			compresser.setInput(buf.array());
+			// copy the data due to buf is direct buffer which is reference counted, it don't support array() method
+			byte[] data = new byte[buf.readableBytes()];
+			buf.getBytes(0, data);
+			compresser.setInput(data);
 			compresser.finish();
-			byte[] out = new byte[buf.readableBytes()];
+			byte[] out = new byte[data.length];
 			int compressedDataLength = compresser.deflate(out);
 			compresser.end();
 			buf.clear();

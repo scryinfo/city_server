@@ -1,10 +1,8 @@
 package Game;
 
-import Shared.Util;
-
 import java.util.UUID;
 
-public interface IStorage extends ISessionCache {
+public interface IStorage {
     boolean reserve(MetaItem m, int n);
     boolean lock(MetaItem m, int n);
     boolean unLock(MetaItem m, int n);
@@ -14,7 +12,7 @@ public interface IStorage extends ISessionCache {
     void markOrder(UUID orderId);
     void clearOrder(UUID orderId);
     static IStorage get(UUID bid, Player p) {
-        if(p != null && Util.bagId.equals(bid)) {
+        if(p != null && Player.BAG_ID.equals(bid)) {
             return p.getBag();
         }
         else {

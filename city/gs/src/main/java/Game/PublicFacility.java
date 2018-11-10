@@ -128,7 +128,7 @@ public class PublicFacility extends Building {
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyColumn(name = "id")
+    @MapKey(name = "id")
     @JoinColumn(name = "public_facility_id")
     // key is ad.id not slot.id
     private Map<UUID, Ad> ad = new HashMap<>();

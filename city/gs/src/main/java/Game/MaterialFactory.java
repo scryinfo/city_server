@@ -51,7 +51,7 @@ public class MaterialFactory extends FactoryBase {
     }
     @Override
     public LineBase addLine(MetaItem item) {
-        if(item instanceof MetaMaterial)
+        if(!(item instanceof MetaMaterial))
             return null;
         Line line = new Line((MetaMaterial)item,0,0);
         lines.put(line.id, line);

@@ -127,9 +127,13 @@ public class City {
         // startUp metaBuilding?
         // calcu parameters
         e.scheduleAtFixedRate(() -> {
-            final long now = System.nanoTime();
-            this.update(now - lastTs);
-            lastTs = now;
+            try {
+                final long now = System.nanoTime();
+                this.update(now - lastTs);
+                lastTs = now;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }, 0, UpdateIntervalNano, TimeUnit.NANOSECONDS);
     }
     private long lastTs;
@@ -140,6 +144,8 @@ public class City {
             GroundAuction.instance().loadMore();
         }
         GroundAuction.instance().update(diffNano);
+        GroundManager.instance().update(diffNano);
+        Exchange.instance().update(diffNano);
         allBuilding.forEach((k,v)->v.update(diffNano));
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});

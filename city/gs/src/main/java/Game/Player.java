@@ -1,6 +1,6 @@
 package Game;
 
-import Game.Exceptions.GroundAlreadySoldException;
+import Game.Listener.EvictListener;
 import Shared.DatabaseInfo;
 import Shared.Package;
 import Shared.Util;
@@ -18,7 +18,11 @@ import java.util.*;
         @Index(name = "ACCNAME_IDX", columnList = DatabaseInfo.Game.Player.AccountName)
     }
 )
-public class Player implements ISessionCache {
+@EntityListeners({
+        EvictListener.class,
+})
+public class Player {
+    public static final UUID BAG_ID = UUID.fromString("a33eab42-cb75-4c77-bd27-710d299f5591");
     @ElementCollection(fetch = FetchType.EAGER)
     Set<Integer> itemIdCanProduce;
     public boolean canProduce(int id) {
@@ -29,15 +33,14 @@ public class Player implements ISessionCache {
     }
 
 
-    public void setCacheType(CacheType t) {
-        this.cacheType = t;
+    public void markTemp() {
+        this.temp = true;
     }
     @Transient
-    CacheType cacheType = CacheType.LongLiving;
+    boolean temp = false;
 
-    @Override
-    public CacheType getCacheType() {
-        return cacheType;
+    public boolean isTemp() {
+        return temp;
     }
 
     public static final class Info {
@@ -139,11 +142,12 @@ public class Player implements ISessionCache {
         this.itemIdCanProduce.forEach(id->builder.addItemIdCanProduce(id));
         this.exchangeFavoriteItem.forEach(id->builder.addExchangeCollectedItem(id));
         builder.addAllGround(GroundManager.instance().getGroundProto(id()));
+        builder.setBagId(Util.toByteString(BAG_ID));
         return builder.build();
     }
 
-    private int lockedMoney() {
-        return this.lockedMoney.values().stream().mapToInt(Number::intValue).sum();
+    private long lockedMoney() {
+        return this.lockedMoney.values().stream().mapToLong(Number::longValue).sum();
     }
 
     public long money() {
@@ -187,12 +191,6 @@ public class Player implements ISessionCache {
         return this.position;
     }
 
-    public void addGround(CoordPair area) throws GroundAlreadySoldException {
-        this.addGround(area.toCoordinates());
-    }
-    public void addGround(Collection<Coordinate> area) throws GroundAlreadySoldException {
-        GroundManager.instance().addGround(id(), area);
-    }
     public void lockMoney(UUID transactionId, long price) {
         Long p = lockedMoney.get(transactionId);
         if(p != null) {
@@ -202,11 +200,13 @@ public class Player implements ISessionCache {
             this.money -= price;
             lockedMoney.put(transactionId, price);
         }
+        sendMoney();
     }
     public long unlockMoney(UUID transactionId) {
         Long p = lockedMoney.get(transactionId);
         if(p != null) {
             this.money += p;
+            sendMoney();
             return p;
         }
         else {
@@ -220,13 +220,20 @@ public class Player implements ISessionCache {
         if(cost > this.money)
             return false;
         this.money -= cost;
+        sendMoney();
         return true;
     }
     public void addMoney(long cost) {
         this.money += cost;
+        sendMoney();
+    }
+    private void sendMoney() {
+        this.send(Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MoneyChange.newBuilder().setMoney(money()).setLockedMoney(this.lockedMoney()).build()));
     }
     public long spentLockMoney(UUID id) {
-        return this.lockedMoney.remove(id);
+        long m = this.lockedMoney.remove(id);
+        sendMoney();
+        return m;
     }
 
     public void groundBidingFail(UUID id, GroundAuction.Entry a) {
@@ -246,7 +253,7 @@ public class Player implements ISessionCache {
         exchangeFavoriteItem.remove(itemId);
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "player_exchange_favorite", joinColumns = @JoinColumn(name = "player_id"))
     private Set<Integer> exchangeFavoriteItem = new TreeSet<>();
 }

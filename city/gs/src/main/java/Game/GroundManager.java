@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Entity
-public class GroundManager implements ISessionCache {
+public class GroundManager {
     public static final int ID = 0;
     private static final Logger logger = Logger.getLogger(GroundManager.class);
     private static GroundManager instance;
@@ -34,10 +34,7 @@ public class GroundManager implements ISessionCache {
         }
     }
     protected GroundManager() {}
-    @Override
-    public CacheType getCacheType() {
-        return CacheType.LongLiving;
-    }
+
     @Id
     public final int id = ID;
 
@@ -63,7 +60,7 @@ public class GroundManager implements ISessionCache {
                 renter.unlockMoney(head.rentTransactionId);
                 v.forEach(i->i.endRent());
                 del.add(k);
-                List<ISessionCache> updates = new ArrayList<>();
+                List updates = new ArrayList<>();
                 updates.addAll(v);
                 updates.add(renter);
                 GameDb.saveOrUpdate(updates);
@@ -84,7 +81,7 @@ public class GroundManager implements ISessionCache {
                         owner.addMoney(cost);
                         v.forEach(i->i.payTs = now);
                     }
-                    List<ISessionCache> updates = new ArrayList<>();
+                    List updates = new ArrayList<>();
                     updates.addAll(v);
                     updates.add(renter);
                     updates.add(owner);
@@ -159,8 +156,7 @@ public class GroundManager implements ISessionCache {
         for(GroundInfo i : gis) {
             i.setBy(rentPara);
         }
-        List<ISessionCache> udpates = new ArrayList<>(gis);
-        GameDb.saveOrUpdate(udpates); // faster than GameDb.saveOrUpdate(this);
+        GameDb.saveOrUpdate(gis); // faster than GameDb.saveOrUpdate(this);
         this.broadcast(gis);
         return true;
     }
@@ -202,7 +198,7 @@ public class GroundManager implements ISessionCache {
         UUID tid = UUID.randomUUID();
         renter.lockMoney(tid, rentPara.deposit);
         long now = System.currentTimeMillis();
-        List<ISessionCache> updates = new ArrayList<>(coordinates.size());
+        List updates = new ArrayList<>(coordinates.size());
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
@@ -225,8 +221,7 @@ public class GroundManager implements ISessionCache {
             gis.add(i);
         }
         gis.forEach(i->i.sellPrice = price);
-        List<ISessionCache> updates = new ArrayList<>();
-        GameDb.saveOrUpdate(updates);
+        GameDb.saveOrUpdate(gis);
         this.broadcast(gis);
         return true;
     }
@@ -251,7 +246,7 @@ public class GroundManager implements ISessionCache {
         Player seller = GameDb.queryPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
-        List<ISessionCache> updates = new ArrayList<>();
+        List updates = new ArrayList<>();
         for(GroundInfo i : gis) {
             i.ownerId = buyer.id();
             i.sellPrice = 0;

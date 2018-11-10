@@ -20,10 +20,4 @@ public class AccountServerEventHandler extends SimpleChannelInboundHandler<Packa
         session = new AccountServerSession(ctx);
         super.channelActive(ctx);
     }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
-        cause.printStackTrace();
-        //ctx.close();
-    }
 }

@@ -75,7 +75,7 @@ public class GameDb {
 							Player res = (Player) s.get(Player.class, id);
 							transaction.commit();
 							s.close();
-							res.setCacheType(ISessionCache.CacheType.Temporary);
+							res.markTemp();
 							return res;
 						}
 					});
@@ -112,6 +112,9 @@ public class GameDb {
 	public static void evict(Player player) {
 		playerCache.invalidate(player.id());
 		session.evict(player);
+	}
+	public static void evict(Object obj) {
+		session.evict(obj);
 	}
 	public static Player getPlayer(UUID id) {
 		tmpPlayerCache.invalidate(id);
@@ -208,21 +211,17 @@ public class GameDb {
 		transaction.commit();
 		return res;
 	}
-	public static void saveOrUpdate(Collection<ISessionCache> objs) {
+	public static void saveOrUpdate(Collection objs) {
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
 			int i = 0;
-			for (ISessionCache o : objs) {
-				if(o.getCacheType() == ISessionCache.CacheType.NoCache)
-					continue;
+			for (Object o : objs) {
 				session.saveOrUpdate(o);
 				++i;
 				if (i % BATCH_SIZE == 0) {
 					session.flush();
 				}
-				if(o.getCacheType() == ISessionCache.CacheType.Temporary)
-					session.evict(o);
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
@@ -232,16 +231,12 @@ public class GameDb {
 		}
 	}
 
-	public static void saveOrUpdate(ISessionCache o) {
-		if(o.getCacheType() == ISessionCache.CacheType.NoCache)
-			return;
+	public static void saveOrUpdate(Object o) {
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
 			session.saveOrUpdate(o);
 			transaction.commit();
-			if(o.getCacheType() == ISessionCache.CacheType.Temporary)
-				session.evict(o);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			transaction.rollback();
@@ -264,14 +259,12 @@ public class GameDb {
 
 		}
 	}
-	public static void delete(Collection<ISessionCache> objs) {
+	public static void delete(Collection objs) {
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
 			int i = 0;
-			for (ISessionCache o : objs) {
-				if(o.getCacheType() == ISessionCache.CacheType.NoCache)
-					continue;
+			for (Object o : objs) {
 				session.delete(o);
 				++i;
 				if (i % BATCH_SIZE == 0) {
@@ -285,19 +278,14 @@ public class GameDb {
 
 		}
 	}
-	public static void saveOrUpdateAndDelete(Collection<ISessionCache> saveOrUpdates, Collection deletes) {
+	public static void saveOrUpdateAndDelete(Collection saveOrUpdates, Collection deletes) {
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
 			int i = 0;
-			for (ISessionCache o : saveOrUpdates) {
-				if(o.getCacheType() == ISessionCache.CacheType.NoCache)
-					continue;
+			for (Object o : saveOrUpdates) {
 				session.saveOrUpdate(o);
 				++i;
-
-				if(o.getCacheType() == ISessionCache.CacheType.Temporary)
-					session.evict(o);
 			}
 			for (Object o : deletes) {
 				session.delete(o);

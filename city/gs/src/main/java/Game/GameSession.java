@@ -66,6 +66,8 @@ public class GameSession {
 		GroundAuction.instance().unregist(this.channelId);
 		player.offline();
 		GameDb.evict(player);
+		//City.instance().execute(()->GameDb.evict(player));
+
 		//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
 		//offline action of validate
 		Validator.getInstance().unRegist(accountName, token);
@@ -127,6 +129,7 @@ public class GameSession {
 	}
 	public void cheat(short cmd, Message message) {
 		Gs.Str c = (Gs.Str)message;
+		System.out.println(c.getStr());
 		Cheat cheat = _parseCheatString(c.getStr());
 		if(cheat != null)
 			_runCheat(cheat);
@@ -147,6 +150,8 @@ public class GameSession {
 				if(n <= 0)
 					return;
 				player.addMoney(n);
+				GameDb.saveOrUpdate(player);
+				break;
 			}
 			case additem: {
 				int id = cheat.paras[0];
@@ -158,6 +163,8 @@ public class GameSession {
 					return;
 				if(player.getBag().reserve(mi, n))
 					player.getBag().consumeReserve(mi, n);
+                GameDb.saveOrUpdate(player);
+                break;
 			}
 			case addground: {
 				int x1 = cheat.paras[0];
@@ -176,10 +183,12 @@ public class GameSession {
 				}
 				CoordPair cp = new CoordPair(new Coordinate(x1, y1), new Coordinate(x2, y2));
 				try {
-					player.addGround(cp);
+                    GroundManager.instance().addGround(id(), cp.toCoordinates());
 				} catch (GroundAlreadySoldException e) {
 					e.printStackTrace();
 				}
+                GameDb.saveOrUpdate(GroundManager.instance());
+                break;
 			}
 		}
 	}
@@ -374,7 +383,7 @@ public class GameSession {
 			return;
 		MetaBuilding m = MetaData.getBuilding(mid);
 		Coordinate ul = new Coordinate(c.getPos());
-		if(!GroundManager.instance().canBuild(player.id(), new CoordPair(ul, ul.offset(m.x, m.y))))
+		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
 			return;
 		Building building = Building.create(mid, ul, player.id());
 		boolean ok = City.instance().addBuilding(building);
@@ -555,6 +564,7 @@ public class GameSession {
 			return;
 		}
 		s.clearOrder(id);
+		GameDb.saveOrUpdate(Exchange.instance());
 		this.write(Package.create(cmd));
 	}
 	public void exchangeStopWatch(short cmd) {
@@ -838,11 +848,11 @@ public class GameSession {
 		MetaItem mi = MetaData.getItem(c.getItemId());
 		if(mi == null)
 			return;
-		if(src.lock(mi, c.getN())) {
+		if(!src.lock(mi, c.getN())) {
 			this.write(Package.fail(cmd));
 			return;
 		}
-		if(dst.reserve(mi, c.getN())) {
+		if(!dst.reserve(mi, c.getN())) {
 			src.unLock(mi, c.getN());
 			this.write(Package.fail(cmd));
 			return;

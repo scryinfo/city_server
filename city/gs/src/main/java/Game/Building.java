@@ -1,6 +1,7 @@
 package Game;
 
 import DB.Db;
+import Game.Listener.ConvertListener;
 import Shared.Package;
 import Shared.Util;
 import com.google.common.collect.EvictingQueue;
@@ -17,13 +18,13 @@ import java.util.stream.Collectors;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class Building implements ISessionCache {
+@EntityListeners({
+        ConvertListener.class,
+})
+public abstract class Building {
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
-    @Override
-    public CacheType getCacheType() {
-        return CacheType.LongLiving;
-    }
+
     protected Building() {
     }
     boolean canUseBy(UUID userId) {
@@ -105,32 +106,26 @@ public abstract class Building implements ISessionCache {
         });
         return res;
     }
-//    @Embeddable //hide those members, the only purpose is to mapping to the table
-//    protected static class _D {
-//        @Column(name = "flowHistory")
-//        private byte[] flowHistoryBinary;
-//        void dirty() {
-//            this.flowHistoryBinary = null;
-//        }
-//    }
-//    @Embedded
-//    protected final _D _d = new _D();
-//
-//    // don't override this in subclass, or else this function will not gets called unless call super._base1()
-//    // so I name this function names strange in purpose
-//    @PrePersist
-//    @PreUpdate
-//    private void _base1() {
-//        Db.FlowHistory.Builder builder = Db.FlowHistory.newBuilder();
-//        this.flowHistory.forEach(f -> builder.addI(Db.FlowHistory.Info.newBuilder().setTs(f.ts).setN(f.n)));
-//        this._d.flowHistoryBinary = builder.build().toByteArray();
-//    }
-//    @PostLoad
-//    private void _base2() throws InvalidProtocolBufferException {
-//        for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this._d.flowHistoryBinary).getIList()) {
-//            this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
-//        }
-//    }
+
+    public void serializeBinaryMembers() {
+        if(this.flowHistory.isEmpty())
+            return;
+        Db.FlowHistory.Builder builder = Db.FlowHistory.newBuilder();
+        this.flowHistory.forEach(f -> builder.addI(Db.FlowHistory.Info.newBuilder().setTs(f.ts).setN(f.n)));
+        this.flowHistoryBinary = builder.build().toByteArray();
+    }
+
+    public void deserializeBinaryMembers() throws InvalidProtocolBufferException {
+        if(this.flowHistoryBinary == null)
+            return;
+        for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this.flowHistoryBinary).getIList())
+            this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
+    }
+
+    @Column(name = "flow_binary")
+    private byte[] flowHistoryBinary;
+
+
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
@@ -156,6 +151,7 @@ public abstract class Building implements ISessionCache {
     @Transient
     private Set<Npc> allNpc = new HashSet<>();
 
+    @Embeddable
     static class FlowInfo {
         int ts;
         int n;
@@ -164,9 +160,13 @@ public abstract class Building implements ISessionCache {
             this.ts = ts;
             this.n = n;
         }
+
+        protected FlowInfo() {}
     }
-    @Column
-    @Convert(converter = FlowHistoryConverter.class)
+    // this doesn't fucking works
+//    @Column
+//    @Convert(converter = FlowHistoryConverter.class)
+    @Transient
     private EvictingQueue<FlowInfo> flowHistory = EvictingQueue.create(MAX_FLOW_SIZE);
 
     public static final class FlowHistoryConverter implements AttributeConverter<EvictingQueue<FlowInfo>, byte[]> {
@@ -314,7 +314,7 @@ public abstract class Building implements ISessionCache {
             if(p != null) {
                 if(p.decMoney(this.salary * this.allNpc.size())) {
                     allNpc.forEach(npc -> npc.addMoney(this.salary));
-                    List<ISessionCache> updates = allNpc.stream().map(ISessionCache.class::cast).collect(Collectors.toList());
+                    List<Object> updates = allNpc.stream().map(Object.class::cast).collect(Collectors.toList());
                     updates.add(p);
                     GameDb.saveOrUpdate(updates);
                 }

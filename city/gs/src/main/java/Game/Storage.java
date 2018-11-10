@@ -183,13 +183,4 @@ public class Storage implements IStorage {
     public boolean full() {
         return capacity == usedSize();
     }
-
-    // if a player is queried, it is impossible to pass its bag to GameDb
-    // we always pass the player to db, so make this longLiving is ok
-    // if player is operated by itself, the it is possible to pass its bag
-    // to GameDb directly, due to its bag is a kind of building
-    @Override
-    public CacheType getCacheType() {
-        return CacheType.LongLiving;
-    }
 }

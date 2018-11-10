@@ -2,7 +2,6 @@ package Game;
 
 import Shared.Util;
 import gs.Gs;
-import org.bson.Document;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class GroundInfo implements ISessionCache, Serializable {
+public class GroundInfo implements Serializable {
     public static final int OWN = 0x00000001;
     public static final int RENTING = 0x00000002;
     public static final int RENTED = 0x00000004;
@@ -39,14 +38,6 @@ public class GroundInfo implements ISessionCache, Serializable {
     public GroundInfo(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-    public GroundInfo(Document d) {
-        this.x = d.getInteger("x");
-        this.y = d.getInteger("y");
-    }
-    public GroundInfo(Gs.MiniIndex i) {
-        this.x = i.getX();
-        this.y = i.getY();
     }
 
     protected GroundInfo() {
@@ -103,11 +94,6 @@ public class GroundInfo implements ISessionCache, Serializable {
             );
         }
         return builder.build();
-    }
-
-    @Override
-    public CacheType getCacheType() {
-        return CacheType.LongLiving;
     }
 
     public void endRent() {

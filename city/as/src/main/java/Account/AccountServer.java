@@ -49,6 +49,7 @@ public class AccountServer {
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder());
                                 ch.pipeline().addLast(businessLogicExecutor, new GameServerEventHandler());
+								ch.pipeline().addLast(new ExceptionHandler());
                             }
                         }).option(ChannelOption.SO_REUSEADDR, true);
                 fs.add(b.bind(accInfo.getLanPortGs()));
@@ -65,6 +66,7 @@ public class AccountServer {
 								ch.pipeline().addLast(new PackageEncoder());
 								//ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));
 								ch.pipeline().addLast(businessLogicExecutor, new AccountEventHandler());
+								ch.pipeline().addLast(new ExceptionHandler());
 							}
 						}).option(ChannelOption.SO_REUSEADDR, true);
 				fs.add(b.bind(accInfo.getInternetPort()));

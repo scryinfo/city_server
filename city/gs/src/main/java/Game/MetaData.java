@@ -144,6 +144,9 @@ class MetaBuilding {
             return MetaData.getBuilding(dbData);
         }
     }
+    public CoordPair area(Coordinate pos) {
+        return new CoordPair(pos, pos.offset(this.x-1, this.y-1));
+    }
 }
 class MetaVirtualBuilding {
     MetaVirtualBuilding(Document d) throws Exception {

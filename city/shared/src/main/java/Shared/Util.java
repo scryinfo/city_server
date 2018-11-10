@@ -21,7 +21,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
-    public static final UUID bagId = UUID.fromString("a33eab42-cb75-4c77-bd27-710d299f5591");
     public static final ObjectId NullOid = new ObjectId(new byte[12]);
     private static final byte[] UUID_APPENDS = new byte[4];
     public static ByteString toByteString(ObjectId id) {
