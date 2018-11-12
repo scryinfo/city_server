@@ -24,6 +24,7 @@ import java.io.File;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 // there are 2 ways:
@@ -286,23 +287,34 @@ public class GameDb {
 			for (Object o : saveOrUpdates) {
 				session.saveOrUpdate(o);
 				++i;
+				if (i % BATCH_SIZE == 0)
+					session.flush();
 			}
 			for (Object o : deletes) {
 				session.delete(o);
 				++i;
+				if (i % BATCH_SIZE == 0)
+					session.flush();
 			}
-			if (i % BATCH_SIZE == 0) {
-				session.flush();
-				//session.clear();
-			}
+
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
 		} finally {
-			//session.close();
 		}
 	}
 
+	public static List<Exchange.DealLog> getDealLogs(int days) {
+		long ts = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days);
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Transaction transaction = session.beginTransaction();
+		Criteria criteria = session.createCriteria(Exchange.DealLog.class);
+		criteria.add(Restrictions.ge("ts", ts)); // jpa meta model can not generate inner class, shit
+		List<Exchange.DealLog> logs = criteria.list();
+		transaction.commit();
+		session.close();
+		return logs;
+	}
 	public static List<Npc> getAllNpc() {
 		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder builder = session.getCriteriaBuilder();

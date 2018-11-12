@@ -17,6 +17,6 @@ public class EvictListener {
                 GameDb.evict(p);
         }
         else if(obj instanceof Exchange.DealLog)
-            GameDb.evict(obj);
+            GameDb.evict(obj); // can not let it be persist by stateless session, it need to saved by other entities. so evict it here
     }
 }

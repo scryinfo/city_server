@@ -6,6 +6,7 @@ import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
+import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -19,16 +20,33 @@ public class Exchange {
         return instance;
     }
     public static final int ID = 0;
-
-    protected Exchange() {
-        //buildOrderCache();
-    }
+    private static final int DEAL_LOG_MAX_PRESERVE_DAYS = 31;
+    private static final long DEAL_LOG_MAX_PRESERVE_MS = TimeUnit.DAYS.toMillis(DEAL_LOG_MAX_PRESERVE_DAYS);
+    private static final Logger logger = Logger.getLogger(Exchange.class);
+    protected Exchange() {}
     public static void init() {
         GameDb.initExchange();
         instance = GameDb.getExchange();
-        //instance.buildOrderCache();
+        instance.buildCache(GameDb.getDealLogs(DEAL_LOG_MAX_PRESERVE_DAYS));
     }
-
+    private void buildCache(List<DealLog> dealLogs) {
+        for(Order order : _orderData) {
+            Trading trading = tradings.computeIfAbsent(order.itemId, k->new Trading());
+            if(order.sell)
+                trading.sell.add(order);
+            else
+                trading.buy.add(order);
+            orders.computeIfAbsent(order.playerId, k->new HashMap<>()).put(order.id, order);
+        }
+        dealLogs.forEach(log->{
+            Stat s = this.itemStat.get(log.itemId);
+            if(s != null) {
+                s.histories.add(log);
+            }
+            else
+                logger.fatal("data inconsistency!" + log.itemId);
+        });
+    }
     @Id
     public final int id = ID;
     public Gs.ExchangeItemList getItemList() {
@@ -173,12 +191,7 @@ public class Exchange {
         this.watcher.broadcastItemChange(o.itemId);
         return o.buildingId;
     }
-//    private void buildOrderCache() {
-//        tradings.forEach((k,v)-> {
-//            v.sell.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
-//            v.buy.forEach(o -> orders.computeIfAbsent(o.playerId, kk->new HashMap<>()).put(o.id, o));
-//        });
-//    }
+
 
     private void matchmaking() {
         tradings.forEach((k,v)->{
@@ -263,10 +276,9 @@ public class Exchange {
         in.clearOrder(b.id);
         in.consumeReserve(mi, n);
 
-        DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, s.price);
+        DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, b.total, s.total, s.price);
         this.itemStat.computeIfAbsent(mi.id, k->new Stat(mi.id)).histories.add(log);
-        this._dealHistoryData.add(log);
-        res.updates = Arrays.asList(buyer, seller, in, out, log, this);
+        res.updates = Arrays.asList(buyer, seller, in, out, this);
 
         // send notify to client if they are online
         final int num = n;
@@ -296,14 +308,18 @@ public class Exchange {
     })
     public final static class DealLog implements Comparable<DealLog> {
         public static final int ROWS_IN_ONE_PAGE = 10;
-        public DealLog(UUID buyer, UUID seller, int itemId, int n, int price) {
+
+        public DealLog(UUID buyer, UUID seller, int itemId, int n, int buyTotalAmount, int sellTotalAmount, int price) {
             this.buyer = buyer;
             this.seller = seller;
             this.itemId = itemId;
             this.n = n;
+            this.buyTotalAmount = buyTotalAmount;
+            this.sellTotalAmount = sellTotalAmount;
             this.price = price;
             ts = System.currentTimeMillis();
         }
+
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
         @Column(name = "id", updatable = false, nullable = false)
@@ -314,9 +330,11 @@ public class Exchange {
         UUID seller;
         int itemId;
         int n;
+        int buyTotalAmount;
+        int sellTotalAmount;
         int price;
         long ts;
-
+        long getTs() {return ts;}
         public DealLog() {
         }
 
@@ -328,6 +346,8 @@ public class Exchange {
                     .setDealed(this.n)
                     .setPrice(this.price)
                     .setTs(this.ts)
+                    .setBuyTotalAmount(this.buyTotalAmount)
+                    .setSellTotalAmount(this.sellTotalAmount)
                     .build();
         }
 
@@ -376,8 +396,7 @@ public class Exchange {
             this.sumDealedPrice = sumPrice;
         }
         @Transient
-        // recent at last
-        TreeSet<DealLog> histories = new TreeSet<>(Comparator.comparing(log->log.ts));
+        TreeSet<DealLog> histories = new TreeSet<>(Comparator.comparing(DealLog::getTs).reversed()); // recent at last
 
         public int priceChange() {
             if(histories.isEmpty())
@@ -399,7 +418,7 @@ public class Exchange {
                 v.calcuStat(24);
                 removeOutdatedDealLog(v.histories, now);
             });
-            //removeOutdatedDealLog((TreeSet<DealLog>) _dealHistoryData, now);
+            //removeOutdatedDealLog((TreeSet<DealLog>) dealHistoryData, now);
         }
 
     }
@@ -423,38 +442,14 @@ public class Exchange {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "exchange_id")
     private Set<Order> _orderData = new HashSet<>();
-    @OneToMany(fetch = FetchType.EAGER)
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @JoinColumn(name = "exchange_id")
-    @OrderBy("ts ASC") // require class DealLog implements Comparable<DealLog>, it doesn't know the comparator pass into Set
-    private SortedSet<DealLog> _dealHistoryData = new TreeSet<>(Comparator.comparing(h -> h.ts));
     //========================================================================
 
-    // in real stock exchange, the log is always there, however, the query of myself log has limitation of duration which
-    // can not longer than 30 days
-    private static final long DEAL_LOG_MAX_PRESERVE_MS =  TimeUnit.DAYS.toMillis(31+10);
-    @PostLoad
-    void _init() {
-        for(Order order : _orderData) {
-            Trading trading = tradings.computeIfAbsent(order.itemId, k->new Trading());
-            if(order.sell)
-                trading.sell.add(order);
-            else
-                trading.buy.add(order);
-            orders.computeIfAbsent(order.playerId, k->new HashMap<>()).put(order.id, order);
-        }
+    //    @OneToMany(fetch = FetchType.EAGER)
+    //    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    //    @JoinColumn(name = "exchange_id")
+    //    @OrderBy("ts ASC") // require class DealLog implements Comparable<DealLog>, it doesn't know the comparator pass into Set
+    //    private TreeSet<DealLog> dealHistoryData = new TreeSet<>(Comparator.comparing(h -> h.ts));
 
-        {
-            // this will be too fucking slow
-            // _dealHistoryData.removeIf(h->now - h.ts > DEAL_LOG_MAX_PRESERVE_MS);
-
-            final long now = System.currentTimeMillis();
-            //TreeSet<DealLog> deals = (TreeSet<DealLog>) _dealHistoryData;
-            //removeOutdatedDealLog(deals, now);
-
-            //deals.descendingSet().forEach(l->this.itemStat.computeIfAbsent(l.itemId, k-
-        }
-    }
     private void removeOutdatedDealLog(TreeSet<DealLog> deals, long now) {
         Iterator<DealLog> iterator = deals.descendingIterator();
         while(iterator.hasNext()) {

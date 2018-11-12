@@ -192,6 +192,7 @@ public class PublicFacility extends Building {
     @Override
     public Gs.PublicFacility detailProto() {
         Gs.PublicFacility.Builder builder = Gs.PublicFacility.newBuilder();
+        builder.setInfo(this.toProto());
         this.slot.values().forEach(v->builder.addAvailableSlot(v.toProto()));
         this.rent.values().forEach(v->builder.addSoldSlot(v.toProto()));
         this.ad.values().forEach(v->builder.addAd(v.toProto()));

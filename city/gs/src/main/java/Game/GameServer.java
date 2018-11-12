@@ -97,7 +97,7 @@ public class GameServer {
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
-                                ch.pipeline().addLast(new PackageEncoder());
+                                ch.pipeline().addLast(new PackageEncoder(false));
                                 ch.pipeline().addLast(businessLogicExecutor, new AccountServerEventHandler());
                                 ch.pipeline().addLast(new AutoReconnectHandler(b, GameServer.this::asConnectAction));
                                 ch.pipeline().addLast(new ExceptionHandler());
@@ -115,7 +115,7 @@ public class GameServer {
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
-                                ch.pipeline().addLast(new PackageEncoder());
+                                ch.pipeline().addLast(new PackageEncoder(true));
                                 //ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));
                                 ch.pipeline().addLast(businessLogicExecutor, new GameEventHandler()); // seems helpless. it only can relieve some db read operation cost due to all business are run in city thread
                                 ch.pipeline().addLast(new ExceptionHandler());

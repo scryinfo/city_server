@@ -53418,6 +53418,26 @@ public final class Gs {
      * <code>required int32 itemId = 6;</code>
      */
     int getItemId();
+
+    // required int32 buyTotalAmount = 7;
+    /**
+     * <code>required int32 buyTotalAmount = 7;</code>
+     */
+    boolean hasBuyTotalAmount();
+    /**
+     * <code>required int32 buyTotalAmount = 7;</code>
+     */
+    int getBuyTotalAmount();
+
+    // required int32 sellTotalAmount = 8;
+    /**
+     * <code>required int32 sellTotalAmount = 8;</code>
+     */
+    boolean hasSellTotalAmount();
+    /**
+     * <code>required int32 sellTotalAmount = 8;</code>
+     */
+    int getSellTotalAmount();
   }
   /**
    * Protobuf type {@code gs.ExchangeDealLog}
@@ -53498,6 +53518,16 @@ public final class Gs {
             case 48: {
               bitField0_ |= 0x00000020;
               itemId_ = input.readInt32();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              buyTotalAmount_ = input.readInt32();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000080;
+              sellTotalAmount_ = input.readInt32();
               break;
             }
           }
@@ -53636,6 +53666,38 @@ public final class Gs {
       return itemId_;
     }
 
+    // required int32 buyTotalAmount = 7;
+    public static final int BUYTOTALAMOUNT_FIELD_NUMBER = 7;
+    private int buyTotalAmount_;
+    /**
+     * <code>required int32 buyTotalAmount = 7;</code>
+     */
+    public boolean hasBuyTotalAmount() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>required int32 buyTotalAmount = 7;</code>
+     */
+    public int getBuyTotalAmount() {
+      return buyTotalAmount_;
+    }
+
+    // required int32 sellTotalAmount = 8;
+    public static final int SELLTOTALAMOUNT_FIELD_NUMBER = 8;
+    private int sellTotalAmount_;
+    /**
+     * <code>required int32 sellTotalAmount = 8;</code>
+     */
+    public boolean hasSellTotalAmount() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>required int32 sellTotalAmount = 8;</code>
+     */
+    public int getSellTotalAmount() {
+      return sellTotalAmount_;
+    }
+
     private void initFields() {
       sellerId_ = com.google.protobuf.ByteString.EMPTY;
       buyerId_ = com.google.protobuf.ByteString.EMPTY;
@@ -53643,6 +53705,8 @@ public final class Gs {
       price_ = 0;
       dealed_ = 0;
       itemId_ = 0;
+      buyTotalAmount_ = 0;
+      sellTotalAmount_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -53673,6 +53737,14 @@ public final class Gs {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasBuyTotalAmount()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSellTotalAmount()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -53697,6 +53769,12 @@ public final class Gs {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeInt32(6, itemId_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeInt32(7, buyTotalAmount_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeInt32(8, sellTotalAmount_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -53730,6 +53808,14 @@ public final class Gs {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, itemId_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, buyTotalAmount_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, sellTotalAmount_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -53859,6 +53945,10 @@ public final class Gs {
         bitField0_ = (bitField0_ & ~0x00000010);
         itemId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000020);
+        buyTotalAmount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000040);
+        sellTotalAmount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -53911,6 +54001,14 @@ public final class Gs {
           to_bitField0_ |= 0x00000020;
         }
         result.itemId_ = itemId_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.buyTotalAmount_ = buyTotalAmount_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        result.sellTotalAmount_ = sellTotalAmount_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -53945,6 +54043,12 @@ public final class Gs {
         if (other.hasItemId()) {
           setItemId(other.getItemId());
         }
+        if (other.hasBuyTotalAmount()) {
+          setBuyTotalAmount(other.getBuyTotalAmount());
+        }
+        if (other.hasSellTotalAmount()) {
+          setSellTotalAmount(other.getSellTotalAmount());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -53971,6 +54075,14 @@ public final class Gs {
           return false;
         }
         if (!hasItemId()) {
+          
+          return false;
+        }
+        if (!hasBuyTotalAmount()) {
+          
+          return false;
+        }
+        if (!hasSellTotalAmount()) {
           
           return false;
         }
@@ -54196,6 +54308,72 @@ public final class Gs {
       public Builder clearItemId() {
         bitField0_ = (bitField0_ & ~0x00000020);
         itemId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 buyTotalAmount = 7;
+      private int buyTotalAmount_ ;
+      /**
+       * <code>required int32 buyTotalAmount = 7;</code>
+       */
+      public boolean hasBuyTotalAmount() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>required int32 buyTotalAmount = 7;</code>
+       */
+      public int getBuyTotalAmount() {
+        return buyTotalAmount_;
+      }
+      /**
+       * <code>required int32 buyTotalAmount = 7;</code>
+       */
+      public Builder setBuyTotalAmount(int value) {
+        bitField0_ |= 0x00000040;
+        buyTotalAmount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 buyTotalAmount = 7;</code>
+       */
+      public Builder clearBuyTotalAmount() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        buyTotalAmount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 sellTotalAmount = 8;
+      private int sellTotalAmount_ ;
+      /**
+       * <code>required int32 sellTotalAmount = 8;</code>
+       */
+      public boolean hasSellTotalAmount() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>required int32 sellTotalAmount = 8;</code>
+       */
+      public int getSellTotalAmount() {
+        return sellTotalAmount_;
+      }
+      /**
+       * <code>required int32 sellTotalAmount = 8;</code>
+       */
+      public Builder setSellTotalAmount(int value) {
+        bitField0_ |= 0x00000080;
+        sellTotalAmount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 sellTotalAmount = 8;</code>
+       */
+      public Builder clearSellTotalAmount() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        sellTotalAmount_ = 0;
         onChanged();
         return this;
       }
@@ -57231,18 +57409,19 @@ public final class Gs {
       "aledAmount\030\003 \002(\005\022\023\n\013totalAmount\030\004 \002(\005\022\r\n",
       "\005price\030\005 \002(\005\022\n\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002(\010\022\022" +
       "\n\nbuildingId\030\010 \002(\014\022\023\n\013dealedPrice\030\t \002(\005\"" +
-      "o\n\017ExchangeDealLog\022\020\n\010sellerId\030\001 \002(\014\022\017\n\007" +
-      "buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030\004 \002(\005" +
-      "\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\"4\n\020Exch" +
-      "angeDealLogs\022 \n\003log\030\001 \003(\0132\023.gs.ExchangeD" +
-      "ealLog\"{\n\nGroundRent\022\022\n\nrentPreDay\030\001 \002(\005" +
-      "\022\030\n\020paymentCycleDays\030\002 \002(\005\022\017\n\007deposit\030\003 " +
-      "\002(\005\022\020\n\010rentDays\030\004 \002(\005\022\034\n\005coord\030\005 \003(\0132\r.g" +
-      "s.MiniIndex\"9\n\nGroundSale\022\r\n\005price\030\001 \002(\005",
-      "\022\034\n\005coord\030\002 \003(\0132\r.gs.MiniIndex*f\n\rBuildi" +
-      "ngState\022\020\n\014CONSTRUCTING\020\002\022\020\n\014WAITING_OPE" +
-      "N\020\003\022\023\n\017WAITING_OPERATE\020\004\022\013\n\007OPERATE\020\005\022\017\n" +
-      "\013DECONSTRUCT\020\006"
+      "\240\001\n\017ExchangeDealLog\022\020\n\010sellerId\030\001 \002(\014\022\017\n" +
+      "\007buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030\004 \002(" +
+      "\005\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\022\026\n\016buy" +
+      "TotalAmount\030\007 \002(\005\022\027\n\017sellTotalAmount\030\010 \002" +
+      "(\005\"4\n\020ExchangeDealLogs\022 \n\003log\030\001 \003(\0132\023.gs" +
+      ".ExchangeDealLog\"{\n\nGroundRent\022\022\n\nrentPr" +
+      "eDay\030\001 \002(\005\022\030\n\020paymentCycleDays\030\002 \002(\005\022\017\n\007" +
+      "deposit\030\003 \002(\005\022\020\n\010rentDays\030\004 \002(\005\022\034\n\005coord",
+      "\030\005 \003(\0132\r.gs.MiniIndex\"9\n\nGroundSale\022\r\n\005p" +
+      "rice\030\001 \002(\005\022\034\n\005coord\030\002 \003(\0132\r.gs.MiniIndex" +
+      "*f\n\rBuildingState\022\020\n\014CONSTRUCTING\020\002\022\020\n\014W" +
+      "AITING_OPEN\020\003\022\023\n\017WAITING_OPERATE\020\004\022\013\n\007OP" +
+      "ERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -57650,7 +57829,7 @@ public final class Gs {
           internal_static_gs_ExchangeDealLog_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDealLog_descriptor,
-              new java.lang.String[] { "SellerId", "BuyerId", "Ts", "Price", "Dealed", "ItemId", });
+              new java.lang.String[] { "SellerId", "BuyerId", "Ts", "Price", "Dealed", "ItemId", "BuyTotalAmount", "SellTotalAmount", });
           internal_static_gs_ExchangeDealLogs_descriptor =
             getDescriptor().getMessageTypes().get(58);
           internal_static_gs_ExchangeDealLogs_fieldAccessorTable = new

@@ -390,7 +390,7 @@ public class GameSession {
 		if(!ok)
 			this.write(Package.fail(cmd));
 		else
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd, building.toProto()));
 	}
 	public void delBuilding(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
