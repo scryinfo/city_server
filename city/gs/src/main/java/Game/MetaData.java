@@ -10,7 +10,9 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import javax.persistence.AttributeConverter;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 class MetaNpc {
@@ -45,7 +47,7 @@ class MetaCity {
         int idx = Arrays.binarySearch(this.timeSection, nowHour);
         if(idx < 0)
             idx = -(idx+2); // fuck java
-        return this.timeSection[idx];
+        return idx;
     }
 
     private int minTimeSectionHour() {
@@ -66,13 +68,24 @@ class MetaCity {
     }
 
     public int nextTimeSectionDuration(int index) {
-        if(index+1 > this.timeSection.length)
-            return timeSectionDuration(0);
-        else
-            return timeSectionDuration(index+1);
+       return timeSectionDuration(nextIndex(index));
+    }
+    public int nextIndex(int index) {
+        if(index >= this.timeSection.length)
+            throw new IllegalArgumentException();
+        if(index == this.timeSection.length-1)
+            return 0;
+        return index+1;
+    }
+    public int nextTimeSectionHour(int index) {
+        return this.timeSection[nextIndex(index)];
     }
 }
 abstract class MetaItem {
+
+    public static final int MATERIAL = 21;
+    public static final int GOOD = 22;
+
     MetaItem(Document d) {
         this.id = d.getInteger("_id");
         this.n = d.getDouble("numOneSec");
@@ -93,6 +106,9 @@ abstract class MetaItem {
             return MetaData.getItem(dbData);
         }
     }
+    public static boolean isItem(int id) {
+        return id / MetaData.ID_RADIX >= MATERIAL;
+    }
 }
 final class MetaMaterial extends MetaItem {
     MetaMaterial(Document d) {
@@ -107,6 +123,68 @@ final class MetaGood extends MetaItem {
     }
     int lux;
 }
+
+class ProbBase {
+    ProbBase(int n, Document d) {
+        this.weight = new int[n];
+        id = d.getLong("_id");
+        for(int i = 0; i < weight.length; ++i)
+            weight[i] = d.getInteger("w"+i);
+    }
+    final long id;
+    final int[] weight;
+    static protected int randomIdx(int[] weight) {
+        int v = ThreadLocalRandom.current().nextInt(0, weight[weight.length-1]);  // range is [l, r)
+        int idx = Arrays.binarySearch(weight, v);
+        if(idx >= 0)
+            return idx+1; // due to we random [l, r), so the idx can not be the index of last element r, so +1 is ok
+        else
+            return -(idx+1);
+    }
+    static protected void process(int[] weight) {
+        for(int i = 1; i < weight.length; ++i)
+            weight[i] = weight[i] + weight[i-1];
+    }
+}
+class AIBuilding extends ProbBase {
+    AIBuilding(Document d) {
+        super(Type.ALL.ordinal(), d);
+    }
+    enum Type {
+        IDLE,
+        GOTO_APARTMENT,
+        GOTO_PUBLIC_FACILITY,
+        GOTO_RETAIL_SHOP,
+        ALL
+    }
+    Type random(BrandManager.BuildingRatio ratio) {
+        int[] d = Arrays.copyOf(weight, weight.length);
+        d[Type.GOTO_APARTMENT.ordinal()] *= ratio.apartment;
+        d[Type.GOTO_PUBLIC_FACILITY.ordinal()] *= ratio.publicFacility;
+        d[Type.GOTO_RETAIL_SHOP.ordinal()] *= ratio.retail;
+        process(d);
+        return Type.values()[super.randomIdx(d)];
+    }
+}
+
+class AIBuy extends ProbBase {
+    AIBuy(Document d) {
+        super(Type.ALL.ordinal(), d);
+    }
+    enum Type { // use good type?
+        FOOD1,
+        FOOD2,
+        COTH,
+        AESS,
+        DIGITAL,
+        SPORT,
+        ALL
+    }
+    Type random(double[] ratio) {
+        int[] d = Arrays.copyOf(weight, weight.length);
+        return Type.values()[super.randomIdx(d)];
+    }
+}
 class MetaBuilding {
     public static final int TRIVIAL = 10;
     public static final int MATERIAL = 11;
@@ -115,10 +193,17 @@ class MetaBuilding {
     public static final int APARTMENT = 14;
     public static final int LAB = 15;
     public static final int PUBLIC = 16;
-    public static final int VIRTUAL = 17;
+    public static final int TALENT = 18;
+    public static final int MAX_TYPE_ID = 20;
+    public static boolean isBuilding(int id) {
+        return id / MetaData.ID_RADIX <= PUBLIC;
+    }
 
+    public static boolean canAd(int type) {
+        return type == RETAIL || type == APARTMENT || type == PUBLIC || type == TALENT;
+    }
     public static int type(int id) {
-        return id/100000;
+        return id/MetaData.ID_RADIX;
     }
     MetaBuilding(Document d) {
         this.id = d.getInteger("_id");
@@ -186,19 +271,23 @@ class MetaApartment extends MetaBuilding {
     MetaApartment(Document d) {
         super(d);
         this.npc = d.getInteger("npc");
+        this.qty = d.getInteger("qty");
     }
 	public int npc;
+    public int qty;
 }
 
 abstract class MetaFactoryBase extends MetaBuilding {
     public int lineNum;
     public int lineMaxWorkerNum;
+    public int lineMinWorkerNum;
     public int storeCapacity;
     public int shelfCapacity;
 
     MetaFactoryBase(Document d) {
         super(d);
         this.lineNum = d.getInteger("lineNum");
+        this.lineMinWorkerNum = d.getInteger("lineMinWorkerNum");
         this.lineMaxWorkerNum = d.getInteger("lineMaxWorkerNum");
         this.storeCapacity = d.getInteger("storeCapacity");
         this.shelfCapacity = d.getInteger("shelfCapacity");
@@ -219,12 +308,13 @@ class MetaRetailShop extends MetaBuilding {
     public int saleTypeNum;
     public int storeCapacity;
     public int shelfCapacity;
-
+    public int qty;
     MetaRetailShop(Document d) {
         super(d);
         this.saleTypeNum = d.getInteger("saleTypeNum");
         this.storeCapacity = d.getInteger("storeCapacity");
         this.shelfCapacity = d.getInteger("shelfCapacity");
+        this.qty = d.getInteger("qty");
     }
 }
 class MetaLaboratory extends MetaBuilding {
@@ -237,10 +327,29 @@ class MetaLaboratory extends MetaBuilding {
 }
 class MetaPublicFacility extends MetaBuilding {
     public int adNum;
-
+    public int qty;
+    public int maxNpcFlow;
+    public int minDayToRent;
+    public int maxDayToRent;
+    public int maxRentPreDay;
+    public int depositRatio;
     MetaPublicFacility(Document d) {
         super(d);
         this.adNum = d.getInteger("adNum");
+        this.qty = d.getInteger("qty");
+        this.maxNpcFlow = d.getInteger("maxNpcFlow");
+        this.minDayToRent = d.getInteger("minDayToRent");
+        this.maxDayToRent = d.getInteger("maxDayToRent");
+        this.maxRentPreDay = d.getInteger("maxRentPreDay");
+        this.depositRatio = d.getInteger("depositRatio");
+    }
+}
+
+class MetaTalentCenter extends MetaBuilding {
+    public int qty;
+    MetaTalentCenter(Document d) {
+        super(d);
+        this.qty = d.getInteger("qty");
     }
 }
 class MetaGroundAuction {
@@ -296,6 +405,7 @@ class SysPara {
     int bagCapacityDelta;
 }
 public class MetaData {
+    public static final int ID_RADIX = 100000;
 	private static final Logger logger = Logger.getLogger(MetaData.class);
 	private static final String dbName = "meta";
 	private static MongoClient mongoClient;
@@ -314,6 +424,9 @@ public class MetaData {
     private static final String sysParaColName = "SysPara";
     private static final String materialColName = "Material";
     private static final String goodColName = "Good";
+    private static final String aiBuildingColName = "AIBuilding";
+    private static final String aiBuyColName = "AIBuy";
+    private static final String dayColName = "Holiday";
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -327,6 +440,8 @@ public class MetaData {
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
     private static final TreeMap<Integer, MetaMaterialFactory> materialFactory = new TreeMap<>();
     private static final TreeMap<Integer, MetaVirtualBuilding> virtualBuilding = new TreeMap<>();
+    private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
+    private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
 
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
     private static final HashMap<Integer, MetaGood> good = new HashMap<>();
@@ -349,10 +464,39 @@ public class MetaData {
     public static MetaRetailShop getRetailShop(int id) {
         return retailShop.get(id);
     }
-    public static MetaProduceDepartment getProductingDepartment(int id) {
+    public static MetaProduceDepartment getProduceDepartment(int id) {
         return produceDepartment.get(id);
     }
+    public static int getDayId() {
+        return dayId;
+    }
+    private static int dayId;
+    public static void updateDayId() {
+        dayId = dayIds.get(new DayKey());
+    }
+    private static Map<DayKey, Integer> dayIds = new HashMap<>();
+    public static final class DayKey {
+        int y;
+        int m;
+        int d;
 
+        public DayKey() {
+            LocalDateTime now = LocalDateTime.now();
+            this.y = now.getYear() % 100;
+            this.m = now.getMonthValue();
+            this.d = now.getDayOfMonth();
+        }
+        public DayKey(Document document) {
+            this.y = document.getInteger("year");
+            this.m = document.getInteger("month");
+            this.d = document.getInteger("day");
+        }
+    }
+    public static void initDayId() {
+        mongoClient.getDatabase(dbName).getCollection(dayColName).find().forEach((Block<Document>) doc -> {
+            dayIds.put(new DayKey(doc), doc.getInteger("id"));
+        });
+    }
     public static MetaVirtualBuilding getVirtualBuilding(int id) {
         return virtualBuilding.get(id);
     }
@@ -398,6 +542,12 @@ public class MetaData {
         MetaItem res = getMaterial(id);
         return res == null ? getGood(id):res;
     }
+    public static AIBuilding getAIBuilding(int id) {
+        return aiBuilding.get(id);
+    }
+    public static AIBuy getAIBuy(int id) {
+        return aiBuy.get(id);
+    }
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }
@@ -440,6 +590,18 @@ public class MetaData {
         if(d == null)
             throw new Exception("SysPara table is empty!");
         sysPara = new SysPara(d);
+    }
+    private static void initAIBuilding() {
+        mongoClient.getDatabase(dbName).getCollection(aiBuildingColName).find().forEach((Block<Document>) doc -> {
+            AIBuilding m = new AIBuilding(doc);
+            aiBuilding.put(m.id, m);
+        });
+    }
+    private static void initAIBuy() {
+        mongoClient.getDatabase(dbName).getCollection(aiBuyColName).find().forEach((Block<Document>) doc -> {
+            AIBuy m = new AIBuy(doc);
+            aiBuy.put(m.id, m);
+        });
     }
 //	public static void initNpc() {
 //		mongoClient.getDatabase(dbName).getCollection(npcColName).find().forEach((Block<Document>) doc -> {
@@ -527,5 +689,9 @@ public class MetaData {
         initGood();
 		initBuilding();
         reloadGroundAuction();
+
+        initAIBuilding();
+        initAIBuy();
+        initDayId();
 	}
 }

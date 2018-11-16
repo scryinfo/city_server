@@ -1,6 +1,7 @@
 package Game;
 
 import javax.persistence.*;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -21,8 +22,13 @@ public class Npc {
     @Column(name = "money", nullable = false)
     private long money;
 
+    public long money() {
+        return money;
+    }
     protected Npc() {
     }
+
+
 
     @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class AdapterData {
@@ -90,8 +96,39 @@ public class Npc {
        switch(section) {
            //??
        }
-    }
 
+       int id = chooseId();
+       AIBuilding aiBuilding = MetaData.getAIBuilding(id);
+       if(aiBuilding == null)
+           return;
+        Set<Building> buildings;
+       switch (aiBuilding.random(BrandManager.instance().getBuildingRatio())) {
+           case IDLE:
+               break;
+           case GOTO_APARTMENT:
+               buildings = buildingLocated().getAllBuildingEffectMe(MetaBuilding.APARTMENT);
+               break;
+           case GOTO_PUBLIC_FACILITY:
+               buildings = buildingLocated().getAllBuildingEffectMe(MetaBuilding.PUBLIC);
+               break;
+           case GOTO_RETAIL_SHOP:
+               buildings = buildingLocated().getAllBuildingEffectMe(MetaBuilding.RETAIL);
+               break;
+       }
+    }
+    private Building chooseOne(Set<Building> buildings) {
+        return null;
+    }
+    private int type;
+    private boolean stopWork;
+    public int chooseId() {
+        int id = type*100000000;
+        id += City.instance().currentHour()*1000000;
+        id += City.instance().weather()*10000;
+        id += MetaData.getDayId()*10;
+        id += stopWork?1:0;
+        return id;
+    }
     // where the npc is are not important, location change can not persist to db
     // after server restarted, all npc will return to its owner born
     public void visit(Building building) {
@@ -116,11 +153,18 @@ public class Npc {
     public void addMoney(int money) {
         this.money += money;
     }
-
+    public boolean decMoney(int money) {
+        if(money() < money)
+            return false;
+        this.money -= money;
+        return true;
+    }
     public Building building() {
         return this.born;
     }
-
+    public Building buildingLocated() {
+        return this.tempBuilding == null?this.born:this.tempBuilding;
+    }
     public void readyForDestroy() {
         this.visit(this.born);
     }

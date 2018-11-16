@@ -13,9 +13,28 @@ import java.util.concurrent.TimeUnit;
 
 @Entity(name = "PublicFacility")
 public class PublicFacility extends Building {
+    public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
+        super(meta, pos, ownerId);
+        this.meta = meta;
+        this.qty = meta.qty;
+    }
+    private int qty;
+    public int getMaxDayToRent() {
+        return meta.maxDayToRent;
+    }
+    public int getMinDayToRent() { return meta.minDayToRent; }
+    public int getMaxRentPreDay() {
+        return meta.maxRentPreDay;
+    }
+
     @Transient
     private MetaPublicFacility meta;
     private static final int MAX_SLOT_NUM = 999;
+
+    public void setTickPrice(int price) {
+        this.tickPrice = price;
+    }
+
     @Entity
     public static final class Slot {
         protected Slot(){}
@@ -37,8 +56,8 @@ public class PublicFacility extends Building {
             return builder.setId(Util.toByteString(id))
                     .setMaxDayToRent(maxDayToRent)
                     .setMinDayToRent(minDayToRent)
-                    .setDeposit(deposit)
                     .setRentPreDay(rentPreDay)
+                    .setDeposit(deposit)
                     .build();
         }
     }
@@ -94,6 +113,7 @@ public class PublicFacility extends Building {
             this.sr = sr;
             this.metaId = metaId;
             this.type = type;
+            this.beginTs = System.currentTimeMillis();
         }
 
         @Id
@@ -101,6 +121,8 @@ public class PublicFacility extends Building {
         @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
         @JoinColumn(name = "slot_rent_id")
         SlotRent sr;
+
+        // building type or good meta id
         int metaId;
 
         protected Ad() {
@@ -116,12 +138,14 @@ public class PublicFacility extends Building {
 
         Gs.PublicFacility.Ad toProto() {
             Gs.PublicFacility.Ad.Builder builder = Gs.PublicFacility.Ad.newBuilder();
-            return builder.setSlot(sr.toProto())
-                    .setId(Util.toByteString(id))
+            if(sr != null)
+                builder.setSlot(sr.toProto());
+            return builder.setId(Util.toByteString(id))
                     .setMetaId(metaId)
                     .setType(Gs.PublicFacility.Ad.Type.valueOf(type.ordinal()))
                     .setBeginTs(beginTs)
                     .setNpcFlow(npcFlow)
+                    .setBrandValue(0)
                     .build();
         }
     }
@@ -134,10 +158,10 @@ public class PublicFacility extends Building {
     private Map<UUID, Ad> ad = new HashMap<>();
 
 
-    public Slot addSlot(int maxDay, int minDay, int rent, int deposit) {
+    public Slot addSlot(int maxDay, int minDay, int rent) {
         if(slot.size() >= MAX_SLOT_NUM)
             return null;
-        Slot s = new Slot(maxDay, minDay, rent, deposit);
+        Slot s = new Slot(maxDay, minDay, rent, rent*meta.depositRatio);
         this.slot.put(s.id, s);
         return s;
     }
@@ -151,6 +175,7 @@ public class PublicFacility extends Building {
     public Slot getSlot(UUID id) {
         return slot.get(id);
     }
+    public boolean isSlotRentOut(UUID id) {return getRentSlot(id) != null;}
     public SlotRent getRentSlot(UUID id) {
         return rent.get(id);
     }
@@ -172,18 +197,38 @@ public class PublicFacility extends Building {
     }
     public void delAd(UUID id) {
         ad.remove(id);
+        qty -= 1;
     }
     public void addAd(SlotRent sr, MetaItem m) {
         Ad ad = new Ad(sr, m.id, Ad.Type.GOOD);
         this.ad.put(ad.id, ad);
     }
     public void addAd(SlotRent sr, MetaBuilding m) {
-        Ad ad = new Ad(sr, m.id, Ad.Type.BUILDING);
+        Ad ad = new Ad(sr, MetaBuilding.type(m.id), Ad.Type.BUILDING);
         this.ad.put(ad.id, ad);
+        qty += 1;
     }
-    public PublicFacility() {
-    }
+    protected PublicFacility() {}
 
+    int tickPrice;
+    @Override
+    protected void visitImpl(Npc npc){
+        if(this.tickPrice > 0) {
+            npc.decMoney(this.tickPrice);
+            Player owner = GameDb.queryPlayer(ownerId());
+            owner.addMoney(this.tickPrice);
+            GameDb.saveOrUpdate(Arrays.asList(npc, owner));
+        }
+
+        this.ad.values().forEach(ad->{
+            ad.npcFlow++;
+            BrandManager.instance().update(ad.sr.renterId, ad.metaId, 1);
+        });
+    }
+    @Override
+    protected boolean canVisit(Npc npc) {
+        return npc.money() >= this.tickPrice;
+    }
     @PostLoad
     private void _1() {
         this.meta = (MetaPublicFacility) super.metaBuilding;
@@ -196,6 +241,8 @@ public class PublicFacility extends Building {
         this.slot.values().forEach(v->builder.addAvailableSlot(v.toProto()));
         this.rent.values().forEach(v->builder.addSoldSlot(v.toProto()));
         this.ad.values().forEach(v->builder.addAd(v.toProto()));
+        builder.setQty(qty);
+        builder.setTicketPrice(this.tickPrice);
         return builder.build();
     }
 
@@ -244,10 +291,4 @@ public class PublicFacility extends Building {
             }
         }
     }
-
-    public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
-        super(meta, pos, ownerId);
-        this.meta = meta;
-    }
-
 }

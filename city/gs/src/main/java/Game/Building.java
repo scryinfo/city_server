@@ -44,7 +44,7 @@ public abstract class Building {
             case MetaBuilding.MATERIAL:
                 return new MaterialFactory(MetaData.getMaterialFactory(id), pos, ownerId);
             case MetaBuilding.PRODUCE:
-                return new ProduceDepartment(MetaData.getProductingDepartment(id), pos, ownerId);
+                return new ProduceDepartment(MetaData.getProduceDepartment(id), pos, ownerId);
             case MetaBuilding.RETAIL:
                 return new RetailShop(MetaData.getRetailShop(id), pos, ownerId);
             case MetaBuilding.APARTMENT:
@@ -97,11 +97,11 @@ public abstract class Building {
         });
         return res;
     }
-    Set<Building> getAllBuildingEffectMe() {
+    Set<Building> getAllBuildingEffectMe(int type) {
         Set<Building> res = new TreeSet<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
         City.instance().forEachBuilding(gip, building -> {
-            if(CoordPair.overlap(building.effectRange(), this.area()))
+            if(building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
                 res.add(building);
         });
         return res;
@@ -281,10 +281,21 @@ public abstract class Building {
     protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
+
+    protected abstract void visitImpl(Npc npc);
+    protected boolean canVisit(Npc npc) {
+        return true;
+    }
     // there is no need to remember which npc is in this building now
     public void enter(Npc npc) {
+        if(!canVisit(npc))
+            return;
         allNpc.add(npc);
         flowCount += 1;
+        visitImpl(npc);
+    }
+    public int getFlow() {
+        return this.flow;
     }
     public void leave(Npc npc) {
         allNpc.remove(npc);

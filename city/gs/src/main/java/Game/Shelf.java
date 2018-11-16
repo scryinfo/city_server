@@ -1,13 +1,14 @@
 package Game;
 
-import Shared.Util;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.*;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
+import javax.persistence.Transient;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Embeddable
 public class Shelf {
@@ -28,44 +29,53 @@ public class Shelf {
     public int size() {
         return slots.size();
     }
-    ItemInfo getContent(UUID id) {
+    Content getContent(ItemKey id) {
         return slots.get(id);
     }
-    @Entity
-    public static final class ItemInfo {
-        @Id
-        final UUID id = UUID.randomUUID();
-        @Column(name = "itemId")
-        @Convert(converter = MetaItem.Converter.class)
-        MetaItem item;
-        int n;
-        int price;
-        public ItemInfo(MetaItem item, int n, int price) {
-            this.item = item;
+    @Embeddable
+    public static final class Content {
+        public Content(int n, int price) {
             this.n = n;
             this.price = price;
         }
 
-        protected ItemInfo() {
-        }
+        int n;
+        int price;
+
+        protected Content() {}
     }
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKey(name = "id")
-    private Map<UUID, ItemInfo> slots = new HashMap<>();
+    private Map<ItemKey, Content> slots = new HashMap<>();
 
-    public UUID add(MetaItem item, int n, int price) {
+    public Gs.Shelf.Content add(Item item, int price) {
         if(full())
             return null;
-        ItemInfo i = new ItemInfo(item, n, price);
-        slots.put(i.id, i);
-        return i.id;
+        Content content = slots.get(item.key);
+        if(content != null) {
+            if(content.price != price)
+                return null;
+            content.n += item.n;
+        }
+        else {
+            content = new Content(item.n, price);
+            slots.put(item.key, content);
+        }
+        return toProto(item.key, content);
     }
-    public boolean del(UUID id) {
-        if(!slots.containsKey(id))
+    private Gs.Shelf.Content toProto(ItemKey k, Content content) {
+        return Gs.Shelf.Content.newBuilder()
+                .setK(k.toProto())
+                .setN(content.n)
+                .setPrice(content.price)
+                .build();
+    }
+    public boolean del(ItemKey k, int n) {
+        Shelf.Content i = this.getContent(k);
+        if(i == null || i.n < n)
             return false;
-        slots.remove(id);
+        i.n -= n;
         return true;
     }
     public boolean full() {
@@ -73,10 +83,7 @@ public class Shelf {
     }
     public Gs.Shelf toProto() {
         Gs.Shelf.Builder builder = Gs.Shelf.newBuilder();
-        slots.forEach((k,v)->builder.addGood(Gs.Shelf.Content.newBuilder()
-                .setId(Util.toByteString(k))
-                .setItemId(v.item.id)
-                .setNum(v.n)));
+        slots.forEach((k,v)->builder.addGood(toProto(k, v)));
         return builder.build();
     }
 }

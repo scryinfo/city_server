@@ -271,10 +271,10 @@ public class Exchange {
         s.dealedPrice += cost;
 
         out.clearOrder(s.id);
-        out.consumeLock(mi, n);
+        out.consumeLock(new ItemKey(mi), n);
 
         in.clearOrder(b.id);
-        in.consumeReserve(mi, n);
+        in.consumeReserve(new ItemKey(mi), n);
 
         DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, b.total, s.total, s.price);
         this.itemStat.computeIfAbsent(mi.id, k->new Stat(mi.id)).histories.add(log);
@@ -429,8 +429,7 @@ public class Exchange {
     private Map<UUID, Map<UUID, Order>> orders = new HashMap<>();
     @Transient
     private PeriodicTimer updateTimer = new PeriodicTimer(20000);
-    //@Transient
-    //private Map<Integer, Info> info = new HashMap<>();
+
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "exchange_id")

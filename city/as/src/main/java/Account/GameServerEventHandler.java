@@ -30,10 +30,4 @@ public class GameServerEventHandler extends SimpleChannelInboundHandler<Package>
 		if(!GameServerEventDispatcher.getInstance().call(msg, session))
 			ctx.close();
 	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		cause.printStackTrace();
-		//ctx.close();
-	}
 }

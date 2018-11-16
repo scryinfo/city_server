@@ -1,14 +1,14 @@
 package Game;
 
-import java.util.UUID;
+import gs.Gs;
 
 public interface IShelf {
 
-    UUID addshelf(MetaItem mi, int num, int price);
+    Gs.Shelf.Content addshelf(Item mi, int price);
 
-    boolean delshelf(UUID id);
+    boolean delshelf(ItemKey id, int n);
 
-    Shelf.ItemInfo getContent(UUID id);
+    Shelf.Content getContent(ItemKey id);
 
-    boolean setNum(UUID id, int num);
+    boolean setPrice(ItemKey id, int price);
 }

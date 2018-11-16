@@ -29,15 +29,15 @@ public abstract class LineBase {
 
     protected LineBase() {
     }
-
-    boolean isPause() {
+    public abstract ItemKey newItemKey(UUID producerId, int qty);
+    public boolean isPause() {
         return count >= targetNum || workerNum == 0;
     }
     @Transient
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 //    public LineBase(Db.Lines.Line d) {
 //        this.id = new ObjectId(d.getId().toByteArray());
-//        this.item = MetaData.getItem(d.getItemId());
+//        this.meta = MetaData.getItem(d.getItemId());
 //        this.count = d.getNowCount();
 //        this.targetNum = d.getTargetCount();
 //        this.workerNum = d.getWorkerNum();
@@ -52,7 +52,7 @@ public abstract class LineBase {
 //    Db.Lines.Line toDbProto() {
 //        return Db.Lines.Line.newBuilder()
 //                .setId(Util.toByteString(id))
-//                .setItemId(item.id)
+//                .setItemId(meta.id)
 //                .setNowCount(count)
 //                .setTargetCount(targetNum)
 //                .setWorkerNum(workerNum)

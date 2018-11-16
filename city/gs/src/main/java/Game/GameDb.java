@@ -185,6 +185,20 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+	public static void initBrandManager() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(BrandManager.class, BrandManager.ID) == null)
+			statelessSession.insert(new BrandManager());
+		transaction.commit();
+		statelessSession.close();
+	}
+	public static BrandManager getBrandManager() {
+		Transaction transaction = session.beginTransaction();
+		BrandManager res = session.get(BrandManager.class, BrandManager.ID);
+		transaction.commit();
+		return res;
+	}
 	public static GroundManager getGroundManager() {
 		Transaction transaction = session.beginTransaction();
 		GroundManager res = session.get(GroundManager.class, GroundManager.ID);

@@ -526,13 +526,29 @@ public final class GsCode {
      */
     adSlotTimeoutInform(63, 1125),
     /**
+     * <code>adSetTicket = 1126;</code>
+     *
+     * <pre>
+     *c 设置门票
+     * </pre>
+     */
+    adSetTicket(64, 1126),
+    /**
+     * <code>adSetSlot = 1127;</code>
+     *
+     * <pre>
+     *c 设置槽位
+     * </pre>
+     */
+    adSetSlot(65, 1127),
+    /**
      * <code>rentOutGround = 1130;</code>
      *
      * <pre>
      *c 出租自己的地
      * </pre>
      */
-    rentOutGround(64, 1130),
+    rentOutGround(66, 1130),
     /**
      * <code>rentGround = 1131;</code>
      *
@@ -540,7 +556,7 @@ public final class GsCode {
      *c 租别人的地
      * </pre>
      */
-    rentGround(65, 1131),
+    rentGround(67, 1131),
     /**
      * <code>sellGround = 1132;</code>
      *
@@ -548,7 +564,7 @@ public final class GsCode {
      *c 出售自己的地
      * </pre>
      */
-    sellGround(66, 1132),
+    sellGround(68, 1132),
     /**
      * <code>buyGround = 1133;</code>
      *
@@ -556,11 +572,11 @@ public final class GsCode {
      *c 购买别人出售中的地
      * </pre>
      */
-    buyGround(67, 1133),
+    buyGround(69, 1133),
     /**
      * <code>cheat = 2000;</code>
      */
-    cheat(68, 2000),
+    cheat(70, 2000),
     ;
 
     /**
@@ -1076,6 +1092,22 @@ public final class GsCode {
      */
     public static final int adSlotTimeoutInform_VALUE = 1125;
     /**
+     * <code>adSetTicket = 1126;</code>
+     *
+     * <pre>
+     *c 设置门票
+     * </pre>
+     */
+    public static final int adSetTicket_VALUE = 1126;
+    /**
+     * <code>adSetSlot = 1127;</code>
+     *
+     * <pre>
+     *c 设置槽位
+     * </pre>
+     */
+    public static final int adSetSlot_VALUE = 1127;
+    /**
      * <code>rentOutGround = 1130;</code>
      *
      * <pre>
@@ -1181,6 +1213,8 @@ public final class GsCode {
         case 1123: return adPutAdToSlot;
         case 1124: return adDelAdFromSlot;
         case 1125: return adSlotTimeoutInform;
+        case 1126: return adSetTicket;
+        case 1127: return adSetSlot;
         case 1130: return rentOutGround;
         case 1131: return rentGround;
         case 1132: return sellGround;
@@ -1246,7 +1280,7 @@ public final class GsCode {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gsCode.proto\022\006gscode*\206\013\n\006OpCode\022\n\n\005log" +
+      "\n\014gsCode.proto\022\006gscode*\250\013\n\006OpCode\022\n\n\005log" +
       "in\020\350\007\022\016\n\theartBeat\020\351\007\022\016\n\troleLogin\020\352\007\022\017\n" +
       "\ncreateRole\020\353\007\022\t\n\004move\020\354\007\022\017\n\nunitCreate\020" +
       "\355\007\022\017\n\nunitRemove\020\356\007\022\017\n\nunitChange\020\357\007\022\021\n\014" +
@@ -1279,9 +1313,10 @@ public final class GsCode {
       "\323\010\022\022\n\rbidFailInform\020\324\010\022\021\n\014bidWinInform\020\325" +
       "\010\022\016\n\tadAddSlot\020\340\010\022\016\n\tadDelSlot\020\341\010\022\016\n\tadB" +
       "uySlot\020\342\010\022\022\n\radPutAdToSlot\020\343\010\022\024\n\017adDelAd" +
-      "FromSlot\020\344\010\022\030\n\023adSlotTimeoutInform\020\345\010\022\022\n" +
-      "\rrentOutGround\020\352\010\022\017\n\nrentGround\020\353\010\022\017\n\nse" +
-      "llGround\020\354\010\022\016\n\tbuyGround\020\355\010\022\n\n\005cheat\020\320\017"
+      "FromSlot\020\344\010\022\030\n\023adSlotTimeoutInform\020\345\010\022\020\n" +
+      "\013adSetTicket\020\346\010\022\016\n\tadSetSlot\020\347\010\022\022\n\rrentO" +
+      "utGround\020\352\010\022\017\n\nrentGround\020\353\010\022\017\n\nsellGrou" +
+      "nd\020\354\010\022\016\n\tbuyGround\020\355\010\022\n\n\005cheat\020\320\017"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

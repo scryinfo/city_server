@@ -23,7 +23,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected FactoryBase() {
     }
 
-    public abstract LineBase addLine(MetaItem m);
+    public abstract LineBase addLine(MetaItem m, int workerNum, int targetNum);
 
     @Override
     public boolean reserve(MetaItem m, int n) {
@@ -31,22 +31,22 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public boolean lock(MetaItem m, int n) {
+    public boolean lock(ItemKey m, int n) {
         return store.lock(m, n);
     }
 
     @Override
-    public boolean unLock(MetaItem m, int n) {
+    public boolean unLock(ItemKey m, int n) {
         return store.unLock(m, n);
     }
 
     @Override
-    public void consumeLock(MetaItem m, int n) {
+    public void consumeLock(ItemKey m, int n) {
         store.consumeLock(m, n);
     }
 
     @Override
-    public void consumeReserve(MetaItem m, int n) {
+    public void consumeReserve(ItemKey m, int n) {
         store.consumeReserve(m, n);
     }
 
@@ -87,7 +87,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         this.lines.values().forEach(l -> {
             int add = l.update(diffNano);
             if(add > 0) {
-                this.store.offset(l.item, add);
+                this.store.offset(l.newItemKey(ownerId(), 0), add);
                 Gs.LineInfo i = Gs.LineInfo.newBuilder()
                         .setId(Util.toByteString(l.id))
                         .setNowCount(l.count)
@@ -128,44 +128,34 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         this.store.setCapacity(meta.storeCapacity); // this is hibernate design problem...
         this.shelf.setCapacity(meta.shelfCapacity);
     }
-
+    protected abstract boolean shelfAddable(ItemKey k);
     @Override
-    public UUID addshelf(MetaItem mi, int num, int price) {
-        if(!this.store.lock(mi, num))
+    public Gs.Shelf.Content addshelf(Item mi, int price) {
+        if(!shelfAddable(mi.key) || !this.store.lock(mi.key, mi.n))
             return null;
-        return this.shelf.add(mi, num, price);
+        return this.shelf.add(mi, price);
     }
 
     @Override
-    public boolean delshelf(UUID id) {
-        Shelf.ItemInfo i = this.shelf.getContent(id);
+    public boolean delshelf(ItemKey id, int n) {
+        if(this.shelf.del(id, n)) {
+            this.store.unLock(id, n);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setPrice(ItemKey id, int price) {
+        Shelf.Content i = this.shelf.getContent(id);
         if(i == null)
             return false;
-        this.store.unLock(i.item, i.n);
-        this.shelf.del(id);
+        i.price = price;
         return true;
     }
 
     @Override
-    public boolean setNum(UUID id, int num) {
-        Shelf.ItemInfo i = this.shelf.getContent(id);
-        if(i == null)
-            return false;
-        int delta = num - i.n;
-        boolean ok = false;
-        if(delta > 0)
-            ok = this.store.lock(i.item, delta);
-        else if(delta < 0)
-            ok = this.store.unLock(i.item, delta);
-
-        if(ok) {
-            i.n += delta;
-        }
-        return ok;
-    }
-
-    @Override
-    public Shelf.ItemInfo getContent(UUID id) {
+    public Shelf.Content getContent(ItemKey id) {
         return this.shelf.getContent(id);
     }
 }

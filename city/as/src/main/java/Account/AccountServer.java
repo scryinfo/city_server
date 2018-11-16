@@ -1,6 +1,8 @@
 package Account;
 
 import Shared.*;
+import ascode.AsCode;
+import gacode.GaCode;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
@@ -47,7 +49,7 @@ public class AccountServer {
                             public void initChannel(SocketChannel ch) throws Exception {
 								ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
-                                ch.pipeline().addLast(new PackageEncoder(false));
+                                ch.pipeline().addLast(new PackageEncoder(GaCode.OpCode.class));
                                 ch.pipeline().addLast(businessLogicExecutor, new GameServerEventHandler());
 								ch.pipeline().addLast(new ExceptionHandler());
                             }
@@ -63,7 +65,7 @@ public class AccountServer {
 							public void initChannel(SocketChannel ch) throws Exception {
 								ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
 								ch.pipeline().addLast(new PackageDecoder());
-								ch.pipeline().addLast(new PackageEncoder(false));
+								ch.pipeline().addLast(new PackageEncoder(AsCode.OpCode.class));
 								//ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));
 								ch.pipeline().addLast(businessLogicExecutor, new AccountEventHandler());
 								ch.pipeline().addLast(new ExceptionHandler());

@@ -23,6 +23,11 @@ public class TrivialBuilding extends Building {
     }
 
     @Override
+    protected void visitImpl(Npc npc) {
+
+    }
+
+    @Override
     protected void _update(long diffNano) {
 
     }

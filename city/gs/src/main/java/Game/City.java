@@ -46,6 +46,11 @@ public class City {
     public static final int TERRIAN_PLAYER = 0x00000002;
     public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
 
+    public int weather() {
+        return 0;
+    }
+
+
     public static final class TerrianInfo {
         UUID ownerId;
         enum State {
@@ -158,12 +163,17 @@ public class City {
         return currentTimeSectionIdx;
     }
     private int currentTimeSectionIdx;
+    public int currentHour() {
+        return lastHour;
+    }
     private void updateTimeSection(long diffNano) {
         int nowHour = this.localTime().getHour();
         if(lastHour != nowHour)
         {
             hourTickAction(nowHour);
             lastHour = nowHour;
+            if(lastHour > nowHour)
+                dayTickAction();
         }
         timeSectionAccumlateNano += diffNano;
         if(timeSectionAccumlateNano - TimeUnit.SECONDS.toNanos(10) > TimeUnit.HOURS.toNanos(meta.minHour))
@@ -177,6 +187,10 @@ public class City {
                 timeSectionTickAction(index, nowHour, meta.timeSectionDuration(index));
             }
         }
+    }
+
+    private void dayTickAction() {
+        MetaData.updateDayId();
     }
 
     private void hourTickAction(int nowHour) {
@@ -193,24 +207,24 @@ public class City {
 
     public long leftMsToNextTimeSection() {
         LocalTime now = localTime();
-        int nextTimeSectionHour = nextTimeSectionHour(this.currentTimeSectionIdx);
+        int nextTimeSectionHour = meta.nextTimeSectionHour(this.currentTimeSectionIdx);
         LocalTime next = LocalTime.of(nextTimeSectionHour, 0);
         return Duration.between(now, next).toMillis();
     }
     public int nextTimeSectionDuration() {
         return meta.nextTimeSectionDuration(this.currentTimeSectionIdx);
     }
-    public int nextTimeSectionHour(int nowHour) {
-        for(int i = 0; i < meta.timeSection.length; ++i) {
-            if(nowHour == meta.timeSection[i]) {
-                if(i+1 == meta.timeSection.length)
-                    return meta.timeSection[0];
-                else
-                    return meta.timeSection[i+1];
-            }
-        }
-        return -1;
-    }
+//    public int nextTimeSectionHour(int nowHour) {
+//        for(int i = 0; i < meta.timeSection.length; ++i) {
+//            if(nowHour == meta.timeSection[i]) {
+//                if(i+1 == meta.timeSection.length)
+//                    return meta.timeSection[0];
+//                else
+//                    return meta.timeSection[i+1];
+//            }
+//        }
+//        return -1;
+//    }
     LocalTime localTime() {
         return Util.getLocalTime(this.meta.timeZone);
     }

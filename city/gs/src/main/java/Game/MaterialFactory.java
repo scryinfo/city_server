@@ -16,6 +16,12 @@ public class MaterialFactory extends FactoryBase {
     @Entity
     public final static class Line extends LineBase {
         protected Line(){}
+
+        @Override
+        public ItemKey newItemKey(UUID producerId, int qty) {
+            return new ItemKey(item);
+        }
+
         public Line(MetaMaterial item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
         }
@@ -26,8 +32,8 @@ public class MaterialFactory extends FactoryBase {
         this.meta = meta;
     }
     @Override
-    public boolean delItem(MetaItem mi) {
-        return this.store.delItem(mi);
+    public boolean delItem(ItemKey k) {
+        return this.store.delItem(k);
     }
     @Transient
     private MetaMaterialFactory meta;
@@ -37,6 +43,12 @@ public class MaterialFactory extends FactoryBase {
         super._1();
         this.meta = (MetaMaterialFactory) super.metaBuilding;
     }
+
+    @Override
+    protected boolean shelfAddable(ItemKey k) {
+        return k.meta instanceof MetaMaterial;
+    }
+
     @Override
     public Gs.MaterialFactory detailProto() {
         Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setInfo(super.toProto());
@@ -49,11 +61,17 @@ public class MaterialFactory extends FactoryBase {
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
         builder.addMaterialFactory(this.detailProto());
     }
+
     @Override
-    public LineBase addLine(MetaItem item) {
-        if(!(item instanceof MetaMaterial))
+    protected void visitImpl(Npc npc) {
+
+    }
+
+    @Override
+    public LineBase addLine(MetaItem item, int workerNum, int targetNum) {
+        if(!(item instanceof MetaMaterial) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
-        Line line = new Line((MetaMaterial)item,0,0);
+        Line line = new Line((MetaMaterial)item, targetNum, workerNum);
         lines.put(line.id, line);
         return line;
     }

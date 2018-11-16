@@ -14,9 +14,12 @@ public class Apartment extends Building {
     public Apartment(MetaApartment meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
+        this.qty = meta.qty;
     }
     @Transient
     private MetaApartment meta;
+
+    private int qty;
 
     @Column(nullable = false)
     private int rent;
@@ -56,11 +59,18 @@ public class Apartment extends Building {
                 .setRent(this.rent)
                 .setRenter(guest.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
+                .setQty(qty)
                 .build();
     }
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
         builder.addApartment(this.detailProto());
     }
+
+    @Override
+    protected void visitImpl(Npc npc) {
+
+    }
+
     @Override
     protected void _update(long diffNano) {
 

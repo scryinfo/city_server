@@ -161,8 +161,14 @@ public class GameSession {
 					return;
 				if (n <= 0)
 					return;
-				if(player.getBag().reserve(mi, n))
-					player.getBag().consumeReserve(mi, n);
+				if(player.getBag().reserve(mi, n)) {
+					Item item;
+					if(mi instanceof MetaMaterial)
+						item = new Item(new ItemKey(mi), n);
+					else
+						item = new Item(new ItemKey(mi, player.id(), 0), n);
+					player.getBag().consumeReserve(item.key, n);
+				}
                 GameDb.saveOrUpdate(player);
                 break;
 			}
@@ -405,80 +411,56 @@ public class GameSession {
 		if(player.extendBag())
 			this.write(Package.create(cmd));
 	}
-	public void shelfAdd(short cmd, Message message) {
+	public void shelfAdd(short cmd, Message message) throws Exception {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
-		if(c.getNum() <= 0 || c.getPrice() <= 0)
-			return;
-		MetaItem mi = MetaData.getItem(c.getItemId());
-		if(mi == null)
-			return;
+		Item item = new Item(c.getItem());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(id);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
 			return;
 		IShelf s = (IShelf)building;
-		UUID cid = s.addshelf(mi, c.getNum(), c.getPrice());
-		if(cid != null)
-			this.write(Package.create(cmd, Gs.Shelf.Content.newBuilder()
-					.setId(Util.toByteString(cid))
-					.setItemId(mi.id)
-					.setNum(c.getNum())
-					.setPrice(c.getPrice()).build()
-			));
+		Gs.Shelf.Content proto = s.addshelf(item, c.getPrice());
+		if(proto != null)
+			this.write(Package.create(cmd, proto));
 		else
 			this.write(Package.fail(cmd));
 	}
-	public void shelfDel(short cmd, Message message) {
+	public void shelfDel(short cmd, Message message) throws Exception {
 		Gs.ShelfDel c = (Gs.ShelfDel)message;
+		Item item = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		UUID cid = Util.toUuid(c.getContentId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
 			return;
 		IShelf s = (IShelf)building;
-		if(s.delshelf(cid))
+		if(s.delshelf(item.key, item.n))
 			this.write(Package.create(cmd, c));
 		else
 			this.write(Package.fail(cmd));
 	}
-	public void shelfSet(short cmd, Message message) {
+	public void shelfSet(short cmd, Message message) throws Exception {
 		Gs.ShelfSet c = (Gs.ShelfSet)message;
-		if(c.getNum() < 0 || c.getPrice() <= 0)
+		if(c.getPrice() <= 0)
 			return;
+		Item item = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		UUID cid = Util.toUuid(c.getContentId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
 			return;
 		IShelf shelf = (IShelf)building;
-		Shelf.ItemInfo i = shelf.getContent(cid);
-		if(i == null) {
-			this.write(Package.fail(cmd));
-			return;
-		}
-		if(i.n != c.getNum()) {
-			if(shelf.setNum(cid, c.getNum())) {
-				i.price = c.getPrice();
-				this.write(Package.create(cmd, c));
-			}
-			else
-				this.write(Package.fail(cmd));
-		}
-		else if(i.price != c.getPrice()) {
-			i.price = c.getPrice();
+		if(shelf.setPrice(item.key, c.getPrice()))
 			this.write(Package.create(cmd, c));
-		}
 		else
-			this.write(Package.create(cmd, c));
+			this.write(Package.fail(cmd));
 	}
 
-	public void buyInShelf(short cmd, Message message) {
+	public void buyInShelf(short cmd, Message message) throws Exception {
 		Gs.BuyInShelf c = (Gs.BuyInShelf)message;
-		if(c.getNum() <= 0 || c.getPrice() <= 0)
+		if(c.getPrice() <= 0)
 			return;
+		Item item = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		UUID wid = Util.toUuid(c.getWareHouseId().toByteArray());
-		UUID cid = Util.toUuid(c.getContentId().toByteArray());
 		Building sellBuilding = City.instance().getBuilding(bid);
 		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || sellBuilding.canUseBy(player.id()))
 			return;
@@ -486,23 +468,23 @@ public class GameSession {
 		if(buyStore == null)
 		    return;
 		IShelf sellShelf = (IShelf)sellBuilding;
-		Shelf.ItemInfo i = sellShelf.getContent(cid);
-		if(i == null || i.price != c.getPrice() || i.n < c.getNum()) {
+		Shelf.Content i = sellShelf.getContent(item.key);
+		if(i == null || i.price != c.getPrice() || i.n < item.n) {
 			this.write(Package.fail(cmd));
 			return;
 		}
-		long cost = c.getNum()*c.getPrice();
+		long cost = item.n*c.getPrice();
 		if(player.money() < cost)
 			return;
 
 		// begin do modify
-		if(!buyStore.reserve(i.item, c.getNum()))
+		if(!buyStore.reserve(item.key.meta, item.n))
 			return;
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
-		buyStore.consumeReserve(i.item, c.getNum());
-		sellShelf.setNum(cid, i.n - c.getNum());
+		buyStore.consumeReserve(item.key, item.n);
+		i.n -= item.n;
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 	}
@@ -543,7 +525,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		IStorage s = IStorage.get(bid, player);
-		if (s == null || !s.lock(mi, c.getNum()))
+		if (s == null || !s.lock(new ItemKey(mi), c.getNum()))
 			return;
 		UUID orderId = Exchange.instance().addSellOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), bid);
 		s.markOrder(orderId);
@@ -674,6 +656,8 @@ public class GameSession {
 	}
 	public void addLine(short cmd, Message message) {
 		Gs.AddLine c = (Gs.AddLine) message;
+		if(c.getTargetNum() <= 0 || c.getWorkerNum() <= 0)
+			return;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
@@ -682,10 +666,11 @@ public class GameSession {
 		if(m == null || (!m.useDirectly && !player.canProduce(m.id)))
 			return;
 		FactoryBase f = (FactoryBase) b;
-		if (f.freeWorkerNum() < c.getWorkerNum() || f.lineFull())
+		if (f.lineFull())
 			return;
-		LineBase line = f.addLine(m);
-		this.write(Package.create(cmd, line.toProto()));
+		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum());
+		if(line != null)
+			this.write(Package.create(cmd, line.toProto()));
 	}
 
 	public void changeLine(short cmd, Message message) {
@@ -706,14 +691,15 @@ public class GameSession {
 	}
 	public void adAddSlot(short cmd, Message message) {
 		Gs.AddSlot c = (Gs.AddSlot)message;
-		if(c.getMaxDayToRent() < c.getMinDayToRent() || c.getRentPreDay() <= 0 || c.getDeposit() <= 0)
-			return;
+
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
 			return;
 		PublicFacility pf = (PublicFacility)building;
-		PublicFacility.Slot slot = pf.addSlot(c.getMaxDayToRent(), c.getMinDayToRent(), c.getRentPreDay(), c.getDeposit());
+		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
+			return;
+		PublicFacility.Slot slot = pf.addSlot(c.getMaxDayToRent(), c.getMinDayToRent(), c.getRentPreDay());
 		this.write(Package.create(cmd, slot.toProto()));
 	}
 	public void adDelSlot(short cmd, Message message) {
@@ -729,13 +715,27 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
+	public void adSetTicket(short cmd, Message message) {
+		Gs.AdSetTicket c = (Gs.AdSetTicket)message;
+		if(c.getPrice() < 0)
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
+			return;
+		PublicFacility pf = (PublicFacility)building;
+		pf.setTickPrice(c.getPrice());
+	}
 	public void adPutAdToSlot(short cmd, Message message) {
 		Gs.AddAd c = (Gs.AddAd)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || !(building instanceof PublicFacility))
 			return;
-
+		if(c.getType() == Gs.PublicFacility.Ad.Type.BUILDING) {
+			if(!MetaBuilding.canAd(MetaBuilding.type(c.getMetaId())))
+				return;
+		}
 		PublicFacility pf = (PublicFacility)building;
 		PublicFacility.SlotRent sr = null;
 		if(c.hasId()) {
@@ -766,6 +766,37 @@ public class GameSession {
 			return;
 		GameDb.saveOrUpdate(pf);
 		this.write(Package.create(cmd));
+	}
+	private boolean isValidDayToRent(int min, int max, PublicFacility pf) {
+		if(min <= 0 || min > pf.getMinDayToRent() || max <= 0 || max < min || max > pf.getMaxDayToRent())
+			return false;
+		return true;
+	}
+	private boolean isValidRentPreDay(int rent, PublicFacility pf) {
+		if(rent <= 0 || rent > pf.getMaxRentPreDay())
+			return false;
+		return true;
+	}
+
+	public void adSetSlot(short cmd, Message message) {
+		Gs.AdSetSlot c = (Gs.AdSetSlot)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof PublicFacility))
+			return;
+		PublicFacility pf = (PublicFacility)building;
+		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
+			return;
+		UUID sid = Util.toUuid(c.getSlotId().toByteArray());
+		PublicFacility.Slot slot = pf.getSlot(sid);
+		if(slot == null)
+			return;
+		if(pf.isSlotRentOut(sid))
+			return;
+		slot.rentPreDay = c.getRentPreDay();
+		slot.minDayToRent = c.getMinDayToRent();
+		slot.maxDayToRent = c.getMaxDayToRent();
+		this.write(Package.create(cmd, c));
 	}
 
 	public void adDelAdFromSlot(short cmd, Message message) {
@@ -820,16 +851,14 @@ public class GameSession {
 		b.watchDetailInfo(this);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
-	public void delItem(short cmd, Message message) {
+	public void delItem(short cmd, Message message) throws Exception {
 		Gs.DelItem c = (Gs.DelItem)message;
+		ItemKey k = new ItemKey(c.getItem());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		IStorage storage = IStorage.get(id, player);
 		if(storage == null)
 			return;
-		MetaItem mi = MetaData.getItem(c.getItemId());
-		if(mi == null)
-			return;
-		if(storage.delItem(mi))
+		if(storage.delItem(k))
 		{
 			GameDb.saveOrUpdate(storage);
 			this.write(Package.create(cmd, c));
@@ -837,7 +866,7 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
-	public void transferItem(short cmd, Message message) {
+	public void transferItem(short cmd, Message message) throws Exception {
 		Gs.TransferItem c = (Gs.TransferItem)message;
 		UUID srcId = Util.toUuid(c.getSrc().toByteArray());
 		UUID dstId = Util.toUuid(c.getDst().toByteArray());
@@ -845,20 +874,18 @@ public class GameSession {
 		IStorage dst = IStorage.get(dstId, player);
 		if(src == null || dst == null)
 			return;
-		MetaItem mi = MetaData.getItem(c.getItemId());
-		if(mi == null)
-			return;
-		if(!src.lock(mi, c.getN())) {
+		Item item = new Item(c.getItem());
+		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
 			return;
 		}
-		if(!dst.reserve(mi, c.getN())) {
-			src.unLock(mi, c.getN());
+		if(!dst.reserve(item.key.meta, item.n)) {
+			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
 			return;
 		}
-		src.consumeLock(mi, c.getN());
-		dst.consumeReserve(mi, c.getN());
+		src.consumeLock(item.key, item.n);
+		dst.consumeReserve(item.key, item.n);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst));
 		this.write(Package.create(cmd, c));
 	}

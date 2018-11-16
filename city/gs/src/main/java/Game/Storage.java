@@ -1,6 +1,7 @@
 package Game;
 
 import gs.Gs;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
@@ -35,21 +36,21 @@ public class Storage implements IStorage {
     public Gs.Store toProto() {
         Gs.Store.Builder builder = Gs.Store.newBuilder();
         this.inHand.forEach((k, v)->{
-            builder.addInHand(Gs.IntNum.newBuilder().setId(k.id).setNum(v));
+            builder.addInHand(Gs.Item.newBuilder().setKey(k.toProto()).setN(v));
         });
         this.reserved.forEach((k, v)->{
             builder.addReserved(Gs.IntNum.newBuilder().setId(k.id).setNum(v));
         });
         this.locked.forEach((k, v)->{
-            builder.addLocked(Gs.IntNum.newBuilder().setId(k.id).setNum(v));
+            builder.addLocked(Gs.Item.newBuilder().setKey(k.toProto()).setN(v));
         });
         return builder.build();
     }
-    public boolean offset(MetaItem item, final int n) {
+    public boolean offset(ItemKey item, final int n) {
         if(n == 0)
             return true;
         else if(n > 0) {
-            if(item.size*n > availableSize())
+            if(item.meta.size*n > availableSize())
                 return false;
             this.inHand.put(item, this.inHand.getOrDefault(item, 0)+n);
         }
@@ -64,15 +65,26 @@ public class Storage implements IStorage {
     }
     @Transient
     private int capacity;
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
+//    private Map<MetaItem, Integer> inHand = new HashMap<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    private Map<ItemKey, Integer> inHand = new HashMap<>();
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = MetaItem.Converter.class, attributeName = "key")
-    private Map<MetaItem, Integer> inHand = new HashMap<>();
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<MetaItem, Integer> reserved = new HashMap<>();
+
+
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
+//    private Map<MetaItem, Integer> locked = new HashMap<>();
     @ElementCollection(fetch = FetchType.EAGER)
-    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
-    private Map<MetaItem, Integer> locked = new HashMap<>();
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    private Map<ItemKey, Integer> locked = new HashMap<>();
 
     void setCapacity(int capacity) {
         this.capacity = capacity;
@@ -87,7 +99,7 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public boolean lock(MetaItem m, int n) {
+    public boolean lock(ItemKey m, int n) {
         if(!has(m, n))
             return false;
         locked.put(m, reserved.getOrDefault(m, 0) + n);
@@ -95,7 +107,7 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public boolean unLock(MetaItem m, int n) {
+    public boolean unLock(ItemKey m, int n) {
         Integer i = this.locked.get(m);
         if(i == null || i < n)
             return false;
@@ -105,7 +117,7 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public void consumeLock(MetaItem m, int n) {
+    public void consumeLock(ItemKey m, int n) {
         locked.put(m, locked.get(m) - n);
         inHand.put(m, inHand.get(m) - n);
         if(locked.get(m) == 0)
@@ -115,11 +127,11 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public void consumeReserve(MetaItem m, int n) {
-        reserved.put(m, reserved.get(m) - n);
+    public void consumeReserve(ItemKey m, int n) {
+        reserved.put(m.meta, reserved.get(m.meta) - n);
         inHand.put(m, inHand.getOrDefault(m, 0) + n);
-        if(reserved.get(m) == 0)
-            reserved.remove(m);
+        if(reserved.get(m.meta) == 0)
+            reserved.remove(m.meta);
     }
 
     @Override
@@ -133,7 +145,7 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public boolean delItem(MetaItem mi) {
+    public boolean delItem(ItemKey mi) {
         if(!this.has(mi, 1))
             return false;
         this.inHand.remove(mi);
@@ -166,7 +178,7 @@ public class Storage implements IStorage {
 //        store.getLockedList().forEach(c->this.locked.put(MetaData.getItem(c.getId()), c.getN()));
 //    }
     public int usedSize() {
-        return inHand.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
+        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
     }
     public int availableSize() {
         return capacity - usedSize();
@@ -177,7 +189,7 @@ public class Storage implements IStorage {
             return 0;
         return n;
     }
-    public boolean has(MetaItem m, int n) {
+    public boolean has(ItemKey m, int n) {
         return inHand.get(m)==null?false:inHand.get(m) >= n;
     }
     public boolean full() {

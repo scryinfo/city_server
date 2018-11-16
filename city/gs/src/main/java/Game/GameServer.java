@@ -5,6 +5,7 @@ import Shared.Package;
 import com.google.common.collect.MapMaker;
 import ga.Ga;
 import gacode.GaCode;
+import gscode.GsCode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -80,6 +81,7 @@ public class GameServer {
         GroundAuction.init();
         GroundManager.init();
         Exchange.init();
+        BrandManager.init();
         City.instance().run();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
@@ -97,7 +99,7 @@ public class GameServer {
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
-                                ch.pipeline().addLast(new PackageEncoder(false));
+                                ch.pipeline().addLast(new PackageEncoder(GaCode.OpCode.class));
                                 ch.pipeline().addLast(businessLogicExecutor, new AccountServerEventHandler());
                                 ch.pipeline().addLast(new AutoReconnectHandler(b, GameServer.this::asConnectAction));
                                 ch.pipeline().addLast(new ExceptionHandler());
@@ -115,7 +117,7 @@ public class GameServer {
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
-                                ch.pipeline().addLast(new PackageEncoder(true));
+                                ch.pipeline().addLast(new PackageEncoder(GsCode.OpCode.class));
                                 //ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));
                                 ch.pipeline().addLast(businessLogicExecutor, new GameEventHandler()); // seems helpless. it only can relieve some db read operation cost due to all business are run in city thread
                                 ch.pipeline().addLast(new ExceptionHandler());

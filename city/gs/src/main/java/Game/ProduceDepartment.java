@@ -22,8 +22,8 @@ public class ProduceDepartment extends FactoryBase {
     }
 
     @Override
-    public boolean delItem(MetaItem mi) {
-        return this.store.delItem(mi);
+    public boolean delItem(ItemKey k) {
+        return this.store.delItem(k);
     }
 
     @Entity
@@ -32,6 +32,11 @@ public class ProduceDepartment extends FactoryBase {
             super(item, targetNum, workerNum);
         }
         protected Line() {}
+
+        @Override
+        public ItemKey newItemKey(UUID producerId, int qty) {
+            return new ItemKey(item, producerId, qty);
+        }
     }
 
     @PostLoad
@@ -39,6 +44,12 @@ public class ProduceDepartment extends FactoryBase {
         super._1();
         this.meta = (MetaProduceDepartment) super.metaBuilding;
     }
+
+    @Override
+    protected boolean shelfAddable(ItemKey k) {
+        return k.meta instanceof MetaGood;
+    }
+
     @Override
     public Gs.ProduceDepartment detailProto() {
         Gs.ProduceDepartment.Builder builder = Gs.ProduceDepartment.newBuilder().setInfo(super.toProto());
@@ -51,10 +62,16 @@ public class ProduceDepartment extends FactoryBase {
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
         builder.addProduceDepartment(this.detailProto());
     }
-    public LineBase addLine(MetaItem item) {
-        if(item instanceof MetaGood)
+
+    @Override
+    protected void visitImpl(Npc npc) {
+
+    }
+
+    public LineBase addLine(MetaItem item, int workerNum, int targetNum) {
+        if(!(item instanceof MetaGood) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
-        Line line = new Line((MetaGood)item,0,0);
+        Line line = new Line((MetaGood)item, targetNum, workerNum);
         lines.put(line.id, line);
         return line;
     }
