@@ -74,29 +74,16 @@ public class GameSession {
 		Validator.getInstance().unRegist(accountName, token);
 		logger.debug("account: " + player.getAccount() + " logout");
 	}
-
-	public GameSession(Player p, ChannelHandlerContext ctx) {
-		this.ctx = ctx;
-		this.channelId = ctx.channel().id();
-		this.player = p;
-
-		//updateScheduleFuture = ctx.channel().eventLoop().scheduleAtFixedRate(()->{this.saveOrUpdate();}, 0, UPDATE_MS, TimeUnit.MILLISECONDS);
-	}
 	
 	public GameSession(ChannelHandlerContext ctx){
 		this.ctx = ctx;
+		this.channelId = ctx.channel().id();
 		//updateScheduleFuture = ctx.channel().eventLoop().scheduleAtFixedRate(()->{this.saveOrUpdate();}, 0, UPDATE_MS, TimeUnit.MILLISECONDS);
 	}
 	public void write(Package pack) {
-		ctx.writeAndFlush(pack);
+		ctx.channel().writeAndFlush(pack);
 	}
-	public void pendingWrite(Package pack) {
-		ctx.write(pack);
-	}
-	public void flush() {
-		ctx.flush();
-	}
-	public void disconnect() {ctx.disconnect();}
+	public void disconnect() {ctx.channel().disconnect();}
 	public void asyncExecute(Method m, short cmd, Message message) {
 		City.instance().execute(()->{
 			try {
