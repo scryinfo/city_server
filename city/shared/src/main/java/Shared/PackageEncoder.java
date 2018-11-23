@@ -19,13 +19,14 @@ public class PackageEncoder extends MessageToByteEncoder<Package> {
     }
     @Override
     protected void encode(ChannelHandlerContext ctx, Package msg, ByteBuf out) throws InvocationTargetException, IllegalAccessException {
+        System.out.println(msg.opcode + " " + msg.body.length);
         msg.toByteBuf(out);
         Object o = this.method.invoke(null, msg.opcode);
         if(o instanceof GsCode.OpCode) {
             if(o != GsCode.OpCode.heartBeat)
-                logger.debug("send to client -> " + o);
+                logger.debug("send to client -> " + o + ", bytes: " + msg.body.length);
         }
         else if(o instanceof GaCode.OpCode)
-            logger.debug("send to server -> " + o);
+            logger.debug("send to server -> " + o + ", bytes: " + msg.body.length);
     }
 }

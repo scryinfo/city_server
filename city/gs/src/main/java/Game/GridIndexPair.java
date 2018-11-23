@@ -17,7 +17,7 @@ public class GridIndexPair {
 
     @Override
     public int hashCode() {
-        return Objects.hash(l, r);
+        return Objects.hash(l.hashCode(), r.hashCode());
     }
 
     public List<GridIndex> toIndexList() {

@@ -389,23 +389,25 @@ public class GameDb {
 		return builder.build();
 	}
 
-	private static final class TopGoodQty {
-		int goodId;
-		int lv;
+	protected static final class TopGoodQty {
+		public TopGoodQty() {}
+
+		int mid;
+		int goodlv;
 	}
 	public static TreeMap<Integer, Integer> getTopGoodQuality() {
 		TreeMap<Integer, Integer> res = new TreeMap<>();
 		StatelessSession session = sessionFactory.openStatelessSession();
 		Transaction transaction = session.beginTransaction();
-		NativeQuery<TopGoodQty> criteria = session.createNativeQuery("SELECT tt.* FROM player_good_lv tt INNER JOIN (SELECT good_meta_id, MAX(goodlv) AS TopLv FROM player_good_lv GROUP BY good_meta_id) groupedtt ON tt.good_meta_id = groupedtt.good_meta_id AND tt.goodlv = groupedtt.TopLv");
-		criteria.addScalar("good_meta_id", new IntegerType());
+		NativeQuery<TopGoodQty> criteria = session.createNativeQuery("SELECT tt.* FROM player_good_lv tt INNER JOIN (SELECT mid, MAX(goodlv) AS TopLv FROM player_good_lv GROUP BY mid) groupedtt ON tt.mid = groupedtt.mid AND tt.goodlv = groupedtt.TopLv");
+		criteria.addScalar("mid", new IntegerType());
 		criteria.addScalar("goodlv", new IntegerType());
 		criteria.setResultTransformer(Transformers.aliasToBean(TopGoodQty.class));
 		List<TopGoodQty> list = criteria.list();
 		transaction.commit();
 		session.close();
 
-		list.forEach(o->res.put(o.goodId, o.lv));
+		list.forEach(o->res.put(o.mid, o.goodlv));
 		return res;
 	}
 }

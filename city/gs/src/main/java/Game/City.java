@@ -23,6 +23,8 @@ public class City {
     private static final Logger logger = Logger.getLogger(City.class);
     public static int GridMaxX;
     public static int GridMaxY;
+    public static int GridX;
+    public static int GridY;
     private MetaCity meta;
     private Grid[][] grids;
     private static City instance;
@@ -116,6 +118,8 @@ public class City {
 
     private City(MetaCity meta) {
         this.meta = meta;
+        GridX = meta.gridX;
+        GridY = meta.gridY;
         GridMaxX = meta.x / meta.gridX;
         GridMaxY = meta.y / meta.gridY;
         grids = new Grid[GridMaxX][GridMaxY];
@@ -335,18 +339,14 @@ public class City {
         return res;
     }
 
-    public void mount(UUID id, CoordPair area) {
-        //this.ground.getOrDefault(id, new ArrayList);
-    }
-    public void mount(UUID id, Collection<Coordinate> area) {
-        //this.ground.getOrDefault(id, new ArrayList);
-    }
     public void delBuilding(Building building) {
         building.destroy();
         this.allBuilding.remove(building.id());
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
         buildings.remove(building.id());
+        GridIndex gi = building.coordinate().toGridIndex();
+        this.grids[gi.x][gi.y].del(building);
         building.broadcastDelete();
         GameDb.delete(building);
     }
@@ -365,14 +365,6 @@ public class City {
         b.broadcastCreate();
         return true;
     }
-//    public boolean addVirtualBuilding(VirtualBuilding b) {
-//        if(!this.canBuild(b))
-//            return false;
-//        takeAsRenter(b);
-//        GameDb.saveOrUpdate(b);
-//        b.broadcastCreate();
-//        return true;
-//    }
     private boolean canBuild(Building building) {
         for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
@@ -387,7 +379,8 @@ public class City {
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
-
+        GridIndex gi = building.coordinate().toGridIndex();
+        this.grids[gi.x][gi.y].add(building);
         this.topBuildingQty.compute(building.type(), (k, oldV)->{
             if(oldV == null)
                 return building.quality();

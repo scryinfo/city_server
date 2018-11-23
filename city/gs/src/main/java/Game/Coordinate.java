@@ -31,7 +31,7 @@ public class Coordinate {
     }
 
     GridIndex toGridIndex() {
-        return new GridIndex(x/City.GridMaxX, y/City.GridMaxY);
+        return new GridIndex(x/City.GridX, y/City.GridY);
     }
     public Coordinate shiftLU(int n) {
         return this.offset(-n, -n);

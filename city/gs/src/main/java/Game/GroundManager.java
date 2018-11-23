@@ -127,10 +127,10 @@ public class GroundManager {
                     return false;
             }
             else if(state == GroundInfo.CAN_BUILD) {
-                if(!i.ownerId.equals(playerId))
-                    return false;
-                if(i.renterId == null || !i.renterId.equals(playerId))
-                    return false;
+                if(!i.ownerId.equals(playerId)) {
+                    if(i.renterId == null || !i.renterId.equals(playerId))
+                        return false;
+                }
             }
         }
         return true;

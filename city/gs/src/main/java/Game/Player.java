@@ -288,7 +288,7 @@ public class Player {
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "good_meta_id")
+    @MapKeyColumn(name = "mid")
     @CollectionTable(name = "player_good_lv", joinColumns = @JoinColumn(name = "player_id"), indexes = { @Index(name = "TOP_QTY", columnList = "goodlv") })
     private Map<Integer, Integer> goodLv = new HashMap<>();
 }

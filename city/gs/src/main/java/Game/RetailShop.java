@@ -43,6 +43,8 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
     @Override
     public Message detailProto() {
         Gs.RetailShop.Builder builder = Gs.RetailShop.newBuilder();
+        builder.setShelf(this.shelf.toProto());
+        builder.setStore(this.store.toProto());
         builder.setInfo(this.toProto());
         builder.setAd(genAdPart());
         builder.setQty(qty);

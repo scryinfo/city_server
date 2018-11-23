@@ -4,6 +4,7 @@ import gs.Gs;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.util.Objects;
 
 @Embeddable
 public class GridIndex implements Comparable<GridIndex> {
@@ -26,6 +27,11 @@ public class GridIndex implements Comparable<GridIndex> {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
     GridIndexPair toSyncRange() {
         GridIndexPair res = new GridIndexPair();
         int delta = Grid.SYNC_RANGE_DELTA;
@@ -33,8 +39,8 @@ public class GridIndex implements Comparable<GridIndex> {
         int uy = this.y-delta<0?0:this.y-delta;
         res.l = new GridIndex(ux, uy);
 
-        int bx = this.x+delta>=City.GridMaxX?City.GridMaxX-delta:this.x+delta;
-        int by = this.y+delta>=City.GridMaxY?City.GridMaxY-delta:this.y+delta;
+        int bx = this.x+delta>=City.GridMaxX?City.GridMaxX-1:this.x+delta;
+        int by = this.y+delta>=City.GridMaxY?City.GridMaxY-1:this.y+delta;
         res.r = new GridIndex(bx, by);
         return res;
     }

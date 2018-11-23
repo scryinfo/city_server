@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 public class Grid {
     public static final int SYNC_RANGE_NUM = 9;
-    public static final int SYNC_RANGE_DELTA = (int) (Math.sqrt(SYNC_RANGE_NUM) - 1);
+    public static final int SYNC_RANGE_DELTA = (int) (Math.sqrt(SYNC_RANGE_NUM) - 2);
     private int x;
     private int y;
     private HashMap<UUID, Building> buildings = new HashMap<>();
@@ -33,8 +33,10 @@ public class Grid {
     void send(Package pack) {
         playerIds.forEach(id->{
             GameSession s = GameServer.allGameSessions.get(id);
-            if(s != null)
+            if(s != null) {
+                System.out.println("grid send to " + s.getPlayer().getName() + " " + id);
                 s.write(pack);
+            }
         });
     }
     public boolean hasBuilding(UUID id) {

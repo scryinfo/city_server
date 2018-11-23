@@ -118,18 +118,22 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         LineBase line = this.lines.get(lineId);
         if(line == null)
             return false;
+        Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();
         if(targetNum.isPresent()) {
             int t = targetNum.getAsInt();
             if(t < 0 || t > this.store.availableSize())
                 return false;
             line.targetNum = t;
+            builder.setTargetCount(t);
         }
         else if(workerNum.isPresent()) {
             int w = workerNum.getAsInt();
             if(w < 0 || (w > line.workerNum && this.freeWorkerNum() < w - line.workerNum))
                 return false;
             line.workerNum = w;
+            builder.setWorkerNum(w);
         }
+        GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.lineChangeInform_VALUE, builder.build()));
         return true;
     }
 
