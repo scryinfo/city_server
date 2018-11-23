@@ -148,6 +148,7 @@ public class GroundAuction {
             return Optional.of(Common.Fail.Reason.auctionNotFound);
         if(a.price >= price)
             return Optional.of(Common.Fail.Reason.auctionPriceIsLow);
+        a.price = price;
         if(a.biderId != null) {
             // unlock its money
             GameSession biderSession = GameServer.allGameSessions.get(a.biderId);
@@ -158,7 +159,6 @@ public class GroundAuction {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
         }
-        a.price = price;
         a.biderId = bider.id();
         bider.lockMoney(id, price);
         GameDb.saveOrUpdate(Arrays.asList(bider, this));

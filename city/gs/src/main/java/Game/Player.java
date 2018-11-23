@@ -22,6 +22,19 @@ import java.util.*;
         EvictListener.class,
 })
 public class Player {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(id, player.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     public static final UUID BAG_ID = UUID.fromString("a33eab42-cb75-4c77-bd27-710d299f5591");
 //    @ElementCollection(fetch = FetchType.EAGER)
 //    Set<Integer> itemIdCanProduce;
@@ -265,7 +278,7 @@ public class Player {
     public void groundBidingFail(UUID id, GroundAuction.Entry a) {
         int m = (int) this.unlockMoney(a.meta.id);
         GameDb.saveOrUpdate(this);
-        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(m).build()));
+        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(a.price).build()));
     }
 
     public String getName() {
