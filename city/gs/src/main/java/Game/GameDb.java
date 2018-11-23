@@ -15,8 +15,10 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
+import org.hibernate.type.IntegerType;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -185,6 +187,14 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+	public static void initTechTradeCenter() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(TechTradeCenter.class, TechTradeCenter.ID) == null)
+			statelessSession.insert(new TechTradeCenter());
+		transaction.commit();
+		statelessSession.close();
+	}
 	public static void initBrandManager() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -196,6 +206,12 @@ public class GameDb {
 	public static BrandManager getBrandManager() {
 		Transaction transaction = session.beginTransaction();
 		BrandManager res = session.get(BrandManager.class, BrandManager.ID);
+		transaction.commit();
+		return res;
+	}
+	public static TechTradeCenter getTechTradeCenter() {
+		Transaction transaction = session.beginTransaction();
+		TechTradeCenter res = session.get(TechTradeCenter.class, TechTradeCenter.ID);
 		transaction.commit();
 		return res;
 	}
@@ -371,6 +387,26 @@ public class GameDb {
 		transaction.commit();
 		session.close();
 		return builder.build();
+	}
+
+	private static final class TopGoodQty {
+		int goodId;
+		int lv;
+	}
+	public static TreeMap<Integer, Integer> getTopGoodQuality() {
+		TreeMap<Integer, Integer> res = new TreeMap<>();
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Transaction transaction = session.beginTransaction();
+		NativeQuery<TopGoodQty> criteria = session.createNativeQuery("SELECT tt.* FROM player_good_lv tt INNER JOIN (SELECT good_meta_id, MAX(goodlv) AS TopLv FROM player_good_lv GROUP BY good_meta_id) groupedtt ON tt.good_meta_id = groupedtt.good_meta_id AND tt.goodlv = groupedtt.TopLv");
+		criteria.addScalar("good_meta_id", new IntegerType());
+		criteria.addScalar("goodlv", new IntegerType());
+		criteria.setResultTransformer(Transformers.aliasToBean(TopGoodQty.class));
+		List<TopGoodQty> list = criteria.list();
+		transaction.commit();
+		session.close();
+
+		list.forEach(o->res.put(o.goodId, o.lv));
+		return res;
 	}
 }
 //public class GameDb {

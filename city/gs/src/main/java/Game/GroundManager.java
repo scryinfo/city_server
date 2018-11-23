@@ -264,11 +264,14 @@ public class GroundManager {
             if(info.containsKey(c))
                 throw new GroundAlreadySoldException();
         }
+        List<GroundInfo> gis = new ArrayList<>();
         for(Coordinate c : area) {
             GroundInfo i = new GroundInfo(c.x, c.y);
             i.ownerId = id;
             info.put(c, i);
+            gis.add(i);
             playerGround.computeIfAbsent(id, k->new HashSet<>()).add(i);
         }
+        this.broadcast(gis);
     }
 }

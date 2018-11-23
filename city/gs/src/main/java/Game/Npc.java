@@ -1,5 +1,7 @@
 package Game;
 
+import Game.Action.IAction;
+
 import javax.persistence.*;
 import java.util.Set;
 import java.util.UUID;
@@ -28,9 +30,14 @@ public class Npc {
     protected Npc() {
     }
 
+    public int salary() {
+        return this.born.salary();
+    }
 
+    public void idle() {
+    }
 
-    @Embeddable //hide those members, the only purpose is to mapping to the table
+        @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class AdapterData {
         @Column(name = "buildingId", updatable = false, nullable = false)
         protected UUID buildingId;
@@ -61,27 +68,6 @@ public class Npc {
         this.money = salary;
         this.tempBuilding = null;
     }
-//    public Npc(Document doc) {
-//        this.id = doc.getObjectId("_id");
-//        this.city = City.instance();
-//        this.born = city.getBuilding(doc.getObjectId("b"));
-//        this.money = doc.getInteger("m");
-//        ObjectId tmpBuildingId = doc.getObjectId("t");
-//        this.tempBuilding = tmpBuildingId == Util.NullOid?null:city.getBuilding(tmpBuildingId);
-//        if(tempBuilding != null)
-//        {
-//            tempBuilding.enter(this);
-//            inTravel = true;
-//        }
-//    }
-//    Document toBson() {
-//        Document doc = new Document()
-//                .append("_id", this.id)
-//                .append("b", this.born.id())
-//                .append("t", this.tempBuilding == null? Util.NullOid:this.tempBuilding.id())
-//                .append("m", this.money);
-//        return doc;
-//    }
     public Coordinate coordinate() {
         return this.tempBuilding == null? this.born.coordinate():this.tempBuilding.coordinate();
     }
@@ -92,31 +78,24 @@ public class Npc {
         return this.apartment != null;
     }
     public void update(long diffNano) {
-       int section = City.instance().currentTimeSectionIdx();
-       switch(section) {
-           //??
-       }
+//       int section = City.instance().currentTimeSectionIdx();
+//       switch(section) {
+//           //??
+//       }
 
        int id = chooseId();
        AIBuilding aiBuilding = MetaData.getAIBuilding(id);
        if(aiBuilding == null)
            return;
-        Set<Building> buildings;
-       switch (aiBuilding.random(BrandManager.instance().getBuildingRatio())) {
-           case IDLE:
-               break;
-           case GOTO_APARTMENT:
-               buildings = buildingLocated().getAllBuildingEffectMe(MetaBuilding.APARTMENT);
-               break;
-           case GOTO_PUBLIC_FACILITY:
-               buildings = buildingLocated().getAllBuildingEffectMe(MetaBuilding.PUBLIC);
-               break;
-           case GOTO_RETAIL_SHOP:
-               buildings = buildingLocated().getAllBuildingEffectMe(MetaBuilding.RETAIL);
-               break;
-       }
+
+       double idleRatio = 1.d;
+       double sumFlow = City.instance().getSumFlow();
+       if(sumFlow > 0)
+           idleRatio = 1.d - (double)this.buildingLocated().getFlow() / sumFlow;
+       IAction action = aiBuilding.random(idleRatio, BrandManager.instance().getBuildingRatio());
+       action.act(this);
     }
-    private Building chooseOne(Set<Building> buildings) {
+    public Building chooseOne(Set<Building> buildings) {
         return null;
     }
     private int type;
@@ -129,26 +108,30 @@ public class Npc {
         id += stopWork?1:0;
         return id;
     }
-    // where the npc is are not important, location change can not persist to db
+    // where the npc is are not important, location phaseChange can not persist to db
     // after server restarted, all npc will return to its owner born
-    public void visit(Building building) {
+    public void goFor(Building building) {
+        visit(building, false);
         building.enter(this);
+    }
+    public void hangOut(Building building) {
+        visit(building, true);
+    }
+    private void visit(Building building, boolean hangOut) {
         if(building == this.born) {
-            this.tempBuilding.leave(this);
+            if(!hangOut)
+                this.tempBuilding.leave(this);
             this.tempBuilding = null;
         }
         else {
-            this.born.leave(this);
+            if(!hangOut)
+                this.born.leave(this);
             this.tempBuilding = building;
         }
     }
-    public boolean rent(Apartment apartment) {
-        if(apartment.rent() > this.money)
-            return false;
-        this.money -= apartment.rent();
+
+    public void setApartment(Apartment apartment) {
         this.apartment = apartment;
-        apartment.take(this);
-        return true;
     }
     public void addMoney(int money) {
         this.money += money;
@@ -166,12 +149,15 @@ public class Npc {
         return this.tempBuilding == null?this.born:this.tempBuilding;
     }
     public void readyForDestroy() {
-        this.visit(this.born);
+        this.goFor(this.born);
     }
-    public void backHome() {
+    public void goHome() {
         if(apartment == null)
-            this.visit(born);
+            this.visit(born, true);
         else
-            this.visit(apartment);
+            this.visit(apartment, true);
+    }
+    public void goWork() {
+        this.visit(born, true);
     }
 }

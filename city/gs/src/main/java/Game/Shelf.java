@@ -3,15 +3,15 @@ package Game;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
-@Embeddable
+@Entity
 public class Shelf {
+    @Id
+    private final UUID id = UUID.randomUUID();
     @Transient
     private int capacity;
 
@@ -76,6 +76,8 @@ public class Shelf {
         if(i == null || i.n < n)
             return false;
         i.n -= n;
+        if(i.n == 0)
+            slots.remove(k);
         return true;
     }
     public boolean full() {

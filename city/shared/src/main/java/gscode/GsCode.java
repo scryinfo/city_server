@@ -574,9 +574,89 @@ public final class GsCode {
      */
     buyGround(69, 1133),
     /**
+     * <code>techTradeGetSummary = 1140;</code>
+     *
+     * <pre>
+     *c 获取科技交易一级列表
+     * </pre>
+     */
+    techTradeGetSummary(70, 1140),
+    /**
+     * <code>techTradeGetDetail = 1141;</code>
+     *
+     * <pre>
+     *c 获取科技交易二级列表
+     * </pre>
+     */
+    techTradeGetDetail(71, 1141),
+    /**
+     * <code>techTradeAdd = 1142;</code>
+     *
+     * <pre>
+     *c 上架
+     * </pre>
+     */
+    techTradeAdd(72, 1142),
+    /**
+     * <code>techTradeDel = 1143;</code>
+     *
+     * <pre>
+     *c 下架
+     * </pre>
+     */
+    techTradeDel(73, 1143),
+    /**
+     * <code>techTradeBuy = 1144;</code>
+     *
+     * <pre>
+     *c 购买
+     * </pre>
+     */
+    techTradeBuy(74, 1144),
+    /**
+     * <code>labLineChange = 1150;</code>
+     *
+     * <pre>
+     *s 研究所生产线阶段改变通知
+     * </pre>
+     */
+    labLineChange(75, 1150),
+    /**
+     * <code>newItem = 1151;</code>
+     *
+     * <pre>
+     *s 商品发明研究推送
+     * </pre>
+     */
+    newItem(76, 1151),
+    /**
+     * <code>labLineAdd = 1153;</code>
+     *
+     * <pre>
+     *c
+     * </pre>
+     */
+    labLineAdd(77, 1153),
+    /**
+     * <code>labLineDel = 1154;</code>
+     *
+     * <pre>
+     *cs
+     * </pre>
+     */
+    labLineDel(78, 1154),
+    /**
+     * <code>labLineSetWorkerNum = 1155;</code>
+     *
+     * <pre>
+     *c 设置生产线员工数量
+     * </pre>
+     */
+    labLineSetWorkerNum(79, 1155),
+    /**
      * <code>cheat = 2000;</code>
      */
-    cheat(70, 2000),
+    cheat(80, 2000),
     ;
 
     /**
@@ -1140,6 +1220,86 @@ public final class GsCode {
      */
     public static final int buyGround_VALUE = 1133;
     /**
+     * <code>techTradeGetSummary = 1140;</code>
+     *
+     * <pre>
+     *c 获取科技交易一级列表
+     * </pre>
+     */
+    public static final int techTradeGetSummary_VALUE = 1140;
+    /**
+     * <code>techTradeGetDetail = 1141;</code>
+     *
+     * <pre>
+     *c 获取科技交易二级列表
+     * </pre>
+     */
+    public static final int techTradeGetDetail_VALUE = 1141;
+    /**
+     * <code>techTradeAdd = 1142;</code>
+     *
+     * <pre>
+     *c 上架
+     * </pre>
+     */
+    public static final int techTradeAdd_VALUE = 1142;
+    /**
+     * <code>techTradeDel = 1143;</code>
+     *
+     * <pre>
+     *c 下架
+     * </pre>
+     */
+    public static final int techTradeDel_VALUE = 1143;
+    /**
+     * <code>techTradeBuy = 1144;</code>
+     *
+     * <pre>
+     *c 购买
+     * </pre>
+     */
+    public static final int techTradeBuy_VALUE = 1144;
+    /**
+     * <code>labLineChange = 1150;</code>
+     *
+     * <pre>
+     *s 研究所生产线阶段改变通知
+     * </pre>
+     */
+    public static final int labLineChange_VALUE = 1150;
+    /**
+     * <code>newItem = 1151;</code>
+     *
+     * <pre>
+     *s 商品发明研究推送
+     * </pre>
+     */
+    public static final int newItem_VALUE = 1151;
+    /**
+     * <code>labLineAdd = 1153;</code>
+     *
+     * <pre>
+     *c
+     * </pre>
+     */
+    public static final int labLineAdd_VALUE = 1153;
+    /**
+     * <code>labLineDel = 1154;</code>
+     *
+     * <pre>
+     *cs
+     * </pre>
+     */
+    public static final int labLineDel_VALUE = 1154;
+    /**
+     * <code>labLineSetWorkerNum = 1155;</code>
+     *
+     * <pre>
+     *c 设置生产线员工数量
+     * </pre>
+     */
+    public static final int labLineSetWorkerNum_VALUE = 1155;
+    /**
      * <code>cheat = 2000;</code>
      */
     public static final int cheat_VALUE = 2000;
@@ -1219,6 +1379,16 @@ public final class GsCode {
         case 1131: return rentGround;
         case 1132: return sellGround;
         case 1133: return buyGround;
+        case 1140: return techTradeGetSummary;
+        case 1141: return techTradeGetDetail;
+        case 1142: return techTradeAdd;
+        case 1143: return techTradeDel;
+        case 1144: return techTradeBuy;
+        case 1150: return labLineChange;
+        case 1151: return newItem;
+        case 1153: return labLineAdd;
+        case 1154: return labLineDel;
+        case 1155: return labLineSetWorkerNum;
         case 2000: return cheat;
         default: return null;
       }
@@ -1280,7 +1450,7 @@ public final class GsCode {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gsCode.proto\022\006gscode*\250\013\n\006OpCode\022\n\n\005log" +
+      "\n\014gsCode.proto\022\006gscode*\362\014\n\006OpCode\022\n\n\005log" +
       "in\020\350\007\022\016\n\theartBeat\020\351\007\022\016\n\troleLogin\020\352\007\022\017\n" +
       "\ncreateRole\020\353\007\022\t\n\004move\020\354\007\022\017\n\nunitCreate\020" +
       "\355\007\022\017\n\nunitRemove\020\356\007\022\017\n\nunitChange\020\357\007\022\021\n\014" +
@@ -1316,7 +1486,12 @@ public final class GsCode {
       "FromSlot\020\344\010\022\030\n\023adSlotTimeoutInform\020\345\010\022\020\n" +
       "\013adSetTicket\020\346\010\022\016\n\tadSetSlot\020\347\010\022\022\n\rrentO" +
       "utGround\020\352\010\022\017\n\nrentGround\020\353\010\022\017\n\nsellGrou" +
-      "nd\020\354\010\022\016\n\tbuyGround\020\355\010\022\n\n\005cheat\020\320\017"
+      "nd\020\354\010\022\016\n\tbuyGround\020\355\010\022\030\n\023techTradeGetSum" +
+      "mary\020\364\010\022\027\n\022techTradeGetDetail\020\365\010\022\021\n\014tech" +
+      "TradeAdd\020\366\010\022\021\n\014techTradeDel\020\367\010\022\021\n\014techTr" +
+      "adeBuy\020\370\010\022\022\n\rlabLineChange\020\376\010\022\014\n\007newItem",
+      "\020\377\010\022\017\n\nlabLineAdd\020\201\t\022\017\n\nlabLineDel\020\202\t\022\030\n" +
+      "\023labLineSetWorkerNum\020\203\t\022\n\n\005cheat\020\320\017"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

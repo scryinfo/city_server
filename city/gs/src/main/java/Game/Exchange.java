@@ -274,7 +274,7 @@ public class Exchange {
         out.consumeLock(new ItemKey(mi), n);
 
         in.clearOrder(b.id);
-        in.consumeReserve(new ItemKey(mi), n);
+        in.consumeReserve(new ItemKey(mi), n, s.price);
 
         DealLog log = new DealLog(b.playerId, s.playerId, mi.id, n, b.total, s.total, s.price);
         this.itemStat.computeIfAbsent(mi.id, k->new Stat(mi.id)).histories.add(log);

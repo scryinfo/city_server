@@ -138,7 +138,8 @@ public class GameSession {
 		enum Type {
 			addmoney,
 			additem,
-			addground
+			addground,
+			invent
 		}
 		Type cmd;
 		int[] paras;
@@ -167,7 +168,7 @@ public class GameSession {
 						item = new Item(new ItemKey(mi), n);
 					else
 						item = new Item(new ItemKey(mi, player.id(), 0), n);
-					player.getBag().consumeReserve(item.key, n);
+					player.getBag().consumeReserve(item.key, n, 1);
 				}
                 GameDb.saveOrUpdate(player);
                 break;
@@ -195,6 +196,20 @@ public class GameSession {
 				}
                 GameDb.saveOrUpdate(GroundManager.instance());
                 break;
+			}
+			case invent: {
+				int mId = cheat.paras[0];
+				int lv = cheat.paras[1];
+				MetaItem mi = MetaData.getItem(mId);
+				if(mi == null)
+					return;
+				if(mi instanceof MetaMaterial && lv != 0)
+					return;
+				if(lv < 0)
+					return;
+				player.addItem(mId, lv);
+				GameDb.saveOrUpdate(player);
+				break;
 			}
 		}
 	}
@@ -309,7 +324,7 @@ public class GameSession {
 		if(err.isPresent())
 			this.write(Package.fail(cmd, err.get()));
 		else
-			this.write(Package.create(cmd, GroundAuction.instance().toProto()));
+			this.write(Package.create(cmd, c));
 	}
 	public void registGroundBidInform(short cmd) {
 		GroundAuction.instance().regist(this.channelId);
@@ -462,7 +477,8 @@ public class GameSession {
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		UUID wid = Util.toUuid(c.getWareHouseId().toByteArray());
 		Building sellBuilding = City.instance().getBuilding(bid);
-		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || sellBuilding.canUseBy(player.id()))
+		// player can not buy things in retail shop
+		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || !(sellBuilding instanceof IStorage) || sellBuilding instanceof RetailShop || sellBuilding.canUseBy(player.id()))
 			return;
         IStorage buyStore = IStorage.get(wid, player);
 		if(buyStore == null)
@@ -483,8 +499,11 @@ public class GameSession {
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
-		buyStore.consumeReserve(item.key, item.n);
-		i.n -= item.n;
+		sellShelf.delshelf(item.key, i.n);
+		//i.n -= item.n;
+		((IStorage)sellBuilding).consumeLock(item.key, i.n);
+
+		buyStore.consumeReserve(item.key, item.n, c.getPrice());
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 	}
@@ -663,12 +682,12 @@ public class GameSession {
 		if(b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		MetaItem m = MetaData.getItem(c.getItemId());
-		if(m == null || (!m.useDirectly && !player.canProduce(m.id)))
+		if(m == null || (!m.useDirectly && !player.hasItem(m.id)))
 			return;
 		FactoryBase f = (FactoryBase) b;
 		if (f.lineFull())
 			return;
-		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum());
+		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum(), player.getGoodLevel(m.id));
 		if(line != null)
 			this.write(Package.create(cmd, line.toProto()));
 	}
@@ -694,7 +713,7 @@ public class GameSession {
 
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
+		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || !building.canUseBy(player.id()))
 			return;
 		PublicFacility pf = (PublicFacility)building;
 		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
@@ -706,7 +725,7 @@ public class GameSession {
 		Gs.AdDelSlot c = (Gs.AdDelSlot)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
+		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || !building.canUseBy(player.id()))
 			return;
 		UUID slotId = Util.toUuid(c.getSlotId().toByteArray());
 		PublicFacility pf = (PublicFacility)building;
@@ -730,9 +749,9 @@ public class GameSession {
 		Gs.AddAd c = (Gs.AddAd)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility))
+		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
-		if(c.getType() == Gs.PublicFacility.Ad.Type.BUILDING) {
+		if(c.getType() == Gs.Advertisement.Ad.Type.BUILDING) {
 			if(!MetaBuilding.canAd(MetaBuilding.type(c.getMetaId())))
 				return;
 		}
@@ -750,22 +769,23 @@ public class GameSession {
 			if(!building.canUseBy(player.id()))
 				return;
 		}
-		if(c.getType() == Gs.PublicFacility.Ad.Type.GOOD) {
+		PublicFacility.Ad ad;
+		if(c.getType() == Gs.Advertisement.Ad.Type.GOOD) {
 			MetaItem m = MetaData.getItem(c.getMetaId());
 			if(m == null)
 				return;
-			pf.addAd(sr, m);
+			ad = pf.addAd(sr, m);
 		}
-		else if(c.getType() == Gs.PublicFacility.Ad.Type.BUILDING) {
+		else if(c.getType() == Gs.Advertisement.Ad.Type.BUILDING) {
 			MetaBuilding m = MetaData.getBuilding(c.getMetaId());
 			if(m == null)
 				return;
-			pf.addAd(sr, m);
+			ad = pf.addAd(sr, m);
 		}
 		else
 			return;
 		GameDb.saveOrUpdate(pf);
-		this.write(Package.create(cmd));
+		this.write(Package.create(cmd, ad.toProto()));
 	}
 	private boolean isValidDayToRent(int min, int max, PublicFacility pf) {
 		if(min <= 0 || min > pf.getMinDayToRent() || max <= 0 || max < min || max > pf.getMaxDayToRent())
@@ -782,7 +802,7 @@ public class GameSession {
 		Gs.AdSetSlot c = (Gs.AdSetSlot)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility))
+		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
 		PublicFacility pf = (PublicFacility)building;
 		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
@@ -803,7 +823,7 @@ public class GameSession {
 		Gs.AdDelAdFromSlot c = (Gs.AdDelAdFromSlot)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility))
+		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
 		UUID adId = Util.toUuid(c.getAdId().toByteArray());
 		PublicFacility pf = (PublicFacility)building;
@@ -824,7 +844,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility) || building.canUseBy(player.id()))
+		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || building.canUseBy(player.id()))
 			return;
 		UUID slotId = Util.toUuid(c.getSlotId().toByteArray());
 		PublicFacility pf = (PublicFacility)building;
@@ -884,8 +904,8 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 			return;
 		}
-		src.consumeLock(item.key, item.n);
-		dst.consumeReserve(item.key, item.n);
+		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
+		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst));
 		this.write(Package.create(cmd, c));
 	}
@@ -953,4 +973,97 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
+	public void labLineSetWorkerNum(short cmd, Message message) {
+		Gs.LabSetLineWorkerNum c = (Gs.LabSetLineWorkerNum)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+		Laboratory lab = (Laboratory)building;
+		boolean ok = lab.setLineWorkerNum(lineId, c.getN());
+		if(ok) {
+			GameDb.saveOrUpdate(lab);
+			this.write(Package.create(cmd));
+		}
+	}
+	public void labLineAdd(short cmd, Message message) {
+		Gs.LabAddLine c = (Gs.LabAddLine)message;
+		if(c.getType() != Formula.Type.INVENT.ordinal() && c.getType() != Formula.Type.RESEARCH.ordinal())
+			return;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+			return;
+		Laboratory lab = (Laboratory)building;
+		Formula.Type type = Formula.Type.values()[c.getType()];
+		Formula formula = null;
+		if(type == Formula.Type.RESEARCH) {
+			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), player.getGoodLevel(c.getItemId())));
+		}
+		else if(type == Formula.Type.INVENT) {
+			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), 0));
+		}
+		if(formula == null)
+			return;
+		Laboratory.Line line = lab.addLine(formula, c.getWorkerNum());
+		if(line != null) {
+			GameDb.saveOrUpdate(lab);
+			this.write(Package.create(cmd, line.toProto()));
+		}
+
+	}
+	public void labLineDel(short cmd, Message message) {
+		Gs.LabDelLine c = (Gs.LabDelLine)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+		Laboratory lab = (Laboratory)building;
+		if(lab.delLine(lineId))
+		{
+			GameDb.saveOrUpdate(lab);
+			this.write(Package.create(cmd, c));
+		}
+	}
+	public void techTradeAdd(short cmd, Message message) {
+		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
+		MetaItem mi = MetaData.getItem(c.getItemId());
+		if(mi == null || c.getLv() < 0 || c.getPrice() <= 0 || !player.hasItem(mi.id, c.getLv()))
+			return;
+		if(mi instanceof MetaMaterial)
+			TechTradeCenter.instance().add(player.id(), (MetaMaterial)mi, c.getPrice());
+		else
+			TechTradeCenter.instance().add(player.id(), (MetaGood) mi, c.getLv(), c.getPrice());
+		GameDb.saveOrUpdate(TechTradeCenter.instance());
+	}
+	public void techTradeDel(short cmd, Message message) {
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		TechTradeCenter.instance().del(player.id(), id);
+		GameDb.saveOrUpdate(TechTradeCenter.instance());
+	}
+	public void techTradeBuy(short cmd, Message message) {
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		TechTradeCenter.Sell sell = TechTradeCenter.instance().get(id);
+		if(sell == null || sell.ownerId.equals(player.id()) || player.hasItem(sell.metaId, sell.lv))
+			return;
+		if(!player.decMoney(sell.price))
+			return;
+		Player seller = GameDb.queryPlayer(sell.ownerId);
+		seller.addMoney(sell.price);
+		player.addItem(sell.metaId, sell.lv);
+		GameDb.saveOrUpdate(Arrays.asList(seller, player));
+		this.write(Package.create(cmd, message));
+	}
+	public void techTradeGetSummary(short cmd) {
+		this.write(Package.create(cmd, TechTradeCenter.instance().getSummary()));
+	}
+	public void techTradeGetDetail(short cmd, Message message) {
+		Gs.Num c = (Gs.Num)message;
+		this.write(Package.create(cmd, TechTradeCenter.instance().getDetail(c.getNum())));
+	}
+
 }

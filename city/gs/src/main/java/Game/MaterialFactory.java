@@ -22,8 +22,8 @@ public class MaterialFactory extends FactoryBase {
             return new ItemKey(item);
         }
 
-        public Line(MetaMaterial item, int targetNum, int workerNum) {
-            super(item, targetNum, workerNum);
+        public Line(MetaMaterial item, int targetNum, int workerNum, int itemLevel) {
+            super(item, targetNum, workerNum, itemLevel);
         }
     }
 
@@ -31,10 +31,7 @@ public class MaterialFactory extends FactoryBase {
         super(meta, pos, ownerId);
         this.meta = meta;
     }
-    @Override
-    public boolean delItem(ItemKey k) {
-        return this.store.delItem(k);
-    }
+
     @Transient
     private MetaMaterialFactory meta;
 
@@ -63,18 +60,29 @@ public class MaterialFactory extends FactoryBase {
     }
 
     @Override
-    protected void visitImpl(Npc npc) {
+    protected void enterImpl(Npc npc) {
 
     }
 
     @Override
-    public LineBase addLine(MetaItem item, int workerNum, int targetNum) {
+    protected void leaveImpl(Npc npc) {
+
+    }
+
+    @Override
+    public LineBase addLine(MetaItem item, int workerNum, int targetNum, int itemLevel) {
         if(!(item instanceof MetaMaterial) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
-        Line line = new Line((MetaMaterial)item, targetNum, workerNum);
+        Line line = new Line((MetaMaterial)item, targetNum, workerNum, itemLevel);
         lines.put(line.id, line);
         return line;
     }
+
+    @Override
+    protected boolean consumeMaterial(LineBase line) {
+        return true;
+    }
+
     protected void _update(long diffNano) {
         super._update(diffNano);
     }

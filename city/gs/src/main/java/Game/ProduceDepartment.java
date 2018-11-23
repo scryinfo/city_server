@@ -21,18 +21,14 @@ public class ProduceDepartment extends FactoryBase {
     public ProduceDepartment() {
     }
 
-    @Override
-    public boolean delItem(ItemKey k) {
-        return this.store.delItem(k);
-    }
-
     @Entity
     public final static class Line extends LineBase {
-        public Line(MetaGood item, int targetNum, int workerNum) {
-            super(item, targetNum, workerNum);
+        public Line(MetaGood item, int targetNum, int workerNum, int itemLevel) {
+            super(item, targetNum, workerNum, itemLevel);
         }
         protected Line() {}
-
+        @Transient
+        GoodFormula formula;
         @Override
         public ItemKey newItemKey(UUID producerId, int qty) {
             return new ItemKey(item, producerId, qty);
@@ -64,17 +60,41 @@ public class ProduceDepartment extends FactoryBase {
     }
 
     @Override
-    protected void visitImpl(Npc npc) {
+    protected void enterImpl(Npc npc) {
 
     }
 
-    public LineBase addLine(MetaItem item, int workerNum, int targetNum) {
+    @Override
+    protected void leaveImpl(Npc npc) {
+
+    }
+
+    public LineBase addLine(MetaItem item, int workerNum, int targetNum, int itemLevel) {
         if(!(item instanceof MetaGood) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
-        Line line = new Line((MetaGood)item, targetNum, workerNum);
+        Line line = new Line((MetaGood)item, targetNum, workerNum, itemLevel);
         lines.put(line.id, line);
         return line;
     }
+
+    @Override
+    protected boolean consumeMaterial(LineBase line) {
+        Line l = (Line)line;
+        for(GoodFormula.Info i : l.formula.material) {
+            if(i.item == null)
+                continue;
+            if(!this.store.has(new ItemKey(i.item), i.n)) {
+                return false;
+            }
+        }
+        for(GoodFormula.Info i : l.formula.material) {
+            if (i.item == null)
+                continue;
+            this.store.offset(new ItemKey(i.item), -i.n);
+        }
+        return true;
+    }
+
     protected void _update(long diffNano) {
         super._update(diffNano);
     }

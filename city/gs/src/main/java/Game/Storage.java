@@ -9,30 +9,13 @@ import java.util.*;
 @Entity
 public class Storage implements IStorage {
     @Id
-    private UUID id = UUID.randomUUID();
+    private final UUID id = UUID.randomUUID();
     public Storage(int capacity) {
         this.capacity = capacity;
     }
 
     public Storage() {
     }
-    //@Id
-   // @Column(name = "id", updatable = false, nullable = false)
-   // private UUID id = UUID.randomUUID();  // because we map this class to entity rather than Embeddable, so must have a id
-//    private byte[] binary() {
-//        Db.Store.Builder builder = Db.Store.newBuilder();
-//        this.inHand.forEach((k, v)->builder.addExisting(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
-//        this.reserved.forEach((k, v)->builder.addReserved(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
-//        this.locked.forEach((k, v)->builder.addLocked(Db.Store.Cargo.newBuilder().setId(k.id).setN(v)));
-//        return builder.build().toByteArray();
-//    }
-//    public Collection<Gs.IntNum> toProto() {
-//        Collection<Gs.IntNum> res = new ArrayList<>();
-//        this.inHand.forEach((k, v)->{
-//            res.add(Gs.IntNum.newBuilder().setId(k.id).setNum(v).build());
-//        });
-//        return res;
-//    }
     public Gs.Store toProto() {
         Gs.Store.Builder builder = Gs.Store.newBuilder();
         this.inHand.forEach((k, v)->{
@@ -65,13 +48,24 @@ public class Storage implements IStorage {
     }
     @Transient
     private int capacity;
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
-//    private Map<MetaItem, Integer> inHand = new HashMap<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Integer> inHand = new HashMap<>();
+
+    @Embeddable
+    public static final class AvgPrice {
+        long avg;
+        long n;// this will be overflow, however, planner don't care then I don't care either
+        void update(int price, int n) {
+            avg = avg*this.n+price*n/(this.n+n);
+            this.n += n;
+        }
+    }
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    private Map<ItemKey, AvgPrice> inHandPrice = new HashMap<>();
+
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = MetaItem.Converter.class, attributeName = "key")
@@ -117,21 +111,24 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public void consumeLock(ItemKey m, int n) {
+    public AvgPrice consumeLock(ItemKey m, int n) {
         locked.put(m, locked.get(m) - n);
         inHand.put(m, inHand.get(m) - n);
         if(locked.get(m) == 0)
             locked.remove(m);
         if(inHand.get(m) == 0)
             inHand.remove(m);
+        return inHandPrice.get(m);
     }
 
     @Override
-    public void consumeReserve(ItemKey m, int n) {
+    public void consumeReserve(ItemKey m, int n, int price) {
         reserved.put(m.meta, reserved.get(m.meta) - n);
-        inHand.put(m, inHand.getOrDefault(m, 0) + n);
         if(reserved.get(m.meta) == 0)
             reserved.remove(m.meta);
+
+        inHand.put(m, inHand.getOrDefault(m, 0) + n);
+        inHandPrice.getOrDefault(m, new AvgPrice()).update(price, n);
     }
 
     @Override
@@ -154,29 +151,7 @@ public class Storage implements IStorage {
 
     @Transient
     Set<UUID> order = new HashSet<>();
-//    @Embeddable
-//    protected static class _D { // private will cause JPA meta class generate fail
-//        @Column(name = "storageBin")
-//        private byte[] binary;
-//
-//        void dirty() {
-//            binary = null;
-//        }
-//    }
-//    @Embedded
-//    private final _D _d = new _D();
-//    @PrePersist
-//    @PreUpdate
-//    protected void _2() {
-//        this._d.binary = this.binary();
-//    }
-//    @PostLoad
-//    protected void _1() throws InvalidProtocolBufferException {
-//        Db.Store store = Db.Store.parseFrom(this._d.binary);
-//        store.getExistingList().forEach(c->this.inHand.put(MetaData.getItem(c.getId()), c.getN()));
-//        store.getReservedList().forEach(c->this.reserved.put(MetaData.getItem(c.getId()), c.getN()));
-//        store.getLockedList().forEach(c->this.locked.put(MetaData.getItem(c.getId()), c.getN()));
-//    }
+
     public int usedSize() {
         return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
     }

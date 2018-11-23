@@ -26,6 +26,8 @@ public class City {
     private MetaCity meta;
     private Grid[][] grids;
     private static City instance;
+    private TreeMap<Integer, Integer> topGoodQty;
+    private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
     private boolean taskIsRunning = false;
@@ -46,8 +48,51 @@ public class City {
     public static final int TERRIAN_PLAYER = 0x00000002;
     public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
 
+    public void updateTopGoodQty(int mId, int qty) {
+        topGoodQty.compute(mId, (k, oldQty)->{
+            if(oldQty == null)
+                return qty;
+            else if(oldQty < qty)
+                return qty;
+            else
+                return oldQty;
+        });
+    }
+    public double goodQtyScore(int mId, int qty) {
+        if(qty == 0)
+            return 0;
+        int top = topGoodQty(mId);
+        if(top == 0)
+            return 0;
+        return (double)qty / top * 100.d;
+    }
+    public double buildingQtyScore(int type, int qty) {
+        if(qty == 0)
+            return 0;
+        int top = topBuildingQty(type);
+        if(top == 0)
+            return 0;
+        return (double)qty / top * 100.d;
+    }
+    private int topGoodQty(int mId) {
+        Integer v = topGoodQty.get(mId);
+        if(v == null)
+            return 0;
+        return v;
+    }
+    private int topBuildingQty(int type) {
+        Integer v = topBuildingQty.get(type);
+        if(v == null)
+            return 0;
+        return v;
+    }
+
     public int weather() {
         return 0;
+    }
+
+    public int getSumFlow() {
+        return allBuilding.values().stream().mapToInt(b->b.getFlow()).reduce(Integer::sum).orElse(0);
     }
 
 
@@ -85,7 +130,7 @@ public class City {
         loadSysBuildings();
         // load all player buildings, cache them into maps
         loadPlayerBuildings();
-
+        this.topGoodQty = GameDb.getTopGoodQuality();
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
 
         this.lastHour = this.localTime().getHour();
@@ -323,7 +368,7 @@ public class City {
 //    public boolean addVirtualBuilding(VirtualBuilding b) {
 //        if(!this.canBuild(b))
 //            return false;
-//        take(b);
+//        takeAsRenter(b);
 //        GameDb.saveOrUpdate(b);
 //        b.broadcastCreate();
 //        return true;
@@ -342,6 +387,14 @@ public class City {
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
+
+        this.topBuildingQty.compute(building.type(), (k, oldV)->{
+            if(oldV == null)
+                return building.quality();
+            if(oldV < building.quality())
+                return building.quality();
+            return oldV;
+        });
     }
 
     private void calcuTerrain(Building building) {

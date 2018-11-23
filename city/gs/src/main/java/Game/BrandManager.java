@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Timers.PeriodicTimer;
+import gs.Gs;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
@@ -20,7 +21,7 @@ public class BrandManager {
     public static void init() {
         GameDb.initBrandManager();
         instance = GameDb.getBrandManager();
-        instance.sum();
+        instance.refineCache();
     }
 
     @Id
@@ -74,7 +75,7 @@ public class BrandManager {
     public void update(UUID playerId, int mid, int add) {
         BrandInfo i = allBrandInfo.computeIfAbsent(new BrandKey(playerId, mid), k->new BrandInfo(k));
         i.v += add;
-        sum(i);
+        refineCache(i, add);
     }
     public static final class BuildingRatio {
         double apartment = 1.d;
@@ -90,40 +91,102 @@ public class BrandManager {
         return res;
     }
     public int getBuilding(int type) {
-        return buildingSum.get(type);
+        return allBuilding.get(type);
     }
     public int getGood(int mid) {
-        return goodSum.get(mid);
+        return allGood.get(mid);
     }
-    private void sum() {
+    private void refineCache() {
         for(BrandInfo i : allBrandInfo.values()) {
-            sum(i);
+            refineCache(i, i.v);
         }
     }
 
-    private void sum(BrandInfo i) {
+    private void refineCache(BrandInfo i, int add) {
         if(i.key.mid < MetaBuilding.MAX_TYPE_ID) {
             int t = MetaBuilding.type(i.key.mid);
-            buildingSum.put(t, buildingSum.getOrDefault(t, 0) + i.v);
+            allBuilding.put(t, allBuilding.getOrDefault(t, 0) + add);
+            Map<Integer, Integer> m = playerBuilding.computeIfAbsent(i.key.playerId, k->new HashMap<>());
+            m.put(i.key.mid, m.getOrDefault(i.key.mid, 0) + add);
         }
         else if(MetaItem.isItem(i.key.mid)) {
-            goodSum.put(i.key.mid, goodSum.getOrDefault(i.key.mid, 0) + i.v);
+            allGood.put(i.key, allGood.getOrDefault(i.key.mid, 0) + add);
+            Map<Integer, Integer> m = playerGood.computeIfAbsent(i.key.playerId, k->new HashMap<>());
+            m.put(i.key.mid, m.getOrDefault(i.key.mid, 0) + add);
         }
     }
+
+    public double buildingBrandScore(int type) {
+        Integer v = allBuilding.get(type);
+        if(v == null)
+            return 0;
+        return (double)v / maxBuilding(type) * 100;
+    }
+    public double goodBrandScore(int metaId) {
+        Integer v = allGood.get(metaId);
+        if(v == null)
+            return 0;
+        return (double)v / maxGood(metaId) * 100;
+    }
+    private double buildingRatio(int type) {
+        Integer v = allBuilding.get(type);
+        if(v == null)
+            return 1.d;
+        return 1.d + v / allBuilding();
+    }
+    private double goodRatio(int mId) {
+        Integer v = allGood.get(mId);
+        if(v == null)
+            return 1.d;
+        return 1.d + v / allGood();
+    }
+    public double spendMoneyRatioBuilding(int type) {
+        return MetaData.getBuildingSpendMoneyRatio(type) * buildingRatio(type);
+    }
+    public double spendMoneyRatioGood(int mId) {
+        return MetaData.getGoodSpendMoneyRatio(mId) * goodRatio(mId);
+    }
+    private double maxBuilding(int type) {
+        // O(n), however the size is small, so not need to optimize
+        return allBuilding.entrySet().stream().filter(e->e.getKey()==type).mapToInt(e->e.getValue()).max().orElse(0);
+    }
+    private double maxGood(int mId) {
+        return allGood.entrySet().stream().filter(e->e.getKey().mid==mId).mapToInt(e->e.getValue()).max().orElse(0);
+    }
     public int allBuilding() {
-        return buildingSum.values().stream().reduce(0, Integer::sum);
+        return allBuilding.values().stream().reduce(0, Integer::sum);
     }
     public int allGood() {
-        return goodSum.values().stream().reduce(0, Integer::sum);
+        return allGood.values().stream().reduce(0, Integer::sum);
     }
-    @Transient  // <buildingSum type, sum value>
-    private Map<Integer, Integer> buildingSum = new TreeMap<>();
+    @Transient  // <building type, refineCache value>
+    private Map<Integer, Integer> allBuilding = new TreeMap<>();
 
-    @Transient  // <goodSum meta id, sum value>
-    private Map<Integer, Integer> goodSum = new HashMap<>();
+    @Transient  // <good meta id, refineCache value>
+    private Map<BrandKey, Integer> allGood = new HashMap<>();
+
+    public List<Gs.IntNum> getBuildingBrandProto(UUID playerId) {
+        List<Gs.IntNum> res = new ArrayList<>();
+        Map<Integer, Integer> m = playerBuilding.get(playerId);
+        if(m != null) {
+            m.forEach((k,v)->res.add(Gs.IntNum.newBuilder().setId(k).setNum(v).build()));
+        }
+        return res;
+    }
+    public List<Gs.IntNum> getGoodBrandProto(UUID playerId) {
+        List<Gs.IntNum> res = new ArrayList<>();
+        Map<Integer, Integer> m = playerGood.get(playerId);
+        if(m != null) {
+            m.forEach((k,v)->res.add(Gs.IntNum.newBuilder().setId(k).setNum(v).build()));
+        }
+        return res;
+    }
 
     @Transient
-    private Map<UUID, Map<Integer, Integer>> cache = new HashMap<>();
+    private Map<UUID, Map<Integer, Integer>> playerBuilding = new HashMap<>();
+
+    @Transient
+    private Map<UUID, Map<Integer, Integer>> playerGood = new HashMap<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})

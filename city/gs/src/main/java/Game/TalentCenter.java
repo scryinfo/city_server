@@ -19,6 +19,11 @@ public class TalentCenter extends Building {
 
     protected TalentCenter() {}
 
+    @Override
+    public int quality() {
+        return this.qty;
+    }
+
     @PostLoad
     private void _1() {
         //this.meta = MetaData.getRetailShop(this._d.metaId);
@@ -37,7 +42,12 @@ public class TalentCenter extends Building {
     }
 
     @Override
-    protected void visitImpl(Npc npc) {
+    protected void enterImpl(Npc npc) {
+
+    }
+
+    @Override
+    protected void leaveImpl(Npc npc) {
 
     }
 

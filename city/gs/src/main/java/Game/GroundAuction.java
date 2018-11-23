@@ -100,21 +100,22 @@ public class GroundAuction {
             if(a.timer.passed())
             {
                 iter.remove();
+                if(a.biderId != null) {
+                    Player bider = GameDb.queryPlayer(a.biderId);
+                    try {
+                        GroundManager.instance().addGround(bider.id(), a.meta.area);
+                    } catch (GroundAlreadySoldException e) {
+                        e.printStackTrace();
+                        continue;
+                    }
+                    long p = bider.spentLockMoney(a.meta.id);
+                    GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance()));
 
-                Player bider = GameDb.queryPlayer(a.biderId);
-                try {
-                    GroundManager.instance().addGround(bider.id(), a.meta.area);
-                } catch (GroundAlreadySoldException e) {
-                    e.printStackTrace();
-                    continue;
+                    bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
                 }
-                long p = bider.spentLockMoney(a.meta.id);
-                GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance()));
-
-                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());
-                this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
-                    if(channel.id().equals(cId))
+                this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel) -> {
+                    if (channel.id().equals(cId))
                         return true;
                     return false;
                 }));

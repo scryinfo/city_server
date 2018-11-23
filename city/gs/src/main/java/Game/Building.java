@@ -27,6 +27,7 @@ public abstract class Building {
 
     protected Building() {
     }
+    public abstract int quality();
     boolean canUseBy(UUID userId) {
         return ownerId.equals(userId);
     }
@@ -87,8 +88,8 @@ public abstract class Building {
         City.instance().send(gip, pack);
     }
 
-    Set<Building> getAllBuildingInEffectRange() {
-        Set<Building> res = new TreeSet<>();
+    public List<Building> getAllBuildingInEffectRange() {
+        List<Building> res = new ArrayList<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
         CoordPair thisRange = this.effectRange();
         City.instance().forEachBuilding(gip, building -> {
@@ -97,8 +98,8 @@ public abstract class Building {
         });
         return res;
     }
-    Set<Building> getAllBuildingEffectMe(int type) {
-        Set<Building> res = new TreeSet<>();
+    public List<Building> getAllBuildingEffectMe(int type) {
+        List<Building> res = new ArrayList<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
         City.instance().forEachBuilding(gip, building -> {
             if(building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
@@ -149,7 +150,15 @@ public abstract class Building {
     private int happy = 0;
 
     @Transient
-    private Set<Npc> allNpc = new HashSet<>();
+    private Set<Npc> allStaff = new HashSet<>();
+
+    public int salary() {
+        return salary;
+    }
+
+    public int cost() {
+        return 0;
+    }
 
     @Embeddable
     static class FlowInfo {
@@ -204,12 +213,12 @@ public abstract class Building {
         this.coordinate = pos;
         this.metaBuilding = meta;
     }
-    Set<Npc> getAllNpc() {
-        return allNpc;
+    Set<Npc> getAllStaff() {
+        return allStaff;
     }
     public final void destroy() {
-        NpcManager.instance().delete(allNpc);
-        allNpc.clear();
+        NpcManager.instance().delete(allStaff);
+        allStaff.clear();
     }
     protected void destoryImpl(){}
 //    public Building(MetaBuilding meta, Document doc) {
@@ -232,7 +241,7 @@ public abstract class Building {
     public void hireNpc(int initSalary) {
         for(Npc npc : NpcManager.instance().create(this.metaBuilding.workerNum, this, initSalary))
         {
-            npc.visit(this);
+            npc.goFor(this);
         }
     }
     public CoordPair effectRange() {
@@ -282,23 +291,20 @@ public abstract class Building {
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
-    protected abstract void visitImpl(Npc npc);
-    protected boolean canVisit(Npc npc) {
-        return true;
-    }
+    protected abstract void enterImpl(Npc npc);
+
+    // for current requirements, there is no leaving actions
+    protected abstract void leaveImpl(Npc npc);
     // there is no need to remember which npc is in this building now
     public void enter(Npc npc) {
-        if(!canVisit(npc))
-            return;
-        allNpc.add(npc);
         flowCount += 1;
-        visitImpl(npc);
+        enterImpl(npc);
     }
     public int getFlow() {
         return this.flow;
     }
     public void leave(Npc npc) {
-        allNpc.remove(npc);
+        leaveImpl(npc);
     }
     void update(long diffNano) {
         if(this.outOfBusiness())
@@ -320,12 +326,12 @@ public abstract class Building {
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
-        if(nowHour == PAYMENT_HOUR && !this.allNpc.isEmpty()) {
+        if(nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
             Player p = GameDb.queryPlayer(ownerId);
             if(p != null) {
-                if(p.decMoney(this.salary * this.allNpc.size())) {
-                    allNpc.forEach(npc -> npc.addMoney(this.salary));
-                    List<Object> updates = allNpc.stream().map(Object.class::cast).collect(Collectors.toList());
+                if(p.decMoney(this.salary * this.allStaff.size())) {
+                    allStaff.forEach(npc -> npc.addMoney(this.salary));
+                    List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
                     updates.add(p);
                     GameDb.saveOrUpdate(updates);
                 }

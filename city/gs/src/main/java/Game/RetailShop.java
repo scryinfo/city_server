@@ -3,43 +3,64 @@ package Game;
 import com.google.protobuf.Message;
 import gs.Gs;
 
-import javax.persistence.Entity;
-import javax.persistence.PostLoad;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-public class RetailShop extends Building {
+public class RetailShop extends PublicFacility implements IShelf, IStorage {
     public RetailShop(MetaRetailShop meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
-        this.qty = meta.qty;
+        this.store = new Storage(meta.storeCapacity);
+        this.shelf = new Shelf(meta.shelfCapacity);
     }
-    private int qty;
     @Transient
     private MetaRetailShop meta;
 
+    @OneToOne(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "store_id")
+    private Storage store;
+
+    @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "shelf_id")
+    private Shelf shelf;
+
     protected RetailShop() {}
 
+    @Override
+    public int quality() {
+        return this.qty;
+    }
+
     @PostLoad
-    private void _1() {
-        //this.meta = MetaData.getRetailShop(this._d.metaId);
-        //this.metaBuilding = this.meta;
+    protected void _1() {
+        super._1();
         this.meta = (MetaRetailShop) super.metaBuilding;
+        this.shelf.setCapacity(this.meta.shelfCapacity);
+        this.store.setCapacity(this.meta.storeCapacity);
     }
 
     @Override
     public Message detailProto() {
-        return null;
+        Gs.RetailShop.Builder builder = Gs.RetailShop.newBuilder();
+        builder.setInfo(this.toProto());
+        builder.setAd(genAdPart());
+        builder.setQty(qty);
+        return builder.build();
     }
 
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+        builder.addRetailShop((Gs.RetailShop) this.detailProto());
+    }
+
+    @Override
+    protected void enterImpl(Npc npc) {
 
     }
 
     @Override
-    protected void visitImpl(Npc npc) {
+    protected void leaveImpl(Npc npc) {
 
     }
 
@@ -47,4 +68,68 @@ public class RetailShop extends Building {
     protected void _update(long diffNano) {
 
     }
+
+    @Override
+    public Gs.Shelf.Content addshelf(Item mi, int price) {
+        return shelf.add(mi, price);
+    }
+
+    @Override
+    public boolean delshelf(ItemKey id, int n) {
+        return shelf.del(id, n);
+    }
+
+    @Override
+    public Shelf.Content getContent(ItemKey id) {
+        return shelf.getContent(id);
+    }
+
+    @Override
+    public boolean setPrice(ItemKey id, int price) {
+        Shelf.Content i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        i.price = price;
+        return true;
+    }
+
+    @Override
+    public boolean reserve(MetaItem m, int n) {
+        return store.reserve(m, n);
+    }
+
+    @Override
+    public boolean lock(ItemKey m, int n) {
+        return store.lock(m, n);
+    }
+
+    @Override
+    public boolean unLock(ItemKey m, int n) {
+        return store.unLock(m, n);
+    }
+
+    @Override
+    public Storage.AvgPrice consumeLock(ItemKey m, int n) {
+        return store.consumeLock(m, n);
+    }
+
+    @Override
+    public void consumeReserve(ItemKey m, int n, int price) {
+        store.consumeReserve(m, n, price);
+    }
+
+    @Override
+    public void markOrder(UUID orderId) {
+        store.markOrder(orderId);
+    }
+
+    @Override
+    public void clearOrder(UUID orderId) {
+        store.clearOrder(orderId);
+    }
+
+    @Override
+    public boolean delItem(ItemKey k) { return this.store.delItem(k); }
+
+
 }

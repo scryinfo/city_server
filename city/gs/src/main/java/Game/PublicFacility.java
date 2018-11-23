@@ -3,6 +3,7 @@ package Game;
 import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import Shared.Util;
+import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
@@ -18,7 +19,9 @@ public class PublicFacility extends Building {
         this.meta = meta;
         this.qty = meta.qty;
     }
-    private int qty;
+    @Column(nullable = false)
+    protected int qty;
+
     public int getMaxDayToRent() {
         return meta.maxDayToRent;
     }
@@ -35,6 +38,10 @@ public class PublicFacility extends Building {
         this.tickPrice = price;
     }
 
+    @Override
+    public int cost() {
+        return this.tickPrice;
+    }
     @Entity
     public static final class Slot {
         protected Slot(){}
@@ -51,8 +58,8 @@ public class PublicFacility extends Building {
         int rentPreDay;
         int deposit;
 
-        Gs.PublicFacility.Slot toProto() {
-            Gs.PublicFacility.Slot.Builder builder = Gs.PublicFacility.Slot.newBuilder();
+        Gs.Advertisement.Slot toProto() {
+            Gs.Advertisement.Slot.Builder builder = Gs.Advertisement.Slot.newBuilder();
             return builder.setId(Util.toByteString(id))
                     .setMaxDayToRent(maxDayToRent)
                     .setMinDayToRent(minDayToRent)
@@ -89,8 +96,8 @@ public class PublicFacility extends Building {
         long beginTs;
         UUID renterId;
         long payTs;
-        Gs.PublicFacility.SoldSlot toProto() {
-            Gs.PublicFacility.SoldSlot.Builder builder = Gs.PublicFacility.SoldSlot.newBuilder();
+        Gs.Advertisement.SoldSlot toProto() {
+            Gs.Advertisement.SoldSlot.Builder builder = Gs.Advertisement.SoldSlot.newBuilder();
             return builder.setS(slot.toProto())
                     .setBeginTs(beginTs)
                     .setDays(day)
@@ -136,16 +143,15 @@ public class PublicFacility extends Building {
         long beginTs;
         int npcFlow;
 
-        Gs.PublicFacility.Ad toProto() {
-            Gs.PublicFacility.Ad.Builder builder = Gs.PublicFacility.Ad.newBuilder();
+        Gs.Advertisement.Ad toProto() {
+            Gs.Advertisement.Ad.Builder builder = Gs.Advertisement.Ad.newBuilder();
             if(sr != null)
                 builder.setSlot(sr.toProto());
             return builder.setId(Util.toByteString(id))
                     .setMetaId(metaId)
-                    .setType(Gs.PublicFacility.Ad.Type.valueOf(type.ordinal()))
+                    .setType(Gs.Advertisement.Ad.Type.valueOf(type.ordinal()))
                     .setBeginTs(beginTs)
                     .setNpcFlow(npcFlow)
-                    .setBrandValue(0)
                     .build();
         }
     }
@@ -199,56 +205,69 @@ public class PublicFacility extends Building {
         ad.remove(id);
         qty -= 1;
     }
-    public void addAd(SlotRent sr, MetaItem m) {
+    public Ad addAd(SlotRent sr, MetaItem m) {
         Ad ad = new Ad(sr, m.id, Ad.Type.GOOD);
         this.ad.put(ad.id, ad);
+        return ad;
     }
-    public void addAd(SlotRent sr, MetaBuilding m) {
+    public Ad addAd(SlotRent sr, MetaBuilding m) {
         Ad ad = new Ad(sr, MetaBuilding.type(m.id), Ad.Type.BUILDING);
         this.ad.put(ad.id, ad);
         qty += 1;
+        return ad;
     }
     protected PublicFacility() {}
 
+    @Override
+    public int quality() {
+        return this.qty;
+    }
+
     int tickPrice;
     @Override
-    protected void visitImpl(Npc npc){
-        if(this.tickPrice > 0) {
-            npc.decMoney(this.tickPrice);
-            Player owner = GameDb.queryPlayer(ownerId());
-            owner.addMoney(this.tickPrice);
-            GameDb.saveOrUpdate(Arrays.asList(npc, owner));
-        }
+    protected void enterImpl(Npc npc){
+//        if(this.tickPrice > 0) { // already paid in action
+//            npc.decMoney(this.tickPrice);
+//            Player owner = GameDb.queryPlayer(ownerId());
+//            owner.addMoney(this.tickPrice);
+//            GameDb.saveOrUpdate(Arrays.asList(npc, owner));
+//        }
 
         this.ad.values().forEach(ad->{
             ad.npcFlow++;
             BrandManager.instance().update(ad.sr.renterId, ad.metaId, 1);
         });
     }
+
     @Override
-    protected boolean canVisit(Npc npc) {
-        return npc.money() >= this.tickPrice;
+    protected void leaveImpl(Npc npc) {
+
     }
+
     @PostLoad
-    private void _1() {
+    protected void _1() {
         this.meta = (MetaPublicFacility) super.metaBuilding;
     }
 
     @Override
-    public Gs.PublicFacility detailProto() {
+    public Message detailProto() {
         Gs.PublicFacility.Builder builder = Gs.PublicFacility.newBuilder();
         builder.setInfo(this.toProto());
-        this.slot.values().forEach(v->builder.addAvailableSlot(v.toProto()));
-        this.rent.values().forEach(v->builder.addSoldSlot(v.toProto()));
-        this.ad.values().forEach(v->builder.addAd(v.toProto()));
+        builder.setAd(genAdPart());
         builder.setQty(qty);
         builder.setTicketPrice(this.tickPrice);
         return builder.build();
     }
-
+    protected Gs.Advertisement genAdPart() {
+        Gs.Advertisement.Builder builder = Gs.Advertisement.newBuilder();
+        this.slot.values().forEach(v->builder.addAvailableSlot(v.toProto()));
+        this.rent.values().forEach(v->builder.addSoldSlot(v.toProto()));
+        this.ad.values().forEach(v->builder.addAd(v.toProto()));
+        return builder.build();
+    }
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
-        builder.addPublicFacility(this.detailProto());
+        builder.addPublicFacility((Gs.PublicFacility) this.detailProto());
     }
 
     @Override

@@ -18,7 +18,7 @@ public class CoordPair {
     public Collection<Coordinate> toCoordinates() {
         Collection<Coordinate> res = new ArrayList<>();
         for(int x = l.x; x <= r.x; ++x) {
-            for(int y = r.y; y <= r.y; ++y) {
+            for(int y = l.y; y <= r.y; ++y) {
                 res.add(new Coordinate(x, y));
             }
         }

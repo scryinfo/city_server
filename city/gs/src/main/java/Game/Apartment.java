@@ -25,12 +25,21 @@ public class Apartment extends Building {
     private int rent;
 
     @Transient
-    private Map<UUID, Npc> guest = new HashMap<>();
+    private Map<UUID, Npc> renters = new HashMap<>();
 
     @Transient
     private Deque<Integer> incomingHistory = new ArrayDeque<>();
 
     public Apartment() {
+    }
+
+    @Override
+    public int cost() {
+        return this.rent;
+    }
+    @Override
+    public int quality() {
+        return this.qty;
     }
 
     @PostLoad
@@ -44,20 +53,11 @@ public class Apartment extends Building {
         this.rent = n;
     }
 
-
-
-    public int rent() {
-        return rent;
-    }
-    public void take(Npc npc) {
-        guest.put(npc.id(), npc);
-    }
-
     public Gs.Apartment detailProto() {
         return Gs.Apartment.newBuilder()
                 .setInfo(super.toProto())
                 .setRent(this.rent)
-                .setRenter(guest.size())
+                .setRenter(renters.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
                 .setQty(qty)
                 .build();
@@ -67,8 +67,15 @@ public class Apartment extends Building {
     }
 
     @Override
-    protected void visitImpl(Npc npc) {
+    protected void enterImpl(Npc npc) {
+        npc.setApartment(this);
+        renters.put(npc.id(), npc);
+    }
 
+    @Override
+    protected void leaveImpl(Npc npc) {
+        npc.setApartment(null);
+        renters.remove(npc.id());
     }
 
     @Override

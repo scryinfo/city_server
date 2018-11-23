@@ -23,16 +23,16 @@ import java.util.*;
 })
 public class Player {
     public static final UUID BAG_ID = UUID.fromString("a33eab42-cb75-4c77-bd27-710d299f5591");
-    @ElementCollection(fetch = FetchType.EAGER)
-    Set<Integer> itemIdCanProduce;
-    public boolean canProduce(int id) {
-        return itemIdCanProduce.contains(id);
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    Set<Integer> itemIdCanProduce;
+    public boolean hasItem(int mId, int lv) {
+        if(goodLv.keySet().contains(mId))
+            return goodLv.get(mId) >= lv;
+        return false;
     }
-    public void learnItem(int id) {
-        itemIdCanProduce.add(id);
+    public boolean hasItem(int mId) {
+        return goodLv.keySet().contains(mId);
     }
-
-
     public void markTemp() {
         this.temp = true;
     }
@@ -42,6 +42,29 @@ public class Player {
     public boolean isTemp() {
         return temp;
     }
+
+    public void addItem(int mId, int lv) {
+        Integer level = goodLv.get(mId);
+        if(level != null && level < lv)
+            return;
+        goodLv.put(mId, lv);
+        GameDb.saveOrUpdate(this);
+        city.forEachBuilding(id(), b->{
+            if(b instanceof FactoryBase)
+                ((FactoryBase)b).updateLineQuality(mId, lv);
+        });
+        this.send(Shared.Package.create(GsCode.OpCode.newItem_VALUE, Gs.IntNum.newBuilder().setId(mId).setNum(lv).build()));
+    }
+
+//    public void addItem(int targetId) {
+//        this.itemIdCanProduce.add(targetId);
+//        if(MetaItem.type(targetId) == MetaItem.GOOD)
+//            goodLv.put(targetId, 0);
+//        GameDb.saveOrUpdate(this);
+//        this.send(Shared.Package.create(GsCode.OpCode.goodInvent_VALUE, Gs.Num.newBuilder().setNum(targetId).build()));
+//    }
+
+
 
     public static final class Info {
         public Info(UUID id, String name) {
@@ -108,7 +131,7 @@ public class Player {
         //this.ground = new Ground();
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
-        this.itemIdCanProduce = new TreeSet<>();
+        MetaData.getAllDefaultToUseItemId().forEach(id->this.goodLv.put(id, 0));
     }
     @PostLoad
     void _init() {
@@ -139,10 +162,13 @@ public class Player {
         });
         builder.setBag(bag.toProto());
         builder.setBagCapacity(bagCapacity);
-        this.itemIdCanProduce.forEach(id->builder.addItemIdCanProduce(id));
         this.exchangeFavoriteItem.forEach(id->builder.addExchangeCollectedItem(id));
         builder.addAllGround(GroundManager.instance().getGroundProto(id()));
         builder.setBagId(Util.toByteString(BAG_ID));
+
+        builder.addAllBuildingBrands(BrandManager.instance().getBuildingBrandProto(id()));
+        builder.addAllGoodBrands(BrandManager.instance().getGoodBrandProto(id()));
+        goodLv.forEach((k,v)->builder.addGoodLv(Gs.IntNum.newBuilder().setId(k).setNum(v)));
         return builder.build();
     }
 
@@ -256,4 +282,13 @@ public class Player {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "player_exchange_favorite", joinColumns = @JoinColumn(name = "player_id"))
     private Set<Integer> exchangeFavoriteItem = new TreeSet<>();
+
+    public int getGoodLevel(int mId) {
+        return goodLv.get(mId);
+    }
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "good_meta_id")
+    @CollectionTable(name = "player_good_lv", joinColumns = @JoinColumn(name = "player_id"), indexes = { @Index(name = "TOP_QTY", columnList = "goodlv") })
+    private Map<Integer, Integer> goodLv = new HashMap<>();
 }

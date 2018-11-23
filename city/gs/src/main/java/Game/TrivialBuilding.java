@@ -7,6 +7,12 @@ import java.util.UUID;
 
 public class TrivialBuilding extends Building {
     private MetaBuilding meta;
+
+    @Override
+    public int quality() {
+        return 0;
+    }
+
     public TrivialBuilding(MetaBuilding meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
@@ -23,7 +29,12 @@ public class TrivialBuilding extends Building {
     }
 
     @Override
-    protected void visitImpl(Npc npc) {
+    protected void enterImpl(Npc npc) {
+
+    }
+
+    @Override
+    protected void leaveImpl(Npc npc) {
 
     }
 

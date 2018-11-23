@@ -1,5 +1,9 @@
 package Game;
 
+import Game.Action.IAction;
+import Game.Action.Idle;
+import Game.Action.JustVisit;
+import Game.Action.Shopping;
 import Shared.Util;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
@@ -10,6 +14,9 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import javax.persistence.AttributeConverter;
+import javax.persistence.Embeddable;
+import javax.persistence.Transient;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -61,7 +68,7 @@ class MetaCity {
     }
 
     public int timeSectionDuration(int index) {
-        if(index != this.timeSection[this.timeSection.length-1])
+        if(index != this.timeSection.length-1)
             return this.timeSection[index+1] - this.timeSection[index];
         else
             return 24-this.timeSection[index];
@@ -82,10 +89,14 @@ class MetaCity {
     }
 }
 abstract class MetaItem {
-
     public static final int MATERIAL = 21;
     public static final int GOOD = 22;
-
+    public static int level(int id) {
+        return id % 1000;
+    }
+    public static int baseId(int id) {
+        return id / 1000;
+    }
     MetaItem(Document d) {
         this.id = d.getInteger("_id");
         this.n = d.getDouble("numOneSec");
@@ -95,6 +106,11 @@ abstract class MetaItem {
     double n;
     int size;
     boolean useDirectly;
+
+    public static int type(int targetId) {
+        return targetId / MetaData.ID_RADIX;
+    }
+
     public static final class Converter implements AttributeConverter<MetaItem, Integer> {
         @Override
         public Integer convertToDatabaseColumn(MetaItem attribute) {
@@ -124,46 +140,38 @@ final class MetaGood extends MetaItem {
     int lux;
 }
 
-class ProbBase {
-    ProbBase(int n, Document d) {
-        this.weight = new int[n];
-        id = d.getLong("_id");
-        for(int i = 0; i < weight.length; ++i)
-            weight[i] = d.getInteger("w"+i);
-    }
-    final long id;
-    final int[] weight;
-    static protected int randomIdx(int[] weight) {
-        int v = ThreadLocalRandom.current().nextInt(0, weight[weight.length-1]);  // range is [l, r)
-        int idx = Arrays.binarySearch(weight, v);
-        if(idx >= 0)
-            return idx+1; // due to we random [l, r), so the idx can not be the index of last element r, so +1 is ok
-        else
-            return -(idx+1);
-    }
-    static protected void process(int[] weight) {
-        for(int i = 1; i < weight.length; ++i)
-            weight[i] = weight[i] + weight[i-1];
-    }
-}
 class AIBuilding extends ProbBase {
     AIBuilding(Document d) {
         super(Type.ALL.ordinal(), d);
     }
     enum Type {
         IDLE,
+        GOTO_HOME,
+        GOTO_WORK,
         GOTO_APARTMENT,
         GOTO_PUBLIC_FACILITY,
         GOTO_RETAIL_SHOP,
         ALL
     }
-    Type random(BrandManager.BuildingRatio ratio) {
+    IAction random(double idleRatio, BrandManager.BuildingRatio ratio) {
         int[] d = Arrays.copyOf(weight, weight.length);
+        d[Type.IDLE.ordinal()] *= idleRatio;
+        d[Type.GOTO_HOME.ordinal()] *= idleRatio;
+        d[Type.GOTO_WORK.ordinal()] *= idleRatio;
         d[Type.GOTO_APARTMENT.ordinal()] *= ratio.apartment;
         d[Type.GOTO_PUBLIC_FACILITY.ordinal()] *= ratio.publicFacility;
         d[Type.GOTO_RETAIL_SHOP.ordinal()] *= ratio.retail;
-        process(d);
-        return Type.values()[super.randomIdx(d)];
+        switch (Type.values()[super.randomIdx(d)]) {
+            case IDLE:
+                return new Idle();
+            case GOTO_APARTMENT:
+                return new JustVisit(MetaBuilding.APARTMENT);
+            case GOTO_PUBLIC_FACILITY:
+                return new JustVisit(MetaBuilding.PUBLIC);
+            case GOTO_RETAIL_SHOP:
+                return new Shopping();
+        }
+        return null;
     }
 }
 
@@ -259,7 +267,7 @@ class MetaVirtualBuilding {
     MetaBuilding meta;
 
     public int totalCapacity() {
-        return material.entrySet().stream().mapToInt(e -> e.getKey().size*e.getValue()).reduce(Integer::sum).getAsInt();
+        return material.entrySet().stream().mapToInt(e -> e.getKey().size*e.getValue()).reduce(Integer::sum).orElse(0);
     }
 
     public int size(MetaMaterial m) {
@@ -304,25 +312,93 @@ class MetaProduceDepartment extends MetaFactoryBase {
         super(d);
     }
 }
-class MetaRetailShop extends MetaBuilding {
+class MetaRetailShop extends MetaPublicFacility {
     public int saleTypeNum;
     public int storeCapacity;
     public int shelfCapacity;
-    public int qty;
     MetaRetailShop(Document d) {
         super(d);
         this.saleTypeNum = d.getInteger("saleTypeNum");
         this.storeCapacity = d.getInteger("storeCapacity");
         this.shelfCapacity = d.getInteger("shelfCapacity");
-        this.qty = d.getInteger("qty");
     }
 }
 class MetaLaboratory extends MetaBuilding {
-    public int techNum;
+    public int lineNum;
+    public int lineMaxWorkerNum;
+    public int lineMinWorkerNum;
+    public int storeCapacity;
 
     MetaLaboratory(Document d) {
         super(d);
-       // this.techNum = d.getInteger("techNum");
+        this.lineNum = d.getInteger("lineNum");
+        this.lineMinWorkerNum = d.getInteger("lineMinWorkerNum");
+        this.lineMaxWorkerNum = d.getInteger("lineMaxWorkerNum");
+        this.storeCapacity = d.getInteger("storeCapacity");
+    }
+}
+class GoodFormula {
+    GoodFormula(Document d) {
+        id = d.getInteger("good");
+        for(int i = 0; i < material.length; ++i) {
+            material[i] = new Info();
+            material[i].item = MetaData.getItem(d.getInteger("material" + i));
+            material[i].n = d.getInteger("num" + i);
+        }
+    }
+    int id;
+    public static final class Info {
+        MetaItem item;
+        int n;
+    }
+    Info[] material = new Info[3];
+}
+class Formula {
+    public static final class Key {
+        Type type;
+        int targetId;
+        int targetLv;
+
+        public Key(Type type, int targetId, int targetLv) {
+            this.type = type;
+            this.targetId = targetId;
+            this.targetLv = targetLv;
+        }
+    }
+    enum Type{
+        RESEARCH,
+        INVENT
+    }
+    Key key;
+    int phaseSec;
+    int phase;
+    int critiChance;
+    int critiV;
+    int[] successChance;
+    public static final class IdNum {
+        int id;
+        int n;
+    }
+    IdNum[] material = new IdNum[3];
+
+    Formula(Document d) {
+        key = new Key(Type.values()[d.getInteger("type")], d.getInteger("good"), d.getInteger("lv"));
+        phaseSec = d.getInteger("phaseSec");
+        phase = d.getInteger("phase");
+        critiChance = d.getInteger("critiChance");
+        critiV = d.getInteger("critiV");
+        List<Integer> l = (List<Integer>) d.get("successChance");
+        if(l.size() != phase)
+            throw new IllegalArgumentException();
+        successChance = new int[l.size()];
+        for(int i = 0; i < l.size(); ++i) {
+            successChance[i] = l.get(i);
+        }
+        for(int i = 0; i < material.length; ++i) {
+            material[i] = new IdNum();
+            material[i].id = d.getInteger("material" + i);
+            material[i].n = d.getInteger("num" + i);
+        }
     }
 }
 class MetaPublicFacility extends MetaBuilding {
@@ -427,6 +503,10 @@ public class MetaData {
     private static final String aiBuildingColName = "AIBuilding";
     private static final String aiBuyColName = "AIBuy";
     private static final String dayColName = "Holiday";
+    private static final String buildingSpendColName = "BuildingSpendRatio";
+    private static final String goodSpendColName = "GoodSpendRatio";
+    private static final String formulaColName = "Formular";
+    private static final String goodFormulaColName = "GoodFormular";
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -442,9 +522,12 @@ public class MetaData {
     private static final TreeMap<Integer, MetaVirtualBuilding> virtualBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
-
+    private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
+    private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
     private static final HashMap<Integer, MetaGood> good = new HashMap<>();
+    private static final HashMap<Formula.Key, Formula> formula = new HashMap<>();
+    private static final HashMap<Integer, GoodFormula> goodFormula = new HashMap<>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
@@ -475,6 +558,15 @@ public class MetaData {
         dayId = dayIds.get(new DayKey());
     }
     private static Map<DayKey, Integer> dayIds = new HashMap<>();
+
+    public static double getBuildingSpendMoneyRatio(int type) {
+        return buildingSpendRatio.get(type);
+    }
+
+    public static double getGoodSpendMoneyRatio(int mId) {
+        return goodSpendRatio.get(mId);
+    }
+
     public static final class DayKey {
         int y;
         int m;
@@ -495,6 +587,14 @@ public class MetaData {
     public static void initDayId() {
         mongoClient.getDatabase(dbName).getCollection(dayColName).find().forEach((Block<Document>) doc -> {
             dayIds.put(new DayKey(doc), doc.getInteger("id"));
+        });
+    }
+    public static void initSpendRatio() {
+        mongoClient.getDatabase(dbName).getCollection(goodSpendColName).find().forEach((Block<Document>) doc -> {
+            goodSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
+        });
+        mongoClient.getDatabase(dbName).getCollection(buildingSpendColName).find().forEach((Block<Document>) doc -> {
+            buildingSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
         });
     }
     public static MetaVirtualBuilding getVirtualBuilding(int id) {
@@ -531,7 +631,12 @@ public class MetaData {
         // Initial building ObjectId have no requirement to be identity all the time, so omit it
     }
     private static final List<InitialBuildingInfo> initialBuilding = new ArrayList<>();
-
+    public static final Formula getFormula(Formula.Key key) {
+        return formula.get(key);
+    }
+    public static final GoodFormula getFormula(int goodId) {
+        return goodFormula.get(goodId);
+    }
     public static final MetaMaterial getMaterial(int id) {
         return material.get(id);
     }
@@ -609,12 +714,6 @@ public class MetaData {
 //			npc.put(m.id, m);
 //		});
 //	}
-    public static void initInitialBuilding() {
-        mongoClient.getDatabase(dbName).getCollection(npcColName).find().forEach((Block<Document>) doc -> {
-            MetaNpc m = new MetaNpc(doc);
-            npc.put(m.id, m);
-        });
-    }
     public static void reloadGroundAuction() {
         groundAuction.clear();
         mongoClient.getDatabase(dbName).getCollection(groundAuctionColName).find().forEach((Block<Document>) doc -> {
@@ -623,16 +722,25 @@ public class MetaData {
         });
     }
 
+    public static Set<Integer> getAllDefaultToUseItemId() {
+        return Collections.unmodifiableSet(defaultToUseItemId);
+    }
+    private static Set<Integer> defaultToUseItemId = new HashSet<>();
+
     public static void initMaterial() {
         mongoClient.getDatabase(dbName).getCollection(materialColName).find().forEach((Block<Document>) doc -> {
             MetaMaterial m = new MetaMaterial(doc);
             material.put(m.id, m);
+            if(m.useDirectly)
+                defaultToUseItemId.add(m.id);
         });
     }
     public static void initGood() {
         mongoClient.getDatabase(dbName).getCollection(goodColName).find().forEach((Block<Document>) doc -> {
             MetaGood m = new MetaGood(doc);
             good.put(m.id, m);
+            if(m.useDirectly)
+                defaultToUseItemId.add(m.id);
         });
     }
     public static void initBuilding() {
@@ -671,7 +779,18 @@ public class MetaData {
         });
     }
 
-
+    public static void initGoodFormula() {
+        mongoClient.getDatabase(dbName).getCollection(goodFormulaColName).find().forEach((Block<Document>) doc -> {
+            GoodFormula m = new GoodFormula(doc);
+            goodFormula.put(m.id, m);
+        });
+    }
+    public static void initFormula() {
+        mongoClient.getDatabase(dbName).getCollection(formulaColName).find().forEach((Block<Document>) doc -> {
+            Formula m = new Formula(doc);
+            formula.put(m.key, m);
+        });
+    }
 	public static MetaNpc getNpc(int id) {
 		return npc.get(id);
 	}
@@ -693,5 +812,9 @@ public class MetaData {
         initAIBuilding();
         initAIBuy();
         initDayId();
+        initSpendRatio();
+
+        initFormula();
+        initGoodFormula();
 	}
 }

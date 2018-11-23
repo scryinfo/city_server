@@ -27,6 +27,8 @@ public abstract class LineBase {
     @Column(nullable = false)
     int workerNum;
 
+    @Column(nullable = false) // if don't save this, we need to query player in each produce action
+    int itemLevel;
     protected LineBase() {
     }
     public abstract ItemKey newItemKey(UUID producerId, int qty);
@@ -35,29 +37,16 @@ public abstract class LineBase {
     }
     @Transient
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
-//    public LineBase(Db.Lines.Line d) {
-//        this.id = new ObjectId(d.getId().toByteArray());
-//        this.meta = MetaData.getItem(d.getItemId());
-//        this.count = d.getNowCount();
-//        this.targetNum = d.getTargetCount();
-//        this.workerNum = d.getWorkerNum();
-//    }
-    public LineBase(MetaItem item, int targetNum, int workerNum) {
+
+    public LineBase(MetaItem item, int targetNum, int workerNum, int itemLevel) {
         this.id = UUID.randomUUID();
         this.item = item;
         this.count = 0;
         this.targetNum = targetNum;
         this.workerNum = workerNum;
+        this.itemLevel = itemLevel;
     }
-//    Db.Lines.Line toDbProto() {
-//        return Db.Lines.Line.newBuilder()
-//                .setId(Util.toByteString(id))
-//                .setItemId(meta.id)
-//                .setNowCount(count)
-//                .setTargetCount(targetNum)
-//                .setWorkerNum(workerNum)
-//                .build();
-//    }
+
     Gs.Line toProto() {
         return Gs.Line.newBuilder()
                 .setId(Util.toByteString(id))
