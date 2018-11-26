@@ -8,7 +8,6 @@ import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
@@ -196,7 +195,8 @@ public class GameSession {
 				if(lv < 0)
 					return;
 				player.addItem(mId, lv);
-				GameDb.saveOrUpdate(player);
+				TechTradeCenter.instance().techCompleteAction(mId, lv);
+				GameDb.saveOrUpdate(Arrays.asList(player, TechTradeCenter.instance()));
 				break;
 			}
 		}
@@ -284,6 +284,12 @@ public class GameSession {
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
 		}
 		else {
+			// this is fucking better, can keep the data consistency, however, it do update many times
+			MetaData.getAllDefaultToUseItemId().forEach(id->{
+				p.addItem(id, 0);
+				TechTradeCenter.instance().techCompleteAction(id, 0);
+			});
+			GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
 			this.write(Package.create(cmd, Gs.RoleInfo.newBuilder().setId(Util.toByteString(p.id())).setName(p.getName()).build()));
 		}
 	}
@@ -389,7 +395,7 @@ public class GameSession {
 	public void addBuilding(short cmd, Message message) {
 		Gs.AddBuilding c = (Gs.AddBuilding) message;
 		int mid = c.getId();
-		logger.debug("addBuilding " + c.getPos().getX() + " " + c.getPos().getY() + " player pos: " + player.gridIndex().x + " " + player.gridIndex().y);
+		logger.debug("addBuilding " + c.getPos().getX() + " " + c.getPos().getY() + " player pos: " + player.getPosition().x + " " + player.getPosition().y);
 		if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
 			return;
 		MetaBuilding m = MetaData.getBuilding(mid);
@@ -1045,7 +1051,8 @@ public class GameSession {
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
 		player.addItem(sell.metaId, sell.lv);
-		GameDb.saveOrUpdate(Arrays.asList(seller, player));
+		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
+		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
 		this.write(Package.create(cmd, message));
 	}
 	public void techTradeGetSummary(short cmd) {

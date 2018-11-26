@@ -140,10 +140,11 @@ public class TechTradeCenter {
             techInfo.put(metaId, new TechInfo(1, lv));
         }
         else {
-            if(i.topLv < lv)
+            i.owners++;
+            if(i.topLv < lv) {
                 i.topLv = lv;
+            }
         }
-        GameDb.saveOrUpdate(this);
     }
 
     @Embeddable

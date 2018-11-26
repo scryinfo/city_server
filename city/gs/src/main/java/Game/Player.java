@@ -36,8 +36,7 @@ public class Player {
     }
 
     public static final UUID BAG_ID = UUID.fromString("a33eab42-cb75-4c77-bd27-710d299f5591");
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    Set<Integer> itemIdCanProduce;
+
     public boolean hasItem(int mId, int lv) {
         if(goodLv.keySet().contains(mId))
             return goodLv.get(mId) >= lv;
@@ -61,23 +60,16 @@ public class Player {
         if(level != null && level < lv)
             return;
         goodLv.put(mId, lv);
-        GameDb.saveOrUpdate(this);
-        city.forEachBuilding(id(), b->{
-            if(b instanceof FactoryBase)
-                ((FactoryBase)b).updateLineQuality(mId, lv);
-        });
-        this.send(Shared.Package.create(GsCode.OpCode.newItem_VALUE, Gs.IntNum.newBuilder().setId(mId).setNum(lv).build()));
+
+        // create role
+        if(city != null) {
+            city.forEachBuilding(id(), b -> {
+                if (b instanceof FactoryBase)
+                    ((FactoryBase) b).updateLineQuality(mId, lv);
+            });
+            this.send(Shared.Package.create(GsCode.OpCode.newItem_VALUE, Gs.IntNum.newBuilder().setId(mId).setNum(lv).build()));
+        }
     }
-
-//    public void addItem(int targetId) {
-//        this.itemIdCanProduce.add(targetId);
-//        if(MetaItem.type(targetId) == MetaItem.GOOD)
-//            goodLv.put(targetId, 0);
-//        GameDb.saveOrUpdate(this);
-//        this.send(Shared.Package.create(GsCode.OpCode.goodInvent_VALUE, Gs.Num.newBuilder().setNum(targetId).build()));
-//    }
-
-
 
     public static final class Info {
         public Info(UUID id, String name) {
@@ -107,9 +99,6 @@ public class Player {
 
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
-
-    //@Transient
-    //private Ground ground;  it seems useless add this field...
 
     // for player, it position is GridIndex, Coordinate is too fine-grained
     @Embedded
@@ -141,10 +130,8 @@ public class Player {
         this.offlineTs = 0;
         this.money = 0;
         this.position = new GridIndex(0,0);
-        //this.ground = new Ground();
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
-        MetaData.getAllDefaultToUseItemId().forEach(id->this.goodLv.put(id, 0));
     }
     @PostLoad
     void _init() {
@@ -226,7 +213,7 @@ public class Player {
         city.relocation(this, old);
         return true;
     }
-    public GridIndex gridIndex() {
+    public GridIndex getPosition() {
         return this.position;
     }
 

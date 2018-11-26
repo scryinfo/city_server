@@ -17666,32 +17666,6 @@ public final class Gs {
      */
     com.google.protobuf.ByteString getBagId();
 
-    // repeated int32 itemIdCanProduce = 15;
-    /**
-     * <code>repeated int32 itemIdCanProduce = 15;</code>
-     *
-     * <pre>
-     *研发出的配方（可以生产的道具id），不包括默认可用的道具
-     * </pre>
-     */
-    java.util.List<java.lang.Integer> getItemIdCanProduceList();
-    /**
-     * <code>repeated int32 itemIdCanProduce = 15;</code>
-     *
-     * <pre>
-     *研发出的配方（可以生产的道具id），不包括默认可用的道具
-     * </pre>
-     */
-    int getItemIdCanProduceCount();
-    /**
-     * <code>repeated int32 itemIdCanProduce = 15;</code>
-     *
-     * <pre>
-     *研发出的配方（可以生产的道具id），不包括默认可用的道具
-     * </pre>
-     */
-    int getItemIdCanProduce(int index);
-
     // repeated int32 exchangeCollectedItem = 20;
     /**
      * <code>repeated int32 exchangeCollectedItem = 20;</code>
@@ -18031,31 +18005,10 @@ public final class Gs {
               bagId_ = input.readBytes();
               break;
             }
-            case 120: {
-              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
-                itemIdCanProduce_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000800;
-              }
-              itemIdCanProduce_.add(input.readInt32());
-              break;
-            }
-            case 122: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800) && input.getBytesUntilLimit() > 0) {
-                itemIdCanProduce_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000800;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                itemIdCanProduce_.add(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
             case 160: {
-              if (!((mutable_bitField0_ & 0x00001000) == 0x00001000)) {
+              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
                 exchangeCollectedItem_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00001000;
+                mutable_bitField0_ |= 0x00000800;
               }
               exchangeCollectedItem_.add(input.readInt32());
               break;
@@ -18063,9 +18016,9 @@ public final class Gs {
             case 162: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00001000) == 0x00001000) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800) && input.getBytesUntilLimit() > 0) {
                 exchangeCollectedItem_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00001000;
+                mutable_bitField0_ |= 0x00000800;
               }
               while (input.getBytesUntilLimit() > 0) {
                 exchangeCollectedItem_.add(input.readInt32());
@@ -18074,33 +18027,33 @@ public final class Gs {
               break;
             }
             case 202: {
-              if (!((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
+              if (!((mutable_bitField0_ & 0x00001000) == 0x00001000)) {
                 buildingBrands_ = new java.util.ArrayList<gs.Gs.IntNum>();
-                mutable_bitField0_ |= 0x00002000;
+                mutable_bitField0_ |= 0x00001000;
               }
               buildingBrands_.add(input.readMessage(gs.Gs.IntNum.PARSER, extensionRegistry));
               break;
             }
             case 210: {
-              if (!((mutable_bitField0_ & 0x00004000) == 0x00004000)) {
+              if (!((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
                 goodBrands_ = new java.util.ArrayList<gs.Gs.IntNum>();
-                mutable_bitField0_ |= 0x00004000;
+                mutable_bitField0_ |= 0x00002000;
               }
               goodBrands_.add(input.readMessage(gs.Gs.IntNum.PARSER, extensionRegistry));
               break;
             }
             case 218: {
-              if (!((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
+              if (!((mutable_bitField0_ & 0x00004000) == 0x00004000)) {
                 goodLv_ = new java.util.ArrayList<gs.Gs.IntNum>();
-                mutable_bitField0_ |= 0x00008000;
+                mutable_bitField0_ |= 0x00004000;
               }
               goodLv_.add(input.readMessage(gs.Gs.IntNum.PARSER, extensionRegistry));
               break;
             }
             case 242: {
-              if (!((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
+              if (!((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
                 ground_ = new java.util.ArrayList<gs.Gs.GroundInfo>();
-                mutable_bitField0_ |= 0x00010000;
+                mutable_bitField0_ |= 0x00008000;
               }
               ground_.add(input.readMessage(gs.Gs.GroundInfo.PARSER, extensionRegistry));
               break;
@@ -18114,21 +18067,18 @@ public final class Gs {
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
-          itemIdCanProduce_ = java.util.Collections.unmodifiableList(itemIdCanProduce_);
-        }
-        if (((mutable_bitField0_ & 0x00001000) == 0x00001000)) {
           exchangeCollectedItem_ = java.util.Collections.unmodifiableList(exchangeCollectedItem_);
         }
-        if (((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
+        if (((mutable_bitField0_ & 0x00001000) == 0x00001000)) {
           buildingBrands_ = java.util.Collections.unmodifiableList(buildingBrands_);
         }
-        if (((mutable_bitField0_ & 0x00004000) == 0x00004000)) {
+        if (((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
           goodBrands_ = java.util.Collections.unmodifiableList(goodBrands_);
         }
-        if (((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
+        if (((mutable_bitField0_ & 0x00004000) == 0x00004000)) {
           goodLv_ = java.util.Collections.unmodifiableList(goodLv_);
         }
-        if (((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
+        if (((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
           ground_ = java.util.Collections.unmodifiableList(ground_);
         }
         this.unknownFields = unknownFields.build();
@@ -18390,41 +18340,6 @@ public final class Gs {
       return bagId_;
     }
 
-    // repeated int32 itemIdCanProduce = 15;
-    public static final int ITEMIDCANPRODUCE_FIELD_NUMBER = 15;
-    private java.util.List<java.lang.Integer> itemIdCanProduce_;
-    /**
-     * <code>repeated int32 itemIdCanProduce = 15;</code>
-     *
-     * <pre>
-     *研发出的配方（可以生产的道具id），不包括默认可用的道具
-     * </pre>
-     */
-    public java.util.List<java.lang.Integer>
-        getItemIdCanProduceList() {
-      return itemIdCanProduce_;
-    }
-    /**
-     * <code>repeated int32 itemIdCanProduce = 15;</code>
-     *
-     * <pre>
-     *研发出的配方（可以生产的道具id），不包括默认可用的道具
-     * </pre>
-     */
-    public int getItemIdCanProduceCount() {
-      return itemIdCanProduce_.size();
-    }
-    /**
-     * <code>repeated int32 itemIdCanProduce = 15;</code>
-     *
-     * <pre>
-     *研发出的配方（可以生产的道具id），不包括默认可用的道具
-     * </pre>
-     */
-    public int getItemIdCanProduce(int index) {
-      return itemIdCanProduce_.get(index);
-    }
-
     // repeated int32 exchangeCollectedItem = 20;
     public static final int EXCHANGECOLLECTEDITEM_FIELD_NUMBER = 20;
     private java.util.List<java.lang.Integer> exchangeCollectedItem_;
@@ -18684,7 +18599,6 @@ public final class Gs {
       bag_ = gs.Gs.Store.getDefaultInstance();
       bagCapacity_ = 0;
       bagId_ = com.google.protobuf.ByteString.EMPTY;
-      itemIdCanProduce_ = java.util.Collections.emptyList();
       exchangeCollectedItem_ = java.util.Collections.emptyList();
       buildingBrands_ = java.util.Collections.emptyList();
       goodBrands_ = java.util.Collections.emptyList();
@@ -18816,9 +18730,6 @@ public final class Gs {
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         output.writeBytes(12, bagId_);
       }
-      for (int i = 0; i < itemIdCanProduce_.size(); i++) {
-        output.writeInt32(15, itemIdCanProduce_.get(i));
-      }
       for (int i = 0; i < exchangeCollectedItem_.size(); i++) {
         output.writeInt32(20, exchangeCollectedItem_.get(i));
       }
@@ -18886,15 +18797,6 @@ public final class Gs {
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(12, bagId_);
-      }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < itemIdCanProduce_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(itemIdCanProduce_.get(i));
-        }
-        size += dataSize;
-        size += 1 * getItemIdCanProduceList().size();
       }
       {
         int dataSize = 0;
@@ -19090,31 +18992,29 @@ public final class Gs {
         bitField0_ = (bitField0_ & ~0x00000200);
         bagId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000400);
-        itemIdCanProduce_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000800);
         exchangeCollectedItem_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00001000);
+        bitField0_ = (bitField0_ & ~0x00000800);
         if (buildingBrandsBuilder_ == null) {
           buildingBrands_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00002000);
+          bitField0_ = (bitField0_ & ~0x00001000);
         } else {
           buildingBrandsBuilder_.clear();
         }
         if (goodBrandsBuilder_ == null) {
           goodBrands_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00004000);
+          bitField0_ = (bitField0_ & ~0x00002000);
         } else {
           goodBrandsBuilder_.clear();
         }
         if (goodLvBuilder_ == null) {
           goodLv_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00008000);
+          bitField0_ = (bitField0_ & ~0x00004000);
         } else {
           goodLvBuilder_.clear();
         }
         if (groundBuilder_ == null) {
           ground_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00010000);
+          bitField0_ = (bitField0_ & ~0x00008000);
         } else {
           groundBuilder_.clear();
         }
@@ -19207,46 +19107,41 @@ public final class Gs {
         }
         result.bagId_ = bagId_;
         if (((bitField0_ & 0x00000800) == 0x00000800)) {
-          itemIdCanProduce_ = java.util.Collections.unmodifiableList(itemIdCanProduce_);
-          bitField0_ = (bitField0_ & ~0x00000800);
-        }
-        result.itemIdCanProduce_ = itemIdCanProduce_;
-        if (((bitField0_ & 0x00001000) == 0x00001000)) {
           exchangeCollectedItem_ = java.util.Collections.unmodifiableList(exchangeCollectedItem_);
-          bitField0_ = (bitField0_ & ~0x00001000);
+          bitField0_ = (bitField0_ & ~0x00000800);
         }
         result.exchangeCollectedItem_ = exchangeCollectedItem_;
         if (buildingBrandsBuilder_ == null) {
-          if (((bitField0_ & 0x00002000) == 0x00002000)) {
+          if (((bitField0_ & 0x00001000) == 0x00001000)) {
             buildingBrands_ = java.util.Collections.unmodifiableList(buildingBrands_);
-            bitField0_ = (bitField0_ & ~0x00002000);
+            bitField0_ = (bitField0_ & ~0x00001000);
           }
           result.buildingBrands_ = buildingBrands_;
         } else {
           result.buildingBrands_ = buildingBrandsBuilder_.build();
         }
         if (goodBrandsBuilder_ == null) {
-          if (((bitField0_ & 0x00004000) == 0x00004000)) {
+          if (((bitField0_ & 0x00002000) == 0x00002000)) {
             goodBrands_ = java.util.Collections.unmodifiableList(goodBrands_);
-            bitField0_ = (bitField0_ & ~0x00004000);
+            bitField0_ = (bitField0_ & ~0x00002000);
           }
           result.goodBrands_ = goodBrands_;
         } else {
           result.goodBrands_ = goodBrandsBuilder_.build();
         }
         if (goodLvBuilder_ == null) {
-          if (((bitField0_ & 0x00008000) == 0x00008000)) {
+          if (((bitField0_ & 0x00004000) == 0x00004000)) {
             goodLv_ = java.util.Collections.unmodifiableList(goodLv_);
-            bitField0_ = (bitField0_ & ~0x00008000);
+            bitField0_ = (bitField0_ & ~0x00004000);
           }
           result.goodLv_ = goodLv_;
         } else {
           result.goodLv_ = goodLvBuilder_.build();
         }
         if (groundBuilder_ == null) {
-          if (((bitField0_ & 0x00010000) == 0x00010000)) {
+          if (((bitField0_ & 0x00008000) == 0x00008000)) {
             ground_ = java.util.Collections.unmodifiableList(ground_);
-            bitField0_ = (bitField0_ & ~0x00010000);
+            bitField0_ = (bitField0_ & ~0x00008000);
           }
           result.ground_ = ground_;
         } else {
@@ -19303,20 +19198,10 @@ public final class Gs {
         if (other.hasBagId()) {
           setBagId(other.getBagId());
         }
-        if (!other.itemIdCanProduce_.isEmpty()) {
-          if (itemIdCanProduce_.isEmpty()) {
-            itemIdCanProduce_ = other.itemIdCanProduce_;
-            bitField0_ = (bitField0_ & ~0x00000800);
-          } else {
-            ensureItemIdCanProduceIsMutable();
-            itemIdCanProduce_.addAll(other.itemIdCanProduce_);
-          }
-          onChanged();
-        }
         if (!other.exchangeCollectedItem_.isEmpty()) {
           if (exchangeCollectedItem_.isEmpty()) {
             exchangeCollectedItem_ = other.exchangeCollectedItem_;
-            bitField0_ = (bitField0_ & ~0x00001000);
+            bitField0_ = (bitField0_ & ~0x00000800);
           } else {
             ensureExchangeCollectedItemIsMutable();
             exchangeCollectedItem_.addAll(other.exchangeCollectedItem_);
@@ -19327,7 +19212,7 @@ public final class Gs {
           if (!other.buildingBrands_.isEmpty()) {
             if (buildingBrands_.isEmpty()) {
               buildingBrands_ = other.buildingBrands_;
-              bitField0_ = (bitField0_ & ~0x00002000);
+              bitField0_ = (bitField0_ & ~0x00001000);
             } else {
               ensureBuildingBrandsIsMutable();
               buildingBrands_.addAll(other.buildingBrands_);
@@ -19340,7 +19225,7 @@ public final class Gs {
               buildingBrandsBuilder_.dispose();
               buildingBrandsBuilder_ = null;
               buildingBrands_ = other.buildingBrands_;
-              bitField0_ = (bitField0_ & ~0x00002000);
+              bitField0_ = (bitField0_ & ~0x00001000);
               buildingBrandsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getBuildingBrandsFieldBuilder() : null;
@@ -19353,7 +19238,7 @@ public final class Gs {
           if (!other.goodBrands_.isEmpty()) {
             if (goodBrands_.isEmpty()) {
               goodBrands_ = other.goodBrands_;
-              bitField0_ = (bitField0_ & ~0x00004000);
+              bitField0_ = (bitField0_ & ~0x00002000);
             } else {
               ensureGoodBrandsIsMutable();
               goodBrands_.addAll(other.goodBrands_);
@@ -19366,7 +19251,7 @@ public final class Gs {
               goodBrandsBuilder_.dispose();
               goodBrandsBuilder_ = null;
               goodBrands_ = other.goodBrands_;
-              bitField0_ = (bitField0_ & ~0x00004000);
+              bitField0_ = (bitField0_ & ~0x00002000);
               goodBrandsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getGoodBrandsFieldBuilder() : null;
@@ -19379,7 +19264,7 @@ public final class Gs {
           if (!other.goodLv_.isEmpty()) {
             if (goodLv_.isEmpty()) {
               goodLv_ = other.goodLv_;
-              bitField0_ = (bitField0_ & ~0x00008000);
+              bitField0_ = (bitField0_ & ~0x00004000);
             } else {
               ensureGoodLvIsMutable();
               goodLv_.addAll(other.goodLv_);
@@ -19392,7 +19277,7 @@ public final class Gs {
               goodLvBuilder_.dispose();
               goodLvBuilder_ = null;
               goodLv_ = other.goodLv_;
-              bitField0_ = (bitField0_ & ~0x00008000);
+              bitField0_ = (bitField0_ & ~0x00004000);
               goodLvBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getGoodLvFieldBuilder() : null;
@@ -19405,7 +19290,7 @@ public final class Gs {
           if (!other.ground_.isEmpty()) {
             if (ground_.isEmpty()) {
               ground_ = other.ground_;
-              bitField0_ = (bitField0_ & ~0x00010000);
+              bitField0_ = (bitField0_ & ~0x00008000);
             } else {
               ensureGroundIsMutable();
               ground_.addAll(other.ground_);
@@ -19418,7 +19303,7 @@ public final class Gs {
               groundBuilder_.dispose();
               groundBuilder_ = null;
               ground_ = other.ground_;
-              bitField0_ = (bitField0_ & ~0x00010000);
+              bitField0_ = (bitField0_ & ~0x00008000);
               groundBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getGroundFieldBuilder() : null;
@@ -20280,106 +20165,12 @@ public final class Gs {
         return this;
       }
 
-      // repeated int32 itemIdCanProduce = 15;
-      private java.util.List<java.lang.Integer> itemIdCanProduce_ = java.util.Collections.emptyList();
-      private void ensureItemIdCanProduceIsMutable() {
-        if (!((bitField0_ & 0x00000800) == 0x00000800)) {
-          itemIdCanProduce_ = new java.util.ArrayList<java.lang.Integer>(itemIdCanProduce_);
-          bitField0_ |= 0x00000800;
-         }
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public java.util.List<java.lang.Integer>
-          getItemIdCanProduceList() {
-        return java.util.Collections.unmodifiableList(itemIdCanProduce_);
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public int getItemIdCanProduceCount() {
-        return itemIdCanProduce_.size();
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public int getItemIdCanProduce(int index) {
-        return itemIdCanProduce_.get(index);
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public Builder setItemIdCanProduce(
-          int index, int value) {
-        ensureItemIdCanProduceIsMutable();
-        itemIdCanProduce_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public Builder addItemIdCanProduce(int value) {
-        ensureItemIdCanProduceIsMutable();
-        itemIdCanProduce_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public Builder addAllItemIdCanProduce(
-          java.lang.Iterable<? extends java.lang.Integer> values) {
-        ensureItemIdCanProduceIsMutable();
-        super.addAll(values, itemIdCanProduce_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated int32 itemIdCanProduce = 15;</code>
-       *
-       * <pre>
-       *研发出的配方（可以生产的道具id），不包括默认可用的道具
-       * </pre>
-       */
-      public Builder clearItemIdCanProduce() {
-        itemIdCanProduce_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000800);
-        onChanged();
-        return this;
-      }
-
       // repeated int32 exchangeCollectedItem = 20;
       private java.util.List<java.lang.Integer> exchangeCollectedItem_ = java.util.Collections.emptyList();
       private void ensureExchangeCollectedItemIsMutable() {
-        if (!((bitField0_ & 0x00001000) == 0x00001000)) {
+        if (!((bitField0_ & 0x00000800) == 0x00000800)) {
           exchangeCollectedItem_ = new java.util.ArrayList<java.lang.Integer>(exchangeCollectedItem_);
-          bitField0_ |= 0x00001000;
+          bitField0_ |= 0x00000800;
          }
       }
       /**
@@ -20435,7 +20226,7 @@ public final class Gs {
        */
       public Builder clearExchangeCollectedItem() {
         exchangeCollectedItem_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00001000);
+        bitField0_ = (bitField0_ & ~0x00000800);
         onChanged();
         return this;
       }
@@ -20444,9 +20235,9 @@ public final class Gs {
       private java.util.List<gs.Gs.IntNum> buildingBrands_ =
         java.util.Collections.emptyList();
       private void ensureBuildingBrandsIsMutable() {
-        if (!((bitField0_ & 0x00002000) == 0x00002000)) {
+        if (!((bitField0_ & 0x00001000) == 0x00001000)) {
           buildingBrands_ = new java.util.ArrayList<gs.Gs.IntNum>(buildingBrands_);
-          bitField0_ |= 0x00002000;
+          bitField0_ |= 0x00001000;
          }
       }
 
@@ -20639,7 +20430,7 @@ public final class Gs {
       public Builder clearBuildingBrands() {
         if (buildingBrandsBuilder_ == null) {
           buildingBrands_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00002000);
+          bitField0_ = (bitField0_ & ~0x00001000);
           onChanged();
         } else {
           buildingBrandsBuilder_.clear();
@@ -20744,7 +20535,7 @@ public final class Gs {
           buildingBrandsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder>(
                   buildingBrands_,
-                  ((bitField0_ & 0x00002000) == 0x00002000),
+                  ((bitField0_ & 0x00001000) == 0x00001000),
                   getParentForChildren(),
                   isClean());
           buildingBrands_ = null;
@@ -20756,9 +20547,9 @@ public final class Gs {
       private java.util.List<gs.Gs.IntNum> goodBrands_ =
         java.util.Collections.emptyList();
       private void ensureGoodBrandsIsMutable() {
-        if (!((bitField0_ & 0x00004000) == 0x00004000)) {
+        if (!((bitField0_ & 0x00002000) == 0x00002000)) {
           goodBrands_ = new java.util.ArrayList<gs.Gs.IntNum>(goodBrands_);
-          bitField0_ |= 0x00004000;
+          bitField0_ |= 0x00002000;
          }
       }
 
@@ -20951,7 +20742,7 @@ public final class Gs {
       public Builder clearGoodBrands() {
         if (goodBrandsBuilder_ == null) {
           goodBrands_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00004000);
+          bitField0_ = (bitField0_ & ~0x00002000);
           onChanged();
         } else {
           goodBrandsBuilder_.clear();
@@ -21056,7 +20847,7 @@ public final class Gs {
           goodBrandsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder>(
                   goodBrands_,
-                  ((bitField0_ & 0x00004000) == 0x00004000),
+                  ((bitField0_ & 0x00002000) == 0x00002000),
                   getParentForChildren(),
                   isClean());
           goodBrands_ = null;
@@ -21068,9 +20859,9 @@ public final class Gs {
       private java.util.List<gs.Gs.IntNum> goodLv_ =
         java.util.Collections.emptyList();
       private void ensureGoodLvIsMutable() {
-        if (!((bitField0_ & 0x00008000) == 0x00008000)) {
+        if (!((bitField0_ & 0x00004000) == 0x00004000)) {
           goodLv_ = new java.util.ArrayList<gs.Gs.IntNum>(goodLv_);
-          bitField0_ |= 0x00008000;
+          bitField0_ |= 0x00004000;
          }
       }
 
@@ -21263,7 +21054,7 @@ public final class Gs {
       public Builder clearGoodLv() {
         if (goodLvBuilder_ == null) {
           goodLv_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00008000);
+          bitField0_ = (bitField0_ & ~0x00004000);
           onChanged();
         } else {
           goodLvBuilder_.clear();
@@ -21368,7 +21159,7 @@ public final class Gs {
           goodLvBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               gs.Gs.IntNum, gs.Gs.IntNum.Builder, gs.Gs.IntNumOrBuilder>(
                   goodLv_,
-                  ((bitField0_ & 0x00008000) == 0x00008000),
+                  ((bitField0_ & 0x00004000) == 0x00004000),
                   getParentForChildren(),
                   isClean());
           goodLv_ = null;
@@ -21380,9 +21171,9 @@ public final class Gs {
       private java.util.List<gs.Gs.GroundInfo> ground_ =
         java.util.Collections.emptyList();
       private void ensureGroundIsMutable() {
-        if (!((bitField0_ & 0x00010000) == 0x00010000)) {
+        if (!((bitField0_ & 0x00008000) == 0x00008000)) {
           ground_ = new java.util.ArrayList<gs.Gs.GroundInfo>(ground_);
-          bitField0_ |= 0x00010000;
+          bitField0_ |= 0x00008000;
          }
       }
 
@@ -21575,7 +21366,7 @@ public final class Gs {
       public Builder clearGround() {
         if (groundBuilder_ == null) {
           ground_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00010000);
+          bitField0_ = (bitField0_ & ~0x00008000);
           onChanged();
         } else {
           groundBuilder_.clear();
@@ -21680,7 +21471,7 @@ public final class Gs {
           groundBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               gs.Gs.GroundInfo, gs.Gs.GroundInfo.Builder, gs.Gs.GroundInfoOrBuilder>(
                   ground_,
-                  ((bitField0_ & 0x00010000) == 0x00010000),
+                  ((bitField0_ & 0x00008000) == 0x00008000),
                   getParentForChildren(),
                   isClean());
           ground_ = null;
@@ -70889,147 +70680,146 @@ public final class Gs {
       "epartment\022*\n\016publicFacility\030\004 \003(\0132\022.gs.P" +
       "ublicFacility\022\"\n\nretailShop\030\005 \003(\0132\016.gs.R" +
       "etailShop\"1\n\013MoneyChange\022\r\n\005money\030\001 \002(\003\022" +
-      "\023\n\013lockedMoney\030\002 \002(\003\"\254\003\n\004Role\022\n\n\002id\030\001 \002(" +
+      "\023\n\013lockedMoney\030\002 \002(\003\"\222\003\n\004Role\022\n\n\002id\030\001 \002(" +
       "\014\022\014\n\004name\030\002 \002(\t\022\r\n\005money\030\003 \002(\003\022\023\n\013locked" +
       "Money\030\004 \002(\003\022\021\n\tofflineTs\030\005 \002(\003\022\037\n\010positi" +
       "on\030\006 \002(\0132\r.gs.GridIndex\022\035\n\004buys\030\007 \001(\0132\017.",
       "gs.BuildingSet\022\036\n\005rents\030\010 \001(\0132\017.gs.Build" +
       "ingSet\022\026\n\003bag\030\n \002(\0132\t.gs.Store\022\023\n\013bagCap" +
-      "acity\030\013 \002(\005\022\r\n\005bagId\030\014 \002(\014\022\030\n\020itemIdCanP" +
-      "roduce\030\017 \003(\005\022\035\n\025exchangeCollectedItem\030\024 " +
-      "\003(\005\022\"\n\016buildingBrands\030\031 \003(\0132\n.gs.IntNum\022" +
-      "\036\n\ngoodBrands\030\032 \003(\0132\n.gs.IntNum\022\032\n\006goodL" +
-      "v\030\033 \003(\0132\n.gs.IntNum\022\036\n\006ground\030\036 \003(\0132\016.gs" +
-      ".GroundInfo\",\n\nUnitCreate\022\036\n\004info\030\001 \003(\0132" +
-      "\020.gs.BuildingInfo\",\n\014GroundChange\022\034\n\004inf" +
-      "o\030\002 \003(\0132\016.gs.GroundInfo\"\'\n\tRoleInfos\022\032\n\004",
-      "info\030\001 \003(\0132\014.gs.RoleInfo\"8\n\007DelItem\022\022\n\nb" +
-      "uildingId\030\001 \002(\014\022\031\n\004item\030\002 \002(\0132\013.gs.ItemK" +
-      "ey\"p\n\rGroundAuction\022)\n\007auction\030\001 \003(\0132\030.g" +
-      "s.GroundAuction.Target\0324\n\006Target\022\n\n\002id\030\001" +
-      " \002(\014\022\017\n\007biderId\030\002 \001(\014\022\r\n\005price\030\003 \001(\005\"\260\001\n" +
-      "\021MetaGroundAuction\022-\n\007auction\030\001 \003(\0132\034.gs" +
-      ".MetaGroundAuction.Target\032l\n\006Target\022\n\n\002i" +
-      "d\030\001 \002(\014\022\033\n\004area\030\002 \003(\0132\r.gs.MiniIndex\022\021\n\t" +
-      "beginTime\030\003 \002(\003\022\023\n\013durationSec\030\004 \002(\005\022\021\n\t" +
-      "basePrice\030\005 \002(\005\"5\n\013AddBuilding\022\n\n\002id\030\001 \002",
-      "(\005\022\032\n\003pos\030\002 \002(\0132\r.gs.MiniIndex\"@\n\014Transf" +
-      "erItem\022\013\n\003src\030\001 \002(\014\022\013\n\003dst\030\002 \002(\014\022\026\n\004item" +
-      "\030\003 \002(\0132\010.gs.Item\"o\n\tApartment\022\036\n\004info\030\001 " +
-      "\002(\0132\020.gs.BuildingInfo\022\014\n\004rent\030\002 \002(\005\022\016\n\006r" +
-      "enter\030\003 \002(\005\022\027\n\005chart\030\004 \002(\0132\010.gs.Nums\022\013\n\003" +
-      "qty\030\005 \002(\005\"\\\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030" +
-      "\002 \002(\005\022\020\n\010nowCount\030\003 \002(\005\022\023\n\013targetCount\030\004" +
-      " \002(\005\022\021\n\tworkerNum\030\005 \002(\005\"\304\001\n\nLaboratory\022\036" +
-      "\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022!\n\004line\030\002" +
-      " \003(\0132\023.gs.Laboratory.Line\032s\n\004Line\022\n\n\002id\030",
-      "\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\014\n\004type\030\003 \002(\005\022\n\n\002l" +
-      "v\030\004 \002(\005\022\023\n\013durationSec\030\005 \002(\005\022\r\n\005phase\030\006 " +
-      "\002(\005\022\021\n\tworkerNum\030\007 \002(\005\"Q\n\nLabAddLine\022\022\n\n" +
-      "buildingId\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\014\n\004type" +
-      "\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"0\n\nLabDelLine\022" +
-      "\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\"D\n\023L" +
-      "abSetLineWorkerNum\022\022\n\nbuildingId\030\001 \002(\014\022\016" +
-      "\n\006lineId\030\002 \002(\014\022\t\n\001n\030\003 \002(\005\"e\n\005Shelf\022\037\n\004go" +
-      "od\030\001 \003(\0132\021.gs.Shelf.Content\032;\n\007Content\022\026" +
-      "\n\001k\030\001 \002(\0132\013.gs.ItemKey\022\t\n\001n\030\002 \002(\005\022\r\n\005pri",
-      "ce\030\003 \002(\005\"}\n\017MaterialFactory\022\036\n\004info\030\001 \002(" +
-      "\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 \002(\0132\t.gs." +
-      "Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\026\n\004line\030" +
-      "\004 \003(\0132\010.gs.Line\"\177\n\021ProduceDepartment\022\036\n\004" +
-      "info\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005store\030\002 " +
-      "\002(\0132\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf" +
-      "\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"\213\004\n\rAdvertiseme" +
-      "nt\022-\n\ravailableSlot\030\002 \003(\0132\026.gs.Advertise" +
-      "ment.Slot\022,\n\010soldSlot\030\003 \003(\0132\032.gs.Adverti" +
-      "sement.SoldSlot\022 \n\002ad\030\004 \003(\0132\024.gs.Adverti",
-      "sement.Ad\032c\n\004Slot\022\n\n\002id\030\001 \002(\014\022\024\n\014minDayT" +
-      "oRent\030\002 \002(\005\022\024\n\014maxDayToRent\030\003 \002(\005\022\022\n\nren" +
-      "tPreDay\030\004 \002(\005\022\017\n\007deposit\030\005 \002(\005\032^\n\010SoldSl" +
-      "ot\022!\n\001s\030\001 \002(\0132\026.gs.Advertisement.Slot\022\017\n" +
-      "\007beginTs\030\002 \002(\003\022\014\n\004days\030\003 \002(\005\022\020\n\010renterId" +
-      "\030\004 \002(\014\032\265\001\n\002Ad\022(\n\004slot\030\001 \001(\0132\032.gs.Adverti" +
-      "sement.SoldSlot\022\016\n\006metaId\030\002 \002(\005\022\'\n\004type\030" +
-      "\003 \002(\0162\031.gs.Advertisement.Ad.Type\022\017\n\007begi" +
-      "nTs\030\004 \002(\003\022\017\n\007npcFlow\030\005 \002(\005\022\n\n\002id\030\007 \002(\014\"\036" +
-      "\n\004Type\022\010\n\004GOOD\020\000\022\014\n\010BUILDING\020\001\"q\n\016Public",
-      "Facility\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo" +
-      "\022\035\n\002ad\030\002 \002(\0132\021.gs.Advertisement\022\013\n\003qty\030\003" +
-      " \002(\005\022\023\n\013ticketPrice\030\004 \002(\005\"\214\001\n\nRetailShop" +
-      "\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\035\n\002ad\030\002" +
-      " \002(\0132\021.gs.Advertisement\022\013\n\003qty\030\003 \002(\005\022\030\n\005" +
-      "store\030\004 \002(\0132\t.gs.Store\022\030\n\005shelf\030\005 \002(\0132\t." +
-      "gs.Shelf\"o\n\tAdSetSlot\022\022\n\nbuildingId\030\001 \002(" +
-      "\014\022\016\n\006slotId\030\002 \002(\014\022\022\n\nrentPreDay\030\003 \002(\005\022\024\n" +
-      "\014minDayToRent\030\004 \002(\005\022\024\n\014maxDayToRent\030\005 \002(" +
-      "\005\"]\n\007AddSlot\022\022\n\nbuildingId\030\001 \002(\014\022\024\n\014minD",
-      "ayToRent\030\002 \002(\005\022\024\n\014maxDayToRent\030\003 \002(\005\022\022\n\n" +
-      "rentPreDay\030\004 \002(\005\"/\n\tAdDelSlot\022\022\n\nbuildin" +
-      "gId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\"<\n\tAdBuySlot\022\022" +
-      "\n\nbuildingId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\022\013\n\003da" +
-      "y\030\003 \002(\005\"0\n\013AdSetTicket\022\022\n\nbuildingId\030\001 \002" +
-      "(\014\022\r\n\005price\030\002 \002(\005\"`\n\005AddAd\022\n\n\002id\030\001 \001(\014\022\016" +
-      "\n\006metaId\030\002 \002(\005\022\'\n\004type\030\003 \002(\0162\031.gs.Advert" +
-      "isement.Ad.Type\022\022\n\nbuildingId\030\004 \002(\014\"3\n\017A" +
-      "dDelAdFromSlot\022\022\n\nbuildingId\030\001 \002(\014\022\014\n\004ad" +
-      "Id\030\002 \002(\014\"E\n\010ShelfAdd\022\022\n\nbuildingId\030\001 \002(\014",
-      "\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r\n\005price\030\003 \002(\005\"" +
-      "6\n\010ShelfDel\022\022\n\nbuildingId\030\001 \002(\014\022\026\n\004item\030" +
-      "\002 \002(\0132\010.gs.Item\"E\n\010ShelfSet\022\022\n\nbuildingI" +
-      "d\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r\n\005price" +
-      "\030\003 \002(\005\"\\\n\nBuyInShelf\022\022\n\nbuildingId\030\001 \002(\014" +
-      "\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r\n\005price\030\003 \002(\005\022" +
-      "\023\n\013wareHouseId\030\004 \002(\014\"K\n\007AddLine\022\n\n\002id\030\001 " +
-      "\002(\014\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021" +
-      "\n\tworkerNum\030\004 \002(\005\"V\n\nChangeLine\022\022\n\nbuild" +
-      "ingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum",
-      "\030\003 \001(\005\022\021\n\ttargetNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n" +
-      "\002id\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(\005\022\023\n\013targetCou" +
-      "nt\030\003 \001(\005\022\021\n\tworkerNum\030\004 \001(\005\"\211\001\n\023Exchange" +
-      "ItemSummary\022\016\n\006itemId\030\001 \002(\005\022\020\n\010lowPrice\030" +
-      "\002 \001(\005\022\021\n\thighPrice\030\003 \001(\005\022\020\n\010nowPrice\030\004 \001" +
-      "(\005\022\026\n\016sumDealedPrice\030\005 \001(\003\022\023\n\013priceChang" +
-      "e\030\006 \001(\021\"<\n\020ExchangeItemList\022(\n\007summary\030\001" +
-      " \003(\0132\027.gs.ExchangeItemSummary\"C\n\026ItemDea" +
-      "lHistoryElement\022\r\n\005price\030\001 \002(\005\022\016\n\006amount" +
-      "\030\002 \002(\005\022\n\n\002ts\030\003 \002(\003\":\n\017ItemDealHistory\022\'\n",
-      "\003log\030\001 \003(\0132\032.gs.ItemDealHistoryElement\"M" +
-      "\n\013ExchangeBuy\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002" +
-      "(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"N\n" +
-      "\014ExchangeSell\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002" +
-      "(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"n\n" +
-      "\022ExchangeItemDetail\022\027\n\003buy\030\001 \003(\0132\n.gs.In" +
-      "tNum\022\030\n\004sell\030\002 \003(\0132\n.gs.IntNum\022\020\n\010nowPri" +
-      "ce\030\003 \002(\005\022\023\n\013priceChange\030\004 \002(\005\"w\n\014Exchang" +
-      "eDeal\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005pr" +
-      "ice\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\022\022\n\nbuyOrde",
-      "rId\030\005 \002(\014\022\023\n\013sellOrderId\030\006 \002(\014\"\334\001\n\016Excha" +
-      "ngeOrders\022\'\n\005order\030\001 \003(\0132\030.gs.ExchangeOr" +
-      "ders.Order\032\240\001\n\005Order\022\n\n\002id\030\001 \002(\014\022\016\n\006item" +
-      "Id\030\002 \002(\005\022\024\n\014dealedAmount\030\003 \002(\005\022\023\n\013totalA" +
-      "mount\030\004 \002(\005\022\r\n\005price\030\005 \002(\005\022\n\n\002ts\030\006 \002(\003\022\014" +
-      "\n\004sell\030\007 \002(\010\022\022\n\nbuildingId\030\010 \002(\014\022\023\n\013deal" +
-      "edPrice\030\t \002(\005\"\240\001\n\017ExchangeDealLog\022\020\n\010sel" +
-      "lerId\030\001 \002(\014\022\017\n\007buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003" +
-      "\022\r\n\005price\030\004 \002(\005\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemI" +
-      "d\030\006 \002(\005\022\026\n\016buyTotalAmount\030\007 \002(\005\022\027\n\017sellT",
-      "otalAmount\030\010 \002(\005\"4\n\020ExchangeDealLogs\022 \n\003" +
-      "log\030\001 \003(\0132\023.gs.ExchangeDealLog\"{\n\nGround" +
-      "Rent\022\022\n\nrentPreDay\030\001 \002(\005\022\030\n\020paymentCycle" +
-      "Days\030\002 \002(\005\022\017\n\007deposit\030\003 \002(\005\022\020\n\010rentDays\030" +
-      "\004 \002(\005\022\034\n\005coord\030\005 \003(\0132\r.gs.MiniIndex\"9\n\nG" +
-      "roundSale\022\r\n\005price\030\001 \002(\005\022\034\n\005coord\030\002 \003(\0132" +
-      "\r.gs.MiniIndex\"t\n\020TechTradeSummary\022\'\n\004in" +
-      "fo\030\001 \003(\0132\031.gs.TechTradeSummary.Info\0327\n\004I" +
-      "nfo\022\020\n\010ownerNum\030\001 \002(\005\022\016\n\006metaId\030\002 \002(\005\022\r\n" +
-      "\005topLv\030\003 \001(\005\"y\n\017TechTradeDetail\022&\n\004info\030",
-      "\001 \003(\0132\030.gs.TechTradeDetail.Info\032>\n\004Info\022" +
-      "\n\n\002id\030\001 \002(\014\022\017\n\007ownerId\030\002 \002(\014\022\r\n\005price\030\003 " +
-      "\002(\005\022\n\n\002lv\030\004 \002(\005\"9\n\014TechTradeAdd\022\016\n\006itemI" +
-      "d\030\001 \002(\005\022\n\n\002lv\030\002 \001(\005\022\r\n\005price\030\003 \002(\005*f\n\rBu" +
-      "ildingState\022\020\n\014CONSTRUCTING\020\002\022\020\n\014WAITING" +
-      "_OPEN\020\003\022\023\n\017WAITING_OPERATE\020\004\022\013\n\007OPERATE\020" +
-      "\005\022\017\n\013DECONSTRUCT\020\006"
+      "acity\030\013 \002(\005\022\r\n\005bagId\030\014 \002(\014\022\035\n\025exchangeCo" +
+      "llectedItem\030\024 \003(\005\022\"\n\016buildingBrands\030\031 \003(" +
+      "\0132\n.gs.IntNum\022\036\n\ngoodBrands\030\032 \003(\0132\n.gs.I" +
+      "ntNum\022\032\n\006goodLv\030\033 \003(\0132\n.gs.IntNum\022\036\n\006gro" +
+      "und\030\036 \003(\0132\016.gs.GroundInfo\",\n\nUnitCreate\022" +
+      "\036\n\004info\030\001 \003(\0132\020.gs.BuildingInfo\",\n\014Groun" +
+      "dChange\022\034\n\004info\030\002 \003(\0132\016.gs.GroundInfo\"\'\n" +
+      "\tRoleInfos\022\032\n\004info\030\001 \003(\0132\014.gs.RoleInfo\"8",
+      "\n\007DelItem\022\022\n\nbuildingId\030\001 \002(\014\022\031\n\004item\030\002 " +
+      "\002(\0132\013.gs.ItemKey\"p\n\rGroundAuction\022)\n\007auc" +
+      "tion\030\001 \003(\0132\030.gs.GroundAuction.Target\0324\n\006" +
+      "Target\022\n\n\002id\030\001 \002(\014\022\017\n\007biderId\030\002 \001(\014\022\r\n\005p" +
+      "rice\030\003 \001(\005\"\260\001\n\021MetaGroundAuction\022-\n\007auct" +
+      "ion\030\001 \003(\0132\034.gs.MetaGroundAuction.Target\032" +
+      "l\n\006Target\022\n\n\002id\030\001 \002(\014\022\033\n\004area\030\002 \003(\0132\r.gs" +
+      ".MiniIndex\022\021\n\tbeginTime\030\003 \002(\003\022\023\n\013duratio" +
+      "nSec\030\004 \002(\005\022\021\n\tbasePrice\030\005 \002(\005\"5\n\013AddBuil" +
+      "ding\022\n\n\002id\030\001 \002(\005\022\032\n\003pos\030\002 \002(\0132\r.gs.MiniI",
+      "ndex\"@\n\014TransferItem\022\013\n\003src\030\001 \002(\014\022\013\n\003dst" +
+      "\030\002 \002(\014\022\026\n\004item\030\003 \002(\0132\010.gs.Item\"o\n\tApartm" +
+      "ent\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\014\n\004r" +
+      "ent\030\002 \002(\005\022\016\n\006renter\030\003 \002(\005\022\027\n\005chart\030\004 \002(\013" +
+      "2\010.gs.Nums\022\013\n\003qty\030\005 \002(\005\"\\\n\004Line\022\n\n\002id\030\001 " +
+      "\002(\014\022\016\n\006itemId\030\002 \002(\005\022\020\n\010nowCount\030\003 \002(\005\022\023\n" +
+      "\013targetCount\030\004 \002(\005\022\021\n\tworkerNum\030\005 \002(\005\"\304\001" +
+      "\n\nLaboratory\022\036\n\004info\030\001 \002(\0132\020.gs.Building" +
+      "Info\022!\n\004line\030\002 \003(\0132\023.gs.Laboratory.Line\032" +
+      "s\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\014\n\004t",
+      "ype\030\003 \002(\005\022\n\n\002lv\030\004 \002(\005\022\023\n\013durationSec\030\005 \002" +
+      "(\005\022\r\n\005phase\030\006 \002(\005\022\021\n\tworkerNum\030\007 \002(\005\"Q\n\n" +
+      "LabAddLine\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006itemId" +
+      "\030\002 \002(\005\022\014\n\004type\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"" +
+      "0\n\nLabDelLine\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lin" +
+      "eId\030\002 \002(\014\"D\n\023LabSetLineWorkerNum\022\022\n\nbuil" +
+      "dingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\t\n\001n\030\003 \002(\005\"" +
+      "e\n\005Shelf\022\037\n\004good\030\001 \003(\0132\021.gs.Shelf.Conten" +
+      "t\032;\n\007Content\022\026\n\001k\030\001 \002(\0132\013.gs.ItemKey\022\t\n\001" +
+      "n\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\"}\n\017MaterialFactor",
+      "y\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005sto" +
+      "re\030\002 \002(\0132\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs." +
+      "Shelf\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"\177\n\021Produce" +
+      "Department\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingIn" +
+      "fo\022\030\n\005store\030\002 \002(\0132\t.gs.Store\022\030\n\005shelf\030\003 " +
+      "\002(\0132\t.gs.Shelf\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"\213" +
+      "\004\n\rAdvertisement\022-\n\ravailableSlot\030\002 \003(\0132" +
+      "\026.gs.Advertisement.Slot\022,\n\010soldSlot\030\003 \003(" +
+      "\0132\032.gs.Advertisement.SoldSlot\022 \n\002ad\030\004 \003(" +
+      "\0132\024.gs.Advertisement.Ad\032c\n\004Slot\022\n\n\002id\030\001 ",
+      "\002(\014\022\024\n\014minDayToRent\030\002 \002(\005\022\024\n\014maxDayToRen" +
+      "t\030\003 \002(\005\022\022\n\nrentPreDay\030\004 \002(\005\022\017\n\007deposit\030\005" +
+      " \002(\005\032^\n\010SoldSlot\022!\n\001s\030\001 \002(\0132\026.gs.Adverti" +
+      "sement.Slot\022\017\n\007beginTs\030\002 \002(\003\022\014\n\004days\030\003 \002" +
+      "(\005\022\020\n\010renterId\030\004 \002(\014\032\265\001\n\002Ad\022(\n\004slot\030\001 \001(" +
+      "\0132\032.gs.Advertisement.SoldSlot\022\016\n\006metaId\030" +
+      "\002 \002(\005\022\'\n\004type\030\003 \002(\0162\031.gs.Advertisement.A" +
+      "d.Type\022\017\n\007beginTs\030\004 \002(\003\022\017\n\007npcFlow\030\005 \002(\005" +
+      "\022\n\n\002id\030\007 \002(\014\"\036\n\004Type\022\010\n\004GOOD\020\000\022\014\n\010BUILDI" +
+      "NG\020\001\"q\n\016PublicFacility\022\036\n\004info\030\001 \002(\0132\020.g",
+      "s.BuildingInfo\022\035\n\002ad\030\002 \002(\0132\021.gs.Advertis" +
+      "ement\022\013\n\003qty\030\003 \002(\005\022\023\n\013ticketPrice\030\004 \002(\005\"" +
+      "\214\001\n\nRetailShop\022\036\n\004info\030\001 \002(\0132\020.gs.Buildi" +
+      "ngInfo\022\035\n\002ad\030\002 \002(\0132\021.gs.Advertisement\022\013\n" +
+      "\003qty\030\003 \002(\005\022\030\n\005store\030\004 \002(\0132\t.gs.Store\022\030\n\005" +
+      "shelf\030\005 \002(\0132\t.gs.Shelf\"o\n\tAdSetSlot\022\022\n\nb" +
+      "uildingId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\022\022\n\nrentP" +
+      "reDay\030\003 \002(\005\022\024\n\014minDayToRent\030\004 \002(\005\022\024\n\014max" +
+      "DayToRent\030\005 \002(\005\"]\n\007AddSlot\022\022\n\nbuildingId" +
+      "\030\001 \002(\014\022\024\n\014minDayToRent\030\002 \002(\005\022\024\n\014maxDayTo",
+      "Rent\030\003 \002(\005\022\022\n\nrentPreDay\030\004 \002(\005\"/\n\tAdDelS" +
+      "lot\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\"" +
+      "<\n\tAdBuySlot\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006slot" +
+      "Id\030\002 \002(\014\022\013\n\003day\030\003 \002(\005\"0\n\013AdSetTicket\022\022\n\n" +
+      "buildingId\030\001 \002(\014\022\r\n\005price\030\002 \002(\005\"`\n\005AddAd" +
+      "\022\n\n\002id\030\001 \001(\014\022\016\n\006metaId\030\002 \002(\005\022\'\n\004type\030\003 \002" +
+      "(\0162\031.gs.Advertisement.Ad.Type\022\022\n\nbuildin" +
+      "gId\030\004 \002(\014\"3\n\017AdDelAdFromSlot\022\022\n\nbuilding" +
+      "Id\030\001 \002(\014\022\014\n\004adId\030\002 \002(\014\"E\n\010ShelfAdd\022\022\n\nbu" +
+      "ildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r",
+      "\n\005price\030\003 \002(\005\"6\n\010ShelfDel\022\022\n\nbuildingId\030" +
+      "\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\"E\n\010ShelfSe" +
+      "t\022\022\n\nbuildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs" +
+      ".Item\022\r\n\005price\030\003 \002(\005\"\\\n\nBuyInShelf\022\022\n\nbu" +
+      "ildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r" +
+      "\n\005price\030\003 \002(\005\022\023\n\013wareHouseId\030\004 \002(\014\"K\n\007Ad" +
+      "dLine\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttar" +
+      "getNum\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"V\n\nChang" +
+      "eLine\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(" +
+      "\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\ttargetNum\030\004 \001(\005\"",
+      "P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(" +
+      "\005\022\023\n\013targetCount\030\003 \001(\005\022\021\n\tworkerNum\030\004 \001(" +
+      "\005\"\211\001\n\023ExchangeItemSummary\022\016\n\006itemId\030\001 \002(" +
+      "\005\022\020\n\010lowPrice\030\002 \001(\005\022\021\n\thighPrice\030\003 \001(\005\022\020" +
+      "\n\010nowPrice\030\004 \001(\005\022\026\n\016sumDealedPrice\030\005 \001(\003" +
+      "\022\023\n\013priceChange\030\006 \001(\021\"<\n\020ExchangeItemLis" +
+      "t\022(\n\007summary\030\001 \003(\0132\027.gs.ExchangeItemSumm" +
+      "ary\"C\n\026ItemDealHistoryElement\022\r\n\005price\030\001" +
+      " \002(\005\022\016\n\006amount\030\002 \002(\005\022\n\n\002ts\030\003 \002(\003\":\n\017Item" +
+      "DealHistory\022\'\n\003log\030\001 \003(\0132\032.gs.ItemDealHi",
+      "storyElement\"M\n\013ExchangeBuy\022\016\n\006itemId\030\001 " +
+      "\002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuild" +
+      "ingId\030\004 \002(\014\"N\n\014ExchangeSell\022\016\n\006itemId\030\001 " +
+      "\002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuild" +
+      "ingId\030\004 \002(\014\"n\n\022ExchangeItemDetail\022\027\n\003buy" +
+      "\030\001 \003(\0132\n.gs.IntNum\022\030\n\004sell\030\002 \003(\0132\n.gs.In" +
+      "tNum\022\020\n\010nowPrice\030\003 \002(\005\022\023\n\013priceChange\030\004 " +
+      "\002(\005\"w\n\014ExchangeDeal\022\016\n\006itemId\030\001 \002(\005\022\013\n\003n" +
+      "um\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 " +
+      "\002(\014\022\022\n\nbuyOrderId\030\005 \002(\014\022\023\n\013sellOrderId\030\006",
+      " \002(\014\"\334\001\n\016ExchangeOrders\022\'\n\005order\030\001 \003(\0132\030" +
+      ".gs.ExchangeOrders.Order\032\240\001\n\005Order\022\n\n\002id" +
+      "\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\024\n\014dealedAmount\030\003" +
+      " \002(\005\022\023\n\013totalAmount\030\004 \002(\005\022\r\n\005price\030\005 \002(\005" +
+      "\022\n\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002(\010\022\022\n\nbuildingId" +
+      "\030\010 \002(\014\022\023\n\013dealedPrice\030\t \002(\005\"\240\001\n\017Exchange" +
+      "DealLog\022\020\n\010sellerId\030\001 \002(\014\022\017\n\007buyerId\030\002 \002" +
+      "(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030\004 \002(\005\022\016\n\006dealed\030" +
+      "\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\022\026\n\016buyTotalAmount\030" +
+      "\007 \002(\005\022\027\n\017sellTotalAmount\030\010 \002(\005\"4\n\020Exchan",
+      "geDealLogs\022 \n\003log\030\001 \003(\0132\023.gs.ExchangeDea" +
+      "lLog\"{\n\nGroundRent\022\022\n\nrentPreDay\030\001 \002(\005\022\030" +
+      "\n\020paymentCycleDays\030\002 \002(\005\022\017\n\007deposit\030\003 \002(" +
+      "\005\022\020\n\010rentDays\030\004 \002(\005\022\034\n\005coord\030\005 \003(\0132\r.gs." +
+      "MiniIndex\"9\n\nGroundSale\022\r\n\005price\030\001 \002(\005\022\034" +
+      "\n\005coord\030\002 \003(\0132\r.gs.MiniIndex\"t\n\020TechTrad" +
+      "eSummary\022\'\n\004info\030\001 \003(\0132\031.gs.TechTradeSum" +
+      "mary.Info\0327\n\004Info\022\020\n\010ownerNum\030\001 \002(\005\022\016\n\006m" +
+      "etaId\030\002 \002(\005\022\r\n\005topLv\030\003 \001(\005\"y\n\017TechTradeD" +
+      "etail\022&\n\004info\030\001 \003(\0132\030.gs.TechTradeDetail",
+      ".Info\032>\n\004Info\022\n\n\002id\030\001 \002(\014\022\017\n\007ownerId\030\002 \002" +
+      "(\014\022\r\n\005price\030\003 \002(\005\022\n\n\002lv\030\004 \002(\005\"9\n\014TechTra" +
+      "deAdd\022\016\n\006itemId\030\001 \002(\005\022\n\n\002lv\030\002 \001(\005\022\r\n\005pri" +
+      "ce\030\003 \002(\005*f\n\rBuildingState\022\020\n\014CONSTRUCTIN" +
+      "G\020\002\022\020\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_OPERATE" +
+      "\020\004\022\013\n\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -71191,7 +70981,7 @@ public final class Gs {
           internal_static_gs_Role_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Role_descriptor,
-              new java.lang.String[] { "Id", "Name", "Money", "LockedMoney", "OfflineTs", "Position", "Buys", "Rents", "Bag", "BagCapacity", "BagId", "ItemIdCanProduce", "ExchangeCollectedItem", "BuildingBrands", "GoodBrands", "GoodLv", "Ground", });
+              new java.lang.String[] { "Id", "Name", "Money", "LockedMoney", "OfflineTs", "Position", "Buys", "Rents", "Bag", "BagCapacity", "BagId", "ExchangeCollectedItem", "BuildingBrands", "GoodBrands", "GoodLv", "Ground", });
           internal_static_gs_UnitCreate_descriptor =
             getDescriptor().getMessageTypes().get(24);
           internal_static_gs_UnitCreate_fieldAccessorTable = new

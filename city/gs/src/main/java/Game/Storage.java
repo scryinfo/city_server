@@ -72,10 +72,6 @@ public class Storage implements IStorage {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<MetaItem, Integer> reserved = new HashMap<>();
 
-
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    @Convert(converter = MetaItem.Converter.class, attributeName = "key")
-//    private Map<MetaItem, Integer> locked = new HashMap<>();
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Integer> locked = new HashMap<>();
@@ -96,7 +92,7 @@ public class Storage implements IStorage {
     public boolean lock(ItemKey m, int n) {
         if(!has(m, n))
             return false;
-        locked.put(m, reserved.getOrDefault(m, 0) + n);
+        locked.put(m, locked.getOrDefault(m, 0) + n);
         return true;
     }
 
@@ -128,7 +124,7 @@ public class Storage implements IStorage {
             reserved.remove(m.meta);
 
         inHand.put(m, inHand.getOrDefault(m, 0) + n);
-        inHandPrice.getOrDefault(m, new AvgPrice()).update(price, n);
+        inHandPrice.computeIfAbsent(m, k->new AvgPrice()).update(price, n);
     }
 
     @Override

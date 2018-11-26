@@ -63,10 +63,16 @@ public class Laboratory extends Building {
                 }
                 else {
                     Player owner = GameDb.queryPlayer(ownerId());
-                    if(r.type == Formula.Type.INVENT)
+                    if(r.type == Formula.Type.INVENT) {
                         owner.addItem(l.formula.key.targetId, 0);
-                    if(r.type == Formula.Type.RESEARCH)
+                        TechTradeCenter.instance().techCompleteAction(l.formula.key.targetId, 0);
+                        GameDb.saveOrUpdate(Arrays.asList(owner, TechTradeCenter.instance()));
+                    }
+                    if(r.type == Formula.Type.RESEARCH) {
                         owner.addItem(l.formula.key.targetId, r.v);
+                        TechTradeCenter.instance().techCompleteAction(l.formula.key.targetId, r.v);
+                        GameDb.saveOrUpdate(Arrays.asList(owner, TechTradeCenter.instance()));
+                    }
                     GameServer.sendTo(this.detailWatchers,
                             Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
                                     Gs.LabDelLine.newBuilder()

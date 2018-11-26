@@ -405,6 +405,8 @@ public class Exchange {
             DealLog l = new DealLog();
             l.ts = now - TimeUnit.HOURS.toMillis(24);
             DealLog old = histories.ceiling(l); // least key greater than or equal to l.ts, can prove this will not return null
+            if(old == null)
+                return 0;
             return (int) ((nowPrice() - old.price)/(double)old.price*1000);
         }
     }

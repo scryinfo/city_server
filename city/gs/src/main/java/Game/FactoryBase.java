@@ -146,7 +146,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean shelfAddable(ItemKey k);
     @Override
     public Gs.Shelf.Content addshelf(Item mi, int price) {
-        if(!shelfAddable(mi.key) || !this.store.lock(mi.key, mi.n))
+        //if(!shelfAddable(mi.key) || !this.store.lock(mi.key, mi.n))
+        if(!shelfAddable(mi.key) )
             return null;
         return this.shelf.add(mi, price);
     }
