@@ -685,7 +685,10 @@ public class GameSession {
 			return;
 		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum(), player.getGoodLevel(m.id));
 		if(line != null)
+		{
+			GameDb.saveOrUpdate(f);
 			this.write(Package.create(cmd, line.toProto()));
+		}
 	}
 
 	public void changeLine(short cmd, Message message) {

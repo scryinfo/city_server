@@ -35,7 +35,7 @@ public abstract class Building {
         return MetaBuilding.type(metaBuilding.id);
     }
     public boolean outOfBusiness() {
-        return true; // according to employee satisfication
+        return false; // according to employee satisfication
     }
     public static Building create(int id, Coordinate pos, UUID ownerId) {
         switch(MetaBuilding.type(id))
