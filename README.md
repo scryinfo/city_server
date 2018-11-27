@@ -13,11 +13,12 @@ How to open this project:
         ------gs  
     to hold jar, NOT make it into git contorl directory 'server'
   4. edit configuration in idea ide, add a config for account server:  
+  assume your server_bin path is D:\server_bin, then do:
     0. choose main class Account.AccountServer  
-    1. VM options: -Dlog4j.configuration=file:\your_path_to_server_bin\as\log4j.properties  
-    2. Program arguments: "your_path_to_server_bin\as\config.ini"  
+    1. VM options: -Dlog4j.configuration=file:\D:\server_bin\as\log4j.properties  
+    2. Program arguments: "D:\server_bin\as\config.ini"
     3. use classpath of module: as_main  
-  5. repeat step 4 for game server, change 'as' to 'gs'
+  5. repeat step 4 for game server, change 'as' to 'gs', add "D:\server_bin\gs\hibernate.cfg.xml" to 4.2 seperate with a blankspace
   
   Now you can debug or run in idea ide
   
