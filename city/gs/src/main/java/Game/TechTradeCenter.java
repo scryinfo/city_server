@@ -121,8 +121,7 @@ public class TechTradeCenter {
     }
 
     private void setSummary(Sell s) {
-        Summary summary = cache.getOrDefault(s.metaId, new Summary(s.metaId));
-        summary.sellId.add(s.id);
+        cache.computeIfAbsent(s.metaId, k->new Summary(s.metaId)).sellId.add(s.id);
     }
 
     @Transient

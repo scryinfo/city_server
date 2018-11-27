@@ -14,12 +14,8 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import javax.persistence.AttributeConverter;
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 class MetaNpc {
@@ -375,11 +371,11 @@ class Formula {
     int critiChance;
     int critiV;
     int[] successChance;
-    public static final class IdNum {
-        int id;
+    public static final class Consume {
+        MetaMaterial m;
         int n;
     }
-    IdNum[] material = new IdNum[3];
+    Consume[] consumes = new Consume[3];
 
     Formula(Document d) {
         key = new Key(Type.values()[d.getInteger("type")], d.getInteger("good"), d.getInteger("lv"));
@@ -394,10 +390,10 @@ class Formula {
         for(int i = 0; i < l.size(); ++i) {
             successChance[i] = l.get(i);
         }
-        for(int i = 0; i < material.length; ++i) {
-            material[i] = new IdNum();
-            material[i].id = d.getInteger("material" + i);
-            material[i].n = d.getInteger("num" + i);
+        for(int i = 0; i < consumes.length; ++i) {
+            consumes[i] = new Consume();
+            consumes[i].m = MetaData.getMaterial(d.getInteger("material" + i));
+            consumes[i].n = d.getInteger("num" + i);
         }
     }
 }

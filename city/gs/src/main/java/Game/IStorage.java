@@ -24,4 +24,9 @@ public interface IStorage {
     }
 
     boolean delItem(ItemKey mi);
+    int getNumber(MetaItem m);
+    boolean has(ItemKey m, int n);
+
+    boolean offset(ItemKey item, int n);
+    boolean offset(MetaItem item, int n);
 }

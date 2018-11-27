@@ -1023,6 +1023,37 @@ public class GameSession {
 			this.write(Package.create(cmd, c));
 		}
 	}
+	public void labLaunchLine(short cmd, Message message) {
+		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+		Laboratory lab = (Laboratory)building;
+		Laboratory.Line line = lab.getLine(lineId);
+		if(line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
+			return;
+		Formula.Consume[] consumes = line.getConsumes();
+		if(consumes == null)
+			return;
+		boolean enoughMaterial = true;
+		for (Formula.Consume consume : consumes) {
+			if(consume.m == null)
+				continue;
+			if(lab.getNumber(consume.m) < consume.n*c.getPhase())
+				enoughMaterial = false;
+		}
+		if(!enoughMaterial)
+			return;
+		for (Formula.Consume consume : consumes) {
+			if(consume.m == null)
+				continue;
+			lab.offset(consume.m, -consume.n*c.getPhase());
+		}
+		line.launch(c.getPhase());
+		GameDb.saveOrUpdate(lab);
+	}
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
 		MetaItem mi = MetaData.getItem(c.getItemId());
@@ -1033,6 +1064,7 @@ public class GameSession {
 		else
 			TechTradeCenter.instance().add(player.id(), (MetaGood) mi, c.getLv(), c.getPrice());
 		GameDb.saveOrUpdate(TechTradeCenter.instance());
+		this.write(Package.create(cmd, c));
 	}
 	public void techTradeDel(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
@@ -1040,6 +1072,7 @@ public class GameSession {
 		TechTradeCenter.instance().del(player.id(), id);
 		GameDb.saveOrUpdate(TechTradeCenter.instance());
 	}
+
 	public void techTradeBuy(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
@@ -1053,7 +1086,7 @@ public class GameSession {
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
-		this.write(Package.create(cmd, message));
+		this.write(Package.create(cmd, c));
 	}
 	public void techTradeGetSummary(short cmd) {
 		this.write(Package.create(cmd, TechTradeCenter.instance().getSummary()));

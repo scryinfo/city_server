@@ -29,6 +29,40 @@ public class Storage implements IStorage {
         });
         return builder.build();
     }
+    public boolean offset(MetaItem item, int n) {
+        if(n == 0)
+            return true;
+        else if(n > 0) {
+            if(item.size*n > availableSize())
+                return false;
+            if(!(item instanceof MetaMaterial))
+                throw new IllegalArgumentException();
+            ItemKey k = new ItemKey(item);
+            this.inHand.put(k, this.inHand.getOrDefault(k, 0)+n);
+        }
+        else if(n < 0) {
+            if(this.getNumber(item) < -n)
+                return false;
+            int left = -n;
+            Iterator<Map.Entry<ItemKey, Integer>> iterator = this.inHand.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<ItemKey, Integer> e = iterator.next();
+                if(e.getKey().meta == item) {
+                    if(e.getValue() < left) {
+                        left -= e.getValue();
+                        iterator.remove();
+                    }
+                    else {
+                        e.setValue(left - e.getValue());
+                        if(e.getValue() == 0)
+                            iterator.remove();
+                        break;
+                    }
+                }
+            }
+        }
+        return true;
+    }
     public boolean offset(ItemKey item, final int n) {
         if(n == 0)
             return true;
@@ -43,7 +77,6 @@ public class Storage implements IStorage {
                 return false;
             this.inHand.put(item, c+n);
         }
-        //this._d.dirty();
         return true;
     }
     @Transient
@@ -145,6 +178,14 @@ public class Storage implements IStorage {
         return true;
     }
 
+    @Override
+    public int getNumber(MetaItem m) {
+        return inHand.entrySet().stream().filter(e->e.getKey().meta == m).mapToInt(e->e.getValue()).sum();
+    }
+    @Override
+    public boolean has(ItemKey m, int n) {
+        return inHand.get(m)==null?false:inHand.get(m) >= n;
+    }
     @Transient
     Set<UUID> order = new HashSet<>();
 
@@ -160,9 +201,7 @@ public class Storage implements IStorage {
             return 0;
         return n;
     }
-    public boolean has(ItemKey m, int n) {
-        return inHand.get(m)==null?false:inHand.get(m) >= n;
-    }
+
     public boolean full() {
         return capacity == usedSize();
     }

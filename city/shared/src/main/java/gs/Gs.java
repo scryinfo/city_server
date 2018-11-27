@@ -30807,23 +30807,39 @@ public final class Gs {
        */
       int getLv();
 
-      // required int32 durationSec = 5;
+      // required int32 leftSec = 5;
       /**
-       * <code>required int32 durationSec = 5;</code>
+       * <code>required int32 leftSec = 5;</code>
+       *
+       * <pre>
+       * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+       * </pre>
        */
-      boolean hasDurationSec();
+      boolean hasLeftSec();
       /**
-       * <code>required int32 durationSec = 5;</code>
+       * <code>required int32 leftSec = 5;</code>
+       *
+       * <pre>
+       * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+       * </pre>
        */
-      int getDurationSec();
+      int getLeftSec();
 
       // required int32 phase = 6;
       /**
        * <code>required int32 phase = 6;</code>
+       *
+       * <pre>
+       *当前此生产线的阶段
+       * </pre>
        */
       boolean hasPhase();
       /**
        * <code>required int32 phase = 6;</code>
+       *
+       * <pre>
+       *当前此生产线的阶段
+       * </pre>
        */
       int getPhase();
 
@@ -30836,6 +30852,42 @@ public final class Gs {
        * <code>required int32 workerNum = 7;</code>
        */
       int getWorkerNum();
+
+      // required int64 createTs = 8;
+      /**
+       * <code>required int64 createTs = 8;</code>
+       *
+       * <pre>
+       *创建时间戳
+       * </pre>
+       */
+      boolean hasCreateTs();
+      /**
+       * <code>required int64 createTs = 8;</code>
+       *
+       * <pre>
+       *创建时间戳
+       * </pre>
+       */
+      long getCreateTs();
+
+      // required bool run = 9;
+      /**
+       * <code>required bool run = 9;</code>
+       *
+       * <pre>
+       *是否在生产
+       * </pre>
+       */
+      boolean hasRun();
+      /**
+       * <code>required bool run = 9;</code>
+       *
+       * <pre>
+       *是否在生产
+       * </pre>
+       */
+      boolean getRun();
     }
     /**
      * Protobuf type {@code gs.Laboratory.Line}
@@ -30910,7 +30962,7 @@ public final class Gs {
               }
               case 40: {
                 bitField0_ |= 0x00000010;
-                durationSec_ = input.readInt32();
+                leftSec_ = input.readInt32();
                 break;
               }
               case 48: {
@@ -30921,6 +30973,16 @@ public final class Gs {
               case 56: {
                 bitField0_ |= 0x00000040;
                 workerNum_ = input.readInt32();
+                break;
+              }
+              case 64: {
+                bitField0_ |= 0x00000080;
+                createTs_ = input.readInt64();
+                break;
+              }
+              case 72: {
+                bitField0_ |= 0x00000100;
+                run_ = input.readBool();
                 break;
               }
             }
@@ -31027,20 +31089,28 @@ public final class Gs {
         return lv_;
       }
 
-      // required int32 durationSec = 5;
-      public static final int DURATIONSEC_FIELD_NUMBER = 5;
-      private int durationSec_;
+      // required int32 leftSec = 5;
+      public static final int LEFTSEC_FIELD_NUMBER = 5;
+      private int leftSec_;
       /**
-       * <code>required int32 durationSec = 5;</code>
+       * <code>required int32 leftSec = 5;</code>
+       *
+       * <pre>
+       * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+       * </pre>
        */
-      public boolean hasDurationSec() {
+      public boolean hasLeftSec() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>required int32 durationSec = 5;</code>
+       * <code>required int32 leftSec = 5;</code>
+       *
+       * <pre>
+       * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+       * </pre>
        */
-      public int getDurationSec() {
-        return durationSec_;
+      public int getLeftSec() {
+        return leftSec_;
       }
 
       // required int32 phase = 6;
@@ -31048,12 +31118,20 @@ public final class Gs {
       private int phase_;
       /**
        * <code>required int32 phase = 6;</code>
+       *
+       * <pre>
+       *当前此生产线的阶段
+       * </pre>
        */
       public boolean hasPhase() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
        * <code>required int32 phase = 6;</code>
+       *
+       * <pre>
+       *当前此生产线的阶段
+       * </pre>
        */
       public int getPhase() {
         return phase_;
@@ -31075,14 +31153,64 @@ public final class Gs {
         return workerNum_;
       }
 
+      // required int64 createTs = 8;
+      public static final int CREATETS_FIELD_NUMBER = 8;
+      private long createTs_;
+      /**
+       * <code>required int64 createTs = 8;</code>
+       *
+       * <pre>
+       *创建时间戳
+       * </pre>
+       */
+      public boolean hasCreateTs() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>required int64 createTs = 8;</code>
+       *
+       * <pre>
+       *创建时间戳
+       * </pre>
+       */
+      public long getCreateTs() {
+        return createTs_;
+      }
+
+      // required bool run = 9;
+      public static final int RUN_FIELD_NUMBER = 9;
+      private boolean run_;
+      /**
+       * <code>required bool run = 9;</code>
+       *
+       * <pre>
+       *是否在生产
+       * </pre>
+       */
+      public boolean hasRun() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>required bool run = 9;</code>
+       *
+       * <pre>
+       *是否在生产
+       * </pre>
+       */
+      public boolean getRun() {
+        return run_;
+      }
+
       private void initFields() {
         id_ = com.google.protobuf.ByteString.EMPTY;
         itemId_ = 0;
         type_ = 0;
         lv_ = 0;
-        durationSec_ = 0;
+        leftSec_ = 0;
         phase_ = 0;
         workerNum_ = 0;
+        createTs_ = 0L;
+        run_ = false;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -31105,7 +31233,7 @@ public final class Gs {
           memoizedIsInitialized = 0;
           return false;
         }
-        if (!hasDurationSec()) {
+        if (!hasLeftSec()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -31114,6 +31242,14 @@ public final class Gs {
           return false;
         }
         if (!hasWorkerNum()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasCreateTs()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasRun()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -31137,13 +31273,19 @@ public final class Gs {
           output.writeInt32(4, lv_);
         }
         if (((bitField0_ & 0x00000010) == 0x00000010)) {
-          output.writeInt32(5, durationSec_);
+          output.writeInt32(5, leftSec_);
         }
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
           output.writeInt32(6, phase_);
         }
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
           output.writeInt32(7, workerNum_);
+        }
+        if (((bitField0_ & 0x00000080) == 0x00000080)) {
+          output.writeInt64(8, createTs_);
+        }
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          output.writeBool(9, run_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -31172,7 +31314,7 @@ public final class Gs {
         }
         if (((bitField0_ & 0x00000010) == 0x00000010)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(5, durationSec_);
+            .computeInt32Size(5, leftSec_);
         }
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
           size += com.google.protobuf.CodedOutputStream
@@ -31181,6 +31323,14 @@ public final class Gs {
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(7, workerNum_);
+        }
+        if (((bitField0_ & 0x00000080) == 0x00000080)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(8, createTs_);
+        }
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(9, run_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -31306,12 +31456,16 @@ public final class Gs {
           bitField0_ = (bitField0_ & ~0x00000004);
           lv_ = 0;
           bitField0_ = (bitField0_ & ~0x00000008);
-          durationSec_ = 0;
+          leftSec_ = 0;
           bitField0_ = (bitField0_ & ~0x00000010);
           phase_ = 0;
           bitField0_ = (bitField0_ & ~0x00000020);
           workerNum_ = 0;
           bitField0_ = (bitField0_ & ~0x00000040);
+          createTs_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000080);
+          run_ = false;
+          bitField0_ = (bitField0_ & ~0x00000100);
           return this;
         }
 
@@ -31359,7 +31513,7 @@ public final class Gs {
           if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
             to_bitField0_ |= 0x00000010;
           }
-          result.durationSec_ = durationSec_;
+          result.leftSec_ = leftSec_;
           if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
             to_bitField0_ |= 0x00000020;
           }
@@ -31368,6 +31522,14 @@ public final class Gs {
             to_bitField0_ |= 0x00000040;
           }
           result.workerNum_ = workerNum_;
+          if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+            to_bitField0_ |= 0x00000080;
+          }
+          result.createTs_ = createTs_;
+          if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+            to_bitField0_ |= 0x00000100;
+          }
+          result.run_ = run_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -31396,14 +31558,20 @@ public final class Gs {
           if (other.hasLv()) {
             setLv(other.getLv());
           }
-          if (other.hasDurationSec()) {
-            setDurationSec(other.getDurationSec());
+          if (other.hasLeftSec()) {
+            setLeftSec(other.getLeftSec());
           }
           if (other.hasPhase()) {
             setPhase(other.getPhase());
           }
           if (other.hasWorkerNum()) {
             setWorkerNum(other.getWorkerNum());
+          }
+          if (other.hasCreateTs()) {
+            setCreateTs(other.getCreateTs());
+          }
+          if (other.hasRun()) {
+            setRun(other.getRun());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -31426,7 +31594,7 @@ public final class Gs {
             
             return false;
           }
-          if (!hasDurationSec()) {
+          if (!hasLeftSec()) {
             
             return false;
           }
@@ -31435,6 +31603,14 @@ public final class Gs {
             return false;
           }
           if (!hasWorkerNum()) {
+            
+            return false;
+          }
+          if (!hasCreateTs()) {
+            
+            return false;
+          }
+          if (!hasRun()) {
             
             return false;
           }
@@ -31595,35 +31771,51 @@ public final class Gs {
           return this;
         }
 
-        // required int32 durationSec = 5;
-        private int durationSec_ ;
+        // required int32 leftSec = 5;
+        private int leftSec_ ;
         /**
-         * <code>required int32 durationSec = 5;</code>
+         * <code>required int32 leftSec = 5;</code>
+         *
+         * <pre>
+         * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+         * </pre>
          */
-        public boolean hasDurationSec() {
+        public boolean hasLeftSec() {
           return ((bitField0_ & 0x00000010) == 0x00000010);
         }
         /**
-         * <code>required int32 durationSec = 5;</code>
+         * <code>required int32 leftSec = 5;</code>
+         *
+         * <pre>
+         * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+         * </pre>
          */
-        public int getDurationSec() {
-          return durationSec_;
+        public int getLeftSec() {
+          return leftSec_;
         }
         /**
-         * <code>required int32 durationSec = 5;</code>
+         * <code>required int32 leftSec = 5;</code>
+         *
+         * <pre>
+         * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+         * </pre>
          */
-        public Builder setDurationSec(int value) {
+        public Builder setLeftSec(int value) {
           bitField0_ |= 0x00000010;
-          durationSec_ = value;
+          leftSec_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>required int32 durationSec = 5;</code>
+         * <code>required int32 leftSec = 5;</code>
+         *
+         * <pre>
+         * 一个阶段的单个员工的剩余时间（秒），与员工数量无关
+         * </pre>
          */
-        public Builder clearDurationSec() {
+        public Builder clearLeftSec() {
           bitField0_ = (bitField0_ & ~0x00000010);
-          durationSec_ = 0;
+          leftSec_ = 0;
           onChanged();
           return this;
         }
@@ -31632,18 +31824,30 @@ public final class Gs {
         private int phase_ ;
         /**
          * <code>required int32 phase = 6;</code>
+         *
+         * <pre>
+         *当前此生产线的阶段
+         * </pre>
          */
         public boolean hasPhase() {
           return ((bitField0_ & 0x00000020) == 0x00000020);
         }
         /**
          * <code>required int32 phase = 6;</code>
+         *
+         * <pre>
+         *当前此生产线的阶段
+         * </pre>
          */
         public int getPhase() {
           return phase_;
         }
         /**
          * <code>required int32 phase = 6;</code>
+         *
+         * <pre>
+         *当前此生产线的阶段
+         * </pre>
          */
         public Builder setPhase(int value) {
           bitField0_ |= 0x00000020;
@@ -31653,6 +31857,10 @@ public final class Gs {
         }
         /**
          * <code>required int32 phase = 6;</code>
+         *
+         * <pre>
+         *当前此生产线的阶段
+         * </pre>
          */
         public Builder clearPhase() {
           bitField0_ = (bitField0_ & ~0x00000020);
@@ -31690,6 +31898,104 @@ public final class Gs {
         public Builder clearWorkerNum() {
           bitField0_ = (bitField0_ & ~0x00000040);
           workerNum_ = 0;
+          onChanged();
+          return this;
+        }
+
+        // required int64 createTs = 8;
+        private long createTs_ ;
+        /**
+         * <code>required int64 createTs = 8;</code>
+         *
+         * <pre>
+         *创建时间戳
+         * </pre>
+         */
+        public boolean hasCreateTs() {
+          return ((bitField0_ & 0x00000080) == 0x00000080);
+        }
+        /**
+         * <code>required int64 createTs = 8;</code>
+         *
+         * <pre>
+         *创建时间戳
+         * </pre>
+         */
+        public long getCreateTs() {
+          return createTs_;
+        }
+        /**
+         * <code>required int64 createTs = 8;</code>
+         *
+         * <pre>
+         *创建时间戳
+         * </pre>
+         */
+        public Builder setCreateTs(long value) {
+          bitField0_ |= 0x00000080;
+          createTs_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int64 createTs = 8;</code>
+         *
+         * <pre>
+         *创建时间戳
+         * </pre>
+         */
+        public Builder clearCreateTs() {
+          bitField0_ = (bitField0_ & ~0x00000080);
+          createTs_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // required bool run = 9;
+        private boolean run_ ;
+        /**
+         * <code>required bool run = 9;</code>
+         *
+         * <pre>
+         *是否在生产
+         * </pre>
+         */
+        public boolean hasRun() {
+          return ((bitField0_ & 0x00000100) == 0x00000100);
+        }
+        /**
+         * <code>required bool run = 9;</code>
+         *
+         * <pre>
+         *是否在生产
+         * </pre>
+         */
+        public boolean getRun() {
+          return run_;
+        }
+        /**
+         * <code>required bool run = 9;</code>
+         *
+         * <pre>
+         *是否在生产
+         * </pre>
+         */
+        public Builder setRun(boolean value) {
+          bitField0_ |= 0x00000100;
+          run_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required bool run = 9;</code>
+         *
+         * <pre>
+         *是否在生产
+         * </pre>
+         */
+        public Builder clearRun() {
+          bitField0_ = (bitField0_ & ~0x00000100);
+          run_ = false;
           onChanged();
           return this;
         }
@@ -32479,10 +32785,18 @@ public final class Gs {
     // required int32 type = 3;
     /**
      * <code>required int32 type = 3;</code>
+     *
+     * <pre>
+     *0研究 1发明
+     * </pre>
      */
     boolean hasType();
     /**
      * <code>required int32 type = 3;</code>
+     *
+     * <pre>
+     *0研究 1发明
+     * </pre>
      */
     int getType();
 
@@ -32649,12 +32963,20 @@ public final class Gs {
     private int type_;
     /**
      * <code>required int32 type = 3;</code>
+     *
+     * <pre>
+     *0研究 1发明
+     * </pre>
      */
     public boolean hasType() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>required int32 type = 3;</code>
+     *
+     * <pre>
+     *0研究 1发明
+     * </pre>
      */
     public int getType() {
       return type_;
@@ -33064,18 +33386,30 @@ public final class Gs {
       private int type_ ;
       /**
        * <code>required int32 type = 3;</code>
+       *
+       * <pre>
+       *0研究 1发明
+       * </pre>
        */
       public boolean hasType() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>required int32 type = 3;</code>
+       *
+       * <pre>
+       *0研究 1发明
+       * </pre>
        */
       public int getType() {
         return type_;
       }
       /**
        * <code>required int32 type = 3;</code>
+       *
+       * <pre>
+       *0研究 1发明
+       * </pre>
        */
       public Builder setType(int value) {
         bitField0_ |= 0x00000004;
@@ -33085,6 +33419,10 @@ public final class Gs {
       }
       /**
        * <code>required int32 type = 3;</code>
+       *
+       * <pre>
+       *0研究 1发明
+       * </pre>
        */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -34242,6 +34580,604 @@ public final class Gs {
     }
 
     // @@protoc_insertion_point(class_scope:gs.LabSetLineWorkerNum)
+  }
+
+  public interface LabLaunchLineOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes buildingId = 1;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    boolean hasBuildingId();
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    com.google.protobuf.ByteString getBuildingId();
+
+    // required bytes lineId = 2;
+    /**
+     * <code>required bytes lineId = 2;</code>
+     */
+    boolean hasLineId();
+    /**
+     * <code>required bytes lineId = 2;</code>
+     */
+    com.google.protobuf.ByteString getLineId();
+
+    // required int32 phase = 3;
+    /**
+     * <code>required int32 phase = 3;</code>
+     */
+    boolean hasPhase();
+    /**
+     * <code>required int32 phase = 3;</code>
+     */
+    int getPhase();
+  }
+  /**
+   * Protobuf type {@code gs.LabLaunchLine}
+   *
+   * <pre>
+   * labLaunchLine
+   * c
+   * </pre>
+   */
+  public static final class LabLaunchLine extends
+      com.google.protobuf.GeneratedMessage
+      implements LabLaunchLineOrBuilder {
+    // Use LabLaunchLine.newBuilder() to construct.
+    private LabLaunchLine(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private LabLaunchLine(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final LabLaunchLine defaultInstance;
+    public static LabLaunchLine getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public LabLaunchLine getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private LabLaunchLine(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              buildingId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              lineId_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              phase_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gs.Gs.internal_static_gs_LabLaunchLine_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gs.Gs.internal_static_gs_LabLaunchLine_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gs.Gs.LabLaunchLine.class, gs.Gs.LabLaunchLine.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<LabLaunchLine> PARSER =
+        new com.google.protobuf.AbstractParser<LabLaunchLine>() {
+      public LabLaunchLine parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new LabLaunchLine(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<LabLaunchLine> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes buildingId = 1;
+    public static final int BUILDINGID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString buildingId_;
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public boolean hasBuildingId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes buildingId = 1;</code>
+     */
+    public com.google.protobuf.ByteString getBuildingId() {
+      return buildingId_;
+    }
+
+    // required bytes lineId = 2;
+    public static final int LINEID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString lineId_;
+    /**
+     * <code>required bytes lineId = 2;</code>
+     */
+    public boolean hasLineId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes lineId = 2;</code>
+     */
+    public com.google.protobuf.ByteString getLineId() {
+      return lineId_;
+    }
+
+    // required int32 phase = 3;
+    public static final int PHASE_FIELD_NUMBER = 3;
+    private int phase_;
+    /**
+     * <code>required int32 phase = 3;</code>
+     */
+    public boolean hasPhase() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 phase = 3;</code>
+     */
+    public int getPhase() {
+      return phase_;
+    }
+
+    private void initFields() {
+      buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      lineId_ = com.google.protobuf.ByteString.EMPTY;
+      phase_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasBuildingId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasLineId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPhase()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, lineId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, phase_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, buildingId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, lineId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, phase_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static gs.Gs.LabLaunchLine parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.LabLaunchLine parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static gs.Gs.LabLaunchLine parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static gs.Gs.LabLaunchLine parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(gs.Gs.LabLaunchLine prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code gs.LabLaunchLine}
+     *
+     * <pre>
+     * labLaunchLine
+     * c
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements gs.Gs.LabLaunchLineOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gs.Gs.internal_static_gs_LabLaunchLine_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gs.Gs.internal_static_gs_LabLaunchLine_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gs.Gs.LabLaunchLine.class, gs.Gs.LabLaunchLine.Builder.class);
+      }
+
+      // Construct using gs.Gs.LabLaunchLine.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        buildingId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        lineId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        phase_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gs.Gs.internal_static_gs_LabLaunchLine_descriptor;
+      }
+
+      public gs.Gs.LabLaunchLine getDefaultInstanceForType() {
+        return gs.Gs.LabLaunchLine.getDefaultInstance();
+      }
+
+      public gs.Gs.LabLaunchLine build() {
+        gs.Gs.LabLaunchLine result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gs.Gs.LabLaunchLine buildPartial() {
+        gs.Gs.LabLaunchLine result = new gs.Gs.LabLaunchLine(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.buildingId_ = buildingId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.lineId_ = lineId_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.phase_ = phase_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gs.Gs.LabLaunchLine) {
+          return mergeFrom((gs.Gs.LabLaunchLine)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gs.Gs.LabLaunchLine other) {
+        if (other == gs.Gs.LabLaunchLine.getDefaultInstance()) return this;
+        if (other.hasBuildingId()) {
+          setBuildingId(other.getBuildingId());
+        }
+        if (other.hasLineId()) {
+          setLineId(other.getLineId());
+        }
+        if (other.hasPhase()) {
+          setPhase(other.getPhase());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasBuildingId()) {
+          
+          return false;
+        }
+        if (!hasLineId()) {
+          
+          return false;
+        }
+        if (!hasPhase()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gs.Gs.LabLaunchLine parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gs.Gs.LabLaunchLine) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes buildingId = 1;
+      private com.google.protobuf.ByteString buildingId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public boolean hasBuildingId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public com.google.protobuf.ByteString getBuildingId() {
+        return buildingId_;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder setBuildingId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        buildingId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes buildingId = 1;</code>
+       */
+      public Builder clearBuildingId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        buildingId_ = getDefaultInstance().getBuildingId();
+        onChanged();
+        return this;
+      }
+
+      // required bytes lineId = 2;
+      private com.google.protobuf.ByteString lineId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes lineId = 2;</code>
+       */
+      public boolean hasLineId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes lineId = 2;</code>
+       */
+      public com.google.protobuf.ByteString getLineId() {
+        return lineId_;
+      }
+      /**
+       * <code>required bytes lineId = 2;</code>
+       */
+      public Builder setLineId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        lineId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes lineId = 2;</code>
+       */
+      public Builder clearLineId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        lineId_ = getDefaultInstance().getLineId();
+        onChanged();
+        return this;
+      }
+
+      // required int32 phase = 3;
+      private int phase_ ;
+      /**
+       * <code>required int32 phase = 3;</code>
+       */
+      public boolean hasPhase() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 phase = 3;</code>
+       */
+      public int getPhase() {
+        return phase_;
+      }
+      /**
+       * <code>required int32 phase = 3;</code>
+       */
+      public Builder setPhase(int value) {
+        bitField0_ |= 0x00000004;
+        phase_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 phase = 3;</code>
+       */
+      public Builder clearPhase() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        phase_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:gs.LabLaunchLine)
+    }
+
+    static {
+      defaultInstance = new LabLaunchLine(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:gs.LabLaunchLine)
   }
 
   public interface ShelfOrBuilder
@@ -70421,6 +71357,11 @@ public final class Gs {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_gs_LabSetLineWorkerNum_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_gs_LabLaunchLine_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_gs_LabLaunchLine_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_gs_Shelf_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -70710,116 +71651,119 @@ public final class Gs {
       "ent\030\002 \002(\005\022\016\n\006renter\030\003 \002(\005\022\027\n\005chart\030\004 \002(\013" +
       "2\010.gs.Nums\022\013\n\003qty\030\005 \002(\005\"\\\n\004Line\022\n\n\002id\030\001 " +
       "\002(\014\022\016\n\006itemId\030\002 \002(\005\022\020\n\010nowCount\030\003 \002(\005\022\023\n" +
-      "\013targetCount\030\004 \002(\005\022\021\n\tworkerNum\030\005 \002(\005\"\304\001" +
+      "\013targetCount\030\004 \002(\005\022\021\n\tworkerNum\030\005 \002(\005\"\340\001" +
       "\n\nLaboratory\022\036\n\004info\030\001 \002(\0132\020.gs.Building" +
       "Info\022!\n\004line\030\002 \003(\0132\023.gs.Laboratory.Line\032" +
-      "s\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\014\n\004t",
-      "ype\030\003 \002(\005\022\n\n\002lv\030\004 \002(\005\022\023\n\013durationSec\030\005 \002" +
-      "(\005\022\r\n\005phase\030\006 \002(\005\022\021\n\tworkerNum\030\007 \002(\005\"Q\n\n" +
-      "LabAddLine\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006itemId" +
-      "\030\002 \002(\005\022\014\n\004type\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"" +
-      "0\n\nLabDelLine\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lin" +
-      "eId\030\002 \002(\014\"D\n\023LabSetLineWorkerNum\022\022\n\nbuil" +
-      "dingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\022\t\n\001n\030\003 \002(\005\"" +
-      "e\n\005Shelf\022\037\n\004good\030\001 \003(\0132\021.gs.Shelf.Conten" +
-      "t\032;\n\007Content\022\026\n\001k\030\001 \002(\0132\013.gs.ItemKey\022\t\n\001" +
-      "n\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\"}\n\017MaterialFactor",
-      "y\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\030\n\005sto" +
-      "re\030\002 \002(\0132\t.gs.Store\022\030\n\005shelf\030\003 \002(\0132\t.gs." +
-      "Shelf\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"\177\n\021Produce" +
-      "Department\022\036\n\004info\030\001 \002(\0132\020.gs.BuildingIn" +
-      "fo\022\030\n\005store\030\002 \002(\0132\t.gs.Store\022\030\n\005shelf\030\003 " +
-      "\002(\0132\t.gs.Shelf\022\026\n\004line\030\004 \003(\0132\010.gs.Line\"\213" +
-      "\004\n\rAdvertisement\022-\n\ravailableSlot\030\002 \003(\0132" +
-      "\026.gs.Advertisement.Slot\022,\n\010soldSlot\030\003 \003(" +
-      "\0132\032.gs.Advertisement.SoldSlot\022 \n\002ad\030\004 \003(" +
-      "\0132\024.gs.Advertisement.Ad\032c\n\004Slot\022\n\n\002id\030\001 ",
-      "\002(\014\022\024\n\014minDayToRent\030\002 \002(\005\022\024\n\014maxDayToRen" +
-      "t\030\003 \002(\005\022\022\n\nrentPreDay\030\004 \002(\005\022\017\n\007deposit\030\005" +
-      " \002(\005\032^\n\010SoldSlot\022!\n\001s\030\001 \002(\0132\026.gs.Adverti" +
-      "sement.Slot\022\017\n\007beginTs\030\002 \002(\003\022\014\n\004days\030\003 \002" +
-      "(\005\022\020\n\010renterId\030\004 \002(\014\032\265\001\n\002Ad\022(\n\004slot\030\001 \001(" +
-      "\0132\032.gs.Advertisement.SoldSlot\022\016\n\006metaId\030" +
-      "\002 \002(\005\022\'\n\004type\030\003 \002(\0162\031.gs.Advertisement.A" +
-      "d.Type\022\017\n\007beginTs\030\004 \002(\003\022\017\n\007npcFlow\030\005 \002(\005" +
-      "\022\n\n\002id\030\007 \002(\014\"\036\n\004Type\022\010\n\004GOOD\020\000\022\014\n\010BUILDI" +
-      "NG\020\001\"q\n\016PublicFacility\022\036\n\004info\030\001 \002(\0132\020.g",
-      "s.BuildingInfo\022\035\n\002ad\030\002 \002(\0132\021.gs.Advertis" +
-      "ement\022\013\n\003qty\030\003 \002(\005\022\023\n\013ticketPrice\030\004 \002(\005\"" +
-      "\214\001\n\nRetailShop\022\036\n\004info\030\001 \002(\0132\020.gs.Buildi" +
-      "ngInfo\022\035\n\002ad\030\002 \002(\0132\021.gs.Advertisement\022\013\n" +
-      "\003qty\030\003 \002(\005\022\030\n\005store\030\004 \002(\0132\t.gs.Store\022\030\n\005" +
-      "shelf\030\005 \002(\0132\t.gs.Shelf\"o\n\tAdSetSlot\022\022\n\nb" +
-      "uildingId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\022\022\n\nrentP" +
-      "reDay\030\003 \002(\005\022\024\n\014minDayToRent\030\004 \002(\005\022\024\n\014max" +
-      "DayToRent\030\005 \002(\005\"]\n\007AddSlot\022\022\n\nbuildingId" +
-      "\030\001 \002(\014\022\024\n\014minDayToRent\030\002 \002(\005\022\024\n\014maxDayTo",
-      "Rent\030\003 \002(\005\022\022\n\nrentPreDay\030\004 \002(\005\"/\n\tAdDelS" +
-      "lot\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\"" +
-      "<\n\tAdBuySlot\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006slot" +
-      "Id\030\002 \002(\014\022\013\n\003day\030\003 \002(\005\"0\n\013AdSetTicket\022\022\n\n" +
-      "buildingId\030\001 \002(\014\022\r\n\005price\030\002 \002(\005\"`\n\005AddAd" +
-      "\022\n\n\002id\030\001 \001(\014\022\016\n\006metaId\030\002 \002(\005\022\'\n\004type\030\003 \002" +
-      "(\0162\031.gs.Advertisement.Ad.Type\022\022\n\nbuildin" +
-      "gId\030\004 \002(\014\"3\n\017AdDelAdFromSlot\022\022\n\nbuilding" +
-      "Id\030\001 \002(\014\022\014\n\004adId\030\002 \002(\014\"E\n\010ShelfAdd\022\022\n\nbu" +
-      "ildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r",
-      "\n\005price\030\003 \002(\005\"6\n\010ShelfDel\022\022\n\nbuildingId\030" +
-      "\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\"E\n\010ShelfSe" +
-      "t\022\022\n\nbuildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs" +
-      ".Item\022\r\n\005price\030\003 \002(\005\"\\\n\nBuyInShelf\022\022\n\nbu" +
-      "ildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs.Item\022\r" +
-      "\n\005price\030\003 \002(\005\022\023\n\013wareHouseId\030\004 \002(\014\"K\n\007Ad" +
-      "dLine\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\021\n\ttar" +
-      "getNum\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"V\n\nChang" +
-      "eLine\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(" +
-      "\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\ttargetNum\030\004 \001(\005\"",
-      "P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022\020\n\010nowCount\030\002 \001(" +
-      "\005\022\023\n\013targetCount\030\003 \001(\005\022\021\n\tworkerNum\030\004 \001(" +
-      "\005\"\211\001\n\023ExchangeItemSummary\022\016\n\006itemId\030\001 \002(" +
-      "\005\022\020\n\010lowPrice\030\002 \001(\005\022\021\n\thighPrice\030\003 \001(\005\022\020" +
-      "\n\010nowPrice\030\004 \001(\005\022\026\n\016sumDealedPrice\030\005 \001(\003" +
-      "\022\023\n\013priceChange\030\006 \001(\021\"<\n\020ExchangeItemLis" +
-      "t\022(\n\007summary\030\001 \003(\0132\027.gs.ExchangeItemSumm" +
-      "ary\"C\n\026ItemDealHistoryElement\022\r\n\005price\030\001" +
-      " \002(\005\022\016\n\006amount\030\002 \002(\005\022\n\n\002ts\030\003 \002(\003\":\n\017Item" +
-      "DealHistory\022\'\n\003log\030\001 \003(\0132\032.gs.ItemDealHi",
-      "storyElement\"M\n\013ExchangeBuy\022\016\n\006itemId\030\001 " +
-      "\002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuild" +
-      "ingId\030\004 \002(\014\"N\n\014ExchangeSell\022\016\n\006itemId\030\001 " +
-      "\002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuild" +
-      "ingId\030\004 \002(\014\"n\n\022ExchangeItemDetail\022\027\n\003buy" +
-      "\030\001 \003(\0132\n.gs.IntNum\022\030\n\004sell\030\002 \003(\0132\n.gs.In" +
-      "tNum\022\020\n\010nowPrice\030\003 \002(\005\022\023\n\013priceChange\030\004 " +
-      "\002(\005\"w\n\014ExchangeDeal\022\016\n\006itemId\030\001 \002(\005\022\013\n\003n" +
-      "um\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022\022\n\nbuildingId\030\004 " +
-      "\002(\014\022\022\n\nbuyOrderId\030\005 \002(\014\022\023\n\013sellOrderId\030\006",
-      " \002(\014\"\334\001\n\016ExchangeOrders\022\'\n\005order\030\001 \003(\0132\030" +
-      ".gs.ExchangeOrders.Order\032\240\001\n\005Order\022\n\n\002id" +
-      "\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\024\n\014dealedAmount\030\003" +
-      " \002(\005\022\023\n\013totalAmount\030\004 \002(\005\022\r\n\005price\030\005 \002(\005" +
-      "\022\n\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002(\010\022\022\n\nbuildingId" +
-      "\030\010 \002(\014\022\023\n\013dealedPrice\030\t \002(\005\"\240\001\n\017Exchange" +
-      "DealLog\022\020\n\010sellerId\030\001 \002(\014\022\017\n\007buyerId\030\002 \002" +
-      "(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030\004 \002(\005\022\016\n\006dealed\030" +
-      "\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\022\026\n\016buyTotalAmount\030" +
-      "\007 \002(\005\022\027\n\017sellTotalAmount\030\010 \002(\005\"4\n\020Exchan",
-      "geDealLogs\022 \n\003log\030\001 \003(\0132\023.gs.ExchangeDea" +
-      "lLog\"{\n\nGroundRent\022\022\n\nrentPreDay\030\001 \002(\005\022\030" +
-      "\n\020paymentCycleDays\030\002 \002(\005\022\017\n\007deposit\030\003 \002(" +
-      "\005\022\020\n\010rentDays\030\004 \002(\005\022\034\n\005coord\030\005 \003(\0132\r.gs." +
-      "MiniIndex\"9\n\nGroundSale\022\r\n\005price\030\001 \002(\005\022\034" +
-      "\n\005coord\030\002 \003(\0132\r.gs.MiniIndex\"t\n\020TechTrad" +
-      "eSummary\022\'\n\004info\030\001 \003(\0132\031.gs.TechTradeSum" +
-      "mary.Info\0327\n\004Info\022\020\n\010ownerNum\030\001 \002(\005\022\016\n\006m" +
-      "etaId\030\002 \002(\005\022\r\n\005topLv\030\003 \001(\005\"y\n\017TechTradeD" +
-      "etail\022&\n\004info\030\001 \003(\0132\030.gs.TechTradeDetail",
-      ".Info\032>\n\004Info\022\n\n\002id\030\001 \002(\014\022\017\n\007ownerId\030\002 \002" +
-      "(\014\022\r\n\005price\030\003 \002(\005\022\n\n\002lv\030\004 \002(\005\"9\n\014TechTra" +
-      "deAdd\022\016\n\006itemId\030\001 \002(\005\022\n\n\002lv\030\002 \001(\005\022\r\n\005pri" +
-      "ce\030\003 \002(\005*f\n\rBuildingState\022\020\n\014CONSTRUCTIN" +
-      "G\020\002\022\020\n\014WAITING_OPEN\020\003\022\023\n\017WAITING_OPERATE" +
-      "\020\004\022\013\n\007OPERATE\020\005\022\017\n\013DECONSTRUCT\020\006"
+      "\216\001\n\004Line\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\014\n\004",
+      "type\030\003 \002(\005\022\n\n\002lv\030\004 \002(\005\022\017\n\007leftSec\030\005 \002(\005\022" +
+      "\r\n\005phase\030\006 \002(\005\022\021\n\tworkerNum\030\007 \002(\005\022\020\n\010cre" +
+      "ateTs\030\010 \002(\003\022\013\n\003run\030\t \002(\010\"Q\n\nLabAddLine\022\022" +
+      "\n\nbuildingId\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\014\n\004ty" +
+      "pe\030\003 \002(\005\022\021\n\tworkerNum\030\004 \002(\005\"0\n\nLabDelLin" +
+      "e\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014\"D\n" +
+      "\023LabSetLineWorkerNum\022\022\n\nbuildingId\030\001 \002(\014" +
+      "\022\016\n\006lineId\030\002 \002(\014\022\t\n\001n\030\003 \002(\005\"B\n\rLabLaunch" +
+      "Line\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006lineId\030\002 \002(\014" +
+      "\022\r\n\005phase\030\003 \002(\005\"e\n\005Shelf\022\037\n\004good\030\001 \003(\0132\021",
+      ".gs.Shelf.Content\032;\n\007Content\022\026\n\001k\030\001 \002(\0132" +
+      "\013.gs.ItemKey\022\t\n\001n\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\"}" +
+      "\n\017MaterialFactory\022\036\n\004info\030\001 \002(\0132\020.gs.Bui" +
+      "ldingInfo\022\030\n\005store\030\002 \002(\0132\t.gs.Store\022\030\n\005s" +
+      "helf\030\003 \002(\0132\t.gs.Shelf\022\026\n\004line\030\004 \003(\0132\010.gs" +
+      ".Line\"\177\n\021ProduceDepartment\022\036\n\004info\030\001 \002(\013" +
+      "2\020.gs.BuildingInfo\022\030\n\005store\030\002 \002(\0132\t.gs.S" +
+      "tore\022\030\n\005shelf\030\003 \002(\0132\t.gs.Shelf\022\026\n\004line\030\004" +
+      " \003(\0132\010.gs.Line\"\213\004\n\rAdvertisement\022-\n\ravai" +
+      "lableSlot\030\002 \003(\0132\026.gs.Advertisement.Slot\022",
+      ",\n\010soldSlot\030\003 \003(\0132\032.gs.Advertisement.Sol" +
+      "dSlot\022 \n\002ad\030\004 \003(\0132\024.gs.Advertisement.Ad\032" +
+      "c\n\004Slot\022\n\n\002id\030\001 \002(\014\022\024\n\014minDayToRent\030\002 \002(" +
+      "\005\022\024\n\014maxDayToRent\030\003 \002(\005\022\022\n\nrentPreDay\030\004 " +
+      "\002(\005\022\017\n\007deposit\030\005 \002(\005\032^\n\010SoldSlot\022!\n\001s\030\001 " +
+      "\002(\0132\026.gs.Advertisement.Slot\022\017\n\007beginTs\030\002" +
+      " \002(\003\022\014\n\004days\030\003 \002(\005\022\020\n\010renterId\030\004 \002(\014\032\265\001\n" +
+      "\002Ad\022(\n\004slot\030\001 \001(\0132\032.gs.Advertisement.Sol" +
+      "dSlot\022\016\n\006metaId\030\002 \002(\005\022\'\n\004type\030\003 \002(\0162\031.gs" +
+      ".Advertisement.Ad.Type\022\017\n\007beginTs\030\004 \002(\003\022",
+      "\017\n\007npcFlow\030\005 \002(\005\022\n\n\002id\030\007 \002(\014\"\036\n\004Type\022\010\n\004" +
+      "GOOD\020\000\022\014\n\010BUILDING\020\001\"q\n\016PublicFacility\022\036" +
+      "\n\004info\030\001 \002(\0132\020.gs.BuildingInfo\022\035\n\002ad\030\002 \002" +
+      "(\0132\021.gs.Advertisement\022\013\n\003qty\030\003 \002(\005\022\023\n\013ti" +
+      "cketPrice\030\004 \002(\005\"\214\001\n\nRetailShop\022\036\n\004info\030\001" +
+      " \002(\0132\020.gs.BuildingInfo\022\035\n\002ad\030\002 \002(\0132\021.gs." +
+      "Advertisement\022\013\n\003qty\030\003 \002(\005\022\030\n\005store\030\004 \002(" +
+      "\0132\t.gs.Store\022\030\n\005shelf\030\005 \002(\0132\t.gs.Shelf\"o" +
+      "\n\tAdSetSlot\022\022\n\nbuildingId\030\001 \002(\014\022\016\n\006slotI" +
+      "d\030\002 \002(\014\022\022\n\nrentPreDay\030\003 \002(\005\022\024\n\014minDayToR",
+      "ent\030\004 \002(\005\022\024\n\014maxDayToRent\030\005 \002(\005\"]\n\007AddSl" +
+      "ot\022\022\n\nbuildingId\030\001 \002(\014\022\024\n\014minDayToRent\030\002" +
+      " \002(\005\022\024\n\014maxDayToRent\030\003 \002(\005\022\022\n\nrentPreDay" +
+      "\030\004 \002(\005\"/\n\tAdDelSlot\022\022\n\nbuildingId\030\001 \002(\014\022" +
+      "\016\n\006slotId\030\002 \002(\014\"<\n\tAdBuySlot\022\022\n\nbuilding" +
+      "Id\030\001 \002(\014\022\016\n\006slotId\030\002 \002(\014\022\013\n\003day\030\003 \002(\005\"0\n" +
+      "\013AdSetTicket\022\022\n\nbuildingId\030\001 \002(\014\022\r\n\005pric" +
+      "e\030\002 \002(\005\"`\n\005AddAd\022\n\n\002id\030\001 \001(\014\022\016\n\006metaId\030\002" +
+      " \002(\005\022\'\n\004type\030\003 \002(\0162\031.gs.Advertisement.Ad" +
+      ".Type\022\022\n\nbuildingId\030\004 \002(\014\"3\n\017AdDelAdFrom",
+      "Slot\022\022\n\nbuildingId\030\001 \002(\014\022\014\n\004adId\030\002 \002(\014\"E" +
+      "\n\010ShelfAdd\022\022\n\nbuildingId\030\001 \002(\014\022\026\n\004item\030\002" +
+      " \002(\0132\010.gs.Item\022\r\n\005price\030\003 \002(\005\"6\n\010ShelfDe" +
+      "l\022\022\n\nbuildingId\030\001 \002(\014\022\026\n\004item\030\002 \002(\0132\010.gs" +
+      ".Item\"E\n\010ShelfSet\022\022\n\nbuildingId\030\001 \002(\014\022\026\n" +
+      "\004item\030\002 \002(\0132\010.gs.Item\022\r\n\005price\030\003 \002(\005\"\\\n\n" +
+      "BuyInShelf\022\022\n\nbuildingId\030\001 \002(\014\022\026\n\004item\030\002" +
+      " \002(\0132\010.gs.Item\022\r\n\005price\030\003 \002(\005\022\023\n\013wareHou" +
+      "seId\030\004 \002(\014\"K\n\007AddLine\022\n\n\002id\030\001 \002(\014\022\016\n\006ite" +
+      "mId\030\002 \002(\005\022\021\n\ttargetNum\030\003 \002(\005\022\021\n\tworkerNu",
+      "m\030\004 \002(\005\"V\n\nChangeLine\022\022\n\nbuildingId\030\001 \002(" +
+      "\014\022\016\n\006lineId\030\002 \002(\014\022\021\n\tworkerNum\030\003 \001(\005\022\021\n\t" +
+      "targetNum\030\004 \001(\005\"P\n\010LineInfo\022\n\n\002id\030\001 \002(\014\022" +
+      "\020\n\010nowCount\030\002 \001(\005\022\023\n\013targetCount\030\003 \001(\005\022\021" +
+      "\n\tworkerNum\030\004 \001(\005\"\211\001\n\023ExchangeItemSummar" +
+      "y\022\016\n\006itemId\030\001 \002(\005\022\020\n\010lowPrice\030\002 \001(\005\022\021\n\th" +
+      "ighPrice\030\003 \001(\005\022\020\n\010nowPrice\030\004 \001(\005\022\026\n\016sumD" +
+      "ealedPrice\030\005 \001(\003\022\023\n\013priceChange\030\006 \001(\021\"<\n" +
+      "\020ExchangeItemList\022(\n\007summary\030\001 \003(\0132\027.gs." +
+      "ExchangeItemSummary\"C\n\026ItemDealHistoryEl",
+      "ement\022\r\n\005price\030\001 \002(\005\022\016\n\006amount\030\002 \002(\005\022\n\n\002" +
+      "ts\030\003 \002(\003\":\n\017ItemDealHistory\022\'\n\003log\030\001 \003(\013" +
+      "2\032.gs.ItemDealHistoryElement\"M\n\013Exchange" +
+      "Buy\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005pric" +
+      "e\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"N\n\014ExchangeS" +
+      "ell\022\016\n\006itemId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005pric" +
+      "e\030\003 \002(\005\022\022\n\nbuildingId\030\004 \002(\014\"n\n\022ExchangeI" +
+      "temDetail\022\027\n\003buy\030\001 \003(\0132\n.gs.IntNum\022\030\n\004se" +
+      "ll\030\002 \003(\0132\n.gs.IntNum\022\020\n\010nowPrice\030\003 \002(\005\022\023" +
+      "\n\013priceChange\030\004 \002(\005\"w\n\014ExchangeDeal\022\016\n\006i",
+      "temId\030\001 \002(\005\022\013\n\003num\030\002 \002(\005\022\r\n\005price\030\003 \002(\005\022" +
+      "\022\n\nbuildingId\030\004 \002(\014\022\022\n\nbuyOrderId\030\005 \002(\014\022" +
+      "\023\n\013sellOrderId\030\006 \002(\014\"\334\001\n\016ExchangeOrders\022" +
+      "\'\n\005order\030\001 \003(\0132\030.gs.ExchangeOrders.Order" +
+      "\032\240\001\n\005Order\022\n\n\002id\030\001 \002(\014\022\016\n\006itemId\030\002 \002(\005\022\024" +
+      "\n\014dealedAmount\030\003 \002(\005\022\023\n\013totalAmount\030\004 \002(" +
+      "\005\022\r\n\005price\030\005 \002(\005\022\n\n\002ts\030\006 \002(\003\022\014\n\004sell\030\007 \002" +
+      "(\010\022\022\n\nbuildingId\030\010 \002(\014\022\023\n\013dealedPrice\030\t " +
+      "\002(\005\"\240\001\n\017ExchangeDealLog\022\020\n\010sellerId\030\001 \002(" +
+      "\014\022\017\n\007buyerId\030\002 \002(\014\022\n\n\002ts\030\003 \002(\003\022\r\n\005price\030",
+      "\004 \002(\005\022\016\n\006dealed\030\005 \002(\005\022\016\n\006itemId\030\006 \002(\005\022\026\n" +
+      "\016buyTotalAmount\030\007 \002(\005\022\027\n\017sellTotalAmount" +
+      "\030\010 \002(\005\"4\n\020ExchangeDealLogs\022 \n\003log\030\001 \003(\0132" +
+      "\023.gs.ExchangeDealLog\"{\n\nGroundRent\022\022\n\nre" +
+      "ntPreDay\030\001 \002(\005\022\030\n\020paymentCycleDays\030\002 \002(\005" +
+      "\022\017\n\007deposit\030\003 \002(\005\022\020\n\010rentDays\030\004 \002(\005\022\034\n\005c" +
+      "oord\030\005 \003(\0132\r.gs.MiniIndex\"9\n\nGroundSale\022" +
+      "\r\n\005price\030\001 \002(\005\022\034\n\005coord\030\002 \003(\0132\r.gs.MiniI" +
+      "ndex\"t\n\020TechTradeSummary\022\'\n\004info\030\001 \003(\0132\031" +
+      ".gs.TechTradeSummary.Info\0327\n\004Info\022\020\n\010own",
+      "erNum\030\001 \002(\005\022\016\n\006metaId\030\002 \002(\005\022\r\n\005topLv\030\003 \001" +
+      "(\005\"y\n\017TechTradeDetail\022&\n\004info\030\001 \003(\0132\030.gs" +
+      ".TechTradeDetail.Info\032>\n\004Info\022\n\n\002id\030\001 \002(" +
+      "\014\022\017\n\007ownerId\030\002 \002(\014\022\r\n\005price\030\003 \002(\005\022\n\n\002lv\030" +
+      "\004 \002(\005\"9\n\014TechTradeAdd\022\016\n\006itemId\030\001 \002(\005\022\n\n" +
+      "\002lv\030\002 \001(\005\022\r\n\005price\030\003 \002(\005*f\n\rBuildingStat" +
+      "e\022\020\n\014CONSTRUCTING\020\002\022\020\n\014WAITING_OPEN\020\003\022\023\n" +
+      "\017WAITING_OPERATE\020\004\022\013\n\007OPERATE\020\005\022\017\n\013DECON" +
+      "STRUCT\020\006"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -71065,7 +72009,7 @@ public final class Gs {
           internal_static_gs_Laboratory_Line_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Laboratory_Line_descriptor,
-              new java.lang.String[] { "Id", "ItemId", "Type", "Lv", "DurationSec", "Phase", "WorkerNum", });
+              new java.lang.String[] { "Id", "ItemId", "Type", "Lv", "LeftSec", "Phase", "WorkerNum", "CreateTs", "Run", });
           internal_static_gs_LabAddLine_descriptor =
             getDescriptor().getMessageTypes().get(35);
           internal_static_gs_LabAddLine_fieldAccessorTable = new
@@ -71084,8 +72028,14 @@ public final class Gs {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_LabSetLineWorkerNum_descriptor,
               new java.lang.String[] { "BuildingId", "LineId", "N", });
-          internal_static_gs_Shelf_descriptor =
+          internal_static_gs_LabLaunchLine_descriptor =
             getDescriptor().getMessageTypes().get(38);
+          internal_static_gs_LabLaunchLine_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_gs_LabLaunchLine_descriptor,
+              new java.lang.String[] { "BuildingId", "LineId", "Phase", });
+          internal_static_gs_Shelf_descriptor =
+            getDescriptor().getMessageTypes().get(39);
           internal_static_gs_Shelf_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Shelf_descriptor,
@@ -71097,19 +72047,19 @@ public final class Gs {
               internal_static_gs_Shelf_Content_descriptor,
               new java.lang.String[] { "K", "N", "Price", });
           internal_static_gs_MaterialFactory_descriptor =
-            getDescriptor().getMessageTypes().get(39);
+            getDescriptor().getMessageTypes().get(40);
           internal_static_gs_MaterialFactory_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_MaterialFactory_descriptor,
               new java.lang.String[] { "Info", "Store", "Shelf", "Line", });
           internal_static_gs_ProduceDepartment_descriptor =
-            getDescriptor().getMessageTypes().get(40);
+            getDescriptor().getMessageTypes().get(41);
           internal_static_gs_ProduceDepartment_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ProduceDepartment_descriptor,
               new java.lang.String[] { "Info", "Store", "Shelf", "Line", });
           internal_static_gs_Advertisement_descriptor =
-            getDescriptor().getMessageTypes().get(41);
+            getDescriptor().getMessageTypes().get(42);
           internal_static_gs_Advertisement_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_Advertisement_descriptor,
@@ -71133,151 +72083,151 @@ public final class Gs {
               internal_static_gs_Advertisement_Ad_descriptor,
               new java.lang.String[] { "Slot", "MetaId", "Type", "BeginTs", "NpcFlow", "Id", });
           internal_static_gs_PublicFacility_descriptor =
-            getDescriptor().getMessageTypes().get(42);
+            getDescriptor().getMessageTypes().get(43);
           internal_static_gs_PublicFacility_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_PublicFacility_descriptor,
               new java.lang.String[] { "Info", "Ad", "Qty", "TicketPrice", });
           internal_static_gs_RetailShop_descriptor =
-            getDescriptor().getMessageTypes().get(43);
+            getDescriptor().getMessageTypes().get(44);
           internal_static_gs_RetailShop_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_RetailShop_descriptor,
               new java.lang.String[] { "Info", "Ad", "Qty", "Store", "Shelf", });
           internal_static_gs_AdSetSlot_descriptor =
-            getDescriptor().getMessageTypes().get(44);
+            getDescriptor().getMessageTypes().get(45);
           internal_static_gs_AdSetSlot_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AdSetSlot_descriptor,
               new java.lang.String[] { "BuildingId", "SlotId", "RentPreDay", "MinDayToRent", "MaxDayToRent", });
           internal_static_gs_AddSlot_descriptor =
-            getDescriptor().getMessageTypes().get(45);
+            getDescriptor().getMessageTypes().get(46);
           internal_static_gs_AddSlot_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddSlot_descriptor,
               new java.lang.String[] { "BuildingId", "MinDayToRent", "MaxDayToRent", "RentPreDay", });
           internal_static_gs_AdDelSlot_descriptor =
-            getDescriptor().getMessageTypes().get(46);
+            getDescriptor().getMessageTypes().get(47);
           internal_static_gs_AdDelSlot_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AdDelSlot_descriptor,
               new java.lang.String[] { "BuildingId", "SlotId", });
           internal_static_gs_AdBuySlot_descriptor =
-            getDescriptor().getMessageTypes().get(47);
+            getDescriptor().getMessageTypes().get(48);
           internal_static_gs_AdBuySlot_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AdBuySlot_descriptor,
               new java.lang.String[] { "BuildingId", "SlotId", "Day", });
           internal_static_gs_AdSetTicket_descriptor =
-            getDescriptor().getMessageTypes().get(48);
+            getDescriptor().getMessageTypes().get(49);
           internal_static_gs_AdSetTicket_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AdSetTicket_descriptor,
               new java.lang.String[] { "BuildingId", "Price", });
           internal_static_gs_AddAd_descriptor =
-            getDescriptor().getMessageTypes().get(49);
+            getDescriptor().getMessageTypes().get(50);
           internal_static_gs_AddAd_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddAd_descriptor,
               new java.lang.String[] { "Id", "MetaId", "Type", "BuildingId", });
           internal_static_gs_AdDelAdFromSlot_descriptor =
-            getDescriptor().getMessageTypes().get(50);
+            getDescriptor().getMessageTypes().get(51);
           internal_static_gs_AdDelAdFromSlot_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AdDelAdFromSlot_descriptor,
               new java.lang.String[] { "BuildingId", "AdId", });
           internal_static_gs_ShelfAdd_descriptor =
-            getDescriptor().getMessageTypes().get(51);
+            getDescriptor().getMessageTypes().get(52);
           internal_static_gs_ShelfAdd_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ShelfAdd_descriptor,
               new java.lang.String[] { "BuildingId", "Item", "Price", });
           internal_static_gs_ShelfDel_descriptor =
-            getDescriptor().getMessageTypes().get(52);
+            getDescriptor().getMessageTypes().get(53);
           internal_static_gs_ShelfDel_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ShelfDel_descriptor,
               new java.lang.String[] { "BuildingId", "Item", });
           internal_static_gs_ShelfSet_descriptor =
-            getDescriptor().getMessageTypes().get(53);
+            getDescriptor().getMessageTypes().get(54);
           internal_static_gs_ShelfSet_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ShelfSet_descriptor,
               new java.lang.String[] { "BuildingId", "Item", "Price", });
           internal_static_gs_BuyInShelf_descriptor =
-            getDescriptor().getMessageTypes().get(54);
+            getDescriptor().getMessageTypes().get(55);
           internal_static_gs_BuyInShelf_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_BuyInShelf_descriptor,
               new java.lang.String[] { "BuildingId", "Item", "Price", "WareHouseId", });
           internal_static_gs_AddLine_descriptor =
-            getDescriptor().getMessageTypes().get(55);
+            getDescriptor().getMessageTypes().get(56);
           internal_static_gs_AddLine_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_AddLine_descriptor,
               new java.lang.String[] { "Id", "ItemId", "TargetNum", "WorkerNum", });
           internal_static_gs_ChangeLine_descriptor =
-            getDescriptor().getMessageTypes().get(56);
+            getDescriptor().getMessageTypes().get(57);
           internal_static_gs_ChangeLine_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ChangeLine_descriptor,
               new java.lang.String[] { "BuildingId", "LineId", "WorkerNum", "TargetNum", });
           internal_static_gs_LineInfo_descriptor =
-            getDescriptor().getMessageTypes().get(57);
+            getDescriptor().getMessageTypes().get(58);
           internal_static_gs_LineInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_LineInfo_descriptor,
               new java.lang.String[] { "Id", "NowCount", "TargetCount", "WorkerNum", });
           internal_static_gs_ExchangeItemSummary_descriptor =
-            getDescriptor().getMessageTypes().get(58);
+            getDescriptor().getMessageTypes().get(59);
           internal_static_gs_ExchangeItemSummary_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeItemSummary_descriptor,
               new java.lang.String[] { "ItemId", "LowPrice", "HighPrice", "NowPrice", "SumDealedPrice", "PriceChange", });
           internal_static_gs_ExchangeItemList_descriptor =
-            getDescriptor().getMessageTypes().get(59);
+            getDescriptor().getMessageTypes().get(60);
           internal_static_gs_ExchangeItemList_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeItemList_descriptor,
               new java.lang.String[] { "Summary", });
           internal_static_gs_ItemDealHistoryElement_descriptor =
-            getDescriptor().getMessageTypes().get(60);
+            getDescriptor().getMessageTypes().get(61);
           internal_static_gs_ItemDealHistoryElement_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ItemDealHistoryElement_descriptor,
               new java.lang.String[] { "Price", "Amount", "Ts", });
           internal_static_gs_ItemDealHistory_descriptor =
-            getDescriptor().getMessageTypes().get(61);
+            getDescriptor().getMessageTypes().get(62);
           internal_static_gs_ItemDealHistory_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ItemDealHistory_descriptor,
               new java.lang.String[] { "Log", });
           internal_static_gs_ExchangeBuy_descriptor =
-            getDescriptor().getMessageTypes().get(62);
+            getDescriptor().getMessageTypes().get(63);
           internal_static_gs_ExchangeBuy_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeBuy_descriptor,
               new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
           internal_static_gs_ExchangeSell_descriptor =
-            getDescriptor().getMessageTypes().get(63);
+            getDescriptor().getMessageTypes().get(64);
           internal_static_gs_ExchangeSell_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeSell_descriptor,
               new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", });
           internal_static_gs_ExchangeItemDetail_descriptor =
-            getDescriptor().getMessageTypes().get(64);
+            getDescriptor().getMessageTypes().get(65);
           internal_static_gs_ExchangeItemDetail_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeItemDetail_descriptor,
               new java.lang.String[] { "Buy", "Sell", "NowPrice", "PriceChange", });
           internal_static_gs_ExchangeDeal_descriptor =
-            getDescriptor().getMessageTypes().get(65);
+            getDescriptor().getMessageTypes().get(66);
           internal_static_gs_ExchangeDeal_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDeal_descriptor,
               new java.lang.String[] { "ItemId", "Num", "Price", "BuildingId", "BuyOrderId", "SellOrderId", });
           internal_static_gs_ExchangeOrders_descriptor =
-            getDescriptor().getMessageTypes().get(66);
+            getDescriptor().getMessageTypes().get(67);
           internal_static_gs_ExchangeOrders_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeOrders_descriptor,
@@ -71289,31 +72239,31 @@ public final class Gs {
               internal_static_gs_ExchangeOrders_Order_descriptor,
               new java.lang.String[] { "Id", "ItemId", "DealedAmount", "TotalAmount", "Price", "Ts", "Sell", "BuildingId", "DealedPrice", });
           internal_static_gs_ExchangeDealLog_descriptor =
-            getDescriptor().getMessageTypes().get(67);
+            getDescriptor().getMessageTypes().get(68);
           internal_static_gs_ExchangeDealLog_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDealLog_descriptor,
               new java.lang.String[] { "SellerId", "BuyerId", "Ts", "Price", "Dealed", "ItemId", "BuyTotalAmount", "SellTotalAmount", });
           internal_static_gs_ExchangeDealLogs_descriptor =
-            getDescriptor().getMessageTypes().get(68);
+            getDescriptor().getMessageTypes().get(69);
           internal_static_gs_ExchangeDealLogs_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_ExchangeDealLogs_descriptor,
               new java.lang.String[] { "Log", });
           internal_static_gs_GroundRent_descriptor =
-            getDescriptor().getMessageTypes().get(69);
+            getDescriptor().getMessageTypes().get(70);
           internal_static_gs_GroundRent_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_GroundRent_descriptor,
               new java.lang.String[] { "RentPreDay", "PaymentCycleDays", "Deposit", "RentDays", "Coord", });
           internal_static_gs_GroundSale_descriptor =
-            getDescriptor().getMessageTypes().get(70);
+            getDescriptor().getMessageTypes().get(71);
           internal_static_gs_GroundSale_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_GroundSale_descriptor,
               new java.lang.String[] { "Price", "Coord", });
           internal_static_gs_TechTradeSummary_descriptor =
-            getDescriptor().getMessageTypes().get(71);
+            getDescriptor().getMessageTypes().get(72);
           internal_static_gs_TechTradeSummary_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_TechTradeSummary_descriptor,
@@ -71325,7 +72275,7 @@ public final class Gs {
               internal_static_gs_TechTradeSummary_Info_descriptor,
               new java.lang.String[] { "OwnerNum", "MetaId", "TopLv", });
           internal_static_gs_TechTradeDetail_descriptor =
-            getDescriptor().getMessageTypes().get(72);
+            getDescriptor().getMessageTypes().get(73);
           internal_static_gs_TechTradeDetail_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_TechTradeDetail_descriptor,
@@ -71337,7 +72287,7 @@ public final class Gs {
               internal_static_gs_TechTradeDetail_Info_descriptor,
               new java.lang.String[] { "Id", "OwnerId", "Price", "Lv", });
           internal_static_gs_TechTradeAdd_descriptor =
-            getDescriptor().getMessageTypes().get(73);
+            getDescriptor().getMessageTypes().get(74);
           internal_static_gs_TechTradeAdd_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_gs_TechTradeAdd_descriptor,

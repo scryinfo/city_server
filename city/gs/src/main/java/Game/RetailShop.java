@@ -133,5 +133,15 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
     @Override
     public boolean delItem(ItemKey k) { return this.store.delItem(k); }
 
+    @Override
+    public int getNumber(MetaItem m) { return this.store.getNumber(m); }
 
+    @Override
+    public boolean has(ItemKey m, int n) { return this.store.has(m, n); }
+
+    @Override
+    public boolean offset(ItemKey item, int n) { return this.store.offset(item, n); }
+
+    @Override
+    public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
 }

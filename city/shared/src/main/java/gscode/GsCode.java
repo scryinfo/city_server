@@ -654,9 +654,17 @@ public final class GsCode {
      */
     labLineSetWorkerNum(79, 1155),
     /**
+     * <code>labLaunchLine = 1156;</code>
+     *
+     * <pre>
+     *c 开始生产
+     * </pre>
+     */
+    labLaunchLine(80, 1156),
+    /**
      * <code>cheat = 2000;</code>
      */
-    cheat(80, 2000),
+    cheat(81, 2000),
     ;
 
     /**
@@ -1300,6 +1308,14 @@ public final class GsCode {
      */
     public static final int labLineSetWorkerNum_VALUE = 1155;
     /**
+     * <code>labLaunchLine = 1156;</code>
+     *
+     * <pre>
+     *c 开始生产
+     * </pre>
+     */
+    public static final int labLaunchLine_VALUE = 1156;
+    /**
      * <code>cheat = 2000;</code>
      */
     public static final int cheat_VALUE = 2000;
@@ -1389,6 +1405,7 @@ public final class GsCode {
         case 1153: return labLineAdd;
         case 1154: return labLineDel;
         case 1155: return labLineSetWorkerNum;
+        case 1156: return labLaunchLine;
         case 2000: return cheat;
         default: return null;
       }
@@ -1450,7 +1467,7 @@ public final class GsCode {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gsCode.proto\022\006gscode*\362\014\n\006OpCode\022\n\n\005log" +
+      "\n\014gsCode.proto\022\006gscode*\206\r\n\006OpCode\022\n\n\005log" +
       "in\020\350\007\022\016\n\theartBeat\020\351\007\022\016\n\troleLogin\020\352\007\022\017\n" +
       "\ncreateRole\020\353\007\022\t\n\004move\020\354\007\022\017\n\nunitCreate\020" +
       "\355\007\022\017\n\nunitRemove\020\356\007\022\017\n\nunitChange\020\357\007\022\021\n\014" +
@@ -1491,7 +1508,8 @@ public final class GsCode {
       "TradeAdd\020\366\010\022\021\n\014techTradeDel\020\367\010\022\021\n\014techTr" +
       "adeBuy\020\370\010\022\022\n\rlabLineChange\020\376\010\022\014\n\007newItem",
       "\020\377\010\022\017\n\nlabLineAdd\020\201\t\022\017\n\nlabLineDel\020\202\t\022\030\n" +
-      "\023labLineSetWorkerNum\020\203\t\022\n\n\005cheat\020\320\017"
+      "\023labLineSetWorkerNum\020\203\t\022\022\n\rlabLaunchLine" +
+      "\020\204\t\022\n\n\005cheat\020\320\017"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

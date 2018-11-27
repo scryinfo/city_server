@@ -179,4 +179,16 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public int quality() {
         return 0;
     }
+
+    @Override
+    public int getNumber(MetaItem m) { return this.store.getNumber(m); }
+
+    @Override
+    public boolean has(ItemKey m, int n) { return this.store.has(m, n); }
+
+    @Override
+    public boolean offset(ItemKey item, int n) { return this.store.offset(item, n); }
+
+    @Override
+    public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
 }
