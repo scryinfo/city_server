@@ -180,6 +180,7 @@ public class City {
     public void run() {
         // startUp metaBuilding?
         // calcu parameters
+        lastTs = System.nanoTime() - UpdateIntervalNano;
         e.scheduleAtFixedRate(() -> {
             try {
                 final long now = System.nanoTime();

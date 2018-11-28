@@ -35,13 +35,15 @@ public class Laboratory extends Building implements IStorage {
         this.meta = (MetaLaboratory) super.metaBuilding;
     }
     @Override
-    public Message detailProto() {
-        return null;
+    public Gs.Laboratory detailProto() {
+        Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
+        builder.setStore(this.store.toProto());
+        this.lines.values().forEach(line -> builder.addLine(line.toProto()));
+        return builder.build();
     }
-
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
-
+        builder.addLaboratory(this.detailProto());
     }
 
     @Override
@@ -56,37 +58,7 @@ public class Laboratory extends Building implements IStorage {
 
     @Override
     protected void _update(long diffNano) {
-        Iterator<Map.Entry<UUID, Line>> iterator = lines.entrySet().iterator();
-        while(iterator.hasNext()) {
-            Map.Entry<UUID, Line> e = iterator.next();
-            Line l = e.getValue();
-            Line.UpdateResult r = l.update(diffNano);
-            if(r != null) {
-                if(r.phaseChange) {
-                    GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.labLineChange_VALUE, l.toProto()));
-                }
-                else {
-                    Player owner = GameDb.queryPlayer(ownerId());
-                    if(r.type == Formula.Type.INVENT) {
-                        owner.addItem(l.formula.key.targetId, 0);
-                        TechTradeCenter.instance().techCompleteAction(l.formula.key.targetId, 0);
-                        iterator.remove();
-                        GameDb.saveOrUpdate(Arrays.asList(this, owner, TechTradeCenter.instance()));
-                    }
-                    if(r.type == Formula.Type.RESEARCH) {
-                        owner.addItem(l.formula.key.targetId, r.v);
-                        TechTradeCenter.instance().techCompleteAction(l.formula.key.targetId, r.v);
-                        GameDb.saveOrUpdate(Arrays.asList(owner, TechTradeCenter.instance()));
-                    }
-                    GameServer.sendTo(this.detailWatchers,
-                            Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
-                                    Gs.LabDelLine.newBuilder()
-                                            .setBuildingId(Util.toByteString(id()))
-                                            .setLineId(Util.toByteString(l.id))
-                                            .build()));
-                }
-            }
-        }
+        this.lines.values().forEach(l->l.update(diffNano));
         if(this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
@@ -105,7 +77,16 @@ public class Laboratory extends Building implements IStorage {
     }
 
     public boolean delLine(UUID lineId) {
-        return lines.remove(lineId) != null;
+        if(lines.remove(lineId) != null) {
+            GameServer.sendTo(this.detailWatchers,
+                    Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
+                            Gs.LabDelLine.newBuilder()
+                                    .setBuildingId(Util.toByteString(id()))
+                                    .setLineId(Util.toByteString(lineId))
+                                    .build()));
+            return true;
+        }
+        return false;
     }
 
     public boolean setLineWorkerNum(UUID lineId, int n) {
@@ -122,6 +103,10 @@ public class Laboratory extends Building implements IStorage {
 
     public Line getLine(UUID lineId) {
         return lines.get(lineId);
+    }
+
+    public void broadcastLine(Line line) {
+        GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.labLineChange_VALUE, line.toProto()));
     }
 
     @Entity
@@ -157,23 +142,24 @@ public class Laboratory extends Building implements IStorage {
             return formula.consumes;
         }
         boolean isComplete() {
-            return phase < formula.phase;
+            return phase == formula.phase;
         }
         boolean isRunning() {
             return this.run;
         }
         void launch(int phase) {
             this.run = true;
-            this.phaseNeedToGo = phase;
+            this.rollTarget = phase;
         }
         int type;
         int targetId;
         int targetLv;
         long leftNano;
         int phase;
-        int phaseNeedToGo;
+        int rollTarget;
         boolean run;
         long createTs;
+        int roll;
         private static final int RADIX = 100000;
         Gs.Laboratory.Line toProto() {
             return Gs.Laboratory.Line.newBuilder()
@@ -186,6 +172,7 @@ public class Laboratory extends Building implements IStorage {
                     .setWorkerNum(workerNum)
                     .setCreateTs(createTs)
                     .setRun(run)
+                    .setRoll(roll)
                     .build();
         }
 
@@ -207,19 +194,13 @@ public class Laboratory extends Building implements IStorage {
             int v;
             boolean phaseChange;
         }
-        UpdateResult update(long diffNano) {
-            if(!run)
-                return null;
-
-            leftNano -= diffNano*workerNum;
-            if(leftNano <= 0) {
-                leftNano = TimeUnit.SECONDS.toNanos(formula.phaseSec);
-
+        UpdateResult roll() {
+            if(roll > 0) {
+                --roll;
                 if(!Prob.success(formula.successChance[phase], 10000))
                     return null;
 
                 if(formula.key.type == Formula.Type.RESEARCH) {
-                    phaseComplete(1);
                     if(Prob.success(formula.critiChance, RADIX))
                         return new UpdateResult(formula.key.type, formula.critiV);
                     return new UpdateResult(formula.key.type, 1);
@@ -228,26 +209,27 @@ public class Laboratory extends Building implements IStorage {
                     int phaseAdd = 1;
                     if(Prob.success(formula.critiChance, RADIX))
                         phaseAdd = formula.critiV;
-                    if(phaseComplete(phaseAdd))
+                    phase += phaseAdd;
+                    phase = phase > formula.phase?formula.phase:phase;
+                    if(phase == formula.phase)
                         return new UpdateResult(formula.key.type, formula.key.targetId);
                     else
                         return new UpdateResult(true);
                 }
-
             }
             return null;
         }
+        void update(long diffNano) {
+            if (!run)
+                return;
 
-        private boolean phaseComplete(int add) {
-            phase += add;
-            phaseNeedToGo -= add;
-            if(phase > formula.phase)
-                phase = formula.phase;
-            if(phaseNeedToGo < 0)
-                phaseNeedToGo = 0;
-            if(phaseNeedToGo == 0)
-                run = false;
-            return phase == formula.phase;
+            leftNano -= diffNano * workerNum;
+            if (leftNano <= 0) {
+                leftNano = TimeUnit.SECONDS.toNanos(formula.phaseSec);
+                roll++;
+                if(roll == rollTarget)
+                    run = false;
+            }
         }
     }
 

@@ -73,6 +73,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.setSalary_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"setSalary"));
 			table.put((short) GsCode.OpCode.addLine_VALUE, Wrapper.newWithMessageAsync(Gs.AddLine.PARSER, GameSession.class,"addLine"));
 			table.put((short) GsCode.OpCode.changeLine_VALUE, Wrapper.newWithMessageAsync(Gs.ChangeLine.PARSER, GameSession.class,"changeLine"));
+			table.put((short) GsCode.OpCode.delLine_VALUE, Wrapper.newWithMessageAsync(Gs.DelLine.PARSER, GameSession.class,"delLine"));
 
 			table.put((short) GsCode.OpCode.rentOutGround_VALUE, Wrapper.newWithMessageAsync(Gs.GroundRent.PARSER, GameSession.class,"rentOutGround"));
 			table.put((short) GsCode.OpCode.rentGround_VALUE, Wrapper.newWithMessageAsync(Gs.GroundRent.PARSER, GameSession.class,"rentGround"));
@@ -83,6 +84,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.labLineDel_VALUE, Wrapper.newWithMessageAsync(Gs.LabDelLine.PARSER, GameSession.class,"labLineDel"));
 			table.put((short) GsCode.OpCode.labLineSetWorkerNum_VALUE, Wrapper.newWithMessageAsync(Gs.LabSetLineWorkerNum.PARSER, GameSession.class,"labLineSetWorkerNum"));
 			table.put((short) GsCode.OpCode.labLaunchLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabLaunchLine.PARSER, GameSession.class,"labLaunchLine"));
+			table.put((short) GsCode.OpCode.labRoll_VALUE, Wrapper.newWithMessageAsync(Gs.LabRoll.PARSER, GameSession.class,"labRoll"));
 
 			table.put((short) GsCode.OpCode.techTradeAdd_VALUE, Wrapper.newWithMessageAsync(Gs.TechTradeAdd.PARSER, GameSession.class,"techTradeAdd"));
 			table.put((short) GsCode.OpCode.techTradeBuy_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"techTradeBuy"));

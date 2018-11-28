@@ -7,6 +7,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
+import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -691,6 +692,17 @@ public class GameSession {
 		}
 	}
 
+	public void delLine(short cmd, Message message) {
+		Gs.ChangeLine c = (Gs.ChangeLine) message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if (b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+			return;
+		ObjectId lineId = new ObjectId(c.getLineId().toByteArray());
+		FactoryBase f = (FactoryBase) b;
+		if(f.delLine(lineId))
+			this.write(Package.create(cmd, c));
+	}
 	public void changeLine(short cmd, Message message) {
 		Gs.ChangeLine c = (Gs.ChangeLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
@@ -998,7 +1010,7 @@ public class GameSession {
 		Formula.Type type = Formula.Type.values()[c.getType()];
 		Formula formula = null;
 		if(type == Formula.Type.RESEARCH) {
-			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), player.getGoodLevel(c.getItemId())));
+			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), player.getGoodLevel(c.getItemId())+1));
 		}
 		else if(type == Formula.Type.INVENT) {
 			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), 0));
@@ -1035,7 +1047,7 @@ public class GameSession {
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
 		Laboratory.Line line = lab.getLine(lineId);
-		if(line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
+		if(line == null || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
 			return;
 		Formula.Consume[] consumes = line.getConsumes();
 		if(consumes == null)
@@ -1056,6 +1068,41 @@ public class GameSession {
 		}
 		line.launch(c.getPhase());
 		GameDb.saveOrUpdate(lab);
+	}
+	public void labRoll(short cmd, Message message) {
+		Gs.LabRoll c = (Gs.LabRoll)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+		Laboratory lab = (Laboratory)building;
+		Laboratory.Line line = lab.getLine(lineId);
+		if(line == null || line.isComplete())
+			return;
+		Laboratory.Line.UpdateResult r = line.roll();
+		if(r != null) {
+			if(r.phaseChange) {
+				lab.broadcastLine(line);
+			}
+			else {
+				if(r.type == Formula.Type.INVENT) {
+					player.addItem(line.formula.key.targetId, 0);
+					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, 0);
+					lab.delLine(line.id);
+					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
+				}
+				if(r.type == Formula.Type.RESEARCH) {
+					player.addItem(line.formula.key.targetId, r.v);
+					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, r.v);
+					lab.delLine(line.id);
+					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
+				}
+			}
+			this.write(Package.create(cmd));
+		}
+		else
+			this.write(Package.fail(cmd));
 	}
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;

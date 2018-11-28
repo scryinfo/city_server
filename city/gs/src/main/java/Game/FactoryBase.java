@@ -191,4 +191,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     @Override
     public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
+
+    public boolean delLine(ObjectId lineId) {
+        return this.lines.remove(lineId) != null;
+    }
 }

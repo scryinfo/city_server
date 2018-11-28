@@ -53,6 +53,7 @@ public class TechTradeCenter {
         Sell s = allSelling.get(sellId);
         if(s != null && s.ownerId.equals(playerId)) {
             allSelling.remove(sellId);
+            cache.get(s.metaId).sellId.remove(sellId);
         }
     }
     public Sell get(UUID id) {
