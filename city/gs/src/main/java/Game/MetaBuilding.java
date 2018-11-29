@@ -1,0 +1,66 @@
+package Game;
+
+import org.bson.Document;
+
+import javax.persistence.AttributeConverter;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class MetaBuilding {
+    public static final int TRIVIAL = 10;
+    public static final int MATERIAL = 11;
+    public static final int PRODUCE = 12;
+    public static final int RETAIL = 13;
+    public static final int APARTMENT = 14;
+    public static final int LAB = 15;
+    public static final int PUBLIC = 16;
+    public static final int TALENT = 18;
+    public static final int MAX_TYPE_ID = 20;
+    public static boolean isBuilding(int id) {
+        return id / MetaData.ID_RADIX <= PUBLIC;
+    }
+
+    public static boolean canAd(int type) {
+        return type == RETAIL || type == APARTMENT || type == PUBLIC || type == TALENT;
+    }
+    public static int type(int id) {
+        return id/MetaData.ID_RADIX;
+    }
+    MetaBuilding(Document d) {
+        this.id = d.getInteger("_id");
+        this.x = d.getInteger("x");
+        this.y = d.getInteger("y");
+        if(d.containsKey("workerNum")) {
+            this.workerNum = d.getInteger("workerNum");
+            this.effectRange = d.getInteger("effectRange");
+            for (int i = 0; i < 10; i++) {
+                int type = d.getInteger("npcType" + i);
+                int n = d.getInteger("npcNum" + i);
+                if (n > 0)
+                    npc.put(type, n);
+            }
+            if (npc.values().stream().mapToInt(n -> n).sum() != workerNum)
+                throw new IllegalArgumentException();
+        }
+    }
+    public int id;
+    public int x;
+    public int y;
+    public int workerNum;
+    public int effectRange;
+    public Map<Integer, Integer> npc = new TreeMap<>();
+    public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(MetaBuilding attribute) {
+            return attribute.id;
+        }
+
+        @Override
+        public MetaBuilding convertToEntityAttribute(Integer dbData) {
+            return MetaData.getBuilding(dbData);
+        }
+    }
+    public CoordPair area(Coordinate pos) {
+        return new CoordPair(pos, pos.offset(this.x-1, this.y-1));
+    }
+}
