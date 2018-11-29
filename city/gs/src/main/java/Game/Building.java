@@ -27,6 +27,11 @@ public abstract class Building {
 
     protected Building() {
     }
+
+    public static double distance(Building a, Building b) {
+        return Math.sqrt(Math.pow(a.coordinate().x - b.coordinate().x, 2) + Math.pow(a.coordinate().y - b.coordinate().y, 2));
+    }
+
     public abstract int quality();
     boolean canUseBy(UUID userId) {
         return ownerId.equals(userId);
@@ -221,28 +226,14 @@ public abstract class Building {
         allStaff.clear();
     }
     protected void destoryImpl(){}
-//    public Building(MetaBuilding meta, Document doc) {
-//        this.id = doc.getObjectId("id");
-//        this.ownerId = doc.getObjectId("owner");
-//        this.coordinate = new Coordinate((Document) doc.get("coordinate"));
-//        this.metaBuilding = meta;
-//        this.salary = doc.getInteger("salary");
-//        this.happy = doc.getInteger("happy");
-//
-//        int lastFlow = 0;
-//        for(Document _d : (List<Document>) doc.get("flowHis")) {
-//            long ts = _d.getLong("t");
-//            int n = _d.getInteger("n");
-//            this.flowHistory.consumeReserve(new FlowInfo(ts, n));
-//            lastFlow = n;
-//        }
-//        this.flow = lastFlow; // don't blame me, java's silly design, no rbegin
-//    }
+
     public void hireNpc(int initSalary) {
-        for(Npc npc : NpcManager.instance().create(this.metaBuilding.workerNum, this, initSalary))
-        {
-            npc.goFor(this);
-        }
+        this.metaBuilding.npc.forEach((k,v)->{
+            for(Npc npc : NpcManager.instance().create(k, v, this, initSalary))
+            {
+                npc.goWork();
+            }
+        });
     }
     public CoordPair effectRange() {
         Coordinate l = coordinate.shiftLU(this.metaBuilding.effectRange);
@@ -252,24 +243,7 @@ public abstract class Building {
     public CoordPair area() {
         return new CoordPair(coordinate, coordinate.offset(metaBuilding.x, metaBuilding.y));
     }
-//    public Document toBson() {
-//        Document res = new Document();
-//        res.append("id", id);
-//        res.append("ownerId", ownerId());
-//        res.append("coordinate", coordinate.toBson());
-//        res.append("salary", salary);
-//        res.append("happy", happy);
-//
-//        List<Document> flowHistoryArr = new ArrayList<>();
-//        for(FlowInfo i : this.flowHistory) {
-//            Document _d = new Document();
-//            _d.append("t", i.ts);
-//            _d.append("n", i.n);
-//            flowHistoryArr.consumeReserve(_d);
-//        }
-//        res.append("flowHis", flowHistoryArr);
-//        return res;
-//    }
+
     public Coordinate coordinate() {
         return coordinate;
     }

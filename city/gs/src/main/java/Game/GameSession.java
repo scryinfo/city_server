@@ -430,6 +430,8 @@ public class GameSession {
 		Building building = City.instance().getBuilding(id);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
 			return;
+		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
+			return;
 		IShelf s = (IShelf)building;
 		Gs.Shelf.Content proto = s.addshelf(item, c.getPrice());
 		if(proto != null)
@@ -443,6 +445,8 @@ public class GameSession {
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+			return;
+		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
 		if(s.delshelf(item.key, item.n))
@@ -458,6 +462,8 @@ public class GameSession {
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+			return;
+		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf shelf = (IShelf)building;
 		if(shelf.setPrice(item.key, c.getPrice()))
@@ -693,15 +699,17 @@ public class GameSession {
 	}
 
 	public void delLine(short cmd, Message message) {
-		Gs.ChangeLine c = (Gs.ChangeLine) message;
+		Gs.DelLine c = (Gs.DelLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if (b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
-		ObjectId lineId = new ObjectId(c.getLineId().toByteArray());
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		FactoryBase f = (FactoryBase) b;
-		if(f.delLine(lineId))
+		if(f.delLine(lineId)) {
+			GameDb.saveOrUpdate(f);
 			this.write(Package.create(cmd, c));
+		}
 	}
 	public void changeLine(short cmd, Message message) {
 		Gs.ChangeLine c = (Gs.ChangeLine) message;

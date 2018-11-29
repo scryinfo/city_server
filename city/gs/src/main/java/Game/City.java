@@ -361,6 +361,7 @@ public class City {
     public boolean addBuilding(Building b) {
         if(!this.canBuild(b))
             return false;
+        b.hireNpc(1000);
         take(b);
         GameDb.saveOrUpdate(b);
         b.broadcastCreate();

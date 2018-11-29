@@ -9,6 +9,13 @@ import java.util.UUID;
 @Entity
 @Table(name = "NPC")
 public class Npc {
+    public Npc(Building born, long money, int type) {
+        this.id = UUID.randomUUID();
+        this.born = born;
+        this.money = money;
+        this.type = type;
+        this.tempBuilding = null;
+    }
     @Id
     private UUID id;
 
@@ -24,11 +31,13 @@ public class Npc {
     @Column(name = "money", nullable = false)
     private long money;
 
+    private int type;
+    private boolean stopWork;
+
     public long money() {
         return money;
     }
-    protected Npc() {
-    }
+    protected Npc() {}
 
     public int salary() {
         return this.born.salary();
@@ -62,12 +71,7 @@ public class Npc {
         this.tempBuilding = this.adapterData.tempBuildingId==null?null:City.instance().getBuilding(this.adapterData.tempBuildingId);
         this.apartment = this.adapterData.apartmentId==null?null: (Apartment) City.instance().getBuilding(this.adapterData.apartmentId);
     }
-    public Npc(Building building, int salary) {
-        this.id = UUID.randomUUID();
-        this.born = building;
-        this.money = salary;
-        this.tempBuilding = null;
-    }
+
     public Coordinate coordinate() {
         return this.tempBuilding == null? this.born.coordinate():this.tempBuilding.coordinate();
     }
@@ -92,14 +96,16 @@ public class Npc {
        double sumFlow = City.instance().getSumFlow();
        if(sumFlow > 0)
            idleRatio = 1.d - (double)this.buildingLocated().getFlow() / sumFlow;
-       IAction action = aiBuilding.random(idleRatio, BrandManager.instance().getBuildingRatio());
+       IAction action = aiBuilding.random(idleRatio, BrandManager.instance().getBuildingRatio(), id);
        action.act(this);
     }
     public Building chooseOne(Set<Building> buildings) {
         return null;
     }
-    private int type;
-    private boolean stopWork;
+
+    public int type() {
+        return type;
+    }
     public int chooseId() {
         int id = type*100000000;
         id += City.instance().currentHour()*1000000;

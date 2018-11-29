@@ -122,11 +122,33 @@ public class BrandManager {
             return 0;
         return (double)v / maxBuilding(type) * 100;
     }
-    public double goodBrandScore(int metaId) {
-        Integer v = allGood.get(metaId);
-        if(v == null)
-            return 0;
-        return (double)v / maxGood(metaId) * 100;
+    public int goodBrandScoreByType(MetaGood.Type type) {
+        return allGood.entrySet().stream().filter(e->MetaGood.goodType(e.getKey().mid) == type).mapToInt(e->e.getValue()).reduce(0, Integer::sum);
+    }
+    public int goodBrandScoreByLux(int lux) {
+        return allGood.entrySet().stream().filter(e->MetaData.getGood(e.getKey().mid).lux == lux).mapToInt(e->e.getValue()).reduce(0, Integer::sum);
+    }
+    public double[] getGoodWeightRatioWithType() {
+        double[] res = new double[MetaGood.Type.ALL.ordinal()];
+        Arrays.fill(res, 1.d);
+        int all = allGood();
+        if(all > 0) {
+            for(int i = 0; i < MetaGood.Type.ALL.ordinal(); ++i) {
+                res[i] += (double)goodBrandScoreByType(MetaGood.Type.values()[i]) / (double)all;
+            }
+        }
+        return res;
+    }
+    public double[] getGoodWeightRatioWithLux() {
+        double[] res = new double[MetaGood.LUX_SIZE];
+        Arrays.fill(res, 1.d);
+        int all = allGood();
+        if(all > 0) {
+            for(int i = 0; i < MetaGood.LUX_SIZE; ++i) {
+                res[i] += (double)goodBrandScoreByLux(i) / (double)all;
+            }
+        }
+        return res;
     }
     private double buildingRatio(int type) {
         Integer v = allBuilding.get(type);
@@ -159,6 +181,9 @@ public class BrandManager {
     public int allGood() {
         return allGood.values().stream().reduce(0, Integer::sum);
     }
+    public int allGood(int metaId) {
+        return allGood.entrySet().stream().filter(e->e.getKey().mid == metaId).mapToInt(e->e.getValue()).reduce(0, Integer::sum);
+    }
     @Transient  // <building type, refineCache value>
     private Map<Integer, Integer> allBuilding = new TreeMap<>();
 
@@ -182,6 +207,18 @@ public class BrandManager {
         return res;
     }
 
+    public int getBuilding(UUID playerId, int type) {
+        Map<Integer, Integer> m = playerBuilding.get(playerId);
+        if(m == null)
+            return 0;
+        return m.getOrDefault(type, 0);
+    }
+    public int getGood(UUID playerId, int mId) {
+        Map<Integer, Integer> m = playerGood.get(playerId);
+        if(m == null)
+            return 0;
+        return m.getOrDefault(mId, 0);
+    }
     @Transient
     private Map<UUID, Map<Integer, Integer>> playerBuilding = new HashMap<>();
 

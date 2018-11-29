@@ -4,6 +4,8 @@ import com.google.protobuf.Message;
 import gs.Gs;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -144,4 +146,15 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
 
     @Override
     public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
+
+    public Collection<Integer> getMetaIdsInShelf(MetaGood.Type type, int lux) {
+        return shelf.getMetaIds(type, lux);
+    }
+    public boolean shelfHas(int metaId) {
+        return shelf.has(metaId);
+    }
+
+    public List<Shelf.SellInfo> getSellInfo(int metaId) {
+        return shelf.getSellInfo(metaId);
+    }
 }

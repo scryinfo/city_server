@@ -98,7 +98,7 @@ abstract class MetaItem {
         this.n = d.getDouble("numOneSec");
         this.useDirectly = d.getBoolean("default");
     }
-    int id;
+    public int id;
     double n;
     int size;
     boolean useDirectly;
@@ -128,13 +128,22 @@ final class MetaMaterial extends MetaItem {
     }
 
 }
-final class MetaGood extends MetaItem {
-    MetaGood(Document d) {
-        super(d);
-        this.lux = d.getInteger("lux");
-    }
-    int lux;
-}
+//final class MetaGood extends MetaItem {
+//    enum Type {
+//        MAIN_FOOD,
+//        SUB_FOOD,
+//        CLOTHING,
+//        ACCESSORY,
+//        SPORT,
+//        DIGITAL,
+//        ALL
+//    }
+//    MetaGood(Document d) {
+//        super(d);
+//        this.lux = d.getInteger("lux");
+//    }
+//    int lux;
+//}
 
 class AIBuilding extends ProbBase {
     AIBuilding(Document d) {
@@ -149,7 +158,7 @@ class AIBuilding extends ProbBase {
         GOTO_RETAIL_SHOP,
         ALL
     }
-    IAction random(double idleRatio, BrandManager.BuildingRatio ratio) {
+    IAction random(double idleRatio, BrandManager.BuildingRatio ratio, int aiId) {
         int[] d = Arrays.copyOf(weight, weight.length);
         d[Type.IDLE.ordinal()] *= idleRatio;
         d[Type.GOTO_HOME.ordinal()] *= idleRatio;
@@ -160,83 +169,21 @@ class AIBuilding extends ProbBase {
         switch (Type.values()[super.randomIdx(d)]) {
             case IDLE:
                 return new Idle();
+            case GOTO_HOME:
+                return new Idle();
+            case GOTO_WORK:
+                return new Idle();
             case GOTO_APARTMENT:
                 return new JustVisit(MetaBuilding.APARTMENT);
             case GOTO_PUBLIC_FACILITY:
                 return new JustVisit(MetaBuilding.PUBLIC);
             case GOTO_RETAIL_SHOP:
-                return new Shopping();
+                return new Shopping(aiId);
         }
         return null;
     }
 }
 
-class AIBuy extends ProbBase {
-    AIBuy(Document d) {
-        super(Type.ALL.ordinal(), d);
-    }
-    enum Type { // use good type?
-        FOOD1,
-        FOOD2,
-        COTH,
-        AESS,
-        DIGITAL,
-        SPORT,
-        ALL
-    }
-    Type random(double[] ratio) {
-        int[] d = Arrays.copyOf(weight, weight.length);
-        return Type.values()[super.randomIdx(d)];
-    }
-}
-class MetaBuilding {
-    public static final int TRIVIAL = 10;
-    public static final int MATERIAL = 11;
-    public static final int PRODUCE = 12;
-    public static final int RETAIL = 13;
-    public static final int APARTMENT = 14;
-    public static final int LAB = 15;
-    public static final int PUBLIC = 16;
-    public static final int TALENT = 18;
-    public static final int MAX_TYPE_ID = 20;
-    public static boolean isBuilding(int id) {
-        return id / MetaData.ID_RADIX <= PUBLIC;
-    }
-
-    public static boolean canAd(int type) {
-        return type == RETAIL || type == APARTMENT || type == PUBLIC || type == TALENT;
-    }
-    public static int type(int id) {
-        return id/MetaData.ID_RADIX;
-    }
-    MetaBuilding(Document d) {
-        this.id = d.getInteger("_id");
-        this.x = d.getInteger("x");
-        this.y = d.getInteger("y");
-        this.workerNum = d.containsKey("workerNum")?d.getInteger("workerNum"):0;
-        this.effectRange = d.containsKey("effectRange")?d.getInteger("effectRange"):0;
-    }
-	public int id;
-	public int x;
-	public int y;
-	public int workerNum;
-	public int effectRange;
-
-    public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
-        @Override
-        public Integer convertToDatabaseColumn(MetaBuilding attribute) {
-            return attribute.id;
-        }
-
-        @Override
-        public MetaBuilding convertToEntityAttribute(Integer dbData) {
-            return MetaData.getBuilding(dbData);
-        }
-    }
-    public CoordPair area(Coordinate pos) {
-        return new CoordPair(pos, pos.offset(this.x-1, this.y-1));
-    }
-}
 class MetaVirtualBuilding {
     MetaVirtualBuilding(Document d) throws Exception {
         this.id = d.getInteger("_id");
@@ -498,6 +445,7 @@ public class MetaData {
     private static final String goodColName = "Good";
     private static final String aiBuildingColName = "AIBuilding";
     private static final String aiBuyColName = "AIBuy";
+    private static final String aiLuxColName = "AILux";
     private static final String dayColName = "Holiday";
     private static final String buildingSpendColName = "BuildingSpendRatio";
     private static final String goodSpendColName = "GoodSpendRatio";
@@ -518,6 +466,7 @@ public class MetaData {
     private static final TreeMap<Integer, MetaVirtualBuilding> virtualBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
+    private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
@@ -643,11 +592,12 @@ public class MetaData {
         MetaItem res = getMaterial(id);
         return res == null ? getGood(id):res;
     }
-    public static AIBuilding getAIBuilding(int id) {
-        return aiBuilding.get(id);
-    }
-    public static AIBuy getAIBuy(int id) {
+    public static AIBuilding getAIBuilding(long id) { return aiBuilding.get(id); }
+    public static AIBuy getAIBuy(long id) {
         return aiBuy.get(id);
+    }
+    public static AILux getAILux(long id) {
+        return aiLux.get(id);
     }
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
@@ -702,6 +652,12 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(aiBuyColName).find().forEach((Block<Document>) doc -> {
             AIBuy m = new AIBuy(doc);
             aiBuy.put(m.id, m);
+        });
+    }
+    private static void initAILux() {
+        mongoClient.getDatabase(dbName).getCollection(aiLuxColName).find().forEach((Block<Document>) doc -> {
+            AILux m = new AILux(doc);
+            aiLux.put(m.id, m);
         });
     }
 //	public static void initNpc() {
@@ -807,6 +763,7 @@ public class MetaData {
 
         initAIBuilding();
         initAIBuy();
+        initAILux();
         initDayId();
         initSpendRatio();
 
