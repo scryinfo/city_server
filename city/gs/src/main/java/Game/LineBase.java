@@ -27,6 +27,9 @@ public abstract class LineBase {
     @Column(nullable = false)
     int workerNum;
 
+    @Column(nullable = false)
+    double accumulated;
+
     @Column(nullable = false) // if don't save this, we need to query player in each produce action
     int itemLevel;
     protected LineBase() {
@@ -60,8 +63,18 @@ public abstract class LineBase {
         int add = 0;
         if(!isPause() && this.timer.update(diffNano))
         {
-            add = (int) (item.n * this.workerNum);
-            this.count += add;
+            accumulated += item.n * this.workerNum;
+            add = (int) Math.round(accumulated);
+            if(add > 0) {
+                this.count += add;
+                if(this.count >= this.targetNum) {
+                    add -= this.count - this.targetNum;
+                    this.count = this.targetNum;
+                    this.accumulated = 0;
+                }
+                else
+                    accumulated -= add;
+            }
         }
         return add;
     }
