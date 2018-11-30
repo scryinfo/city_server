@@ -92,6 +92,13 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.techTradeGetSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"techTradeGetSummary"));
 			table.put((short) GsCode.OpCode.techTradeGetDetail_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"techTradeGetDetail"));
 
+			//wxj=================================================
+
+			//===========================================================
+
+			//llb========================================================
+
+			//===========================================================
 			if(GlobalConfig.debug()){
 
 			}
