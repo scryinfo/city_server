@@ -93,11 +93,11 @@ public class NpcManager {
     private int updateIdx;
     private boolean reCalcuWaitToUpdate;
     private NpcManager() {
-        updateTimesAtCurrentTimeSection = (int) (TimeUnit.MILLISECONDS.toNanos(City.instance().leftMsToNextTimeSection()) / City.UpdateIntervalNano);
+        long leftMs = City.instance().leftMsToNextTimeSection();
+        updateTimesAtCurrentTimeSection = (int) (TimeUnit.MILLISECONDS.toNanos(leftMs) / City.UpdateIntervalNano);
         GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
         // set the updateIdx according to the left time to next time section
-        long leftMs = City.instance().leftMsToNextTimeSection();
-        updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(City.instance().nextTimeSectionDuration()) * updateTimesAtCurrentTimeSection);
+        updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(City.instance().currentTimeSectionDuration()) * updateTimesAtCurrentTimeSection);
         waitToUpdate = Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>());
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
     }

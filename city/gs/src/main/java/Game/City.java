@@ -259,10 +259,16 @@ public class City {
         LocalTime now = localTime();
         int nextTimeSectionHour = meta.nextTimeSectionHour(this.currentTimeSectionIdx);
         LocalTime next = LocalTime.of(nextTimeSectionHour, 0);
-        return Duration.between(now, next).toMillis();
+        if(now.isBefore(next))
+            return Duration.between(now, next).toMillis();
+        else
+            return Duration.between(now, LocalTime.MAX).toMillis();
     }
     public int nextTimeSectionDuration() {
         return meta.nextTimeSectionDuration(this.currentTimeSectionIdx);
+    }
+    public int currentTimeSectionDuration() {
+        return meta.timeSectionDuration(this.currentTimeSectionIdx);
     }
 //    public int nextTimeSectionHour(int nowHour) {
 //        for(int i = 0; i < meta.timeSection.length; ++i) {
