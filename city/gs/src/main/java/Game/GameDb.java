@@ -37,6 +37,12 @@ import java.util.concurrent.TimeUnit;
 // http manner. so the session will closed right after we done the operation of database rather than the business logic. that will cause object
 // be state of detached in most of time. when it needs update, it will have a transient duration of persist state. this will making hibernate
 // do additional select
+
+// if server reach the max npc amount, its about 400 update/sec, if each npc trigger one db update, due to SQL have not non-acknowledge mode
+// the db operation is time consuming(5-10 ms, common pc, LAN), the all 400 update will consume 2-4 seconds to complete, it over limit the update frequency
+// even you could do those db update in dedicated thread, that will not blocking the game logic update, but the queue in that thread will
+// bigger and bigger. and there is no way to solve this except buy an high performance SQL machine. If we get this machine, then sync db
+// update will not be the problem anymore
 public class GameDb {
 	private static final Logger logger = Logger.getLogger(GameDb.class);
 	private static SessionFactory sessionFactory;
@@ -263,6 +269,7 @@ public class GameDb {
 	}
 
 	public static void saveOrUpdate(Object o) {
+		long a = System.nanoTime();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -274,6 +281,7 @@ public class GameDb {
 		} finally {
 
 		}
+		System.out.println(System.nanoTime()-a);
 	}
 
 	public static void delete(Object o) {

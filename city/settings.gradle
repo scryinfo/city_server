@@ -2,4 +2,5 @@ rootProject.name = 'city'
 include 'as'
 include 'gs'
 include 'Shared'
+include 'ss'
 

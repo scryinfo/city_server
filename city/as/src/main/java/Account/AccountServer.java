@@ -40,7 +40,7 @@ public class AccountServer {
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {
-			List<ChannelFuture> fs = new ArrayList<ChannelFuture>();
+			List<ChannelFuture> fs = new ArrayList<>();
             {
                 ServerBootstrap b = new ServerBootstrap();
                 b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)

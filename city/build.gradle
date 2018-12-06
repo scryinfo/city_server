@@ -15,6 +15,7 @@ allprojects {
         compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.6.Final'
         compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
         compile 'com.vladmihalcea:hibernate-types-52:2.3.0'
+        compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
@@ -38,6 +39,12 @@ project(':as') {
 }
 
 project(':gs') {
+    dependencies {
+        compile project(':Shared')
+    }
+}
+
+project(':ss') {
     dependencies {
         compile project(':Shared')
     }

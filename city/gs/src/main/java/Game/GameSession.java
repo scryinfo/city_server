@@ -68,7 +68,7 @@ public class GameSession {
 		player.offline();
 		GameDb.evict(player);
 		//City.instance().execute(()->GameDb.evict(player));
-
+		GameServer.allGameSessions.remove(id());
 		//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
 		//offline action of validate
 		Validator.getInstance().unRegist(accountName, token);
@@ -434,8 +434,10 @@ public class GameSession {
 			return;
 		IShelf s = (IShelf)building;
 		Gs.Shelf.Content proto = s.addshelf(item, c.getPrice());
-		if(proto != null)
+		if(proto != null) {
+			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, proto));
+		}
 		else
 			this.write(Package.fail(cmd));
 	}
@@ -1153,6 +1155,7 @@ public class GameSession {
 		Gs.Num c = (Gs.Num)message;
 		this.write(Package.create(cmd, TechTradeCenter.instance().getDetail(c.getNum())));
 	}
+
     //wxj========================================================
 
 	//===========================================================

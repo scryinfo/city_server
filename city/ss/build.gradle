@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+}
+
+group 'info.scry'
+version 'unspecified'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jar {
+    baseName = 'ss'
+    manifest {
+        attributes 'Main-Class':'StatisticServer'
+    }
+}
+task myCopyTask(type: Copy) {
+    dependsOn jar
+    from "build/libs/ss.jar"
+    into "../../../server_bin/ss"
+}
+
+assemble.dependsOn myCopyTask
