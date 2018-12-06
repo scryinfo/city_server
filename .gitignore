@@ -8,5 +8,16 @@
 /city/gs/out
 /city/shared/build
 /city/shared/out
+/city/ss/build
+/city/ss/out
+/city/shared/src/main/java/as
+/city/shared/src/main/java/asCode
+/city/shared/src/main/java/gs
+/city/shared/src/main/java/gsCode
+/city/shared/src/main/java/ss
+/city/shared/src/main/java/ssCode
+/city/shared/src/main/java/ga
+/city/shared/src/main/java/gaCode
+/city/shared/src/main/java/common
 /city/log
 /city/gs/src/jpaModelgen/*

@@ -97,7 +97,7 @@ public class GameDb {
 						public Player.Info load(UUID key) {
 							StatelessSession session = sessionFactory.openStatelessSession();
 							Transaction transaction = session.beginTransaction();
-							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id = :x");
+							org.hibernate.Query q = session.createQuery("SELECT new Game.Player$Info(id ,name) FROM Player where id = :x");
 							q.setParameter("x", key);
 							List<Player.Info> l = q.list();
 							transaction.commit();
@@ -108,7 +108,7 @@ public class GameDb {
 						public Map<UUID, Player.Info> loadAll(Iterable<? extends UUID> keys) {
 							StatelessSession session = sessionFactory.openStatelessSession();
 							Transaction transaction = session.beginTransaction();
-							org.hibernate.Query q = session.createQuery("SELECT new Game$Player$Info(id ,name) FROM Player where id in :x");
+							org.hibernate.Query q = session.createQuery("SELECT new Game.Player$Info(id ,name) FROM Player where id in :x");
 							q.setParameter("x", keys);
 							List<Player.Info> list = q.list();
 							Map<UUID, Player.Info> res = new HashMap<>(list.size());
