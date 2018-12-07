@@ -39,8 +39,11 @@ public abstract class Building {
     public int type() {
         return MetaBuilding.type(metaBuilding.id);
     }
+
     public boolean outOfBusiness() {
-        return false; // according to employee satisfication
+        if(state != Gs.BuildingState.OPERATE_VALUE)
+            return true;
+        return outOfBusiness;
     }
     public static Building create(int id, Coordinate pos, UUID ownerId) {
         switch(MetaBuilding.type(id))
@@ -59,8 +62,6 @@ public abstract class Building {
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
-//            case MetaBuilding.VIRTUAL:
-//                return new VirtualBuilding(MetaData.getVirtualBuilding(id), pos, ownerId);
         }
         return null;
     }
@@ -107,7 +108,7 @@ public abstract class Building {
         List<Building> res = new ArrayList<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
         City.instance().forEachBuilding(gip, building -> {
-            if(building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
+            if(!building.outOfBusiness() && building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
                 res.add(building);
         });
         return res;
@@ -149,20 +150,38 @@ public abstract class Building {
     private int flowCount = 0;
 
     @Column(nullable = false)
-    private int salary;
+    private int salaryRatio;
 
     @Column(nullable = false)
     private int happy = 0;
 
+    @Column(nullable = false)
+    private boolean outOfBusiness = true;
+
+    @Column(nullable = false)
+    protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
+
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
 
-    public int salary() {
-        return salary;
+    public int allSalary() {
+        return singleSalary() * metaBuilding.workerNum;
     }
-
+    public int singleSalary() {
+        return (int) (salaryRatio / 100.d * metaBuilding.salary);
+    }
     public int cost() {
         return 0;
+    }
+
+    public boolean startBusiness(Player player) {
+        if(state != Gs.BuildingState.WAITING_OPEN_VALUE)
+            return false;
+        if(!this.payOff(player))
+            return false;
+        state = Gs.BuildingState.OPERATE_VALUE;
+        this.broadcastChange();
+        return true;
     }
 
     @Embeddable
@@ -231,6 +250,7 @@ public abstract class Building {
         this.metaBuilding.npc.forEach((k,v)->{
             for(Npc npc : NpcManager.instance().create(k, v, this, initSalary))
             {
+                allStaff.add(npc);
                 npc.goWork();
             }
         });
@@ -257,11 +277,11 @@ public abstract class Building {
                 .setOwnerId(Util.toByteString(ownerId))
                 .setNpcFlow(this.flow)
                 .setState(Gs.BuildingState.valueOf(state))
-                .setSalary(salary)
+                .setSalary(salaryRatio)
                 .setHappy(happy)
                 .build();
     }
-    protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
+
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
@@ -290,8 +310,8 @@ public abstract class Building {
 
     }
 
-    public void setSalary(int salary) {
-        this.salary = salary;
+    public void setSalaryRatio(int salaryRatio) {
+        this.salaryRatio = salaryRatio;
     }
 
     public void hourTickAction(int nowHour) {
@@ -303,14 +323,46 @@ public abstract class Building {
         if(nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
             Player p = GameDb.queryPlayer(ownerId);
             if(p != null) {
-                if(p.decMoney(this.salary * this.allStaff.size())) {
-                    allStaff.forEach(npc -> npc.addMoney(this.salary));
-                    List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
-                    updates.add(p);
-                    GameDb.saveOrUpdate(updates);
-                }
+                this.payOff(p);
             }
         }
-    }
 
+        if(!outOfBusiness) {
+            for (int i : metaBuilding.endWorkHour[happy]) {
+                if (i == nowHour)
+                    outOfBusiness = true;
+            }
+        }
+        else {
+            for (int i : metaBuilding.startWorkHour[happy]) {
+                if (i == nowHour)
+                    outOfBusiness = false;
+            }
+        }
+
+        this.broadcastChange();
+    }
+    private boolean payOff(Player p) {
+        calcuHappy();
+        if(p.decMoney(this.allSalary())) {
+            allStaff.forEach(npc -> npc.addMoney(this.singleSalary()));
+            List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
+            updates.add(p);
+            GameDb.saveOrUpdate(updates);
+            return true;
+        }
+        return false;
+    }
+    private void calcuHappy() {
+        if(salaryRatio == 100)
+            happy = 0;
+        else if(salaryRatio < 100 && salaryRatio >= 80)
+            happy = 1;
+        else if(salaryRatio < 80 && salaryRatio >= 60)
+            happy = 2;
+        else if(salaryRatio < 60 && salaryRatio >= 40)
+            happy = 3;
+        else if(salaryRatio < 40 && salaryRatio >= 0)
+            happy = 4;
+    }
 }

@@ -24,7 +24,7 @@ jar {
 task myCopyTask(type: Copy) {
     dependsOn jar
     from "build/libs/ss.jar"
-    into "../../../server_bin/ss"
+    into "../../../server_bin/gs"
 }
 
 assemble.dependsOn myCopyTask

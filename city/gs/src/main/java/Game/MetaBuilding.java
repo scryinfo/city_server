@@ -3,8 +3,11 @@ package Game;
 import org.bson.Document;
 
 import javax.persistence.AttributeConverter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 public class MetaBuilding {
     public static final int TRIVIAL = 10;
@@ -16,6 +19,7 @@ public class MetaBuilding {
     public static final int PUBLIC = 16;
     public static final int TALENT = 18;
     public static final int MAX_TYPE_ID = 20;
+
     public static boolean isBuilding(int id) {
         return id / MetaData.ID_RADIX <= PUBLIC;
     }
@@ -41,6 +45,15 @@ public class MetaBuilding {
             }
             if (npc.values().stream().mapToInt(n -> n).sum() != workerNum)
                 throw new IllegalArgumentException();
+            for (int i = 0; i < startWorkHour.length; i++) {
+                int[] startWorkHour = ((List<Integer>)d.get("startWorkHour" + i)).stream().mapToInt(Integer::valueOf).toArray();
+                int[] workingHours = ((List<Integer>)d.get("workingHours" + i)).stream().mapToInt(Integer::valueOf).toArray();
+                if(startWorkHour.length != workingHours.length)
+                    throw new IllegalArgumentException();
+                this.startWorkHour[i] = startWorkHour;
+                this.endWorkHour[i] = IntStream.range(0, startWorkHour.length).map(idx->startWorkHour[idx]+workingHours[idx]).toArray();
+            }
+            this.salary = d.getInteger("salary");
         }
     }
     public int id;
@@ -49,6 +62,9 @@ public class MetaBuilding {
     public int workerNum;
     public int effectRange;
     public Map<Integer, Integer> npc = new TreeMap<>();
+    public int[][] startWorkHour = {{},{},{},{}};
+    public int[][] endWorkHour = {{},{},{},{}};
+    public int salary;
     public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
         @Override
         public Integer convertToDatabaseColumn(MetaBuilding attribute) {

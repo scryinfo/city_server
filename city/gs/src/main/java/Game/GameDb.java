@@ -269,7 +269,6 @@ public class GameDb {
 	}
 
 	public static void saveOrUpdate(Object o) {
-		long a = System.nanoTime();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -281,7 +280,6 @@ public class GameDb {
 		} finally {
 
 		}
-		System.out.println(System.nanoTime()-a);
 	}
 
 	public static void delete(Object o) {

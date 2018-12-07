@@ -40,7 +40,7 @@ public class Npc {
     protected Npc() {}
 
     public int salary() {
-        return this.born.salary();
+        return this.born.singleSalary();
     }
 
     public void idle() {

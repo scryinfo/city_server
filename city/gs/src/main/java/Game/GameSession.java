@@ -7,7 +7,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
-import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -351,20 +350,19 @@ public class GameSession {
 //		if(a.construct())
 //			a.broadcastChange();
 //	}
-//	public void startBusiness(short cmd, Message message) {
-//		Gs.Bytes c = (Gs.Bytes)message;
-//		UUID id = Util.toUuid(c.toByteArray());
-//		Building b = City.instance().getBuilding(id);
-//		if(b == null || b.type() != MetaBuilding.VIRTUAL || !b.ownerId().equals(player.id()))
-//			return;
-//		VirtualBuilding a = (VirtualBuilding)b;
-//		if(a.startBusiness()) {
-//			City.instance().delBuilding(a);
-//			Building building = Building.create(a.linkBuildingId(), a.coordinate(), player.id());
-//			building.state = Gs.BuildingState.WAITING_OPEN_VALUE;
-//			City.instance().addBuilding(building);
-//		}
-//	}
+	public void startBusiness(short cmd, Message message) {
+		Gs.Bytes c = (Gs.Bytes)message;
+		UUID id = Util.toUuid(c.toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || !b.ownerId().equals(player.id()))
+			return;
+		if(player.money() < b.allSalary()) {
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
+			return;
+		}
+		if(b.startBusiness(player))
+			this.write(Package.create(cmd));
+	}
 //	public void addBuilding(short cmd, Message message) {
 //		Gs.AddBuilding c = (Gs.AddBuilding) message;
 //		int id = c.getId();
@@ -658,14 +656,9 @@ public class GameSession {
 		Gs.ByteNum c = (Gs.ByteNum) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null)
+		if(b == null || c.getNum() < 0 || c.getNum() > 100)
 			return;
-		if(player.money() < c.getNum())
-		{
-			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
-			return;
-		}
-		b.setSalary(c.getNum());
+		b.setSalaryRatio(c.getNum());
 		this.write(Package.create(cmd, c));
 	}
 	public void setRent(short cmd, Message message) {
@@ -1105,7 +1098,7 @@ public class GameSession {
 				if(r.type == Formula.Type.RESEARCH) {
 					player.addItem(line.formula.key.targetId, r.v);
 					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, r.v);
-					lab.delLine(line.id);
+					//lab.delLine(line.id);
 					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
 				}
 			}

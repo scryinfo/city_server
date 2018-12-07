@@ -173,6 +173,7 @@ public class Laboratory extends Building implements IStorage {
                     .setCreateTs(createTs)
                     .setRun(run)
                     .setRoll(roll)
+                    .setRollTarget(rollTarget)
                     .build();
         }
 
