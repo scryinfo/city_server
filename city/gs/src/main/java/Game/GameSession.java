@@ -328,28 +328,6 @@ public class GameSession {
 		GroundAuction.instance().unregist(this.channelId);
 	}
 
-//	public void addBuilding(short cmd, Message message) {
-//		Gs.AddBuilding c = (Gs.AddBuilding) message;
-//		int id = c.getId();
-//		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
-//			return;
-//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coordinate(c.getPos()), player.id());
-//		boolean ok = City.instance().addVirtualBuilding(building);
-//		if(!ok)
-//			this.write(Package.fail(cmd));
-//		else
-//			this.write(Package.create(cmd));
-//	}
-//	public void construct(short cmd, Message message) {
-//		Gs.Bytes c = (Gs.Bytes)message;
-//		UUID id = Util.toUuid(c.toByteArray());
-//		Building b = City.instance().getBuilding(id);
-//		if(b == null || b.type() != MetaBuilding.VIRTUAL || !b.ownerId().equals(player.id()))
-//			return;
-//		VirtualBuilding a = (VirtualBuilding)b;
-//		if(a.construct())
-//			a.broadcastChange();
-//	}
 	public void startBusiness(short cmd, Message message) {
 		Gs.Bytes c = (Gs.Bytes)message;
 		UUID id = Util.toUuid(c.toByteArray());
@@ -426,7 +404,7 @@ public class GameSession {
 		Item item = new Item(c.getItem());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(id);
-		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 			return;
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
@@ -444,7 +422,7 @@ public class GameSession {
 		Item item = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 			return;
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
@@ -461,7 +439,7 @@ public class GameSession {
 		Item item = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()))
+		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 			return;
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
@@ -481,7 +459,7 @@ public class GameSession {
 		UUID wid = Util.toUuid(c.getWareHouseId().toByteArray());
 		Building sellBuilding = City.instance().getBuilding(bid);
 		// player can not buy things in retail shop
-		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || !(sellBuilding instanceof IStorage) || sellBuilding instanceof RetailShop || sellBuilding.canUseBy(player.id()))
+		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || !(sellBuilding instanceof IStorage) || sellBuilding instanceof RetailShop || sellBuilding.canUseBy(player.id()) || sellBuilding.outOfBusiness())
 			return;
         IStorage buyStore = IStorage.get(wid, player);
 		if(buyStore == null)
@@ -652,11 +630,11 @@ public class GameSession {
         this.write(Package.create(cmd, b.detailProto()));
     }
 
-    public void setSalary(short cmd, Message message) {
+    public void setSalaryRatio(short cmd, Message message) {
 		Gs.ByteNum c = (Gs.ByteNum) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || c.getNum() < 0 || c.getNum() > 100)
+		if(b == null || b.outOfBusiness() || c.getNum() < 40 || c.getNum() > 100)
 			return;
 		b.setSalaryRatio(c.getNum());
 		this.write(Package.create(cmd, c));
@@ -665,7 +643,7 @@ public class GameSession {
 		Gs.ByteNum c = (Gs.ByteNum) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.type() != MetaBuilding.APARTMENT || !b.ownerId().equals(player.id()))
+		if(b == null || b.outOfBusiness() || b.type() != MetaBuilding.APARTMENT || !b.ownerId().equals(player.id()))
 			return;
 		Apartment a = (Apartment)b;
 		a.setRent(c.getNum());
@@ -677,7 +655,7 @@ public class GameSession {
 			return;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+		if(b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		MetaItem m = MetaData.getItem(c.getItemId());
 		if(m == null || (!m.useDirectly && !player.hasItem(m.id)))
@@ -697,7 +675,7 @@ public class GameSession {
 		Gs.DelLine c = (Gs.DelLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if (b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		FactoryBase f = (FactoryBase) b;
@@ -710,7 +688,7 @@ public class GameSession {
 		Gs.ChangeLine c = (Gs.ChangeLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if (b == null || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		ObjectId lineId = new ObjectId(c.getLineId().toByteArray());
         FactoryBase f = (FactoryBase) b;
@@ -727,7 +705,7 @@ public class GameSession {
 
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || !building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || !building.canUseBy(player.id()))
 			return;
 		PublicFacility pf = (PublicFacility)building;
 		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
@@ -739,7 +717,7 @@ public class GameSession {
 		Gs.AdDelSlot c = (Gs.AdDelSlot)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || !building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || !building.canUseBy(player.id()))
 			return;
 		UUID slotId = Util.toUuid(c.getSlotId().toByteArray());
 		PublicFacility pf = (PublicFacility)building;
@@ -754,7 +732,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof PublicFacility) || !building.canUseBy(player.id()))
 			return;
 		PublicFacility pf = (PublicFacility)building;
 		pf.setTickPrice(c.getPrice());
@@ -763,7 +741,7 @@ public class GameSession {
 		Gs.AddAd c = (Gs.AddAd)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
+		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
 		if(c.getType() == Gs.Advertisement.Ad.Type.BUILDING) {
 			if(!MetaBuilding.canAd(MetaBuilding.type(c.getMetaId())))
@@ -816,7 +794,7 @@ public class GameSession {
 		Gs.AdSetSlot c = (Gs.AdSetSlot)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
+		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
 		PublicFacility pf = (PublicFacility)building;
 		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
@@ -837,7 +815,7 @@ public class GameSession {
 		Gs.AdDelAdFromSlot c = (Gs.AdDelAdFromSlot)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
+		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
 		UUID adId = Util.toUuid(c.getAdId().toByteArray());
 		PublicFacility pf = (PublicFacility)building;
@@ -858,7 +836,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)) || building.canUseBy(player.id()))
 			return;
 		UUID slotId = Util.toUuid(c.getSlotId().toByteArray());
 		PublicFacility pf = (PublicFacility)building;
@@ -991,7 +969,7 @@ public class GameSession {
 		Gs.LabSetLineWorkerNum c = (Gs.LabSetLineWorkerNum)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
@@ -1007,7 +985,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
 			return;
 		Laboratory lab = (Laboratory)building;
 		Formula.Type type = Formula.Type.values()[c.getType()];
@@ -1031,7 +1009,7 @@ public class GameSession {
 		Gs.LabDelLine c = (Gs.LabDelLine)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
@@ -1050,7 +1028,7 @@ public class GameSession {
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
 		Laboratory.Line line = lab.getLine(lineId);
-		if(line == null || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
+		if(line == null || building.outOfBusiness() || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
 			return;
 		Formula.Consume[] consumes = line.getConsumes();
 		if(consumes == null)
@@ -1076,7 +1054,7 @@ public class GameSession {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;

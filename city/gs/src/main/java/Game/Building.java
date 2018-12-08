@@ -156,10 +156,10 @@ public abstract class Building {
     private int happy = 0;
 
     @Column(nullable = false)
-    private boolean outOfBusiness = true;
+    private boolean outOfBusiness = false;//true;
 
     @Column(nullable = false)
-    protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
+    protected int state = Gs.BuildingState.OPERATE_VALUE;//WAITING_OPEN_VALUE;
 
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
@@ -320,7 +320,7 @@ public abstract class Building {
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
-        if(nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
+        if(MetaData.getDayId() != 0 && nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
             Player p = GameDb.queryPlayer(ownerId);
             if(p != null) {
                 this.payOff(p);

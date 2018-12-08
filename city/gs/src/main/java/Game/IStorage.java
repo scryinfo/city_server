@@ -17,7 +17,7 @@ public interface IStorage {
         }
         else {
             Building building = City.instance().getBuilding(bid);
-            if (building == null || !building.canUseBy(p.id()) || !(building instanceof IStorage))
+            if (building == null || !building.canUseBy(p.id()) || !(building instanceof IStorage) || building.outOfBusiness())
                 return null;
             return (IStorage) building;
         }
