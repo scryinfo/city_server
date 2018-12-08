@@ -95,6 +95,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			//===========================================================
 
 			//llb========================================================
+			table.put((short) GsCode.OpCode.getAllMails_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllMails"));
 
 			//===========================================================
 			if(GlobalConfig.debug()){

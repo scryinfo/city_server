@@ -51,6 +51,14 @@ public class GameServer {
     public static void sendTo(Collection<ChannelId> ids, Package pack) {
         allClientChannels.writeAndFlush(pack, new ChannelIdsMatcher(ids));
     }
+    public static void sendTo(List<UUID> roleIds, Package pack) {
+        roleIds.forEach(id->{
+            GameSession session = allGameSessions.get(id);
+            if(session != null) {
+                session.write(pack);
+            }
+        });
+    }
     public GameServer() throws Exception {
         ServerCfgDb.init(GlobalConfig.configUri());
         ServerCfgDb.startUp();

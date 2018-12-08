@@ -395,6 +395,16 @@ public class GameDb {
 		return builder.build();
 	}
 
+	public static Collection<Mail> getMail(UUID playerId) {
+		Collection<Mail> res = new ArrayList<>();
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Transaction transaction = session.beginTransaction();
+		// .....
+		transaction.commit();
+		session.close();
+		return res;
+	}
+
 	protected static final class TopGoodQty {
 		public TopGoodQty() {}
 

@@ -1133,5 +1133,11 @@ public class GameSession {
 
 	//llb========================================================
 
+	public void getAllMails(short cmd) {
+		Collection<Mail> mails = MailBox.instance().getAllMails(player.id());
+		Gs.Mails.Builder builder = Gs.Mails.newBuilder();
+		mails.forEach(mail -> builder.addMail(mail.toProto()));
+		this.write(Package.create(cmd, builder.build()));
+	}
 	//===========================================================
 }
