@@ -1,11 +1,15 @@
 package Game;
 
 
+import Game.FriendManager.FriendRequest;
+import Game.FriendManager.OfflineMessage;
 import Shared.RoleBriefInfo;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import gs.Gs;
 import org.apache.log4j.Logger;
 import org.hibernate.*;
@@ -13,12 +17,14 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.IntegerType;
+import org.hibernate.type.StandardBasicTypes;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -118,6 +124,159 @@ public class GameDb {
 							return res;
 						}
 					});
+
+	//wxj============================================
+	public static List<OfflineMessage> getOfflineMsg(UUID to_id)
+	{
+		StatelessSession session = sessionFactory.openStatelessSession();
+		Criteria criteria = session.createCriteria(OfflineMessage.class);
+		List<OfflineMessage> list = criteria.add(Restrictions.eq("to_id", to_id))
+				.addOrder(Order.asc("time"))
+				.list();
+		session.close();
+		return list;
+	}
+	public static void deleteFriendRequest(UUID from, UUID to)
+	{
+		Transaction transaction = null;
+		try
+		{
+			transaction = session.beginTransaction();
+			session.createQuery("DELETE friend_request WHERE from_id=:x AND to_id=:y")
+					.setParameter("x", from)
+					.setParameter("y", to)
+					.executeUpdate();
+			transaction.commit();
+		}
+		catch (RuntimeException e)
+		{
+			logger.fatal("delete friend request failed");
+			e.printStackTrace();
+		}
+	}
+	public static List<FriendRequest> getFriendRequest(UUID from, UUID to)
+	{
+		List<FriendRequest> list = new ArrayList<>();
+		try
+		{
+			if (from == null)
+			{
+				list = session.createQuery("FROM friend_request WHERE to_id=:y")
+						.setParameter("y", to)
+						.list();
+			}
+			else
+			{
+				list = session.createQuery("FROM friend_request WHERE from_id=:x AND to_id=:y")
+						.setParameter("x", from)
+						.setParameter("y", to)
+						.list();
+			}
+		}
+		catch (RuntimeException e)
+		{
+			logger.fatal("query friend request failed");
+			e.printStackTrace();
+		}
+		return list;
+	}
+	public static void deleteFriend(UUID pid, UUID fid)
+	{
+		Transaction transaction = null;
+		StatelessSession session = null;
+		exchangeUUID(pid, fid);
+		try
+		{
+			session = sessionFactory.openStatelessSession();
+			transaction = session.beginTransaction();
+			session.createSQLQuery("DELETE FROM friend WHERE pid=:x AND fid=:y")
+					.setParameter("x", pid)
+					.setParameter("y", fid)
+					.executeUpdate();
+			transaction.commit();
+		}
+		catch (RuntimeException e)
+		{
+			transaction.rollback();
+			logger.fatal("Delete friend failure");
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (session != null) session.close();
+		}
+	}
+
+	public static Set<UUID> queryFriends(UUID pid)
+	{
+		StatelessSession session = sessionFactory.openStatelessSession();
+		List<UUID> resultList= session.createSQLQuery("SELECT fid AS uuid FROM friend WHERE pid=:x UNION SELECT pid AS uuid FROM friend WHERE fid=:x ")
+				.addScalar("uuid",StandardBasicTypes.UUID_CHAR)
+				.setParameter("x",pid)
+		        .getResultList();
+		session.close();
+		return new HashSet<>(resultList);
+	}
+
+	public static List<Player.Info> queryPlayByPartialName(String name)
+	{
+		StatelessSession session = sessionFactory.openStatelessSession();
+		List<Player.Info> list  = session.createQuery("SELECT new Game.Player$Info(id,name) From Player WHERE name LIKE :x")
+				.setParameter("x", name + "%")
+				.list();
+		session.close();
+		return list;
+	}
+
+	private static void exchangeUUID(UUID pid, UUID fid)
+	{
+		if (pid.compareTo(fid) > 0)
+		{
+			UUID tmp = pid;
+			pid = fid;
+			fid = tmp;
+		}
+	}
+
+	public static void addFriend(UUID pid,UUID fid)
+	{
+		Transaction transaction = null;
+		exchangeUUID(pid, fid);
+		try
+		{
+			transaction = session.beginTransaction();
+			session.createSQLQuery("INSERT INTO friend (pid,fid) values (:x,:y)")
+					.setParameter("x", pid)
+					.setParameter("y", fid)
+					.executeUpdate();
+			transaction.commit();
+		}
+		catch (RuntimeException e)
+		{
+			transaction.rollback();
+			logger.fatal("Save friend failure");
+			e.printStackTrace();
+		}
+	}
+
+	public static boolean createFriendTable()
+	{
+		boolean success = false;
+		Transaction transaction = null;
+		try
+		{
+			transaction = session.beginTransaction();
+			session.createSQLQuery("CREATE TABLE  IF NOT EXISTS friend (pid uuid not null,fid uuid not null,primary key(pid,fid))")
+					.executeUpdate();
+			transaction.commit();
+			success = true;
+		}catch (RuntimeException e) {
+			transaction.rollback();
+			e.printStackTrace();
+		}
+		return success;
+	}
+	//===============================================
 	public static void evict(Player player) {
 		playerCache.invalidate(player.id());
 		session.evict(player);
@@ -139,6 +298,11 @@ public class GameDb {
 	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
 		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);
 		return map.values().asList();
+	}
+
+	public static Player.Info getPlayerInfo(UUID uuid)
+	{
+		return playerInfoCache.getUnchecked(uuid);
 	}
 	public static List<RoleBriefInfo> getPlayerInfo(String account) {
 		StatelessSession session = sessionFactory.openStatelessSession();

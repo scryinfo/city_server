@@ -1,12 +1,19 @@
 package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
+import Game.FriendManager.FriendManager;
+import Game.FriendManager.FriendRequest;
+import Game.FriendManager.ManagerCommunication;
+import Game.FriendManager.OfflineMessage;
 import Shared.*;
 import Shared.Package;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
+import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -72,6 +79,9 @@ public class GameSession {
 		//offline action of validate
 		Validator.getInstance().unRegist(accountName, token);
 		logger.debug("account: " + player.getAccount() + " logout");
+
+		//Notify friends
+		FriendManager.getInstance().broadcastStatue(player.id(),false);
 	}
 	
 	public GameSession(ChannelHandlerContext ctx){
@@ -274,6 +284,7 @@ public class GameSession {
 
 		City.instance().add(player); // will send UnitCreate
 		player.online();
+		toDoOnline();
 	}
 
 	public void createRole(short cmd, Message message) {
@@ -290,7 +301,7 @@ public class GameSession {
 				TechTradeCenter.instance().techCompleteAction(id, 0);
 			});
 			GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
-			this.write(Package.create(cmd, Gs.RoleInfo.newBuilder().setId(Util.toByteString(p.id())).setName(p.getName()).build()));
+			this.write(Package.create(cmd, playerToRoleInfo(p)));
 		}
 	}
 
@@ -358,6 +369,7 @@ public class GameSession {
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
 			return;
 		List<UUID> ids = new ArrayList<>(c.getIdsCount());
+
 		for(ByteString bs : c.getIdsList()) {
 			ids.add(Util.toUuid(bs.toByteArray()));
 		}
@@ -366,7 +378,7 @@ public class GameSession {
 			// send false data, kick this one ?
 		}
 		Gs.RoleInfos.Builder builder = Gs.RoleInfos.newBuilder();
-		infos.forEach((i)->builder.addInfo(Gs.RoleInfo.newBuilder().setId(Util.toByteString(i.id)).setName(i.name)));
+		infos.forEach((i)->builder.addInfo(infoToRoleInfo(i)));
 		this.write(Package.create(cmd, builder.build()));
 	}
 	public void addBuilding(short cmd, Message message) {
@@ -1134,7 +1146,199 @@ public class GameSession {
 		this.write(Package.create(cmd, TechTradeCenter.instance().getDetail(c.getNum())));
 	}
 
-    //wxj========================================================
+	//wxj========================================================
+	private void toDoOnline()
+	{
+		//async notify friend online
+		City.instance().execute(() -> {
+			FriendManager.getInstance().broadcastStatue(player.id(), true);
+		});
+
+		City.instance().execute(()->{
+			//push blacklist
+			Gs.RoleInfos.Builder builder1 = Gs.RoleInfos.newBuilder();
+			try
+			{
+				GameDb.getPlayerInfo(player.getBlacklist()).forEach(info -> {
+					builder1.addInfo(infoToRoleInfo(info));
+				});
+			}
+			catch (ExecutionException e)
+			{
+				logger.fatal("GameSession.toDoOnline(): push blacklist failed.");
+				e.printStackTrace();
+			}
+			this.write(Package.create(GsCode.OpCode.getBlacklist_VALUE, builder1.build()));
+
+			//push friend addition request
+			List<FriendRequest> list = GameDb.getFriendRequest(null, player.id());
+			Gs.RequestFriend.Builder builder = Gs.RequestFriend.newBuilder();
+			UUID from_id = null;
+			List<FriendRequest> toBeDel = new ArrayList<>();
+			List<FriendRequest> toBeUpdate = new ArrayList<>();
+			for (FriendRequest fr : list)
+			{
+				//only send three times
+				if (fr.getCount() > 100)
+				{
+					toBeDel.add(fr);
+					continue;
+				}
+				from_id = fr.getFrom_id();
+				String name = "";
+				try
+				{
+					for (Player.Info i :
+							GameDb.getPlayerInfo(ImmutableList.of(from_id)))
+					{
+						name = i.getName();
+					}
+				}
+				catch (ExecutionException e)
+				{
+					logger.fatal("get player name failed : id=" + from_id);
+					e.printStackTrace();
+				}
+				builder.setId(Util.toByteString(from_id))
+						.setName(name)
+						.setDesc(fr.getDescp());
+				this.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
+				fr.setCount(fr.getCount() + 1);
+				toBeUpdate.add(fr);
+			}
+			GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
+		});
+
+		//push offline message
+		City.instance().execute(()->{
+			List<OfflineMessage> lists = GameDb.getOfflineMsg(player.id());
+			lists.forEach(message -> {
+				ManagerCommunication.getInstance().sendMsgToPersion(this, message);
+			});
+			GameDb.delete(lists);
+		});
+	}
+	public void searchPlayerByName(short cmd, Message message)
+	{
+		Gs.Str name = (Gs.Str) message;
+		if (Strings.isNullOrEmpty(name.getStr())) return;
+		if (name.getStr().trim().isEmpty()) return;
+		List<Player.Info> infos= FriendManager.getInstance()
+				.searchPlayByName(name.getStr());
+		Gs.RoleInfos.Builder builder = Gs.RoleInfos.newBuilder();
+		infos.forEach(info -> {
+			if (!info.getId().equals(player.id())) {
+				builder.addInfo(infoToRoleInfo(info));
+			}
+		});
+		this.write(Package.create(cmd,builder.build()));
+	}
+
+	private Gs.RoleInfo infoToRoleInfo(Player.Info info)
+	{
+		return Gs.RoleInfo.newBuilder()
+				.setId(Util.toByteString(info.getId()))
+				.setName(info.getName())
+				.build();
+	}
+
+	private Gs.RoleInfo playerToRoleInfo(Player player)
+	{
+		return Gs.RoleInfo.newBuilder()
+				.setId(Util.toByteString(player.id()))
+				.setName(player.getName())
+				.build();
+	}
+
+	public void addFriend(short cmd, Message message)
+	{
+		Gs.ByteStr addMsg = (Gs.ByteStr) message;
+		UUID targetId = Util.toUuid(addMsg.getId().toByteArray());
+		if (!FriendManager.playerFriends.getUnchecked(id()).contains(targetId))
+		{
+			if (player.getBlacklist().contains(targetId)
+					|| GameDb.queryPlayer(targetId).getBlacklist().contains(player.id()))
+			{
+				//邮件通知黑名单拒绝添加
+			}
+			else
+			{
+				GameSession gs = GameServer.allGameSessions.get(targetId);
+				if (gs != null)
+				{
+					Gs.RequestFriend.Builder builder = Gs.RequestFriend.newBuilder();
+					builder.setId(Util.toByteString(player.id()))
+							.setName(player.getName())
+							.setDesc(addMsg.getDesc());
+					gs.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
+
+				}
+				List<FriendRequest> list = GameDb.getFriendRequest(player.id(), targetId);
+				if (list.isEmpty())
+				{
+					FriendRequest friendRequest = new FriendRequest(player.id(), targetId, addMsg.getDesc());
+					GameDb.saveOrUpdate(friendRequest);
+				}
+			}
+		}
+	}
+
+	public void addFriendResult(short cmd, Message message)
+	{
+		Gs.ByteBool result = (Gs.ByteBool) message;
+		UUID sourceId = Util.toUuid(result.getId().toByteArray());
+		if (result.getB())
+		{
+			FriendManager.getInstance().saveFriendship(sourceId, player.id());
+			Gs.RoleInfo firend = infoToRoleInfo(GameDb.getPlayerInfo(sourceId));
+			this.write(
+				Package.create(GsCode.OpCode.addFriendSucess_VALUE, firend));
+			GameSession gameSession = GameServer.allGameSessions.get(sourceId);
+			if (gameSession != null)
+			{
+				gameSession.write(
+						Package.create(GsCode.OpCode.addFriendSucess_VALUE,
+								playerToRoleInfo(player)));
+			}
+		}
+		else
+		{
+			//refuse add
+			//邮件通知系统对方拒绝添加
+		}
+		//remove record
+		GameDb.deleteFriendRequest(sourceId,player.id());
+	}
+
+	public void deleteFriend(short cmd, Message message)
+	{
+		Gs.Id id = (Gs.Id) message;
+		FriendManager.getInstance().deleteFriend(id(),Util.toUuid(id.getId().toByteArray()));
+	}
+
+	public void addBlacklist(short cmd, Message message)
+	{
+		Gs.Id id = (Gs.Id) message;
+		player.getBlacklist().add(Util.toUuid(id.getId().toByteArray()));
+		GameDb.saveOrUpdate(player);
+		Player.Info info = GameDb.getPlayerInfo(Util.toUuid(id.getId().toByteArray()));
+		if (info != null)
+		{
+			this.write(Package.create(cmd, infoToRoleInfo(info)));
+		}
+	}
+	public void deleteBlacklist(short cmd, Message message)
+	{
+		Gs.Id id = (Gs.Id) message;
+		player.getBlacklist().remove(Util.toUuid(id.getId().toByteArray()));
+		this.write(Package.create(cmd, id));
+		GameDb.saveOrUpdate(player);
+	}
+
+	public void communication(short cmd, Message message)
+	{
+		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
+	}
 
 	//===========================================================
 

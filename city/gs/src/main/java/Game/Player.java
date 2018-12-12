@@ -1,5 +1,6 @@
 package Game;
 
+import Game.FriendManager.FriendManager;
 import Game.Listener.EvictListener;
 import Shared.DatabaseInfo;
 import Shared.Package;
@@ -79,6 +80,26 @@ public class Player {
 
         UUID id;
         String name;
+
+        public UUID getId()
+        {
+            return id;
+        }
+
+        public void setId(UUID id)
+        {
+            this.id = id;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
     }
     @Id
     //@GeneratedValue(generator = "uuid2")
@@ -165,10 +186,11 @@ public class Player {
         this.exchangeFavoriteItem.forEach(id->builder.addExchangeCollectedItem(id));
         builder.addAllGround(GroundManager.instance().getGroundProto(id()));
         builder.setBagId(Util.toByteString(BAG_ID));
-
         builder.addAllBuildingBrands(BrandManager.instance().getBuildingBrandProto(id()));
         builder.addAllGoodBrands(BrandManager.instance().getGoodBrandProto(id()));
         goodLv.forEach((k,v)->builder.addGoodLv(Gs.IntNum.newBuilder().setId(k).setNum(v)));
+
+        builder.addAllFriends(FriendManager.getInstance().getFriends(this.id));
         return builder.build();
     }
 
@@ -189,7 +211,7 @@ public class Player {
         if(this.session != null)
             this.session.write(pack);
     }
-    UUID id() {
+    public UUID id() {
         return id;
     }
     public void online() {
@@ -291,4 +313,10 @@ public class Player {
     @MapKeyColumn(name = "mid")
     @CollectionTable(name = "player_good_lv", joinColumns = @JoinColumn(name = "player_id"), indexes = { @Index(name = "TOP_QTY", columnList = "goodlv") })
     private Map<Integer, Integer> goodLv = new HashMap<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "player_blacklist", joinColumns = @JoinColumn(name = "player_id"))
+    private Set<UUID> blacklist = new HashSet<>();
+
+    public Set<UUID> getBlacklist() { return blacklist; }
 }
