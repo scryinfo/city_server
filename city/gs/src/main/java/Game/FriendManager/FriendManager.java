@@ -120,13 +120,13 @@ public class FriendManager
     private void deleteCache(UUID id1, UUID id2)
     {
         Set<UUID> set = null;
+        if ((set = playerFriends.getIfPresent(id1)) != null)
+        {
+            set.remove(id2);
+        }
         GameSession gameSession = GameServer.allGameSessions.get(id1);
         if (gameSession != null)
         {
-            if ((set = playerFriends.getIfPresent(id1)) != null)
-            {
-                set.remove(id2);
-            }
             Gs.Id delFirend = Gs.Id.newBuilder()
                     .setId(Util.toByteString(id2))
                     .build();
