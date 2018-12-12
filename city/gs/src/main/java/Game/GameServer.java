@@ -75,6 +75,7 @@ public class GameServer {
         // db info is in hibernate.xml now
         //GameDb.startUp(gsInfo.getGameDbUrl());
         //GameDb.startUp();
+        Logger.getLogger("AI").info("111");
     }
 
     private void asConnectAction(ChannelFuture f) {

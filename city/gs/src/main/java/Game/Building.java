@@ -2,6 +2,7 @@ package Game;
 
 import DB.Db;
 import Game.Listener.ConvertListener;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import com.google.common.collect.EvictingQueue;
@@ -43,7 +44,10 @@ public abstract class Building {
     public boolean outOfBusiness() {
         if(state != Gs.BuildingState.OPERATE_VALUE)
             return true;
-        return outOfBusiness;
+        return happy == 4;
+    }
+    public boolean onStrike() {
+        return this.happy > 0 && this.happy < 4;
     }
     public static Building create(int id, Coordinate pos, UUID ownerId) {
         switch(MetaBuilding.type(id))
@@ -149,14 +153,14 @@ public abstract class Building {
     @Transient
     private int flowCount = 0;
 
+    @Transient
+    protected boolean working;
+
     @Column(nullable = false)
     private int salaryRatio;
 
     @Column(nullable = false)
     private int happy = 0;
-
-    @Column(nullable = false)
-    private boolean outOfBusiness = false;//true;
 
     @Column(nullable = false)
     protected int state = Gs.BuildingState.OPERATE_VALUE;//WAITING_OPEN_VALUE;
@@ -180,8 +184,17 @@ public abstract class Building {
         if(!this.payOff(player))
             return false;
         state = Gs.BuildingState.OPERATE_VALUE;
+        this.calcuWorking(City.instance().currentHour());
         this.broadcastChange();
         return true;
+    }
+
+    public int metaId() {
+        return metaBuilding.id;
+    }
+
+    public void init() {
+        this.calcuWorking(City.instance().currentHour());
     }
 
     @Embeddable
@@ -237,18 +250,15 @@ public abstract class Building {
         this.coordinate = pos;
         this.metaBuilding = meta;
     }
-    Set<Npc> getAllStaff() {
-        return allStaff;
-    }
     public final void destroy() {
         NpcManager.instance().delete(allStaff);
         allStaff.clear();
     }
     protected void destoryImpl(){}
 
-    public void hireNpc(int initSalary) {
+    public void hireNpc() {
         this.metaBuilding.npc.forEach((k,v)->{
-            for(Npc npc : NpcManager.instance().create(k, v, this, initSalary))
+            for(Npc npc : NpcManager.instance().create(k, v, this, 0))
             {
                 allStaff.add(npc);
                 npc.goWork();
@@ -301,7 +311,7 @@ public abstract class Building {
         leaveImpl(npc);
     }
     void update(long diffNano) {
-        if(this.outOfBusiness())
+        if(this.outOfBusiness() || !working)
             return;
         this._update(diffNano);
     }
@@ -326,31 +336,53 @@ public abstract class Building {
                 this.payOff(p);
             }
         }
-
-        if(!outOfBusiness) {
-            for (int i : metaBuilding.endWorkHour[happy]) {
-                if (i == nowHour)
-                    outOfBusiness = true;
-            }
+        if(!outOfBusiness()) {
+            Boolean w = isWorking(nowHour);
+            this.working = (w == null ? this.working:w);
         }
-        else {
-            for (int i : metaBuilding.startWorkHour[happy]) {
-                if (i == nowHour)
-                    outOfBusiness = false;
-            }
-        }
-
         this.broadcastChange();
     }
+    private Boolean isWorking(int nowHour) {
+        Boolean res = null;
+        for (int i : metaBuilding.endWorkHour[happy]) {
+            if (i == nowHour) {
+                res = false;
+                break;
+            }
+        }
+        for (int i : metaBuilding.startWorkHour[happy]) {
+            if (i == nowHour) {
+                res = true;
+                break;
+            }
+        }
+        return res;
+    }
+    private void calcuWorking(int nowHour) {
+        Boolean w = isWorking(nowHour);
+        if(w == null)
+        {
+            int startIdx = Arrays.binarySearch(metaBuilding.startWorkHour[happy], nowHour);
+            int endHour = metaBuilding.endWorkHour[happy][-(startIdx+2)];
+            if(nowHour < endHour)
+                this.working = true;
+            else if(nowHour >= endHour)
+                this.working = false;
+        }
+    }
     private boolean payOff(Player p) {
-        calcuHappy();
         if(p.decMoney(this.allSalary())) {
+            calcuHappy();
             allStaff.forEach(npc -> npc.addMoney(this.singleSalary()));
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
             GameDb.saveOrUpdate(updates);
+            LogDb.payOff(p.id(), id(), this.singleSalary(), this.allStaff.size());
             return true;
         }
+        else
+            happy = 4;
+
         return false;
     }
     private void calcuHappy() {

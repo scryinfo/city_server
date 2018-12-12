@@ -2,6 +2,7 @@ package Game.Action;
 
 
 import Game.*;
+import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -15,11 +16,16 @@ public class JustVisit implements IAction {
     private int buildingType;
     @Override
     public void act(Npc npc) {
+        if(this.buildingType == MetaBuilding.APARTMENT && npc.hasApartment())
+            return;
+        logger.info("npc " + npc.id().toString() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
             return;
+        logger.info("building num: " + buildings.size());
         int[] buildingWeights = new int[buildings.size()];
         final int cost = (int) (npc.salary() * BrandManager.instance().spendMoneyRatioBuilding(buildingType));
+        logger.info("cost: " + cost);
         int i = 0;
         Iterator<Building> iterator = buildings.iterator();
         while(iterator.hasNext()) {
@@ -30,6 +36,7 @@ public class JustVisit implements IAction {
         }
         int idx = ProbBase.randomIdx(buildingWeights);
         Building chosen = buildings.get(idx);
+        logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
         }

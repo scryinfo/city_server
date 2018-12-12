@@ -81,6 +81,11 @@ public class BrandManager {
         double apartment = 1.d;
         double publicFacility = 1.d;
         double retail = 1.d;
+
+        @Override
+        public String toString() {
+            return "apartment " + apartment + ", park " + publicFacility + ", retail " + retail;
+        }
     }
     BuildingRatio getBuildingRatio() {
         BuildingRatio res = new BuildingRatio();

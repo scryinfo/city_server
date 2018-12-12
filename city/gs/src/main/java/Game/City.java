@@ -111,7 +111,13 @@ public class City {
     private HashMap<UUID, Ground> playerGround = new HashMap<>();
     public static void init(MetaCity meta) {
         instance = new City(meta);
+        instance.initAllBuildings();
     }
+
+    private void initAllBuildings() {
+        this.playerBuilding.values().forEach(m->m.values().forEach(b->b.init()));
+    }
+
     public static City instance() {
         return instance;
     }
@@ -367,8 +373,9 @@ public class City {
     public boolean addBuilding(Building b) {
         if(!this.canBuild(b))
             return false;
-        b.hireNpc(1000);
+        b.hireNpc();
         take(b);
+        b.init();
         GameDb.saveOrUpdate(b);
         b.broadcastCreate();
         return true;

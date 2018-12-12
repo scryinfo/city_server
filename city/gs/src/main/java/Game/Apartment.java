@@ -30,8 +30,7 @@ public class Apartment extends Building {
     @Transient
     private Deque<Integer> incomingHistory = new ArrayDeque<>();
 
-    public Apartment() {
-    }
+    protected Apartment() {}
 
     @Override
     public int cost() {
@@ -44,9 +43,7 @@ public class Apartment extends Building {
 
     @PostLoad
     private void _1() {
-        //this.meta = MetaData.getApartment(this._d.metaId);
         this.meta = (MetaApartment) super.metaBuilding;
-        //this.metaBuilding = this.meta;
     }
 
     public void setRent(int n) {

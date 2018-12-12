@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Action.IAction;
+import org.apache.log4j.Logger;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "NPC")
 public class Npc {
+    private static final Logger logger = Logger.getLogger(Npc.class);
     public Npc(Building born, long money, int type) {
         this.id = UUID.randomUUID();
         this.born = born;
@@ -32,7 +34,6 @@ public class Npc {
     private long money;
 
     private int type;
-    private boolean stopWork;
 
     public long money() {
         return money;
@@ -46,7 +47,8 @@ public class Npc {
     public void idle() {
     }
 
-        @Embeddable //hide those members, the only purpose is to mapping to the table
+    // should we change this to OneToOne mapping??
+    @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class AdapterData {
         @Column(name = "buildingId", updatable = false, nullable = false)
         protected UUID buildingId;
@@ -82,25 +84,19 @@ public class Npc {
         return this.apartment != null;
     }
     public void update(long diffNano) {
-//       int section = City.instance().currentTimeSectionIdx();
-//       switch(section) {
-//           //??
-//       }
-
-       int id = chooseId();
-       AIBuilding aiBuilding = MetaData.getAIBuilding(id);
-       if(aiBuilding == null)
+        int id = chooseId();
+        IAction.logger.info(this.id().toString() + " choose " + id);
+        AIBuilding aiBuilding = MetaData.getAIBuilding(id);
+        if(aiBuilding == null)
            return;
 
-       double idleRatio = 1.d;
-       double sumFlow = City.instance().getSumFlow();
-       if(sumFlow > 0)
+        double idleRatio = 1.d;
+        double sumFlow = City.instance().getSumFlow();
+        if(sumFlow > 0)
            idleRatio = 1.d - (double)this.buildingLocated().getFlow() / sumFlow;
-       IAction action = aiBuilding.random(idleRatio, BrandManager.instance().getBuildingRatio(), id);
-       action.act(this);
-    }
-    public Building chooseOne(Set<Building> buildings) {
-        return null;
+        IAction.logger.info("sumFlow " + sumFlow + " idle " + idleRatio);
+        IAction action = aiBuilding.random(idleRatio, BrandManager.instance().getBuildingRatio(), id);
+        action.act(this);
     }
 
     public int type() {
@@ -111,7 +107,7 @@ public class Npc {
         id += City.instance().currentHour()*1000000;
         id += City.instance().weather()*10000;
         id += MetaData.getDayId()*10;
-        id += stopWork?1:0;
+        id += this.born.onStrike()?1:0;
         return id;
     }
     // where the npc is are not important, location phaseChange can not persist to db

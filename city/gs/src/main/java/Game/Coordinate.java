@@ -14,6 +14,11 @@ public class Coordinate {
     @Column(name = "y", nullable = false)
     public int y;
 
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+
     public Coordinate(int x, int y) {
         this.x = x;
         this.y = y;

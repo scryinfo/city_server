@@ -634,7 +634,7 @@ public class GameSession {
 		Gs.ByteNum c = (Gs.ByteNum) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.outOfBusiness() || c.getNum() < 40 || c.getNum() > 100)
+		if(b == null || c.getNum() < 40 || c.getNum() > 100)
 			return;
 		b.setSalaryRatio(c.getNum());
 		this.write(Package.create(cmd, c));
@@ -853,6 +853,13 @@ public class GameSession {
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player));
 		this.write(Package.create(cmd));
+	}
+	public void getAllBuildingDetail(short cmd) {
+		Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();
+		City.instance().forEachBuilding(player.id(), (Building b)->{
+			b.appendDetailProto(builder);
+		});
+		this.write(Package.create(cmd, builder.build()));
 	}
 	public void detailPublicFacility(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;

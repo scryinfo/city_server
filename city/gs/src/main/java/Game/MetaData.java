@@ -1,9 +1,6 @@
 package Game;
 
-import Game.Action.IAction;
-import Game.Action.Idle;
-import Game.Action.JustVisit;
-import Game.Action.Shopping;
+import Game.Action.*;
 import Shared.Util;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
@@ -128,22 +125,6 @@ final class MetaMaterial extends MetaItem {
     }
 
 }
-//final class MetaGood extends MetaItem {
-//    enum Type {
-//        MAIN_FOOD,
-//        SUB_FOOD,
-//        CLOTHING,
-//        ACCESSORY,
-//        SPORT,
-//        DIGITAL,
-//        ALL
-//    }
-//    MetaGood(Document d) {
-//        super(d);
-//        this.lux = d.getInteger("lux");
-//    }
-//    int lux;
-//}
 
 class AIBuilding extends ProbBase {
     AIBuilding(Document d) {
@@ -159,6 +140,7 @@ class AIBuilding extends ProbBase {
         ALL
     }
     IAction random(double idleRatio, BrandManager.BuildingRatio ratio, int aiId) {
+        IAction.logger.info("AIBuilding id " + this.id + " building ratio " + ratio.toString() + " aiId " + aiId);
         int[] d = Arrays.copyOf(weight, weight.length);
         d[Type.IDLE.ordinal()] *= idleRatio;
         d[Type.GOTO_HOME.ordinal()] *= idleRatio;
@@ -166,13 +148,14 @@ class AIBuilding extends ProbBase {
         d[Type.GOTO_APARTMENT.ordinal()] *= ratio.apartment;
         d[Type.GOTO_PUBLIC_FACILITY.ordinal()] *= ratio.publicFacility;
         d[Type.GOTO_RETAIL_SHOP.ordinal()] *= ratio.retail;
+        IAction.logger.info("AIBuilding id " + this.id + " weights " + Arrays.toString(d));
         switch (Type.values()[super.randomIdx(d)]) {
             case IDLE:
                 return new Idle();
             case GOTO_HOME:
-                return new Idle();
+                return new GoHome();
             case GOTO_WORK:
-                return new Idle();
+                return new GoWork();
             case GOTO_APARTMENT:
                 return new JustVisit(MetaBuilding.APARTMENT);
             case GOTO_PUBLIC_FACILITY:

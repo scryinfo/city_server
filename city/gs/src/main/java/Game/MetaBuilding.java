@@ -52,6 +52,8 @@ public class MetaBuilding {
                     throw new IllegalArgumentException();
                 this.startWorkHour[i] = startWorkHour;
                 this.endWorkHour[i] = IntStream.range(0, startWorkHour.length).map(idx->startWorkHour[idx]+workingHours[idx]).toArray();
+                Arrays.sort(this.startWorkHour[i]);
+                Arrays.sort(this.endWorkHour[i]);
             }
             this.salary = d.getInteger("salary");
         }
