@@ -988,7 +988,7 @@ public class GameSession {
 		Gs.LabSetLineWorkerNum c = (Gs.LabSetLineWorkerNum)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
@@ -1004,12 +1004,14 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		Laboratory lab = (Laboratory)building;
 		Formula.Type type = Formula.Type.values()[c.getType()];
 		Formula formula = null;
 		if(type == Formula.Type.RESEARCH) {
+			if(!player.hasItem(c.getItemId()))
+				return;
 			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), player.getGoodLevel(c.getItemId())+1));
 		}
 		else if(type == Formula.Type.INVENT) {
@@ -1028,7 +1030,7 @@ public class GameSession {
 		Gs.LabDelLine c = (Gs.LabDelLine)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
@@ -1042,7 +1044,7 @@ public class GameSession {
 		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
@@ -1073,7 +1075,7 @@ public class GameSession {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
