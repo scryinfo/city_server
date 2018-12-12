@@ -1,5 +1,6 @@
 package Game;
 
+import Game.FriendManager.FriendManager;
 import Shared.*;
 import Shared.Package;
 import com.google.common.collect.MapMaker;
@@ -84,6 +85,7 @@ public class GameServer {
         System.out.println("login to account server");
     }
     public void run() throws Exception {
+        FriendManager.getInstance().init();
         City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();

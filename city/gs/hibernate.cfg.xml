@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration SYSTEM 
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.implicit_naming_strategy">
+			org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+		</property>
+		<property name="hibernate.dialect">
+			org.hibernate.dialect.PostgreSQL95Dialect
+		</property>
+		<property name="hibernate.connection.driver_class">
+			org.postgresql.Driver
+		</property>
+		<!-- Assume test is the database name -->
+		<property name="hibernate.connection.url">
+			jdbc:postgresql://192.168.0.51/50
+		</property>
+		<property name="hibernate.connection.username">
+			postgres
+		</property>
+		<property name="hibernate.connection.password">
+			123456
+		</property>
+		<property name="hbm2ddl.auto">update</property>
+		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.jdbc.batch_size">50</property>
+		<property name="hibernate.cache.use_second_level_cache">false</property> <!--doc say the default value is true but default cache is NoCachingRegionFactory-->
+
+		<mapping class="Game.Player"></mapping>
+		<mapping class="Game.Coordinate"></mapping>
+		<mapping class="Game.Building"></mapping>
+		<mapping class="Game.Apartment"></mapping>
+		<mapping class="Game.GridIndex"></mapping>
+		<mapping class="Game.Ground"></mapping>
+		<mapping class="Game.GroundAuction"></mapping>
+		<mapping class="Game.GroundAuction$Entry"></mapping>
+		<mapping class="Game.Laboratory"></mapping>
+		<mapping class="Game.Laboratory$Line"></mapping>
+		<mapping class="Game.ItemKey"></mapping>
+		<mapping class="Game.Item"></mapping>
+		<mapping class="Game.Npc"></mapping>
+		<mapping class="Game.RetailShop"></mapping>
+		<mapping class="Game.ProduceDepartment"></mapping>
+		<mapping class="Game.ProduceDepartment$Line"></mapping>
+		<mapping class="Game.MaterialFactory"></mapping>
+		<mapping class="Game.MaterialFactory$Line"></mapping>
+		<mapping class="Game.Shelf"></mapping>
+		<mapping class="Game.Shelf$Content"></mapping>
+		<mapping class="Game.LineBase"></mapping>
+		<mapping class="Game.Storage"></mapping>
+		<mapping class="Game.Storage$AvgPrice"></mapping>
+		<mapping class="Game.Exchange$Stat"></mapping>
+		<mapping class="Game.Exchange"></mapping>
+		<mapping class="Game.Exchange$DealLog"></mapping>
+		<mapping class="Game.Exchange$Order"></mapping>
+		<mapping class="Game.PublicFacility"></mapping>
+		<mapping class="Game.PublicFacility$Slot"></mapping>
+		<mapping class="Game.PublicFacility$SlotRent"></mapping>
+		<mapping class="Game.PublicFacility$Ad"></mapping>
+		<mapping class="Game.GroundManager"></mapping>
+		<mapping class="Game.GroundInfo"></mapping>
+		<mapping class="Game.BrandManager"></mapping>
+		<mapping class="Game.BrandManager$BrandInfo"></mapping>
+		<mapping class="Game.TechTradeCenter"></mapping>
+		<mapping class="Game.TechTradeCenter$Sell"></mapping>
+		<mapping class="Game.TechTradeCenter$TechInfo"></mapping>
+		<mapping class="Game.FriendManager.FriendRequest"></mapping>
+		<mapping class="Game.FriendManager.OfflineMessage"></mapping>
+	</session-factory>
+</hibernate-configuration> 
