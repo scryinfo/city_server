@@ -83,7 +83,7 @@ public class MaterialFactory extends FactoryBase {
         return true;
     }
 
-    protected void _update(long diffNano) {
-        super._update(diffNano);
-    }
+//    protected void _update(long diffNano) {
+//        super._update(diffNano);
+//    }
 }

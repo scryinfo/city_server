@@ -32,6 +32,10 @@ public abstract class LineBase {
 
     @Column(nullable = false) // if don't save this, we need to query player in each produce action
     int itemLevel;
+
+    @Column(nullable = false)
+    boolean suspend = false;
+
     protected LineBase() {
     }
     public abstract ItemKey newItemKey(UUID producerId, int qty);
@@ -61,10 +65,10 @@ public abstract class LineBase {
     }
     int update(long diffNano) {
         int add = 0;
-        if(!isPause() && this.timer.update(diffNano))
+        if(this.timer.update(diffNano))
         {
             accumulated += item.n * this.workerNum;
-            add = (int) Math.round(accumulated);
+            add = left();
             if(add > 0) {
                 this.count += add;
                 if(this.count >= this.targetNum) {
@@ -77,5 +81,22 @@ public abstract class LineBase {
             }
         }
         return add;
+    }
+
+    public void suspend(int add) {
+        this.accumulated += add;
+        this.suspend = true;
+    }
+
+    public boolean isSuspend() {
+        return this.suspend;
+    }
+
+    public int left() {
+        return (int) Math.round(accumulated);
+    }
+
+    public void resume() {
+        this.suspend = false;
     }
 }

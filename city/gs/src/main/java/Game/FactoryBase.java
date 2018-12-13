@@ -94,16 +94,26 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean consumeMaterial(LineBase line);
     protected void _update(long diffNano) {
         this.lines.values().forEach(l -> {
-            if(!this.consumeMaterial(l))
+            if(l.isPause())
                 return;
-            int add = l.update(diffNano);
-            if(add > 0) {
-                this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add);
-                Gs.LineInfo i = Gs.LineInfo.newBuilder()
-                        .setId(Util.toByteString(l.id))
-                        .setNowCount(l.count)
-                        .build();
-                GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.lineChangeInform_VALUE, i));
+            if(l.isSuspend()) {
+                assert l.left() > 0;
+                if(this.store.offset(l.newItemKey(ownerId(), l.itemLevel), l.left())) {
+                    l.resume();
+                    broadcastLineInfo(l);
+                }
+            }
+            else {
+                if (!this.consumeMaterial(l))
+                    return;
+                int add = l.update(diffNano);
+                if (add > 0) {
+                    if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
+                        broadcastLineInfo(l);
+                    } else {
+                        l.suspend(add);
+                    }
+                }
             }
         });
 
@@ -111,6 +121,15 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
     }
+
+    private void broadcastLineInfo(LineBase l) {
+        Gs.LineInfo i = Gs.LineInfo.newBuilder()
+                .setId(Util.toByteString(l.id))
+                .setNowCount(l.count)
+                .build();
+        GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.lineChangeInform_VALUE, i));
+    }
+
     @Transient
     private MetaFactoryBase meta;
 

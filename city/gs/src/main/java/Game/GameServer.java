@@ -18,6 +18,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -76,7 +77,6 @@ public class GameServer {
         // db info is in hibernate.xml now
         //GameDb.startUp(gsInfo.getGameDbUrl());
         //GameDb.startUp();
-        Logger.getLogger("AI").info("111");
     }
 
     private void asConnectAction(ChannelFuture f) {
@@ -151,6 +151,7 @@ public class GameServer {
     }
     public static void main(String[] args) throws Exception {
         // By default, logging is enabled via the popular SLF4J API. The use of SLF4J is optional; the driver will use SLF4J if the driver detects the presence of SLF4J in the classpath. Otherwise, the driver will fall back to JUL (java.util.logging)
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
         java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
         GlobalConfig.init(args[0]);
         GameDb.startUp(args[1]);
