@@ -267,11 +267,11 @@ public abstract class Building {
     }
     public CoordPair effectRange() {
         Coordinate l = coordinate.shiftLU(this.metaBuilding.effectRange);
-        Coordinate r = coordinate.offset(this.metaBuilding.x, this.metaBuilding.y).shiftRB(this.metaBuilding.effectRange);
+        Coordinate r = coordinate.offset(this.metaBuilding.x-1, this.metaBuilding.y-1).shiftRB(this.metaBuilding.effectRange);
        return new CoordPair(l, r);
     }
     public CoordPair area() {
-        return new CoordPair(coordinate, coordinate.offset(metaBuilding.x, metaBuilding.y));
+        return metaBuilding.area(coordinate);
     }
 
     public Coordinate coordinate() {

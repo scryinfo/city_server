@@ -19,7 +19,7 @@ public class ExceptionHandler extends ChannelDuplexHandler {
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         ctx.write(msg, promise.addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
-                future.cause().printStackTrace();
+                logger.fatal(Throwables.getStackTraceAsString(future.cause()));
             }
         }));
     }

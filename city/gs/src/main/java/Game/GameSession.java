@@ -8,6 +8,7 @@ import Game.FriendManager.OfflineMessage;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -101,7 +102,7 @@ public class GameSession {
 						m.invoke(this, cmd);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							e.printStackTrace();
+							logger.fatal(Throwables.getStackTraceAsString(e));
 						else
 							this.close();
 					}
@@ -111,14 +112,14 @@ public class GameSession {
 						m.invoke(this, cmd, message);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							e.printStackTrace();
+							logger.fatal(Throwables.getStackTraceAsString(e));
 						else
 							this.close();
 					}
 				}
 			} catch (Exception e) {
 				if(GlobalConfig.debug())
-					e.printStackTrace();
+					logger.fatal(Throwables.getStackTraceAsString(e));
 				else
 					this.close();
 			}
@@ -126,7 +127,7 @@ public class GameSession {
 	}
 	public void cheat(short cmd, Message message) {
 		Gs.Str c = (Gs.Str)message;
-		System.out.println(c.getStr());
+		logger.debug("cheat command: " + c.getStr());
 		Cheat cheat = _parseCheatString(c.getStr());
 		if(cheat != null)
 			_runCheat(cheat);

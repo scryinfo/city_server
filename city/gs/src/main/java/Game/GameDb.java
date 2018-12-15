@@ -427,7 +427,8 @@ public class GameDb {
 			transaction.commit();
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-			transaction.rollback();
+			if(transaction != null)
+				transaction.rollback();
 		} finally {
 		}
 	}
@@ -440,7 +441,8 @@ public class GameDb {
 			transaction.commit();
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-			transaction.rollback();
+			if(transaction != null)
+				transaction.rollback();
 		} finally {
 
 		}
@@ -454,7 +456,8 @@ public class GameDb {
 			transaction.commit();
 		}
 		catch(RuntimeException e) {
-			transaction.rollback();
+			if(transaction != null)
+				transaction.rollback();
 		}
 		finally {
 
@@ -474,7 +477,8 @@ public class GameDb {
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
-			transaction.rollback();
+			if(transaction != null)
+				transaction.rollback();
 		} finally {
 
 		}
@@ -499,7 +503,8 @@ public class GameDb {
 
 			transaction.commit();
 		} catch (RuntimeException e) {
-			transaction.rollback();
+			if(transaction != null)
+				transaction.rollback();
 		} finally {
 		}
 	}

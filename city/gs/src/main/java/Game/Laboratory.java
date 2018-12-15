@@ -18,9 +18,9 @@ public class Laboratory extends Building implements IStorage {
     private MetaLaboratory meta;
 
     public Laboratory(MetaLaboratory meta, Coordinate pos, UUID ownerId) {
-
         super(meta, pos, ownerId);
         this.store = new Storage(meta.storeCapacity);
+        this.meta = meta;
     }
 
     protected Laboratory() {}
