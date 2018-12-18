@@ -73,6 +73,7 @@ public class Laboratory extends Building implements IStorage {
             return null;
         Line line = new Line(workerNum, formula);
         lines.put(line.id, line);
+        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
     }
 

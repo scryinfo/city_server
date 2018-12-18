@@ -603,7 +603,8 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
-		b.watchDetailInfo(this);
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfo(this);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
@@ -612,7 +613,8 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
-        b.watchDetailInfo(this);
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfo(this);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailProduceDepartment(short cmd, Message message) {
@@ -621,16 +623,28 @@ public class GameSession {
         Building b = City.instance().getBuilding(id);
         if(b == null || b.type() != MetaBuilding.PRODUCE)
             return;
-        b.watchDetailInfo(this);
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfo(this);
         this.write(Package.create(cmd, b.detailProto()));
     }
+	public void detailPublicFacility(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.PUBLIC)
+			return;
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfo(this);
+		this.write(Package.create(cmd, b.detailProto()));
+	}
     public void detailLaboratory(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
         UUID id = Util.toUuid(c.getId().toByteArray());
         Building b = City.instance().getBuilding(id);
         if(b == null || b.type() != MetaBuilding.LAB)
             return;
-        b.watchDetailInfo(this);
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfo(this);
         this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
@@ -639,7 +653,8 @@ public class GameSession {
         Building b = City.instance().getBuilding(id);
         if(b == null || b.type() != MetaBuilding.RETAIL)
             return;
-        b.watchDetailInfo(this);
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfo(this);
         this.write(Package.create(cmd, b.detailProto()));
     }
 
@@ -662,7 +677,7 @@ public class GameSession {
 		a.setRent(c.getNum());
 		this.write(Package.create(cmd, c));
 	}
-	public void addLine(short cmd, Message message) {
+	public void ftyAddLine(short cmd, Message message) {
 		Gs.AddLine c = (Gs.AddLine) message;
 		if(c.getTargetNum() <= 0 || c.getWorkerNum() <= 0)
 			return;
@@ -678,13 +693,10 @@ public class GameSession {
 			return;
 		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum(), player.getGoodLevel(m.id));
 		if(line != null)
-		{
 			GameDb.saveOrUpdate(f);
-			this.write(Package.create(cmd, line.toProto()));
-		}
 	}
 
-	public void delLine(short cmd, Message message) {
+	public void ftyDelLine(short cmd, Message message) {
 		Gs.DelLine c = (Gs.DelLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
@@ -697,7 +709,7 @@ public class GameSession {
 			this.write(Package.create(cmd, c));
 		}
 	}
-	public void changeLine(short cmd, Message message) {
+	public void ftyChangeLine(short cmd, Message message) {
 		Gs.ChangeLine c = (Gs.ChangeLine) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
@@ -874,15 +886,7 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
-	public void detailPublicFacility(short cmd, Message message) {
-		Gs.Id c = (Gs.Id) message;
-		UUID id = Util.toUuid(c.getId().toByteArray());
-		Building b = City.instance().getBuilding(id);
-		if(b == null || b.type() != MetaBuilding.PUBLIC)
-			return;
-		b.watchDetailInfo(this);
-		this.write(Package.create(cmd, b.detailProto()));
-	}
+
 	public void delItem(short cmd, Message message) throws Exception {
 		Gs.DelItem c = (Gs.DelItem)message;
 		ItemKey k = new ItemKey(c.getItem());
@@ -1023,9 +1027,7 @@ public class GameSession {
 		Laboratory.Line line = lab.addLine(formula, c.getWorkerNum());
 		if(line != null) {
 			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, line.toProto()));
 		}
-
 	}
 	public void labLineDel(short cmd, Message message) {
 		Gs.LabDelLine c = (Gs.LabDelLine)message;

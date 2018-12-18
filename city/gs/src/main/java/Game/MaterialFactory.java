@@ -1,7 +1,10 @@
 package Game;
 
+import Shared.Package;
+import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
+import gscode.GsCode;
 
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
@@ -75,6 +78,7 @@ public class MaterialFactory extends FactoryBase {
             return null;
         Line line = new Line((MetaMaterial)item, targetNum, workerNum, itemLevel);
         lines.put(line.id, line);
+        this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
     }
 

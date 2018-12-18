@@ -127,7 +127,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 .setId(Util.toByteString(l.id))
                 .setNowCount(l.count)
                 .build();
-        GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.lineChangeInform_VALUE, i));
+        sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
 
     @Transient
@@ -152,7 +152,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             line.workerNum = w;
             builder.setWorkerNum(w);
         }
-        GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.lineChangeInform_VALUE, builder.build()));
+        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, builder.build()));
         return true;
     }
 

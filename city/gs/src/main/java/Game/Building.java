@@ -97,7 +97,9 @@ public abstract class Building {
         Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.Bytes.newBuilder().addIds(Util.toByteString(id)).build());
         City.instance().send(gip, pack);
     }
-
+    protected void sendToWatchers(Shared.Package p) {
+        GameServer.sendTo(this.detailWatchers, p);
+    }
     public List<Building> getAllBuildingInEffectRange() {
         List<Building> res = new ArrayList<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
@@ -368,6 +370,9 @@ public abstract class Building {
                 this.working = true;
             else if(nowHour >= endHour)
                 this.working = false;
+        }
+        else {
+            this.working = w;
         }
     }
     private boolean payOff(Player p) {
