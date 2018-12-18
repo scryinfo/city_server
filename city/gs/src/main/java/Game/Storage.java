@@ -70,6 +70,7 @@ public class Storage implements IStorage {
             if(item.meta.size*n > availableSize())
                 return false;
             this.inHand.put(item, this.inHand.getOrDefault(item, 0)+n);
+            inHandPrice.computeIfAbsent(item, k->new AvgPrice()).update(0, n);
         }
         else if(n < 0) {
             Integer c = this.inHand.get(item);
