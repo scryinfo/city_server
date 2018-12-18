@@ -1073,6 +1073,7 @@ public class GameSession {
 		}
 		line.launch(c.getPhase());
 		GameDb.saveOrUpdate(lab);
+		this.write(Package.create(cmd, c));
 	}
 	public void labRoll(short cmd, Message message) {
 		Gs.LabRoll c = (Gs.LabRoll)message;

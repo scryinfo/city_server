@@ -53,7 +53,7 @@ public class Storage implements IStorage {
                         iterator.remove();
                     }
                     else {
-                        e.setValue(left - e.getValue());
+                        e.setValue(e.getValue() - left);
                         if(e.getValue() == 0)
                             iterator.remove();
                         break;
