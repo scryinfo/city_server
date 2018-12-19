@@ -910,6 +910,9 @@ public class GameSession {
 		IStorage dst = IStorage.get(dstId, player);
 		if(src == null || dst == null)
 			return;
+		int charge = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(src, dst));
+		if(player.money() < charge)
+			return;
 		Item item = new Item(c.getItem());
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
@@ -920,9 +923,10 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 			return;
 		}
+		player.decMoney(charge);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
-		GameDb.saveOrUpdate(Arrays.asList(src, dst));
+		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd, c));
 	}
 	public void rentOutGround(short cmd, Message message) {
@@ -1038,10 +1042,7 @@ public class GameSession {
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId))
-		{
 			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, c));
-		}
 	}
 	public void labLaunchLine(short cmd, Message message) {
 		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;

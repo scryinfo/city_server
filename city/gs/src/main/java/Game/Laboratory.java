@@ -79,8 +79,7 @@ public class Laboratory extends Building implements IStorage {
 
     public boolean delLine(UUID lineId) {
         if(lines.remove(lineId) != null) {
-            GameServer.sendTo(this.detailWatchers,
-                    Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
+            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
                             Gs.LabDelLine.newBuilder()
                                     .setBuildingId(Util.toByteString(id()))
                                     .setLineId(Util.toByteString(lineId))

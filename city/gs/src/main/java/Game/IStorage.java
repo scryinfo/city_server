@@ -22,7 +22,21 @@ public interface IStorage {
             return (IStorage) building;
         }
     }
+    static double distance(IStorage src, IStorage dst) {
+        if(src == dst)
+            return 0;
+        Coordinate a, b;
+        if(src instanceof Building)
+            a = ((Building)src).coordinate();
+        else
+            a = MetaData.getSysPara().centerStorePos;
 
+        if(dst instanceof Building)
+            b = ((Building)dst).coordinate();
+        else
+            b = MetaData.getSysPara().centerStorePos;
+        return Coordinate.distance(a, b);
+    }
     boolean delItem(ItemKey mi);
     int getNumber(MetaItem m);
     boolean has(ItemKey m, int n);

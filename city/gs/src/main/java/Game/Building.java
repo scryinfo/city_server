@@ -30,7 +30,7 @@ public abstract class Building {
     }
 
     public static double distance(Building a, Building b) {
-        return Math.sqrt(Math.pow(a.coordinate().x - b.coordinate().x, 2) + Math.pow(a.coordinate().y - b.coordinate().y, 2));
+        return Coordinate.distance(a.coordinate(), b.coordinate());
     }
 
     public abstract int quality();

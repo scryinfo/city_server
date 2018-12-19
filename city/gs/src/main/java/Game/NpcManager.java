@@ -98,7 +98,7 @@ public class NpcManager {
         GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
         // set the updateIdx according to the left time to next time section
         updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(City.instance().currentTimeSectionDuration()) * updateTimesAtCurrentTimeSection);
-        waitToUpdate = Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>());
+        waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
     }
 

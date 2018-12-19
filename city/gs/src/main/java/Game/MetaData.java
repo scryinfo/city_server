@@ -417,9 +417,14 @@ class SysPara {
     public SysPara(Document d) {
         this.playerBagCapcaity = d.getInteger("playerBagCapacity");
         this.bagCapacityDelta = d.getInteger("bagCapacityDelta");
+        this.transferChargeRatio = d.getInteger("transferChargeRatio");
+        this.centerStorePos.x = d.getInteger("centerStoreX");
+        this.centerStorePos.y = d.getInteger("centerStoreY");
     }
     int playerBagCapcaity;
     int bagCapacityDelta;
+    int transferChargeRatio;
+    Coordinate centerStorePos = new Coordinate();
 }
 public class MetaData {
     public static final int ID_RADIX = 100000;
