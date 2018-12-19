@@ -86,7 +86,7 @@ public class NpcManager {
         waitToUpdate.get(idx).add(npc.id());
     }
     private Map<UUID, Npc> allNpc = new HashMap<>();
-    private List<Set<UUID>> waitToUpdate;
+    private List<Set<UUID>> waitToUpdate = new ArrayList<>();
     private List<Set<UUID>> waitToUpdateNext = new ArrayList<>();
     private int updateTimesAtCurrentTimeSection;
     private int updateTimesAtNextTimeSection;
@@ -98,7 +98,10 @@ public class NpcManager {
         GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
         // set the updateIdx according to the left time to next time section
         updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(City.instance().currentTimeSectionDuration()) * updateTimesAtCurrentTimeSection);
-        waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));
+        for (int i = 0; i < updateTimesAtCurrentTimeSection; i++) {
+            waitToUpdate.add(new HashSet<>());
+        }
+        //waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));  won't works, n copies are refer to same object
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
     }
 
