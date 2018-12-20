@@ -26,8 +26,7 @@ public abstract class Building {
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
 
-    protected Building() {
-    }
+    protected Building() {}
 
     public static double distance(Building a, Building b) {
         return Coordinate.distance(a.coordinate(), b.coordinate());

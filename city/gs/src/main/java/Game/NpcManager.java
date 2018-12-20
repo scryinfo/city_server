@@ -24,7 +24,7 @@ public class NpcManager {
         }
         if(reCalcuWaitToUpdate) {
             ids.forEach(id -> {
-                int idx = id.hashCode()%updateTimesAtNextTimeSection;
+                int idx = Math.abs(id.hashCode())%updateTimesAtNextTimeSection;
                 waitToUpdateNext.get(idx).add(id);
             });
             ids.clear();
