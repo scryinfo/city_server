@@ -43,7 +43,7 @@ public class MailBox {
         GameDb.delMail(mailId);
     }
 
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(2));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
     void update(long diffNano) {
         if(this.timer.update(diffNano)){
             GameDb.deloverdueMail();

@@ -567,7 +567,9 @@ public class GameDb {
         org.hibernate.Query query = session.createQuery("FROM Mail where playerId = :x ");
         query.setParameter("x", playerId);
         List mails = query.list();
-        mails.forEach(mail -> res.add((Mail) mail));
+        if (null != mails && mails.size() != 0) {
+            mails.forEach(mail -> res.add((Mail) mail));
+        }
         transaction.commit();
         session.close();
         return res;
@@ -606,11 +608,13 @@ public class GameDb {
             long now = System.currentTimeMillis();
             String sqlSelect = "select ts from mail";
             List ts = session.createSQLQuery(sqlSelect).list();
-            Long t = Long.valueOf(ts.get(0).toString());
-            if (t < (now - (7 * 24 * 60 * 60 * 1000))) {
-                session.createQuery("delete from Mail where ts = :x")
-                        .setParameter("x", t)
-                        .executeUpdate();
+            if (null != ts && ts.size() != 0) {
+                Long t = Long.valueOf(ts.get(0).toString());
+                if (t < (now - (24 * 60 * 60 * 1000))) {
+                    session.createQuery("delete from Mail where ts = :x")
+                            .setParameter("x", t)
+                            .executeUpdate();
+                }
             }
             transaction.commit();
         } catch (RuntimeException e) {
