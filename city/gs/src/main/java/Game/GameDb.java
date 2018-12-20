@@ -581,7 +581,7 @@ public class GameDb {
         try {
             session = sessionFactory.openStatelessSession();
             transaction = session.beginTransaction();
-            session.createSQLQuery("DELETE FROM mail WHERE Id= :x ,read = :y")
+            session.createSQLQuery("DELETE FROM mail WHERE Id= :x and read = :y")
                     .setParameter("x", mailId)
                     .setParameter("y", true)
                     .executeUpdate();
@@ -610,7 +610,7 @@ public class GameDb {
             List ts = session.createSQLQuery(sqlSelect).list();
             if (null != ts && ts.size() != 0) {
                 Long t = Long.valueOf(ts.get(0).toString());
-                if (t < (now - (24 * 60 * 60 * 1000))) {
+                if (t < (now - (7 * 24 * 60 * 60 * 1000))) {
                     session.createQuery("delete from Mail where ts = :x")
                             .setParameter("x", t)
                             .executeUpdate();
