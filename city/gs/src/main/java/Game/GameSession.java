@@ -286,6 +286,8 @@ public class GameSession {
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		toDoOnline();
+
+		MailBox.instance().getAllMails(roleId);
 	}
 
 	public void createRole(short cmd, Message message) {

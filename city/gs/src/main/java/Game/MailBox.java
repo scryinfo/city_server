@@ -1,11 +1,13 @@
 package Game;
 
+import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import gscode.GsCode;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class MailBox {
     private static MailBox instance = new MailBox();
@@ -31,5 +33,20 @@ public class MailBox {
 
     Collection<Mail> getAllMails(UUID playerId) {
         return GameDb.getMail(playerId);
+    }
+
+    void mailRead(UUID mailId){
+        GameDb.mailChangeRead(mailId);
+    }
+
+    void deleteMail(UUID mailId){
+        GameDb.delMail(mailId);
+    }
+
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(2));
+    void update(long diffNano) {
+        if(this.timer.update(diffNano)){
+            GameDb.deloverdueMail();
+        }
     }
 }
