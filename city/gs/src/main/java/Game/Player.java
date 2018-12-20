@@ -58,7 +58,7 @@ public class Player {
 
     public void addItem(int mId, int lv) {
         Integer level = goodLv.get(mId);
-        if(level != null && level < lv)
+        if(level != null && level >= lv)
             return;
         goodLv.put(mId, lv);
 

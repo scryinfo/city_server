@@ -1,5 +1,6 @@
 package Shared;
 
+import common.Common;
 import gacode.GaCode;
 import gscode.GsCode;
 import io.netty.buffer.ByteBuf;
@@ -27,5 +28,9 @@ public class PackageEncoder extends MessageToByteEncoder<Package> {
                 logger.debug("send to client -> " + o + ", bytes: " + bytes);
         } else if (o instanceof GaCode.OpCode)
             logger.debug("send to server -> " + o + ", bytes: " + bytes);
+        else if(o instanceof Common.OpCode) {
+            if(o == Common.OpCode.error)
+                logger.debug("send to client -> fail");
+        }
     }
 }

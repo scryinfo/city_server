@@ -3,6 +3,7 @@ package Game;
 import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import Shared.Util;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.protobuf.ByteString;
 import gs.Gs;
@@ -193,7 +194,7 @@ public class City {
                 this.update(now - lastTs);
                 lastTs = now;
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.fatal(Throwables.getStackTraceAsString(e));
             }
         }, 0, UpdateIntervalNano, TimeUnit.NANOSECONDS);
     }

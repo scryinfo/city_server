@@ -738,7 +738,7 @@ public class GameSession {
 		if(!isValidDayToRent(c.getMinDayToRent(), c.getMaxDayToRent(), pf) || !isValidRentPreDay(c.getRentPreDay(), pf))
 			return;
 		PublicFacility.Slot slot = pf.addSlot(c.getMaxDayToRent(), c.getMinDayToRent(), c.getRentPreDay());
-		this.write(Package.create(cmd, slot.toProto()));
+		this.write(Package.create(cmd, Gs.AddSlotACK.newBuilder().setBuildingId(Util.toByteString(pf.id())).setS(slot.toProto()).build()));
 	}
 	public void adDelSlot(short cmd, Message message) {
 		Gs.AdDelSlot c = (Gs.AdDelSlot)message;
@@ -763,6 +763,7 @@ public class GameSession {
 			return;
 		PublicFacility pf = (PublicFacility)building;
 		pf.setTickPrice(c.getPrice());
+		this.write(Package.create(cmd, c));
 	}
 	public void adPutAdToSlot(short cmd, Message message) {
 		Gs.AddAd c = (Gs.AddAd)message;
@@ -804,7 +805,7 @@ public class GameSession {
 		else
 			return;
 		GameDb.saveOrUpdate(pf);
-		this.write(Package.create(cmd, ad.toProto()));
+		this.write(Package.create(cmd, Gs.AddAdACK.newBuilder().setBuildingId(Util.toByteString(pf.id())).setA(ad.toProto()).build()));
 	}
 	private boolean isValidDayToRent(int min, int max, PublicFacility pf) {
 		if(min <= 0 || min > pf.getMinDayToRent() || max <= 0 || max < min || max > pf.getMaxDayToRent())
@@ -879,7 +880,7 @@ public class GameSession {
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player));
-		this.write(Package.create(cmd));
+		this.write(Package.create(cmd, c));
 	}
 	public void getAllBuildingDetail(short cmd) {
 		Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();

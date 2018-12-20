@@ -73,7 +73,7 @@ public class Laboratory extends Building implements IStorage {
             return null;
         Line line = new Line(workerNum, formula);
         lines.put(line.id, line);
-        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
+        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
     }
 
@@ -106,7 +106,10 @@ public class Laboratory extends Building implements IStorage {
     }
 
     public void broadcastLine(Line line) {
-        GameServer.sendTo(this.detailWatchers, Shared.Package.create(GsCode.OpCode.labLineChange_VALUE, line.toProto()));
+        Gs.LabLineInform.Builder builder = Gs.LabLineInform.newBuilder();
+        builder.setBuildingId(Util.toByteString(this.id()));
+        builder.setLine(line.toProto());
+        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineChange_VALUE, builder.build()));
     }
 
     @Entity

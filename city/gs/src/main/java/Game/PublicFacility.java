@@ -304,9 +304,10 @@ public class PublicFacility extends Building {
             }
             if(!ids.isEmpty()) {
                 GameDb.saveOrUpdate(this); // update the delete
-                Gs.Bytes.Builder builder = Gs.Bytes.newBuilder();
-                ids.forEach(e->builder.addIds(Util.toByteString(e)));
-                GameServer.sendTo(this.detailWatchers, Package.create(GsCode.OpCode.adSlotTimeoutInform_VALUE, builder.build()));
+                Gs.AdSlotTimeoutInform.Builder builder = Gs.AdSlotTimeoutInform.newBuilder();
+                builder.setBuildingId(Util.toByteString(this.id()));
+                ids.forEach(e->builder.addSlotId(Util.toByteString(e)));
+                this.sendToWatchers(Package.create(GsCode.OpCode.adSlotTimeoutInform_VALUE, builder.build()));
             }
         }
     }
