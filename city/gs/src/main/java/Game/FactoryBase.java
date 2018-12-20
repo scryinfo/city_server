@@ -111,6 +111,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
                         broadcastLineInfo(l);
                     } else {
+                        MailBox.instance().sendMail(MailType.STORE_FULL.getMailType(2),this.ownerId());
                         l.suspend(add);
                     }
                 }

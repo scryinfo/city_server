@@ -211,6 +211,7 @@ public class City {
         allBuilding.forEach((k,v)->v.update(diffNano));
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
+        MailBox.instance().update(diffNano);
 
         // do this at last
         updateTimeSection(diffNano);
