@@ -68,5 +68,6 @@
 		<mapping class="Game.TechTradeCenter$TechInfo"></mapping>
 		<mapping class="Game.FriendManager.FriendRequest"></mapping>
 		<mapping class="Game.FriendManager.OfflineMessage"></mapping>
+		<mapping class="Game.Mail"></mapping>
 	</session-factory>
 </hibernate-configuration> 
