@@ -442,7 +442,7 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.delshelf(item.key, item.n))
+		if(s.delshelf(item.key, item.n, true))
 			this.write(Package.create(cmd, c));
 		else
 			this.write(Package.fail(cmd));
@@ -495,13 +495,13 @@ public class GameSession {
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
-		//sellShelf.delshelf(itemBuy.key, itemBuy.n); delShelf will unlock item in store
-		i.n -= itemBuy.n;
+		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
+		this.write(Package.create(cmd, c));
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));

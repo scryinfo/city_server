@@ -176,9 +176,10 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public boolean delshelf(ItemKey id, int n) {
+    public boolean delshelf(ItemKey id, int n, boolean unLock) {
         if(this.shelf.del(id, n)) {
-            this.store.unLock(id, n);
+            if(unLock)
+                this.store.unLock(id, n);
             return true;
         }
         return false;

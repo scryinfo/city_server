@@ -84,8 +84,13 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
     }
 
     @Override
-    public boolean delshelf(ItemKey id, int n) {
-        return shelf.del(id, n);
+    public boolean delshelf(ItemKey id, int n, boolean unLock) {
+        if(this.shelf.del(id, n)) {
+            if(unLock)
+                this.store.unLock(id, n);
+            return true;
+        }
+        return false;
     }
 
     @Override
