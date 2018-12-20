@@ -75,7 +75,12 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
 
     @Override
     public Gs.Shelf.Content addshelf(Item mi, int price) {
-        return shelf.add(mi, price);
+        if(!this.store.has(mi.key, mi.n))
+            return null;
+        Gs.Shelf.Content res = this.shelf.add(mi, price);
+        if(res != null)
+            this.store.lock(mi.key, mi.n);
+        return res;
     }
 
     @Override

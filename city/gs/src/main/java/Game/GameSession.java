@@ -467,7 +467,7 @@ public class GameSession {
 		Gs.BuyInShelf c = (Gs.BuyInShelf)message;
 		if(c.getPrice() <= 0)
 			return;
-		Item item = new Item(c.getItem());
+		Item itemBuy = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		UUID wid = Util.toUuid(c.getWareHouseId().toByteArray());
 		Building sellBuilding = City.instance().getBuilding(bid);
@@ -478,26 +478,26 @@ public class GameSession {
 		if(buyStore == null)
 		    return;
 		IShelf sellShelf = (IShelf)sellBuilding;
-		Shelf.Content i = sellShelf.getContent(item.key);
-		if(i == null || i.price != c.getPrice() || i.n < item.n) {
+		Shelf.Content i = sellShelf.getContent(itemBuy.key);
+		if(i == null || i.price != c.getPrice() || i.n < itemBuy.n) {
 			this.write(Package.fail(cmd));
 			return;
 		}
-		long cost = item.n*c.getPrice();
+		long cost = itemBuy.n*c.getPrice();
 		if(player.money() < cost)
 			return;
 
 		// begin do modify
-		if(!buyStore.reserve(item.key.meta, item.n))
+		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n))
 			return;
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
-		sellShelf.delshelf(item.key, i.n);
-		//i.n -= item.n;
-		((IStorage)sellBuilding).consumeLock(item.key, i.n);
+		//sellShelf.delshelf(itemBuy.key, itemBuy.n); delShelf will unlock item in store
+		i.n -= itemBuy.n;
+		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 
-		buyStore.consumeReserve(item.key, item.n, c.getPrice());
+		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 	}
@@ -1005,7 +1005,7 @@ public class GameSession {
 		boolean ok = lab.setLineWorkerNum(lineId, c.getN());
 		if(ok) {
 			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd, c));
 		}
 	}
 	public void labLineAdd(short cmd, Message message) {
@@ -1107,7 +1107,7 @@ public class GameSession {
 					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
 				}
 			}
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd, c));
 		}
 		else
 			this.write(Package.fail(cmd));
