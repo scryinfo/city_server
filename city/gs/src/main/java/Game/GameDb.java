@@ -581,7 +581,7 @@ public class GameDb {
         try {
             session = sessionFactory.openStatelessSession();
             transaction = session.beginTransaction();
-            session.createSQLQuery("DELETE FROM mail WHERE Id= :x and read = :y")
+            session.createSQLQuery("DELETE FROM Mail WHERE Id= :x and read = :y")
                     .setParameter("x", mailId)
                     .setParameter("y", true)
                     .executeUpdate();
@@ -597,7 +597,7 @@ public class GameDb {
         }
     }
 
-    public static void deloverdueMail() {
+    public static void delOverdueMail() {
         Transaction transaction = null;
         StatelessSession session = null;
 
@@ -606,14 +606,16 @@ public class GameDb {
             transaction = session.beginTransaction();
 
             long now = System.currentTimeMillis();
-            String sqlSelect = "select ts from mail";
-            List ts = session.createSQLQuery(sqlSelect).list();
+            String sqlSelect = "select ts from Mail";
+            List ts = session.createQuery(sqlSelect).list();
             if (null != ts && ts.size() != 0) {
-                Long t = Long.valueOf(ts.get(0).toString());
-                if (t < (now - (7 * 24 * 60 * 60 * 1000))) {
-                    session.createQuery("delete from Mail where ts = :x")
-                            .setParameter("x", t)
-                            .executeUpdate();
+                for (Object t : ts) {
+                    Long sendTs = Long.valueOf(String.valueOf(t));
+                    if (sendTs < (now - (7 * 24 * 60 * 60 * 1000))) {
+                        session.createQuery("delete from Mail where ts = :x")
+                                .setParameter("x", t)
+                                .executeUpdate();
+                    }
                 }
             }
             transaction.commit();
@@ -634,7 +636,7 @@ public class GameDb {
         try {
             session = sessionFactory.openStatelessSession();
             transaction = session.beginTransaction();
-            session.createSQLQuery("update mail SET read = TRUE WHERE id = :x")
+            session.createSQLQuery("update Mail SET read = TRUE WHERE id = :x")
                     .setParameter("x", mailId)
                     .executeUpdate();
             transaction.commit();

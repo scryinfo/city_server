@@ -11,10 +11,13 @@ import java.util.concurrent.TimeUnit;
 
 public class MailBox {
     private static MailBox instance = new MailBox();
+
     public static MailBox instance() {
         return instance;
     }
-    protected MailBox() {}
+
+    protected MailBox() {
+    }
 
     void sendMail(int type, UUID playerId) {
         Mail mail = new Mail(type, playerId);
@@ -35,18 +38,19 @@ public class MailBox {
         return GameDb.getMail(playerId);
     }
 
-    void mailRead(UUID mailId){
+    void mailRead(UUID mailId) {
         GameDb.mailChangeRead(mailId);
     }
 
-    void deleteMail(UUID mailId){
+    void deleteMail(UUID mailId) {
         GameDb.delMail(mailId);
     }
 
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(2));
+
     void update(long diffNano) {
-        if(this.timer.update(diffNano)){
-            GameDb.deloverdueMail();
+        if (this.timer.update(diffNano)) {
+            GameDb.delOverdueMail();
         }
     }
 }
