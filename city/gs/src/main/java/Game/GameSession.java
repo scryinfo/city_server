@@ -1103,8 +1103,9 @@ public class GameSession {
 					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
 				}
 				if(r.type == Formula.Type.RESEARCH) {
-					player.addItem(line.formula.key.targetId, r.v);
-					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, r.v);
+					OptionalInt lv = player.addItemLv(line.formula.key.targetId, r.v);
+					assert lv.isPresent();
+					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, lv.getAsInt());
 					//lab.delLine(line.id);
 					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
 				}

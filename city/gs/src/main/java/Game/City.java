@@ -232,19 +232,15 @@ public class City {
             lastHour = nowHour;
             if(lastHour > nowHour)
                 dayTickAction();
-        }
-        timeSectionAccumlateNano += diffNano;
-        if(timeSectionAccumlateNano - TimeUnit.SECONDS.toNanos(10) > TimeUnit.HOURS.toNanos(meta.minHour))
-        {
-
             int index = meta.indexOfHour(nowHour);
             if(index == -1) // still in the range
-                return;
-            if(currentTimeSectionIdx != index) {
+                ;
+            else if(currentTimeSectionIdx != index) {
                 timeSectionAccumlateNano = 0;
                 timeSectionTickAction(index, nowHour, meta.timeSectionDuration(index));
             }
         }
+        timeSectionAccumlateNano += diffNano;
     }
 
     private void dayTickAction() {

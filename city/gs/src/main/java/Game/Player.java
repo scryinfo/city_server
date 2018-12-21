@@ -61,15 +61,27 @@ public class Player {
         if(level != null && level >= lv)
             return;
         goodLv.put(mId, lv);
+        itemChangeAction(mId, lv);
+    }
 
-        // create role
-        if(city != null) {
+    private void itemChangeAction(int mId, int lv) {
+        if (city != null) { // null when role just be created
             city.forEachBuilding(id(), b -> {
                 if (b instanceof FactoryBase)
                     ((FactoryBase) b).updateLineQuality(mId, lv);
             });
-            this.send(Shared.Package.create(GsCode.OpCode.newItem_VALUE, Gs.IntNum.newBuilder().setId(mId).setNum(lv).build()));
+            this.send(Package.create(GsCode.OpCode.newItem_VALUE, Gs.IntNum.newBuilder().setId(mId).setNum(lv).build()));
         }
+    }
+
+    public OptionalInt addItemLv(int mId, int adds) {
+        Integer level = goodLv.get(mId);
+        if(level == null)
+            return OptionalInt.empty();
+        int lv = level+adds;
+        goodLv.put(mId, lv);
+        itemChangeAction(mId, lv);
+        return OptionalInt.of(lv);
     }
 
     public static final class Info {
