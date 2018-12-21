@@ -47,7 +47,6 @@ public class MailBox {
     }
 
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(2));
-
     void update(long diffNano) {
         if (this.timer.update(diffNano)) {
             GameDb.delOverdueMail();
