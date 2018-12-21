@@ -112,6 +112,7 @@ public class NpcManager {
         }
         int nextSectionHours =  city.nextTimeSectionDuration();
         this.reCalcuWaitToUpdate = (nextSectionHours != currentSectionHours);
+        this.updateTimesAtNextTimeSection = (int) (TimeUnit.HOURS.toNanos(nextSectionHours) / City.UpdateIntervalNano);
         for (int i = 0; i < updateTimesAtNextTimeSection; i++) {
             waitToUpdateNext.add(new HashSet<>());
         }
