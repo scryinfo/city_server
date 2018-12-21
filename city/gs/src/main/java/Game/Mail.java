@@ -59,6 +59,7 @@ public class Mail {
         ts = System.currentTimeMillis();
         read = false;        //默认值为false,未读
     }
+
     public Mail(int type, UUID playerId) {
         id = UUID.randomUUID();
         this.playerId = playerId;
@@ -66,7 +67,9 @@ public class Mail {
         ts = System.currentTimeMillis();
         read = false;
     }
-    protected Mail(){}
+
+    protected Mail() {
+    }
 
     @Id
     private UUID id;
@@ -74,7 +77,7 @@ public class Mail {
     private UUID playerId;
     private int type;
 
-    @Type( type = "int-array" )
+    @Type(type = "int-array")
     @Column(
             name = "paras",
             columnDefinition = "integer[]"

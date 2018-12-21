@@ -600,24 +600,15 @@ public class GameDb {
     public static void delOverdueMail() {
         Transaction transaction = null;
         StatelessSession session = null;
-
         try {
             session = sessionFactory.openStatelessSession();
             transaction = session.beginTransaction();
 
             long now = System.currentTimeMillis();
-            String sqlSelect = "select ts from Mail";
-            List ts = session.createQuery(sqlSelect).list();
-            if (null != ts && ts.size() != 0) {
-                for (Object t : ts) {
-                    Long sendTs = Long.valueOf(String.valueOf(t));
-                    if (sendTs < (now - (7 * 24 * 60 * 60 * 1000))) {
-                        session.createQuery("delete from Mail where ts = :x")
-                                .setParameter("x", t)
-                                .executeUpdate();
-                    }
-                }
-            }
+            long diffTs = now - TimeUnit.HOURS.toMillis(7 * 24);
+            session.createSQLQuery("DELETE FROM Mail WHERE ts < :x")
+                    .setParameter("x", diffTs)
+                    .executeUpdate();
             transaction.commit();
         } catch (RuntimeException e) {
             transaction.rollback();
