@@ -7,9 +7,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.UUID;
 
 @TypeDefs({
@@ -19,6 +17,7 @@ import java.util.UUID;
         )
 })
 @Entity
+@Table(name = "Mail",indexes={@Index(name="ind_mail_ts",columnList="ts")})
 public class Mail {
 
     public enum MailType {
@@ -37,7 +36,7 @@ public class Mail {
         FRIENDS_NOTICE(13),
         LAND_TRANSACTION(14),
         AD_SPACE_EXPIRE(15),
-        RETAIL_STORE_MERCHANDISE(16),
+        RETAIL_SHOP_MERCHANDISE(16),
         PARK_TICKET_REVENUE(17);
 
         private int mailType;
@@ -83,6 +82,7 @@ public class Mail {
             columnDefinition = "integer[]"
     )
     private int[] paras;
+
     private long ts;
     private boolean read;
 
