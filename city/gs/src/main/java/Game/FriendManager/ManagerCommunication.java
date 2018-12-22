@@ -6,15 +6,22 @@ import Game.GameSession;
 import Game.Player;
 import Shared.Package;
 import Shared.Util;
+import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
+import java.time.Duration;
 import java.util.UUID;
 
 public class ManagerCommunication
 {
     private static final Logger LOGGER = Logger.getLogger(ManagerCommunication.class);
+    //World Speech Frequency
+    private static final long DELAY = 1000;
     private static ManagerCommunication instance = new ManagerCommunication();
     private ManagerCommunication() { }
     public static ManagerCommunication getInstance()
@@ -22,11 +29,23 @@ public class ManagerCommunication
         return instance;
     }
 
+    private static LoadingCache<UUID, Long> worldLimit = CacheBuilder.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(3))
+            .concurrencyLevel(1)
+            .maximumSize(10000).build(new CacheLoader<UUID, Long>() {
+                @Override
+                public Long load(UUID key)
+                {
+                    return null;
+                }
+            });
+
     public void processing(Gs.CommunicationReq communicationReq, Player player)
     {
         switch (communicationReq.getChannel())
         {
             case WORLD:
+                messageToEveryone(communicationReq, player);
                 break;
             case GROUP:
                 break;
@@ -39,29 +58,60 @@ public class ManagerCommunication
         }
     }
 
-
-    private void chatWithPerson(Gs.CommunicationReq communicationReq, Player player)
+    private void messageToEveryone(Gs.CommunicationReq communicationReq, Player player)
     {
-        if (communicationReq.hasChannelId())
+        if (!Strings.isNullOrEmpty(communicationReq.getMsg()))
         {
-            UUID friend_id = Util.toUuid(communicationReq.getChannelId().toByteArray());
-            //blacklist
-            if (GameDb.queryPlayer(friend_id).getBlacklist().contains(player.id()))
+            Long old = worldLimit.getIfPresent(player.id());
+            Long now = System.currentTimeMillis();
+            if (old == null || now - old > DELAY)
             {
-                //邮件通知黑名单发送消息失败
-                return;
+                worldLimit.put(player.id(), now);
+                Gs.CommunicationProces.Builder builder = Gs.CommunicationProces.newBuilder();
+                builder.setChannel(communicationReq.getChannel())
+                        .setId(Util.toByteString(player.id()))
+                        .setName(player.getName())
+                        .setMsg(communicationReq.getMsg())
+                        .setTime(now);
+                GameServer.allGameSessions.values().forEach(gameSession ->{
+                    if (!gameSession.getPlayer().getBlacklist().contains(player.id()))
+                    {
+                        gameSession.write(Package.create(GsCode.OpCode.roleCommunication_VALUE, builder.build()));
+                    }
+                });
             }
             else
             {
-                GameSession gameSession = GameServer.allGameSessions.get(friend_id);
+                GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE));
+            }
+        }
+    }
+
+
+    private void chatWithPerson(Gs.CommunicationReq communicationReq, Player player)
+    {
+        if (communicationReq.hasChannelId() &&
+                !Strings.isNullOrEmpty(communicationReq.getMsg()))
+        {
+            UUID friend_id = Util.toUuid(communicationReq.getChannelId().toByteArray());
+            //blacklist
+            if (GameDb.queryPlayer(friend_id).getBlacklist().contains(player.id())
+                    || player.getBlacklist().contains(friend_id))
+            {
+                GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE));
+            }
+            else
+            {
                 OfflineMessage message = new OfflineMessage(player.id(),
                         Util.toUuid(communicationReq.getChannelId().toByteArray()),
                         communicationReq.getMsg(), player.getName());
                 message.setTime(System.currentTimeMillis());
-
+                //send to self
+                sendMsgToPersion(GameServer.allGameSessions.get(player.id()), message);
+                GameSession gameSession = GameServer.allGameSessions.get(friend_id);
                 if (gameSession != null)
                 {
-                    sendMsgToPersion(gameSession,message);
+                    sendMsgToPersion(gameSession, message);
                 }
                 //offline save message
                 else
@@ -79,6 +129,7 @@ public class ManagerCommunication
                 .setName(message.getFrom_name())
                 .setMsg(message.getMsg());
         builder.setTime(message.getTime());
+        builder.setChannelId(Util.toByteString(message.getTo_id()));
 
         //friend
         if (FriendManager.playerFriends.getUnchecked(message.getTo_id()).contains(message.getFrom_id()))

@@ -110,6 +110,13 @@ public class FriendManager
         }
     }
 
+    public void deleteFriendWithBlacklist(Player player,UUID fid)
+    {
+        GameDb.deleteFriendWithBlacklist(player, fid);
+        deleteCache(player.id(), fid);
+        deleteCache(fid, player.id());
+    }
+
     public void deleteFriend(UUID pid,UUID fid)
     {
         GameDb.deleteFriend(pid, fid);
