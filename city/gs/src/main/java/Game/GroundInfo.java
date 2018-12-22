@@ -27,6 +27,8 @@ public class GroundInfo implements Serializable {
     int rentPreDay;
     int paymentCycleDays;
     int deposit;
+    int rentDaysMin;
+    int rentDaysMax;
     int rentDays;
     UUID renterId;
     UUID rentTransactionId;
@@ -43,13 +45,15 @@ public class GroundInfo implements Serializable {
     protected GroundInfo() {
     }
     public boolean sameAs(RentPara rentPara) {
-        return rentPara.paymentCycleDays == paymentCycleDays && rentPara.rentDays == rentDays && rentPara.deposit == deposit && rentPara.rentPreDay == rentPreDay;
+        return rentPara.paymentCycleDays == paymentCycleDays && rentPara.rentDaysMin == rentDaysMin && rentPara.rentDaysMax == rentDaysMax && rentPara.deposit == deposit && rentPara.rentPreDay == rentPreDay;
     }
     public void setBy(RentPara rentPara) {
         this.paymentCycleDays = rentPara.paymentCycleDays;
         this.rentDays = rentPara.rentDays;
         this.rentPreDay = rentPara.rentPreDay;
         this.deposit = rentPara.deposit;
+        this.rentDaysMin = rentPara.rentDaysMin;
+        this.rentDaysMax = rentPara.rentDaysMax;
     }
     public void rentOut(RentPara rentPara, UUID tid, UUID renterId, long now) {
         this.setBy(rentPara);
@@ -57,6 +61,7 @@ public class GroundInfo implements Serializable {
         this.renterId = renterId;
         this.rentBeginTs = now;
         this.payTs = this.rentBeginTs;
+        this.rentDays = rentPara.rentDays;
     }
     @Override
     public boolean equals(Object o) {
@@ -77,16 +82,19 @@ public class GroundInfo implements Serializable {
         builder.setOwnerId(Util.toByteString(ownerId))
                 .setX(x)
                 .setY(y);
-        if(renterId != null) {
-            builder.setRent(
-                    Gs.GroundInfo.Rent.newBuilder()
-                    .setRenterId(Util.toByteString(renterId))
-                    .setDeposit(deposit)
-                    .setPaymentCycleDays(paymentCycleDays)
-                    .setRentDays(rentDays)
-                    .setRentPreDay(rentPreDay)
-                    .setRentBeginTs(rentBeginTs)
-            );
+        if(sellPrice == 0) {
+            Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
+            if(renterId != null) {
+                giBuilder.setRenterId(Util.toByteString(renterId));
+                giBuilder.setRentDays(rentDays);
+                giBuilder.setRentBeginTs(rentBeginTs);
+            }
+            giBuilder.setRentDaysMin(rentDaysMin);
+            giBuilder.setRentDaysMax(rentDaysMax);
+            giBuilder.setDeposit(deposit);
+            giBuilder.setPaymentCycleDays(paymentCycleDays);
+            giBuilder.setRentPreDay(rentPreDay);
+            builder.setRent(giBuilder);
         }
         else if(sellPrice > 0) {
             builder.setSell(Gs.GroundInfo.Sell.newBuilder()

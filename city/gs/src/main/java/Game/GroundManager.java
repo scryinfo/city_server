@@ -143,9 +143,7 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            if(i == null)
-                return false;
-            if(!i.sameAs(rentPara))
+            if(i == null || i.inSell() || !i.sameAs(rentPara))
                 return false;
             gis.add(i);
         }
