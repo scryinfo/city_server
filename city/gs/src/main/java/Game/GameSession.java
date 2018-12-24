@@ -1,10 +1,7 @@
 package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
-import Game.FriendManager.FriendManager;
-import Game.FriendManager.FriendRequest;
-import Game.FriendManager.ManagerCommunication;
-import Game.FriendManager.OfflineMessage;
+import Game.FriendManager.*;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -67,24 +64,34 @@ public class GameSession {
 	public void update(long diffNano){
 		
 	}
-	public void logout(){
+	public void logout(boolean isEvict){
 		if(!this.roleLogin()){
 			return;
 		}
-		GroundAuction.instance().unregist(this.channelId);
-		player.offline();
-		GameDb.evict(player);
-		//City.instance().execute(()->GameDb.evict(player));
-		GameServer.allGameSessions.remove(id());
-		//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
-		//offline action of validate
-		Validator.getInstance().unRegist(accountName, token);
-		logger.debug("account: " + player.getAccount() + " logout");
+		if (isEvict)
+		{
+			GroundAuction.instance().unregist(this.channelId);
+			player.offline();
+			GameDb.evict(player);
+			//City.instance().execute(()->GameDb.evict(player));
+			GameServer.allGameSessions.remove(id());
+			//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
+			//offline action of validate
+			Validator.getInstance().unRegist(accountName, token);
+			logger.debug("account: " + player.getAccount() + " logout");
 
-		//Notify friends
-		FriendManager.getInstance().broadcastStatue(player.id(),false);
+			//Notify friends
+			FriendManager.getInstance().broadcastStatue(player.id(),false);
+		}
+		//re-login
+		else
+		{
+			GroundAuction.instance().regist(this.channelId);
+			GameServer.allGameSessions.get(id()).disconnect();
+			logger.debug("account: " + player.getAccount() + " logout by re-login");
+		}
 	}
-	
+
 	public GameSession(ChannelHandlerContext ctx){
 		this.ctx = ctx;
 		this.channelId = ctx.channel().id();
@@ -275,17 +282,21 @@ public class GameSession {
 		}
 
 		player.setSession(this);
-		GameServer.allGameSessions.putIfAbsent(player.id(), this);
+		loginState = LoginState.ROLE_LOGIN;
+		if (GameServer.allGameSessions.containsKey(roleId))
+		{
+			logout(false);
+		}
+		GameServer.allGameSessions.put(player.id(), this);
 
 		player.setCity(City.instance()); // toProto will use Player.city
-		loginState = LoginState.ROLE_LOGIN;
 		logger.debug("account: " + this.accountName + " login");
 
 		this.write(Package.create(cmd, player.toProto()));
 
 		City.instance().add(player); // will send UnitCreate
 		player.online();
-		toDoOnline();
+		sendSocialInfo();
 
 		MailBox.instance().getAllMails(roleId);
 	}
@@ -1188,76 +1199,70 @@ public class GameSession {
 	}
 
 	//wxj========================================================
-	private void toDoOnline()
+	private void sendSocialInfo()
 	{
-		//async notify friend online
-		City.instance().execute(() -> {
-			FriendManager.getInstance().broadcastStatue(player.id(), true);
-		});
+		//push blacklist
+		Gs.RoleInfos.Builder builder1 = Gs.RoleInfos.newBuilder();
+		try
+		{
+			GameDb.getPlayerInfo(player.getBlacklist()).forEach(info -> {
+				builder1.addInfo(infoToRoleInfo(info));
+			});
+		}
+		catch (ExecutionException e)
+		{
+			logger.fatal("GameSession.toDoOnline(): push blacklist failed.");
+			e.printStackTrace();
+		}
+		this.write(Package.create(GsCode.OpCode.getBlacklist_VALUE, builder1.build()));
 
-		City.instance().execute(()->{
-			//push blacklist
-			Gs.RoleInfos.Builder builder1 = Gs.RoleInfos.newBuilder();
+		//push friend addition request
+		List<FriendRequest> list = GameDb.getFriendRequest(null, player.id());
+		Gs.RequestFriend.Builder builder = Gs.RequestFriend.newBuilder();
+		UUID from_id = null;
+		List<FriendRequest> toBeDel = new ArrayList<>();
+		List<FriendRequest> toBeUpdate = new ArrayList<>();
+		for (FriendRequest fr : list)
+		{
+			//only send 10 times
+			if (fr.getCount() > 10)
+			{
+				toBeDel.add(fr);
+				continue;
+			}
+			from_id = fr.getFrom_id();
+			String name = "";
 			try
 			{
-				GameDb.getPlayerInfo(player.getBlacklist()).forEach(info -> {
-					builder1.addInfo(infoToRoleInfo(info));
-				});
+				for (Player.Info i :
+						GameDb.getPlayerInfo(ImmutableList.of(from_id)))
+				{
+					name = i.getName();
+				}
 			}
 			catch (ExecutionException e)
 			{
-				logger.fatal("GameSession.toDoOnline(): push blacklist failed.");
+				logger.fatal("get player name failed : id=" + from_id);
 				e.printStackTrace();
 			}
-			this.write(Package.create(GsCode.OpCode.getBlacklist_VALUE, builder1.build()));
-
-			//push friend addition request
-			List<FriendRequest> list = GameDb.getFriendRequest(null, player.id());
-			Gs.RequestFriend.Builder builder = Gs.RequestFriend.newBuilder();
-			UUID from_id = null;
-			List<FriendRequest> toBeDel = new ArrayList<>();
-			List<FriendRequest> toBeUpdate = new ArrayList<>();
-			for (FriendRequest fr : list)
-			{
-				//only send three times
-				if (fr.getCount() > 100)
-				{
-					toBeDel.add(fr);
-					continue;
-				}
-				from_id = fr.getFrom_id();
-				String name = "";
-				try
-				{
-					for (Player.Info i :
-							GameDb.getPlayerInfo(ImmutableList.of(from_id)))
-					{
-						name = i.getName();
-					}
-				}
-				catch (ExecutionException e)
-				{
-					logger.fatal("get player name failed : id=" + from_id);
-					e.printStackTrace();
-				}
-				builder.setId(Util.toByteString(from_id))
-						.setName(name)
-						.setDesc(fr.getDescp());
-				this.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
-				fr.setCount(fr.getCount() + 1);
-				toBeUpdate.add(fr);
-			}
-			GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
-		});
+			builder.setId(Util.toByteString(from_id))
+					.setName(name)
+					.setDesc(fr.getDescp());
+			this.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
+			fr.setCount(fr.getCount() + 1);
+			toBeUpdate.add(fr);
+		}
+		GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
 
 		//push offline message
-		City.instance().execute(()->{
-			List<OfflineMessage> lists = GameDb.getOfflineMsg(player.id());
-			lists.forEach(message -> {
-				ManagerCommunication.getInstance().sendMsgToPersion(this, message);
-			});
-			GameDb.delete(lists);
+		List<OfflineMessage> lists = GameDb.getOfflineMsg(player.id());
+		lists.forEach(message -> {
+			ManagerCommunication.getInstance().sendMsgToPersion(this, message);
 		});
+		GameDb.delete(lists);
+
+		//notify friend online
+		FriendManager.getInstance().broadcastStatue(player.id(), true);
 	}
 	public void searchPlayerByName(short cmd, Message message)
 	{
@@ -1297,8 +1302,7 @@ public class GameSession {
 		UUID targetId = Util.toUuid(addMsg.getId().toByteArray());
 		if (!FriendManager.playerFriends.getUnchecked(id()).contains(targetId))
 		{
-			if (player.getBlacklist().contains(targetId)
-					|| GameDb.queryPlayer(targetId).getBlacklist().contains(player.id()))
+			if (GameDb.queryPlayer(targetId).getBlacklist().contains(player.id()))
 			{
 				//邮件通知黑名单拒绝添加
 			}
@@ -1328,12 +1332,19 @@ public class GameSession {
 	{
 		Gs.ByteBool result = (Gs.ByteBool) message;
 		UUID sourceId = Util.toUuid(result.getId().toByteArray());
-		if (result.getB())
+		if (result.getB() &&
+				!FriendManager.playerFriends.getUnchecked(player.id()).contains(sourceId))
 		{
 			FriendManager.getInstance().saveFriendship(sourceId, player.id());
+			Player temp = GameDb.queryPlayer(sourceId);
+			if (temp.getBlacklist().contains(player.id()))
+			{
+				temp.getBlacklist().remove(player.id());
+				GameDb.saveOrUpdate(temp);
+			}
 			Gs.RoleInfo firend = infoToRoleInfo(GameDb.getPlayerInfo(sourceId));
 			this.write(
-				Package.create(GsCode.OpCode.addFriendSucess_VALUE, firend));
+					Package.create(GsCode.OpCode.addFriendSucess_VALUE, firend));
 			GameSession gameSession = GameServer.allGameSessions.get(sourceId);
 			if (gameSession != null)
 			{
@@ -1360,8 +1371,17 @@ public class GameSession {
 	public void addBlacklist(short cmd, Message message)
 	{
 		Gs.Id id = (Gs.Id) message;
-		player.getBlacklist().add(Util.toUuid(id.getId().toByteArray()));
-		GameDb.saveOrUpdate(player);
+		if (!FriendManager.playerFriends.getUnchecked(player.id())
+				.contains(Util.toUuid(id.getId().toByteArray())))
+		{
+			player.getBlacklist().add(Util.toUuid(id.getId().toByteArray()));
+			GameDb.saveOrUpdate(player);
+		}
+		else
+		{
+			FriendManager.getInstance().deleteFriendWithBlacklist(player,
+					Util.toUuid(id.getId().toByteArray()));
+		}
 		Player.Info info = GameDb.getPlayerInfo(Util.toUuid(id.getId().toByteArray()));
 		if (info != null)
 		{
