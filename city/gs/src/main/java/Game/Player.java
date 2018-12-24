@@ -138,7 +138,7 @@ public class Player {
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
 
-    String des;
+    String des = "";
 
     String companyName;
 

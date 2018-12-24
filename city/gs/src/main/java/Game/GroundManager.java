@@ -172,24 +172,24 @@ public class GroundManager {
         }
     }
 
-    public UUID rentGround(Player renter, List<Coordinate> coordinates, RentPara rentPara) {
+    public boolean rentGround(Player renter, List<Coordinate> coordinates, RentPara rentPara) {
         UUID ownerId = null;
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            if(i == null)
-                return null;
-            if(!i.sameAs(rentPara))
-                return null;
-            if(ownerId == null)
+            if (i == null)
+                return false;
+            if (!i.sameAs(rentPara))
+                return false;
+            if (ownerId == null)
                 ownerId = i.ownerId;
             else {
-                if(!ownerId.equals(i.ownerId))
-                    return null;
+                if (!ownerId.equals(i.ownerId))
+                    return false;
             }
         }
 
-        if(renter.money() < rentPara.requiredCost())
-            return null;
+//        if(renter.money() < rentPara.requiredCost())
+//            return null;
         renter.decMoney(rentPara.requiredPay());
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(rentPara.requiredPay());
@@ -207,7 +207,7 @@ public class GroundManager {
         updates.add(renter);
         GameDb.saveOrUpdate(updates);
         this.broadcast(gis);
-        return tid;
+        return true;
     }
 
     public boolean sellGround(UUID id, Set<Coordinate> coordinates, int price) {

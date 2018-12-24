@@ -366,6 +366,16 @@ public class GameSession {
 		if(b.startBusiness(player))
 			this.write(Package.create(cmd));
 	}
+	public void shutdownBusiness(short cmd, Message message) {
+		Gs.Bytes c = (Gs.Bytes)message;
+		UUID id = Util.toUuid(c.toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || !b.ownerId().equals(player.id()))
+			return;
+		b.shutdownBusiness(player);
+		this.write(Package.create(cmd));
+	}
+
 //	public void addBuilding(short cmd, Message message) {
 //		Gs.AddBuilding c = (Gs.AddBuilding) message;
 //		int id = c.getId();
@@ -945,7 +955,7 @@ public class GameSession {
 	}
 	public void rentOutGround(short cmd, Message message) {
 		Gs.GroundRent c = (Gs.GroundRent)message;
-		RentPara rentPara = new RentPara(c.getRentPreDay(), c.getPaymentCycleDays(), c.getDeposit(), c.getRentDaysMin(), c.getRentDaysMax());
+		RentPara rentPara = new RentPara(c.getRentPreDay(), c.getDeposit(), c.getRentDaysMin(), c.getRentDaysMax());
 		if(!rentPara.valid())
 			return;
 		List<Coordinate> coordinates = new ArrayList<>(c.getCoordCount());
@@ -958,20 +968,16 @@ public class GameSession {
 	}
 	public void rentGround(short cmd, Message message) {
 		Gs.RentGround c = (Gs.RentGround)message;
-		RentPara rentPara = new RentPara(c.getInfo().getRentPreDay(), c.getInfo().getPaymentCycleDays(), c.getInfo().getDeposit(), c.getInfo().getRentDaysMin(), c.getInfo().getRentDaysMax(), c.getDays());
+		RentPara rentPara = new RentPara(c.getInfo().getRentPreDay(), c.getDays(), c.getInfo().getDeposit(), c.getInfo().getRentDaysMin(), c.getInfo().getRentDaysMax(), c.getDays());
 		if(!rentPara.valid())
 			return;
 		List<Coordinate> coordinates = new ArrayList<>(c.getInfo().getCoordCount());
 		for(Gs.MiniIndex i : c.getInfo().getCoordList()) {
 			coordinates.add(new Coordinate(i));
 		}
-		int cost = c.getInfo().getRentPreDay() * c.getInfo().getPaymentCycleDays() + c.getInfo().getDeposit();
-		if(player.money() < cost)
+		if(player.money() < rentPara.requiredCost())
 			return;
-		UUID transactionId = GroundManager.instance().rentGround(player, coordinates, rentPara);
-		if(transactionId != null) {
-			player.decMoney(c.getInfo().getRentPreDay() * c.getInfo().getPaymentCycleDays());
-			player.lockMoney(transactionId, c.getInfo().getDeposit());
+		if(GroundManager.instance().rentGround(player, coordinates, rentPara)) {
 			this.write(Package.create(cmd, c));
 		}
 		else

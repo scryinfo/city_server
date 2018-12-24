@@ -26,6 +26,9 @@ public abstract class Building {
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
 
+    private static final int HAPPY_MAX = 0;
+    private static final int HAPPY_MIN = 4;
+
     protected Building() {}
 
     public static double distance(Building a, Building b) {
@@ -43,10 +46,10 @@ public abstract class Building {
     public boolean outOfBusiness() {
         if(state != Gs.BuildingState.OPERATE_VALUE)
             return true;
-        return happy == 4;
+        return happy == HAPPY_MIN;
     }
     public boolean onStrike() {
-        return this.happy > 0 && this.happy < 4;
+        return this.happy > HAPPY_MAX && this.happy < HAPPY_MIN;
     }
     public static Building create(int id, Coordinate pos, UUID ownerId) {
         switch(MetaBuilding.type(id))
@@ -196,6 +199,10 @@ public abstract class Building {
 
     public void init() {
         this.calcuWorking(City.instance().currentHour());
+    }
+
+    public void shutdownBusiness(Player player) {
+        this.happy = HAPPY_MIN;
     }
 
     @Embeddable
@@ -385,13 +392,13 @@ public abstract class Building {
             return true;
         }
         else
-            happy = 4;
+            happy = HAPPY_MIN;
 
         return false;
     }
     private void calcuHappy() {
         if(salaryRatio == 100)
-            happy = 0;
+            happy = HAPPY_MAX;
         else if(salaryRatio < 100 && salaryRatio >= 80)
             happy = 1;
         else if(salaryRatio < 80 && salaryRatio >= 60)
@@ -399,6 +406,6 @@ public abstract class Building {
         else if(salaryRatio < 60 && salaryRatio >= 40)
             happy = 3;
         else if(salaryRatio < 40 && salaryRatio >= 0)
-            happy = 4;
+            happy = HAPPY_MIN;
     }
 }
