@@ -109,6 +109,9 @@ public class GroundInfo implements Serializable {
         renterId = null;
         rentTransactionId = null;
         payTs = 0;
+        rentDaysMax = 0;
+        rentDaysMin = 0;
+        rentDays = 0;
     }
 
     public boolean canSell(UUID id) {
@@ -119,5 +122,15 @@ public class GroundInfo implements Serializable {
     }
     public boolean inSell() {
         return !inRent() && sellPrice > 0;
+    }
+
+    public void cancelRent() {
+        assert renterId == null;
+        rentBeginTs = 0;
+        rentTransactionId = null;
+        payTs = 0;
+        rentDaysMax = 0;
+        rentDaysMin = 0;
+        rentDays = 0;
     }
 }

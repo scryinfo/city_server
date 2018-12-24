@@ -52,6 +52,7 @@ public class Player {
     @Transient
     boolean temp = false;
 
+
     public boolean isTemp() {
         return temp;
     }
@@ -82,6 +83,10 @@ public class Player {
         goodLv.put(mId, lv);
         itemChangeAction(mId, lv);
         return OptionalInt.of(lv);
+    }
+
+    public void setDes(String str) {
+        this.des = str;
     }
 
     public static final class Info {
@@ -133,6 +138,11 @@ public class Player {
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
 
+    String des;
+
+    String companyName;
+
+    boolean male;
     // for player, it position is GridIndex, Coordinate is too fine-grained
     @Embedded
     private GridIndex position;
@@ -156,10 +166,12 @@ public class Player {
     @Transient
     private GameSession session;
 
-    public Player(String name, String account) {
+    public Player(String name, String account, boolean male, String companyName) {
         this.id = UUID.randomUUID();
         this.account = account;
         this.name = name;
+        this.companyName = companyName;
+        this.male = male;
         this.offlineTs = 0;
         this.money = 0;
         this.position = new GridIndex(0,0);
@@ -185,11 +197,14 @@ public class Player {
     public Gs.Role toProto() {
         Gs.Role.Builder builder = Gs.Role.newBuilder();
         builder.setId(Util.toByteString(id()))
-            .setName(this.name)
-            .setMoney(this.money)
-            .setLockedMoney(this.lockedMoney())
-            .setPosition(this.position.toProto())
-            .setOfflineTs(this.offlineTs);
+                .setName(this.name)
+                .setCompanyName(companyName)
+                .setMale(this.male)
+                .setDes(this.des)
+                .setMoney(this.money)
+                .setLockedMoney(this.lockedMoney())
+                .setPosition(this.position.toProto())
+                .setOfflineTs(this.offlineTs);
         city.forEachBuilding(id, (Building b)->{
             b.appendDetailProto(builder.getBuysBuilder());
         });

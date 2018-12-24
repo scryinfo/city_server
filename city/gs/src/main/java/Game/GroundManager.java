@@ -272,4 +272,32 @@ public class GroundManager {
         }
         this.broadcast(gis);
     }
+
+    public boolean cancelSell(UUID id, Set<Coordinate> coordinates) {
+        List<GroundInfo> gis = new ArrayList<>();
+        for(Coordinate c : coordinates) {
+            GroundInfo i = info.get(c);
+            if (i == null || !i.ownerId.equals(id) || !i.inSell())
+                return false;
+            gis.add(i);
+        }
+        gis.forEach(i->i.sellPrice = 0);
+        GameDb.saveOrUpdate(gis);
+        this.broadcast(gis);
+        return true;
+    }
+
+    public boolean cancelRent(UUID id, Set<Coordinate> coordinates) {
+        List<GroundInfo> gis = new ArrayList<>();
+        for(Coordinate c : coordinates) {
+            GroundInfo i = info.get(c);
+            if (i == null || !i.ownerId.equals(id) || i.inRent())
+                return false;
+            gis.add(i);
+        }
+        gis.forEach(i->i.cancelRent());
+        GameDb.saveOrUpdate(gis);
+        this.broadcast(gis);
+        return true;
+    }
 }

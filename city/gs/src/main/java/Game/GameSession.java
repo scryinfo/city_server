@@ -291,8 +291,8 @@ public class GameSession {
 	}
 
 	public void createRole(short cmd, Message message) {
-		Gs.Str c = (Gs.Str)message;
-		Player p = new Player(c.getStr(), this.accountName);
+		Gs.CreateRole c = (Gs.CreateRole)message;
+		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName());
 		p.addMoney(999999999);
 		if(!GameDb.createPlayer(p)) {
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
@@ -981,6 +981,36 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
+
+	public void setRoleDescription(short cmd, Message message) {
+		Gs.Str c = (Gs.Str)message;
+		player.setDes(c.getStr());
+		GameDb.saveOrUpdate(player);
+	}
+	public void cancelRentGround(short cmd, Message message) {
+		Gs.MiniIndexCollection c = (Gs.MiniIndexCollection)message;
+		Set<Coordinate> coordinates = new HashSet<>();
+		for(Gs.MiniIndex i : c.getCoordList()) {
+			coordinates.add(new Coordinate(i));
+		}
+		if(GroundManager.instance().cancelRent(player.id(), coordinates))
+			this.write(Package.create(cmd));
+		else
+			this.write(Package.fail(cmd));
+
+	}
+	public void cancelSellGround(short cmd, Message message) {
+		Gs.MiniIndexCollection c = (Gs.MiniIndexCollection)message;
+		Set<Coordinate> coordinates = new HashSet<>();
+		for(Gs.MiniIndex i : c.getCoordList()) {
+			coordinates.add(new Coordinate(i));
+		}
+		if(GroundManager.instance().cancelSell(player.id(), coordinates))
+			this.write(Package.create(cmd));
+		else
+			this.write(Package.fail(cmd));
+	}
+
 	public void buyGround(short cmd, Message message) {
 		Gs.GroundSale c = (Gs.GroundSale)message;
 		if(c.getPrice() <= 0)
