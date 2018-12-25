@@ -977,7 +977,7 @@ public class GameSession {
 		for(Gs.MiniIndex i : c.getInfo().getCoordList()) {
 			coordinates.add(new Coordinate(i));
 		}
-		if(player.money() < rentPara.requiredCost())
+		if(player.money() < rentPara.requiredCost() * coordinates.size())
 			return;
 		if(GroundManager.instance().rentGround(player, coordinates, rentPara)) {
 			this.write(Package.create(cmd, c));

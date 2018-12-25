@@ -187,12 +187,10 @@ public class GroundManager {
                     return false;
             }
         }
-
-//        if(renter.money() < rentPara.requiredCost())
-//            return null;
-        renter.decMoney(rentPara.requiredPay());
+        int cost = rentPara.requiredPay() * coordinates.size();
+        renter.decMoney(cost);
         Player owner = GameDb.queryPlayer(ownerId);
-        owner.addMoney(rentPara.requiredPay());
+        owner.addMoney(cost);
         UUID tid = UUID.randomUUID();
         renter.lockMoney(tid, rentPara.deposit);
         long now = System.currentTimeMillis();
