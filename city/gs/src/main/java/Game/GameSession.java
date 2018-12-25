@@ -897,10 +897,12 @@ public class GameSession {
 		int cost = slot.rentPreDay + slot.deposit;
 		if(player.money() < cost)
 			return;
+		Player owner = GameDb.queryPlayer(building.ownerId());
+		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
-		GameDb.saveOrUpdate(Arrays.asList(pf, player));
+		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
 		this.write(Package.create(cmd, c));
 	}
 	public void getAllBuildingDetail(short cmd) {
