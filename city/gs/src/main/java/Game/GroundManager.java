@@ -67,7 +67,7 @@ public class GroundManager {
             }
             else {
                 if(now - head.payTs >= TimeUnit.DAYS.toMillis(head.paymentCycleDays)) {
-                    int cost = head.rentPreDay*head.paymentCycleDays;
+                    int cost = head.rentPreDay*head.paymentCycleDays*v.size();
                     Player renter = GameDb.queryPlayer(head.renterId);
                     Player owner = GameDb.queryPlayer(head.ownerId);
                     if(renter.money() < cost) {
@@ -93,10 +93,14 @@ public class GroundManager {
             rentGround.remove(tid);
         }
     }
+    // role id --> all grounds belong to this role
     @Transient
     Map<UUID, Set<GroundInfo>> playerGround = new HashMap<>();
+
+    // transactionId --> all grounds belong to this transaction
     @Transient
     Map<UUID, Set<GroundInfo>> rentGround = new HashMap<>();
+
     // memory is hundreds MB
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
@@ -204,6 +208,7 @@ public class GroundManager {
         }
         updates.add(renter);
         GameDb.saveOrUpdate(updates);
+        this.rentGround.put(tid, new HashSet<>(gis));
         this.broadcast(gis);
         return true;
     }
