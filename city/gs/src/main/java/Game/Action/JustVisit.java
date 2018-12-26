@@ -2,6 +2,7 @@ package Game.Action;
 
 
 import Game.*;
+import Shared.LogDb;
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;
@@ -44,6 +45,7 @@ public class JustVisit implements IAction {
             Player owner = GameDb.queryPlayer(chosen.ownerId());
             owner.addMoney(chosen.cost());
             npc.decMoney(chosen.cost());
+            LogDb.incomeVisit(owner.id(),owner.money(),chosen.cost(),chosen.id(),npc.id());
             GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
             npc.goFor(chosen);
         }

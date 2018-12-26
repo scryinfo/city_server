@@ -25,7 +25,14 @@ public class LogDb {
 	private static final String BUY_GROUND = "buyGround";
 	private static final String EXTEND_BAG = "extendBag";
 	//-------------------------------------------------
-	/*private static final String INCOME_EXCHANGE = "incomeExchange";*/
+	private static final String INCOME_EXCHANGE = "incomeExchange";
+	private static final String INCOME_INSHELF = "incomeInShelf";
+	private static final String INCOME_AD_SLOT = "incomeAdSlot";
+	private static final String INCOME_TECH = "incomeTech";
+	private static final String INCOME_RENT_GROUND = "incomeRentGround";
+	private static final String INCOME_BUY_GROUND = "incomeBuyGround";
+	private static final String INCOME_VISIT = "incomeVisit";
+	private static final String INCOME_SHOP = "incomeShop";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
@@ -36,6 +43,15 @@ public class LogDb {
 	private static MongoCollection<Document> buyTech;
 	private static MongoCollection<Document> buyGround;
 	private static MongoCollection<Document> extendBag;
+	//-----------------------------------------
+	private static MongoCollection<Document> incomeExchange;
+	private static MongoCollection<Document> incomeInShelf;
+	private static MongoCollection<Document> incomeAdSlot;
+	private static MongoCollection<Document> incomeTech;
+	private static MongoCollection<Document> incomeRentGround;
+	private static MongoCollection<Document> incomeBuyGround;
+	private static MongoCollection<Document> incomeVisit;
+	private static MongoCollection<Document> incomeShop;
 	public static void init(String url) {
 		connectionUrl = new MongoClientURI(url);
 		mongoClient = new MongoClient(connectionUrl);
@@ -60,6 +76,22 @@ public class LogDb {
 		extendBag = database.getCollection(EXTEND_BAG)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		/*test();*/
+		incomeExchange = database.getCollection(INCOME_EXCHANGE)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeInShelf = database.getCollection(INCOME_INSHELF)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeAdSlot = database.getCollection(INCOME_AD_SLOT)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeTech = database.getCollection(INCOME_TECH)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeRentGround = database.getCollection(INCOME_RENT_GROUND)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeBuyGround = database.getCollection(INCOME_BUY_GROUND)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeVisit = database.getCollection(INCOME_VISIT)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		incomeShop = database.getCollection(INCOME_SHOP)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
 	private static void test()
@@ -84,15 +116,12 @@ public class LogDb {
 
 	public static void startUp(){}
 
-
-
 	public static void buyInShelf(UUID roleId, UUID dstId, long money, int n, int price, UUID producerId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", dstId)
 				.append("m", money)
-				.append("c", n)
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId);
@@ -160,33 +189,23 @@ public class LogDb {
 	public static void rentGround(UUID roleId, long money, UUID ownerId, int cost, List<Positon> positons)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
-		List<Document> pDList = new ArrayList<>();
-		for (Positon p : positons)
-		{
-			pDList.add(p.toDocument());
-		}
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("m", money)
 				.append("a", cost)
-				.append("p", pDList);
+				.append("p", positionToDoc(positons));
 		rentGround.insertOne(document);
 	}
 
 	public static void buyGround(UUID roleId, UUID ownerId, long money, int price, List<Positon> plist1)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
-		List<Document> pDList = new ArrayList<>();
-		for (Positon p : plist1)
-		{
-			pDList.add(p.toDocument());
-		}
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("m", money)
 				.append("s", price)
 				.append("a", price * plist1.size())
-				.append("p", pDList);
+				.append("p", positionToDoc(plist1));
 		buyGround.insertOne(document);
 	}
 
@@ -198,6 +217,108 @@ public class LogDb {
 				.append("a", cost)
 				.append("c", bagCapacity);
 		extendBag.insertOne(document);
+	}
+
+	public static void incomeExchange(UUID roleId, long money, UUID dstId, int n, int price, int producerId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r",roleId)
+				.append("d",dstId)
+				.append("m",money)
+				.append("s",price)
+				.append("a", n*price)
+				.append("i",producerId);
+		incomeExchange.insertOne(document);
+	}
+
+	public static void incomeInShelf(UUID roleId, UUID dstId, long money, int n, int price, UUID producerId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("d", dstId)
+				.append("m", money)
+				.append("p", price)
+				.append("a", n * price)
+				.append("i", producerId);
+		incomeInShelf.insertOne(document);
+	}
+
+	public static void incomeAdSlot(UUID roleId, long money, UUID bid, UUID slotId, int rentPreDay)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("b", bid)
+				.append("s", slotId)
+				.append("m", money)
+				.append("a", rentPreDay);
+		incomeAdSlot.insertOne(document);
+	}
+
+	public static void incomeTech(UUID roleId, UUID payId, long money, int price, int metaId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("d", payId)
+				.append("m", money)
+				.append("a", price)
+				.append("i", metaId);
+		incomeTech.insertOne(document);
+	}
+
+	public static void incomeRentGround(UUID roleId, long money, UUID payId, int cost, List<Positon> plist1)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("d", payId)
+				.append("m", money)
+				.append("a", cost)
+				.append("p", positionToDoc(plist1));
+		incomeRentGround.insertOne(document);
+	}
+
+	private static List<Document> positionToDoc(List<Positon> plist1)
+	{
+		List<Document> pDList = new ArrayList<>();
+		for (Positon p : plist1)
+		{
+			pDList.add(p.toDocument());
+		}
+		return pDList;
+	}
+
+	public static void incomeBuyGround(UUID roleId, UUID payId, long money, int price, List<Positon> plist1)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("d", payId)
+				.append("m", money)
+				.append("s", price)
+				.append("a", price * plist1.size())
+				.append("p", positionToDoc(plist1));
+		incomeBuyGround.insertOne(document);
+	}
+
+	public static void incomeVisit(UUID roldId, long money, int cost, UUID bId, UUID payId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roldId)
+				.append("d", payId)
+				.append("b", bId)
+				.append("m", money)
+				.append("a", cost);
+		incomeVisit.insertOne(document);
+	}
+
+	public static void incomeShop(UUID roleId, long money, int price, UUID npcId, UUID bId, UUID producerId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("d", npcId)
+				.append("b", bId)
+				.append("i", producerId)
+				.append("a", price)
+				.append("m", money);
+		incomeShop.insertOne(document);
 	}
 
 	public static class Positon

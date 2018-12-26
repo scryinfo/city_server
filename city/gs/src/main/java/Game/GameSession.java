@@ -514,6 +514,7 @@ public class GameSession {
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
+		LogDb.incomeInShelf(seller.id(),seller.id(),seller.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
 		LogDb.buyInShelf(player.id(),seller.id(),player.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
@@ -899,6 +900,7 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
+		LogDb.incomeAdSlot(owner.id(), owner.money(), bid, slotId, slot.rentPreDay);
 		LogDb.buyAdSlot(player.id(), player.money(), bid, slotId, slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
@@ -1195,6 +1197,7 @@ public class GameSession {
 		LogDb.buyTech(player.id(), sell.ownerId, player.money(), sell.price, sell.metaId);
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
+		LogDb.incomeTech(seller.id(), player.id(), seller.money(), sell.price, sell.metaId);
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
