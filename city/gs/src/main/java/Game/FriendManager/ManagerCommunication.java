@@ -21,7 +21,7 @@ public class ManagerCommunication
 {
     private static final Logger LOGGER = Logger.getLogger(ManagerCommunication.class);
     //World Speech Frequency
-    private static final long DELAY = 1000;
+    private static final long DELAY = 60000;
     private static ManagerCommunication instance = new ManagerCommunication();
     private ManagerCommunication() { }
     public static ManagerCommunication getInstance()

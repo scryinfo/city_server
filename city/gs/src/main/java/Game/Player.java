@@ -3,6 +3,7 @@ package Game;
 import Game.FriendManager.FriendManager;
 import Game.Listener.EvictListener;
 import Shared.DatabaseInfo;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
@@ -187,6 +188,7 @@ public class Player {
         int cost = 100;
         if(this.decMoney(100)) {
             this.bagCapacity += MetaData.getSysPara().bagCapacityDelta;
+            LogDb.extendBag(id, money, cost, bagCapacity);
             return true;
         }
         return false;

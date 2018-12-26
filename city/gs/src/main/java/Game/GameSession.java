@@ -514,6 +514,7 @@ public class GameSession {
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
+		LogDb.buyInShelf(player.id(),seller.id(),player.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 
@@ -898,6 +899,7 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
+		LogDb.buyAdSlot(player.id(), player.money(), bid, slotId, slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -948,6 +950,7 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
+		LogDb.payTransfer(player.id(), player.money(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
@@ -1189,6 +1192,7 @@ public class GameSession {
 			return;
 		if(!player.decMoney(sell.price))
 			return;
+		LogDb.buyTech(player.id(), sell.ownerId, player.money(), sell.price, sell.metaId);
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
 		player.addItem(sell.metaId, sell.lv);

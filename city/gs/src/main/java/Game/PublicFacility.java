@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import com.google.protobuf.Message;
@@ -288,6 +289,7 @@ public class PublicFacility extends Building {
                         ids.add(v.slot.id);
                     }
                     else {
+                        LogDb.buyAdSlot(renter.id(), renter.money(), this.id(), v.slot.id, v.slot.rentPreDay);
                         owner.addMoney(v.slot.rentPreDay);
                         v.payTs = now;
                     }

@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
+import Shared.LogDb;
 import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
@@ -193,6 +194,12 @@ public class GroundManager {
         }
         int cost = rentPara.requiredPay() * coordinates.size();
         renter.decMoney(cost);
+        List<LogDb.Positon> plist1 = new ArrayList<>();
+        for(Coordinate c : coordinates)
+        {
+            plist1.add(new LogDb.Positon(c.x, c.y));
+        }
+        LogDb.rentGround(renter.id(), renter.money(), ownerId, cost, plist1);
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(cost);
         UUID tid = UUID.randomUUID();
@@ -247,6 +254,12 @@ public class GroundManager {
         Player seller = GameDb.queryPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
+        List<LogDb.Positon> plist1 = new ArrayList<>();
+        for(Coordinate c : coordinates)
+        {
+            plist1.add(new LogDb.Positon(c.x, c.y));
+        }
+        LogDb.buyGround(buyer.id(),sellerId,buyer.money(),price,plist1);
         List updates = new ArrayList<>();
         for(GroundInfo i : gis) {
             i.ownerId = buyer.id();
