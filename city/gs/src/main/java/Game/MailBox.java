@@ -29,7 +29,7 @@ public class MailBox {
         GameServer.sendTo(Arrays.asList(playerId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
     }
 
-    void sendMail(int type, UUID playerId, int[] paras) {
+    void sendMail(int type, UUID playerId, String[] paras) {
         Mail mail = new Mail(type, playerId, paras);
         sendMailImpl(playerId, mail);
     }

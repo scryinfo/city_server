@@ -1,7 +1,7 @@
 package Game;
 
 import Shared.Util;
-import com.vladmihalcea.hibernate.type.array.IntArrayType;
+import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import gs.Gs;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -12,8 +12,8 @@ import java.util.UUID;
 
 @TypeDefs({
         @TypeDef(
-                name = "int-array",
-                typeClass = IntArrayType.class
+                name = "string-array",
+                typeClass = StringArrayType.class
         )
 })
 @Entity
@@ -33,11 +33,12 @@ public class Mail {
         LAND_LEASE(10),
         LAND_AUCTION_HIGHERPRICE(11),
         FINANCE(12),
-        FRIENDS_NOTICE(13),
-        LAND_TRANSACTION(14),
-        AD_SPACE_EXPIRE(15),
-        RETAIL_SHOP_MERCHANDISE(16),
-        PARK_TICKET_REVENUE(17);
+        ADD_FRIEND_FAIL(13),
+        ADD_FRIEND_REFUSED(14),
+        LAND_TRANSACTION(15),
+        AD_SPACE_EXPIRE(16),
+        RETAIL_SHOP_MERCHANDISE(17),
+        PARK_TICKET_REVENUE(18);
 
         private int mailType;
 
@@ -45,12 +46,31 @@ public class Mail {
             this.mailType = mailType;
         }
 
-        public int getMailType(int t) {
-            return t;
+        public int getMailType() {
+            return this.mailType;
         }
     }
 
-    public Mail(int type, UUID playerId, int[] paras) {
+    public enum ParaType {
+        PRODUCE_DEPARTMENT("ProduceDepartment"),
+        MATERIAL_FACTORY("MaterialFactory"),
+        RETAIL_SHOP("RetailShop"),
+        PUBLIC_FACILITY("PublicFacility"),
+        LABORATORY("Laboratory"),
+        APARTMENT("Apartment");
+
+        private String paraType;
+
+        ParaType(String paraType) {
+            this.paraType = paraType;
+        }
+
+        public String getParaType() {
+            return this.paraType;
+        }
+    }
+
+    public Mail(int type, UUID playerId, String[] paras) {
         id = UUID.randomUUID();
         this.playerId = playerId;
         this.type = type;
@@ -76,12 +96,12 @@ public class Mail {
     private UUID playerId;
     private int type;
 
-    @Type(type = "int-array")
+    @Type(type = "string-array")
     @Column(
             name = "paras",
-            columnDefinition = "integer[]"
+            columnDefinition = "text[]"
     )
-    private int[] paras;
+    private String[] paras;
 
     private long ts;
     private boolean read;
@@ -93,7 +113,7 @@ public class Mail {
         builder.setType(type);
         builder.setRead(read);
         if (null != paras && paras.length != 0) {
-            for (int p : paras) {
+            for (String p : paras) {
                 builder.addParas(p);
             }
         }

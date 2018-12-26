@@ -297,8 +297,6 @@ public class GameSession {
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		sendSocialInfo();
-
-		MailBox.instance().getAllMails(roleId);
 	}
 
 	public void createRole(short cmd, Message message) {
@@ -1313,6 +1311,8 @@ public class GameSession {
 			if (GameDb.queryPlayer(targetId).getBlacklist().contains(player.id()))
 			{
 				//邮件通知黑名单拒绝添加
+				String[] targetPlayer = {targetId.toString()};
+				MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_FAIL.getMailType(),player.id(),targetPlayer);
 			}
 			else
 			{
@@ -1365,6 +1365,8 @@ public class GameSession {
 		{
 			//refuse add
 			//邮件通知系统对方拒绝添加
+			String[] oppositePlayer = {player.id().toString()};
+			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_REFUSED.getMailType(),sourceId,oppositePlayer);
 		}
 		//remove record
 		GameDb.deleteFriendRequest(sourceId,player.id());
