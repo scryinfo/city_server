@@ -352,8 +352,8 @@ public class GameSession {
 	}
 
 	public void startBusiness(short cmd, Message message) {
-		Gs.Bytes c = (Gs.Bytes)message;
-		UUID id = Util.toUuid(c.toByteArray());
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
@@ -365,8 +365,8 @@ public class GameSession {
 			this.write(Package.create(cmd));
 	}
 	public void shutdownBusiness(short cmd, Message message) {
-		Gs.Bytes c = (Gs.Bytes)message;
-		UUID id = Util.toUuid(c.toByteArray());
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;

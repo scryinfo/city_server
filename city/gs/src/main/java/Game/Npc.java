@@ -151,7 +151,6 @@ public class Npc {
         return this.tempBuilding == null?this.born:this.tempBuilding;
     }
     public void readyForDestroy() {
-        this.goFor(this.born);
     }
     public void goHome() {
         if(apartment == null)
