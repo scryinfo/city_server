@@ -102,10 +102,12 @@ public class Mail {
     )
     private String[] paras;
 
+/*
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "mail_uuidPara", joinColumns = { @JoinColumn(name = "Mail_id", referencedColumnName = "id")})
     private Set<UUID> uuidParas = new HashSet<>();
     public Set<UUID> getUuidParas() { return uuidParas; }
+*/
 
     private long ts;
     private boolean read;
