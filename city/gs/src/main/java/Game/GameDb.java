@@ -599,6 +599,7 @@ public class GameDb {
 		return builder.build();
 	}
 
+	//llb=================================
 	public static Collection<Mail> getMail(UUID playerId) {
 		Collection<Mail> res = new ArrayList<>();
 		StatelessSession session = sessionFactory.openStatelessSession();
@@ -680,6 +681,8 @@ public class GameDb {
             }
         }
     }
+	//llb=================================
+
 	protected static final class TopGoodQty {
 		public TopGoodQty() {}
 

@@ -108,6 +108,8 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			//llb========================================================
 			table.put((short) GsCode.OpCode.getAllMails_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllMails"));
+			table.put((short) GsCode.OpCode.mailRead_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "mailRead"));
+			table.put((short) GsCode.OpCode.delMail_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "delMail"));
 
 			//===========================================================
 			if(GlobalConfig.debug()){

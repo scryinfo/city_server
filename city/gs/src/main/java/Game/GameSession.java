@@ -297,6 +297,7 @@ public class GameSession {
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		sendSocialInfo();
+		getAllMails(cmd);
 	}
 
 	public void createRole(short cmd, Message message) {
@@ -1311,8 +1312,6 @@ public class GameSession {
 			if (GameDb.queryPlayer(targetId).getBlacklist().contains(player.id()))
 			{
 				//邮件通知黑名单拒绝添加
-				String[] targetPlayer = {targetId.toString()};
-				MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_FAIL.getMailType(),player.id(),targetPlayer);
 			}
 			else
 			{
@@ -1360,13 +1359,13 @@ public class GameSession {
 						Package.create(GsCode.OpCode.addFriendSucess_VALUE,
 								playerToRoleInfo(player)));
 			}
+			//邮件通知添加好友成功
+			
+			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId);
 		}
 		else
 		{
 			//refuse add
-			//邮件通知系统对方拒绝添加
-			String[] oppositePlayer = {player.id().toString()};
-			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_REFUSED.getMailType(),sourceId,oppositePlayer);
 		}
 		//remove record
 		GameDb.deleteFriendRequest(sourceId,player.id());
@@ -1421,5 +1420,18 @@ public class GameSession {
 		mails.forEach(mail -> builder.addMail(mail.toProto()));
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void delMail(short cmd, Message message)	{
+		Gs.Id id = (Gs.Id) message;
+		MailBox.instance().deleteMail(Util.toUuid(id.getId().toByteArray()));
+		this.write(Package.create(cmd, id));
+	}
+
+	public void mailRead(short cmd, Message message) {
+		Gs.Id id = (Gs.Id) message;
+		MailBox.instance().mailRead(Util.toUuid(id.getId().toByteArray()));
+		this.write(Package.create(cmd, id));
+	}
+
 	//===========================================================
 }

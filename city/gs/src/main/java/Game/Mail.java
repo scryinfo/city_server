@@ -8,6 +8,8 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @TypeDefs({
@@ -31,14 +33,11 @@ public class Mail {
         INVENTIONS(8),
         LAND_AUCTION(9),
         LAND_LEASE(10),
-        LAND_AUCTION_HIGHERPRICE(11),
-        FINANCE(12),
-        ADD_FRIEND_FAIL(13),
-        ADD_FRIEND_REFUSED(14),
-        LAND_TRANSACTION(15),
-        AD_SPACE_EXPIRE(16),
-        RETAIL_SHOP_MERCHANDISE(17),
-        PARK_TICKET_REVENUE(18);
+        ADD_FRIEND_SUCCESS(11),
+        LAND_TRANSACTION(12),
+        AD_SPACE_EXPIRE(13),
+        RETAIL_SHOP_MERCHANDISE(14),
+        PARK_TICKET_REVENUE(15);
 
         private int mailType;
 
@@ -103,6 +102,11 @@ public class Mail {
     )
     private String[] paras;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "mail_uuidPara", joinColumns = { @JoinColumn(name = "Mail_id", referencedColumnName = "id")})
+    private Set<UUID> uuidParas = new HashSet<>();
+    public Set<UUID> getUuidParas() { return uuidParas; }
+
     private long ts;
     private boolean read;
 
@@ -119,5 +123,4 @@ public class Mail {
         }
         return builder.build();
     }
-
 }
