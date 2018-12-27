@@ -18,6 +18,6 @@ public class StatisticSession {
     }
 
     public void logout() {
-
+        this.ctx.disconnect();
     }
 }
