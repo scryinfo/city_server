@@ -325,11 +325,11 @@ public class City {
         });
         p.send(Package.create(GsCode.OpCode.unitCreate_VALUE, ucb.build()));
 
-        Gs.Bytes.Builder urb = Gs.Bytes.newBuilder();
-        this.forEachBuilding(leavingGrids, (Building b)->{
-            urb.addIds(ByteString.copyFrom(Util.toBytes(b.id())));
-        });
-        p.send(Package.create(GsCode.OpCode.unitRemove_VALUE, urb.build()));
+//        Gs.Bytes.Builder urb = Gs.Bytes.newBuilder();
+//        this.forEachBuilding(leavingGrids, (Building b)->{
+//            urb.addIds(ByteString.copyFrom(Util.toBytes(b.id())));
+//        });
+//        p.send(Package.create(GsCode.OpCode.unitRemove_VALUE, urb.build()));
     }
     private void updateVisibilityCreate(Player p) {
         Gs.UnitCreate.Builder ucb = Gs.UnitCreate.newBuilder();

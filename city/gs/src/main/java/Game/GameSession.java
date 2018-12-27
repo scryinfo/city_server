@@ -373,19 +373,6 @@ public class GameSession {
 		b.shutdownBusiness(player);
 		this.write(Package.create(cmd));
 	}
-
-//	public void addBuilding(short cmd, Message message) {
-//		Gs.AddBuilding c = (Gs.AddBuilding) message;
-//		int id = c.getId();
-//		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
-//			return;
-//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coordinate(c.getPos()), player.id());
-//		boolean ok = City.instance().addVirtualBuilding(building);
-//		if(!ok)
-//			this.write(Package.fail(cmd));
-//		else
-//			this.write(Package.create(cmd));
-//	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -699,6 +686,13 @@ public class GameSession {
 		Apartment a = (Apartment)b;
 		a.setRent(c.getNum());
 		this.write(Package.create(cmd, c));
+	}
+	public void queryPlayerBuildingIds(short cmd, Message message) {
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Gs.Bytes.Builder builder = Gs.Bytes.newBuilder();
+		City.instance().forEachBuilding(id, b->builder.addIds(Util.toByteString(b.id())));
+		this.write(Package.create(cmd, builder.build()));
 	}
 	public void ftyAddLine(short cmd, Message message) {
 		Gs.AddLine c = (Gs.AddLine) message;

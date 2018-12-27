@@ -91,13 +91,19 @@ public class Player {
     }
 
     public static final class Info {
-        public Info(UUID id, String name) {
+        public Info(UUID id, String name, String companyName, String des, boolean male) {
             this.id = id;
             this.name = name;
+            this.companyName = companyName;
+            this.des = des;
+            this.male = male;
         }
 
         UUID id;
         String name;
+        String companyName;
+        String des;
+        boolean male;
 
         public UUID getId()
         {

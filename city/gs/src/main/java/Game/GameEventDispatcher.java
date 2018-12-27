@@ -18,6 +18,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.heartBeat_VALUE, Wrapper.newWithMessage(Gs.HeartBeat.PARSER, GameSession.class, "heartBeat"));
 
 
+			table.put((short) GsCode.OpCode.queryPlayerBuildingIds_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryPlayerBuildingIds"));
 			table.put((short) GsCode.OpCode.getAllBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllBuildingDetail"));
 			table.put((short) GsCode.OpCode.cheat_VALUE, Wrapper.newWithMessageAsync(Gs.Str.PARSER, GameSession.class,"cheat"));
 			table.put((short) GsCode.OpCode.setRoleDescription_VALUE, Wrapper.newWithMessageAsync(Gs.Str.PARSER, GameSession.class,"setRoleDescription"));

@@ -96,7 +96,7 @@ public abstract class Building {
     }
     public void broadcastDelete() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
-        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.Bytes.newBuilder().addIds(Util.toByteString(id)).build());
+        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.UnitRemove.newBuilder().setId(Util.toByteString(id)).setX(this.coordinate.x).setY(this.coordinate.y).build());
         City.instance().send(gip, pack);
     }
     protected void sendToWatchers(Shared.Package p) {
