@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import common.Common;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
@@ -82,7 +83,7 @@ public class ManagerCommunication
             }
             else
             {
-                GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE));
+                GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE, Common.Fail.Reason.highFrequency));
             }
         }
     }
@@ -98,7 +99,7 @@ public class ManagerCommunication
             if (GameDb.queryPlayer(friend_id).getBlacklist().contains(player.id())
                     || player.getBlacklist().contains(friend_id))
             {
-                GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE));
+                GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE, Common.Fail.Reason.notAllow));
             }
             else
             {
