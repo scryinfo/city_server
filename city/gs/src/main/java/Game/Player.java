@@ -3,6 +3,7 @@ package Game;
 import Game.FriendManager.FriendManager;
 import Game.Listener.EvictListener;
 import Shared.DatabaseInfo;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
@@ -90,13 +91,41 @@ public class Player {
     }
 
     public static final class Info {
-        public Info(UUID id, String name) {
+        public Info(UUID id, String name,String companyName,boolean male,String des,int picture)
+        {
             this.id = id;
             this.name = name;
+            this.companyName = companyName;
+            this.male = male;
+            this.des = des;
+            this.picture = picture;
         }
-
         UUID id;
         String name;
+        String companyName;
+        String des;
+        boolean male;
+        int picture;
+
+        public String getDes()
+        {
+            return des;
+        }
+
+        public boolean isMale()
+        {
+            return male;
+        }
+
+        public int getPicture()
+        {
+            return picture;
+        }
+
+        public String getCompanyName()
+        {
+            return companyName;
+        }
 
         public UUID getId()
         {
@@ -138,11 +167,17 @@ public class Player {
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
 
-    String des = "";
+    @Column
+    private String des = "";
 
-    String companyName;
+    @Column
+    private String companyName;
 
-    boolean male;
+    @Column
+    private boolean male;
+
+    @Column
+    private int picture = 0;
     // for player, it position is GridIndex, Coordinate is too fine-grained
     @Embedded
     private GridIndex position;
@@ -187,6 +222,7 @@ public class Player {
         int cost = 100;
         if(this.decMoney(100)) {
             this.bagCapacity += MetaData.getSysPara().bagCapacityDelta;
+            LogDb.extendBag(id, money, cost, bagCapacity);
             return true;
         }
         return false;
@@ -346,4 +382,39 @@ public class Player {
     private Set<UUID> blacklist = new HashSet<>();
 
     public Set<UUID> getBlacklist() { return blacklist; }
+
+    public String getCompanyName()
+    {
+        return companyName;
+    }
+
+    public String getDes()
+    {
+        return des;
+    }
+
+    public void setCompanyName(String companyName)
+    {
+        this.companyName = companyName;
+    }
+
+    public int getPicture()
+    {
+        return picture;
+    }
+
+    public void setPicture(int picture)
+    {
+        this.picture = picture;
+    }
+
+    public boolean isMale()
+    {
+        return male;
+    }
+
+    public void setMale(boolean male)
+    {
+        this.male = male;
+    }
 }

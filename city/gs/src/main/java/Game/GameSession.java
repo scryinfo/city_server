@@ -353,8 +353,8 @@ public class GameSession {
 	}
 
 	public void startBusiness(short cmd, Message message) {
-		Gs.Bytes c = (Gs.Bytes)message;
-		UUID id = Util.toUuid(c.toByteArray());
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
@@ -366,27 +366,14 @@ public class GameSession {
 			this.write(Package.create(cmd));
 	}
 	public void shutdownBusiness(short cmd, Message message) {
-		Gs.Bytes c = (Gs.Bytes)message;
-		UUID id = Util.toUuid(c.toByteArray());
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
-		b.shutdownBusiness(player);
+		b.shutdownBusiness();
 		this.write(Package.create(cmd));
 	}
-
-//	public void addBuilding(short cmd, Message message) {
-//		Gs.AddBuilding c = (Gs.AddBuilding) message;
-//		int id = c.getId();
-//		if(MetaBuilding.type(id) != MetaBuilding.VIRTUAL)
-//			return;
-//		VirtualBuilding building = (VirtualBuilding) Building.create(id, new Coordinate(c.getPos()), player.id());
-//		boolean ok = City.instance().addVirtualBuilding(building);
-//		if(!ok)
-//			this.write(Package.fail(cmd));
-//		else
-//			this.write(Package.create(cmd));
-//	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -515,6 +502,8 @@ public class GameSession {
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		player.decMoney(cost);
+		LogDb.incomeInShelf(seller.id(),seller.id(),seller.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
+		LogDb.buyInShelf(player.id(),seller.id(),player.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 
@@ -698,6 +687,13 @@ public class GameSession {
 		Apartment a = (Apartment)b;
 		a.setRent(c.getNum());
 		this.write(Package.create(cmd, c));
+	}
+	public void queryPlayerBuildingIds(short cmd, Message message) {
+		Gs.Id c = (Gs.Id)message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Gs.Bytes.Builder builder = Gs.Bytes.newBuilder();
+		City.instance().forEachBuilding(id, b->builder.addIds(Util.toByteString(b.id())));
+		this.write(Package.create(cmd, builder.build()));
 	}
 	public void ftyAddLine(short cmd, Message message) {
 		Gs.AddLine c = (Gs.AddLine) message;
@@ -899,6 +895,8 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
+		LogDb.incomeAdSlot(owner.id(), owner.money(), bid, slotId, slot.rentPreDay);
+		LogDb.buyAdSlot(player.id(), player.money(), bid, slotId, slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -949,6 +947,7 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
+		LogDb.payTransfer(player.id(), player.money(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
@@ -1190,8 +1189,10 @@ public class GameSession {
 			return;
 		if(!player.decMoney(sell.price))
 			return;
+		LogDb.buyTech(player.id(), sell.ownerId, player.money(), sell.price, sell.metaId);
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
+		LogDb.incomeTech(seller.id(), player.id(), seller.money(), sell.price, sell.metaId);
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
@@ -1239,12 +1240,16 @@ public class GameSession {
 			}
 			from_id = fr.getFrom_id();
 			String name = "";
+			String companyName = "";
+			int pic = 0;
 			try
 			{
 				for (Player.Info i :
 						GameDb.getPlayerInfo(ImmutableList.of(from_id)))
 				{
 					name = i.getName();
+					companyName = i.getCompanyName();
+					pic = i.getPicture();
 				}
 			}
 			catch (ExecutionException e)
@@ -1254,7 +1259,9 @@ public class GameSession {
 			}
 			builder.setId(Util.toByteString(from_id))
 					.setName(name)
-					.setDesc(fr.getDescp());
+					.setDesc(fr.getDescp())
+					.setPic(pic)
+					.setCompanyName(companyName);
 			this.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
 			fr.setCount(fr.getCount() + 1);
 			toBeUpdate.add(fr);
@@ -1292,6 +1299,10 @@ public class GameSession {
 		return Gs.RoleInfo.newBuilder()
 				.setId(Util.toByteString(info.getId()))
 				.setName(info.getName())
+				.setCompanyName(info.getCompanyName())
+				.setDes(info.getDes())
+				.setMale(info.isMale())
+				.setPic(info.getPicture())
 				.build();
 	}
 
@@ -1300,9 +1311,12 @@ public class GameSession {
 		return Gs.RoleInfo.newBuilder()
 				.setId(Util.toByteString(player.id()))
 				.setName(player.getName())
+				.setCompanyName(player.getCompanyName())
+				.setDes(player.getDes())
+				.setMale(player.isMale())
+				.setPic(player.getPicture())
 				.build();
 	}
-
 	public void addFriend(short cmd, Message message)
 	{
 		Gs.ByteStr addMsg = (Gs.ByteStr) message;
@@ -1321,7 +1335,9 @@ public class GameSession {
 					Gs.RequestFriend.Builder builder = Gs.RequestFriend.newBuilder();
 					builder.setId(Util.toByteString(player.id()))
 							.setName(player.getName())
-							.setDesc(addMsg.getDesc());
+							.setDesc(addMsg.getDesc())
+							.setCompanyName(player.getCompanyName())
+							.setPic(player.getPicture());
 					gs.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
 
 				}

@@ -96,7 +96,7 @@ public abstract class Building {
     }
     public void broadcastDelete() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
-        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.Bytes.newBuilder().addIds(Util.toByteString(id)).build());
+        Package pack = Package.create(GsCode.OpCode.unitRemove_VALUE, Gs.UnitRemove.newBuilder().setId(Util.toByteString(id)).setX(this.coordinate.x).setY(this.coordinate.y).build());
         City.instance().send(gip, pack);
     }
     protected void sendToWatchers(Shared.Package p) {
@@ -201,8 +201,10 @@ public abstract class Building {
         this.calcuWorking(City.instance().currentHour());
     }
 
-    public void shutdownBusiness(Player player) {
+    public void shutdownBusiness() {
         this.happy = HAPPY_MIN;
+        this.state = Gs.BuildingState.SHUTDOWN_VALUE;
+        this.broadcastChange();
     }
 
     @Embeddable
@@ -388,7 +390,7 @@ public abstract class Building {
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
             GameDb.saveOrUpdate(updates);
-            LogDb.payOff(p.id(), id(), this.singleSalary(), this.allStaff.size());
+            LogDb.paySalary(p.id(), id(),p.money(), this.singleSalary(), this.allStaff.size());
             return true;
         }
         else
