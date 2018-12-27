@@ -201,8 +201,10 @@ public abstract class Building {
         this.calcuWorking(City.instance().currentHour());
     }
 
-    public void shutdownBusiness(Player player) {
+    public void shutdownBusiness() {
         this.happy = HAPPY_MIN;
+        this.state = Gs.BuildingState.SHUTDOWN_VALUE;
+        this.broadcastChange();
     }
 
     @Embeddable

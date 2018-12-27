@@ -370,7 +370,7 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
-		b.shutdownBusiness(player);
+		b.shutdownBusiness();
 		this.write(Package.create(cmd));
 	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
