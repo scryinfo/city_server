@@ -1239,12 +1239,16 @@ public class GameSession {
 			}
 			from_id = fr.getFrom_id();
 			String name = "";
+			String companyName = "";
+			int pic = 0;
 			try
 			{
 				for (Player.Info i :
 						GameDb.getPlayerInfo(ImmutableList.of(from_id)))
 				{
 					name = i.getName();
+					companyName = i.getCompanyName();
+					pic = i.getPicture();
 				}
 			}
 			catch (ExecutionException e)
@@ -1254,7 +1258,9 @@ public class GameSession {
 			}
 			builder.setId(Util.toByteString(from_id))
 					.setName(name)
-					.setDesc(fr.getDescp());
+					.setDesc(fr.getDescp())
+					.setPic(pic)
+					.setCompanyName(companyName);
 			this.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
 			fr.setCount(fr.getCount() + 1);
 			toBeUpdate.add(fr);
@@ -1292,6 +1298,10 @@ public class GameSession {
 		return Gs.RoleInfo.newBuilder()
 				.setId(Util.toByteString(info.getId()))
 				.setName(info.getName())
+				.setCompanyName(info.getCompanyName())
+				.setDes(info.getDes())
+				.setMale(info.isMale())
+				.setPic(info.getPicture())
 				.build();
 	}
 
@@ -1300,9 +1310,12 @@ public class GameSession {
 		return Gs.RoleInfo.newBuilder()
 				.setId(Util.toByteString(player.id()))
 				.setName(player.getName())
+				.setCompanyName(player.getCompanyName())
+				.setDes(player.getDes())
+				.setMale(player.isMale())
+				.setPic(player.getPicture())
 				.build();
 	}
-
 	public void addFriend(short cmd, Message message)
 	{
 		Gs.ByteStr addMsg = (Gs.ByteStr) message;
@@ -1323,7 +1336,9 @@ public class GameSession {
 					Gs.RequestFriend.Builder builder = Gs.RequestFriend.newBuilder();
 					builder.setId(Util.toByteString(player.id()))
 							.setName(player.getName())
-							.setDesc(addMsg.getDesc());
+							.setDesc(addMsg.getDesc())
+							.setCompanyName(player.getCompanyName())
+							.setPic(player.getPicture());
 					gs.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
 
 				}
