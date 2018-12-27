@@ -169,6 +169,9 @@ public abstract class Building {
     @Column(nullable = false)
     protected int state = Gs.BuildingState.OPERATE_VALUE;//WAITING_OPEN_VALUE;
 
+    @Column(nullable = false)
+    private long constructCompleteTs;
+
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
 
@@ -259,6 +262,7 @@ public abstract class Building {
         this.ownerId = ownerId;
         this.coordinate = pos;
         this.metaBuilding = meta;
+        this.constructCompleteTs = System.currentTimeMillis();
     }
     public final void destroy() {
         NpcManager.instance().delete(allStaff);
@@ -299,6 +303,7 @@ public abstract class Building {
                 .setState(Gs.BuildingState.valueOf(state))
                 .setSalary(salaryRatio)
                 .setHappy(happy)
+                .setConstructCompleteTs(constructCompleteTs)
                 .build();
     }
 
