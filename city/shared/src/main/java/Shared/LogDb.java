@@ -56,9 +56,8 @@ public class LogDb {
 		connectionUrl = new MongoClientURI(url);
 		mongoClient = new MongoClient(connectionUrl);
 		database = mongoClient.getDatabase("cityLog");
-		npcBuyInRetailCol = database.getCollection("retail");
-		npcBuyInRetailCol.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-
+		npcBuyInRetailCol = database.getCollection("retail")
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		paySalary = database.getCollection(PAY_SALARY)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buyInShelf = database.getCollection(BUY_INSHELF)
