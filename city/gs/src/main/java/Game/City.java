@@ -229,15 +229,16 @@ public class City {
         if(lastHour != nowHour)
         {
             hourTickAction(nowHour);
-            lastHour = nowHour;
             if(lastHour > nowHour)
                 dayTickAction();
+            lastHour = nowHour;
             int index = meta.indexOfHour(nowHour);
             if(index == -1) // still in the range
                 ;
             else if(currentTimeSectionIdx != index) {
                 timeSectionAccumlateNano = 0;
                 timeSectionTickAction(index, nowHour, meta.timeSectionDuration(index));
+                currentTimeSectionIdx = index;
             }
         }
         timeSectionAccumlateNano += diffNano;

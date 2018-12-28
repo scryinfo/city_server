@@ -520,6 +520,21 @@ public class MetaData {
         int m;
         int d;
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DayKey dayKey = (DayKey) o;
+            return y == dayKey.y &&
+                    m == dayKey.m &&
+                    d == dayKey.d;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(y, m, d);
+        }
+
         public DayKey() {
             LocalDateTime now = LocalDateTime.now();
             this.y = now.getYear() % 100;
