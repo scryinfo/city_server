@@ -4,6 +4,8 @@ import gs.Gs;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Embeddable
@@ -44,7 +46,15 @@ public class GridIndex implements Comparable<GridIndex> {
         res.r = new GridIndex(bx, by);
         return res;
     }
-
+    List<Coordinate> toCoordinates() {
+        List<Coordinate> res = new ArrayList<>();
+        for(int i = this.x*City.GridX; i < (this.x+1)*City.GridX; ++i) {
+            for(int j = this.y*City.GridY; j < (this.y+1)*City.GridY; ++j) {
+                res.add(new Coordinate(i,j));
+            }
+        }
+        return res;
+    }
     @Override
     public int compareTo(GridIndex o) {
         if(this.x < o.x)

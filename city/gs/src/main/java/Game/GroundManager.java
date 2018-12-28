@@ -3,6 +3,7 @@ package Game;
 import Game.Exceptions.GroundAlreadySoldException;
 import Shared.LogDb;
 import Shared.Package;
+import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
@@ -176,7 +177,18 @@ public class GroundManager {
             City.instance().send(p, pack);
         }
     }
-
+    public Gs.GroundChange getGroundProto(List<GridIndex> g) {
+        Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
+        for (GridIndex gridIndex : g) {
+            gridIndex.toCoordinates().forEach(c->{
+                GroundInfo i = info.get(c);
+                if(i != null) {
+                    builder.addInfo(i.toProto());
+                }
+            });
+        }
+        return builder.build();
+    }
     public boolean rentGround(Player renter, List<Coordinate> coordinates, RentPara rentPara) {
         UUID ownerId = null;
         for(Coordinate c : coordinates) {

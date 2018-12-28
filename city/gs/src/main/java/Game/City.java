@@ -331,6 +331,8 @@ public class City {
 //            urb.addIds(ByteString.copyFrom(Util.toBytes(b.id())));
 //        });
 //        p.send(Package.create(GsCode.OpCode.unitRemove_VALUE, urb.build()));
+
+        p.send(Package.create(GsCode.OpCode.groundChange_VALUE, GroundManager.instance().getGroundProto(goingGrids)));
     }
     private void updateVisibilityCreate(Player p) {
         Gs.UnitCreate.Builder ucb = Gs.UnitCreate.newBuilder();

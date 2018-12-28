@@ -687,11 +687,11 @@ public class GameSession {
 		a.setRent(c.getNum());
 		this.write(Package.create(cmd, c));
 	}
-	public void queryPlayerBuildingIds(short cmd, Message message) {
+	public void queryPlayerBuildings(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
-		Gs.Bytes.Builder builder = Gs.Bytes.newBuilder();
-		City.instance().forEachBuilding(id, b->builder.addIds(Util.toByteString(b.id())));
+		Gs.BuildingInfos.Builder builder = Gs.BuildingInfos.newBuilder();
+		City.instance().forEachBuilding(id, b->builder.addInfo(b.toProto()));
 		this.write(Package.create(cmd, builder.build()));
 	}
 	public void ftyAddLine(short cmd, Message message) {
