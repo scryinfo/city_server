@@ -89,7 +89,6 @@ public class Ground {
                     .setY(y)
                     .setRent(Gs.GroundInfo.Rent.newBuilder()
                         .setRentPreDay(rentPreDay)
-                        .setPaymentCycleDays(paymentCycleDays)
                         .setDeposit(deposit)
                         .setRentDays(rentDays))
                     .build();

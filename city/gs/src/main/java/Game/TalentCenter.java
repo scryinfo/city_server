@@ -26,8 +26,6 @@ public class TalentCenter extends Building {
 
     @PostLoad
     private void _1() {
-        //this.meta = MetaData.getRetailShop(this._d.metaId);
-        //this.metaBuilding = this.meta;
         this.meta = (MetaTalentCenter) super.metaBuilding;
     }
 

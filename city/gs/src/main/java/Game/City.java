@@ -229,15 +229,16 @@ public class City {
         if(lastHour != nowHour)
         {
             hourTickAction(nowHour);
-            lastHour = nowHour;
             if(lastHour > nowHour)
                 dayTickAction();
+            lastHour = nowHour;
             int index = meta.indexOfHour(nowHour);
             if(index == -1) // still in the range
                 ;
             else if(currentTimeSectionIdx != index) {
                 timeSectionAccumlateNano = 0;
                 timeSectionTickAction(index, nowHour, meta.timeSectionDuration(index));
+                currentTimeSectionIdx = index;
             }
         }
         timeSectionAccumlateNano += diffNano;
@@ -330,6 +331,8 @@ public class City {
 //            urb.addIds(ByteString.copyFrom(Util.toBytes(b.id())));
 //        });
 //        p.send(Package.create(GsCode.OpCode.unitRemove_VALUE, urb.build()));
+
+        p.send(Package.create(GsCode.OpCode.groundChange_VALUE, GroundManager.instance().getGroundProto(goingGrids)));
     }
     private void updateVisibilityCreate(Player p) {
         Gs.UnitCreate.Builder ucb = Gs.UnitCreate.newBuilder();
@@ -337,6 +340,7 @@ public class City {
             ucb.addInfo(b.toProto());
         });
         p.send(Package.create(GsCode.OpCode.unitCreate_VALUE, ucb.build()));
+        p.send(Package.create(GsCode.OpCode.groundChange_VALUE, GroundManager.instance().getGroundProto(p.getPosition().toSyncRange().toIndexList())));
     }
     public GridDiffs diff(GridIndexPair l, GridIndexPair r) {
         GridDiffs res = new GridDiffs();

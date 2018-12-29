@@ -81,6 +81,14 @@ class MetaCity {
         return this.timeSection[nextIndex(index)];
     }
 }
+class MetaTalent {
+    MetaTalent(Document d) {
+        this.id = d.getInteger("_id");
+        this.n = d.getDouble("numOneSec");
+    }
+    public int id;
+    double n;
+}
 abstract class MetaItem {
     public static final int MATERIAL = 21;
     public static final int GOOD = 22;
@@ -94,6 +102,7 @@ abstract class MetaItem {
         this.id = d.getInteger("_id");
         this.n = d.getDouble("numOneSec");
         this.useDirectly = d.getBoolean("default");
+        this.size = d.getInteger("size");
     }
     public int id;
     double n;
@@ -123,7 +132,6 @@ final class MetaMaterial extends MetaItem {
     MetaMaterial(Document d) {
         super(d);
     }
-
 }
 
 class AIBuilding extends ProbBase {
@@ -164,41 +172,6 @@ class AIBuilding extends ProbBase {
                 return new Shopping(aiId);
         }
         return null;
-    }
-}
-
-class MetaVirtualBuilding {
-    MetaVirtualBuilding(Document d) throws Exception {
-        this.id = d.getInteger("_id");
-        this.constructSec = d.getInteger("constructSec");
-        this.deconstructSec = d.getInteger("deconstructSec");
-        this.meta = MetaData.getBuilding(d.getInteger("buildingId"));
-        List<Integer> l = (List<Integer>)d.get("material");
-        assert l.size() % 2 == 0;
-        for(int i = 0; i < l.size(); i+=2) {
-            MetaMaterial m = MetaData.getMaterial(l.get(i));
-            if(m == null)
-                throw new Exception("can not find Material id: "+l.get(i));
-            int n = l.get(i+1);
-            material.put(m, n);
-        }
-    }
-    boolean valid(MetaMaterial m) {
-        return material.containsKey(m);
-    }
-    int id;
-    Map<MetaMaterial, Integer> material;
-    int constructSec;
-    int deconstructSec;
-    MetaBuilding meta;
-
-    public int totalCapacity() {
-        return material.entrySet().stream().mapToInt(e -> e.getKey().size*e.getValue()).reduce(Integer::sum).orElse(0);
-    }
-
-    public int size(MetaMaterial m) {
-        Integer n = material.get(m);
-        return n==null?0:n;
     }
 }
 class MetaApartment extends MetaBuilding {
@@ -466,7 +439,6 @@ public class MetaData {
     private static final TreeMap<Integer, MetaLaboratory> laboratory = new TreeMap<>();
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
     private static final TreeMap<Integer, MetaMaterialFactory> materialFactory = new TreeMap<>();
-    private static final TreeMap<Integer, MetaVirtualBuilding> virtualBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
     private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
@@ -520,6 +492,21 @@ public class MetaData {
         int m;
         int d;
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DayKey dayKey = (DayKey) o;
+            return y == dayKey.y &&
+                    m == dayKey.m &&
+                    d == dayKey.d;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(y, m, d);
+        }
+
         public DayKey() {
             LocalDateTime now = LocalDateTime.now();
             this.y = now.getYear() % 100;
@@ -544,9 +531,6 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(buildingSpendColName).find().forEach((Block<Document>) doc -> {
             buildingSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
         });
-    }
-    public static MetaVirtualBuilding getVirtualBuilding(int id) {
-        return virtualBuilding.get(id);
     }
     public static MetaBuilding getBuilding(int id) {
         switch(MetaBuilding.type(id)) {
