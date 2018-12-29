@@ -67,29 +67,6 @@ public class GroundManager {
                 updates.add(renter);
                 GameDb.saveOrUpdate(updates);
             }
-            else {
-                if(now - head.payTs >= TimeUnit.DAYS.toMillis(head.paymentCycleDays)) {
-                    int cost = head.rentPreDay*head.paymentCycleDays*v.size();
-                    Player renter = GameDb.queryPlayer(head.renterId);
-                    Player owner = GameDb.queryPlayer(head.ownerId);
-                    if(renter.money() < cost) {
-                        renter.spentLockMoney(head.rentTransactionId);
-                        owner.addMoney(head.deposit);
-                        v.forEach(i->i.endRent());
-                        del.add(k);
-                    }
-                    else {
-                        renter.decMoney(cost);
-                        owner.addMoney(cost);
-                        v.forEach(i->i.payTs = now);
-                    }
-                    List updates = new ArrayList<>();
-                    updates.addAll(v);
-                    updates.add(renter);
-                    updates.add(owner);
-                    GameDb.saveOrUpdate(updates);
-                }
-            }
         });
         for(UUID tid : del) {
             rentGround.remove(tid);
