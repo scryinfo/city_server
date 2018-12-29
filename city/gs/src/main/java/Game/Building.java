@@ -167,7 +167,7 @@ public abstract class Building {
     private int happy = 0;
 
     @Column(nullable = false)
-    protected int state = Gs.BuildingState.OPERATE_VALUE;//WAITING_OPEN_VALUE;
+    protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
 
     @Column(nullable = false)
     private long constructCompleteTs;
@@ -186,7 +186,7 @@ public abstract class Building {
     }
 
     public boolean startBusiness(Player player) {
-        if(state != Gs.BuildingState.WAITING_OPEN_VALUE)
+        if(state == Gs.BuildingState.OPERATE_VALUE)
             return false;
         if(!this.payOff(player))
             return false;
@@ -374,18 +374,21 @@ public abstract class Building {
         return res;
     }
     private void calcuWorking(int nowHour) {
-        Boolean w = isWorking(nowHour);
-        if(w == null)
-        {
-            int startIdx = Arrays.binarySearch(metaBuilding.startWorkHour[happy], nowHour);
-            int endHour = metaBuilding.endWorkHour[happy][-(startIdx+2)];
-            if(nowHour < endHour)
-                this.working = true;
-            else if(nowHour >= endHour)
-                this.working = false;
+        if(happy == HAPPY_MIN) {
+            this.working = false;
         }
         else {
-            this.working = w;
+            Boolean w = isWorking(nowHour);
+            if (w == null) {
+                int startIdx = Arrays.binarySearch(metaBuilding.startWorkHour[happy], nowHour);
+                int endHour = metaBuilding.endWorkHour[happy][-(startIdx + 2)];
+                if (nowHour < endHour)
+                    this.working = true;
+                else if (nowHour >= endHour)
+                    this.working = false;
+            } else {
+                this.working = w;
+            }
         }
     }
     private boolean payOff(Player p) {

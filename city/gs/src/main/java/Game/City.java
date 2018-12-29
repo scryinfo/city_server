@@ -340,6 +340,7 @@ public class City {
             ucb.addInfo(b.toProto());
         });
         p.send(Package.create(GsCode.OpCode.unitCreate_VALUE, ucb.build()));
+        p.send(Package.create(GsCode.OpCode.groundChange_VALUE, GroundManager.instance().getGroundProto(p.getPosition().toSyncRange().toIndexList())));
     }
     public GridDiffs diff(GridIndexPair l, GridIndexPair r) {
         GridDiffs res = new GridDiffs();

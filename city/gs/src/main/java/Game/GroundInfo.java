@@ -42,8 +42,7 @@ public class GroundInfo implements Serializable {
         this.y = y;
     }
 
-    protected GroundInfo() {
-    }
+    protected GroundInfo() {}
     public boolean sameAs(RentPara rentPara) {
         return rentPara.paymentCycleDays == paymentCycleDays && rentPara.rentDaysMin == rentDaysMin && rentPara.rentDaysMax == rentDaysMax && rentPara.deposit == deposit && rentPara.rentPreDay == rentPreDay;
     }
@@ -62,6 +61,15 @@ public class GroundInfo implements Serializable {
         this.rentBeginTs = now;
         this.payTs = this.rentBeginTs;
         this.rentDays = rentPara.rentDays;
+    }
+    public boolean inRenting() {
+        return this.rentDays > 0;
+    }
+    public boolean isRentOut() {
+        return this.rentTransactionId != null;
+    }
+    public boolean inSelling() {
+        return sellPrice > 0;
     }
     @Override
     public boolean equals(Object o) {
@@ -82,9 +90,9 @@ public class GroundInfo implements Serializable {
         builder.setOwnerId(Util.toByteString(ownerId))
                 .setX(x)
                 .setY(y);
-        if(sellPrice == 0) {
+        if(inRenting()) {
             Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
-            if(renterId != null) {
+            if(isRentOut()) {
                 giBuilder.setRenterId(Util.toByteString(renterId));
                 giBuilder.setRentDays(rentDays);
                 giBuilder.setRentBeginTs(rentBeginTs);
@@ -96,7 +104,7 @@ public class GroundInfo implements Serializable {
             giBuilder.setRentPreDay(rentPreDay);
             builder.setRent(giBuilder);
         }
-        else if(sellPrice > 0) {
+        else if(inSelling()) {
             builder.setSell(Gs.GroundInfo.Sell.newBuilder()
                 .setPrice(sellPrice)
             );
