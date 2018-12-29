@@ -1376,8 +1376,8 @@ public class GameSession {
 								playerToRoleInfo(player)));
 			}
 			//邮件通知添加好友成功
-			
-			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId);
+			UUID[] oppositeId = {player.id()};
+			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId,null,oppositeId);
 		}
 		else
 		{

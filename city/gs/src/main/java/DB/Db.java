@@ -5032,6 +5032,468 @@ public final class Db {
     // @@protoc_insertion_point(class_scope:DB.Int32Array)
   }
 
+  public interface BytesArrayOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated bytes i = 1;
+    /**
+     * <code>repeated bytes i = 1;</code>
+     */
+    java.util.List<com.google.protobuf.ByteString> getIList();
+    /**
+     * <code>repeated bytes i = 1;</code>
+     */
+    int getICount();
+    /**
+     * <code>repeated bytes i = 1;</code>
+     */
+    com.google.protobuf.ByteString getI(int index);
+  }
+  /**
+   * Protobuf type {@code DB.BytesArray}
+   */
+  public static final class BytesArray extends
+      com.google.protobuf.GeneratedMessage
+      implements BytesArrayOrBuilder {
+    // Use BytesArray.newBuilder() to construct.
+    private BytesArray(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private BytesArray(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final BytesArray defaultInstance;
+    public static BytesArray getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public BytesArray getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private BytesArray(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                i_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              i_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          i_ = java.util.Collections.unmodifiableList(i_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return DB.Db.internal_static_DB_BytesArray_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return DB.Db.internal_static_DB_BytesArray_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              DB.Db.BytesArray.class, DB.Db.BytesArray.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<BytesArray> PARSER =
+        new com.google.protobuf.AbstractParser<BytesArray>() {
+      public BytesArray parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new BytesArray(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BytesArray> getParserForType() {
+      return PARSER;
+    }
+
+    // repeated bytes i = 1;
+    public static final int I_FIELD_NUMBER = 1;
+    private java.util.List<com.google.protobuf.ByteString> i_;
+    /**
+     * <code>repeated bytes i = 1;</code>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getIList() {
+      return i_;
+    }
+    /**
+     * <code>repeated bytes i = 1;</code>
+     */
+    public int getICount() {
+      return i_.size();
+    }
+    /**
+     * <code>repeated bytes i = 1;</code>
+     */
+    public com.google.protobuf.ByteString getI(int index) {
+      return i_.get(index);
+    }
+
+    private void initFields() {
+      i_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < i_.size(); i++) {
+        output.writeBytes(1, i_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < i_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(i_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getIList().size();
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static DB.Db.BytesArray parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static DB.Db.BytesArray parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static DB.Db.BytesArray parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static DB.Db.BytesArray parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static DB.Db.BytesArray parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static DB.Db.BytesArray parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static DB.Db.BytesArray parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static DB.Db.BytesArray parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static DB.Db.BytesArray parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static DB.Db.BytesArray parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(DB.Db.BytesArray prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code DB.BytesArray}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements DB.Db.BytesArrayOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return DB.Db.internal_static_DB_BytesArray_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return DB.Db.internal_static_DB_BytesArray_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                DB.Db.BytesArray.class, DB.Db.BytesArray.Builder.class);
+      }
+
+      // Construct using DB.Db.BytesArray.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        i_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return DB.Db.internal_static_DB_BytesArray_descriptor;
+      }
+
+      public DB.Db.BytesArray getDefaultInstanceForType() {
+        return DB.Db.BytesArray.getDefaultInstance();
+      }
+
+      public DB.Db.BytesArray build() {
+        DB.Db.BytesArray result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public DB.Db.BytesArray buildPartial() {
+        DB.Db.BytesArray result = new DB.Db.BytesArray(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          i_ = java.util.Collections.unmodifiableList(i_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.i_ = i_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof DB.Db.BytesArray) {
+          return mergeFrom((DB.Db.BytesArray)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(DB.Db.BytesArray other) {
+        if (other == DB.Db.BytesArray.getDefaultInstance()) return this;
+        if (!other.i_.isEmpty()) {
+          if (i_.isEmpty()) {
+            i_ = other.i_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureIIsMutable();
+            i_.addAll(other.i_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        DB.Db.BytesArray parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (DB.Db.BytesArray) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // repeated bytes i = 1;
+      private java.util.List<com.google.protobuf.ByteString> i_ = java.util.Collections.emptyList();
+      private void ensureIIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          i_ = new java.util.ArrayList<com.google.protobuf.ByteString>(i_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getIList() {
+        return java.util.Collections.unmodifiableList(i_);
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public int getICount() {
+        return i_.size();
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public com.google.protobuf.ByteString getI(int index) {
+        return i_.get(index);
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public Builder setI(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureIIsMutable();
+        i_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public Builder addI(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureIIsMutable();
+        i_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public Builder addAllI(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureIIsMutable();
+        super.addAll(values, i_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes i = 1;</code>
+       */
+      public Builder clearI() {
+        i_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:DB.BytesArray)
+    }
+
+    static {
+      defaultInstance = new BytesArray(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:DB.BytesArray)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_DB_Lines_descriptor;
   private static
@@ -5067,6 +5529,11 @@ public final class Db {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_DB_Int32Array_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_DB_BytesArray_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_DB_BytesArray_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5085,7 +5552,8 @@ public final class Db {
       " \003(\0132\017.DB.Store.Cargo\032\036\n\005Cargo\022\n\n\002id\030\001 \002" +
       "(\005\022\t\n\001n\030\002 \002(\005\"M\n\013FlowHistory\022\037\n\001i\030\001 \003(\0132" +
       "\024.DB.FlowHistory.Info\032\035\n\004Info\022\n\n\002ts\030\001 \002(" +
-      "\005\022\t\n\001n\030\002 \002(\005\"\027\n\nInt32Array\022\t\n\001i\030\001 \003(\005"
+      "\005\022\t\n\001n\030\002 \002(\005\"\027\n\nInt32Array\022\t\n\001i\030\001 \003(\005\"\027\n",
+      "\nBytesArray\022\t\n\001i\030\001 \003(\014"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5133,6 +5601,12 @@ public final class Db {
           internal_static_DB_Int32Array_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_DB_Int32Array_descriptor,
+              new java.lang.String[] { "I", });
+          internal_static_DB_BytesArray_descriptor =
+            getDescriptor().getMessageTypes().get(4);
+          internal_static_DB_BytesArray_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_DB_BytesArray_descriptor,
               new java.lang.String[] { "I", });
           return null;
         }
