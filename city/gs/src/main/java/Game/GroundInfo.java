@@ -25,7 +25,6 @@ public class GroundInfo implements Serializable {
     public int y;
 
     int rentPreDay;
-    int deposit;
     int rentDaysMin;
     int rentDaysMax;
     int rentDays;
@@ -43,12 +42,11 @@ public class GroundInfo implements Serializable {
 
     protected GroundInfo() {}
     public boolean sameAs(RentPara rentPara) {
-        return rentPara.rentDaysMin == rentDaysMin && rentPara.rentDaysMax == rentDaysMax && rentPara.deposit == deposit && rentPara.rentPreDay == rentPreDay;
+        return rentPara.rentDaysMin == rentDaysMin && rentPara.rentDaysMax == rentDaysMax && rentPara.rentPreDay == rentPreDay;
     }
     public void setBy(RentPara rentPara) {
         this.rentDays = rentPara.rentDays;
         this.rentPreDay = rentPara.rentPreDay;
-        this.deposit = rentPara.deposit;
         this.rentDaysMin = rentPara.rentDaysMin;
         this.rentDaysMax = rentPara.rentDaysMax;
     }
@@ -97,7 +95,6 @@ public class GroundInfo implements Serializable {
             }
             giBuilder.setRentDaysMin(rentDaysMin);
             giBuilder.setRentDaysMax(rentDaysMax);
-            giBuilder.setDeposit(deposit);
             giBuilder.setRentPreDay(rentPreDay);
             builder.setRent(giBuilder);
         }

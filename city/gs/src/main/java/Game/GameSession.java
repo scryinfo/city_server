@@ -955,7 +955,7 @@ public class GameSession {
 	}
 	public void rentOutGround(short cmd, Message message) {
 		Gs.GroundRent c = (Gs.GroundRent)message;
-		RentPara rentPara = new RentPara(c.getRentPreDay(), c.getDeposit(), c.getRentDaysMin(), c.getRentDaysMax());
+		RentPara rentPara = new RentPara(c.getRentPreDay(),c.getRentDaysMin(), c.getRentDaysMax());
 		if(!rentPara.valid())
 			return;
 		List<Coordinate> coordinates = new ArrayList<>(c.getCoordCount());
@@ -968,7 +968,7 @@ public class GameSession {
 	}
 	public void rentGround(short cmd, Message message) {
 		Gs.RentGround c = (Gs.RentGround)message;
-		RentPara rentPara = new RentPara(c.getInfo().getRentPreDay(), c.getInfo().getDeposit(), c.getInfo().getRentDaysMin(), c.getInfo().getRentDaysMax(), c.getDays());
+		RentPara rentPara = new RentPara(c.getInfo().getRentPreDay(),c.getInfo().getRentDaysMin(), c.getInfo().getRentDaysMax(), c.getDays());
 		if(!rentPara.valid())
 			return;
 		List<Coordinate> coordinates = new ArrayList<>(c.getInfo().getCoordCount());

@@ -58,13 +58,10 @@ public class GroundManager {
                 return;
             GroundInfo head = v.iterator().next();
             if(now - head.rentBeginTs >= TimeUnit.DAYS.toMillis(head.rentDays)) {
-                Player renter = GameDb.queryPlayer(head.renterId);
-                renter.unlockMoney(head.rentTransactionId);
                 v.forEach(i->i.endRent());
                 del.add(k);
                 List updates = new ArrayList<>();
                 updates.addAll(v);
-                updates.add(renter);
                 GameDb.saveOrUpdate(updates);
             }
         });
@@ -193,7 +190,6 @@ public class GroundManager {
         owner.addMoney(cost);
         LogDb.incomeRentGround(owner.id(), owner.money(), renter.id(), cost, plist1);
         UUID tid = UUID.randomUUID();
-        renter.lockMoney(tid, rentPara.deposit);
         long now = System.currentTimeMillis();
         List updates = new ArrayList<>(coordinates.size());
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
