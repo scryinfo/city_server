@@ -297,7 +297,7 @@ public class GameSession {
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		sendSocialInfo();
-		getAllMails(cmd);
+		getAllMails((short) GsCode.OpCode.getAllMails_VALUE);
 	}
 
 	public void createRole(short cmd, Message message) {
