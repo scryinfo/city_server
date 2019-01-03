@@ -1426,6 +1426,13 @@ public class GameSession {
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
 
+    public void getGroundInfo(short cmd)
+    {
+        Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
+        builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+        this.write(Package.create(cmd, builder.build()));
+    }
+
 	//===========================================================
 
 	//llb========================================================

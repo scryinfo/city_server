@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,6 +36,8 @@ public class GroundInfo implements Serializable {
     int sellPrice;
     long rentBeginTs;
     long payTs;
+    @Column(nullable = false)
+    private GroundStatus status = GroundStatus.STATELESS;
     public GroundInfo(int x, int y) {
         this.x = x;
         this.y = y;
@@ -44,28 +47,23 @@ public class GroundInfo implements Serializable {
     public boolean sameAs(RentPara rentPara) {
         return rentPara.rentDaysMin == rentDaysMin && rentPara.rentDaysMax == rentDaysMax && rentPara.rentPreDay == rentPreDay;
     }
-    public void setBy(RentPara rentPara) {
-        this.rentDays = rentPara.rentDays;
-        this.rentPreDay = rentPara.rentPreDay;
-        this.rentDaysMin = rentPara.rentDaysMin;
-        this.rentDaysMax = rentPara.rentDaysMax;
-    }
-    public void rentOut(RentPara rentPara, UUID tid, UUID renterId, long now) {
-        this.setBy(rentPara);
+
+    public void rented(RentPara rentPara, UUID tid, UUID renterId, long now) {
         this.rentTransactionId = tid;
         this.renterId = renterId;
         this.rentBeginTs = now;
         this.payTs = this.rentBeginTs;
         this.rentDays = rentPara.rentDays;
+        this.status = GroundStatus.RENTED;
     }
     public boolean inRenting() {
-        return this.rentDays > 0;
+        return status == GroundStatus.RENTING;
     }
-    public boolean isRentOut() {
-        return this.rentTransactionId != null;
+    public boolean isRented() {
+        return status == GroundStatus.RENTED;
     }
     public boolean inSelling() {
-        return sellPrice > 0;
+        return status == GroundStatus.SELLING;
     }
     @Override
     public boolean equals(Object o) {
@@ -88,19 +86,26 @@ public class GroundInfo implements Serializable {
                 .setY(y);
         if(inRenting()) {
             Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
-            if(isRentOut()) {
-                giBuilder.setRenterId(Util.toByteString(renterId));
-                giBuilder.setRentDays(rentDays);
-                giBuilder.setRentBeginTs(rentBeginTs);
-            }
             giBuilder.setRentDaysMin(rentDaysMin);
             giBuilder.setRentDaysMax(rentDaysMax);
             giBuilder.setRentPreDay(rentPreDay);
             builder.setRent(giBuilder);
         }
-        else if(inSelling()) {
+        else if (isRented())
+        {
+            Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
+            giBuilder.setRenterId(Util.toByteString(renterId));
+            giBuilder.setRentDays(rentDays);
+            giBuilder.setRentBeginTs(rentBeginTs);
+            giBuilder.setRentDaysMin(rentDaysMin);
+            giBuilder.setRentDaysMax(rentDaysMax);
+            giBuilder.setRentPreDay(rentPreDay);
+            builder.setRent(giBuilder);
+        }
+        else if (inSelling())
+        {
             builder.setSell(Gs.GroundInfo.Sell.newBuilder()
-                .setPrice(sellPrice)
+                    .setPrice(sellPrice)
             );
         }
         return builder.build();
@@ -114,25 +119,58 @@ public class GroundInfo implements Serializable {
         rentDaysMax = 0;
         rentDaysMin = 0;
         rentDays = 0;
+        status = GroundStatus.STATELESS;
     }
 
     public boolean canSell(UUID id) {
-        return ownerId.equals(id) && !inRent();
-    }
-    public boolean inRent() {
-        return renterId != null;
-    }
-    public boolean inSell() {
-        return !inRent() && sellPrice > 0;
+        return ownerId.equals(id) &&
+                (status == GroundStatus.STATELESS
+                        || status == GroundStatus.SELLING);
     }
 
-    public void cancelRent() {
-        assert renterId == null;
-        rentBeginTs = 0;
-        rentTransactionId = null;
-        payTs = 0;
-        rentDaysMax = 0;
-        rentDaysMin = 0;
-        rentDays = 0;
+    public boolean canRenting(UUID id)
+    {
+        return this.ownerId.equals(id) &&
+                (this.status == GroundStatus.RENTING
+                        || this.status == GroundStatus.STATELESS);
+    }
+
+    public void sell(int price)
+    {
+        this.sellPrice = price;
+        this.status = GroundStatus.SELLING;
+    }
+
+    public void cancelSell()
+    {
+        this.sellPrice = 0;
+        this.status = GroundStatus.STATELESS;
+    }
+
+    public void buyGround(UUID id)
+    {
+        GroundManager.instance().playerGround.computeIfPresent(ownerId,(k,v)->{
+            v.remove(this);
+            return v;
+        });
+        this.ownerId = id;
+        this.sellPrice = 0;
+        this.status = GroundStatus.STATELESS;
+        GroundManager.instance().playerGround.computeIfAbsent(ownerId, k->new HashSet<>()).add(this);
+    }
+
+    public void renting(RentPara rentPara)
+    {
+        this.rentPreDay = rentPara.rentPreDay;
+        this.rentDaysMin = rentPara.rentDaysMin;
+        this.rentDaysMax = rentPara.rentDaysMax;
+        this.status = GroundStatus.RENTING;
+    }
+
+
+
+    enum GroundStatus
+    {
+        STATELESS,RENTING,RENTED,SELLING
     }
 }
