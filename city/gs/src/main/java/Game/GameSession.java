@@ -1269,12 +1269,10 @@ public class GameSession {
 		GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
 
 		//push offline message
-		List<OfflineMessage> lists = GameDb.getOfflineMsg(player.id());
+		List<OfflineMessage> lists = GameDb.getOfflineMsgAndDel(player.id());
 		lists.forEach(message -> {
 			ManagerCommunication.getInstance().sendMsgToPersion(this, message);
 		});
-		GameDb.delete(lists);
-
 		//notify friend online
 		FriendManager.getInstance().broadcastStatue(player.id(), true);
 	}
@@ -1425,6 +1423,13 @@ public class GameSession {
 	{
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
+
+    public void getGroundInfo(short cmd)
+    {
+        Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
+        builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+        this.write(Package.create(cmd, builder.build()));
+    }
 
 	//===========================================================
 
