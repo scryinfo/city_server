@@ -3,6 +3,7 @@ package Game;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
@@ -25,9 +26,10 @@ public class ProduceDepartment extends FactoryBase {
     public final static class Line extends LineBase {
         public Line(MetaGood item, int targetNum, int workerNum, int itemLevel) {
             super(item, targetNum, workerNum, itemLevel);
+            this.formula = MetaData.getFormula(item.id);
         }
         protected Line() {}
-        @Transient
+        @Convert(converter = GoodFormula.Converter.class)
         GoodFormula formula;
         @Override
         public ItemKey newItemKey(UUID producerId, int qty) {

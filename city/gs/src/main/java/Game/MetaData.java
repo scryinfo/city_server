@@ -237,6 +237,17 @@ class MetaLaboratory extends MetaBuilding {
     }
 }
 class GoodFormula {
+    public static final class Converter implements AttributeConverter<GoodFormula, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(GoodFormula attribute) {
+            return attribute.id;
+        }
+
+        @Override
+        public GoodFormula convertToEntityAttribute(Integer dbData) {
+            return MetaData.getFormula(dbData);
+        }
+    }
     GoodFormula(Document d) {
         id = d.getInteger("good");
         for(int i = 0; i < material.length; ++i) {
