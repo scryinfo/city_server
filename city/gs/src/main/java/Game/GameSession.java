@@ -1353,6 +1353,7 @@ public class GameSession {
 	{
 		Gs.ByteBool result = (Gs.ByteBool) message;
 		UUID sourceId = Util.toUuid(result.getId().toByteArray());
+		boolean blacklistNotify = false;
 		if (result.getB() &&
 				!FriendManager.playerFriends.getUnchecked(player.id()).contains(sourceId))
 		{
@@ -1362,6 +1363,7 @@ public class GameSession {
 			{
 				temp.getBlacklist().remove(player.id());
 				GameDb.saveOrUpdate(temp);
+				blacklistNotify = true;
 			}
 			Gs.RoleInfo firend = infoToRoleInfo(GameDb.getPlayerInfo(sourceId));
 			this.write(
@@ -1372,6 +1374,11 @@ public class GameSession {
 				gameSession.write(
 						Package.create(GsCode.OpCode.addFriendSucess_VALUE,
 								playerToRoleInfo(player)));
+				if (blacklistNotify) {
+					gameSession.write(
+							Package.create(GsCode.OpCode.deleteBlacklist_VALUE,
+									Gs.Id.newBuilder().setId(Util.toByteString(player.id())).build()));
+				}
 			}
 			//邮件通知添加好友成功
 			UUID[] oppositeId = {player.id()};
