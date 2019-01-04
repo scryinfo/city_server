@@ -1269,12 +1269,10 @@ public class GameSession {
 		GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
 
 		//push offline message
-		List<OfflineMessage> lists = GameDb.getOfflineMsg(player.id());
+		List<OfflineMessage> lists = GameDb.getOfflineMsgAndDel(player.id());
 		lists.forEach(message -> {
 			ManagerCommunication.getInstance().sendMsgToPersion(this, message);
 		});
-		GameDb.delete(lists);
-
 		//notify friend online
 		FriendManager.getInstance().broadcastStatue(player.id(), true);
 	}
