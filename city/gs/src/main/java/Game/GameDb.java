@@ -604,7 +604,7 @@ public class GameDb {
 		Collection<Mail> res = new ArrayList<>();
 		StatelessSession session = sessionFactory.openStatelessSession();
 		Transaction transaction = session.beginTransaction();
-        org.hibernate.Query query = session.createQuery("FROM Mail where playerId = :x ");
+		org.hibernate.Query query = session.createQuery("FROM Mail where playerId = :x ");
         query.setParameter("x", playerId);
 		List<Mail> mails = query.list();
 		if (null != mails && mails.size() != 0) {
@@ -637,26 +637,6 @@ public class GameDb {
         }
     }
 
-/*	public static long mailLeftTime(UUID mailId) {
-		StatelessSession session = sessionFactory.openStatelessSession();
-		Transaction transaction = session.beginTransaction();
-		long now = System.currentTimeMillis();
-		long senvenDaysMs = TimeUnit.HOURS.toMillis(7 * 24);
-		long mailLeftTs = 0;
-		List list = session.createSQLQuery("select ts from Mail where id = :x")
-				.setParameter("x", mailId).list();
-		if (null != list && list.size() != 0){
-			long sendTs = Long.parseLong(list.get(0).toString());
-			mailLeftTs = sendTs + senvenDaysMs - now;
-			if (mailLeftTs < 0){
-				delOverdueMail();
-			}
-		}
-		transaction.commit();
-		session.close();
-		return mailLeftTs;
-	}*/
-
     public static void delOverdueMail() {
         Transaction transaction = null;
         StatelessSession session = null;
@@ -666,7 +646,7 @@ public class GameDb {
 
             long now = System.currentTimeMillis();
             long diffTs = now - TimeUnit.HOURS.toMillis(7 * 24);
-            session.createSQLQuery("DELETE FROM Mail WHERE ts <= :x")
+            session.createSQLQuery("DELETE FROM Mail WHERE ts < :x")
                     .setParameter("x", diffTs)
                     .executeUpdate();
             transaction.commit();
