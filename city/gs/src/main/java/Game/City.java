@@ -355,7 +355,7 @@ public class City {
     }
 
     public void delBuilding(Building building) {
-        building.destroy();
+        List npcs = building.destroy();
         this.allBuilding.remove(building.id());
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
@@ -363,7 +363,7 @@ public class City {
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
         building.broadcastDelete();
-        GameDb.delete(building);
+        GameDb.delete(npcs.add(building));
     }
     public void send(GridIndexPair range, Package pack) {
         for(int x = range.l.x; x < range.r.x; ++x) {
@@ -375,10 +375,11 @@ public class City {
     public boolean addBuilding(Building b) {
         if(!this.canBuild(b))
             return false;
-        b.hireNpc();
+        List updates = b.hireNpc();
         take(b);
         b.init();
-        GameDb.saveOrUpdate(b);
+        updates.add(b);
+        GameDb.saveOrUpdate(updates);
         b.broadcastCreate();
         return true;
     }

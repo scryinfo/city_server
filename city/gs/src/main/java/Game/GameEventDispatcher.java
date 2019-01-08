@@ -96,6 +96,12 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.techTradeGetSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"techTradeGetSummary"));
 			table.put((short) GsCode.OpCode.techTradeGetDetail_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"techTradeGetDetail"));
 
+			table.put((short) GsCode.OpCode.talentAddLine_VALUE, Wrapper.newWithMessageAsync(Gs.TalentAddLine.PARSER, GameSession.class,"talentAddLine"));
+			table.put((short) GsCode.OpCode.talentDelLine_VALUE, Wrapper.newWithMessageAsync(Gs.TalentDelLine.PARSER, GameSession.class,"talentDelLine"));
+			table.put((short) GsCode.OpCode.talentFinishLine_VALUE, Wrapper.newWithMessageAsync(Gs.TalentFinishLine.PARSER, GameSession.class,"talentFinishLine"));
+			table.put((short) GsCode.OpCode.allocTalent_VALUE, Wrapper.newWithMessageAsync(Gs.AllocTalent.PARSER, GameSession.class,"allocTalent"));
+			table.put((short) GsCode.OpCode.unallocTalent_VALUE, Wrapper.newWithMessageAsync(Gs.AllocTalent.PARSER, GameSession.class,"unallocTalent"));
+
 			//wxj=================================================
 			table.put((short) GsCode.OpCode.searchPlayer_VALUE, Wrapper.newWithMessageAsync(Gs.Str.PARSER, GameSession.class, "searchPlayerByName"));
 			table.put((short) GsCode.OpCode.addFriend_VALUE, Wrapper.newWithMessageAsync(Gs.ByteStr.PARSER, GameSession.class, "addFriend"));

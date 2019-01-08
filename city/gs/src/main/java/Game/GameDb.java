@@ -26,6 +26,8 @@ import org.hibernate.type.StandardBasicTypes;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.io.File;
 import java.time.Duration;
 import java.util.*;
@@ -312,6 +314,80 @@ public class GameDb {
 		return success;
 	}
 	//===============================================
+
+	public static List<Talent> getTalent(Collection<UUID> talentIds) {
+		List<Talent> res = new ArrayList<>();
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<Talent> criteria = builder.createQuery(Talent.class);
+			Root<Talent> root = criteria.from(Talent.class);
+			root.in(talentIds);			// this is no fucking difference with call session.get in loop, still generate multiple SQL
+			res = session.createQuery(criteria).list();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+		}
+		return res;
+	}
+	public static Talent getTalent(UUID id) {
+		Talent res = null;
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			res = session.get(Talent.class, id);
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+		}
+		return res;
+	}
+	public static Collection<Talent> getTalentByBuildingId(UUID id) {
+		Collection<Talent> res = null;
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<Talent> criteria = builder.createQuery(Talent.class);
+			Root<Talent> root = criteria.from(Talent.class);
+			criteria.select(root).where(builder.equal(root.get("buildingId"), id)); // hibernate will not return different object if those object already queried by this session
+			res = session.createQuery(criteria).list();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+		}
+		return res;
+	}
+	public static Collection<Talent> getTalentByPlayerId(UUID id) {
+		Collection<Talent> res = null;
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<Talent> criteria = builder.createQuery(Talent.class);
+			Root<Talent> root = criteria.from(Talent.class);
+			criteria.select(root).where(builder.equal(root.get("ownerId"), id)); // hibernate will not return different object if those object already queried by this session
+			res = session.createQuery(criteria).list();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+		}
+		return res;
+	}
+
 	public static void evict(Player player) {
 		playerCache.invalidate(player.id());
 		session.evict(player);

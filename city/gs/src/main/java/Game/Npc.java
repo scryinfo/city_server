@@ -18,6 +18,13 @@ public class Npc {
         this.type = type;
         this.tempBuilding = null;
     }
+    public Npc(Building born, long money, UUID id) {
+        this.id = id;
+        this.born = born;
+        this.money = money;
+        this.type = Npc.TALENT_TYPE;
+        this.tempBuilding = null;
+    }
     @Id
     private UUID id;
 
@@ -47,7 +54,6 @@ public class Npc {
     public void idle() {
     }
 
-    // should we change this to OneToOne mapping??
     @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class AdapterData {
         @Column(name = "buildingId", updatable = false, nullable = false)
@@ -161,4 +167,8 @@ public class Npc {
     public void goWork() {
         this.visit(born, true);
     }
+    public boolean isTalent() {
+        return type == TALENT_TYPE;
+    }
+    public static final int TALENT_TYPE = 19;
 }

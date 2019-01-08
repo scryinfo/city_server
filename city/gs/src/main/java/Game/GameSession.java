@@ -1205,7 +1205,86 @@ public class GameSession {
 		Gs.Num c = (Gs.Num)message;
 		this.write(Package.create(cmd, TechTradeCenter.instance().getDetail(c.getNum())));
 	}
-
+	public void talentAddLine(short cmd, Message message) {
+		Gs.TalentAddLine c = (Gs.TalentAddLine)message;
+		if(!MetaBuilding.legalType(c.getType()) || TalentCenter.inapplicable(c.getType()) || c.getWorkerNum() <= 0)
+			return;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.outOfBusiness() || !(b instanceof TalentCenter) || !b.canUseBy(player.id()))
+			return;
+		TalentCenter tc = (TalentCenter)b;
+		if(tc.addLine(c.getWorkerNum(), c.getType()))
+			GameDb.saveOrUpdate(tc);
+	}
+	public void talentDelLine(short cmd, Message message) {
+		Gs.TalentDelLine c = (Gs.TalentDelLine)message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.outOfBusiness() || !(b instanceof TalentCenter) || !b.canUseBy(player.id()))
+			return;
+		TalentCenter tc = (TalentCenter)b;
+		if(tc.delLine(Util.toUuid(c.getLineId().toByteArray())))
+			GameDb.saveOrUpdate(tc);
+	}
+	public void talentFinishLine(short cmd, Message message) {
+		Gs.TalentFinishLine c = (Gs.TalentFinishLine)message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.outOfBusiness() || !(b instanceof TalentCenter) || !b.canUseBy(player.id()))
+			return;
+		TalentCenter tc = (TalentCenter)b;
+		Talent t = tc.finishLine(Util.toUuid(c.getLineId().toByteArray()));
+		if(t != null) {
+			TalentManager.instance().add(t);
+			this.write(Package.create(GsCode.OpCode.newTalentInform_VALUE, t.toProto()));
+			GameDb.saveOrUpdate(Arrays.asList(player, tc));
+			this.write(Package.create(cmd, c));
+		}
+	}
+	public void allocTalent(short cmd, Message message) {
+		Gs.AllocTalent c = (Gs.AllocTalent)message;
+		UUID buildingId = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(buildingId);
+		if(b == null || b.outOfBusiness() || !b.canUseBy(player.id()) || TalentCenter.inapplicable(b.type()))
+			return;
+		UUID talentId = Util.toUuid(c.getTalentId().toByteArray());
+		if(!TalentManager.instance().hasTalent(player.id(), talentId))
+			return;
+		Talent talent = TalentManager.instance().get(talentId);
+		if(talent == null || !talent.getOwnerId().equals(player.id()) || !b.canTake(talent))
+			return;
+		List<Object> updates;
+		if(!talent.payed()) {
+			int cost = b.singleSalary(talent) * talent.getWorkDays();
+			if (player.money() < cost) // if the salary is dynamic, client need to know it
+				return;
+			talent.addMoney(cost);
+			player.decMoney(cost);
+			updates = Arrays.asList(talent, player);
+		}
+		else
+			updates = Arrays.asList(talent);
+		b.take(talent, updates);
+		GameDb.saveOrUpdate(updates);
+		this.write(Package.create(cmd, c));
+	}
+	public void unallocTalent(short cmd, Message message) {
+		Gs.AllocTalent c = (Gs.AllocTalent)message;
+		UUID buildingId = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(buildingId);
+		if(b == null || b.outOfBusiness() || !b.canUseBy(player.id()) || TalentCenter.inapplicable(b.type()))
+			return;
+		UUID talentId = Util.toUuid(c.getTalentId().toByteArray());
+		if(!b.hasTalent(talentId))
+			return;
+		Talent talent = TalentManager.instance().get(talentId);
+		Npc npc = b.untake(talent);
+		if(npc == null)
+			GameDb.saveOrUpdate(talent);
+		else
+			GameDb.saveOrUpdateAndDelete(Arrays.asList(talent), Arrays.asList(npc));
+	}
 	//wxj========================================================
 	private void sendSocialInfo()
 	{

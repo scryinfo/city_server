@@ -17,7 +17,7 @@ public class MetaBuilding {
     public static final int APARTMENT = 14;
     public static final int LAB = 15;
     public static final int PUBLIC = 16;
-    public static final int TALENT = 18;
+    public static final int TALENT = 17;
     public static final int MAX_TYPE_ID = 20;
 
     public static boolean isBuilding(int id) {
@@ -56,6 +56,7 @@ public class MetaBuilding {
                 Arrays.sort(this.endWorkHour[i]);
             }
             this.salary = d.getInteger("salary");
+            this.talentNum = d.getInteger("talentNum");
         }
     }
     public int id;
@@ -67,6 +68,11 @@ public class MetaBuilding {
     public int[][] startWorkHour = {{},{},{},{}};
     public int[][] endWorkHour = {{},{},{},{}};
     public int salary;
+    public int talentNum;
+    public static boolean legalType(int type) {
+        return type >= TRIVIAL && type <= TALENT;
+    }
+
     public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
         @Override
         public Integer convertToDatabaseColumn(MetaBuilding attribute) {

@@ -17,7 +17,8 @@ import java.nio.ByteBuffer;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
@@ -68,6 +69,29 @@ public class Util {
         return ByteString.copyFrom(toBytes(uuid));
     }
 
+    public static <T extends Object> T randomChoose(Collection<T> collection) {
+        if(collection instanceof List) {
+            List list = (List)collection;
+            return (T) list.get(random(0, list.size()));
+        }
+        else {
+            final int idx = random(0, collection.size());
+            Iterator<T> iterator = collection.iterator();
+            int i = 0;
+            T t = null;
+            while(i != idx) {
+                t = iterator.next();
+                ++i;
+            }
+            return t;
+        }
+    }
+    public static int random(int l, int r) {
+        return ThreadLocalRandom.current().nextInt(l, r);
+    }
+    public static double random(double l, double r) {
+        return ThreadLocalRandom.current().nextDouble(l, r);
+    }
     private static final Codec<Document> codec = new DocumentCodec();
 
     public static byte[] toBytes(final Document document) {
@@ -81,14 +105,4 @@ public class Util {
         BsonBinaryReader bsonReader = new BsonBinaryReader(ByteBuffer.wrap(input));
         return codec.decode(bsonReader, DecoderContext.builder().build());
     }
-    //problematic. the wall clock might jitter to prev day
-//    public static long currentTimeMillis(int hour, int minute, int second) {
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTime(new Date());
-//        cal.set(Calendar.HOUR_OF_DAY, hour);
-//        cal.set(Calendar.MINUTE, minute);
-//        cal.set(Calendar.SECOND, second);
-//        cal.set(Calendar.MILLISECOND, 0);
-//        return cal.getTime().getTime();
-//    }
 }

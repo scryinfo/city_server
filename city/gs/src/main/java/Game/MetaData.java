@@ -82,12 +82,80 @@ class MetaCity {
     }
 }
 class MetaTalent {
+
+    public static final class Key {
+        public Key(int buildingType, int lv) {
+            this.buildingType = buildingType;
+            this.lv = lv;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Key key = (Key) o;
+            return buildingType == key.buildingType &&
+                    lv == key.lv;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(buildingType, lv);
+        }
+
+        int buildingType;
+        int lv;
+    }
+    public static int buildingType(int id) {
+        return MetaItem.baseId(id)%100;
+    }
     MetaTalent(Document d) {
         this.id = d.getInteger("_id");
-        this.n = d.getDouble("numOneSec");
+        this.workDaysMin = d.getInteger("workDaysMin");
+        this.workDaysMax = d.getInteger("workDaysMax");
+
+        this.itemWeights = ((List<Integer>)d.get("itemWeights")).stream().mapToInt(Integer::intValue).toArray();
+        assert itemWeights.length == 4;
+        this.itemsV1 = (List<Integer>)d.get("itemsV1");
+        this.itemsV2 = (List<Integer>)d.get("itemsV2");
+        this.itemsV3 = (List<Integer>)d.get("itemsV3");
+        this.itemWeights = ((List<Integer>)d.get("funcWeights")).stream().mapToInt(Integer::intValue).toArray();
+        assert funcWeights.length == lv;
+        this.speedRatioMin = d.getInteger("speedRatioMin");
+        this.speedRatioMax = d.getInteger("speedRatioMax");
+        this.qtyAddMin = d.getInteger("qtyAddMin");
+        this.qtyAddMax = d.getInteger("qtyAddMax");
+        this.advRatioMin = d.getInteger("advRatioMin");
+        this.advRatioMax = d.getInteger("advRatioMax");
+        this.keepDaysMin = d.getInteger("keepDaysMin");
+        this.keepDaysMax = d.getInteger("keepDaysMax");
+        this.salaryRatioMin = d.getInteger("salaryRatioMin");
+        this.salaryRatioMax = d.getInteger("salaryRatioMax");
+        this.nameIdxMin = d.getInteger("nameIdxMin");
+        this.nameIdxMax = d.getInteger("nameIdxMax");
     }
     public int id;
-    double n;
+    public int createSec;
+    public int lv;
+    public int workDaysMin;
+    public int workDaysMax;
+    public int nameIdxMin;
+    public int nameIdxMax;
+    public int[] itemWeights;
+    public List<Integer> itemsV1;
+    public List<Integer> itemsV2;
+    public List<Integer> itemsV3;
+    public int[] funcWeights;
+    public int speedRatioMin;
+    public int speedRatioMax;
+    public int qtyAddMin;
+    public int qtyAddMax;
+    public int advRatioMin;
+    public int advRatioMax;
+    public int keepDaysMin;
+    public int keepDaysMax;
+    public int salaryRatioMin;
+    public int salaryRatioMax;
 }
 abstract class MetaItem {
     public static final int MATERIAL = 21;
@@ -337,9 +405,11 @@ class MetaPublicFacility extends MetaBuilding {
 
 class MetaTalentCenter extends MetaBuilding {
     public int qty;
+    public int createSecPreWorker;
     MetaTalentCenter(Document d) {
         super(d);
         this.qty = d.getInteger("qty");
+        this.createSecPreWorker = d.getInteger("createSecPreWorker");
     }
 }
 class MetaGroundAuction {
@@ -399,6 +469,7 @@ class SysPara {
     int transferChargeRatio;
     Coordinate centerStorePos = new Coordinate();
 }
+
 public class MetaData {
     public static final int ID_RADIX = 100000;
 	private static final Logger logger = Logger.getLogger(MetaData.class);
@@ -413,6 +484,7 @@ public class MetaData {
     private static final String retailShopColName = "RetailShop";
     private static final String laboratoryColName = "Laboratory";
     private static final String publicFacilityColName = "PublicFacility";
+    private static final String talentCenterColName = "TalentCenter";
     private static final String groundAuctionColName = "GroundAuction";
     private static final String initialBuildingColName = "InitialBuilding";
     private static final String trivialBuildingColName = "TrivialBuilding";
@@ -427,6 +499,8 @@ public class MetaData {
     private static final String goodSpendColName = "GoodSpendRatio";
     private static final String formulaColName = "Formular";
     private static final String goodFormulaColName = "GoodFormular";
+    private static final String talentColName = "Talent";
+    private static final String talentLvCreateColName = "TalentLvCreate";
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -437,6 +511,7 @@ public class MetaData {
     private static final TreeMap<Integer, MetaProduceDepartment> produceDepartment = new TreeMap<>();
     private static final TreeMap<Integer, MetaRetailShop> retailShop = new TreeMap<>();
     private static final TreeMap<Integer, MetaLaboratory> laboratory = new TreeMap<>();
+    private static final TreeMap<Integer, MetaTalentCenter> talentCenter = new TreeMap<>();
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
     private static final TreeMap<Integer, MetaMaterialFactory> materialFactory = new TreeMap<>();
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
@@ -478,13 +553,29 @@ public class MetaData {
         dayId = dayIds.get(new DayKey());
     }
     private static Map<DayKey, Integer> dayIds = new HashMap<>();
-
+    private static Map<Integer, int[]> talentLvWeights = new HashMap<>();
+    private static Map<MetaTalent.Key, MetaTalent> talent = new HashMap<>();
+    public static int getTalentLv(int score) {
+        int[] ws = talentLvWeights.get(score);
+        if(ws == null) {
+            logger.fatal("score " + score + " don't exit");
+            return 0;
+        }
+        return ProbBase.randomIdx(ws);
+    }
+    public static MetaTalent getTalent(int buildingType, int talentLv) {
+        return talent.get(new MetaTalent.Key(buildingType, talentLv));
+    }
     public static double getBuildingSpendMoneyRatio(int type) {
         return buildingSpendRatio.get(type);
     }
 
     public static double getGoodSpendMoneyRatio(int mId) {
         return goodSpendRatio.get(mId);
+    }
+
+    public static MetaTalentCenter getTalentCenter(int id) {
+        return talentCenter.get(id);
     }
 
     public static final class DayKey {
@@ -617,6 +708,16 @@ public class MetaData {
 			logger.fatal(e.getMessage());
 		}
 	}
+	private static void initTalent() {
+        mongoClient.getDatabase(dbName).getCollection(talentColName).find().forEach((Block<Document>) doc -> {
+            MetaTalent t = new MetaTalent(doc);
+            talent.put(new MetaTalent.Key(MetaTalent.buildingType(t.id), t.lv), t);
+        });
+        mongoClient.getDatabase(dbName).getCollection(talentLvCreateColName).find().forEach((Block<Document>) doc -> {
+            int[] ws = {doc.getInteger("v0"), doc.getInteger("v1"), doc.getInteger("v2")};
+            talentLvWeights.put(doc.getInteger("_id"), ws);
+        });
+    }
 	private static void initCity() throws Exception {
 		Document d = mongoClient.getDatabase(dbName).getCollection(cityColName).find().first();
 		if(d == null)
@@ -715,6 +816,10 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(initialBuildingColName).find().forEach((Block<Document>) doc -> {
             InitialBuildingInfo i = new InitialBuildingInfo(doc);
             initialBuilding.add(i);
+        });
+        mongoClient.getDatabase(dbName).getCollection(talentCenterColName).find().forEach((Block<Document>) doc -> {
+            MetaTalentCenter m = new MetaTalentCenter(doc);
+            talentCenter.put(m.id, m);
         });
     }
 

@@ -62,7 +62,7 @@ public class NpcManager {
              }
          }
     }
-    public void delete(Set<Npc> npc) {
+    public void delete(Collection<Npc> npc) {
         npc.forEach(n->{
             n.readyForDestroy();
             allNpc.remove(n.id());
@@ -78,6 +78,12 @@ public class NpcManager {
             addImpl(npc);
         }
         return res;
+    }
+
+    public Npc create(UUID id, Building building, long salary) {
+       Npc npc = new Npc(building, salary, id);
+       addImpl(npc);
+       return npc;
     }
     private void addImpl(Npc npc) {
         allNpc.put(npc.id(), npc);
@@ -103,14 +109,13 @@ public class NpcManager {
     private NpcManager() {
         long leftMs = City.instance().leftMsToNextTimeSection();
         updateTimesAtCurrentTimeSection = (int) (TimeUnit.MILLISECONDS.toNanos(leftMs) / City.UpdateIntervalNano);
-        GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
         // set the updateIdx according to the left time to next time section
         int currentSectionHours = city.currentTimeSectionDuration();
         updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(currentSectionHours) * updateTimesAtCurrentTimeSection);
         for (int i = 0; i < updateTimesAtCurrentTimeSection; i++) {
             waitToUpdate.add(new HashSet<>());
         }
-        int nextSectionHours =  city.nextTimeSectionDuration();
+        int nextSectionHours = city.nextTimeSectionDuration();
         this.reCalcuWaitToUpdate = (nextSectionHours != currentSectionHours);
         this.updateTimesAtNextTimeSection = (int) (TimeUnit.HOURS.toNanos(nextSectionHours) / City.UpdateIntervalNano);
         for (int i = 0; i < updateTimesAtNextTimeSection; i++) {
@@ -118,6 +123,7 @@ public class NpcManager {
         }
         //waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));  won't works, n copies are refer to same object
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
+        GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
     }
 
     public void hourTickAction(int nowHour) {

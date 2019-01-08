@@ -90,6 +90,23 @@ public class Player {
         this.des = str;
     }
 
+//    public void addTalent(Talent t) {
+//        talentIds.add(t.id());
+//        TalentManager.instance().add(t);
+//        this.send(Package.create(GsCode.OpCode.newTalentInform_VALUE, t.toProto()));
+//    }
+//    public void delTalent(Talent t) {
+//        talentIds.remove(t.id());
+//        TalentManager.instance().delete(t);
+//        GameDb.saveOrUpdateAndDelete(Arrays.asList(this), Arrays.asList(t));
+//        this.send(Package.create(GsCode.OpCode.delTalentInform_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(t.id())).build()));
+//    }
+//    public boolean hasTalent(UUID id) {
+//        return talentIds.contains(id);
+//    }
+//    @ElementCollection
+//    private Set<UUID> talentIds = new HashSet<>();
+
     public static final class Info {
         public Info(UUID id, String name,String companyName,boolean male,String des,int picture)
         {
@@ -280,11 +297,17 @@ public class Player {
     public void online() {
         this.onlineTs = System.currentTimeMillis();
         GameDb.saveOrUpdate(this);
+        talentIds = TalentManager.instance().getTalentIdsByPlayerId(this.id());
     }
     public void offline(){
         this.offlineTs = System.currentTimeMillis();
         GameDb.saveOrUpdate(this);
+        if(!this.talentIds.isEmpty()) {
+            TalentManager.instance().unload(this.talentIds);
+        }
     }
+    @Transient
+    Collection<UUID> talentIds;
 
     String getAccount() {
         return account;

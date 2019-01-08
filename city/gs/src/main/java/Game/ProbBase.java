@@ -15,9 +15,10 @@ public class ProbBase {
     final long id;
     final int[] weight;
     public static int randomIdx(int[] weight) {
-        process(weight);
-        int v = ThreadLocalRandom.current().nextInt(0, weight[weight.length-1]);  // range is [l, r)
-        int idx = Arrays.binarySearch(weight, v);
+        int[] copy = Arrays.copyOf(weight, weight.length);
+        process(copy);
+        int v = ThreadLocalRandom.current().nextInt(0, copy[copy.length-1]);  // range is [l, r)
+        int idx = Arrays.binarySearch(copy, v);
         if(idx >= 0)
             return idx+1; // due to we random [l, r), so the idx can not be the index of last element r, so +1 is ok
         else

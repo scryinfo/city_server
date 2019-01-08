@@ -68,6 +68,8 @@ public abstract class Building {
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
+            case MetaBuilding.TALENT:
+                return new TalentCenter(MetaData.getTalentCenter(id), pos, ownerId);
         }
         return null;
     }
@@ -137,6 +139,48 @@ public abstract class Building {
             this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
     }
 
+    public boolean hasTalent(UUID id) {
+        return talentId.contains(id);
+    }
+    public boolean canTake(Talent talent) {
+        if(talentId.size() >= metaBuilding.talentNum)
+            return false;
+        if(this.type() != talent.buildingType())
+            return false;
+        return true;
+    }
+    public boolean take(Talent talent, List<Object> updates) {
+        talent.inBuilding(this.id());
+        talentId.add(talent.id());
+        if(talent.money() > 0) {
+            Npc npc = NpcManager.instance().create(talent.id(), this, talent.money());
+            allStaff.add(npc);
+            npc.goWork();
+            updates.add(npc);
+        }
+        return true;
+    }
+    private Npc findNpc(UUID id) {
+        for (Npc npc : allStaff) {
+            if(npc.id().equals(id))
+                return npc;
+        }
+        return null;
+    }
+    public Npc untake(Talent talent) {
+        talent.outBuilding(this.id());
+        this.talentId.remove(talent.id());
+        Npc npc = this.findNpc(talent.id());
+        if(npc != null) {
+            talent.setMoney(npc.money());
+            NpcManager.instance().delete(Arrays.asList(npc));
+        }
+        return npc;
+    }
+
+    @Transient  // init this from TalentManager!!!
+    private Collection<UUID> talentId = new HashSet<>();
+
     @Column(name = "flow_binary")
     private byte[] flowHistoryBinary;
 
@@ -181,6 +225,9 @@ public abstract class Building {
     public int singleSalary() {
         return (int) (salaryRatio / 100.d * metaBuilding.salary);
     }
+    public int singleSalary(Talent talent) {
+        return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
+    }
     public int cost() {
         return 0;
     }
@@ -201,6 +248,7 @@ public abstract class Building {
     }
 
     public void init() {
+        this.talentId = TalentManager.instance().getTalentIdsByBuildingId(this.id());
         this.calcuWorking(City.instance().currentHour());
     }
 
@@ -264,21 +312,26 @@ public abstract class Building {
         this.metaBuilding = meta;
         this.constructCompleteTs = System.currentTimeMillis();
     }
-    public final void destroy() {
+    public final List<Npc> destroy() {
+        List<Npc> npcs = new ArrayList<>(allStaff);
         NpcManager.instance().delete(allStaff);
         allStaff.clear();
+        return npcs;
     }
-    protected void destoryImpl(){}
 
-    public void hireNpc() {
+    public List<Npc> hireNpc() {
+        List<Npc> npcs = new ArrayList<>();
         this.metaBuilding.npc.forEach((k,v)->{
             for(Npc npc : NpcManager.instance().create(k, v, this, 0))
             {
+                npcs.add(npc);
                 allStaff.add(npc);
                 npc.goWork();
             }
         });
+        return npcs;
     }
+
     public CoordPair effectRange() {
         Coordinate l = coordinate.shiftLU(this.metaBuilding.effectRange);
         Coordinate r = coordinate.offset(this.metaBuilding.x-1, this.metaBuilding.y-1).shiftRB(this.metaBuilding.effectRange);
