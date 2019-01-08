@@ -126,16 +126,55 @@ public class GameDb {
 					});
 
 	//wxj============================================
-	public static List<OfflineMessage> getOfflineMsg(UUID to_id)
+	public static void statelessSaveOrUpdate(Object o) {
+		Transaction transaction = null;
+		StatelessSession statelessSession = null;
+		try {
+			statelessSession = sessionFactory.openStatelessSession();
+			transaction = statelessSession.beginTransaction();
+			statelessSession.insert(o);
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			rollBack(transaction);
+		} finally {
+			closeSession(statelessSession);
+		}
+	}
+	public static List<OfflineMessage> getOfflineMsgAndDel(UUID to_id)
 	{
-		StatelessSession session = sessionFactory.openStatelessSession();
-		Criteria criteria = session.createCriteria(OfflineMessage.class);
-		List<OfflineMessage> list = criteria.add(Restrictions.eq("to_id", to_id))
-				.addOrder(Order.asc("time"))
-				.list();
-		session.close();
+		Transaction transaction = null;
+		StatelessSession statelessSession = null;
+		List<OfflineMessage> list = new ArrayList<>();
+		try
+		{
+			statelessSession = sessionFactory.openStatelessSession();
+			transaction = statelessSession.beginTransaction();
+			Criteria criteria = statelessSession.createCriteria(OfflineMessage.class);
+			list = criteria.add(Restrictions.eq("to_id", to_id))
+					.addOrder(Order.asc("time"))
+					.list();
+			for (OfflineMessage m : list)
+			{
+				statelessSession.delete(m);
+			}
+			transaction.commit();
+		}
+		catch (RuntimeException e)
+		{
+			e.printStackTrace();
+			rollBack(transaction);
+		}
+		finally
+		{
+			if (statelessSession != null)
+			{
+				statelessSession.close();
+			}
+		}
 		return list;
 	}
+
 	public static void deleteFriendRequest(UUID from, UUID to)
 	{
 		Transaction transaction = null;
@@ -184,6 +223,7 @@ public class GameDb {
 	public static void deleteFriendWithBlacklist(Player player, UUID fid)
 	{
 		Transaction transaction = null;
+		StatelessSession statelessSession = null;
 		UUID pid = player.id();
 		if (player.id().compareTo(fid) > 0)
 		{
@@ -192,20 +232,25 @@ public class GameDb {
 		}
 		try
 		{
-			transaction = session.beginTransaction();
-			session.createSQLQuery("DELETE FROM friend WHERE pid=:x AND fid=:y")
+			statelessSession = sessionFactory.openStatelessSession();
+			transaction = statelessSession.beginTransaction();
+			statelessSession.createSQLQuery("DELETE FROM friend WHERE pid=:x AND fid=:y")
 					.setParameter("x", pid)
 					.setParameter("y", fid)
 					.executeUpdate();
+			transaction.commit();
 			player.getBlacklist().add((player.id().equals(pid) ? fid : pid));
 			session.saveOrUpdate(player);
-			transaction.commit();
 		}
 		catch (RuntimeException e)
 		{
 			rollBack(transaction);
 			logger.fatal("deleteFriendWithBlacklist request failed");
 			e.printStackTrace();
+		}
+		finally
+		{
+			closeSession(statelessSession);
 		}
 
 	}
@@ -216,10 +261,16 @@ public class GameDb {
 			transaction.rollback();
 		}
 	}
+	private static void closeSession(StatelessSession statelessSession)
+	{
+		if (statelessSession != null) {
+			statelessSession.close();
+		}
+	}
 	public static void deleteFriend(UUID pid, UUID fid)
 	{
 		Transaction transaction = null;
-		StatelessSession session = null;
+		StatelessSession statelessSession = null;
 		if (pid.compareTo(fid) > 0)
 		{
 			UUID tmp = pid;
@@ -228,9 +279,9 @@ public class GameDb {
 		}
 		try
 		{
-			session = sessionFactory.openStatelessSession();
-			transaction = session.beginTransaction();
-			session.createSQLQuery("DELETE FROM friend WHERE pid=:x AND fid=:y")
+			statelessSession = sessionFactory.openStatelessSession();
+			transaction = statelessSession.beginTransaction();
+			statelessSession.createSQLQuery("DELETE FROM friend WHERE pid=:x AND fid=:y")
 					.setParameter("x", pid)
 					.setParameter("y", fid)
 					.executeUpdate();
@@ -244,7 +295,7 @@ public class GameDb {
 		}
 		finally
 		{
-			if (session != null) session.close();
+			closeSession(statelessSession);
 		}
 	}
 
@@ -273,6 +324,7 @@ public class GameDb {
 	public static void addFriend(UUID pid,UUID fid)
 	{
 		Transaction transaction = null;
+		StatelessSession statelessSession = null;
 		if (pid.compareTo(fid) > 0)
 		{
 			UUID tmp = pid;
@@ -281,8 +333,9 @@ public class GameDb {
 		}
 		try
 		{
-			transaction = session.beginTransaction();
-			session.createSQLQuery("INSERT INTO friend (pid,fid) values (:x,:y)")
+			statelessSession = sessionFactory.openStatelessSession();
+			transaction = statelessSession.beginTransaction();
+			statelessSession.createSQLQuery("INSERT INTO friend (pid,fid) values (:x,:y)")
 					.setParameter("x", pid)
 					.setParameter("y", fid)
 					.executeUpdate();
@@ -290,9 +343,13 @@ public class GameDb {
 		}
 		catch (RuntimeException e)
 		{
-			transaction.rollback();
+			rollBack(transaction);
 			logger.fatal("Save friend failure");
 			e.printStackTrace();
+		}
+		finally
+		{
+			closeSession(statelessSession);
 		}
 	}
 
@@ -300,16 +357,22 @@ public class GameDb {
 	{
 		boolean success = false;
 		Transaction transaction = null;
+		StatelessSession statelessSession = null;
 		try
 		{
-			transaction = session.beginTransaction();
-			session.createSQLQuery("CREATE TABLE  IF NOT EXISTS friend (pid uuid not null,fid uuid not null,primary key(pid,fid))")
+			statelessSession = sessionFactory.openStatelessSession();
+			transaction = statelessSession.beginTransaction();
+			statelessSession.createSQLQuery("CREATE TABLE  IF NOT EXISTS friend (pid uuid not null,fid uuid not null,primary key(pid,fid))")
 					.executeUpdate();
 			transaction.commit();
 			success = true;
 		}catch (RuntimeException e) {
-			transaction.rollback();
+			rollBack(transaction);
 			e.printStackTrace();
+		}
+		finally
+		{
+			closeSession(statelessSession);
 		}
 		return success;
 	}
@@ -574,6 +637,7 @@ public class GameDb {
 
 		}
 	}
+
 	public static void delete(Collection objs) {
 		Transaction transaction = null;
 		try {
@@ -588,6 +652,7 @@ public class GameDb {
 			}
 			transaction.commit();
 		} catch (RuntimeException e) {
+			e.printStackTrace();
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
@@ -680,7 +745,7 @@ public class GameDb {
 		Collection<Mail> res = new ArrayList<>();
 		StatelessSession session = sessionFactory.openStatelessSession();
 		Transaction transaction = session.beginTransaction();
-        org.hibernate.Query query = session.createQuery("FROM Mail where playerId = :x ");
+		org.hibernate.Query query = session.createQuery("FROM Mail where playerId = :x ");
         query.setParameter("x", playerId);
 		List<Mail> mails = query.list();
 		if (null != mails && mails.size() != 0) {
@@ -713,26 +778,6 @@ public class GameDb {
         }
     }
 
-/*	public static long mailLeftTime(UUID mailId) {
-		StatelessSession session = sessionFactory.openStatelessSession();
-		Transaction transaction = session.beginTransaction();
-		long now = System.currentTimeMillis();
-		long senvenDaysMs = TimeUnit.HOURS.toMillis(7 * 24);
-		long mailLeftTs = 0;
-		List list = session.createSQLQuery("select ts from Mail where id = :x")
-				.setParameter("x", mailId).list();
-		if (null != list && list.size() != 0){
-			long sendTs = Long.parseLong(list.get(0).toString());
-			mailLeftTs = sendTs + senvenDaysMs - now;
-			if (mailLeftTs < 0){
-				delOverdueMail();
-			}
-		}
-		transaction.commit();
-		session.close();
-		return mailLeftTs;
-	}*/
-
     public static void delOverdueMail() {
         Transaction transaction = null;
         StatelessSession session = null;
@@ -742,7 +787,7 @@ public class GameDb {
 
             long now = System.currentTimeMillis();
             long diffTs = now - TimeUnit.HOURS.toMillis(7 * 24);
-            session.createSQLQuery("DELETE FROM Mail WHERE ts <= :x")
+            session.createSQLQuery("DELETE FROM Mail WHERE ts < :x")
                     .setParameter("x", diffTs)
                     .executeUpdate();
             transaction.commit();

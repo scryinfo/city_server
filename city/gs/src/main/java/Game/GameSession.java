@@ -297,7 +297,7 @@ public class GameSession {
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		sendSocialInfo();
-		getAllMails((short) GsCode.OpCode.getAllMails_VALUE);
+
 	}
 
 	public void createRole(short cmd, Message message) {
@@ -1348,12 +1348,10 @@ public class GameSession {
 		GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
 
 		//push offline message
-		List<OfflineMessage> lists = GameDb.getOfflineMsg(player.id());
+		List<OfflineMessage> lists = GameDb.getOfflineMsgAndDel(player.id());
 		lists.forEach(message -> {
 			ManagerCommunication.getInstance().sendMsgToPersion(this, message);
 		});
-		GameDb.delete(lists);
-
 		//notify friend online
 		FriendManager.getInstance().broadcastStatue(player.id(), true);
 	}
@@ -1434,6 +1432,7 @@ public class GameSession {
 	{
 		Gs.ByteBool result = (Gs.ByteBool) message;
 		UUID sourceId = Util.toUuid(result.getId().toByteArray());
+		boolean blacklistNotify = false;
 		if (result.getB() &&
 				!FriendManager.playerFriends.getUnchecked(player.id()).contains(sourceId))
 		{
@@ -1443,6 +1442,7 @@ public class GameSession {
 			{
 				temp.getBlacklist().remove(player.id());
 				GameDb.saveOrUpdate(temp);
+				blacklistNotify = true;
 			}
 			Gs.RoleInfo firend = infoToRoleInfo(GameDb.getPlayerInfo(sourceId));
 			this.write(
@@ -1453,6 +1453,11 @@ public class GameSession {
 				gameSession.write(
 						Package.create(GsCode.OpCode.addFriendSucess_VALUE,
 								playerToRoleInfo(player)));
+				if (blacklistNotify) {
+					gameSession.write(
+							Package.create(GsCode.OpCode.deleteBlacklist_VALUE,
+									Gs.Id.newBuilder().setId(Util.toByteString(player.id())).build()));
+				}
 			}
 			//邮件通知添加好友成功
 			UUID[] oppositeId = {player.id()};
@@ -1504,6 +1509,13 @@ public class GameSession {
 	{
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
+
+    public void getGroundInfo(short cmd)
+    {
+        Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
+        builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+        this.write(Package.create(cmd, builder.build()));
+    }
 
 	//===========================================================
 

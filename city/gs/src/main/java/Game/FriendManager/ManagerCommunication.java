@@ -117,7 +117,7 @@ public class ManagerCommunication
                 //offline save message
                 else
                 {
-                    GameDb.saveOrUpdate(message);
+                    GameDb.statelessSaveOrUpdate(message);
                 }
             }
         }

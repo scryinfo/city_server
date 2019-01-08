@@ -10,6 +10,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.UUID;
 
 @TypeDefs({
@@ -130,6 +131,7 @@ public class Mail {
             uuidParas[i] = Util.toUuid(ba.getI(i).toByteArray());
     }
 
+    @PrePersist
     @PreUpdate
     private void _2() {
         Db.BytesArray.Builder builder = Db.BytesArray.newBuilder();
@@ -153,11 +155,12 @@ public class Mail {
                 builder.addParas(p);
             }
         }
-        /*if (null != uuidParas && uuidParas.length != 0) {
+        if (null != uuidParas && uuidParas.length != 0) {
             for (UUID uuidPara : uuidParas) {
                 builder.addUuidParas(Util.toByteString(uuidPara));
             }
-        }*/
+        }
         return builder.build();
     }
+
 }

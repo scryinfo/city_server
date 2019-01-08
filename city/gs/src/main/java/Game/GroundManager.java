@@ -30,7 +30,7 @@ public class GroundManager {
     private void buildCache() {
         for(GroundInfo i : info.values()) {
             playerGround.computeIfAbsent(i.ownerId, k->new HashSet<>()).add(i);
-            if(i.rentTransactionId != null) {
+            if(i.isRented()) {
                 rentGround.computeIfAbsent(i.rentTransactionId, k->new HashSet<>()).add(i);
             }
         }
@@ -123,16 +123,12 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            if(i == null || i.inSell() || !i.sameAs(rentPara))
+            if(i == null || !i.canRenting(id))
                 return false;
             gis.add(i);
         }
         for(GroundInfo i : gis) {
-            if(!i.ownerId.equals(id) || i.renterId != null)
-                return false;
-        }
-        for(GroundInfo i : gis) {
-            i.setBy(rentPara);
+            i.renting(rentPara);
         }
         GameDb.saveOrUpdate(gis); // faster than GameDb.saveOrUpdate(this);
         this.broadcast(gis);
@@ -140,15 +136,17 @@ public class GroundManager {
     }
 
     private void broadcast(List<GroundInfo> gis) {
-        Set<GridIndexPair> pairSet = new HashSet<>();
-        Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
-        for(GroundInfo gi : gis) {
-            pairSet.add(new Coordinate(gi.x, gi.y).toGridIndex().toSyncRange());
+        Map<GridIndexPair, Gs.GroundChange.Builder> notifyMap = new HashMap<>();
+        for(GroundInfo gi : gis)
+        {
+            GridIndexPair pair = new Coordinate(gi.x, gi.y).toGridIndex().toSyncRange();
+            Gs.GroundChange.Builder builder = notifyMap.computeIfAbsent(pair, k -> Gs.GroundChange.newBuilder());
             builder.addInfo(gi.toProto());
         }
-        Package pack = Package.create(GsCode.OpCode.groundChange_VALUE, builder.build());
-        for(GridIndexPair p : pairSet) {
-            City.instance().send(p, pack);
+        for (Map.Entry<GridIndexPair, Gs.GroundChange.Builder> entry : notifyMap.entrySet())
+        {
+            Package pack = Package.create(GsCode.OpCode.groundChange_VALUE,entry.getValue().build());
+            City.instance().send(entry.getKey(), pack);
         }
     }
     public Gs.GroundChange getGroundProto(List<GridIndex> g) {
@@ -169,7 +167,7 @@ public class GroundManager {
             GroundInfo i = info.get(c);
             if (i == null)
                 return false;
-            if (!i.sameAs(rentPara))
+            if (!i.sameAs(rentPara) || !i.inRenting())
                 return false;
             if (ownerId == null)
                 ownerId = i.ownerId;
@@ -195,7 +193,7 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            i.rentOut(rentPara, tid, renter.id(), now);
+            i.rented(rentPara, tid, renter.id(), now);
             updates.add(i);
             gis.add(i);
         }
@@ -214,7 +212,9 @@ public class GroundManager {
                 return false;
             gis.add(i);
         }
-        gis.forEach(i->i.sellPrice = price);
+        gis.forEach(i->{
+            i.sell(price);
+        });
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);
         return true;
@@ -224,7 +224,7 @@ public class GroundManager {
         UUID sellerId = null;
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            if (i == null || !i.inSell() || i.sellPrice != price)
+            if (i == null || !i.inSelling() || i.sellPrice != price)
                 return false;
             if(sellerId == null)
                 sellerId = i.ownerId;
@@ -249,8 +249,7 @@ public class GroundManager {
         LogDb.incomeBuyGround(seller.id(),buyer.id(),seller.money(),price,plist1);
         List updates = new ArrayList<>();
         for(GroundInfo i : gis) {
-            i.ownerId = buyer.id();
-            i.sellPrice = 0;
+            i.buyGround(buyer.id());
             updates.add(i);
         }
         updates.add(buyer);
@@ -280,11 +279,13 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>();
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            if (i == null || !i.ownerId.equals(id) || !i.inSell())
+            if (i == null || !i.ownerId.equals(id) || !i.inSelling())
                 return false;
             gis.add(i);
         }
-        gis.forEach(i->i.sellPrice = 0);
+        gis.forEach(i->{
+            i.cancelSell();
+        });
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);
         return true;
@@ -294,11 +295,11 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>();
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            if (i == null || !i.ownerId.equals(id) || i.inRent())
+            if (i == null || !i.ownerId.equals(id) || !i.inRenting())
                 return false;
             gis.add(i);
         }
-        gis.forEach(i->i.cancelRent());
+        gis.forEach(i->i.endRent());
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);
         return true;
