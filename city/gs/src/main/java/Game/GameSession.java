@@ -617,6 +617,17 @@ public class GameSession {
 		if(b.canUseBy(player.id()))
 			b.watchDetailInfoDel(this);
 	}
+	public void setBuildingName(short cmd, Message message) {
+		Gs.SetBuildingName c = (Gs.SetBuildingName) message;
+		if(c.getName().length() == 0 || c.getName().length() >= 30)
+			return;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null)
+			return;
+		if(b.canUseBy(player.id()))
+			b.setName(c.getName());
+	}
 
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;

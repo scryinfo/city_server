@@ -216,6 +216,8 @@ public abstract class Building {
     @Column(nullable = false)
     private long constructCompleteTs;
 
+    private String name;
+
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
 
@@ -255,6 +257,11 @@ public abstract class Building {
     public void shutdownBusiness() {
         this.happy = HAPPY_MIN;
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
+        this.broadcastChange();
+    }
+
+    public void setName(String name) {
+        this.name = name;
         this.broadcastChange();
     }
 
@@ -345,8 +352,8 @@ public abstract class Building {
         return coordinate;
     }
     public Gs.BuildingInfo toProto() {
-        return Gs.BuildingInfo.newBuilder()
-                .setId(Util.toByteString(id))
+        Gs.BuildingInfo.Builder builder = Gs.BuildingInfo.newBuilder();
+        builder.setId(Util.toByteString(id))
                 .setMId(metaBuilding.id)
                 .setPos(Gs.MiniIndex.newBuilder()
                         .setX(this.coordinate.x)
@@ -356,8 +363,10 @@ public abstract class Building {
                 .setState(Gs.BuildingState.valueOf(state))
                 .setSalary(salaryRatio)
                 .setHappy(happy)
-                .setConstructCompleteTs(constructCompleteTs)
-                .build();
+                .setConstructCompleteTs(constructCompleteTs);
+        if(name != null && name.length() > 0)
+            builder.setName(name);
+        return builder.build();
     }
 
     public abstract Message detailProto();
