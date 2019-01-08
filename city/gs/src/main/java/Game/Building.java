@@ -77,11 +77,11 @@ public abstract class Building {
     @Convert(converter = MetaBuilding.Converter.class)
     protected MetaBuilding metaBuilding;
 
-    public void watchDetailInfo(GameSession s) {
-        if(detailWatchers.contains(s.channelId()))
-            detailWatchers.remove(s.channelId());
-        else
-            detailWatchers.add(s.channelId());
+    public void watchDetailInfoAdd(GameSession s) {
+        detailWatchers.add(s.channelId());
+    }
+    public void watchDetailInfoDel(GameSession s) {
+        detailWatchers.remove(s.channelId());
     }
     @Transient
     Set<ChannelId> detailWatchers = new HashSet<>();

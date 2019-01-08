@@ -608,6 +608,16 @@ public class GameSession {
 			return;
 		player.unCollectExchangeItem(itemId);
 	}
+	public void stopListenBuildingDetailInform(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null)
+			return;
+		if(b.canUseBy(player.id()))
+			b.watchDetailInfoDel(this);
+	}
+
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
@@ -615,7 +625,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
 		if(b.canUseBy(player.id()))
-			b.watchDetailInfo(this);
+			b.watchDetailInfoAdd(this);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
@@ -625,7 +635,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
 		if(b.canUseBy(player.id()))
-			b.watchDetailInfo(this);
+			b.watchDetailInfoAdd(this);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailProduceDepartment(short cmd, Message message) {
@@ -635,7 +645,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.PRODUCE)
             return;
 		if(b.canUseBy(player.id()))
-			b.watchDetailInfo(this);
+			b.watchDetailInfoAdd(this);
         this.write(Package.create(cmd, b.detailProto()));
     }
 	public void detailPublicFacility(short cmd, Message message) {
@@ -645,7 +655,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.PUBLIC)
 			return;
 		if(b.canUseBy(player.id()))
-			b.watchDetailInfo(this);
+			b.watchDetailInfoAdd(this);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailLaboratory(short cmd, Message message) {
@@ -655,7 +665,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.LAB)
             return;
 		if(b.canUseBy(player.id()))
-			b.watchDetailInfo(this);
+			b.watchDetailInfoAdd(this);
         this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
@@ -665,7 +675,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.RETAIL)
             return;
 		if(b.canUseBy(player.id()))
-			b.watchDetailInfo(this);
+			b.watchDetailInfoAdd(this);
         this.write(Package.create(cmd, b.detailProto()));
     }
 
