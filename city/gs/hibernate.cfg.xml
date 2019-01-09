@@ -28,7 +28,9 @@
 		<property name="hibernate.jdbc.batch_size">50</property>
 		<property name="hibernate.cache.use_second_level_cache">false</property> <!--doc say the default value is true but default cache is NoCachingRegionFactory-->
 
+		<mapping class="Game.Player$Info"></mapping>
 		<mapping class="Game.Player"></mapping>
+		<mapping class="Game.Talent"></mapping>
 		<mapping class="Game.Coordinate"></mapping>
 		<mapping class="Game.Building"></mapping>
 		<mapping class="Game.Apartment"></mapping>
