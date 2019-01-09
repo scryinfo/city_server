@@ -211,8 +211,8 @@ public class PublicFacility extends Building {
         this.ad.put(ad.id, ad);
         return ad;
     }
-    public Ad addAd(SlotRent sr, MetaBuilding m) {
-        Ad ad = new Ad(sr, MetaBuilding.type(m.id), Ad.Type.BUILDING);
+    public Ad addAd(SlotRent sr, int buildingType) {
+        Ad ad = new Ad(sr, buildingType, Ad.Type.BUILDING);
         this.ad.put(ad.id, ad);
         qty += 1;
         return ad;

@@ -35,12 +35,12 @@ public class GameSession {
 	private boolean valid = false;
 	private boolean loginFailed = false;
 	private ArrayList<UUID> roleIds = new ArrayList<>();
-
+	private HashSet<UUID> buildingDetail = new HashSet<>();
+	private static final int MAX_DETAIL_BUILDING = 30;
 	public Player getPlayer() {
 		return player;
 	}
-	private
-	enum LoginState {
+	private enum LoginState {
 		ROLE_NO_LOGIN,
 		ROLE_LOGIN
 	}
@@ -63,33 +63,6 @@ public class GameSession {
 	}
 	public void update(long diffNano){
 		
-	}
-	public void logout(boolean isEvict){
-		if(!this.roleLogin()){
-			return;
-		}
-		if (isEvict)
-		{
-			GroundAuction.instance().unregist(this.channelId);
-			player.offline();
-			GameDb.evict(player);
-			//City.instance().execute(()->GameDb.evict(player));
-			GameServer.allGameSessions.remove(id());
-			//GameDb.saveOrUpdate(player); // unnecessary in this game, and can not do this, due to current thread is not city thread
-			//offline action of validate
-			Validator.getInstance().unRegist(accountName, token);
-			logger.debug("account: " + player.getAccount() + " logout");
-
-			//Notify friends
-			FriendManager.getInstance().broadcastStatue(player.id(),false);
-		}
-		//re-login
-		else
-		{
-			GroundAuction.instance().regist(this.channelId);
-			GameServer.allGameSessions.get(id()).disconnect();
-			logger.debug("account: " + player.getAccount() + " logout by re-login");
-		}
 	}
 
 	public GameSession(ChannelHandlerContext ctx){
@@ -271,22 +244,61 @@ public class GameSession {
 		Gs.HeartBeat b = (Gs.HeartBeat)message;
 		this.write(Package.create(cmd, Gs.HeartBeatACK.newBuilder().setClientTs(b.getTs()).setServerTs(System.currentTimeMillis()).build()));
 	}
+	private boolean kickOff = false;
+	private Player kickOff() {
+		assert player != null;
+		kickOff = true;
+		this.disconnect();
+		return player;
+	}
+	public void logout(){
+		if(!this.roleLogin()){
+			return;
+		}
+		for (UUID uuid : buildingDetail) {
+			Building building = City.instance().getBuilding(uuid);
+			if(building != null)
+				building.watchDetailInfoDel(this);
+		}
+		GroundAuction.instance().unregist(this.channelId);
+		if (kickOff)
+		{
+			logger.debug("account: " + player.getAccount() + " be kick off");
+		}
+		else
+		{
+			player.offline();
+			GameDb.evict(player);
+			logger.debug("account: " + player.getAccount() + " logout");
+
+			//Notify friends
+			FriendManager.getInstance().broadcastStatue(player.id(),false);
+		}
+		GameServer.allGameSessions.remove(id());
+		Validator.getInstance().unRegist(accountName, token);
+	}
 	public void roleLogin(short cmd, Message message) {
 		// in city thread
 		Gs.Id c = (Gs.Id)message;
 		UUID roleId = Util.toUuid(c.getId().toByteArray());
-		player = GameDb.getPlayer(roleId);
-		if(player == null){
-			this.write(Package.fail(cmd));
-			return;
+		GameSession otherOne = GameServer.allGameSessions.get(roleId);
+		if(otherOne != null) {
+			player = otherOne.kickOff();
+		}
+		else {
+			player = GameDb.getPlayer(roleId);
+			if (player == null) {
+				this.write(Package.fail(cmd));
+				return;
+			}
 		}
 
 		player.setSession(this);
 		loginState = LoginState.ROLE_LOGIN;
-		if (GameServer.allGameSessions.containsKey(roleId))
-		{
-			logout(false);
-		}
+//		if (GameServer.allGameSessions.containsKey(roleId))
+//		{
+//			logout(false);
+//		}
 		GameServer.allGameSessions.put(player.id(), this);
 
 		player.setCity(City.instance()); // toProto will use Player.city
@@ -628,15 +640,19 @@ public class GameSession {
 		if(b.canUseBy(player.id()))
 			b.setName(c.getName());
 	}
-
+	private void registBuildingDetail(Building building) {
+		if(buildingDetail.size() < MAX_DETAIL_BUILDING || building.canUseBy(player.id())) {
+			building.watchDetailInfoAdd(this);
+			buildingDetail.add(building.id());
+		}
+	}
 	public void detailApartment(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
-		if(b.canUseBy(player.id()))
-			b.watchDetailInfoAdd(this);
+		registBuildingDetail(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
@@ -645,18 +661,17 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
-		if(b.canUseBy(player.id()))
-			b.watchDetailInfoAdd(this);
+		registBuildingDetail(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
+
     public void detailProduceDepartment(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
         UUID id = Util.toUuid(c.getId().toByteArray());
         Building b = City.instance().getBuilding(id);
         if(b == null || b.type() != MetaBuilding.PRODUCE)
             return;
-		if(b.canUseBy(player.id()))
-			b.watchDetailInfoAdd(this);
+		registBuildingDetail(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
 	public void detailPublicFacility(short cmd, Message message) {
@@ -665,8 +680,7 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.type() != MetaBuilding.PUBLIC)
 			return;
-		if(b.canUseBy(player.id()))
-			b.watchDetailInfoAdd(this);
+		registBuildingDetail(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailLaboratory(short cmd, Message message) {
@@ -675,8 +689,7 @@ public class GameSession {
         Building b = City.instance().getBuilding(id);
         if(b == null || b.type() != MetaBuilding.LAB)
             return;
-		if(b.canUseBy(player.id()))
-			b.watchDetailInfoAdd(this);
+		registBuildingDetail(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
@@ -685,8 +698,7 @@ public class GameSession {
         Building b = City.instance().getBuilding(id);
         if(b == null || b.type() != MetaBuilding.RETAIL)
             return;
-		if(b.canUseBy(player.id()))
-			b.watchDetailInfoAdd(this);
+		registBuildingDetail(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
 
@@ -809,7 +821,7 @@ public class GameSession {
 		if(building == null || building.outOfBusiness() || (!(building instanceof PublicFacility) && !(building instanceof RetailShop)))
 			return;
 		if(c.getType() == Gs.Advertisement.Ad.Type.BUILDING) {
-			if(!MetaBuilding.canAd(MetaBuilding.type(c.getMetaId())))
+			if(!MetaBuilding.canAd(c.getMetaId()))
 				return;
 		}
 		PublicFacility pf = (PublicFacility)building;
@@ -834,10 +846,7 @@ public class GameSession {
 			ad = pf.addAd(sr, m);
 		}
 		else if(c.getType() == Gs.Advertisement.Ad.Type.BUILDING) {
-			MetaBuilding m = MetaData.getBuilding(c.getMetaId());
-			if(m == null)
-				return;
-			ad = pf.addAd(sr, m);
+			ad = pf.addAd(sr, c.getMetaId());
 		}
 		else
 			return;

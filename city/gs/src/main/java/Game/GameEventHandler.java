@@ -29,7 +29,7 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         if(session.valid())
-            City.instance().execute(()->session.logout(true)); // because logout will evict the player object, we must serialize the evict and all other logic which will get this object
+            City.instance().execute(()->session.logout()); // because logout will evict the player object, we must serialize the evict and all other logic which will get this object
         super.channelInactive(ctx);
     }
 
