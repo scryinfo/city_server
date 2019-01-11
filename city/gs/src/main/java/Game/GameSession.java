@@ -1381,7 +1381,7 @@ public class GameSession {
 			fr.setCount(fr.getCount() + 1);
 			toBeUpdate.add(fr);
 		}
-		GameDb.saveOrUpdateAndDelete(toBeUpdate,toBeDel);
+		GameDb.newSessionSaveOrUpdateAndDelete(toBeUpdate,toBeDel);
 
 		//push offline message
 		List<OfflineMessage> lists = GameDb.getOfflineMsgAndDel(player.id());
@@ -1458,7 +1458,7 @@ public class GameSession {
 				if (list.isEmpty())
 				{
 					FriendRequest friendRequest = new FriendRequest(player.id(), targetId, addMsg.getDesc());
-					GameDb.saveOrUpdate(friendRequest);
+					GameDb.statelessInsert(friendRequest);
 				}
 			}
 		}

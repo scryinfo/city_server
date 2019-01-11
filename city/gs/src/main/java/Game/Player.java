@@ -265,6 +265,7 @@ public class Player {
         builder.setBagCapacity(bagCapacity);
         this.exchangeFavoriteItem.forEach(id->builder.addExchangeCollectedItem(id));
         builder.addAllGround(GroundManager.instance().getGroundProto(id()));
+        builder.addAllRentGround(GroundManager.instance().getRentGroundProto(id()));
         builder.setBagId(Util.toByteString(BAG_ID));
         builder.addAllBuildingBrands(BrandManager.instance().getBuildingBrandProto(id()));
         builder.addAllGoodBrands(BrandManager.instance().getGoodBrandProto(id()));
