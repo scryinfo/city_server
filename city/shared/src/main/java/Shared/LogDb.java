@@ -97,10 +97,8 @@ public class LogDb {
 	{
 		UUID uuid = UUID.randomUUID();
 		UUID uuid1 = UUID.randomUUID();
-		buyInShelf(uuid, uuid1, 10l, 1, 1, UUID.randomUUID());
 		npcBuy(1, 1, UUID.randomUUID(), 1, UUID.randomUUID(), 1, 1.0f);
 		paySalary(UUID.randomUUID(), UUID.randomUUID(), 10L, 1, 1);
-		buyAdSlot(UUID.randomUUID(), 10L, UUID.randomUUID(), UUID.randomUUID(), 1);
 		payTransfer(UUID.randomUUID(), 10L, 1, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1);
 		buyTech(UUID.randomUUID(), UUID.randomUUID(), 10L, 1, 1);
 		rentGround(UUID.randomUUID(), 10L, UUID.randomUUID(), 1, new ArrayList<>());
@@ -115,12 +113,15 @@ public class LogDb {
 
 	public static void startUp(){}
 
-	public static void buyInShelf(UUID roleId, UUID dstId, long money, int n, int price, UUID producerId)
+	public static void buyInShelf(UUID roleId, UUID dstId, long money,
+								  int n, int price, UUID producerId,UUID bid)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", dstId)
+				.append("b", bid)
 				.append("m", money)
+				.append("c", n)
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId);
@@ -150,10 +151,11 @@ public class LogDb {
 		paySalary.insertOne(document);
 	}
 
-	public static void buyAdSlot(UUID roleId, long money, UUID bid, UUID slotId, int rentPreDay)
+	public static void buyAdSlot(UUID roleId, long money,UUID dstId, UUID bid, UUID slotId, int rentPreDay)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
+				.append("d", dstId)
 				.append("b", bid)
 				.append("s", slotId)
 				.append("m", money)
@@ -230,11 +232,13 @@ public class LogDb {
 		incomeExchange.insertOne(document);
 	}
 
-	public static void incomeInShelf(UUID roleId, UUID dstId, long money, int n, int price, UUID producerId)
+	public static void incomeInShelf(UUID roleId, UUID dstId, long money,
+									 int n, int price, UUID producerId,UUID bid)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", dstId)
+				.append("b", bid)
 				.append("m", money)
 				.append("p", price)
 				.append("a", n * price)
@@ -242,10 +246,11 @@ public class LogDb {
 		incomeInShelf.insertOne(document);
 	}
 
-	public static void incomeAdSlot(UUID roleId, long money, UUID bid, UUID slotId, int rentPreDay)
+	public static void incomeAdSlot(UUID roleId, long money,UUID desId, UUID bid, UUID slotId, int rentPreDay)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
+				.append("d", desId)
 				.append("b", bid)
 				.append("s", slotId)
 				.append("m", money)

@@ -505,7 +505,8 @@ public class GameSession {
 			return;
 		}
 		long cost = itemBuy.n*c.getPrice();
-		if(player.money() < cost)
+		int freight = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(buyStore, (IStorage) sellBuilding));
+		if(player.money() < cost + freight)
 			return;
 
 		// begin do modify
@@ -513,9 +514,14 @@ public class GameSession {
 			return;
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
+
 		player.decMoney(cost);
-		LogDb.incomeInShelf(seller.id(),seller.id(),seller.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
-		LogDb.buyInShelf(player.id(),seller.id(),player.money(),itemBuy.n,c.getPrice(),itemBuy.key.producerId);
+		player.decMoney(freight);
+
+		LogDb.payTransfer(player.id(), player.money(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+		LogDb.incomeInShelf(seller.id(), seller.id(), seller.money(), itemBuy.n, c.getPrice(), itemBuy.key.producerId, sellBuilding.id());
+		LogDb.buyInShelf(player.id(), seller.id(), player.money(), itemBuy.n, c.getPrice(), itemBuy.key.producerId, sellBuilding.id());
+
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 
@@ -925,8 +931,8 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
-		LogDb.incomeAdSlot(owner.id(), owner.money(), bid, slotId, slot.rentPreDay);
-		LogDb.buyAdSlot(player.id(), player.money(), bid, slotId, slot.rentPreDay);
+		LogDb.incomeAdSlot(owner.id(), owner.money(),player.id(), bid, slotId, slot.rentPreDay);
+		LogDb.buyAdSlot(player.id(), player.money(),owner.id(), bid, slotId, slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -1546,7 +1552,6 @@ public class GameSession {
         builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
         this.write(Package.create(cmd, builder.build()));
     }
-
 	//===========================================================
 
 	//llb========================================================

@@ -289,9 +289,9 @@ public class PublicFacility extends Building {
                         ids.add(v.slot.id);
                     }
                     else {
-                        LogDb.buyAdSlot(renter.id(), renter.money(), this.id(), v.slot.id, v.slot.rentPreDay);
+                        LogDb.buyAdSlot(renter.id(), renter.money(),owner.id(), this.id(), v.slot.id, v.slot.rentPreDay);
                         owner.addMoney(v.slot.rentPreDay);
-                        LogDb.incomeAdSlot(owner.id(), owner.money(), this.id(), v.slot.id, v.slot.rentPreDay);
+                        LogDb.incomeAdSlot(owner.id(), owner.money(),renter.id(), this.id(), v.slot.id, v.slot.rentPreDay);
                         v.payTs = now;
                     }
                     GameDb.saveOrUpdate(Arrays.asList(renter, owner, this)); // seems we should disable select-before-update
