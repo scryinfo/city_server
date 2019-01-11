@@ -227,23 +227,18 @@ public class PublicFacility extends Building {
     int tickPrice;
     @Override
     protected void enterImpl(Npc npc){
-//        if(this.tickPrice > 0) { // already paid in action
-//            npc.decMoney(this.tickPrice);
-//            Player owner = GameDb.queryPlayer(ownerId());
-//            owner.addMoney(this.tickPrice);
-//            GameDb.saveOrUpdate(Arrays.asList(npc, owner));
-//        }
-
         this.ad.values().forEach(ad->{
             ad.npcFlow++;
             BrandManager.instance().update(ad.sr.renterId, ad.metaId, 1);
         });
+        ++visitorCount;
     }
 
     @Override
     protected void leaveImpl(Npc npc) {
-
+        --visitorCount;
     }
+    private int visitorCount;
 
     @PostLoad
     protected void _1() {
@@ -257,6 +252,7 @@ public class PublicFacility extends Building {
         builder.setAd(genAdPart());
         builder.setQty(qty);
         builder.setTicketPrice(this.tickPrice);
+        builder.setVisitorCount(visitorCount);
         return builder.build();
     }
     protected Gs.Advertisement genAdPart() {

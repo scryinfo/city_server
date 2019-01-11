@@ -295,10 +295,6 @@ public class GameSession {
 
 		player.setSession(this);
 		loginState = LoginState.ROLE_LOGIN;
-//		if (GameServer.allGameSessions.containsKey(roleId))
-//		{
-//			logout(false);
-//		}
 		GameServer.allGameSessions.put(player.id(), this);
 
 		player.setCity(City.instance()); // toProto will use Player.city
