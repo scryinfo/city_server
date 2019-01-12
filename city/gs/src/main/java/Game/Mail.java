@@ -119,7 +119,7 @@ public class Mail {
 //    public Set<UUID> getUuidParas() { return uuidParas; }
 
     @Transient
-    private UUID[] uuidParas;
+    private UUID[] uuidParas = new UUID[]{};
 
     private byte[] uuids;
 
