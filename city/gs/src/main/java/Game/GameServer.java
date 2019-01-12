@@ -74,6 +74,13 @@ public class GameServer {
         MetaData.init(gsInfo.getMetaDbUri());
         MetaData.startUp();
 
+        UUID uuid = UUID.randomUUID();
+        MailBox.instance().sendMail(Mail.MailType.LAND_RENT.getMailType(),uuid,new int[]{Mail.ParaType.APARTMENT.getParaType()},new UUID[]{uuid},new int[]{3});
+        MailBox.instance().getAllMails(uuid).forEach(mail -> System.out.println(mail));
+        MailBox.instance().getAllMails(UUID.fromString("926c1b4a-d42e-43f2-b0c6-946bdae5033d"));
+        MailBox.instance().mailRead(UUID.fromString("f0d77c37-27cf-483d-84e3-7521d58538bd"));
+        MailBox.instance().deleteMail(UUID.fromString("a485f29c-2b8b-4862-9906-c1777590ecbb"));
+        MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(),uuid);
         // db info is in hibernate.xml now
         //GameDb.startUp(gsInfo.getGameDbUrl());
         //GameDb.startUp();
