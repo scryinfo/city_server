@@ -461,7 +461,7 @@ class MetaGroundAuction {
         return b.build();
     }
     UUID id;    // use to check this data has been changed or not, compare it with player db(if anyone bid it)
-    Set<Coordinate> area = new HashSet<>();
+    List<Coordinate> area = new ArrayList<>();
     long beginTime;
     long endTime;
     int price;
@@ -650,6 +650,8 @@ public class MetaData {
                 return laboratory.get(id);
             case MetaBuilding.PUBLIC:
                 return publicFacility.get(id);
+            case MetaBuilding.TALENT:
+                return talentCenter.get(id);
         }
         return null;
     }
