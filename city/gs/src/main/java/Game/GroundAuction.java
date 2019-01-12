@@ -162,7 +162,7 @@ public class GroundAuction {
         a.biderId = bider.id();
         bider.lockMoney(id, price);
         GameDb.saveOrUpdate(Arrays.asList(bider, this));
-        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(id)).setNum(price).build());
+        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(Util.toByteString(id)).setNowPrice(price).setBiderId(Util.toByteString(bider.id())).build());
         this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
             if(channel.id().equals(cId))
                 return true;
