@@ -50,6 +50,24 @@ public class GroundManager {
         }
         return res;
     }
+    
+    public Iterable<? extends Gs.GroundInfo> getRentGroundProto(UUID rentId) {
+        Set<GroundInfo> gs = new HashSet<>();
+        rentGround.values().forEach(set->{
+            set.forEach(groundInfo -> {
+                if (groundInfo.isRented() && groundInfo.renterId.equals(rentId)) {
+                    gs.add(groundInfo);
+                }
+            });
+        });
+        if(gs.isEmpty())
+            return new ArrayList<>();
+        List<Gs.GroundInfo> res = new ArrayList<>(gs.size());
+        for(GroundInfo i : gs) {
+            res.add(i.toProto());
+        }
+        return res;
+    }
     void update(long diffNano) {
         final long now = System.currentTimeMillis();
         List<UUID> del = new ArrayList<>();

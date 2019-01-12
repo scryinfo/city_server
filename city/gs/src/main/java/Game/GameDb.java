@@ -126,7 +126,7 @@ public class GameDb {
 					});
 
 	//wxj============================================
-	public static void statelessSaveOrUpdate(Object o) {
+	public static void statelessInsert(Object o) {
 		Transaction transaction = null;
 		StatelessSession statelessSession = null;
 		try {
@@ -178,6 +178,7 @@ public class GameDb {
 	public static void deleteFriendRequest(UUID from, UUID to)
 	{
 		Transaction transaction = null;
+        StatelessSession session = sessionFactory.openStatelessSession();
 		try
 		{
 			transaction = session.beginTransaction();
@@ -191,22 +192,60 @@ public class GameDb {
 		{
 			logger.fatal("delete friend request failed");
 			e.printStackTrace();
+			rollBack(transaction);
+		}
+		finally
+        {
+            closeSession(session);
+        }
+	}
+
+	public static void newSessionSaveOrUpdateAndDelete(Collection saveUpdate, Collection deletes) {
+		Transaction transaction = null;
+		Session session1 = sessionFactory.openSession();
+		try
+        {
+		    transaction = session1.beginTransaction();
+			int i = 0;
+			for (Object o : saveUpdate)
+			{
+				session1.saveOrUpdate(o);
+				++i;
+				if (i % BATCH_SIZE == 0)
+					session1.flush();
+			}
+			for (Object o : deletes)
+			{
+				session1.delete(o);
+				++i;
+				if (i % BATCH_SIZE == 0)
+					session1.flush();
+			}
+			transaction.commit();
+		} catch (RuntimeException e) {
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+			if (session1 != null) {
+				session1.close();
+			}
 		}
 	}
 	public static List<FriendRequest> getFriendRequest(UUID from, UUID to)
 	{
 		List<FriendRequest> list = new ArrayList<>();
+		Session session1 = sessionFactory.openSession();
 		try
 		{
 			if (from == null)
 			{
-				list = session.createQuery("FROM friend_request WHERE to_id=:y")
+				list = session1.createQuery("FROM friend_request WHERE to_id=:y")
 						.setParameter("y", to)
 						.list();
 			}
 			else
 			{
-				list = session.createQuery("FROM friend_request WHERE from_id=:x AND to_id=:y")
+				list = session1.createQuery("FROM friend_request WHERE from_id=:x AND to_id=:y")
 						.setParameter("x", from)
 						.setParameter("y", to)
 						.list();
@@ -216,6 +255,12 @@ public class GameDb {
 		{
 			logger.fatal("query friend request failed");
 			e.printStackTrace();
+		}
+		finally
+		{
+			if (session1 != null) {
+				session1.close();
+			}
 		}
 		return list;
 	}
@@ -319,8 +364,6 @@ public class GameDb {
 		session.close();
 		return list;
 	}
-
-
 	public static void addFriend(UUID pid,UUID fid)
 	{
 		Transaction transaction = null;
