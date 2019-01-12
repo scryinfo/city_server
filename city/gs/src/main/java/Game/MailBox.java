@@ -24,19 +24,14 @@ public class MailBox {
         sendMailImpl(playerId, mail);
     }
 
+    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr) {
+        Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr);
+        sendMailImpl(playerId, mail);
+    }
+
     private void sendMailImpl(UUID playerId, Mail mail) {
         GameDb.saveOrUpdate(mail);
         GameServer.sendTo(Arrays.asList(playerId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
-    }
-
-    void sendMail(int type, UUID playerId, int[] paras) {
-        Mail mail = new Mail(type, playerId, paras);
-        sendMailImpl(playerId, mail);
-    }
-
-    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas) {
-        Mail mail = new Mail(type, playerId, paras, uuidParas);
-        sendMailImpl(playerId, mail);
     }
 
     Collection<Mail> getAllMails(UUID playerId) {

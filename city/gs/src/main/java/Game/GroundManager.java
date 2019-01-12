@@ -201,6 +201,17 @@ public class GroundManager {
         GameDb.saveOrUpdate(updates);
         this.rentGround.put(tid, new HashSet<>(gis));
         this.broadcast(gis);
+        //土地出租通知
+        List<Integer> list = new ArrayList<>();
+        for (Coordinate c : coordinates) {
+            list.add(c.x);
+            list.add(c.y);
+        }
+        int[] landCoordinates = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            landCoordinates[i] = list.get(i);
+        }
+        MailBox.instance().sendMail(Mail.MailType.LAND_RENT.getMailType(),ownerId,null,new UUID[]{renter.id()},landCoordinates);
         return true;
     }
 
@@ -256,6 +267,17 @@ public class GroundManager {
         updates.add(seller);
         GameDb.saveOrUpdate(updates);
         this.broadcast(gis);
+        //土地出售通知
+        List<Integer> list = new ArrayList<>();
+        for (Coordinate c : coordinates) {
+            list.add(c.x);
+            list.add(c.y);
+        }
+        int[] landCoordinates = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            landCoordinates[i] = list.get(i);
+        }
+        MailBox.instance().sendMail(Mail.MailType.LAND_SALE.getMailType(),sellerId,null,new UUID[]{buyer.id()},landCoordinates);
         return true;
     }
 

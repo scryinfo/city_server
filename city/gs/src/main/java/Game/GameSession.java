@@ -309,7 +309,6 @@ public class GameSession {
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		sendSocialInfo();
-
 	}
 
 	public void createRole(short cmd, Message message) {
@@ -1070,6 +1069,7 @@ public class GameSession {
 			return;
 		if(GroundManager.instance().buyGround(player, coordinates, c.getPrice()))
 			this.write(Package.create(cmd));
+
 		else
 			this.write(Package.fail(cmd));
 	}
@@ -1491,7 +1491,7 @@ public class GameSession {
 			}
 			//邮件通知添加好友成功
 			UUID[] oppositeId = {player.id()};
-			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId,null,oppositeId);
+			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId,null,oppositeId,null);
 		}
 		else
 		{

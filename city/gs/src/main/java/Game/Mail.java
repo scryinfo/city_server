@@ -2,6 +2,7 @@ package Game;
 
 import DB.Db;
 import Shared.Util;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import gs.Gs;
@@ -26,7 +27,7 @@ public class Mail {
     public enum MailType {
         EXCHANGE_GOODS_SOLD(1),
         STORE_FULL(2),
-        PRODUC_LINE_COMPLETION(3),
+        PRODUCTION_LINE_COMPLETION(3),
         EMPLOYEE_SATISFACTION(4),
         LOCKOUT(5),
         AD_SPACE_RENT_OUT(6),
@@ -70,31 +71,23 @@ public class Mail {
         }
     }
 
-    public Mail(int type, UUID playerId, int[] paras) {
-        id = UUID.randomUUID();
-        this.playerId = playerId;
-        this.type = type;
-        this.paras = paras;
-        ts = System.currentTimeMillis();
-        read = false;        //默认值为false,未读
-    }
-
-    public Mail(int type, UUID playerId, int[] paras, UUID[] uuidParas) {
-        id = UUID.randomUUID();
-        this.playerId = playerId;
-        this.type = type;
-        this.paras = paras;
-        this.uuidParas = uuidParas;
-        ts = System.currentTimeMillis();
-        read = false;        //默认值为false,未读
-    }
-
     public Mail(int type, UUID playerId) {
         id = UUID.randomUUID();
         this.playerId = playerId;
         this.type = type;
         ts = System.currentTimeMillis();
         read = false;
+    }
+
+    public Mail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr) {
+        id = UUID.randomUUID();
+        this.playerId = playerId;
+        this.type = type;
+        this.paras = paras;
+        this.uuidParas = uuidParas;
+        this.intParasArr = intParasArr;
+        ts = System.currentTimeMillis();
+        read = false;        //默认值为false,未读
     }
 
     protected Mail() {
@@ -112,6 +105,13 @@ public class Mail {
             columnDefinition = "int[]"
     )
     private int[] paras;
+
+    @Type(type = "int-array")
+    @Column(
+            name = "intParasArr",
+            columnDefinition = "int[]"
+    )
+    private int[] intParasArr;
 
 //    @ElementCollection(fetch = FetchType.EAGER)
 //    @CollectionTable(name = "mail_uuidPara", joinColumns = { @JoinColumn(name = "Mail_id")})
@@ -155,10 +155,13 @@ public class Mail {
                 builder.addParas(p);
             }
         }
-        if (null != uuidParas && uuidParas.length != 0) {
-            for (UUID uuidPara : uuidParas) {
-                builder.addUuidParas(Util.toByteString(uuidPara));
+        if (null != intParasArr && intParasArr.length != 0) {
+            for (int a : intParasArr) {
+                builder.addIntParasArr(a);
             }
+        }
+        if (null != uuids && uuids.length != 0) {
+            builder.addUuids(ByteString.copyFrom(uuids));
         }
         return builder.build();
     }
