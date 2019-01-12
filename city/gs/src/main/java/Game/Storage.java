@@ -127,6 +127,7 @@ public class Storage implements IStorage {
         if(!has(m, n))
             return false;
         locked.put(m, locked.getOrDefault(m, 0) + n);
+        this.inHand.put(m, this.inHand.getOrDefault(m, 0) - n);
         return true;
     }
 
