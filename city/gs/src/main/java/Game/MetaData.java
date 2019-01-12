@@ -650,6 +650,8 @@ public class MetaData {
                 return laboratory.get(id);
             case MetaBuilding.PUBLIC:
                 return publicFacility.get(id);
+            case MetaBuilding.TALENT:
+                return talentCenter.get(id);
         }
         return null;
     }

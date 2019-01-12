@@ -406,6 +406,8 @@ public class GameSession {
 		if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
 			return;
 		MetaBuilding m = MetaData.getBuilding(mid);
+		if(m == null)
+			return;
 		Coordinate ul = new Coordinate(c.getPos());
 		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
 			return;
