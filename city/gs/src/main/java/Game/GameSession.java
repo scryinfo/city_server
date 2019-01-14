@@ -1146,7 +1146,7 @@ public class GameSession {
 		for (Formula.Consume consume : consumes) {
 			if(consume.m == null)
 				continue;
-			if(lab.getNumber(consume.m) < consume.n*c.getPhase())
+			if(lab.availableQuantity(consume.m) < consume.n*c.getPhase())
 				enoughMaterial = false;
 		}
 		if(!enoughMaterial)

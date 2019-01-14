@@ -146,7 +146,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
     public boolean delItem(ItemKey k) { return this.store.delItem(k); }
 
     @Override
-    public int getNumber(MetaItem m) { return this.store.getNumber(m); }
+    public int availableQuantity(MetaItem m) { return this.store.availableQuantity(m); }
 
     @Override
     public boolean has(ItemKey m, int n) { return this.store.has(m, n); }

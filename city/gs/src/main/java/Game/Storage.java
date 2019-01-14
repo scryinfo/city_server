@@ -41,7 +41,7 @@ public class Storage implements IStorage {
             this.inHand.put(k, this.inHand.getOrDefault(k, 0)+n);
         }
         else if(n < 0) {
-            if(this.getNumber(item) < -n)
+            if(this.availableQuantity(item) < -n)
                 return false;
             int left = -n;
             Iterator<Map.Entry<ItemKey, Integer>> iterator = this.inHand.entrySet().iterator();
@@ -144,11 +144,8 @@ public class Storage implements IStorage {
     @Override
     public AvgPrice consumeLock(ItemKey m, int n) {
         locked.put(m, locked.get(m) - n);
-        inHand.put(m, inHand.get(m) - n);
         if(locked.get(m) == 0)
             locked.remove(m);
-        if(inHand.get(m) == 0)
-            inHand.remove(m);
         return inHandPrice.get(m);
     }
 
@@ -181,7 +178,7 @@ public class Storage implements IStorage {
     }
 
     @Override
-    public int getNumber(MetaItem m) {
+    public int availableQuantity(MetaItem m) {
         return inHand.entrySet().stream().filter(e->e.getKey().meta == m).mapToInt(e->e.getValue()).sum();
     }
     @Override
@@ -192,7 +189,7 @@ public class Storage implements IStorage {
     Set<UUID> order = new HashSet<>();
 
     public int usedSize() {
-        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
+        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + locked.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
     }
     public int availableSize() {
         return capacity - usedSize();

@@ -204,7 +204,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public int getNumber(MetaItem m) { return this.store.getNumber(m); }
+    public int availableQuantity(MetaItem m) { return this.store.availableQuantity(m); }
 
     @Override
     public boolean has(ItemKey m, int n) { return this.store.has(m, n); }

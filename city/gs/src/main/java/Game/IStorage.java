@@ -38,7 +38,7 @@ public interface IStorage {
         return Coordinate.distance(a, b);
     }
     boolean delItem(ItemKey mi);
-    int getNumber(MetaItem m);
+    int availableQuantity(MetaItem m);
     boolean has(ItemKey m, int n);
 
     boolean offset(ItemKey item, int n);
