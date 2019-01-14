@@ -52,10 +52,12 @@ public class LogDb {
 	private static MongoCollection<Document> incomeBuyGround;
 	private static MongoCollection<Document> incomeVisit;
 	private static MongoCollection<Document> incomeShop;
-	public static void init(String url) {
+
+	public static void init(String url, String dbName)
+	{
 		connectionUrl = new MongoClientURI(url);
 		mongoClient = new MongoClient(connectionUrl);
-		database = mongoClient.getDatabase("cityLog");
+		database = mongoClient.getDatabase(dbName);
 		npcBuyInRetailCol = database.getCollection("retail")
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		paySalary = database.getCollection(PAY_SALARY)
@@ -91,6 +93,7 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		incomeShop = database.getCollection(INCOME_SHOP)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//test();
 	}
 
 	private static void test()
@@ -106,9 +109,6 @@ public class LogDb {
 		extendBag(UUID.randomUUID(), 10L, 1, 1);
 		Document document = buyInShelf.find(Filters.eq("r", uuid)).first();
 		System.err.println("uuid1 = " + uuid1);
-		UUID uuid2 = (UUID) document.get("d");
-		System.err.println("doc uuid2 = " + uuid2);
-		System.err.println("doc uuid2 == uuid : " + uuid2.equals(uuid1));
 	}
 
 	public static void startUp(){}

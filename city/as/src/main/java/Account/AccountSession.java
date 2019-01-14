@@ -121,6 +121,8 @@ public class AccountSession {
             cag.setPort(gsInfo.getPort());
             cag.setCreateTime((int) (gsInfo.getCreateTime().toEpochMilli() / 1000));
             cag.setTag(0);
+            cag.setSsIp(gsInfo.getSsIp());
+            cag.setSsPort(gsInfo.getSsPort());
             if(AccountServer.gsIdToChannelId.containsKey(gsInfo.getId()))
                 cag.setAvailable(true);
             else

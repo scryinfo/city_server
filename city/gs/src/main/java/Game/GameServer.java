@@ -69,7 +69,7 @@ public class GameServer {
         gsInfo = ServerCfgDb.getGameServerInfo(this.getId());
         if(gsInfo == null)
             throw new Exception("can not find game server " + this.id + " in cfg db");
-        LogDb.init(gsInfo.getLogDbUri());
+        LogDb.init(gsInfo.getLogDbUri(), gsInfo.getLogDbName());
         LogDb.startUp();
         MetaData.init(gsInfo.getMetaDbUri());
         MetaData.startUp();

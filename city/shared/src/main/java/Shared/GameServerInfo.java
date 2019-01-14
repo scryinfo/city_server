@@ -14,6 +14,24 @@ public class GameServerInfo {
     private String metaDbUri;
     private Instant maintainEndTime;
     private Instant createTime;
+    private String ssIp;
+    private int ssPort;
+    private String logDbName;
+
+    public String getLogDbName()
+    {
+        return logDbName;
+    }
+
+    public String getSsIp()
+    {
+        return ssIp;
+    }
+
+    public int getSsPort()
+    {
+        return ssPort;
+    }
 
     public String getLogDbUri() {
         return logDbUri;
@@ -63,6 +81,9 @@ public class GameServerInfo {
         this.logDbUri = doc.getString("logDbUri");
         this.gameDbUrl = doc.getString("gameDbUrl");
         this.metaDbUri = doc.getString("metaDbUri");
+        this.ssIp = doc.getString("ssIp");
+        this.ssPort = doc.getInteger("ssPort");
+        this.logDbName = doc.getString("logDbName");
     }
 
     public String getGameDbUrl() {

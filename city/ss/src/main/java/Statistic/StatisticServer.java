@@ -37,7 +37,7 @@ public class StatisticServer {
         ServerCfgDb.startUp();
         this.id = GlobalConfig.serverId();
         serverInfo = ServerCfgDb.getGameServerInfo(id);
-        LogDb.init(serverInfo.getLogDbUri());
+        LogDb.init(serverInfo.getLogDbUri(),serverInfo.getLogDbName());
     }
 
     public void run() throws Exception {
