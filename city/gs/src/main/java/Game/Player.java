@@ -375,6 +375,18 @@ public class Player {
         int m = (int) this.unlockMoney(a.meta.id);
         GameDb.saveOrUpdate(this);
         this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum(a.price).build()));
+        //更高出价通知
+        List<Coordinate> areas = a.meta.area;
+        List<Integer> list = new ArrayList<>();
+        for (Coordinate c : areas) {
+            list.add(c.x);
+            list.add(c.y);
+        }
+        int[] landCoordinates = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            landCoordinates[i] = list.get(i);
+        }
+        MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION_HIGHER.getMailType(),id,null,null,landCoordinates);
     }
 
     public String getName() {

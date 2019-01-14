@@ -112,6 +112,19 @@ public class GroundAuction {
                     GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance()));
 
                     bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
+                    //土地拍卖通知
+                    List<Coordinate> areas = a.meta.area;
+                    List<Integer> list = new ArrayList<>();
+                    for (Coordinate c : areas) {
+                        list.add(c.x);
+                        list.add(c.y);
+                    }
+                    int[] landCoordinates = new int[list.size()];
+                    for (int i = 0; i < list.size(); i++) {
+                        landCoordinates[i] = list.get(i);
+                    }
+                    MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,null,landCoordinates);
+
                 }
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());
                 this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel) -> {
