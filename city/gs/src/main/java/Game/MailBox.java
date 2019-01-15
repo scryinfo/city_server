@@ -19,8 +19,8 @@ public class MailBox {
     protected MailBox() {
     }
 
-    void sendMail(int type, UUID playerId) {
-        Mail mail = new Mail(type, playerId);
+    void sendMail(int type, UUID playerId, int[] paras, int[] intParasArr) {
+        Mail mail = new Mail(type, playerId, paras, intParasArr);
         sendMailImpl(playerId, mail);
     }
 

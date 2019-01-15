@@ -386,7 +386,7 @@ public class Player {
         for (int i = 0; i < list.size(); i++) {
             landCoordinates[i] = list.get(i);
         }
-        MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION_HIGHER.getMailType(),id,null,null,landCoordinates);
+        MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION_HIGHER.getMailType(),id,null,landCoordinates);
     }
 
     public String getName() {

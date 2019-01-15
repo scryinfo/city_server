@@ -58,7 +58,11 @@ public class Mail {
         PUBLIC_FACILITY(4),
         LABORATORY(5),
         APARTMENT(6),
-        CENTER_STORE(7);
+        CENTER_STORE(7),
+        TECHNOLOGY_EXCHANGE(8),
+        TALENT_CENTER(9),
+        TALENT_EXCHANGE_CENTER(10),
+        EXCHANGE(11);
 
         private int paraType;
 
@@ -71,10 +75,12 @@ public class Mail {
         }
     }
 
-    public Mail(int type, UUID playerId) {
+    public Mail(int type, UUID playerId, int[] paras, int[] intParasArr) {
         id = UUID.randomUUID();
         this.playerId = playerId;
         this.type = type;
+        this.paras = paras;
+        this.intParasArr = intParasArr;
         ts = System.currentTimeMillis();
         read = false;
     }

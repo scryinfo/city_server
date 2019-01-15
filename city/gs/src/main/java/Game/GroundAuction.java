@@ -123,7 +123,7 @@ public class GroundAuction {
                     for (int i = 0; i < list.size(); i++) {
                         landCoordinates[i] = list.get(i);
                     }
-                    MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,null,landCoordinates);
+                    MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,landCoordinates);
 
                 }
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());
