@@ -706,22 +706,22 @@ public class GameSession {
     }
 
     public void setSalaryRatio(short cmd, Message message) {
-		Gs.ByteNum c = (Gs.ByteNum) message;
-		UUID id = Util.toUuid(c.getId().toByteArray());
+		Gs.SetSalary c = (Gs.SetSalary) message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || c.getNum() < 40 || c.getNum() > 100)
+		if(b == null || c.getSalary() < 40 || c.getSalary() > 100)
 			return;
-		b.setSalaryRatio(c.getNum());
+		b.setSalaryRatio(c.getSalary());
 		this.write(Package.create(cmd, c));
 	}
 	public void setRent(short cmd, Message message) {
-		Gs.ByteNum c = (Gs.ByteNum) message;
-		UUID id = Util.toUuid(c.getId().toByteArray());
+		Gs.SetRent c = (Gs.SetRent) message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.outOfBusiness() || b.type() != MetaBuilding.APARTMENT || !b.ownerId().equals(player.id()))
 			return;
 		Apartment a = (Apartment)b;
-		a.setRent(c.getNum());
+		a.setRent(c.getRent());
 		this.write(Package.create(cmd, c));
 	}
 	public void queryPlayerBuildings(short cmd, Message message) {

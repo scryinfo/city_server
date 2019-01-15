@@ -366,8 +366,8 @@ public class City {
         GameDb.delete(npcs.add(building));
     }
     public void send(GridIndexPair range, Package pack) {
-        for(int x = range.l.x; x < range.r.x; ++x) {
-            for (int y = range.l.y; y < range.r.y; ++y) {
+        for(int x = range.l.x; x <= range.r.x; ++x) {
+            for (int y = range.l.y; y <= range.r.y; ++y) {
                 grids[x][y].send(pack);
             }
         }
