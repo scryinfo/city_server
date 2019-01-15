@@ -128,6 +128,8 @@ public class Storage implements IStorage {
             return false;
         locked.put(m, locked.getOrDefault(m, 0) + n);
         this.inHand.put(m, this.inHand.getOrDefault(m, 0) - n);
+        if(this.inHand.get(m) == 0)
+            this.inHand.remove(m);
         return true;
     }
 
@@ -137,6 +139,8 @@ public class Storage implements IStorage {
         if(i == null || i < n)
             return false;
         this.locked.put(m, i-n);
+        if(i == n)
+            this.locked.remove(m);
         this.inHand.put(m, this.inHand.getOrDefault(m, 0) + n);
         return true;
     }
