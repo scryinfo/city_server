@@ -1,16 +1,17 @@
 package Shared;
 
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import org.bson.Document;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import static com.mongodb.client.model.Filters.*;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -33,6 +34,8 @@ public class LogDb {
 	private static final String INCOME_BUY_GROUND = "incomeBuyGround";
 	private static final String INCOME_VISIT = "incomeVisit";
 	private static final String INCOME_SHOP = "incomeShop";
+
+	private static final String PLAYER_ID = "playerId";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
@@ -52,6 +55,9 @@ public class LogDb {
 	private static MongoCollection<Document> incomeBuyGround;
 	private static MongoCollection<Document> incomeVisit;
 	private static MongoCollection<Document> incomeShop;
+	private static MongoCollection<Document> playerId;
+
+	public static final String KEY_TOTAL = "total";
 
 	public static void init(String url, String dbName)
 	{
@@ -76,7 +82,7 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		extendBag = database.getCollection(EXTEND_BAG)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		/*test();*/
+
 		incomeExchange = database.getCollection(INCOME_EXCHANGE)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		incomeInShelf = database.getCollection(INCOME_INSHELF)
@@ -93,7 +99,14 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		incomeShop = database.getCollection(INCOME_SHOP)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		playerId = database.getCollection(PLAYER_ID)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		//test();
+	}
+
+	public static MongoDatabase getDatabase()
+	{
+		return database;
 	}
 
 	private static void test()
@@ -107,11 +120,44 @@ public class LogDb {
 		rentGround(UUID.randomUUID(), 10L, UUID.randomUUID(), 1, new ArrayList<>());
 		buyGround(UUID.randomUUID(), UUID.randomUUID(), 10L, 1, new ArrayList<>());
 		extendBag(UUID.randomUUID(), 10L, 1, 1);
-		Document document = buyInShelf.find(Filters.eq("r", uuid)).first();
 		System.err.println("uuid1 = " + uuid1);
 	}
 
 	public static void startUp(){}
+
+	//isIncome = true ->  collection = incomeBuyGround
+	public static List<Document> daySummarySellGround(long yestodayStartTime, long todayStartTime,boolean isIncome)
+	{
+		List<Document> documentList = new ArrayList<>();
+		MongoCollection<Document> collection = buyGround;
+		if (isIncome)
+		{
+			collection = incomeBuyGround;
+		}
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t",yestodayStartTime),
+								lt("t",todayStartTime))),
+						Aggregates.group("$r",Accumulators.sum(KEY_TOTAL,"$a"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static Set<UUID> getAllPlayer()
+	{
+		Set<UUID> set = new HashSet<>();
+		playerId.find().forEach((Block<? super Document>) document -> {
+			set.add((UUID) document.get("r"));
+		});
+		return set;
+	}
+
+	public static void insertPlayerId(UUID uuid)
+	{
+		playerId.insertOne(new Document("r", uuid));
+	}
 
 	public static void buyInShelf(UUID roleId, UUID dstId, long money,
 								  int n, int price, UUID producerId,UUID bid)
@@ -198,7 +244,7 @@ public class LogDb {
 		rentGround.insertOne(document);
 	}
 
-	public static void buyGround(UUID roleId, UUID ownerId, long money, int price, List<Positon> plist1)
+	public static void buyGround(UUID roleId, UUID ownerId, long money, long price, List<Positon> plist1)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
@@ -290,7 +336,7 @@ public class LogDb {
 		return pDList;
 	}
 
-	public static void incomeBuyGround(UUID roleId, UUID payId, long money, int price, List<Positon> plist1)
+	public static void incomeBuyGround(UUID roleId, UUID payId, long money, long price, List<Positon> plist1)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)

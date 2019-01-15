@@ -38,6 +38,7 @@ public class StatisticServer {
         this.id = GlobalConfig.serverId();
         serverInfo = ServerCfgDb.getGameServerInfo(id);
         LogDb.init(serverInfo.getLogDbUri(),serverInfo.getLogDbName());
+        SummaryUtil.init();
     }
 
     public void run() throws Exception {
@@ -48,7 +49,7 @@ public class StatisticServer {
                 .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0,0))
                 .build());
         scheduler.scheduleJob(newJob(WeekJob.class).build(), newTrigger()
-                .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(0,0,0))
+                .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
                 .build());
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
