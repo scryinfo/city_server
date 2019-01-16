@@ -2,6 +2,7 @@ package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.Timers.DateTimeTracker;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import common.Common;
@@ -109,6 +110,12 @@ public class GroundAuction {
                         continue;
                     }
                     long p = bider.spentLockMoney(a.meta.id);
+                    List<LogDb.Positon> plist1 = new ArrayList<>();
+                    for(Coordinate c : a.meta.area)
+                    {
+                        plist1.add(new LogDb.Positon(c.x, c.y));
+                    }
+                    LogDb.buyGround(bider.id(), null, bider.money() + p, (int) p, plist1);
                     GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance()));
 
                     bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));

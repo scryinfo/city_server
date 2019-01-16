@@ -6,6 +6,8 @@ import Shared.Package;
 import as.As;
 import ascode.AsCode;
 import org.apache.log4j.Logger;
+import ss.Ss;
+import sscode.SsCode;
 
 public class StatisticEventDispatcher extends DispatcherBase {
     private static StatisticEventDispatcher instance = new StatisticEventDispatcher();
@@ -14,6 +16,8 @@ public class StatisticEventDispatcher extends DispatcherBase {
     private StatisticEventDispatcher() {
         try {
             table.put((short) AsCode.OpCode.login_VALUE, Wrapper.newWithMessage(As.Login.PARSER, StatisticSession.class, "login"));
+
+            table.put((short) SsCode.OpCode.queryPlayerEconomy_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class, "queryPlayerEconomy"));
         } catch (Exception e) {
             e.printStackTrace();
         }

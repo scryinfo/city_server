@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.apache.log4j.Logger;
+import sscode.SsCode;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,8 +29,12 @@ public class PackageEncoder extends MessageToByteEncoder<Package> {
                 logger.debug("send to client -> " + o + ", bytes: " + bytes);
         } else if (o instanceof GaCode.OpCode)
             logger.debug("send to server -> " + o + ", bytes: " + bytes);
-        else if(o instanceof Common.OpCode) {
-            if(o == Common.OpCode.error)
+        else if (o instanceof SsCode.OpCode) {
+            logger.debug("ss send to client -> " + o + ", bytes: " + bytes);
+        }
+        else if (o instanceof Common.OpCode)
+        {
+            if (o == Common.OpCode.error)
                 logger.debug("send to client -> fail");
         }
     }
