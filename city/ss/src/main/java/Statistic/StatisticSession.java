@@ -17,6 +17,12 @@ public class StatisticSession {
     private ChannelHandlerContext ctx;
     private static final Logger logger = Logger.getLogger(StatisticSession.class);
     private ChannelId channelId;
+    public static volatile boolean isReady = false;
+
+    public static void setIsReady(boolean isReady)
+    {
+        StatisticSession.isReady = isReady;
+    }
 
     public StatisticSession(ChannelHandlerContext ctx){
         this.ctx = ctx;
@@ -36,15 +42,13 @@ public class StatisticSession {
     public void queryPlayerEconomy(short cmd, Message message)
     {
         UUID playerId = Util.toUuid((message).toByteArray());
-        Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
-        if (economyInfos != null)
-        {
-            this.write(Package.create(cmd, economyInfos));
-        }
-        else
+        if (!isReady)
         {
             this.write(Package.fail(cmd));
             logger.info("data not ready,playerId = " + playerId);
+            return;
         }
+        Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
+        this.write(Package.create(cmd, economyInfos));
     }
 }

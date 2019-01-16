@@ -2,6 +2,7 @@ package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
+import Game.Meta.MetaItem;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -516,9 +517,14 @@ public class GameSession {
 		player.decMoney(cost);
 		player.decMoney(freight);
 
+
+		int itemId = itemBuy.key.meta.id;
+		int type = MetaItem.type(itemBuy.key.meta.id);
 		LogDb.payTransfer(player.id(), player.money(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-		LogDb.incomeInShelf(seller.id(), seller.id(), seller.money(), itemBuy.n, c.getPrice(), itemBuy.key.producerId, sellBuilding.id());
-		LogDb.buyInShelf(player.id(), seller.id(), player.money(), itemBuy.n, c.getPrice(), itemBuy.key.producerId, sellBuilding.id());
+		LogDb.incomeInShelf(seller.id(), seller.id(), seller.money(), itemBuy.n, c.getPrice(),
+				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
+		LogDb.buyInShelf(player.id(), seller.id(), player.money(), itemBuy.n, c.getPrice(),
+				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);

@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaItem;
 import Shared.Util;
 import gs.Gs;
 import org.apache.log4j.Logger;
