@@ -309,7 +309,7 @@ public class GameSession {
 
 	public void createRole(short cmd, Message message) {
 		Gs.CreateRole c = (Gs.CreateRole)message;
-		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName());
+		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
 		p.addMoney(999999999);
 		if(!GameDb.createPlayer(p)) {
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
@@ -1363,7 +1363,7 @@ public class GameSession {
 				{
 					name = i.getName();
 					companyName = i.getCompanyName();
-					pic = i.getPicture();
+					pic = i.getFaceId();
 				}
 			}
 			catch (ExecutionException e)
@@ -1374,7 +1374,7 @@ public class GameSession {
 			builder.setId(Util.toByteString(from_id))
 					.setName(name)
 					.setDesc(fr.getDescp())
-					.setPic(pic)
+					.setFaceId(pic)
 					.setCompanyName(companyName);
 			this.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
 			fr.setCount(fr.getCount() + 1);
@@ -1414,7 +1414,7 @@ public class GameSession {
 				.setCompanyName(info.getCompanyName())
 				.setDes(info.getDes())
 				.setMale(info.isMale())
-				.setPic(info.getPicture())
+				.setFaceId(info.getFaceId())
 				.build();
 	}
 
@@ -1426,7 +1426,7 @@ public class GameSession {
 				.setCompanyName(player.getCompanyName())
 				.setDes(player.getDes())
 				.setMale(player.isMale())
-				.setPic(player.getPicture())
+				.setFaceId(player.getFaceId())
 				.build();
 	}
 	public void addFriend(short cmd, Message message)
@@ -1449,7 +1449,7 @@ public class GameSession {
 							.setName(player.getName())
 							.setDesc(addMsg.getDesc())
 							.setCompanyName(player.getCompanyName())
-							.setPic(player.getPicture());
+							.setFaceId(player.getFaceId());
 					gs.write(Package.create(GsCode.OpCode.addFriendReq_VALUE, builder.build()));
 
 				}

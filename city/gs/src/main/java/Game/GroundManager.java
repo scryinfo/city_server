@@ -229,7 +229,7 @@ public class GroundManager {
         for (int i = 0; i < list.size(); i++) {
             landCoordinates[i] = list.get(i);
         }
-        MailBox.instance().sendMail(Mail.MailType.LAND_RENT.getMailType(),ownerId,null,new UUID[]{renter.id()},landCoordinates);
+        MailBox.instance().sendMail(Mail.MailType.LAND_RENT.getMailType(),owner.id(),null,new UUID[]{renter.id()},landCoordinates);
         return true;
     }
 

@@ -108,21 +108,21 @@ public class Player {
 //    private Set<UUID> talentIds = new HashSet<>();
 
     public static final class Info {
-        public Info(UUID id, String name,String companyName,boolean male,String des,int picture)
+        public Info(UUID id, String name,String companyName,boolean male,String des,int faceId)
         {
             this.id = id;
             this.name = name;
             this.companyName = companyName;
             this.male = male;
             this.des = des;
-            this.picture = picture;
+            this.faceId = faceId;
         }
         UUID id;
         String name;
         String companyName;
         String des;
         boolean male;
-        int picture;
+        int faceId;
 
         public String getDes()
         {
@@ -134,9 +134,9 @@ public class Player {
             return male;
         }
 
-        public int getPicture()
+        public int getFaceId()
         {
-            return picture;
+            return faceId;
         }
 
         public String getCompanyName()
@@ -194,7 +194,7 @@ public class Player {
     private boolean male;
 
     @Column
-    private int picture = 0;
+    private int faceId = 0;
     // for player, it position is GridIndex, Coordinate is too fine-grained
     @Embedded
     private GridIndex position;
@@ -218,7 +218,7 @@ public class Player {
     @Transient
     private GameSession session;
 
-    public Player(String name, String account, boolean male, String companyName) {
+    public Player(String name, String account, boolean male, String companyName, int faceId) {
         this.id = UUID.randomUUID();
         this.account = account;
         this.name = name;
@@ -226,6 +226,7 @@ public class Player {
         this.male = male;
         this.offlineTs = 0;
         this.money = 0;
+        this.faceId = faceId;
         this.position = new GridIndex(0,0);
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
@@ -255,6 +256,7 @@ public class Player {
                 .setMale(this.male)
                 .setDes(this.des)
                 .setMoney(this.money)
+                .setFaceId(this.faceId)
                 .setLockedMoney(this.lockedMoney())
                 .setPosition(this.position.toProto())
                 .setOfflineTs(this.offlineTs);
@@ -434,14 +436,14 @@ public class Player {
         this.companyName = companyName;
     }
 
-    public int getPicture()
+    public int getFaceId()
     {
-        return picture;
+        return faceId;
     }
 
-    public void setPicture(int picture)
+    public void setFaceId(int faceId)
     {
-        this.picture = picture;
+        this.faceId = faceId;
     }
 
     public boolean isMale()
