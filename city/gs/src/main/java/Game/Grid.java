@@ -34,7 +34,6 @@ public class Grid {
         playerIds.forEach(id->{
             GameSession s = GameServer.allGameSessions.get(id);
             if(s != null) {
-                System.out.println("grid send to " + s.getPlayer().getName() + " " + id);
                 s.write(pack);
             }
         });

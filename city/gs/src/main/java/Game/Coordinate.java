@@ -61,18 +61,22 @@ public class Coordinate {
                 fx = this.x + x >= mx ? mx : this.x + x;
             }
             else {
-                fx = this.x - x < 0 ? 0 : this.x - x;
+                fx = this.x + x < 0 ? 0 : this.x + x;
             }
         }
+        else
+            fx = this.x;
         if(y != 0) {
             if(y > 0) {
                 int my = MetaData.getCity().y;
                 fy = this.y + y >= my ? my : this.y + y;
             }
             else {
-                fy = this.y - y < 0 ? 0 : this.y - y;
+                fy = this.y + y < 0 ? 0 : this.y + y;
             }
         }
+        else
+            fy = this.y;
         return new Coordinate(fx, fy);
     }
 

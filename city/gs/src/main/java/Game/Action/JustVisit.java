@@ -23,6 +23,9 @@ public class JustVisit implements IAction {
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
             return;
+        for (Building building : buildings) {
+            logger.info("chosen building " + building.id().toString() + " located at: " + building.coordinate());
+        }
         logger.info("building num: " + buildings.size());
         int[] buildingWeights = new int[buildings.size()];
         final int cost = (int) (npc.salary() * BrandManager.instance().spendMoneyRatioBuilding(buildingType));
