@@ -93,6 +93,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return this.meta.workerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
     }
     protected abstract boolean consumeMaterial(LineBase line);
+
     protected void _update(long diffNano) {
         this.lines.values().forEach(l -> {
             if(l.isPause())
@@ -105,20 +106,23 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
             }
             else {
-                if (!this.consumeMaterial(l))
-                    return;
-                int add = l.update(diffNano);
-                if (add > 0) {
-                    if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
-                        broadcastLineInfo(l);
-                    } else {
-                        //(加工厂/原料厂)仓库已满通知
-                        UUID[] ownerIdAndFactoryId = {ownerId(),this.id()};
-                        MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(),ownerId(),null,ownerIdAndFactoryId,null);
+                if (l.materialConsumed == false)
+                l.materialConsumed = this.consumeMaterial(l);
+                    if (!l.materialConsumed)
+                        return;
+                    int add = l.update(diffNano);
+                    if (add > 0) {
+                        l.materialConsumed = false;
+                        if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
+                            broadcastLineInfo(l);
+                        } else {
+                            //(加工厂/原料厂)仓库已满通知
+                            UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
+                            MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), null, ownerIdAndFactoryId, null);
 
-                        l.suspend(add);
+                            l.suspend(add);
+                        }
                     }
-                }
             }
         });
 
