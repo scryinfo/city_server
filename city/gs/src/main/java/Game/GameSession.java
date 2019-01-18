@@ -413,6 +413,7 @@ public class GameSession {
 		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
 			return;
 		Building building = Building.create(mid, ul, player.id());
+		building.setName(player.getCompanyName());
 		boolean ok = City.instance().addBuilding(building);
 		if(!ok)
 			this.write(Package.fail(cmd));
@@ -1421,6 +1422,7 @@ public class GameSession {
 				.setDes(info.getDes())
 				.setMale(info.isMale())
 				.setFaceId(info.getFaceId())
+				.setCreateTs(info.getCreateTs())
 				.build();
 	}
 
@@ -1433,6 +1435,7 @@ public class GameSession {
 				.setDes(player.getDes())
 				.setMale(player.isMale())
 				.setFaceId(player.getFaceId())
+				.setCreateTs(player.getCreateTs())
 				.build();
 	}
 	public void addFriend(short cmd, Message message)
