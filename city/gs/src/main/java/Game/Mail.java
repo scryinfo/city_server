@@ -38,7 +38,9 @@ public class Mail {
         LAND_AUCTION_HIGHER(11),
         ADD_FRIEND_SUCCESS(12),
         LAND_SALE(13),
-        LAND_RENT(14);
+        LAND_RENT(14),
+        SHELF_SALE(15),
+        APARTMENT_CHECK_IN(16);
 
         private int mailType;
 
@@ -169,6 +171,11 @@ public class Mail {
         if (null != uuids && uuids.length != 0) {
             builder.addUuids(ByteString.copyFrom(uuids));
         }
+/*        if (null != uuidParas && uuidParas.length != 0) {
+            for (UUID uuidPara : uuidParas) {
+                builder.addUuidParas(Util.toByteString(uuidPara));
+            }
+        }*/
         return builder.build();
     }
 
