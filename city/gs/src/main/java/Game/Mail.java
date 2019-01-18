@@ -168,14 +168,24 @@ public class Mail {
                 builder.addIntParasArr(a);
             }
         }
-        if (null != uuids && uuids.length != 0) {
-            builder.addUuids(ByteString.copyFrom(uuids));
+
+        if ((null != uuids && uuids.length != 0) &&  (null == uuidParas || uuidParas.length == 0)){
+            Db.BytesArray ba = null;
+            try {
+                ba = Db.BytesArray.PARSER.parseFrom(uuids);
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+            uuidParas = new UUID[ba.getICount()];
+            for (int i = 0; i < ba.getICount(); ++i)
+                uuidParas[i] = Util.toUuid(ba.getI(i).toByteArray());
         }
-/*        if (null != uuidParas && uuidParas.length != 0) {
+        if (null != uuidParas && uuidParas.length != 0) {
             for (UUID uuidPara : uuidParas) {
                 builder.addUuidParas(Util.toByteString(uuidPara));
             }
-        }*/
+        }
+
         return builder.build();
     }
 

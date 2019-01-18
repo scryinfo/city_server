@@ -788,7 +788,7 @@ public class GameDb {
 		Collection<Mail> res = new ArrayList<>();
 		StatelessSession session = sessionFactory.openStatelessSession();
 		Transaction transaction = session.beginTransaction();
-		org.hibernate.Query query = session.createQuery("FROM Mail where playerId = :x ");
+		org.hibernate.Query query = session.createQuery(" FROM Mail where playerId = :x ");
         query.setParameter("x", playerId);
 		List<Mail> mails = query.list();
 		if (null != mails && mails.size() != 0) {
