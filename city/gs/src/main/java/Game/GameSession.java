@@ -412,6 +412,7 @@ public class GameSession {
 		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
 			return;
 		Building building = Building.create(mid, ul, player.id());
+		building.setName(player.getCompanyName());
 		boolean ok = City.instance().addBuilding(building);
 		if(!ok)
 			this.write(Package.fail(cmd));
