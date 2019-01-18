@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import Shared.LogDb;
 import Shared.Package;

@@ -1,6 +1,7 @@
 package Game.Action;
 
 import Game.*;
+import Game.Meta.MetaItem;
 import Shared.LogDb;
 import org.apache.log4j.Logger;
 
@@ -74,8 +75,12 @@ public class Shopping implements IAction {
             owner.addMoney(chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
-            LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
-            LogDb.incomeShop(owner.id(), owner.money(), chosen.price, npc.id(), chosen.bId, chosen.producerId);
+
+            LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
+                    chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
+
+            LogDb.incomeInShelf(owner.id(),npc.id(),owner.money(),1,chosen.price,
+                    chosen.producerId,chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
         }
     }
     private static final class WeightInfo {

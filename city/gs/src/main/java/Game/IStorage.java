@@ -1,5 +1,7 @@
 package Game;
 
+import Game.Meta.MetaItem;
+
 import java.util.UUID;
 
 public interface IStorage {

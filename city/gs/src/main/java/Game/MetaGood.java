@@ -1,8 +1,10 @@
 package Game;
 
+import Game.Meta.MetaItem;
 import org.bson.Document;
 
-public final class MetaGood extends MetaItem {
+public final class MetaGood extends MetaItem
+{
     public static final int LUX_SIZE = 4;
     public static Type goodType(int id) {
         Type res;

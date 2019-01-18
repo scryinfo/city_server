@@ -1,13 +1,12 @@
 package Game;
 
+import Game.Meta.MetaItem;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Entity
 public class Shelf {

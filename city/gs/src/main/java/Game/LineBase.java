@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
 import gs.Gs;
@@ -63,6 +64,8 @@ public abstract class LineBase {
                 .setWorkerNum(workerNum)
                 .build();
     }
+
+    boolean materialConsumed = false;
     int update(long diffNano) {
         int add = 0;
         if(this.timer.update(diffNano))

@@ -1,9 +1,6 @@
 package Shared;
 
-import com.mongodb.Block;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
@@ -17,6 +14,10 @@ public class LogDb {
 	private static MongoClientURI connectionUrl;
 	private static MongoClient mongoClient;
 	private static MongoDatabase database;
+	private static final int TP_APARTMENT = 14;
+	private static final int TP_TYPE_MATERIAL = 21;
+	private static final int TP_TYPE_GOODS = 22;
+
 	private static final String PAY_SALARY = "paySalary";
 	private static final String BUY_INSHELF = "buyInShelf";
 	private static final String BUY_AD_SLOT = "buyAdSlot";
@@ -33,28 +34,33 @@ public class LogDb {
 	private static final String INCOME_RENT_GROUND = "incomeRentGround";
 	private static final String INCOME_BUY_GROUND = "incomeBuyGround";
 	private static final String INCOME_VISIT = "incomeVisit";
-	private static final String INCOME_SHOP = "incomeShop";
 
 	private static final String PLAYER_ID = "playerId";
 	//---------------------------------------------------
+	private static MongoCollection<Document> buyAdSlot;
+	private static MongoCollection<Document> buyTech;
+
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
+
+	//player buy material or goods
 	private static MongoCollection<Document> buyInShelf;
-	private static MongoCollection<Document> buyAdSlot;
 	private static MongoCollection<Document> payTransfer;
 	private static MongoCollection<Document> rentGround;
-	private static MongoCollection<Document> buyTech;
 	private static MongoCollection<Document> buyGround;
 	private static MongoCollection<Document> extendBag;
 	//-----------------------------------------
 	private static MongoCollection<Document> incomeExchange;
-	private static MongoCollection<Document> incomeInShelf;
 	private static MongoCollection<Document> incomeAdSlot;
 	private static MongoCollection<Document> incomeTech;
+
+	//player buy material or goods  and npc buy goods
+	private static MongoCollection<Document> incomeInShelf;
+
 	private static MongoCollection<Document> incomeRentGround;
 	private static MongoCollection<Document> incomeBuyGround;
 	private static MongoCollection<Document> incomeVisit;
-	private static MongoCollection<Document> incomeShop;
+
 	private static MongoCollection<Document> playerId;
 
 	public static final String KEY_TOTAL = "total";
@@ -97,8 +103,6 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		incomeVisit = database.getCollection(INCOME_VISIT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		incomeShop = database.getCollection(INCOME_SHOP)
-				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerId = database.getCollection(PLAYER_ID)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		//test();
@@ -125,25 +129,78 @@ public class LogDb {
 
 	public static void startUp(){}
 
-	//isIncome = true ->  collection = incomeBuyGround
-	public static List<Document> daySummarySellGround(long yestodayStartTime, long todayStartTime,boolean isIncome)
+	/**
+	 *
+	 * @param yestodayStartTime
+	 * @param todayStartTime
+	 * @param collection
+	 * @return Aggregation document only has id,total
+	 */
+	public static List<Document> daySummary1(long yestodayStartTime, long todayStartTime,
+											MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
-		MongoCollection<Document> collection = buyGround;
-		if (isIncome)
-		{
-			collection = incomeBuyGround;
-		}
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								gte("t",yestodayStartTime),
-								lt("t",todayStartTime))),
-						Aggregates.group("$r",Accumulators.sum(KEY_TOTAL,"$a"))
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+
+	public static List<Document> daySummaryRoomRent(long yestodayStartTime, long todayStartTime)
+	{
+		List<Document> documentList = new ArrayList<>();
+		incomeVisit.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp",TP_APARTMENT),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
+												 MongoCollection<Document> collection,boolean isGoods)
+	{
+		List<Document> documentList = new ArrayList<>();
+		List<Document> documentTmp = new ArrayList<>();
+		BasicDBObject dbObject = new BasicDBObject("_id",
+				new BasicDBObject("r", "$r")
+						.append("tpi", "$tpi"));
+		int tp = TP_TYPE_GOODS;
+		if (!isGoods) {
+			tp = TP_TYPE_MATERIAL;
+		}
+		//npc buy
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", tp),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group(dbObject, Accumulators.sum(KEY_TOTAL, "$a"))
+				)
+		).forEach((Block<? super Document>) documentTmp::add);
+
+		documentTmp.forEach(document -> {
+			Document newDoc = new Document();
+			Document tmp = (Document) ((Document) document.get("_id")).get("_id");
+			newDoc.append("id", tmp.get("r"))
+					.append("tpi", tmp.get("tpi"))
+					.append(KEY_TOTAL,document.get(KEY_TOTAL));
+			documentList.add(newDoc);
+		});
+
+		return documentList;
+	}
+
 
 	public static Set<UUID> getAllPlayer()
 	{
@@ -159,18 +216,20 @@ public class LogDb {
 		playerId.insertOne(new Document("r", uuid));
 	}
 
-	public static void buyInShelf(UUID roleId, UUID dstId, long money,
-								  int n, int price, UUID producerId,UUID bid)
+
+	public static void buyInShelf(UUID roleId, UUID dstId, long money, long n, long price,
+								  UUID producerId, UUID bid, int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", dstId)
 				.append("b", bid)
 				.append("m", money)
-				.append("c", n)
 				.append("p", price)
 				.append("a", n * price)
-				.append("i", producerId);
+				.append("i", producerId)
+				.append("tp", type)
+				.append("tpi", typeId);
 		buyInShelf.insertOne(document);
 	}
 
@@ -186,13 +245,13 @@ public class LogDb {
 		npcBuyInRetailCol.insertOne(document);
 	}
 
-	public static void paySalary(UUID roleId, UUID buildingId, long money, int salary, int workers) {
+	public static void paySalary(UUID roleId, UUID buildingId, long money, long salary, long workers) {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("b", buildingId)
 				.append("m", money)
 				.append("s", salary)
-				.append("a", salary*workers)
+				.append("a", salary * workers)
 				.append("w", workers);
 		paySalary.insertOne(document);
 	}
@@ -209,7 +268,7 @@ public class LogDb {
 		buyAdSlot.insertOne(document);
 	}
 
-	public static void payTransfer(UUID roleId, long money, int charge, UUID srcId, UUID dstId, UUID producerId, int n)
+	public static void payTransfer(UUID roleId, long money, long charge, UUID srcId, UUID dstId, UUID producerId, int n)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
@@ -233,7 +292,7 @@ public class LogDb {
 		buyTech.insertOne(document);
 	}
 
-	public static void rentGround(UUID roleId, long money, UUID ownerId, int cost, List<Positon> positons)
+	public static void rentGround(UUID roleId, long money, UUID ownerId, long cost, List<Positon> positons)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
@@ -278,8 +337,8 @@ public class LogDb {
 		incomeExchange.insertOne(document);
 	}
 
-	public static void incomeInShelf(UUID roleId, UUID dstId, long money,
-									 int n, int price, UUID producerId,UUID bid)
+	public static void incomeInShelf(UUID roleId, UUID dstId, long money, long n, long price,
+									 UUID producerId,UUID bid, int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
@@ -288,7 +347,9 @@ public class LogDb {
 				.append("m", money)
 				.append("p", price)
 				.append("a", n * price)
-				.append("i", producerId);
+				.append("i", producerId)
+				.append("tp", type)
+				.append("tpi", typeId);
 		incomeInShelf.insertOne(document);
 	}
 
@@ -315,7 +376,7 @@ public class LogDb {
 		incomeTech.insertOne(document);
 	}
 
-	public static void incomeRentGround(UUID roleId, long money, UUID payId, int cost, List<Positon> plist1)
+	public static void incomeRentGround(UUID roleId, long money, UUID payId, long cost, List<Positon> plist1)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
@@ -348,27 +409,97 @@ public class LogDb {
 		incomeBuyGround.insertOne(document);
 	}
 
-	public static void incomeVisit(UUID roldId, long money, int cost, UUID bId, UUID payId)
+	public static void incomeVisit(UUID roldId, long money, int type,long cost, UUID bId, UUID payId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roldId)
 				.append("d", payId)
 				.append("b", bId)
 				.append("m", money)
-				.append("a", cost);
+				.append("a", cost)
+				.append("tp",type);
 		incomeVisit.insertOne(document);
 	}
 
-	public static void incomeShop(UUID roleId, long money, int price, UUID npcId, UUID bId, UUID producerId)
+
+	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
-		Document document = new Document("t", System.currentTimeMillis());
-		document.append("r", roleId)
-				.append("d", npcId)
-				.append("b", bId)
-				.append("i", producerId)
-				.append("a", price)
-				.append("m", money);
-		incomeShop.insertOne(document);
+		return npcBuyInRetailCol;
+	}
+
+	public static MongoCollection<Document> getPaySalary()
+	{
+		return paySalary;
+	}
+
+	public static MongoCollection<Document> getBuyInShelf()
+	{
+		return buyInShelf;
+	}
+
+	public static MongoCollection<Document> getBuyAdSlot()
+	{
+		return buyAdSlot;
+	}
+
+	public static MongoCollection<Document> getPayTransfer()
+	{
+		return payTransfer;
+	}
+
+	public static MongoCollection<Document> getRentGround()
+	{
+		return rentGround;
+	}
+
+	public static MongoCollection<Document> getBuyTech()
+	{
+		return buyTech;
+	}
+
+	public static MongoCollection<Document> getBuyGround()
+	{
+		return buyGround;
+	}
+
+	public static MongoCollection<Document> getExtendBag()
+	{
+		return extendBag;
+	}
+
+	public static MongoCollection<Document> getIncomeExchange()
+	{
+		return incomeExchange;
+	}
+
+	public static MongoCollection<Document> getIncomeInShelf()
+	{
+		return incomeInShelf;
+	}
+
+	public static MongoCollection<Document> getIncomeAdSlot()
+	{
+		return incomeAdSlot;
+	}
+
+	public static MongoCollection<Document> getIncomeTech()
+	{
+		return incomeTech;
+	}
+
+	public static MongoCollection<Document> getIncomeRentGround()
+	{
+		return incomeRentGround;
+	}
+
+	public static MongoCollection<Document> getIncomeBuyGround()
+	{
+		return incomeBuyGround;
+	}
+
+	public static MongoCollection<Document> getIncomeVisit()
+	{
+		return incomeVisit;
 	}
 
 	public static class Positon
