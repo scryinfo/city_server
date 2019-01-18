@@ -268,7 +268,6 @@ public class Exchange {
         }
         long cost = n*s.price;
         seller.addMoney(cost);
-        LogDb.incomeExchange(seller.id(),seller.money(),buyer.id(),n,s.price, mi.id);
         buyer.spentLockMoney(b.id);
         b.dealedPrice += cost;
         s.dealedPrice += cost;

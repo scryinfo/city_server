@@ -201,10 +201,10 @@ public class GroundManager {
         {
             plist1.add(new LogDb.Positon(c.x, c.y));
         }
-        LogDb.rentGround(renter.id(), renter.money(), ownerId, cost, plist1);
+
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(cost);
-        LogDb.incomeRentGround(owner.id(), owner.money(), renter.id(), cost, plist1);
+        LogDb.rentGround(renter.id(), ownerId, cost, plist1);
         UUID tid = UUID.randomUUID();
         long now = System.currentTimeMillis();
         List updates = new ArrayList<>(coordinates.size());
@@ -274,8 +274,7 @@ public class GroundManager {
         {
             plist1.add(new LogDb.Positon(c.x, c.y));
         }
-        LogDb.buyGround(buyer.id(),sellerId,buyer.money(),price,plist1);
-        LogDb.incomeBuyGround(seller.id(),buyer.id(),seller.money(),price,plist1);
+        LogDb.buyGround(buyer.id(),sellerId,price,plist1);
         List updates = new ArrayList<>();
         for(GroundInfo i : gis) {
             i.buyGround(buyer.id());
