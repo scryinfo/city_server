@@ -50,62 +50,72 @@ public class Test
         list.add(new LogDb.Positon(1, 1));
         for (int i = 0; i < 3; i++)
         {
-            LogDb.incomeBuyGround(player1, UUID.randomUUID(), 100, 3, list);
-            LogDb.incomeBuyGround(player2, UUID.randomUUID(), 100, 3, list);
+            //土地交易
+            LogDb.buyGround(player1, UUID.randomUUID(),  3, list);
+            LogDb.buyGround(UUID.randomUUID(),player1 ,  4, list);
 
-            LogDb.buyGround(player1, UUID.randomUUID(), 100, 3, list);
-            LogDb.buyGround(player2, UUID.randomUUID(), 100, 3, list);
+            LogDb.buyGround(player2, UUID.randomUUID(),  3, list);
+            LogDb.buyGround(UUID.randomUUID(), player2,  4, list);
 
-            LogDb.incomeRentGround(player1,100,UUID.randomUUID(),3,list);
-            LogDb.incomeRentGround(player2,100,UUID.randomUUID(),3,list);
-            LogDb.rentGround(player1,100,UUID.randomUUID(),3,list);
-            LogDb.rentGround(player2,100,UUID.randomUUID(),3,list);
+            //土地租赁
+            LogDb.rentGround(player1,  UUID.randomUUID(), 3, list);
+            LogDb.rentGround(UUID.randomUUID(),  player1, 4, list);
 
-            LogDb.payTransfer(player1, 100, 3, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1);
-            LogDb.payTransfer(player2, 100, 3, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1);
+            LogDb.rentGround(player2,UUID.randomUUID(),3,list);
+            LogDb.rentGround(UUID.randomUUID(),  player2, 4, list);
 
-            LogDb.paySalary(player1,UUID.randomUUID(),100,3,1);
-            LogDb.paySalary(player2,UUID.randomUUID(),100,3,1);
+            //运费
+            LogDb.payTransfer(player1,  3, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1);
+            LogDb.payTransfer(player2, 3, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1);
+            //工资
+            LogDb.paySalary(player1,UUID.randomUUID(),3,1);
+            LogDb.paySalary(player2,UUID.randomUUID(),3,1);
+            //房租
+            LogDb.incomeVisit(player1,  14, 3, UUID.randomUUID(), UUID.randomUUID());
+            LogDb.incomeVisit(player2,  14, 3, UUID.randomUUID(), UUID.randomUUID());
 
-            LogDb.incomeVisit(player1, 100, 14, 3, UUID.randomUUID(), UUID.randomUUID());
-            LogDb.incomeVisit(player2, 100, 14, 3, UUID.randomUUID(), UUID.randomUUID());
-
-            LogDb.incomeInShelf(player1,UUID.randomUUID(),100,1,3,
+            //商品
+            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251101);
-            LogDb.incomeInShelf(player2,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251102);
-            LogDb.incomeInShelf(player1,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251103);
-            LogDb.incomeInShelf(player2,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251201);
-
-
-            LogDb.buyInShelf(player1,UUID.randomUUID(),100,1,3,
+            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251101);
-            LogDb.buyInShelf(player2,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251102);
-            LogDb.buyInShelf(player1,UUID.randomUUID(),100,1,3,
+
+            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251101);
+            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251101);
+
+            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251202);
-            LogDb.buyInShelf(player2,UUID.randomUUID(),100,1,3,
+            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251203);
 
-            LogDb.incomeInShelf(player1,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2101001);
-            LogDb.incomeInShelf(player2,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2101002 );
-            LogDb.incomeInShelf(player1,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2101003 );
-            LogDb.incomeInShelf(player2,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2101004 );
+            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251202);
+            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251203);
 
-            LogDb.buyInShelf(player1,UUID.randomUUID(),100,1,3,
+            //原料
+            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
                     UUID.randomUUID(),UUID.randomUUID(),21,2101001);
-            LogDb.buyInShelf(player2,UUID.randomUUID(),100,1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2101002 );
-            LogDb.buyInShelf(player1,UUID.randomUUID(),100,1,3,
+            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2101001);
+
+            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2101001 );
+            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2101001);
+
+            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
                     UUID.randomUUID(),UUID.randomUUID(),21,2102001 );
-            LogDb.buyInShelf(player2,UUID.randomUUID(),100,1,3,
+            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),21,2102002);
+
+            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2102001);
+            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2102002);
+
             System.err.println("end--------------");
             TimeUnit.SECONDS.sleep(5);
         }

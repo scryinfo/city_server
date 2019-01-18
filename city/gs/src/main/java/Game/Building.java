@@ -460,7 +460,7 @@ public abstract class Building {
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
             GameDb.saveOrUpdate(updates);
-            LogDb.paySalary(p.id(), id(),p.money(), this.singleSalary(), this.allStaff.size());
+            LogDb.paySalary(p.id(), id(), this.singleSalary(), this.allStaff.size());
             return true;
         }
         else
