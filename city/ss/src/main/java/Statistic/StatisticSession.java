@@ -17,7 +17,7 @@ public class StatisticSession {
     private ChannelHandlerContext ctx;
     private static final Logger logger = Logger.getLogger(StatisticSession.class);
     private ChannelId channelId;
-    public static volatile boolean isReady = false;
+    public static volatile boolean isReady = true;
 
     public static void setIsReady(boolean isReady)
     {
@@ -48,6 +48,10 @@ public class StatisticSession {
             logger.info("data not ready,playerId = " + playerId);
             return;
         }
+
+        //for test
+        //playerId = UUID.fromString("228953c5-7da9-4563-8856-166c41dbb19c");
+
         Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
         this.write(Package.create(cmd, economyInfos));
     }

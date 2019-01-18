@@ -1422,6 +1422,7 @@ public class GameSession {
 				.setDes(info.getDes())
 				.setMale(info.isMale())
 				.setFaceId(info.getFaceId())
+				.setCreateTs(info.getCreateTs())
 				.build();
 	}
 
@@ -1434,6 +1435,7 @@ public class GameSession {
 				.setDes(player.getDes())
 				.setMale(player.isMale())
 				.setFaceId(player.getFaceId())
+				.setCreateTs(player.getCreateTs())
 				.build();
 	}
 	public void addFriend(short cmd, Message message)

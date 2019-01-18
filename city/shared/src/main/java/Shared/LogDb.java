@@ -105,26 +105,11 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerId = database.getCollection(PLAYER_ID)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		//test();
 	}
 
 	public static MongoDatabase getDatabase()
 	{
 		return database;
-	}
-
-	private static void test()
-	{
-		UUID uuid = UUID.randomUUID();
-		UUID uuid1 = UUID.randomUUID();
-		npcBuy(1, 1, UUID.randomUUID(), 1, UUID.randomUUID(), 1, 1.0f);
-		paySalary(UUID.randomUUID(), UUID.randomUUID(), 10L, 1, 1);
-		payTransfer(UUID.randomUUID(), 10L, 1, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1);
-		buyTech(UUID.randomUUID(), UUID.randomUUID(), 10L, 1, 1);
-		rentGround(UUID.randomUUID(), 10L, UUID.randomUUID(), 1, new ArrayList<>());
-		buyGround(UUID.randomUUID(), UUID.randomUUID(), 10L, 1, new ArrayList<>());
-		extendBag(UUID.randomUUID(), 10L, 1, 1);
-		System.err.println("uuid1 = " + uuid1);
 	}
 
 	public static void startUp(){}
@@ -140,12 +125,17 @@ public class LogDb {
 											MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a"))
+						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -154,13 +144,18 @@ public class LogDb {
 	public static List<Document> daySummaryRoomRent(long yestodayStartTime, long todayStartTime)
 	{
 		List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
 		incomeVisit.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
 								eq("tp",TP_APARTMENT),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a"))
+						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a")),
+                        Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -170,34 +165,30 @@ public class LogDb {
 												 MongoCollection<Document> collection,boolean isGoods)
 	{
 		List<Document> documentList = new ArrayList<>();
-		List<Document> documentTmp = new ArrayList<>();
-		BasicDBObject dbObject = new BasicDBObject("_id",
-				new BasicDBObject("r", "$r")
-						.append("tpi", "$tpi"));
+
+        Document groupObject = new Document("_id",
+                new Document("r", "$r")
+                        .append("tpi", "$tpi"));
+        Document projectObject = new Document()
+                .append("id", "$_id._id.r")
+                .append("tpi", "$_id._id.tpi")
+                .append("total","$total")
+                .append("_id",0);
 		int tp = TP_TYPE_GOODS;
 		if (!isGoods) {
 			tp = TP_TYPE_MATERIAL;
 		}
 		//npc buy
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								eq("tp", tp),
-								gte("t", yestodayStartTime),
-								lt("t", todayStartTime))),
-						Aggregates.group(dbObject, Accumulators.sum(KEY_TOTAL, "$a"))
-				)
-		).forEach((Block<? super Document>) documentTmp::add);
-
-		documentTmp.forEach(document -> {
-			Document newDoc = new Document();
-			Document tmp = (Document) ((Document) document.get("_id")).get("_id");
-			newDoc.append("id", tmp.get("r"))
-					.append("tpi", tmp.get("tpi"))
-					.append(KEY_TOTAL,document.get(KEY_TOTAL));
-			documentList.add(newDoc);
-		});
-
+        collection.aggregate(
+                Arrays.asList(
+                        Aggregates.match(and(
+                                eq("tp", tp),
+                                gte("t", yestodayStartTime),
+                                lt("t", todayStartTime))),
+                        Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a")),
+                        Aggregates.project(projectObject)
+                )
+        ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
 

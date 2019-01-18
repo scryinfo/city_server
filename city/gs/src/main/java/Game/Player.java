@@ -108,7 +108,8 @@ public class Player {
 //    private Set<UUID> talentIds = new HashSet<>();
 
     public static final class Info {
-        public Info(UUID id, String name,String companyName,boolean male,String des,int faceId)
+        public Info(UUID id, String name, String companyName, boolean male, String des,
+                    int faceId, long createTs)
         {
             this.id = id;
             this.name = name;
@@ -116,6 +117,7 @@ public class Player {
             this.male = male;
             this.des = des;
             this.faceId = faceId;
+            this.createTs = createTs;
         }
         UUID id;
         String name;
@@ -123,6 +125,7 @@ public class Player {
         String des;
         boolean male;
         int faceId;
+        long createTs;
 
         public String getDes()
         {
@@ -137,6 +140,11 @@ public class Player {
         public int getFaceId()
         {
             return faceId;
+        }
+
+        public long getCreateTs()
+        {
+            return createTs;
         }
 
         public String getCompanyName()
@@ -184,6 +192,9 @@ public class Player {
     @Column(name = DatabaseInfo.Game.Player.OnlineTs, nullable = false)
     private long onlineTs;
 
+    @Column(name = "createTs", nullable = false)
+    private long createTs;
+
     @Column
     private String des = "";
 
@@ -230,6 +241,7 @@ public class Player {
         this.position = new GridIndex(0,0);
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
+        this.createTs = System.currentTimeMillis();
     }
     @PostLoad
     void _init() {
@@ -439,6 +451,11 @@ public class Player {
     public int getFaceId()
     {
         return faceId;
+    }
+
+    public long getCreateTs()
+    {
+        return createTs;
     }
 
     public void setFaceId(int faceId)
