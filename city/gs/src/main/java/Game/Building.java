@@ -2,6 +2,8 @@ package Game;
 
 import DB.Db;
 import Game.Listener.ConvertListener;
+import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;

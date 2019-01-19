@@ -1,6 +1,6 @@
 package Game;
 
-import Game.Meta.MetaItem;
+import Game.Meta.*;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 

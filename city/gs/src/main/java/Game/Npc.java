@@ -1,10 +1,11 @@
 package Game;
 
 import Game.Action.IAction;
+import Game.Meta.AIBuilding;
+import Game.Meta.MetaData;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -157,6 +158,7 @@ public class Npc {
         return this.tempBuilding == null?this.born:this.tempBuilding;
     }
     public void readyForDestroy() {
+        MoneyPool.instance().add(this.money);
     }
     public void goHome() {
         if(apartment == null)

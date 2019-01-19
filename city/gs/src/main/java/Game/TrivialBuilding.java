@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaBuilding;
 import com.google.protobuf.Message;
 import gs.Gs;
 

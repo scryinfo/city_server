@@ -1,4 +1,4 @@
-package Game;
+package Game.Meta;
 
 import Game.Meta.MetaItem;
 import org.bson.Document;
@@ -45,5 +45,5 @@ public final class MetaGood extends MetaItem
         super(d);
         this.lux = d.getInteger("lux");
     }
-    int lux;
+    public int lux;
 }

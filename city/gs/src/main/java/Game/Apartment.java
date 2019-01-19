@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaApartment;
 import gs.Gs;
 
 import javax.persistence.Column;

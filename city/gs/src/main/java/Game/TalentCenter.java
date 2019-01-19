@@ -1,5 +1,9 @@
 package Game;
 
+import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
+import Game.Meta.MetaTalent;
+import Game.Meta.MetaTalentCenter;
 import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import Shared.Util;

@@ -65,13 +65,18 @@ public class DayJob implements org.quartz.Job {
 
         //Goods Shelf income (contain npc shopping)
         documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),true,true);
-        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayGoods());
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf(), true, true);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
+
         //Goods Shelf pay
         documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), true,false);
         SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
 
         //material Shelf income
         documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false,true);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayMaterial());
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf(), false,true);
         SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayMaterial());
 
         //material Shelf pay

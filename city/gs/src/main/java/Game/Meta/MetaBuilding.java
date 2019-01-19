@@ -1,5 +1,7 @@
-package Game;
+package Game.Meta;
 
+import Game.CoordPair;
+import Game.Coordinate;
 import org.bson.Document;
 
 import javax.persistence.AttributeConverter;

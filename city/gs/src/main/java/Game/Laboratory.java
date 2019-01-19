@@ -1,6 +1,9 @@
 package Game;
 
+import Game.Meta.Formula;
+import Game.Meta.MetaData;
 import Game.Meta.MetaItem;
+import Game.Meta.MetaLaboratory;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
 import gs.Gs;

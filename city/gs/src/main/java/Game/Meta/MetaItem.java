@@ -1,6 +1,5 @@
 package Game.Meta;
 
-import Game.MetaData;
 import org.bson.Document;
 
 import javax.persistence.AttributeConverter;

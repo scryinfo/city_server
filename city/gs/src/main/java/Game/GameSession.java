@@ -2,7 +2,7 @@ package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
-import Game.Meta.MetaItem;
+import Game.Meta.*;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -654,6 +654,9 @@ public class GameSession {
 		if(b.canUseBy(player.id()))
 			b.setName(c.getName());
 	}
+	public void queryMoneyPoolInfo(short cmd) {
+		this.write(Package.create(cmd, MoneyPool.instance().toProto()));
+	}
 	private void registBuildingDetail(Building building) {
 		if(buildingDetail.size() < MAX_DETAIL_BUILDING || building.canUseBy(player.id())) {
 			building.watchDetailInfoAdd(this);
@@ -989,6 +992,7 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
+		MoneyPool.instance().add(charge);
 		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);

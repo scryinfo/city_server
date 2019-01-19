@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaData;
 import Game.Meta.MetaItem;
 
 import java.util.UUID;

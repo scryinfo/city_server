@@ -75,45 +75,45 @@ public class Test
             LogDb.incomeVisit(player2,  14, 3, UUID.randomUUID(), UUID.randomUUID());
 
             //商品
-            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
+            LogDb.buyInShelf(player1,player2,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251101);
-            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251101);
-
-            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251101);
-            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+            LogDb.buyInShelf(player2,player1,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251101);
 
-            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player1,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251101);
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player2,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251101);
+
+            LogDb.buyInShelf(player1,player2,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251202);
-            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
+            LogDb.buyInShelf(player2,player1,1,3,
+                    UUID.randomUUID(),UUID.randomUUID(),22,2251202);
+
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player1,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251203);
-
-            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
-                    UUID.randomUUID(),UUID.randomUUID(),22,2251202);
-            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player2,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),22,2251203);
 
             //原料
-            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
+            LogDb.buyInShelf(player1,player2,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),21,2101001);
-            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2101001);
-
-            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
+            LogDb.buyInShelf(player2,player1,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),21,2101001 );
-            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player1,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2101001);
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player2,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),21,2101001);
 
-            LogDb.buyInShelf(player1,UUID.randomUUID(),1,3,
+            LogDb.buyInShelf(player1,player2,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),21,2102001 );
-            LogDb.buyInShelf(UUID.randomUUID(),player1,1,4,
-                    UUID.randomUUID(),UUID.randomUUID(),21,2102002);
-
-            LogDb.buyInShelf(player2,UUID.randomUUID(),1,3,
+            LogDb.buyInShelf(player2,player1,1,3,
                     UUID.randomUUID(),UUID.randomUUID(),21,2102001);
-            LogDb.buyInShelf(UUID.randomUUID(),player2,1,4,
+
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player1,1,4,
+                    UUID.randomUUID(),UUID.randomUUID(),21,2102002);
+            LogDb.npcBuyInShelf(UUID.randomUUID(),player2,1,4,
                     UUID.randomUUID(),UUID.randomUUID(),21,2102002);
 
             System.err.println("end--------------");

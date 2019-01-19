@@ -550,6 +550,14 @@ public class GameDb {
 		}
 		return success;
 	}
+	public static void initMoneyPool() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(MoneyPool.class, MoneyPool.ID) == null)
+			statelessSession.insert(new MoneyPool());
+		transaction.commit();
+		statelessSession.close();
+	}
 	public static void initGroundAuction() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -589,6 +597,12 @@ public class GameDb {
 			statelessSession.insert(new BrandManager());
 		transaction.commit();
 		statelessSession.close();
+	}
+	public static MoneyPool getMoneyPool() {
+		Transaction transaction = session.beginTransaction();
+		MoneyPool res = session.get(MoneyPool.class, MoneyPool.ID);
+		transaction.commit();
+		return res;
 	}
 	public static BrandManager getBrandManager() {
 		Transaction transaction = session.beginTransaction();

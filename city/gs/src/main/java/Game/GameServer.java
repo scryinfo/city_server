@@ -1,6 +1,7 @@
 package Game;
 
 import Game.FriendManager.FriendManager;
+import Game.Meta.MetaData;
 import Shared.*;
 import Shared.Package;
 import com.google.common.collect.MapMaker;

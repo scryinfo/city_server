@@ -1,6 +1,8 @@
 package Game;
 
 import Game.Meta.MetaItem;
+import Game.Meta.MetaTalent;
+import Game.Meta.ProbBase;
 import Shared.Util;
 import gs.Gs;
 

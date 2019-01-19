@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Meta.MetaItem;
+import Game.Meta.MetaMaterial;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
 
