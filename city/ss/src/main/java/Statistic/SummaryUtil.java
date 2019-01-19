@@ -8,9 +8,11 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.*;
 
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import ss.Ss;
 
@@ -19,6 +21,7 @@ import java.util.*;
 public class SummaryUtil
 {
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
+    public static final long HOUR_MILLISECOND = 1000 * 3600;
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String TIME = "time";
@@ -53,6 +56,38 @@ public class SummaryUtil
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayRentRoom = database.getCollection(DAY_RENTROOM)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+    }
+
+    public static Map<Long, Long> getBuildIncomeById(UUID bid)
+    {
+        long nowTime = System.currentTimeMillis();
+        long lastFullTime = getLastFullTime(nowTime);
+        long beforeDayTime = getBeforeDayStartTime(7, nowTime);
+        Map<Long, Long> map = new LinkedHashMap<>();
+        LogDb.getBuildingIncome().find(and(
+                eq("b", bid),
+                gte("t", beforeDayTime),
+                lte("t", lastFullTime)))
+                .projection(fields(include("t", "a"), excludeId()))
+                .sort(Sorts.ascending("t"))
+                .forEach((Block<? super Document>) document ->
+                {
+                    long node = getLastFullTime(document.getLong("t")) + HOUR_MILLISECOND;
+                    map.computeIfAbsent(node, k -> 0L);
+                    map.put(node, map.get(node) + document.getLong("a"));
+                });
+        return map;
+    }
+
+    public static long getLastFullTime(long currentTime)
+    {
+        return currentTime - (currentTime % HOUR_MILLISECOND);
+    }
+
+    public static long getBeforeDayStartTime(int day, long currentTime)
+    {
+        long todayStartTime = todayStartTime(currentTime);
+        return todayStartTime - (day - 1) * DAY_MILLISECOND;
     }
 
     /**
@@ -178,9 +213,8 @@ public class SummaryUtil
         return builder.build();
     }
 
-    public static long todayStartTime()
+    public static long todayStartTime(long nowTime)
     {
-        long nowTime = System.currentTimeMillis();
         return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% DAY_MILLISECOND;
     }
 

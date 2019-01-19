@@ -50,6 +50,7 @@ public class JustVisit implements IAction {
             owner.addMoney(chosen.cost());
             npc.decMoney(chosen.cost());
             LogDb.incomeVisit(owner.id(),chosen.type(),chosen.cost(),chosen.id(),npc.id());
+            LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
             GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
             npc.goFor(chosen);
         }

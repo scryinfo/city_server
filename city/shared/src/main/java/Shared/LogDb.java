@@ -31,6 +31,7 @@ public class LogDb {
 	private static final String INCOME_VISIT = "incomeVisit";
 
 	private static final String PLAYER_ID = "playerId";
+	private static final String BUILDING_INCOME = "buildingIncome";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
@@ -48,6 +49,7 @@ public class LogDb {
 	private static MongoCollection<Document> incomeVisit;
 
 	private static MongoCollection<Document> playerId;
+	private static MongoCollection<Document> buildingIncome;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -79,6 +81,8 @@ public class LogDb {
 		incomeVisit = database.getCollection(INCOME_VISIT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerId = database.getCollection(PLAYER_ID)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		buildingIncome = database.getCollection(BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -174,7 +178,6 @@ public class LogDb {
 		return documentList;
 	}
 
-
 	public static Set<UUID> getAllPlayer()
 	{
 		Set<UUID> set = new HashSet<>();
@@ -187,6 +190,17 @@ public class LogDb {
 	public static void insertPlayerId(UUID uuid)
 	{
 		playerId.insertOne(new Document("r", uuid));
+	}
+
+	public static void buildingIncome(UUID bId,UUID payId,long cost,int type,int typeId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("b", bId)
+				.append("p", payId)
+				.append("a", cost)
+				.append("tp", type)
+				.append("tpi", typeId);
+		buildingIncome.insertOne(document);
 	}
 
 
@@ -294,14 +308,14 @@ public class LogDb {
 		return pDList;
 	}
 
-	public static void incomeVisit(UUID roldId,int type,long cost, UUID bId, UUID payId)
+	public static void incomeVisit(UUID roldId,int buildType,long cost, UUID bId, UUID payId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roldId)
 				.append("d", payId)
 				.append("b", bId)
 				.append("a", cost)
-				.append("tp",type);
+				.append("tp",buildType);
 		incomeVisit.insertOne(document);
 	}
 
@@ -334,6 +348,11 @@ public class LogDb {
 	public static MongoCollection<Document> getBuyGround()
 	{
 		return buyGround;
+	}
+
+	public static MongoCollection<Document> getBuildingIncome()
+	{
+		return buildingIncome;
 	}
 
 	public static MongoCollection<Document> getNpcBuyInShelf()

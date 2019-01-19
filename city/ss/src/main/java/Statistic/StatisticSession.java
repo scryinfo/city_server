@@ -8,6 +8,7 @@ import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import ss.Ss;
 
+import java.util.Map;
 import java.util.UUID;
 
 // this class contain only getXXX method, that means the only purpose this class or this server
@@ -54,5 +55,19 @@ public class StatisticSession {
 
         Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
         this.write(Package.create(cmd, economyInfos));
+    }
+
+    public void queryBuildingIncome(short cmd, Message message)
+    {
+        UUID buildingId = Util.toUuid((message).toByteArray());
+        Ss.BuildingIncome.Builder builder = Ss.BuildingIncome.newBuilder();
+        builder.setBuildingId(Util.toByteString(buildingId));
+        SummaryUtil.getBuildIncomeById(buildingId).forEach((k,v) ->{
+            Ss.NodeIncome.Builder node = Ss.NodeIncome.newBuilder()
+                    .setIncome(v)
+                    .setTime(k);
+            builder.addNodes(node.build());
+        });
+        this.write(Package.create(cmd, builder.build()));
     }
 }

@@ -525,6 +525,7 @@ public class GameSession {
 
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
+		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);

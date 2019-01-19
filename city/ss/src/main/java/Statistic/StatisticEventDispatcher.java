@@ -14,6 +14,7 @@ public class StatisticEventDispatcher extends DispatcherBase {
     private StatisticEventDispatcher() {
         try {
             table.put((short) SsCode.OpCode.queryPlayerEconomy_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class, "queryPlayerEconomy"));
+            table.put((short) SsCode.OpCode.queryBuildingIncomeMap_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class, "queryBuildingIncome"));
         } catch (Exception e) {
             e.printStackTrace();
         }
