@@ -112,18 +112,23 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                         return;
                     int add = l.update(diffNano);
                     if (add > 0) {
+                        UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
+
                         l.materialConsumed = false;
                         if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
+                            //生产线完成通知
+                            int[] itemIdAndNum = {l.item.id, add};
+                            MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(),ownerId(),null,ownerIdAndFactoryId,itemIdAndNum);
+
                             broadcastLineInfo(l);
                         } else {
                             //(加工厂/原料厂)仓库已满通知
-                            UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
                             MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), null, ownerIdAndFactoryId, null);
 
                             l.suspend(add);
                         }
                     }
-            }
+                }
         });
 
         if(this.dbTimer.update(diffNano)) {

@@ -786,14 +786,14 @@ public class GameDb {
 	//llb=================================
 	public static Collection<Mail> getMail(UUID playerId) {
 		Collection<Mail> res = new ArrayList<>();
-		StatelessSession session = sessionFactory.openStatelessSession();
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		org.hibernate.Query query = session.createQuery(" FROM Mail where playerId = :x ");
-        query.setParameter("x", playerId);
+		query.setParameter("x", playerId);
 		List<Mail> mails = query.list();
 		if (null != mails && mails.size() != 0) {
 			mails.forEach(mail -> res.add(mail));
-        }
+		}
 		transaction.commit();
 		session.close();
 		return res;
