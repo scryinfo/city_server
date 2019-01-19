@@ -22,6 +22,7 @@ public class LogDb {
 	private static final String PAY_TRANSFER = "payTransfer";
 
 	private static final String BUY_INSHELF = "buyInShelf";
+	private static final String NPC_BUY_INSHELF = "npcBuyInShelf";
 	private static final String RENT_GROUND = "rentGround";
 	private static final String BUY_GROUND = "buyGround";
 
@@ -36,6 +37,7 @@ public class LogDb {
 
 	//player buy material or goods
 	private static MongoCollection<Document> buyInShelf;
+	private static MongoCollection<Document> npcBuyInShelf;
 	private static MongoCollection<Document> payTransfer;
 	private static MongoCollection<Document> rentGround;
 	private static MongoCollection<Document> buyGround;
@@ -61,6 +63,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buyInShelf = database.getCollection(BUY_INSHELF)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		npcBuyInShelf = database.getCollection(NPC_BUY_INSHELF)
+						.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
 		payTransfer = database.getCollection(PAY_TRANSFER)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -186,12 +190,12 @@ public class LogDb {
 	}
 
 
-	public static void buyInShelf(UUID roleId, UUID dstId, long n, long price,
+	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
 								  UUID producerId, UUID bid, int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
-		document.append("r", roleId)
-				.append("d", dstId)
+		document.append("r", buyId)
+				.append("d", sellId)
 				.append("b", bid)
 				.append("p", price)
 				.append("a", n * price)
@@ -199,6 +203,21 @@ public class LogDb {
 				.append("tp", type)
 				.append("tpi", typeId);
 		buyInShelf.insertOne(document);
+	}
+
+	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
+								  UUID producerId, UUID bid, int type, int typeId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", npcId)
+				.append("d", sellId)
+				.append("b", bid)
+				.append("p", price)
+				.append("a", n * price)
+				.append("i", producerId)
+				.append("tp", type)
+				.append("tpi", typeId);
+		npcBuyInShelf.insertOne(document);
 	}
 
 	public static void npcBuy(int itemId, int price, UUID producerId, int itemQty, UUID buildingOwnerId, int buildingQty, float distance) {
@@ -315,6 +334,11 @@ public class LogDb {
 	public static MongoCollection<Document> getBuyGround()
 	{
 		return buyGround;
+	}
+
+	public static MongoCollection<Document> getNpcBuyInShelf()
+	{
+		return npcBuyInShelf;
 	}
 
 	public static MongoCollection<Document> getExtendBag()

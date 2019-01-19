@@ -78,8 +78,8 @@ public class Shopping implements IAction {
 
             LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
                     chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
-            LogDb.buyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
-                    sellShop.id(),MetaItem.type(chosen.meta.id),chosen.meta.id);
+            LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
+                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
         }
     }
     private static final class WeightInfo {
