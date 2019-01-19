@@ -158,6 +158,7 @@ public class Npc {
         return this.tempBuilding == null?this.born:this.tempBuilding;
     }
     public void readyForDestroy() {
+        MoneyPool.instance().add(this.money);
     }
     public void goHome() {
         if(apartment == null)

@@ -112,13 +112,14 @@ public class GroundAuction {
                         continue;
                     }
                     long p = bider.spentLockMoney(a.meta.id);
+                    MoneyPool.instance().add(p);
                     List<LogDb.Positon> plist1 = new ArrayList<>();
                     for(Coordinate c : a.meta.area)
                     {
                         plist1.add(new LogDb.Positon(c.x, c.y));
                     }
                     LogDb.buyGround(bider.id(), null,   p, plist1);
-                    GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance()));
+                    GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
 
                     bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
                     //土地拍卖通知

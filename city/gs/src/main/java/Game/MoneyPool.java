@@ -1,5 +1,8 @@
 package Game;
 
+import com.google.protobuf.Message;
+import gs.Gs;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.UUID;
@@ -32,5 +35,9 @@ public class MoneyPool {
             return false;
         this.n -= n;
         return true;
+    }
+
+    public Gs.MoneyPool toProto() {
+        return Gs.MoneyPool.newBuilder().setMoney(this.n).build();
     }
 }
