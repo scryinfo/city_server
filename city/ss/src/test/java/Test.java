@@ -18,6 +18,31 @@ public class Test
     static final String p2 = "3ab1ad45-9575-4e79-9b96-336b489dfe97";
 
     @org.junit.Test
+    public void querySexInfo()
+    {
+        LogDb.init("mongodb://192.168.0.51:27017", "city148");
+        SummaryUtil.init();
+        System.out.println(SummaryUtil.getSexInfo(true));
+        System.out.println(SummaryUtil.getSexInfo(false));
+    }
+
+    @org.junit.Test
+    public void insertSexInfo() throws InterruptedException
+    {
+        LogDb.init("mongodb://192.168.0.51:27017","city148");
+        UUID player1 = UUID.fromString(p1);
+        for (int i = 0; i < 38; i++)
+        {
+            LogDb.insertPlayerInfo(player1,true);
+        }
+        for (int i = 0; i < 25; i++)
+        {
+            LogDb.insertPlayerInfo(player1,false);
+        }
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    @org.junit.Test
     public void getBuidingIncome()
     {
         UUID player1 = UUID.fromString(p1);

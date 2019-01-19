@@ -323,7 +323,7 @@ public class GameSession {
 			});
 			GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
 			this.write(Package.create(cmd, playerToRoleInfo(p)));
-			LogDb.insertPlayerId(p.id());
+			LogDb.insertPlayerInfo(p.id(),c.getMale());
 		}
 	}
 

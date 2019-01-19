@@ -30,7 +30,7 @@ public class LogDb {
 
 	private static final String INCOME_VISIT = "incomeVisit";
 
-	private static final String PLAYER_ID = "playerId";
+	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
@@ -48,7 +48,7 @@ public class LogDb {
 	//player buy material or goods  and npc buy goods
 	private static MongoCollection<Document> incomeVisit;
 
-	private static MongoCollection<Document> playerId;
+	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
 
 	public static final String KEY_TOTAL = "total";
@@ -80,7 +80,7 @@ public class LogDb {
 
 		incomeVisit = database.getCollection(INCOME_VISIT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		playerId = database.getCollection(PLAYER_ID)
+		playerInfo = database.getCollection(PLAYER_INFO)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buildingIncome = database.getCollection(BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -178,18 +178,9 @@ public class LogDb {
 		return documentList;
 	}
 
-	public static Set<UUID> getAllPlayer()
+	public static void insertPlayerInfo(UUID uuid,boolean isMale)
 	{
-		Set<UUID> set = new HashSet<>();
-		playerId.find().forEach((Block<? super Document>) document -> {
-			set.add((UUID) document.get("r"));
-		});
-		return set;
-	}
-
-	public static void insertPlayerId(UUID uuid)
-	{
-		playerId.insertOne(new Document("r", uuid));
+		playerInfo.insertOne(new Document("r", uuid).append("male",isMale));
 	}
 
 	public static void buildingIncome(UUID bId,UUID payId,long cost,int type,int typeId)
@@ -368,6 +359,11 @@ public class LogDb {
 	public static MongoCollection<Document> getIncomeVisit()
 	{
 		return incomeVisit;
+	}
+
+	public static MongoCollection<Document> getPlayerInfo()
+	{
+		return playerInfo;
 	}
 
 	public static class Positon

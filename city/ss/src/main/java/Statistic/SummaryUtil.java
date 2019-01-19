@@ -58,6 +58,11 @@ public class SummaryUtil
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
+    public static long getSexInfo(boolean isMale)
+    {
+        return LogDb.getPlayerInfo().countDocuments(eq("male", isMale));
+    }
+
     public static Map<Long, Long> getBuildIncomeById(UUID bid)
     {
         long nowTime = System.currentTimeMillis();

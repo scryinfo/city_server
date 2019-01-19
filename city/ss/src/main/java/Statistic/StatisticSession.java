@@ -70,4 +70,12 @@ public class StatisticSession {
         });
         this.write(Package.create(cmd, builder.build()));
     }
+
+    public void queryAllPlayerSex(short cmd)
+    {
+        Ss.SexInfo.Builder builder = Ss.SexInfo.newBuilder();
+        builder.setMale(SummaryUtil.getSexInfo(true));
+        builder.setFemale(SummaryUtil.getSexInfo(false));
+        this.write(Package.create(cmd, builder.build()));
+    }
 }
