@@ -27,32 +27,36 @@ public class DayJob implements org.quartz.Job {
         long todayStartTime = SummaryUtil.todayStartTime();
         long yestodayStartTime = todayStartTime - DAY_MILLISECOND;
 
+        //for test
+        /*long yestodayStartTime = todayStartTime;
+        todayStartTime = todayStartTime + DAY_MILLISECOND;*/
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("DayJob start execute,time = " + timeStr);
 
-        //info to a collection once a day
+        //summary info to special collection once a day
         //save sell ground income
-        List<Document> documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getIncomeBuyGround());
+        List<Document> documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime,LogDb.getBuyGround(),true);
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDaySellGround());
         //buy ground pay
-        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getBuyGround());
+        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getBuyGround(),false);
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDaySellGround());
 
         //rent ground income
-        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getIncomeRentGround());
+        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getRentGround(),true);
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDayRentGround());
         //rent ground pay
-        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getRentGround());
+        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getRentGround(),false);
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayRentGround());
 
         //transfer pay
-        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getPayTransfer());
+        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getPayTransfer(),false);
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayTransfer());
 
         //salary pay
-        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getPaySalary());
+        documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime, LogDb.getPaySalary(),false);
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDaySalary());
 
         //rent room income
@@ -60,11 +64,24 @@ public class DayJob implements org.quartz.Job {
         SummaryUtil.insertDaySummary1(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDayRentRoom());
 
         //Goods Shelf income (contain npc shopping)
-        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getIncomeInShelf(),true);
-        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayGoods());
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),true,true);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf(), true, true);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
+
         //Goods Shelf pay
-        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), true);
-        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.PAY, documentList,yestodayStartTime,SummaryUtil.getDayGoods());
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), true,false);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
+
+        //material Shelf income
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false,true);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayMaterial());
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf(), false,true);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayMaterial());
+
+        //material Shelf pay
+        documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false,false);
+        SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayMaterial());
 
         //accept all client request
         StatisticSession.setIsReady(true);

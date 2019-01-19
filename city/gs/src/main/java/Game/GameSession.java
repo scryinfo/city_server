@@ -521,10 +521,9 @@ public class GameSession {
 
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
-		LogDb.payTransfer(player.id(), player.money(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-		LogDb.incomeInShelf(seller.id(), seller.id(), seller.money(), itemBuy.n, c.getPrice(),
-				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
-		LogDb.buyInShelf(player.id(), seller.id(), player.money(), itemBuy.n, c.getPrice(),
+		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+
+		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
@@ -936,8 +935,6 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
-		LogDb.incomeAdSlot(owner.id(), owner.money(),player.id(), bid, slotId, slot.rentPreDay);
-		LogDb.buyAdSlot(player.id(), player.money(),owner.id(), bid, slotId, slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -988,7 +985,7 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
-		LogDb.payTransfer(player.id(), player.money(), charge, srcId, dstId, item.key.producerId, item.n);
+		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
@@ -1231,10 +1228,8 @@ public class GameSession {
 			return;
 		if(!player.decMoney(sell.price))
 			return;
-		LogDb.buyTech(player.id(), sell.ownerId, player.money(), sell.price, sell.metaId);
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
-		LogDb.incomeTech(seller.id(), player.id(), seller.money(), sell.price, sell.metaId);
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
@@ -1422,6 +1417,7 @@ public class GameSession {
 				.setDes(info.getDes())
 				.setMale(info.isMale())
 				.setFaceId(info.getFaceId())
+				.setCreateTs(info.getCreateTs())
 				.build();
 	}
 
@@ -1434,6 +1430,7 @@ public class GameSession {
 				.setDes(player.getDes())
 				.setMale(player.isMale())
 				.setFaceId(player.getFaceId())
+				.setCreateTs(player.getCreateTs())
 				.build();
 	}
 	public void addFriend(short cmd, Message message)

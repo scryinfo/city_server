@@ -73,7 +73,8 @@ public class ManagerCommunication
                         .setId(Util.toByteString(player.id()))
                         .setName(player.getName())
                         .setMsg(communicationReq.getMsg())
-                        .setTime(now);
+                        .setTime(now)
+                        .setImage(player.getFaceId());
                 GameServer.allGameSessions.values().forEach(gameSession ->{
                     if (!gameSession.getPlayer().getBlacklist().contains(player.id()))
                     {

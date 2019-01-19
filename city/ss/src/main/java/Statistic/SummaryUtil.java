@@ -1,6 +1,7 @@
 package Statistic;
 
 import Shared.LogDb;
+import Shared.Util;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.WriteConcern;
@@ -65,12 +66,13 @@ public class SummaryUtil
                                          long time,MongoCollection<Document> collection)
     {
         //document has key "total" == LogDb.KEY_TOTAL
+        //document already owned : id,total
         documentList.forEach(document ->
                 document.append(TIME, time)
-                        .append(ID,document.get("_id"))
-                        .append(TYPE, isIncome.getValue())
-                        .remove("_id"));
-        collection.insertMany(documentList);
+                        .append(TYPE, isIncome.getValue()));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
     }
 
     public static void insertDaySummaryWithTypeId(Type isIncome, List<Document> documentList,
@@ -80,12 +82,15 @@ public class SummaryUtil
         documentList.forEach(document ->
                 document.append(TIME, time)
                         .append(TYPE, isIncome.getValue()));
-        collection.insertMany(documentList);
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
     }
 
     public static Ss.EconomyInfos getPlayerEconomy(UUID playerId)
     {
         Ss.EconomyInfos.Builder builder = Ss.EconomyInfos.newBuilder();
+        builder.setPlayerId(Util.toByteString(playerId));
         builder.addInfos(getSummaryInfo1(playerId, Ss.EconomyInfo.Type.SELL_GROUND, daySellGround));
         builder.addInfos(getSummaryInfo1(playerId, Ss.EconomyInfo.Type.RENT_GROUND, dayRentGround));
         builder.addInfos(getSummaryInfo1(playerId, Ss.EconomyInfo.Type.TRANSFER, dayTransfer));
@@ -94,6 +99,9 @@ public class SummaryUtil
 
         //goods has type id
         builder.addAllInfos(getSummaryInfoWithTpi(playerId, Ss.EconomyInfo.Type.GOODS, dayGoods));
+        //material has type id
+        builder.addAllInfos(getSummaryInfoWithTpi(playerId, Ss.EconomyInfo.Type.MATERIAL, dayMaterial));
+
         return builder.build();
     }
 
@@ -102,28 +110,36 @@ public class SummaryUtil
     {
 
         Map<Integer, Ss.EconomyInfo.Builder> map = new HashMap<>();
-        BasicDBObject dbObject = new BasicDBObject("_id",
+        Document groupObject = new Document("_id",
                 new BasicDBObject(TYPE, "$"+TYPE)
                         .append("tpi", "$tpi"));
+
+        Document projectObject = new Document()
+                .append(TYPE, "$_id._id." + TYPE)
+                .append("tpi", "$_id._id.tpi")
+                .append(LogDb.KEY_TOTAL, "$" + LogDb.KEY_TOTAL)
+                .append("_id", 0);
+
         collection.aggregate(
                 Arrays.asList(
                         Aggregates.match(eq(ID, playerId)),
-                        Aggregates.group(dbObject, Accumulators.sum(LogDb.KEY_TOTAL, "$" + LogDb.KEY_TOTAL))
+                        Aggregates.group(groupObject, Accumulators.sum(LogDb.KEY_TOTAL, "$" + LogDb.KEY_TOTAL)),
+                        Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) document ->
         {
-            Document tmp = (Document) ((Document) document.get("_id")).get("_id");
-            int incomeType = tmp.getInteger(TYPE);
-            int goodsId = tmp.getInteger("tpi");
+            int incomeType = document.getInteger(TYPE);
+            int goodsId = document.getInteger("tpi");
+            long total = (long) document.get(LogDb.KEY_TOTAL);
             map.computeIfAbsent(goodsId,
                     k -> Ss.EconomyInfo.newBuilder().setType(bType).setId(goodsId));
             if (incomeType == Type.INCOME.getValue())
             {
-                map.get(goodsId).setIncome((Long) document.get(LogDb.KEY_TOTAL));
+                map.get(goodsId).setIncome(total);
             }
             else
             {
-                map.get(goodsId).setPay((Long) document.get(LogDb.KEY_TOTAL));
+                map.get(goodsId).setPay(total);
             }
 
         });

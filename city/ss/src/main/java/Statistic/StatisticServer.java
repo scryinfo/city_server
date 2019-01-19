@@ -39,6 +39,7 @@ public class StatisticServer {
         serverInfo = ServerCfgDb.getGameServerInfo(id);
         LogDb.init(serverInfo.getLogDbUri(),serverInfo.getLogDbName());
         SummaryUtil.init();
+        StatisticEventDispatcher.getInstance();
     }
 
     public void run() throws Exception {
