@@ -1,6 +1,8 @@
 package Game;
 
 import Game.Meta.MetaItem;
+import Game.Meta.MetaMaterial;
+import Game.Meta.MetaMaterialFactory;
 import Shared.Package;
 import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;

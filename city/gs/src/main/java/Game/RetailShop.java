@@ -1,6 +1,8 @@
 package Game;
 
+import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
+import Game.Meta.MetaRetailShop;
 import com.google.protobuf.Message;
 import gs.Gs;
 

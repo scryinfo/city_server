@@ -2,7 +2,7 @@ package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
-import Game.Meta.MetaItem;
+import Game.Meta.*;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;

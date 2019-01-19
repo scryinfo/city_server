@@ -1,6 +1,8 @@
 package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGroundAuction;
 import Game.Timers.DateTimeTracker;
 import Shared.LogDb;
 import Shared.Package;

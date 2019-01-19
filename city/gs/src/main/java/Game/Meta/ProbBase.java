@@ -1,4 +1,4 @@
-package Game;
+package Game.Meta;
 
 import org.bson.Document;
 

@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Meta.MetaData;
 import gs.Gs;
 import org.bson.Document;
 
@@ -32,8 +33,7 @@ public class Coordinate {
         this.y = i.getY();
     }
 
-    protected Coordinate() {
-    }
+    public Coordinate() {}
     public static double distance(Coordinate a, Coordinate b) {
         return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
     }
@@ -94,7 +94,7 @@ public class Coordinate {
         return Objects.hash(x, y);
     }
 
-    Gs.MiniIndex toProto() {
+    public Gs.MiniIndex toProto() {
         return Gs.MiniIndex.newBuilder()
                 .setX(this.x)
                 .setY(this.y)

@@ -1,5 +1,8 @@
 package Game;
 
+import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import gs.Gs;
@@ -79,9 +82,9 @@ public class BrandManager {
         refineCache(i, add);
     }
     public static final class BuildingRatio {
-        double apartment = 1.d;
-        double publicFacility = 1.d;
-        double retail = 1.d;
+        public double apartment = 1.d;
+        public double publicFacility = 1.d;
+        public double retail = 1.d;
 
         @Override
         public String toString() {

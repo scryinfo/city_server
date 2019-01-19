@@ -2,6 +2,7 @@ package Game;
 
 import Game.FriendManager.FriendManager;
 import Game.Listener.EvictListener;
+import Game.Meta.MetaData;
 import Shared.DatabaseInfo;
 import Shared.LogDb;
 import Shared.Package;

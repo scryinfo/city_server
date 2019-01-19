@@ -1,10 +1,11 @@
 package Game;
 
 import Game.Action.IAction;
+import Game.Meta.AIBuilding;
+import Game.Meta.MetaData;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
