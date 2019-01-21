@@ -97,8 +97,15 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     protected void _update(long diffNano) {
         this.lines.values().forEach(l -> {
-            if(l.isPause())
+            UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
+            if(l.isPause()) {
+                if (l.count >= l.targetNum) {
+                    //生产线完成通知
+                    int[] itemIdAndNum = {l.item.id, l.targetNum};
+                    MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), null, ownerIdAndFactoryId, itemIdAndNum);
+                }
                 return;
+            }
             if(l.isSuspend()) {
                 assert l.left() > 0;
                 if(this.store.offset(l.newItemKey(ownerId(), l.itemLevel), l.left())) {
@@ -113,14 +120,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                         return;
                     int add = l.update(diffNano);
                     if (add > 0) {
-                        UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
-
                         l.materialConsumed = false;
                         if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
-                            //生产线完成通知
-                            int[] itemIdAndNum = {l.item.id, add};
-                            MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(),ownerId(),null,ownerIdAndFactoryId,itemIdAndNum);
-
                             broadcastLineInfo(l);
                         } else {
                             //(加工厂/原料厂)仓库已满通知

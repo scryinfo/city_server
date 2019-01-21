@@ -382,6 +382,10 @@ public abstract class Building {
     public void enter(Npc npc) {
         flowCount += 1;
         enterImpl(npc);
+/*        //住宅入住通知
+        UUID[] apartmentOwnerId = {this.ownerId};
+        int[] num = {flowCount};
+        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwnerId,num);*/
     }
     public int getFlow() {
         return this.flow;
