@@ -1,5 +1,6 @@
 package Game.Meta;
 
+import Shared.Util;
 import org.bson.Document;
 
 import java.util.Arrays;
@@ -17,7 +18,7 @@ public class ProbBase {
     public static int randomIdx(int[] weight) {
         int[] copy = Arrays.copyOf(weight, weight.length);
         process(copy);
-        int v = ThreadLocalRandom.current().nextInt(0, copy[copy.length-1]);  // range is [l, r)
+        int v = Util.random(0, copy[copy.length-1]);
         int idx = Arrays.binarySearch(copy, v);
         if(idx >= 0)
             return idx+1; // due to we random [l, r), so the idx can not be the index of last element r, so +1 is ok

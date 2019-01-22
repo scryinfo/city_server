@@ -86,12 +86,18 @@ public class Util {
             return t;
         }
     }
+    // range is [l, r]
     public static int random(int l, int r) {
-        return ThreadLocalRandom.current().nextInt(l, r);
+        if(l == r)
+            return l;
+        else if(l > r)
+            return ThreadLocalRandom.current().nextInt(r, l);
+        else
+            return ThreadLocalRandom.current().nextInt(l, r);
     }
-    public static double random(double l, double r) {
-        return ThreadLocalRandom.current().nextDouble(l, r);
-    }
+//    public static double random(double l, double r) {
+//        return ThreadLocalRandom.current().nextDouble(l, r);
+//    }
     private static final Codec<Document> codec = new DocumentCodec();
 
     public static byte[] toBytes(final Document document) {
