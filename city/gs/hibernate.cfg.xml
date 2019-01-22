@@ -30,6 +30,7 @@
 		<property name="hibernate.connection.isolation">2</property>
 		<mapping class="Game.Player$Info"></mapping>
 		<mapping class="Game.Player"></mapping>
+		<mapping class="Game.MoneyPool"></mapping>
 		<mapping class="Game.Talent"></mapping>
 		<mapping class="Game.Coordinate"></mapping>
 		<mapping class="Game.Building"></mapping>
