@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class AILux extends ProbBase {
     AILux(Document d) {
-        super(4, d);
+        super(3, d);
     }
     public int random(double[] ratio) {
         IAction.logger.info("AILux ratio" + Arrays.toString(ratio));
