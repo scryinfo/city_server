@@ -1,6 +1,5 @@
 package Game;
 
-import com.google.protobuf.Message;
 import gs.Gs;
 
 import javax.persistence.Entity;

@@ -95,6 +95,7 @@ public class GameServer {
         Exchange.init();
         BrandManager.init();
         TechTradeCenter.init();
+        MoneyPool.init();
         City.instance().run();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
