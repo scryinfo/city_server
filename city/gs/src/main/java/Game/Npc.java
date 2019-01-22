@@ -128,9 +128,12 @@ public class Npc {
     }
     private void visit(Building building, boolean hangOut) {
         if(building == this.born) {
-            if(!hangOut)
-                this.tempBuilding.leave(this);
-            this.tempBuilding = null;
+            if(!hangOut) {
+                if (this.tempBuilding != null) {
+                    this.tempBuilding.leave(this);
+                    this.tempBuilding = null;
+                }
+            }
         }
         else {
             if(!hangOut)
