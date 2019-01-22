@@ -271,11 +271,15 @@ public class LogDb {
 
 	public static void buyGround(UUID roleId, UUID ownerId, long price, List<Positon> plist1)
 	{
+		long all = price;
+		if (ownerId != null) {
+			all = price * plist1.size();
+		}
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("s", price)
-				.append("a", price * plist1.size())
+				.append("a", all)
 				.append("p", positionToDoc(plist1));
 		buyGround.insertOne(document);
 	}
