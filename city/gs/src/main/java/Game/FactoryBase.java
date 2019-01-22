@@ -99,11 +99,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         this.lines.values().forEach(l -> {
             UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
             if(l.isPause()) {
-                if (l.count >= l.targetNum) {
-                    //生产线完成通知
-                    int[] itemIdAndNum = {l.item.id, l.targetNum};
-                    MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), null, ownerIdAndFactoryId, itemIdAndNum);
-                }
                 return;
             }
             if(l.isSuspend()) {
