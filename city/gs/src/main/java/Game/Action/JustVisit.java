@@ -20,7 +20,7 @@ public class JustVisit implements IAction {
     public void act(Npc npc) {
         if(this.buildingType == MetaBuilding.APARTMENT && npc.hasApartment())
             return;
-        logger.info("npc " + npc.id().toString() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
+        logger.info("npc " + npc.id().toString() + " type " + npc.type() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
             return;

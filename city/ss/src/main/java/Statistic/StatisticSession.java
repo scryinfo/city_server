@@ -42,7 +42,7 @@ public class StatisticSession {
 
     public void queryPlayerEconomy(short cmd, Message message)
     {
-        UUID playerId = Util.toUuid((message).toByteArray());
+        UUID playerId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
         if (!isReady)
         {
             this.write(Package.fail(cmd));

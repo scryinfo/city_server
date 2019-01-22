@@ -15,6 +15,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
@@ -47,7 +48,8 @@ public class StatisticServer {
         scheduler.start();
 
         scheduler.scheduleJob(newJob(DayJob.class).build(), newTrigger()
-                .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0,0))
+                .withSchedule(/*CronScheduleBuilder.dailyAtHourAndMinute(0,0)*/
+                        CronScheduleBuilder.cronSchedule("0 */10 * * * ?"))
                 .build());
         scheduler.scheduleJob(newJob(WeekJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
