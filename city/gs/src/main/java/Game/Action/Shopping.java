@@ -13,7 +13,7 @@ public class Shopping implements IAction {
     private int aiId;
     @Override
     public void act(Npc npc) {
-        logger.info("npc " + npc.id().toString() + " begin to shopping who located at: " + npc.buildingLocated().coordinate());
+        logger.info("npc " + npc.id().toString() + " type " + npc.type() + " begin to shopping who located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(MetaBuilding.RETAIL);
         if(buildings.isEmpty())
             return;

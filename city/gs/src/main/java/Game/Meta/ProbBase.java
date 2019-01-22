@@ -16,6 +16,9 @@ public class ProbBase {
     final long id;
     final int[] weight;
     public static int randomIdx(int[] weight) {
+        assert weight.length > 0;
+        if(weight.length == 1)
+            return 0;
         int[] copy = Arrays.copyOf(weight, weight.length);
         process(copy);
         int v = Util.random(0, copy[copy.length-1]);
