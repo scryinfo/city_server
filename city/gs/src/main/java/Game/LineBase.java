@@ -66,6 +66,7 @@ public abstract class LineBase {
     }
 
     boolean materialConsumed = false;
+    boolean mailSend = false;
     int update(long diffNano) {
         int add = 0;
         if(this.timer.update(diffNano))
