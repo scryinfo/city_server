@@ -21,17 +21,25 @@ public class DayJob implements org.quartz.Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException
     {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+        /*if (StatisticSession.isReady) {
+            System.out.println("-------------------job----" +
+                    formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault())));
+            return;
+        }*/
         //refuse all client request
         StatisticSession.setIsReady(false);
 
-        long todayStartTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
-        long yestodayStartTime = todayStartTime - DAY_MILLISECOND;
+        long time1 = System.currentTimeMillis();
+        long todayStartTime = /*SummaryUtil.todayStartTime(System.currentTimeMillis())*/
+                time1 - time1%(1000 * 60 * 10);
+        long yestodayStartTime = todayStartTime - 1000 * 60 * 10;
 
         //for test
         /*long yestodayStartTime = todayStartTime;
         todayStartTime = todayStartTime + DAY_MILLISECOND;*/
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("DayJob start execute,time = " + timeStr);
