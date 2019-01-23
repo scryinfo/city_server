@@ -103,7 +103,7 @@ public class BrandManager {
         return allBuilding.get(type);
     }
     public int getGood(int mid) {
-        return allGood.get(mid);
+        return allGood.getOrDefault(mid, 0);
     }
     private void refineCache() {
         for(BrandInfo i : allBrandInfo.values()) {
