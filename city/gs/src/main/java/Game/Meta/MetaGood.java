@@ -28,7 +28,7 @@ public final class MetaGood extends MetaItem
                 res = Type.DIGITAL;
                 break;
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(Integer.toString(id));
         }
         return res;
     }

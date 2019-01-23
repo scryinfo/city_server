@@ -30,6 +30,8 @@ public class Shopping implements IAction {
             goodMetaIds.addAll(shop.getMetaIdsInShelf(type, lux));
         });
         logger.info("good meta ids this npc can buy: " + goodMetaIds);
+        if(goodMetaIds.isEmpty())
+            return;
         Map<Integer, Integer> brandV = new HashMap<>();
         int sumBrandV = 0;
         for (Integer goodMetaId : goodMetaIds) {
