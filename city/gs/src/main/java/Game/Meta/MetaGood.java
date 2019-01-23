@@ -8,7 +8,7 @@ public final class MetaGood extends MetaItem
     public static final int LUX_SIZE = 4;
     public static Type goodType(int id) {
         Type res;
-        switch ((id / 100)%100) {
+        switch ((MetaItem.baseId(id))%100) {
             case 51:
                 res = Type.MAIN_FOOD;
                 break;
@@ -28,7 +28,7 @@ public final class MetaGood extends MetaItem
                 res = Type.DIGITAL;
                 break;
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(Integer.toString(id));
         }
         return res;
     }

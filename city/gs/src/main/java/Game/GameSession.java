@@ -83,7 +83,7 @@ public class GameSession {
 						m.invoke(this, cmd);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							logger.fatal(Throwables.getStackTraceAsString(e));
+							logger.fatal(Throwables.getStackTraceAsString(e) + " " + Integer.toString(cmd));
 						else
 							this.close();
 					}
