@@ -91,6 +91,8 @@ public class Npc {
         return this.apartment != null;
     }
     public void update(long diffNano) {
+        if(this.born.outOfBusiness())
+            return;
         int id = chooseId();
         IAction.logger.info(this.id().toString() + " choose " + id);
         AIBuilding aiBuilding = MetaData.getAIBuilding(id);
