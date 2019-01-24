@@ -293,7 +293,7 @@ public class Exchange {
                 .setBuyOrderId(Util.toByteString(b.id))
                 .setSellOrderId(Util.toByteString(s.id))
                 .build()));
-        //交易所商品出售成功通知
+        //交易所商品售出通知
         int[] orderNum = {num};  //售出数量
         UUID[] orderID = {s.id}; //挂单ID
         MailBox.instance().sendMail(Mail.MailType.EXCHANGE_GOODS_SOLD.getMailType(),seller.id(),null,orderID,orderNum);

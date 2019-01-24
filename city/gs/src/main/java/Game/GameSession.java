@@ -537,7 +537,7 @@ public class GameSession {
 		//货架商品出售通知
 		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
 		int[] itemIdAndNum = {itemId, itemBuy.n};
-		MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);
+		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
