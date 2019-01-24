@@ -733,7 +733,7 @@ public class GameSession {
 		Gs.SetRent c = (Gs.SetRent) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.outOfBusiness() || b.type() != MetaBuilding.APARTMENT || !b.ownerId().equals(player.id()))
+		if(b == null || b.type() != MetaBuilding.APARTMENT || !b.ownerId().equals(player.id()))
 			return;
 		Apartment a = (Apartment)b;
 		a.setRent(c.getRent());
