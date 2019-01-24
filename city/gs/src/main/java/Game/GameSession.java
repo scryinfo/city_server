@@ -83,7 +83,7 @@ public class GameSession {
 						m.invoke(this, cmd);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							logger.fatal(Throwables.getStackTraceAsString(e) + " " + Integer.toString(cmd));
+							logger.error(Throwables.getStackTraceAsString(e) + " " + Integer.toString(cmd));
 						else
 							this.close();
 					}
@@ -93,7 +93,7 @@ public class GameSession {
 						m.invoke(this, cmd, message);
 					} catch (IllegalArgumentException e) {
 						if(GlobalConfig.debug())
-							logger.fatal(Throwables.getStackTraceAsString(e));
+							logger.error(Throwables.getStackTraceAsString(e));
 						else
 							this.close();
 					}
