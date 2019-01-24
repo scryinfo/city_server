@@ -79,20 +79,20 @@ public class Shelf {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Content> slots = new HashMap<>();
 
-    public Gs.Shelf.Content add(Item item, int price) {
+    public boolean add(Item item, int price) {
         if(full())
-            return null;
+            return false;
         Content content = slots.get(item.key);
         if(content != null) {
             if(content.price != price)
-                return null;
+                return false;
             content.n += item.n;
         }
         else {
             content = new Content(item.n, price);
             slots.put(item.key, content);
         }
-        return toProto(item.key, content);
+        return true;
     }
     private Gs.Shelf.Content toProto(ItemKey k, Content content) {
         return Gs.Shelf.Content.newBuilder()

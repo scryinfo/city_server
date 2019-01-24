@@ -443,10 +443,9 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		Gs.Shelf.Content proto = s.addshelf(item, c.getPrice());
-		if(proto != null) {
+		if(s.addshelf(item, c.getPrice())) {
 			GameDb.saveOrUpdate(s);
-			this.write(Package.create(cmd, proto));
+			this.write(Package.create(cmd, c));
 		}
 		else
 			this.write(Package.fail(cmd));
