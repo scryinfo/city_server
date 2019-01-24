@@ -460,8 +460,10 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.delshelf(item.key, item.n, true))
+		if(s.delshelf(item.key, item.n, true)) {
+			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
+		}
 		else
 			this.write(Package.fail(cmd));
 	}
@@ -476,9 +478,11 @@ public class GameSession {
 			return;
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
-		IShelf shelf = (IShelf)building;
-		if(shelf.setPrice(item.key, c.getPrice()))
+		IShelf s = (IShelf)building;
+		if(s.setPrice(item.key, c.getPrice())) {
+			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
+		}
 		else
 			this.write(Package.fail(cmd));
 	}
