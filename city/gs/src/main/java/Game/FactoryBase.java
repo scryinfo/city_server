@@ -3,6 +3,7 @@ package Game;
 import Game.Meta.MetaFactoryBase;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
+import Shared.Package;
 import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
@@ -25,8 +26,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected FactoryBase() {
     }
 
-    public abstract LineBase addLine(MetaItem m, int workerNum, int targetNum, int itemLevel);
-
+    protected abstract LineBase addLineImpl(MetaItem m, int workerNum, int targetNum, int itemLevel);
+    public LineBase addLine(MetaItem m, int workerNum, int targetNum, int itemLevel) {
+        LineBase l = this.addLineImpl(m, workerNum, targetNum, itemLevel);
+        if(l != null)
+            this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(l.toProto()).build()));
+        return l;
+    }
     @Override
     public boolean reserve(MetaItem m, int n) {
         return store.reserve(m, n);

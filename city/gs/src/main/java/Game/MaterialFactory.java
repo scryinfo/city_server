@@ -76,12 +76,11 @@ public class MaterialFactory extends FactoryBase {
     }
 
     @Override
-    public LineBase addLine(MetaItem item, int workerNum, int targetNum, int itemLevel) {
+    protected LineBase addLineImpl(MetaItem item, int workerNum, int targetNum, int itemLevel) {
         if(!(item instanceof MetaMaterial) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaMaterial)item, targetNum, workerNum, itemLevel);
         lines.put(line.id, line);
-        this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
     }
 

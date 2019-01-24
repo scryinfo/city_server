@@ -72,7 +72,7 @@ public class ProduceDepartment extends FactoryBase {
 
     }
 
-    public LineBase addLine(MetaItem item, int workerNum, int targetNum, int itemLevel) {
+    protected LineBase addLineImpl(MetaItem item, int workerNum, int targetNum, int itemLevel) {
         if(!(item instanceof MetaGood) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaGood)item, targetNum, workerNum, itemLevel);
