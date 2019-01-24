@@ -102,18 +102,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean consumeMaterial(LineBase line);
 
     protected void _update(long diffNano) {
+        List<UUID> completedLines = new ArrayList<>();
         this.lines.values().forEach(l -> {
-            UUID[] ownerIdAndFactoryId = {ownerId(), this.id()};
             if(l.isPause()) {
-
-                if (!l.mailSend) {
-                    if (l.count >= l.targetNum) {
-                        //生产线完成通知
-                        int[] itemIdAndNum = {l.item.id, l.targetNum};
-                        MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), null, ownerIdAndFactoryId, itemIdAndNum);
-                        l.mailSend = true;
-                    }
-                }
+                if(l.isComplete())
+                    completedLines.add(l.id);
                 return;
             }
             if(l.isSuspend()) {
@@ -135,14 +128,18 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                             broadcastLineInfo(l);
                         } else {
                             //(加工厂/原料厂)仓库已满通知
-                            MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), null, ownerIdAndFactoryId, null);
+                            MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), null, new UUID[]{ownerId(), this.id()}, null);
 
                             l.suspend(add);
                         }
                     }
                 }
         });
-
+        for (UUID id : completedLines) {
+            LineBase l = this.lines.remove(id);
+            //this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+            MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), null, new UUID[]{ownerId(), this.id()}, new int[]{l.item.id, l.targetNum});
+        }
         if(this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }

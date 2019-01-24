@@ -41,7 +41,10 @@ public abstract class LineBase {
     }
     public abstract ItemKey newItemKey(UUID producerId, int qty);
     public boolean isPause() {
-        return count >= targetNum || workerNum == 0;
+        return isComplete() || workerNum == 0;
+    }
+    public boolean isComplete() {
+        return count >= targetNum;
     }
     @Transient
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
@@ -66,7 +69,6 @@ public abstract class LineBase {
     }
 
     boolean materialConsumed = false;
-    boolean mailSend = false;
     int update(long diffNano) {
         int add = 0;
         if(this.timer.update(diffNano))
