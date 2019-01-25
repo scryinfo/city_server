@@ -104,7 +104,15 @@ public class Npc {
         if(sumFlow > 0)
            idleRatio = 1.d - (double)this.buildingLocated().getFlow() / sumFlow;
         IAction.logger.info("sumFlow " + sumFlow + " idle " + idleRatio);
-        IAction action = aiBuilding.random(idleRatio, BrandManager.instance().getBuildingRatio(), id);
+
+        BrandManager.BuildingRatio r = BrandManager.instance().getBuildingRatio();
+        if(this.hasApartment())
+            r.apartment = 0;
+        IAction action = aiBuilding.random(idleRatio, r, id);
+        if(action == null) {
+            logger.fatal("flow error, this building pos" + this.buildingLocated().coordinate() + " flow " + this.buildingLocated().getFlow());
+            return;
+        }
         action.act(this);
     }
 
