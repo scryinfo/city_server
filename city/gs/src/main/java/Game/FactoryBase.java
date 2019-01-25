@@ -163,7 +163,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();
         if(targetNum.isPresent()) {
             int t = targetNum.getAsInt();
-            if(t < 0 || t > this.store.availableSize())
+            if(t < 0)
                 return false;
             line.targetNum = t;
             builder.setTargetCount(t);
