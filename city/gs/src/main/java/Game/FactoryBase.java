@@ -156,7 +156,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @Transient
     private MetaFactoryBase meta;
 
-    public boolean changeLine(ObjectId lineId, OptionalInt targetNum, OptionalInt workerNum) {
+    public boolean changeLine(UUID lineId, OptionalInt targetNum, OptionalInt workerNum) {
         LineBase line = this.lines.get(lineId);
         if(line == null)
             return false;

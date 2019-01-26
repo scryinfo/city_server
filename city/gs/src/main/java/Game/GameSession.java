@@ -790,7 +790,7 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
-		ObjectId lineId = new ObjectId(c.getLineId().toByteArray());
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
         FactoryBase f = (FactoryBase) b;
         OptionalInt tn = c.hasTargetNum()?OptionalInt.of(c.getTargetNum()):OptionalInt.empty();
         OptionalInt wn = c.hasWorkerNum()?OptionalInt.of(c.getWorkerNum()):OptionalInt.empty();
