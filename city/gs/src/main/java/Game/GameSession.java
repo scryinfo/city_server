@@ -655,8 +655,11 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null)
 			return;
-		if(b.canUseBy(player.id()))
+		if (b.canUseBy(player.id()))
+		{
 			b.setName(c.getName());
+			b.broadcastChange();
+		}
 	}
 	public void queryMoneyPoolInfo(short cmd) {
 		this.write(Package.create(cmd, MoneyPool.instance().toProto()));

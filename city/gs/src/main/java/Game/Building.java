@@ -269,7 +269,6 @@ public abstract class Building {
 
     public void setName(String name) {
         this.name = name;
-        this.broadcastChange();
     }
 
     @Embeddable

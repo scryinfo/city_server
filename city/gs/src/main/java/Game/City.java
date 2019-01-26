@@ -364,6 +364,12 @@ public class City {
         buildings.remove(building.id());
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
+        //重置土地建筑
+        for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
+            for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
+                    terrain[x][y] = TERRIAN_NONE;
+            }
+        }
         building.broadcastDelete();
         GameDb.delete(npcs.add(building));
     }
