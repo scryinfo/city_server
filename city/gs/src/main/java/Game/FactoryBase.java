@@ -161,6 +161,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         if(line == null)
             return false;
         Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();
+        builder.setId(Util.toByteString(line.id));
         if(targetNum.isPresent()) {
             int t = targetNum.getAsInt();
             if(t < 0)
