@@ -169,7 +169,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             line.targetNum = t;
             builder.setTargetCount(t);
         }
-        else if(workerNum.isPresent()) {
+        if(workerNum.isPresent()) {
             int w = workerNum.getAsInt();
             if(w < 0 || (w > line.workerNum && this.freeWorkerNum() < w - line.workerNum))
                 return false;
