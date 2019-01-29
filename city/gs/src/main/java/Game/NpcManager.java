@@ -109,11 +109,9 @@ public class NpcManager {
     private City city = City.instance();
     private MetaCity metaCity = city.getMeta();
     private NpcManager() {
-        long leftMs = City.instance().leftMsToNextTimeSection();
-        updateTimesAtCurrentTimeSection = (int) (TimeUnit.MILLISECONDS.toNanos(leftMs) / City.UpdateIntervalNano);
-        // set the updateIdx according to the left time to next time section
         int currentSectionHours = city.currentTimeSectionDuration();
-        updateIdx = (int) ((double)leftMs / TimeUnit.HOURS.toMillis(currentSectionHours) * updateTimesAtCurrentTimeSection);
+        updateTimesAtCurrentTimeSection = (int) (TimeUnit.MILLISECONDS.toNanos(currentSectionHours) / City.UpdateIntervalNano);
+        updateIdx = (int) ((double)City.instance().leftMsToNextTimeSection() / TimeUnit.HOURS.toMillis(currentSectionHours) * updateTimesAtCurrentTimeSection);
         for (int i = 0; i < updateTimesAtCurrentTimeSection; i++) {
             waitToUpdate.add(new HashSet<>());
         }
