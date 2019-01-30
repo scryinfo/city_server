@@ -3,6 +3,7 @@ package Game;
 import Game.Exceptions.GroundAlreadySoldException;
 import Shared.LogDb;
 import Shared.Package;
+import Shared.Util;
 import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
@@ -197,13 +198,16 @@ public class GroundManager {
         int cost = rentPara.requiredPay() * coordinates.size();
         renter.decMoney(cost);
         List<LogDb.Positon> plist1 = new ArrayList<>();
+        List<Gs.MiniIndex> miniIndexList = new ArrayList<>();
         for(Coordinate c : coordinates)
         {
             plist1.add(new LogDb.Positon(c.x, c.y));
+            miniIndexList.add(c.toProto());
         }
 
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(cost);
+
         LogDb.rentGround(renter.id(), ownerId, cost, plist1);
         UUID tid = UUID.randomUUID();
         long now = System.currentTimeMillis();
@@ -219,6 +223,15 @@ public class GroundManager {
         GameDb.saveOrUpdate(updates);
         this.rentGround.put(tid, new HashSet<>(gis));
         this.broadcast(gis);
+
+        GameServer.sendIncomeNotity(ownerId,Gs.IncomeNotify.newBuilder()
+                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+                .setBuyerId(Util.toByteString(renter.id()))
+                .setFaceId(renter.getFaceId())
+                .setCost(cost)
+                .setType(Gs.IncomeNotify.Type.RENT_GROUND)
+                .addAllCoord(miniIndexList)
+                .build());
         //土地出租通知
         List<Integer> list = new ArrayList<>();
         for (Coordinate c : coordinates) {
@@ -270,9 +283,11 @@ public class GroundManager {
         seller.addMoney(cost);
         buyer.decMoney(cost);
         List<LogDb.Positon> plist1 = new ArrayList<>();
+        List<Gs.MiniIndex> miniIndexList = new ArrayList<>();
         for(Coordinate c : coordinates)
         {
             plist1.add(new LogDb.Positon(c.x, c.y));
+            miniIndexList.add(c.toProto());
         }
         LogDb.buyGround(buyer.id(),sellerId,price,plist1);
         List updates = new ArrayList<>();
@@ -284,6 +299,15 @@ public class GroundManager {
         updates.add(seller);
         GameDb.saveOrUpdate(updates);
         this.broadcast(gis);
+
+        GameServer.sendIncomeNotity(sellerId,Gs.IncomeNotify.newBuilder()
+                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+                .setBuyerId(Util.toByteString(buyer.id()))
+                .setFaceId(buyer.getFaceId())
+                .setCost(cost)
+                .setType(Gs.IncomeNotify.Type.BUY_GROUND)
+                .addAllCoord(miniIndexList)
+                .build());
         //土地出售通知
         List<Integer> list = new ArrayList<>();
         for (Coordinate c : coordinates) {

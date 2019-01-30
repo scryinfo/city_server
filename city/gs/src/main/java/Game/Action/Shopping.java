@@ -3,6 +3,8 @@ package Game.Action;
 import Game.*;
 import Game.Meta.*;
 import Shared.LogDb;
+import Shared.Util;
+import gs.Gs;
 
 import java.util.*;
 
@@ -76,6 +78,16 @@ public class Shopping implements IAction {
             owner.addMoney(chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+
+            GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+                    .setBuyer(Gs.IncomeNotify.Buyer.NPC)
+                    .setBuyerId(Util.toByteString(npc.id()))
+                    .setCost(chosen.price)
+                    .setCount(1)
+                    .setType(Gs.IncomeNotify.Type.INSHELF)
+                    .setBid(sellShop.metaId())
+                    .setItemId(chosen.meta.id)
+                    .build());
 
             LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
                     chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
