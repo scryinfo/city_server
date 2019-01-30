@@ -537,10 +537,10 @@ public class GameSession {
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 		this.write(Package.create(cmd, c));
-		//货架商品出售通知
+/*		//货架商品出售通知
 		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
 		int[] itemIdAndNum = {itemId, itemBuy.n};
-		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);
+		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);*/
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
