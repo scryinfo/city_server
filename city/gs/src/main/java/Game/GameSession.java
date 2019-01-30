@@ -33,7 +33,7 @@ public class GameSession {
 	private String accountName;
 	private String token;
 	private ScheduledFuture<?> updateScheduleFuture;
-	private boolean valid = false;
+	private volatile boolean valid = false;
 	private boolean loginFailed = false;
 	private ArrayList<UUID> roleIds = new ArrayList<>();
 	private HashSet<UUID> buildingDetail = new HashSet<>();
@@ -517,7 +517,16 @@ public class GameSession {
 			return;
 		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
-
+		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
+				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+				.setBuyerId(Util.toByteString(player.id()))
+				.setFaceId(player.getFaceId())
+				.setCost(cost)
+				.setType(Gs.IncomeNotify.Type.INSHELF)
+				.setBid(sellBuilding.metaBuilding.id)
+				.setItemId(itemBuy.key.meta.id)
+				.setCount(itemBuy.n)
+				.build());
 		player.decMoney(cost);
 		player.decMoney(freight);
 

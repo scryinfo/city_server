@@ -5,6 +5,8 @@ import Game.*;
 import Game.Meta.MetaBuilding;
 import Game.Meta.ProbBase;
 import Shared.LogDb;
+import Shared.Util;
+import gs.Gs;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -50,6 +52,15 @@ public class JustVisit implements IAction {
             LogDb.incomeVisit(owner.id(),chosen.type(),chosen.cost(),chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
             GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
+            if (chosen.type() == MetaBuilding.APARTMENT) {
+                GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+                        .setBuyer(Gs.IncomeNotify.Buyer.NPC)
+                        .setBuyerId(Util.toByteString(npc.id()))
+                        .setCost(chosen.cost())
+                        .setType(Gs.IncomeNotify.Type.RENT_ROOM)
+                        .setBid(chosen.metaId())
+                        .build());
+            }
             npc.goFor(chosen);
         }
     }

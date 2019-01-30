@@ -342,20 +342,12 @@ public class Player {
     }
 
     public void lockMoney(UUID transactionId, long price) {
-        Long p = lockedMoney.get(transactionId);
-        if(p != null) {
-            this.money += (p - price);
-        }
-        else {
-            this.money -= price;
-            lockedMoney.put(transactionId, price);
-        }
+        lockedMoney.put(transactionId, price);
         sendMoney();
     }
     public long unlockMoney(UUID transactionId) {
-        Long p = lockedMoney.get(transactionId);
+        Long p = lockedMoney.remove(transactionId);
         if(p != null) {
-            this.money += p;
             sendMoney();
             return p;
         }
@@ -367,7 +359,7 @@ public class Player {
     // addMoney on others units. Those dec consumeReserve should in an transaction, which means, db class
     // will has many function to cope with those different situation?
     public boolean decMoney(long cost) {
-        if(cost > this.money)
+        if(cost > money())
             return false;
         this.money -= cost;
         sendMoney();
@@ -382,6 +374,7 @@ public class Player {
     }
     public long spentLockMoney(UUID id) {
         long m = this.lockedMoney.remove(id);
+        this.money -= m;
         sendMoney();
         return m;
     }

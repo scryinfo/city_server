@@ -7,6 +7,7 @@ import Shared.Package;
 import com.google.common.collect.MapMaker;
 import ga.Ga;
 import gacode.GaCode;
+import gs.Gs;
 import gscode.GsCode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
@@ -61,6 +62,14 @@ public class GameServer {
                 session.write(pack);
             }
         });
+    }
+
+    public static void sendIncomeNotity(UUID roleId, Gs.IncomeNotify notify)
+    {
+        GameSession session = allGameSessions.get(roleId);
+        if(session != null) {
+            session.write(Package.create(GsCode.OpCode.incomeNotify_VALUE,notify));
+        }
     }
     public GameServer() throws Exception {
         ServerCfgDb.init(GlobalConfig.configUri());
