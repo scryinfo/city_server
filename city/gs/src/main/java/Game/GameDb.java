@@ -539,14 +539,17 @@ public class GameDb {
 	public static boolean createPlayer(Player p) {
 		boolean success = false;
 		Transaction transaction = null;
-		try {
+		try
+		{
 			transaction = session.beginTransaction();
 			session.save(p);
 			transaction.commit();
 			success = true;
-		} catch (RuntimeException e) { // the exception is complex, may be javax.PersistenceException, or HibernateException, or jdbc exception ...
-			transaction.rollback();
+		}
+		catch (RuntimeException e)
+		{ // the exception is complex, may be javax.PersistenceException, or HibernateException, or jdbc exception ...
 			e.printStackTrace();
+			transaction.rollback();
 		}
 		return success;
 	}
