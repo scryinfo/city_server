@@ -674,7 +674,7 @@ public class GameSession {
 		this.write(Package.create(cmd, MoneyPool.instance().toProto()));
 	}
 	private void registBuildingDetail(Building building) {
-		if(buildingDetail.size() < MAX_DETAIL_BUILDING || building.canUseBy(player.id())) {
+		if(buildingDetail.size() < MAX_DETAIL_BUILDING && building.canUseBy(player.id())) {
 			building.watchDetailInfoAdd(this);
 			buildingDetail.add(building.id());
 		}
