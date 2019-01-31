@@ -449,11 +449,15 @@ public abstract class Building {
             Boolean w = isWorking(nowHour);
             if (w == null) {
                 int startIdx = Arrays.binarySearch(metaBuilding.startWorkHour[happy], nowHour);
-                int endHour = metaBuilding.endWorkHour[happy][-(startIdx + 2)];
-                if (nowHour < endHour)
-                    this.working = true;
-                else if (nowHour >= endHour)
+                if(startIdx == -1)
                     this.working = false;
+                else {
+                    int endHour = metaBuilding.endWorkHour[happy][-(startIdx + 2)];
+                    if (nowHour < endHour)
+                        this.working = true;
+                    else if (nowHour >= endHour)
+                        this.working = false;
+                }
             } else {
                 this.working = w;
             }
