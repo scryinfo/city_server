@@ -88,6 +88,7 @@ public class Player {
     }
 
     public void setDes(String str) {
+        GameDb.invalidatePlayerInfoCache(id);
         this.des = str;
     }
 

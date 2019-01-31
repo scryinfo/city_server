@@ -126,6 +126,12 @@ public class GameDb {
 					});
 
 	//wxj============================================
+
+	public static void invalidatePlayerInfoCache(UUID id)
+	{
+		playerInfoCache.invalidate(id);
+	}
+
 	public static void statelessInsert(Object o) {
 		Transaction transaction = null;
 		StatelessSession statelessSession = null;
