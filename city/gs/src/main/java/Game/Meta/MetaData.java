@@ -222,7 +222,7 @@ public class MetaData {
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }
-    public static Set<MetaGroundAuction> getNonFinishedGroundAuction() {
+    public static synchronized Set<MetaGroundAuction> getNonFinishedGroundAuction() {
         Set<MetaGroundAuction> res = new HashSet<>();
         long now = System.currentTimeMillis();
         for(MetaGroundAuction a : groundAuction.values()) {
