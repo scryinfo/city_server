@@ -330,6 +330,8 @@ public class GameSession {
 	public void move(short cmd, Message message) {
 		Gs.GridIndex c = (Gs.GridIndex)message;
 		logger.debug("move " + c.getX() + " " + c.getY());
+		if(c.getX() < 0 || c.getX() >= City.GridMaxX || c.getY() < 0 || c.getY() >= City.GridMaxY)
+			return;
 		GridIndex index = new GridIndex(c.getX(), c.getY());
 		if(!this.player.setPosition(index))
 			return;
