@@ -50,6 +50,9 @@ public abstract class Building {
             return true;
         return happy == HAPPY_MIN;
     }
+    public boolean npcSelectable() {
+        return true;
+    }
     public boolean onStrike() {
         return this.happy > HAPPY_MAX && this.happy < HAPPY_MIN;
     }
@@ -120,7 +123,7 @@ public abstract class Building {
         List<Building> res = new ArrayList<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
         City.instance().forEachBuilding(gip, building -> {
-            if(!building.outOfBusiness() && building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
+            if(building.npcSelectable() && !building.outOfBusiness() && building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
                 res.add(building);
         });
         return res;

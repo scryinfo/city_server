@@ -80,4 +80,9 @@ public class Apartment extends Building {
     protected void _update(long diffNano) {
 
     }
+
+    @Override
+    public boolean npcSelectable() {
+        return meta.npc > this.renters.size();
+    }
 }

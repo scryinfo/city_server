@@ -41,7 +41,7 @@
 //                 return false;
 //        }
 //        if(this.store.offset(m, n)) {
-//            if (n > 0 && store.full() && state != Gs.BuildingState.WAITING_CONSTRUCT_VALUE) {
+//            if (n > 0 && store.npcSelectable() && state != Gs.BuildingState.WAITING_CONSTRUCT_VALUE) {
 //                state = Gs.BuildingState.WAITING_CONSTRUCT_VALUE;
 //                this.broadcastChange();
 //            }
@@ -54,7 +54,7 @@
 //        return false;
 //    }
 //    boolean construct() {
-//        if(state != Gs.BuildingState.WAITING_CONSTRUCT_VALUE)//(!store.full())
+//        if(state != Gs.BuildingState.WAITING_CONSTRUCT_VALUE)//(!store.npcSelectable())
 //            return false;
 //        completeTs = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.meta.constructSec);
 //        state = Gs.BuildingState.CONSTRUCTING_VALUE;
