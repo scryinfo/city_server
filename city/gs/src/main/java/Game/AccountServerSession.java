@@ -16,7 +16,7 @@ public class AccountServerSession {
 	public void update(){
 		Ga.StateReport.Builder c = Ga.StateReport.newBuilder();
 		c.setOnlineCount(GameServer.allClientChannels.size());
-		this.ctx.writeAndFlush(Package.create(GaCode.OpCode.stateReport_VALUE,c.build()));
+		this.ctx.channel().writeAndFlush(Package.create(GaCode.OpCode.stateReport_VALUE,c.build()));
 	}
 	
 	public AccountServerSession(ChannelHandlerContext ctx){
@@ -27,7 +27,7 @@ public class AccountServerSession {
 		Ga.ValidationCode c = (Ga.ValidationCode)message;
 		Validator.getInstance().regist(c.getAccountName(), c.getCode());
 		logger.debug("send back code to account server " + c.getAccountName() + " " + c.getCode());
-		this.ctx.writeAndFlush(Package.create(GaCode.OpCode.validateAck_VALUE, c));
+		this.ctx.channel().writeAndFlush(Package.create(GaCode.OpCode.validateAck_VALUE, c));
 	}
 	public void handleError(short cmd, Message message) throws InvalidProtocolBufferException {
 		Common.Fail c = (Common.Fail)message;

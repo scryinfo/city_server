@@ -45,7 +45,9 @@ public class AccountSession {
     public AccountSession(ChannelHandlerContext ctx) {
         this.ctx = ctx;
     }
-
+    public void write(Package pack) {
+        ctx.channel().writeAndFlush(pack);
+    }
     public void login(short cmd, Message message) {
         if (!valid()) {
             As.Login c = (As.Login)message;
@@ -67,11 +69,11 @@ public class AccountSession {
             }
 
             if (accInfo.freezeTime.isAfter(Instant.now())) {
-                this.ctx.writeAndFlush(Shared.Package.fail(cmd, Common.Fail.Reason.accountInFreeze));
+                this.write(Shared.Package.fail(cmd, Common.Fail.Reason.accountInFreeze));
                 return;
             }
 
-            this.ctx.writeAndFlush(Shared.Package.create(cmd));
+            this.write(Shared.Package.create(cmd));
             valid = true;
             AccountServer.allClientChannels.add(ctx.channel());
             AccountServer.clientAccountToChannelId.put(this.accountName(), ctx.channel().id());
@@ -100,12 +102,12 @@ public class AccountSession {
             logger.debug("rely token to game server " + cv.getCode());
             gs.writeAndFlush(Shared.Package.create(GaCode.OpCode.validateInfo_VALUE, cv.build()));
         } else {
-            this.ctx.writeAndFlush(Shared.Package.fail(cmd, Common.Fail.Reason.gameServerNotOnline));
+            this.write(Shared.Package.fail(cmd, Common.Fail.Reason.gameServerNotOnline));
         }
     }
 
     public void getServerList(short cmd) {
-        this.ctx.writeAndFlush(Package.create(cmd, getServersInfo()));
+        this.write(Package.create(cmd, getServersInfo()));
     }
 
     private As.AllGameServerInfo getServersInfo() {

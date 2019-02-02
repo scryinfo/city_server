@@ -60,7 +60,7 @@ public class GameServerSession {
 		if(gsInfo != null){
 			if(AccountServer.gsIdToChannelId.containsKey(id))
 			{
-				ctx.writeAndFlush(Package.fail(cmd));
+				ctx.channel().writeAndFlush(Package.fail(cmd));
 				System.out.println("duplicated game server " + id);
 			}
 			else {
@@ -71,7 +71,7 @@ public class GameServerSession {
 
 				AccountServer.allGsChannels.add(ctx.channel());
 				AccountServer.gsIdToChannelId.put(id(), ctx.channel().id());
-				ctx.writeAndFlush(Package.create(cmd));
+				ctx.channel().writeAndFlush(Package.create(cmd));
 				System.out.println("game server " + id + " connected");
 			}
 		}
