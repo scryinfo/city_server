@@ -77,6 +77,7 @@ public class Npc {
     @PostLoad
     private void _2() {
         this.born = City.instance().getBuilding(this.adapterData.buildingId);
+        this.born.makeReference(this);
         this.tempBuilding = this.adapterData.tempBuildingId==null?null:City.instance().getBuilding(this.adapterData.tempBuildingId);
         this.apartment = this.adapterData.apartmentId==null?null: (Apartment) City.instance().getBuilding(this.adapterData.apartmentId);
     }

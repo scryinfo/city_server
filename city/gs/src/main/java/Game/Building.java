@@ -274,6 +274,11 @@ public abstract class Building {
         this.name = name;
     }
 
+    // ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
+    public void makeReference(Npc npc) {
+        this.allStaff.add(npc);
+    }
+
     @Embeddable
     static class FlowInfo {
         int ts;
