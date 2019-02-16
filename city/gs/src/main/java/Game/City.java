@@ -205,7 +205,7 @@ public class City {
 
     public void update(long diffNano) {
         if(this.metaAuctionLoadTimer.update(diffNano)) {
-            GroundAuction.instance().loadMore();
+//            GroundAuction.instance().loadMore();
         }
         GroundAuction.instance().update(diffNano);
         GroundManager.instance().update(diffNano);

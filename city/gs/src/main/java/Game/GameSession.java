@@ -336,14 +336,14 @@ public class GameSession {
 		if(!this.player.setPosition(index))
 			return;
 	}
-	public void queryMetaGroundAuction(short cmd) {
-		Set<MetaGroundAuction> auctions = MetaData.getNonFinishedGroundAuction();
-		Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
-		for(MetaGroundAuction m : auctions) {
-			builder.addAuction(m.toProto());
-		}
-		this.write(Package.create(cmd, builder.build()));
-	}
+//	public void queryMetaGroundAuction(short cmd) {
+//		Set<MetaGroundAuction> auctions = MetaData.getNonFinishedGroundAuction();
+//		Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
+//		for(MetaGroundAuction m : auctions) {
+//			builder.addAuction(m.toProto());
+//		}
+//		this.write(Package.create(cmd, builder.build()));
+//	}
 	public void queryGroundAuction(short cmd) {
 		this.write(Package.create(cmd, GroundAuction.instance().toProto()));
 	}

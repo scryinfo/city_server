@@ -13,7 +13,7 @@ public class GameEventDispatcher extends DispatcherBase {
 	private GameEventDispatcher(){
 		try {
 			table.put((short) GsCode.OpCode.login_VALUE, Wrapper.newWithMessage(Gs.Login.PARSER, GameSession.class,"login"));
-			table.put((short) GsCode.OpCode.queryMetaGroundAuction_VALUE, Wrapper.newOnlyOpcode(GameSession.class,"queryMetaGroundAuction"));
+			//table.put((short) GsCode.OpCode.queryMetaGroundAuction_VALUE, Wrapper.newOnlyOpcode(GameSession.class,"queryMetaGroundAuction"));
 			table.put((short) GsCode.OpCode.heartBeat_VALUE, Wrapper.newWithMessage(Gs.HeartBeat.PARSER, GameSession.class, "heartBeat"));
 
 			table.put((short) GsCode.OpCode.createRole_VALUE, Wrapper.newWithMessageAsync(Gs.CreateRole.PARSER, GameSession.class,"createRole"));

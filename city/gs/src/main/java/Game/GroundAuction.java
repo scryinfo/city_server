@@ -31,7 +31,6 @@ public class GroundAuction {
     public static void init() {
         GameDb.initGroundAuction();
         instance = GameDb.getGroundAction();
-        instance.loadMore();
     }
     protected GroundAuction() {}
     @Id
@@ -40,18 +39,43 @@ public class GroundAuction {
     @Entity
     @Table(name = "ground_auction_entry")
     public static class Entry {
-        public Entry(){}
+        protected Entry(){}
         public Entry(MetaGroundAuction meta) {
             this.metaId = meta.id;
             this.meta = meta;
-            this.timer = new DateTimeTracker(meta.beginTime, meta.endTime);
         }
+
+        public void bid(UUID id, int price) {
+            this.history.add(new BidRecord(id, price));
+            if(this.history.size() > BID_RECORD_MAX)
+                this.history.iterator().remove();
+        }
+        private static final int BID_RECORD_MAX = 10;
+        @Embeddable
+        //@Table(name = "ground_auction_entry_history")
+        public static final class BidRecord {
+            public BidRecord(UUID biderId, int price) {
+                this.biderId = biderId;
+                this.price = price;
+                this.ts = System.currentTimeMillis();
+            }
+
+            @Column(name = "biderId", nullable = false)
+            UUID biderId;
+            @Column(name = "price", nullable = false)
+            int price = 0;
+            @Column(name = "ts", nullable = false)
+            long ts = 0;
+        }
+        //@OneToMany(fetch = FetchType.EAGER)
+        @ElementCollection(fetch = FetchType.EAGER)
+        @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+        private List<BidRecord> history = new ArrayList<>();
+
         public Gs.GroundAuction.Target toProto() {
             Gs.GroundAuction.Target.Builder b =  Gs.GroundAuction.Target.newBuilder();
             b.setId(Util.toByteString(meta.id));
-            b.setPrice(price);
-            if(biderId != null)
-                b.setBiderId(Util.toByteString(biderId));
+            history.forEach(r->Gs.GroundAuction.Target.BidHistory.newBuilder().setBiderId(Util.toByteString(r.biderId)).setPrice(r.price).setTs(r.ts));
             return b.build();
         }
         @Transient //@Convert can not apply on @Id
@@ -59,16 +83,32 @@ public class GroundAuction {
         @Id
         @Column(name = "id", nullable = false)
         UUID metaId;
-        @Column(name = "biderId")
-        UUID biderId;
-        @Column(name = "price", nullable = false)
-        int price = 0;
+
         @Transient
-        DateTimeTracker timer;
+        private DateTimeTracker timer;
+
+        public boolean update(long diffNano) {
+            if(timer == null)
+                return false;
+            timer.update(diffNano);
+            return timer.passed();
+        }
         @PostLoad
         private void init() {
             this.meta = MetaData.getGroundAuction(metaId);
-            this.timer = new DateTimeTracker(meta.beginTime, meta.endTime);
+            if(biderId() != null)
+                startTicking();
+        }
+
+        public void startTicking() {
+            this.timer = new DateTimeTracker(meta.beginTime, MetaData.getSysPara().auctionDelay);
+        }
+
+        public UUID biderId() {
+            return history.isEmpty()?null:history.get(history.size()-1).biderId;
+        }
+        public int price() {
+            return history.isEmpty()?0:history.get(history.size()-1).price;
         }
     }
 
@@ -77,65 +117,64 @@ public class GroundAuction {
     @MapKey(name = "metaId")
     @JoinColumn(name = "ground_auction_id")
     private Map<UUID, Entry> auctions = new HashMap<>();
-    public void loadMore() {
-        Set<MetaGroundAuction> m = MetaData.getNonFinishedGroundAuction();
-        Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
-        List<Entry> newAdds = new ArrayList<>();
-        m.forEach((v)->{
-            if(!this.auctions.containsKey(v.id))
-            {
-                Entry e = new Entry(v);
-                this.auctions.put(v.id, e);
-                newAdds.add(e);
-            }
-            builder.addAuction(v.toProto());
-        });
-        GameDb.saveOrUpdate(this);
-        GameServer.allClientChannels.writeAndFlush(Package.create(GsCode.OpCode.metaGroundAuctionAddInform_VALUE, builder.build()));
-    }
+//    public void loadMore() {
+//        Set<MetaGroundAuction> m = MetaData.getNonFinishedGroundAuction();
+//        Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
+//        List<Entry> newAdds = new ArrayList<>();
+//        m.forEach((v)->{
+//            if(!this.auctions.containsKey(v.id))
+//            {
+//                Entry e = new Entry(v);
+//                this.auctions.put(v.id, e);
+//                newAdds.add(e);
+//            }
+//            builder.addAuction(v.toProto());
+//        });
+//        GameDb.saveOrUpdate(this);
+//        GameServer.allClientChannels.writeAndFlush(Package.create(GsCode.OpCode.metaGroundAuctionAddInform_VALUE, builder.build()));
+//    }
 
     public void update(long diffNano) {
         Iterator<Entry> iter = this.auctions.values().iterator();
         while(iter.hasNext())
         {
             Entry a = iter.next();
-            a.timer.update(diffNano);
-            if(a.timer.passed())
+            if(a.update(diffNano))
             {
                 iter.remove();
-                if(a.biderId != null) {
-                    Player bider = GameDb.queryPlayer(a.biderId);
-                    try {
-                        GroundManager.instance().addGround(bider.id(), a.meta.area);
-                    } catch (GroundAlreadySoldException e) {
-                        e.printStackTrace();
-                        continue;
-                    }
-                    long p = bider.spentLockMoney(a.meta.id);
-                    MoneyPool.instance().add(p);
-                    List<LogDb.Positon> plist1 = new ArrayList<>();
-                    for(Coordinate c : a.meta.area)
-                    {
-                        plist1.add(new LogDb.Positon(c.x, c.y));
-                    }
-                    LogDb.buyGround(bider.id(), null,   p, plist1);
-                    GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
+                assert (a.biderId() != null);
 
-                    bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
-                    //土地拍卖通知
-                    List<Coordinate> areas = a.meta.area;
-                    List<Integer> list = new ArrayList<>();
-                    for (Coordinate c : areas) {
-                        list.add(c.x);
-                        list.add(c.y);
-                    }
-                    int[] landCoordinates = new int[list.size()];
-                    for (int i = 0; i < list.size(); i++) {
-                        landCoordinates[i] = list.get(i);
-                    }
-                    MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,landCoordinates);
-
+                Player bider = GameDb.queryPlayer(a.biderId());
+                try {
+                    GroundManager.instance().addGround(bider.id(), a.meta.area);
+                } catch (GroundAlreadySoldException e) {
+                    e.printStackTrace();
+                    continue;
                 }
+                long p = bider.spentLockMoney(a.meta.id);
+                MoneyPool.instance().add(p);
+                List<LogDb.Positon> plist1 = new ArrayList<>();
+                for(Coordinate c : a.meta.area)
+                {
+                    plist1.add(new LogDb.Positon(c.x, c.y));
+                }
+                LogDb.buyGround(bider.id(), null,   p, plist1);
+                GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
+
+                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
+                //土地拍卖通知
+                List<Coordinate> areas = a.meta.area;
+                List<Integer> list = new ArrayList<>();
+                for (Coordinate c : areas) {
+                    list.add(c.x);
+                    list.add(c.y);
+                }
+                int[] landCoordinates = new int[list.size()];
+                for (int i = 0; i < list.size(); i++) {
+                    landCoordinates[i] = list.get(i);
+                }
+                MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,landCoordinates);
+
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());
                 this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel) -> {
                     if (channel.id().equals(cId))
@@ -152,16 +191,7 @@ public class GroundAuction {
             b.addAuction(a.toProto());
         return b.build();
     }
-//    public Document toBson() {
-//        List<Document> ba = new ArrayList<>();
-//        for(Entry e : auctions.values()) {
-//            ba.consumeReserve(e.toBson());
-//        }
-//        Document doc = new Document()
-//                .append("_id", GameServer.gsInfo.getId())
-//                .append("auction", ba);
-//        return doc;
-//    }
+
     public boolean contain(ObjectId id) {
         return this.auctions.containsKey(id);
     }
@@ -169,20 +199,21 @@ public class GroundAuction {
         Entry a = this.auctions.get(id);
         if(a == null)
             return Optional.of(Common.Fail.Reason.auctionNotFound);
-        if(a.price >= price)
+        if(a.price() >= price)
             return Optional.of(Common.Fail.Reason.auctionPriceIsLow);
-        a.price = price;
-        if(a.biderId != null) {
+        if(a.biderId() != null) {
             // unlock its money
-            GameSession biderSession = GameServer.allGameSessions.get(a.biderId);
+            GameSession biderSession = GameServer.allGameSessions.get(a.biderId());
             if(biderSession == null) {
-                GameDb.queryPlayer(a.biderId).groundBidingFail(bider.id(), a);
+                GameDb.queryPlayer(a.biderId()).groundBidingFail(bider.id(), a);
             }
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
         }
-        a.biderId = bider.id();
+        else
+            a.startTicking();
+        a.bid(bider.id(), price);
         bider.lockMoney(id, price);
         GameDb.saveOrUpdate(Arrays.asList(bider, this));
         Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(Util.toByteString(id)).setNowPrice(price).setBiderId(Util.toByteString(bider.id())).build());
