@@ -39,6 +39,7 @@
 		<mapping class="Game.Ground"></mapping>
 		<mapping class="Game.GroundAuction"></mapping>
 		<mapping class="Game.GroundAuction$Entry"></mapping>
+		<mapping class="Game.GroundAuction$Entry$BidRecord"></mapping>
 		<mapping class="Game.Laboratory"></mapping>
 		<mapping class="Game.Laboratory$Line"></mapping>
 		<mapping class="Game.ItemKey"></mapping>
