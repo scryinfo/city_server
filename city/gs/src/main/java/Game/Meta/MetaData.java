@@ -44,7 +44,7 @@ public class MetaData {
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
-    private static final HashMap<UUID, MetaGroundAuction> groundAuction = new HashMap<>();
+    private static final HashMap<Integer, MetaGroundAuction> groundAuction = new HashMap<>();
 	private static final TreeMap<Integer, MetaNpc> npc = new TreeMap<>();
     private static final TreeMap<Integer, MetaBuilding> trivial = new TreeMap<>();
     private static final TreeMap<Integer, MetaApartment> apartment = new TreeMap<>();
@@ -222,7 +222,7 @@ public class MetaData {
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }
-    public static MetaGroundAuction getGroundAuction(UUID id) {
+    public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
     }
 	public static void init(String uri){

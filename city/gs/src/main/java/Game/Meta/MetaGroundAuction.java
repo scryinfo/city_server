@@ -22,7 +22,7 @@ public class MetaGroundAuction {
 //        }
 //    }
     MetaGroundAuction(Document d) {
-        this.id = Util.toUuid(d.getObjectId("_id"));
+        this.id = d.getInteger("_id");
         List<Integer> index = (List<Integer>) d.get("area");
         if(index.size() % 2 != 0)  {
             System.out.println("Game.Meta.MetaGroundAuction area size is not odd!");
@@ -34,7 +34,7 @@ public class MetaGroundAuction {
         this.price = d.getInteger("price");
     }
 
-    public UUID id;    // use to check this data has been changed or not, compare it with player db(if anyone bid it)
+    public int id;
     public List<Coordinate> area = new ArrayList<>();
     public long beginTime;
     public int price;

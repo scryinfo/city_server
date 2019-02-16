@@ -43,6 +43,7 @@ public class GroundAuction {
         public Entry(MetaGroundAuction meta) {
             this.metaId = meta.id;
             this.meta = meta;
+            this.transactionId = UUID.randomUUID();
         }
 
         public void bid(UUID id, int price) {
@@ -70,11 +71,12 @@ public class GroundAuction {
         //@OneToMany(fetch = FetchType.EAGER)
         @ElementCollection(fetch = FetchType.EAGER)
         @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+        @OrderBy("price ASC")
         private List<BidRecord> history = new ArrayList<>();
 
         public Gs.GroundAuction.Target toProto() {
             Gs.GroundAuction.Target.Builder b =  Gs.GroundAuction.Target.newBuilder();
-            b.setId(Util.toByteString(meta.id));
+            b.setId(meta.id);
             history.forEach(r->Gs.GroundAuction.Target.BidHistory.newBuilder().setBiderId(Util.toByteString(r.biderId)).setPrice(r.price).setTs(r.ts));
             return b.build();
         }
@@ -82,8 +84,9 @@ public class GroundAuction {
         MetaGroundAuction meta;
         @Id
         @Column(name = "id", nullable = false)
-        UUID metaId;
+        int metaId;
 
+        UUID transactionId;
         @Transient
         private DateTimeTracker timer;
 
@@ -151,7 +154,7 @@ public class GroundAuction {
                     e.printStackTrace();
                     continue;
                 }
-                long p = bider.spentLockMoney(a.meta.id);
+                long p = bider.spentLockMoney(a.transactionId);
                 MoneyPool.instance().add(p);
                 List<LogDb.Positon> plist1 = new ArrayList<>();
                 for(Coordinate c : a.meta.area)
@@ -161,7 +164,7 @@ public class GroundAuction {
                 LogDb.buyGround(bider.id(), null,   p, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
 
-                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.ByteNum.newBuilder().setId(Util.toByteString(a.meta.id)).setNum((int) p).build()));
+                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.IntNum.newBuilder().setId(a.meta.id).setNum((int) p).build()));
                 //土地拍卖通知
                 List<Coordinate> areas = a.meta.area;
                 List<Integer> list = new ArrayList<>();
@@ -175,7 +178,7 @@ public class GroundAuction {
                 }
                 MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,landCoordinates);
 
-                Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Id.newBuilder().setId(Util.toByteString(a.meta.id)).build());
+                Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Num.newBuilder().setNum(a.metaId).build());
                 this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel) -> {
                     if (channel.id().equals(cId))
                         return true;
@@ -195,7 +198,7 @@ public class GroundAuction {
     public boolean contain(ObjectId id) {
         return this.auctions.containsKey(id);
     }
-    public Optional<Common.Fail.Reason> bid(UUID id, Player bider, int price) {
+    public Optional<Common.Fail.Reason> bid(int id, Player bider, int price) {
         Entry a = this.auctions.get(id);
         if(a == null)
             return Optional.of(Common.Fail.Reason.auctionNotFound);
@@ -214,9 +217,9 @@ public class GroundAuction {
         else
             a.startTicking();
         a.bid(bider.id(), price);
-        bider.lockMoney(id, price);
+        bider.lockMoney(a.transactionId, price);
         GameDb.saveOrUpdate(Arrays.asList(bider, this));
-        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(Util.toByteString(id)).setNowPrice(price).setBiderId(Util.toByteString(bider.id())).build());
+        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(id).setNowPrice(price).setBiderId(Util.toByteString(bider.id())).build());
         this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
             if(channel.id().equals(cId))
                 return true;
