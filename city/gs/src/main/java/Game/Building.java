@@ -222,6 +222,9 @@ public abstract class Building {
     private long constructCompleteTs;
 
     private String name;
+    private String des;
+    private int emoticon;
+    private boolean showBubble;
 
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
@@ -277,6 +280,18 @@ public abstract class Building {
     // ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
     public void makeReference(Npc npc) {
         this.allStaff.add(npc);
+    }
+
+    public void setDes(String des) {
+        this.des = des;
+    }
+
+    public void setEmoticon(int emoticon) {
+        this.emoticon = emoticon;
+    }
+
+    public void setShowBubble(boolean showBubble) {
+        this.showBubble = showBubble;
     }
 
     @Embeddable
@@ -378,8 +393,13 @@ public abstract class Building {
                 .setSalary(salaryRatio)
                 .setHappy(happy)
                 .setConstructCompleteTs(constructCompleteTs);
-        if(name != null && name.length() > 0)
-            builder.setName(name);
+        if(this.name != null && this.name.length() > 0)
+            builder.setName(this.name);
+        if(this.des != null && this.des.length() > 0)
+            builder.setDes(this.des);
+        if(this.emoticon > 0)
+            builder.setEmoticon(this.emoticon);
+        builder.setBubble(this.showBubble);
         return builder.build();
     }
 

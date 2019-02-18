@@ -657,9 +657,11 @@ public class GameSession {
 		if(b.canUseBy(player.id()))
 			b.watchDetailInfoDel(this);
 	}
-	public void setBuildingName(short cmd, Message message) {
-		Gs.SetBuildingName c = (Gs.SetBuildingName) message;
-		if(c.getName().length() == 0 || c.getName().length() >= 30)
+	public void setBuildingInfo(short cmd, Message message) {
+		Gs.SetBuildingInfo c = (Gs.SetBuildingInfo) message;
+		if(c.hasName() && (c.getName().length() == 0 || c.getName().length() >= 30))
+			return;
+		if(c.hasDes() && (c.getDes().length() == 0 || c.getDes().length() >= 30))
 			return;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
@@ -667,7 +669,14 @@ public class GameSession {
 			return;
 		if (b.canUseBy(player.id()))
 		{
-			b.setName(c.getName());
+			if(c.hasName())
+				b.setName(c.getName());
+			if(c.hasDes())
+				b.setDes(c.getDes());
+			if(c.hasEmoticon())
+				b.setEmoticon(c.getEmoticon());
+			if(c.hasShowBubble())
+				b.setShowBubble(c.getShowBubble());
 			b.broadcastChange();
 		}
 	}
