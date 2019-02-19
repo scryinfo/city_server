@@ -427,6 +427,14 @@ public class City {
         }
     }
 
+    public long calcuPlayerStaff(UUID playerId)
+    {
+       return playerBuilding.get(playerId)
+               .values().stream()
+               .mapToLong(Building::getAllStaffSize)
+               .sum();
+    }
+
     class GridDiffs {
         public GridDiffs() {
             l.ensureCapacity(Grid.SYNC_RANGE_NUM);

@@ -229,6 +229,11 @@ public abstract class Building {
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
 
+    public long getAllStaffSize()
+    {
+        return allStaff.size();
+    }
+
     public int allSalary() {
         return singleSalary() * metaBuilding.workerNum;
     }
