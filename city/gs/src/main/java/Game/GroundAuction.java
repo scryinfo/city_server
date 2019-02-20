@@ -31,6 +31,7 @@ public class GroundAuction {
     public static void init() {
         GameDb.initGroundAuction();
         instance = GameDb.getGroundAction();
+        instance.loadAuction();
     }
     protected GroundAuction() {}
     @Id
@@ -46,8 +47,8 @@ public class GroundAuction {
             this.transactionId = UUID.randomUUID();
         }
 
-        public void bid(UUID id, int price) {
-            this.history.add(new BidRecord(id, price));
+        public void bid(UUID id, int price, long ts) {
+            this.history.add(new BidRecord(id, price, ts));
             if(this.history.size() > BID_RECORD_MAX)
                 this.history.iterator().remove();
         }
@@ -55,10 +56,10 @@ public class GroundAuction {
         @Embeddable
         //@Table(name = "ground_auction_entry_history")
         public static final class BidRecord {
-            public BidRecord(UUID biderId, int price) {
+            public BidRecord(UUID biderId, int price, long ts) {
                 this.biderId = biderId;
                 this.price = price;
-                this.ts = System.currentTimeMillis();
+                this.ts = ts;
             }
 
             @Column(name = "biderId", nullable = false)
@@ -119,7 +120,7 @@ public class GroundAuction {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKey(name = "metaId")
     @JoinColumn(name = "ground_auction_id")
-    private Map<UUID, Entry> auctions = new HashMap<>();
+    private Map<Integer, Entry> auctions = new HashMap<>();
 //    public void loadMore() {
 //        Set<MetaGroundAuction> m = MetaData.getNonFinishedGroundAuction();
 //        Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
@@ -136,8 +137,19 @@ public class GroundAuction {
 //        GameDb.saveOrUpdate(this);
 //        GameServer.allClientChannels.writeAndFlush(Package.create(GsCode.OpCode.metaGroundAuctionAddInform_VALUE, builder.build()));
 //    }
-
+    private int nextAuctionId = 1;
+    private void loadAuction() {
+        MetaGroundAuction mga = MetaData.getGroundAuction(nextAuctionId);
+        while(mga != null && mga.beginTime <= System.currentTimeMillis()) {
+            Entry e = new Entry(mga);
+            this.auctions.put(mga.id, e);
+            mga = MetaData.getGroundAuction(nextAuctionId++);
+        }
+        GameDb.saveOrUpdate(this); // let hibernate do the dirty check
+    }
     public void update(long diffNano) {
+        loadAuction();
+
         Iterator<Entry> iter = this.auctions.values().iterator();
         while(iter.hasNext())
         {
@@ -195,7 +207,7 @@ public class GroundAuction {
         return b.build();
     }
 
-    public boolean contain(ObjectId id) {
+    public boolean contain(int id) {
         return this.auctions.containsKey(id);
     }
     public Optional<Common.Fail.Reason> bid(int id, Player bider, int price) {
@@ -216,10 +228,11 @@ public class GroundAuction {
         }
         else
             a.startTicking();
-        a.bid(bider.id(), price);
+        long now = System.currentTimeMillis();
+        a.bid(bider.id(), price, now);
         bider.lockMoney(a.transactionId, price);
         GameDb.saveOrUpdate(Arrays.asList(bider, this));
-        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(id).setNowPrice(price).setBiderId(Util.toByteString(bider.id())).build());
+        Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(id).setNowPrice(price).setTs(now).setBiderId(Util.toByteString(bider.id())).build());
         this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
             if(channel.id().equals(cId))
                 return true;
