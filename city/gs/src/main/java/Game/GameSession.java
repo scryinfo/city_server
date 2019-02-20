@@ -1624,7 +1624,7 @@ public class GameSession {
 			player.setSocietyId(society.getId());
 			player.decMoney(cost);
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd, society.toProto()));
+			this.write(Package.create(cmd, society.toProto(false)));
 		}
 	}
 
@@ -1656,8 +1656,16 @@ public class GameSession {
 		if (societyId.equals(player.getSocietyId()))
 		{
 			Society society = SocietyManager.getSociety(societyId);
-			this.write(Package.create(cmd, society.toProto()));
+			this.write(Package.create(cmd, society.toProto(false)));
 		}
+	}
+
+	public void getSocietyList(short cmd)
+	{
+		this.write(Package.create(cmd,
+				Gs.SocietyList.newBuilder()
+						.addAllListInfo(SocietyManager.getSocietyList())
+						.build()));
 	}
 	//===========================================================
 
