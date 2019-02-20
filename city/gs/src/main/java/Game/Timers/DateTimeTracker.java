@@ -3,6 +3,9 @@ package Game.Timers;
 public class DateTimeTracker {
     private long begin;
     private long end;
+    public long getEndTs() {
+        return end;
+    }
     enum State {
         NOT_BEGIN,
         IN_PROGRESS,

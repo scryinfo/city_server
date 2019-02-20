@@ -3,6 +3,7 @@ package Game;
 
 import Game.FriendManager.FriendRequest;
 import Game.FriendManager.OfflineMessage;
+import Game.FriendManager.Society;
 import Shared.RoleBriefInfo;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -126,6 +127,28 @@ public class GameDb {
 					});
 
 	//wxj============================================
+	public static boolean saveOrUpdSociety(Society society)
+	{
+		Transaction transaction = null;
+		boolean success = false;
+		try
+		{
+			transaction = session.beginTransaction();
+			session.saveOrUpdate(society);
+			transaction.commit();
+			success = true;
+		}
+		catch (RuntimeException e)
+		{
+			logger.error(e.getMessage());
+			rollBack(transaction);
+		}
+		return success;
+	}
+	public static Society getSocietyById(UUID id)
+	{
+		return session.get(Society.class, id);
+	}
 
 	public static void invalidatePlayerInfoCache(UUID id)
 	{
@@ -504,8 +527,12 @@ public class GameDb {
 		playerCache.invalidate(player.id());
 		session.evict(player);
 	}
-	public static void evict(Object obj) {
-		session.evict(obj);
+
+	public static void evict(Object obj)
+	{
+		if (obj != null) {
+			session.evict(obj);
+		}
 	}
 	public static Player getPlayer(UUID id) {
 		tmpPlayerCache.invalidate(id);
@@ -555,7 +582,7 @@ public class GameDb {
 		catch (RuntimeException e)
 		{ // the exception is complex, may be javax.PersistenceException, or HibernateException, or jdbc exception ...
 			e.printStackTrace();
-			transaction.rollback();
+			rollBack(transaction);
 		}
 		return success;
 	}

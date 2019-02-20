@@ -288,6 +288,9 @@ public class Player {
         goodLv.forEach((k,v)->builder.addGoodLv(Gs.IntNum.newBuilder().setId(k).setNum(v)));
 
         builder.addAllFriends(FriendManager.getInstance().getFriends(this.id));
+        if (societyId != null) {
+            builder.setSocietyId(Util.toByteString(societyId));
+        }
         return builder.build();
     }
 
@@ -427,6 +430,9 @@ public class Player {
     @CollectionTable(name = "player_blacklist", joinColumns = @JoinColumn(name = "player_id"))
     private Set<UUID> blacklist = new HashSet<>();
 
+    @Column(nullable = true)
+    private UUID societyId  = null;
+
     public Set<UUID> getBlacklist() { return blacklist; }
 
     public String getCompanyName()
@@ -467,5 +473,15 @@ public class Player {
     public void setMale(boolean male)
     {
         this.male = male;
+    }
+
+    public UUID getSocietyId()
+    {
+        return societyId;
+    }
+
+    public void setSocietyId(UUID societyId)
+    {
+        this.societyId = societyId;
     }
 }
