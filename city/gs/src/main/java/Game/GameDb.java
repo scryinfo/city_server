@@ -27,7 +27,6 @@ import org.hibernate.type.StandardBasicTypes;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.File;
 import java.time.Duration;
@@ -127,6 +126,14 @@ public class GameDb {
 					});
 
 	//wxj============================================
+	public static List<Society> getAllSociety()
+	{
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		List<Society> list = statelessSession.createQuery("from society",Society.class).list();
+		statelessSession.close();
+		return list;
+	}
+
 	public static boolean saveOrUpdSociety(Society society)
 	{
 		Transaction transaction = null;
