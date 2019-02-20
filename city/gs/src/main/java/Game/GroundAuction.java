@@ -53,6 +53,11 @@ public class GroundAuction {
                 this.history.iterator().remove();
         }
         private static final int BID_RECORD_MAX = 10;
+
+        public void delayTimer() {
+            this.timer.delay(MetaData.getSysPara().auctionDelay);
+        }
+
         @Embeddable
         //@Table(name = "ground_auction_entry_history")
         public static final class BidRecord {
@@ -105,7 +110,8 @@ public class GroundAuction {
         }
 
         public void startTicking() {
-            this.timer = new DateTimeTracker(meta.beginTime, meta.beginTime+MetaData.getSysPara().auctionDelay);
+            long now = System.currentTimeMillis();
+            this.timer = new DateTimeTracker(meta.beginTime, now+MetaData.getSysPara().auctionDelay);
         }
 
         public UUID biderId() {
@@ -225,6 +231,7 @@ public class GroundAuction {
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
+            a.delayTimer();
         }
         else
             a.startTicking();

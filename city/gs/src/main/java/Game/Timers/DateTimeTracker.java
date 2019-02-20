@@ -3,9 +3,11 @@ package Game.Timers;
 public class DateTimeTracker {
     private long begin;
     private long end;
-    public long getEndTs() {
-        return end;
+
+    public void delay(int auctionDelay) {
+        this.end += auctionDelay;
     }
+
     enum State {
         NOT_BEGIN,
         IN_PROGRESS,
