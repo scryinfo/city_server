@@ -61,7 +61,7 @@ public class GroundAuction {
                 this.price = price;
                 this.ts = ts;
             }
-
+            protected BidRecord(){}
             @Column(name = "biderId", nullable = false)
             UUID biderId;
             @Column(name = "price", nullable = false)
@@ -105,7 +105,7 @@ public class GroundAuction {
         }
 
         public void startTicking() {
-            this.timer = new DateTimeTracker(meta.beginTime, MetaData.getSysPara().auctionDelay);
+            this.timer = new DateTimeTracker(meta.beginTime, meta.beginTime+MetaData.getSysPara().auctionDelay);
         }
 
         public UUID biderId() {

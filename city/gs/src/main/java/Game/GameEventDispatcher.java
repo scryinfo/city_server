@@ -28,7 +28,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryGroundAuction_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryGroundAuction"));
 			table.put((short) GsCode.OpCode.registGroundBidInform_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "registGroundBidInform"));
 			table.put((short) GsCode.OpCode.unregistGroundBidInform_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "unregistGroundBidInform"));
-			table.put((short) GsCode.OpCode.bidGround_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"bidGround"));
+			table.put((short) GsCode.OpCode.bidGround_VALUE, Wrapper.newWithMessageAsync(Gs.IntNum.PARSER, GameSession.class,"bidGround"));
 			table.put((short) GsCode.OpCode.addBuilding_VALUE, Wrapper.newWithMessageAsync(Gs.AddBuilding.PARSER, GameSession.class,"addBuilding"));
 			table.put((short) GsCode.OpCode.delBuilding_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"delBuilding"));
 			table.put((short) GsCode.OpCode.startBusiness_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"startBusiness"));
