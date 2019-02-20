@@ -578,6 +578,13 @@ public class GameSession {
 		player.lockMoney(orderId, cost);
 		s.markOrder(orderId);
 		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
+		if(cost>=1000){//重大交易 交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(cmd,Gs.MajorExchange.newBuilder()
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setTotalAmount(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
 	}
 	public void exchangeSell(short cmd, Message message) {
