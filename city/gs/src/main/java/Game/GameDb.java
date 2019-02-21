@@ -128,9 +128,9 @@ public class GameDb {
 	//wxj============================================
 	public static List<Society> getAllSociety()
 	{
-		StatelessSession statelessSession = sessionFactory.openStatelessSession();
-		List<Society> list = statelessSession.createQuery("from society",Society.class).list();
-		statelessSession.close();
+		Session session = sessionFactory.openSession();
+		List<Society> list = session.createQuery("from Society",Society.class).list();
+		session.close();
 		return list;
 	}
 
