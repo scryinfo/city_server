@@ -116,7 +116,8 @@ public class SocietyManager
                             .build();
 
                     GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
-                    GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,notice.toProto(societyId)));
+                    GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+                    societyInfoMap.put(society.getId(), society.toProto(true));
                 }
                 else
                 {
@@ -149,7 +150,33 @@ public class SocietyManager
                     .setCreateId(Util.toByteString(gameSession.getPlayer().id()))
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
-            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,notice.toProto(societyId)));
+            GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+            societyInfoMap.put(society.getId(), society.toProto(true));
+        }
+    }
+
+    public static void modifyIntroduction(UUID societyId, String introduction,
+                                         GameSession gameSession, short cmd)
+    {
+        Society society = societyCache.getUnchecked(societyId);
+        if (society != null
+                && modifyPermission.contains(society.getIdentity(gameSession.getPlayer().id())))
+        {
+            society.setIntroduction(introduction);
+            Society.SocietyNotice notice = new Society.SocietyNotice(gameSession.getPlayer().id(),
+                    null,
+                    Gs.SocietyNotice.NoticeType.MODIFY_INTRODUCTION_VALUE);
+            society.addNotice(notice);
+            GameDb.saveOrUpdate(society);
+
+            Gs.BytesStrings info = Gs.BytesStrings.newBuilder()
+                    .setSocietyId(Util.toByteString(societyId))
+                    .setStr(introduction)
+                    .setCreateId(Util.toByteString(gameSession.getPlayer().id()))
+                    .build();
+            GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
+            GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+            societyInfoMap.put(society.getId(), society.toProto(true));
         }
     }
 

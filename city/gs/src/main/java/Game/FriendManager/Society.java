@@ -4,6 +4,7 @@ import Game.City;
 import Game.GameDb;
 import Game.Player;
 import Shared.Util;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import gs.Gs;
 
@@ -35,7 +36,13 @@ public class Society
     @Column(nullable = false)
     private String declaration;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(nullable = true)
+    private String introduction;
+
+    @Column(nullable = false)
+    private int memberCount;
+
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "society_member", joinColumns = @JoinColumn(name = "society_id"))
     @MapKeyColumn(name = "member_id")
     private Map<UUID, SocietyMember> memberHashMap = new HashMap<>();
@@ -43,6 +50,13 @@ public class Society
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "society_notice", joinColumns = @JoinColumn(name = "society_id"))
     private List<SocietyNotice> noticeList = new ArrayList<>();
+
+    @PrePersist
+    @PreUpdate
+    private void updateMemberCount()
+    {
+        this.memberCount = memberHashMap.size();
+    }
 
     public Society()
     {
@@ -84,8 +98,7 @@ public class Society
             memberBuilder.setId(Util.toByteString(player.id()))
                     .setName(player.getName())
                     .setFaceId(player.getFaceId())
-                    .setJoinTs(joinTs)
-                    .setMoney(player.money());
+                    .setJoinTs(joinTs);
             memberBuilder.setIdentity(Gs.SocietyMember.Identity.valueOf(identity));
             memberBuilder.setStaffCount(City.instance().calcuPlayerStaff(player.id()));
             memberBuilder.setBelongToId(Util.toByteString(belongTo));
@@ -111,7 +124,8 @@ public class Society
                 Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE,
                 Gs.SocietyNotice.NoticeType.CREATE_SOCIETY_VALUE,
                 Gs.SocietyNotice.NoticeType.MODIFY_DECLARATION_VALUE,
-                Gs.SocietyNotice.NoticeType.MODIFY_NAME_VALUE
+                Gs.SocietyNotice.NoticeType.MODIFY_NAME_VALUE,
+                Gs.SocietyNotice.NoticeType.MODIFY_INTRODUCTION_VALUE
         );
 
         public SocietyNotice(UUID createId, UUID affectedId, int noticeType)
@@ -177,6 +191,11 @@ public class Society
         this.declaration = declaration;
     }
 
+    public void setIntroduction(String introduction)
+    {
+        this.introduction = introduction;
+    }
+
     public List<UUID> getMemberIds()
     {
         return new ArrayList<>(memberHashMap.keySet());
@@ -209,22 +228,20 @@ public class Society
                 .setName(name)
                 .setDeclaration(declaration)
                 .setCreateTs(createTs)
-                .setAllCount(memberHashMap.size())
-                .setChairmanId(Util.toByteString(createId));
+                .setAllCount(memberCount)
+                .setChairmanId(Util.toByteString(createId))
+                .setIntroduction(Strings.nullToEmpty(introduction));
         Player player = GameDb.queryPlayer(createId);
         builder.setChairmanName(player.getName())
                 .setChairmanFaceId(player.getFaceId());
-        memberHashMap.forEach((memberId, member) ->
-        {
-            Player player1 = GameDb.queryPlayer(memberId);
-            if (!isSimple)
-            {
-                builder.addMembers(member.toProto(id,player1));
-            }
-            builder.setAllMoney(builder.getAllMoney() + player1.money());
-        });
         if (!isSimple)
         {
+            memberHashMap.forEach((memberId, member) ->
+            {
+                Player player1 = GameDb.queryPlayer(memberId);
+                builder.addMembers(member.toProto(id,player1));
+            });
+
             noticeList.forEach(notice ->{
                 builder.addNotice(notice.toProto(id));
             });

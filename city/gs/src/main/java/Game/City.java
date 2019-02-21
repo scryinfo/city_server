@@ -429,10 +429,14 @@ public class City {
 
     public long calcuPlayerStaff(UUID playerId)
     {
-       return playerBuilding.get(playerId)
-               .values().stream()
-               .mapToLong(Building::getAllStaffSize)
-               .sum();
+        if (playerBuilding.get(playerId) != null)
+        {
+            return playerBuilding.get(playerId)
+                    .values().stream()
+                    .mapToLong(Building::getAllStaffSize)
+                    .sum();
+        }
+        return 0;
     }
 
     class GridDiffs {

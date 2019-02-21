@@ -1650,6 +1650,17 @@ public class GameSession {
 		}
 	}
 
+	public void modifyIntroduction(short cmd, Message message)
+	{
+		Gs.BytesStrings params = (Gs.BytesStrings) message;
+		String introduction = params.getStr();
+		UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			SocietyManager.modifyIntroduction(societyId, introduction, this, cmd);
+		}
+	}
+
 	public void getSocietyInfo(short cmd, Message message)
 	{
 		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
