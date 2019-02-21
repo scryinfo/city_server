@@ -261,7 +261,6 @@ public class GameSession {
 			if(building != null)
 				building.watchDetailInfoDel(this);
 		}
-		GroundAuction.instance().unregist(this.channelId);
 		if (kickOff)
 		{
 			logger.debug("account: " + player.getAccount() + " be kick off");
@@ -362,12 +361,6 @@ public class GameSession {
 			this.write(Package.fail(cmd, err.get()));
 		else
 			this.write(Package.create(cmd, c));
-	}
-	public void registGroundBidInform(short cmd) {
-		GroundAuction.instance().regist(this.channelId);
-	}
-	public void unregistGroundBidInform(short cmd) {
-		GroundAuction.instance().unregist(this.channelId);
 	}
 
 	public void startBusiness(short cmd, Message message) {

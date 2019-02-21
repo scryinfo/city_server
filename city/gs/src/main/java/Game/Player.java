@@ -386,7 +386,8 @@ public class Player {
     public void groundBidingFail(UUID id, GroundAuction.Entry a) {
         int m = (int) this.unlockMoney(a.transactionId);
         GameDb.saveOrUpdate(this);
-        this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.IntNum.newBuilder().setId(a.meta.id).setNum(a.price()).build()));
+        if(!a.biderId().equals(id))
+            this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.IntNum.newBuilder().setId(a.meta.id).setNum(a.price()).build()));
         //更高出价通知
         UUID biderId = a.biderId();
         List<Coordinate> areas = a.meta.area;

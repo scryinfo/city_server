@@ -4,8 +4,8 @@ public class DateTimeTracker {
     private long begin;
     private long end;
 
-    public void delay(int auctionDelay) {
-        this.end += auctionDelay;
+    public void resetEnd(long end) {
+        this.end = end;
     }
 
     enum State {

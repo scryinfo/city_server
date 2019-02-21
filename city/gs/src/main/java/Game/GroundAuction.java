@@ -10,10 +10,8 @@ import Shared.Util;
 import common.Common;
 import gs.Gs;
 import gscode.GsCode;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -39,7 +37,7 @@ public class GroundAuction {
 
     @Entity
     @Table(name = "ground_auction_entry")
-    public static class Entry {
+    public final static class Entry {
         protected Entry(){}
         public Entry(MetaGroundAuction meta) {
             this.metaId = meta.id;
@@ -51,12 +49,9 @@ public class GroundAuction {
             this.history.add(new BidRecord(id, price, ts));
             if(this.history.size() > BID_RECORD_MAX)
                 this.history.iterator().remove();
+            this.tweakTicking(ts);
         }
         private static final int BID_RECORD_MAX = 10;
-
-        public void delayTimer() {
-            this.timer.delay(MetaData.getSysPara().auctionDelay);
-        }
 
         @Embeddable
         //@Table(name = "ground_auction_entry_history")
@@ -83,7 +78,7 @@ public class GroundAuction {
         public Gs.GroundAuction.Target toProto() {
             Gs.GroundAuction.Target.Builder b =  Gs.GroundAuction.Target.newBuilder();
             b.setId(meta.id);
-            history.forEach(r->Gs.GroundAuction.Target.BidHistory.newBuilder().setBiderId(Util.toByteString(r.biderId)).setPrice(r.price).setTs(r.ts));
+            history.forEach(r->b.addBidHistoryBuilder().setBiderId(Util.toByteString(r.biderId)).setPrice(r.price).setTs(r.ts));
             return b.build();
         }
         @Transient //@Convert can not apply on @Id
@@ -106,12 +101,14 @@ public class GroundAuction {
         private void init() {
             this.meta = MetaData.getGroundAuction(metaId);
             if(biderId() != null)
-                startTicking();
+                tweakTicking(System.currentTimeMillis());
         }
 
-        public void startTicking() {
-            long now = System.currentTimeMillis();
-            this.timer = new DateTimeTracker(meta.beginTime, now+MetaData.getSysPara().auctionDelay);
+        public void tweakTicking(long now) {
+            if(this.timer == null)
+                this.timer = new DateTimeTracker(meta.beginTime, now+MetaData.getSysPara().auctionDelay);
+            else
+                this.timer.resetEnd(now+MetaData.getSysPara().auctionDelay);
         }
 
         public UUID biderId() {
@@ -122,7 +119,7 @@ public class GroundAuction {
         }
     }
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKey(name = "metaId")
     @JoinColumn(name = "ground_auction_id")
@@ -197,11 +194,8 @@ public class GroundAuction {
                 MailBox.instance().sendMail(Mail.MailType.LAND_AUCTION.getMailType(),bider.id(),null,landCoordinates);
 
                 Package pack = Package.create(GsCode.OpCode.auctionEnd_VALUE, Gs.Num.newBuilder().setNum(a.metaId).build());
-                this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel) -> {
-                    if (channel.id().equals(cId))
-                        return true;
-                    return false;
-                }));
+                //GameServer.sendTo(this.watcher, pack);
+                GameServer.sendToAll(pack);
             }
         }
 
@@ -222,6 +216,7 @@ public class GroundAuction {
             return Optional.of(Common.Fail.Reason.auctionNotFound);
         if(a.price() >= price)
             return Optional.of(Common.Fail.Reason.auctionPriceIsLow);
+        long now = System.currentTimeMillis();
         if(a.biderId() != null) {
             // unlock its money
             GameSession biderSession = GameServer.allGameSessions.get(a.biderId());
@@ -231,28 +226,17 @@ public class GroundAuction {
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
-            a.delayTimer();
         }
-        else
-            a.startTicking();
-        long now = System.currentTimeMillis();
         a.bid(bider.id(), price, now);
         bider.lockMoney(a.transactionId, price);
         GameDb.saveOrUpdate(Arrays.asList(bider, this));
         Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, Gs.BidChange.newBuilder().setTargetId(id).setNowPrice(price).setTs(now).setBiderId(Util.toByteString(bider.id())).build());
-        this.watcher.forEach(cId -> GameServer.allClientChannels.writeAndFlush(pack, (Channel channel)->{
-            if(channel.id().equals(cId))
-                return true;
-            return false;
-        }));
+        //GameServer.sendTo(this.watcher, pack);
+        GameServer.sendToAll(pack);
         return Optional.empty();
     }
-    public void regist(ChannelId id) {
-        this.watcher.add(id);
-    }
-    public void unregist(ChannelId id) {
-        this.watcher.remove(id);
-    }
+    //public void regist(ChannelId id) { this.watcher.add(id); }
+    //public void unregist(ChannelId id) { this.watcher.remove(id); }
     @Transient
     private Set<ChannelId> watcher = new HashSet<>();
 }
