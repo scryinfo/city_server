@@ -3,6 +3,7 @@ package Game.FriendManager;
 import Game.GameDb;
 import Game.GameServer;
 import Game.GameSession;
+import Game.Player;
 import Shared.Package;
 import Shared.Util;
 import com.google.common.cache.CacheBuilder;
@@ -151,7 +152,7 @@ public class SocietyManager
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
             GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
-            societyInfoMap.put(society.getId(), society.toProto(true));
+            //societyInfoMap.put(society.getId(), society.toProto(true));
         }
     }
 
@@ -178,6 +179,128 @@ public class SocietyManager
             GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
             societyInfoMap.put(society.getId(), society.toProto(true));
         }
+    }
+
+    public static boolean reqJoinSociety(UUID societyId, Player player,String descp)
+    {
+        Society society = societyCache.getUnchecked(societyId);
+        if (society != null)
+        {
+            society.getJoinMap().put(player.id(),descp);
+            GameDb.saveOrUpdate(society);
+
+            Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
+            builder.setSocietyId(Util.toByteString(societyId))
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setPlayerFaceId(player.getFaceId())
+                    .setPlayerName(player.getName())
+                    .setDescription(descp);
+            GameServer.sendTo(getmodifyPermissionIds(society),
+                    Package.create(GsCode.OpCode.newJoinReq_VALUE, builder.build()));
+            return true;
+        }
+        return false;
+    }
+
+    private static List<UUID> getmodifyPermissionIds(Society society)
+    {
+        List<UUID> list = new ArrayList<>();
+        society.getMemberHashMap().forEach((k,v)->{
+            if (modifyPermission.contains(v.getIdentity()))
+            {
+                list.add(k);
+            }
+        });
+        return list;
+    }
+
+    public static void handleReqJoin(Gs.JoinHandle params, Player handler)
+    {
+        UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+        if (societyId.equals(handler.getSocietyId()))
+        {
+            Society society = societyCache.getUnchecked(societyId);
+            UUID reqId = Util.toUuid(params.getPlayerId().toByteArray());
+            if (society != null &&
+                    !society.getMemberIds().contains(reqId)
+                    && modifyPermission.contains(society.getIdentity(handler.id())))
+            {
+                Player reqPlayer = GameDb.queryPlayer(reqId);
+                Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
+                society.getJoinMap().remove(reqId);
+                List<Object> updateList = new ArrayList<>();
+                updateList.add(society);
+                //已加入其他公会
+                if (reqPlayer.getSocietyId() != null)
+                {
+                    builder.setSocietyId(Util.toByteString(societyId))
+                            .setPlayerId(Util.toByteString(reqId))
+                            .setHandleId(Util.toByteString(handler.id()))
+                            .setServerFlag(false);
+                }
+                else if (params.getIsAgree())
+                {
+
+                    society.getMemberHashMap().put(reqId,
+                            new Society.SocietyMember(Gs.SocietyMember.Identity.MEMBER_VALUE));
+                    Society.SocietyNotice notice = new Society.SocietyNotice(handler.id(),
+                            reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);
+                    society.addNotice(notice);
+                    reqPlayer.setSocietyId(societyId);
+                    updateList.add(reqPlayer);
+                    builder.setSocietyId(Util.toByteString(societyId))
+                            .setPlayerId(Util.toByteString(reqId))
+                            .setHandleId(Util.toByteString(handler.id()))
+                            .setServerFlag(true)
+                            .setHandleFlag(true);
+                    //给申请人发送加入公会ID
+                    GameServer.sendTo(Collections.singletonList(reqId),
+                            Package.create(GsCode.OpCode.joinHandle_VALUE,
+                                    Gs.Id.newBuilder().setId(Util.toByteString(societyId)).build()));
+                }
+                //拒绝
+                else
+                {
+                    builder.setSocietyId(Util.toByteString(societyId))
+                            .setPlayerId(Util.toByteString(reqId))
+                            .setHandleId(Util.toByteString(handler.id()))
+                            .setServerFlag(true)
+                            .setHandleFlag(false);
+                    /**
+                     * TODO:
+                     * 2019/2/22
+                     * 发送邮件给申请人入会请求被拒绝 reqId
+                     */
+                }
+
+                GameDb.saveOrUpdate(updateList);
+                //通知权限人清除该请求
+                GameServer.sendTo(getmodifyPermissionIds(society),
+                        Package.create(GsCode.OpCode.delJoinReq_VALUE, builder.build()));
+            }
+        }
+    }
+
+    public static List<Gs.JoinReq> getJoinReqList(UUID societyId, UUID playerId)
+    {
+        Society society = societyCache.getUnchecked(societyId);
+        List<Gs.JoinReq> lists = new ArrayList<>();
+        if (society != null &&
+                modifyPermission.contains(society.getIdentity(playerId)))
+        {
+            society.getJoinMap().forEach((k,v)->{
+                Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
+                Player player = GameDb.queryPlayer(k);
+                builder.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(k))
+                        .setDescription(v)
+                        .setPlayerName(player.getName())
+                        .setPlayerFaceId(player.getFaceId());
+                lists.add(builder.build());
+            });
+            return lists;
+        }
+        return null;
     }
 
 }

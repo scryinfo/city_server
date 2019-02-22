@@ -1679,6 +1679,39 @@ public class GameSession {
 						.addAllListInfo(SocietyManager.getSocietyList())
 						.build()));
 	}
+
+	public void joinSociety(short cmd, Message message)
+	{
+		String str = ((Gs.ByteStr) message).getDesc();
+		UUID societyId = Util.toUuid(((Gs.ByteStr) message).getId().toByteArray());
+		if (!Strings.isNullOrEmpty(str) && player.getSocietyId() == null)
+		{
+			if (SocietyManager.reqJoinSociety(societyId,player,str))
+			{
+				this.write(Package.create(cmd));
+			}
+		}
+	}
+
+	public void joinHandle(short cmd, Message message)
+	{
+		Gs.JoinHandle params = (Gs.JoinHandle) message;
+		SocietyManager.handleReqJoin(params,player);
+	}
+
+	public void getJoinReq(short cmd, Message message)
+	{
+		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			List<Gs.JoinReq> list = SocietyManager.getJoinReqList(societyId, player.id());
+			if (list != null)
+			{
+				this.write(Package.create(cmd, Gs.JoinReqList.newBuilder().addAllReqs(list).build()));
+			}
+		}
+	}
+
 	//===========================================================
 
 	//llb========================================================
