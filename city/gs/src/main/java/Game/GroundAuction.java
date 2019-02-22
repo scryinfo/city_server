@@ -54,7 +54,6 @@ public class GroundAuction {
         private static final int BID_RECORD_MAX = 10;
 
         @Embeddable
-        //@Table(name = "ground_auction_entry_history")
         public static final class BidRecord {
             public BidRecord(UUID biderId, int price, long ts) {
                 this.biderId = biderId;
@@ -69,7 +68,6 @@ public class GroundAuction {
             @Column(name = "ts", nullable = false)
             long ts = 0;
         }
-        //@OneToMany(fetch = FetchType.EAGER)
         @ElementCollection(fetch = FetchType.EAGER)
         @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
         @OrderBy("price ASC")
@@ -124,29 +122,15 @@ public class GroundAuction {
     @MapKey(name = "metaId")
     @JoinColumn(name = "ground_auction_id")
     private Map<Integer, Entry> auctions = new HashMap<>();
-//    public void loadMore() {
-//        Set<MetaGroundAuction> m = MetaData.getNonFinishedGroundAuction();
-//        Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
-//        List<Entry> newAdds = new ArrayList<>();
-//        m.forEach((v)->{
-//            if(!this.auctions.containsKey(v.id))
-//            {
-//                Entry e = new Entry(v);
-//                this.auctions.put(v.id, e);
-//                newAdds.add(e);
-//            }
-//            builder.addAuction(v.toProto());
-//        });
-//        GameDb.saveOrUpdate(this);
-//        GameServer.allClientChannels.writeAndFlush(Package.create(GsCode.OpCode.metaGroundAuctionAddInform_VALUE, builder.build()));
-//    }
+
     private int nextAuctionId = 1;
+
     private void loadAuction() {
         MetaGroundAuction mga = MetaData.getGroundAuction(nextAuctionId);
         while(mga != null && mga.beginTime <= System.currentTimeMillis()) {
             Entry e = new Entry(mga);
             this.auctions.put(mga.id, e);
-            mga = MetaData.getGroundAuction(nextAuctionId++);
+            mga = MetaData.getGroundAuction(++nextAuctionId);
         }
         GameDb.saveOrUpdate(this); // let hibernate do the dirty check
     }
