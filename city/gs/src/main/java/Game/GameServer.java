@@ -63,7 +63,9 @@ public class GameServer {
             }
         });
     }
-
+    public static void sendToAll(Package pack) {
+        allClientChannels.writeAndFlush(pack);
+    }
     public static void sendIncomeNotity(UUID roleId, Gs.IncomeNotify notify)
     {
         GameSession session = allGameSessions.get(roleId);

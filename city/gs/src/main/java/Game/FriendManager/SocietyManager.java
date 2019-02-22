@@ -11,9 +11,10 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import common.Common;
 import gs.Gs;
+import gscode.GsCode;
 
 import java.time.Duration;
-import java.util.UUID;
+import java.util.*;
 
 public class SocietyManager
 {
@@ -36,14 +37,31 @@ public class SocietyManager
             Gs.SocietyMember.Identity.CHAIRMAN_VALUE,
             Gs.SocietyMember.Identity.VICE_CHAIRMAN_VALUE
     );
+
     private static final long modifyInterval = 7 * 24 * 3600 * 1000;
+    private static final long queryInterval = 5 * 60 * 1000;
+
+    private static long lastQueryTime = 0L;
+    private static Map<UUID,Gs.SocietyInfo> societyInfoMap = new HashMap<>();
+
+    public static Collection<Gs.SocietyInfo> getSocietyList()
+    {
+        if (System.currentTimeMillis() - lastQueryTime > queryInterval)
+        {
+            GameDb.getAllSociety().forEach(society ->
+                    societyInfoMap.put(society.getId(),society.toProto(true)));
+            lastQueryTime = System.currentTimeMillis();
+        }
+        return societyInfoMap.values();
+    }
 
     public static Society createSociety(UUID createId, String name, String declaration)
     {
-        Society society = new Society(createId,name,declaration);
+        Society society = new Society(createId, name, declaration);
         if (GameDb.saveOrUpdSociety(society))
         {
             societyCache.put(society.getId(), society);
+            societyInfoMap.put(society.getId(), society.toProto(true));
             return society;
         }
         return null;
@@ -78,11 +96,17 @@ public class SocietyManager
         {
             if (System.currentTimeMillis() - society.getLastModify() < modifyInterval)
             {
-                gameSession.write(Package.fail(cmd,Common.Fail.Reason.highFrequency));
+                gameSession.write(Package.fail(cmd, Common.Fail.Reason.highFrequency));
             }
             else
             {
                 society.setName(name);
+                Society.SocietyNotice notice = new Society.SocietyNotice(
+                        gameSession.getPlayer().id(),
+                        null,
+                        Gs.SocietyNotice.NoticeType.MODIFY_NAME_VALUE);
+                society.addNotice(notice);
+                //重名
                 if (GameDb.saveOrUpdSociety(society))
                 {
                     Gs.BytesStrings info = Gs.BytesStrings.newBuilder()
@@ -90,11 +114,15 @@ public class SocietyManager
                             .setStr(name)
                             .setCreateId(Util.toByteString(gameSession.getPlayer().id()))
                             .build();
+
                     GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
+                    GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+                    societyInfoMap.put(society.getId(), society.toProto(true));
                 }
                 else
                 {
-                    gameSession.write(Package.fail(cmd,Common.Fail.Reason.societyNameDuplicated));
+                    society.removeNotice(notice);
+                    gameSession.write(Package.fail(cmd, Common.Fail.Reason.societyNameDuplicated));
                 }
 
             }
@@ -110,13 +138,46 @@ public class SocietyManager
                 && modifyPermission.contains(society.getIdentity(gameSession.getPlayer().id())))
         {
             society.setDeclaration(declaration);
+            Society.SocietyNotice notice = new Society.SocietyNotice(gameSession.getPlayer().id(),
+                    null,
+                    Gs.SocietyNotice.NoticeType.MODIFY_DECLARATION_VALUE);
+            society.addNotice(notice);
             GameDb.saveOrUpdate(society);
+
             Gs.BytesStrings info = Gs.BytesStrings.newBuilder()
                     .setSocietyId(Util.toByteString(societyId))
                     .setStr(declaration)
                     .setCreateId(Util.toByteString(gameSession.getPlayer().id()))
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
+            GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+            societyInfoMap.put(society.getId(), society.toProto(true));
         }
     }
+
+    public static void modifyIntroduction(UUID societyId, String introduction,
+                                         GameSession gameSession, short cmd)
+    {
+        Society society = societyCache.getUnchecked(societyId);
+        if (society != null
+                && modifyPermission.contains(society.getIdentity(gameSession.getPlayer().id())))
+        {
+            society.setIntroduction(introduction);
+            Society.SocietyNotice notice = new Society.SocietyNotice(gameSession.getPlayer().id(),
+                    null,
+                    Gs.SocietyNotice.NoticeType.MODIFY_INTRODUCTION_VALUE);
+            society.addNotice(notice);
+            GameDb.saveOrUpdate(society);
+
+            Gs.BytesStrings info = Gs.BytesStrings.newBuilder()
+                    .setSocietyId(Util.toByteString(societyId))
+                    .setStr(introduction)
+                    .setCreateId(Util.toByteString(gameSession.getPlayer().id()))
+                    .build();
+            GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
+            GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+            societyInfoMap.put(society.getId(), society.toProto(true));
+        }
+    }
+
 }

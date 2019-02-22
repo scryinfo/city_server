@@ -4,6 +4,8 @@ import Game.City;
 import Game.GameDb;
 import Game.Player;
 import Shared.Util;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import gs.Gs;
 
 import javax.persistence.*;
@@ -34,7 +36,13 @@ public class Society
     @Column(nullable = false)
     private String declaration;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(nullable = true)
+    private String introduction;
+
+    @Column(nullable = false)
+    private int memberCount;
+
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "society_member", joinColumns = @JoinColumn(name = "society_id"))
     @MapKeyColumn(name = "member_id")
     private Map<UUID, SocietyMember> memberHashMap = new HashMap<>();
@@ -42,6 +50,13 @@ public class Society
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "society_notice", joinColumns = @JoinColumn(name = "society_id"))
     private List<SocietyNotice> noticeList = new ArrayList<>();
+
+    @PrePersist
+    @PreUpdate
+    private void updateMemberCount()
+    {
+        this.memberCount = memberHashMap.size();
+    }
 
     public Society()
     {
@@ -76,6 +91,19 @@ public class Society
         public SocietyMember()
         {
         }
+
+        public Gs.SocietyMember toProto(UUID belongTo, Player player)
+        {
+            Gs.SocietyMember.Builder memberBuilder = Gs.SocietyMember.newBuilder();
+            memberBuilder.setId(Util.toByteString(player.id()))
+                    .setName(player.getName())
+                    .setFaceId(player.getFaceId())
+                    .setJoinTs(joinTs);
+            memberBuilder.setIdentity(Gs.SocietyMember.Identity.valueOf(identity));
+            memberBuilder.setStaffCount(City.instance().calcuPlayerStaff(player.id()));
+            memberBuilder.setBelongToId(Util.toByteString(belongTo));
+            return memberBuilder.build();
+        }
     }
 
     @Embeddable
@@ -91,6 +119,15 @@ public class Society
         @Column(nullable = false)
         private int noticeType;
 
+        @Transient
+        private static ImmutableSet<Integer> personalAct = ImmutableSet.of(
+                Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE,
+                Gs.SocietyNotice.NoticeType.CREATE_SOCIETY_VALUE,
+                Gs.SocietyNotice.NoticeType.MODIFY_DECLARATION_VALUE,
+                Gs.SocietyNotice.NoticeType.MODIFY_NAME_VALUE,
+                Gs.SocietyNotice.NoticeType.MODIFY_INTRODUCTION_VALUE
+        );
+
         public SocietyNotice(UUID createId, UUID affectedId, int noticeType)
         {
             this.createTs = System.currentTimeMillis();
@@ -101,6 +138,29 @@ public class Society
 
         public SocietyNotice()
         {
+        }
+
+        public Gs.SocietyNotice toProto(UUID belongTo)
+        {
+            Gs.SocietyNotice.Builder noticeBuilder = Gs.SocietyNotice.newBuilder();
+            noticeBuilder.setCreateTs(createTs);
+            noticeBuilder.setType(Gs.SocietyNotice.NoticeType.valueOf(noticeType));
+
+            Player tmpPlayer = GameDb.queryPlayer(createId);
+            noticeBuilder.setCreateId(Util.toByteString(createId));
+            noticeBuilder.setCreateFaceId(tmpPlayer.getFaceId());
+            noticeBuilder.setCreateName(tmpPlayer.getName());
+            noticeBuilder.setBelongToId(Util.toByteString(belongTo));
+
+            //非个人行为
+            if (!personalAct.contains(noticeType))
+            {
+                tmpPlayer = GameDb.queryPlayer(affectedId);
+                noticeBuilder.setAffectedId(Util.toByteString(affectedId));
+                noticeBuilder.setAffectedFaceId(tmpPlayer.getFaceId());
+                noticeBuilder.setAffectedName(tmpPlayer.getName());
+            }
+            return noticeBuilder.build();
         }
 
     }
@@ -131,6 +191,11 @@ public class Society
         this.declaration = declaration;
     }
 
+    public void setIntroduction(String introduction)
+    {
+        this.introduction = introduction;
+    }
+
     public List<UUID> getMemberIds()
     {
         return new ArrayList<>(memberHashMap.keySet());
@@ -146,60 +211,41 @@ public class Society
         return this.onlineCount.decrementAndGet();
     }
 
-    public Gs.SocietyInfo toProto()
+    public void addNotice(SocietyNotice notice)
+    {
+        this.noticeList.add(notice);
+    }
+
+    public void removeNotice(SocietyNotice notice)
+    {
+        this.noticeList.remove(notice);
+    }
+
+    public Gs.SocietyInfo toProto(boolean isSimple)
     {
         Gs.SocietyInfo.Builder builder = Gs.SocietyInfo.newBuilder();
         builder.setId(Util.toByteString(id))
                 .setName(name)
                 .setDeclaration(declaration)
                 .setCreateTs(createTs)
-                .setAllCount(memberHashMap.size())
-                .setChairmanId(Util.toByteString(createId));
+                .setAllCount(memberCount)
+                .setChairmanId(Util.toByteString(createId))
+                .setIntroduction(Strings.nullToEmpty(introduction));
         Player player = GameDb.queryPlayer(createId);
         builder.setChairmanName(player.getName())
                 .setChairmanFaceId(player.getFaceId());
-        Gs.SocietyMember.Builder memberBuilder = Gs.SocietyMember.newBuilder();
-        memberHashMap.forEach((id, member) ->
+        if (!isSimple)
         {
-            memberBuilder.clear();
-            Player player1 = GameDb.queryPlayer(id);
-            memberBuilder.setId(Util.toByteString(id))
-                    .setName(player1.getName())
-                    .setFaceId(player1.getFaceId())
-                    .setJoinTs(member.joinTs)
-                    .setMoney(player1.money());
-
-            memberBuilder.setIdentity(Gs.SocietyMember.Identity.valueOf(member.identity));
-            memberBuilder.setStaffCount(City.instance().calcuPlayerStaff(id));
-
-            builder.setAllMoney(builder.getAllMoney() + memberBuilder.getMoney());
-            builder.addMembers(memberBuilder.build());
-        });
-
-        Gs.SocietyNotice.Builder noticeBuilder = Gs.SocietyNotice.newBuilder();
-        noticeList.forEach(notice ->{
-            noticeBuilder.clear();
-            noticeBuilder.setCreateTs(notice.createTs);
-            noticeBuilder.setType(Gs.SocietyNotice.NoticeType.valueOf(notice.noticeType));
-
-            Player tmpPlayer = GameDb.queryPlayer(notice.createId);
-            noticeBuilder.setCreateId(Util.toByteString(notice.createId));
-            noticeBuilder.setCreateFaceId(tmpPlayer.getFaceId());
-            noticeBuilder.setCreateName(tmpPlayer.getName());
-
-            //非个人行为
-            if (Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE != notice.noticeType
-                    && Gs.SocietyNotice.NoticeType.CREATE_SOCIETY_VALUE != notice.noticeType)
+            memberHashMap.forEach((memberId, member) ->
             {
-                tmpPlayer = GameDb.queryPlayer(notice.affectedId);
-                noticeBuilder.setAffectedId(Util.toByteString(notice.affectedId));
-                noticeBuilder.setAffectedFaceId(tmpPlayer.getFaceId());
-                noticeBuilder.setAffectedName(tmpPlayer.getName());
-            }
+                Player player1 = GameDb.queryPlayer(memberId);
+                builder.addMembers(member.toProto(id,player1));
+            });
 
-            builder.addNotice(noticeBuilder.build());
-        });
-
+            noticeList.forEach(notice ->{
+                builder.addNotice(notice.toProto(id));
+            });
+        }
         return builder.build();
     }
 }
