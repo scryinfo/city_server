@@ -281,4 +281,26 @@ public class SocietyManager
         }
     }
 
+    public static List<Gs.JoinReq> getJoinReqList(UUID societyId, UUID playerId)
+    {
+        Society society = societyCache.getUnchecked(societyId);
+        List<Gs.JoinReq> lists = new ArrayList<>();
+        if (society != null &&
+                modifyPermission.contains(society.getIdentity(playerId)))
+        {
+            society.getJoinMap().forEach((k,v)->{
+                Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
+                Player player = GameDb.queryPlayer(k);
+                builder.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(k))
+                        .setDescription(v)
+                        .setPlayerName(player.getName())
+                        .setPlayerFaceId(player.getFaceId());
+                lists.add(builder.build());
+            });
+            return lists;
+        }
+        return null;
+    }
+
 }

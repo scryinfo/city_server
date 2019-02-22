@@ -1691,6 +1691,19 @@ public class GameSession {
 		SocietyManager.handleReqJoin(params,player);
 	}
 
+	public void getJoinReq(short cmd, Message message)
+	{
+		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			List<Gs.JoinReq> list = SocietyManager.getJoinReqList(societyId, player.id());
+			if (list != null)
+			{
+				this.write(Package.create(cmd, Gs.JoinReqList.newBuilder().addAllReqs(list).build()));
+			}
+		}
+	}
+
 	//===========================================================
 
 	//llb========================================================
