@@ -404,6 +404,15 @@ public class City {
         assert building.type() != MetaBuilding.TRIVIAL;
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
+        //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
+        if(allBuilding!=null&&allBuilding.size()>=100){
+        	GameSession gs = GameServer.allGameSessions.get(building.id());
+        	gs.write(Package.create(GsCode.OpCode.getNumBreakThrough_VALUE,Gs.CityBroadcast.newBuilder()
+        			.setType(5)
+        			.setNum(allBuilding.size())
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+        }
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
@@ -429,10 +438,14 @@ public class City {
 
     public long calcuPlayerStaff(UUID playerId)
     {
-       return playerBuilding.get(playerId)
-               .values().stream()
-               .mapToLong(Building::getAllStaffSize)
-               .sum();
+        if (playerBuilding.get(playerId) != null)
+        {
+            return playerBuilding.get(playerId)
+                    .values().stream()
+                    .mapToLong(Building::getAllStaffSize)
+                    .sum();
+        }
+        return 0;
     }
 
     class GridDiffs {

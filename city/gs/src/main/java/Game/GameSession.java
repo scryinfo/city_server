@@ -261,7 +261,6 @@ public class GameSession {
 			if(building != null)
 				building.watchDetailInfoDel(this);
 		}
-		GroundAuction.instance().unregist(this.channelId);
 		if (kickOff)
 		{
 			logger.debug("account: " + player.getAccount() + " be kick off");
@@ -362,12 +361,6 @@ public class GameSession {
 			this.write(Package.fail(cmd, err.get()));
 		else
 			this.write(Package.create(cmd, c));
-	}
-	public void registGroundBidInform(short cmd) {
-		GroundAuction.instance().regist(this.channelId);
-	}
-	public void unregistGroundBidInform(short cmd) {
-		GroundAuction.instance().unregist(this.channelId);
 	}
 
 	public void startBusiness(short cmd, Message message) {
@@ -586,10 +579,11 @@ public class GameSession {
 		player.lockMoney(orderId, cost);
 		s.markOrder(orderId);
 		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
-		if(cost>=1000){//重大交易 交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			this.write(Package.create(cmd,Gs.MajorExchange.newBuilder()
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(cmd,Gs.CityBroadcast.newBuilder()
+					.setType(1)
                     .setPlayerId(Util.toByteString(player.id()))
-                    .setTotalAmount(cost)
+                    .setCost(cost)
                     .setTs(System.currentTimeMillis())
                     .build()));
 		}
@@ -1631,7 +1625,7 @@ public class GameSession {
 			player.setSocietyId(society.getId());
 			player.decMoney(cost);
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd, society.toProto()));
+			this.write(Package.create(cmd, society.toProto(false)));
 		}
 	}
 
@@ -1657,14 +1651,33 @@ public class GameSession {
 		}
 	}
 
+	public void modifyIntroduction(short cmd, Message message)
+	{
+		Gs.BytesStrings params = (Gs.BytesStrings) message;
+		String introduction = params.getStr();
+		UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			SocietyManager.modifyIntroduction(societyId, introduction, this, cmd);
+		}
+	}
+
 	public void getSocietyInfo(short cmd, Message message)
 	{
 		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
 		if (societyId.equals(player.getSocietyId()))
 		{
 			Society society = SocietyManager.getSociety(societyId);
-			this.write(Package.create(cmd, society.toProto()));
+			this.write(Package.create(cmd, society.toProto(false)));
 		}
+	}
+
+	public void getSocietyList(short cmd)
+	{
+		this.write(Package.create(cmd,
+				Gs.SocietyList.newBuilder()
+						.addAllListInfo(SocietyManager.getSocietyList())
+						.build()));
 	}
 	//===========================================================
 

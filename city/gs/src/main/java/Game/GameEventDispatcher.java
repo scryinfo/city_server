@@ -13,7 +13,6 @@ public class GameEventDispatcher extends DispatcherBase {
 	private GameEventDispatcher(){
 		try {
 			table.put((short) GsCode.OpCode.login_VALUE, Wrapper.newWithMessage(Gs.Login.PARSER, GameSession.class,"login"));
-			//table.put((short) GsCode.OpCode.queryMetaGroundAuction_VALUE, Wrapper.newOnlyOpcode(GameSession.class,"queryMetaGroundAuction"));
 			table.put((short) GsCode.OpCode.heartBeat_VALUE, Wrapper.newWithMessage(Gs.HeartBeat.PARSER, GameSession.class, "heartBeat"));
 
 			table.put((short) GsCode.OpCode.createRole_VALUE, Wrapper.newWithMessageAsync(Gs.CreateRole.PARSER, GameSession.class,"createRole"));
@@ -26,9 +25,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.roleLogin_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"roleLogin"));
 			table.put((short) GsCode.OpCode.move_VALUE, Wrapper.newWithMessageAsync(Gs.GridIndex.PARSER, GameSession.class, "move"));
 			table.put((short) GsCode.OpCode.queryGroundAuction_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryGroundAuction"));
-			table.put((short) GsCode.OpCode.registGroundBidInform_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "registGroundBidInform"));
-			table.put((short) GsCode.OpCode.unregistGroundBidInform_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "unregistGroundBidInform"));
-			table.put((short) GsCode.OpCode.bidGround_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class,"bidGround"));
+			table.put((short) GsCode.OpCode.bidGround_VALUE, Wrapper.newWithMessageAsync(Gs.IntNum.PARSER, GameSession.class,"bidGround"));
 			table.put((short) GsCode.OpCode.addBuilding_VALUE, Wrapper.newWithMessageAsync(Gs.AddBuilding.PARSER, GameSession.class,"addBuilding"));
 			table.put((short) GsCode.OpCode.delBuilding_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"delBuilding"));
 			table.put((short) GsCode.OpCode.startBusiness_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"startBusiness"));
@@ -118,7 +115,9 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.createSociety_VALUE, Wrapper.newWithMessageAsync(Gs.CreateSociety.PARSER, GameSession.class, "createSociety"));
 			table.put((short) GsCode.OpCode.modifySocietyName_VALUE, Wrapper.newWithMessageAsync(Gs.BytesStrings.PARSER, GameSession.class, "modifySocietyName"));
 			table.put((short) GsCode.OpCode.modifyDeclaration_VALUE, Wrapper.newWithMessageAsync(Gs.BytesStrings.PARSER, GameSession.class, "modifyDeclaration"));
+			table.put((short) GsCode.OpCode.modifyIntroduction_VALUE, Wrapper.newWithMessageAsync(Gs.BytesStrings.PARSER, GameSession.class, "modifyIntroduction"));
 			table.put((short) GsCode.OpCode.getSocietyInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "getSocietyInfo"));
+			table.put((short) GsCode.OpCode.getSocietyList_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "getSocietyList"));
 			//===========================================================
 
 			//llb========================================================

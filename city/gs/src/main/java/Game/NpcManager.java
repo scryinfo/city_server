@@ -1,6 +1,10 @@
 package Game;
 
 import Game.Meta.MetaCity;
+import Shared.Package;
+import Shared.Util;
+import gs.Gs;
+import gscode.GsCode;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -89,6 +93,15 @@ public class NpcManager {
     }
     private void addImpl(Npc npc) {
         allNpc.put(npc.id(), npc);
+        //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
+        if(allNpc!=null&&allNpc.size()>=500){
+        	GameSession gs = GameServer.allGameSessions.get(npc.id());
+        	gs.write(Package.create(GsCode.OpCode.getNumBreakThrough_VALUE,Gs.CityBroadcast.newBuilder()
+        			.setType(2)
+        			.setNum(allNpc.size())
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+        }
         int idx = Math.abs(npc.id().hashCode())% updateTimesAtCurrentTimeSection;
         if(reCalcuWaitToUpdate) {
             int nextIdx = Math.abs(npc.id().hashCode())%updateTimesAtNextTimeSection;
