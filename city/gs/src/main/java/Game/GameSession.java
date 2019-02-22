@@ -580,7 +580,7 @@ public class GameSession {
 		s.markOrder(orderId);
 		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
 		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			this.write(Package.create(GsCode.OpCode.getNumBreakThrough_VALUE,Gs.CityBroadcast.newBuilder()
+			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setPlayerId(Util.toByteString(player.id()))
                     .setCost(cost)

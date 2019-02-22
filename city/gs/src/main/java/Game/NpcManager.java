@@ -96,7 +96,7 @@ public class NpcManager {
         //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
         if(allNpc!=null&&allNpc.size()>=500){
         	GameSession gs = GameServer.allGameSessions.get(npc.id());
-        	gs.write(Package.create(GsCode.OpCode.getNumBreakThrough_VALUE,Gs.CityBroadcast.newBuilder()
+        	gs.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
         			.setType(2)
         			.setNum(allNpc.size())
                     .setTs(System.currentTimeMillis())
