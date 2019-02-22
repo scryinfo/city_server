@@ -49,7 +49,13 @@ public class Society
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "society_notice", joinColumns = @JoinColumn(name = "society_id"))
+    @OrderColumn
     private List<SocietyNotice> noticeList = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "society_join_req", joinColumns = @JoinColumn(name = "society_id"))
+    @MapKeyColumn(name = "player_id")
+    private Map<UUID, String> joinMap = new HashMap<>();
 
     @PrePersist
     @PreUpdate
@@ -69,7 +75,7 @@ public class Society
         this.lastModify = this.createTs = System.currentTimeMillis();
         this.name = name;
         this.declaration = declaration;
-        this.memberHashMap.put(createId, new SocietyMember(System.currentTimeMillis(), Gs.SocietyMember.Identity.CHAIRMAN_VALUE));
+        this.memberHashMap.put(createId, new SocietyMember(Gs.SocietyMember.Identity.CHAIRMAN_VALUE));
         this.noticeList.add(new SocietyNotice(createId, null, Gs.SocietyNotice.NoticeType.CREATE_SOCIETY_VALUE));
     }
 
@@ -82,14 +88,19 @@ public class Society
         @Column(nullable = false)
         private int identity;
 
-        public SocietyMember(long joinTs, int identity)
+        public SocietyMember(int identity)
         {
-            this.joinTs = joinTs;
+            this.joinTs = System.currentTimeMillis();
             this.identity = identity;
         }
 
         public SocietyMember()
         {
+        }
+
+        public int getIdentity()
+        {
+            return identity;
         }
 
         public Gs.SocietyMember toProto(UUID belongTo, Player player)
@@ -201,6 +212,11 @@ public class Society
         return new ArrayList<>(memberHashMap.keySet());
     }
 
+    public Map<UUID, SocietyMember> getMemberHashMap()
+    {
+        return memberHashMap;
+    }
+
     public void increaseCount()
     {
         this.onlineCount.incrementAndGet();
@@ -219,6 +235,16 @@ public class Society
     public void removeNotice(SocietyNotice notice)
     {
         this.noticeList.remove(notice);
+    }
+
+    /*public void addJoinReq(UUID playerId, String desc)
+    {
+        this.joinMap.put(playerId, desc);
+    }*/
+
+    public Map<UUID, String> getJoinMap()
+    {
+        return joinMap;
     }
 
     public Gs.SocietyInfo toProto(boolean isSimple)

@@ -579,6 +579,14 @@ public class GameSession {
 		player.lockMoney(orderId, cost);
 		s.markOrder(orderId);
 		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
 	}
 	public void exchangeSell(short cmd, Message message) {
@@ -1671,6 +1679,39 @@ public class GameSession {
 						.addAllListInfo(SocietyManager.getSocietyList())
 						.build()));
 	}
+
+	public void joinSociety(short cmd, Message message)
+	{
+		String str = ((Gs.ByteStr) message).getDesc();
+		UUID societyId = Util.toUuid(((Gs.ByteStr) message).getId().toByteArray());
+		if (!Strings.isNullOrEmpty(str) && player.getSocietyId() == null)
+		{
+			if (SocietyManager.reqJoinSociety(societyId,player,str))
+			{
+				this.write(Package.create(cmd));
+			}
+		}
+	}
+
+	public void joinHandle(short cmd, Message message)
+	{
+		Gs.JoinHandle params = (Gs.JoinHandle) message;
+		SocietyManager.handleReqJoin(params,player);
+	}
+
+	public void getJoinReq(short cmd, Message message)
+	{
+		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			List<Gs.JoinReq> list = SocietyManager.getJoinReqList(societyId, player.id());
+			if (list != null)
+			{
+				this.write(Package.create(cmd, Gs.JoinReqList.newBuilder().addAllReqs(list).build()));
+			}
+		}
+	}
+
 	//===========================================================
 
 	//llb========================================================

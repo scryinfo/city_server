@@ -1,25 +1,33 @@
 package Game;
 
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
+
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import Shared.Util;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
 import gs.Gs;
 import gscode.GsCode;
-import org.apache.log4j.Logger;
-
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class City {
     public static final UUID SysRoleId = UUID.nameUUIDFromBytes(new byte[16]);
@@ -404,6 +412,15 @@ public class City {
         assert building.type() != MetaBuilding.TRIVIAL;
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
+        //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
+        if(allBuilding!=null&&allBuilding.size()>=100){
+        	GameSession gs = GameServer.allGameSessions.get(building.id());
+        	gs.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+        			.setType(5)
+        			.setNum(allBuilding.size())
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+        }
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
