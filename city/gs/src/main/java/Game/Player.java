@@ -111,7 +111,7 @@ public class Player {
 
     public static final class Info {
         public Info(UUID id, String name, String companyName, boolean male, String des,
-                    int faceId, long createTs)
+                    String faceId, long createTs)
         {
             this.id = id;
             this.name = name;
@@ -126,7 +126,7 @@ public class Player {
         String companyName;
         String des;
         boolean male;
-        int faceId;
+        String faceId;
         long createTs;
 
         public String getDes()
@@ -139,7 +139,7 @@ public class Player {
             return male;
         }
 
-        public int getFaceId()
+        public String getFaceId()
         {
             return faceId;
         }
@@ -207,7 +207,7 @@ public class Player {
     private boolean male;
 
     @Column
-    private int faceId = 0;
+    private String faceId = "";
     // for player, it position is GridIndex, Coordinate is too fine-grained
     @Embedded
     private GridIndex position;
@@ -231,7 +231,7 @@ public class Player {
     @Transient
     private GameSession session;
 
-    public Player(String name, String account, boolean male, String companyName, int faceId) {
+    public Player(String name, String account, boolean male, String companyName, String faceId) {
         this.id = UUID.randomUUID();
         this.account = account;
         this.name = name;
@@ -451,7 +451,7 @@ public class Player {
         this.companyName = companyName;
     }
 
-    public int getFaceId()
+    public String getFaceId()
     {
         return faceId;
     }
@@ -461,7 +461,7 @@ public class Player {
         return createTs;
     }
 
-    public void setFaceId(int faceId)
+    public void setFaceId(String faceId)
     {
         this.faceId = faceId;
     }

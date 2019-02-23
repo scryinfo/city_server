@@ -1400,7 +1400,7 @@ public class GameSession {
 			from_id = fr.getFrom_id();
 			String name = "";
 			String companyName = "";
-			int pic = 0;
+			String pic = "";
 			try
 			{
 				for (Player.Info i :
