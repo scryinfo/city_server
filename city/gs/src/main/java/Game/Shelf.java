@@ -121,4 +121,7 @@ public class Shelf {
         slots.forEach((k,v)->builder.addGood(toProto(k, v)));
         return builder.build();
     }
+    public int getSaleNum(int itemid) {
+        return 0;
+    }
 }

@@ -19,6 +19,10 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
         this.store = new Storage(meta.storeCapacity);
         this.shelf = new Shelf(meta.shelfCapacity);
     }
+    @Override
+    public int getSaleNum(int itemid) {
+        return this.shelf.getSaleNum(itemid);
+    }
     @Transient
     private MetaRetailShop meta;
 

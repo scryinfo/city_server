@@ -19,8 +19,11 @@ public class ProduceDepartment extends FactoryBase {
         super(meta, pos, ownerId);
         this.meta = meta;
     }
-
-    public ProduceDepartment() {
+    @Override
+    public int getSaleNum(int itemid) {
+        return this.shelf.getSaleNum(itemid);
+    }
+    protected ProduceDepartment() {
     }
 
     @Entity

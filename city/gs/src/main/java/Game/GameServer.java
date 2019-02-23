@@ -74,6 +74,7 @@ public class GameServer {
         }
     }
     public GameServer() throws Exception {
+        GameEventDispatcher.getInstance(); //just used to check error when process start run
         ServerCfgDb.init(GlobalConfig.configUri());
         ServerCfgDb.startUp();
         accInfo = ServerCfgDb.getAccountserverInfo();

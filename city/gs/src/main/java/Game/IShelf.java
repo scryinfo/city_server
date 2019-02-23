@@ -9,4 +9,6 @@ public interface IShelf {
     Shelf.Content getContent(ItemKey id);
 
     boolean setPrice(ItemKey id, int price);
+
+    int getSaleNum(int itemid);
 }

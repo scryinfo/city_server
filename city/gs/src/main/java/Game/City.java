@@ -326,6 +326,13 @@ public class City {
             bs.values().forEach(f);
         }
     }
+    public void forAllGrid(Consumer<Grid> f) {
+        for(int i = 0; i < this.grids.length; ++i) {
+            for(int j = 0; j < this.grids[i].length; ++j) {
+                f.accept(this.grids[i][j]);
+            }
+        }
+    }
     private void updateVisibilityRelocate(Player p, GridIndex old) {
         GridDiffs diffs = this.diff(p.getPosition().toSyncRange(), old.toSyncRange());
         ArrayList<GridIndex> goingGrids = diffs.l;

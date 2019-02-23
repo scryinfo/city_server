@@ -19,6 +19,11 @@ public class MaterialFactory extends FactoryBase {
     public MaterialFactory() {
     }
 
+    @Override
+    public int getSaleNum(int itemid) {
+        return this.shelf.getSaleNum(itemid);
+    }
+
     @Entity
     public final static class Line extends LineBase {
         protected Line(){}

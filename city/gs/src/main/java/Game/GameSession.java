@@ -21,8 +21,10 @@ import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
 import java.lang.reflect.Method;
+import java.time.chrono.IsoChronology;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -384,6 +386,31 @@ public class GameSession {
 			return;
 		b.shutdownBusiness();
 		this.write(Package.create(cmd));
+	}
+
+	public void queryMakertSummary(short cmd, Message message) {
+		Gs.Num c = (Gs.Num)message;
+		MetaItem mi = MetaData.getItem(c.getNum());
+		if(mi == null)
+			return;
+		Gs.MarketSummary.Builder builder = Gs.MarketSummary.newBuilder();
+		City.instance().forAllGrid((grid)->{
+			AtomicInteger n = new AtomicInteger(0);
+			grid.forAllBuilding(building -> {
+				if(building instanceof IShelf) {
+					IShelf s = (IShelf)building;
+					n.addAndGet(s.getSaleNum(mi.id));
+				}
+			});
+			builder.addInfoBuilder()
+					.setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
+					.setItemId(mi.id)
+					.setNum(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+	public void queryGroundSummary(short cmd) {
+
 	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
