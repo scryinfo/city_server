@@ -20,11 +20,13 @@ public class GroundInfo implements Serializable {
     public static final int CAN_BUILD = OWN | RENTING;
     @Id
     @Column(name = "x", nullable = false)
-    public int x;
+    private int x;
     @Id
     @Column(name = "y", nullable = false)
-    public int y;
-
+    private int y;
+    public Coordinate coordinate() {
+        return new Coordinate(x, y);
+    }
     int rentPreDay;
     int rentDaysMin;
     int rentDaysMax;
@@ -149,14 +151,9 @@ public class GroundInfo implements Serializable {
 
     public void buyGround(UUID id)
     {
-        GroundManager.instance().playerGround.computeIfPresent(ownerId,(k,v)->{
-            v.remove(this);
-            return v;
-        });
         this.ownerId = id;
         this.sellPrice = 0;
         this.status = GroundStatus.STATELESS;
-        GroundManager.instance().playerGround.computeIfAbsent(ownerId, k->new HashSet<>()).add(this);
     }
 
     public void renting(RentPara rentPara)

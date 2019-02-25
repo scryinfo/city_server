@@ -410,7 +410,7 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 	public void queryGroundSummary(short cmd) {
-
+		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
 	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
@@ -1083,8 +1083,6 @@ public class GameSession {
 		for(Gs.MiniIndex i : c.getInfo().getCoordList()) {
 			coordinates.add(new Coordinate(i));
 		}
-		if(player.money() < rentPara.requiredCost() * coordinates.size())
-			return;
 		if(GroundManager.instance().rentGround(player, coordinates, rentPara)) {
 			this.write(Package.create(cmd, c));
 		}

@@ -20,9 +20,6 @@ public class RentPara {
     int rentDays;
     int rentDaysMin;
     int rentDaysMax;
-    public int requiredCost() {
-        return rentPreDay * rentDays;
-    }
     public int requiredPay() {
         return rentPreDay * rentDays;
     }
