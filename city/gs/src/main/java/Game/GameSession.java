@@ -317,6 +317,8 @@ public class GameSession {
 
 	public void createRole(short cmd, Message message) {
 		Gs.CreateRole c = (Gs.CreateRole)message;
+		if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN)
+			return;
 		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
 		p.addMoney(999999999);
 		if(!GameDb.createPlayer(p)) {
@@ -406,6 +408,13 @@ public class GameSession {
 					.setNum(n.intValue());
 		});
 		this.write(Package.create(cmd, builder.build()));
+	}
+	public void setRoleFaceId(short cmd, Message message) {
+		Gs.Str c = (Gs.Str) message;
+		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
+			return;
+		this.player.setFaceId(c.getStr());
+		GameDb.saveOrUpdate(player);
 	}
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));

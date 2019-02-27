@@ -25,6 +25,7 @@ import java.util.*;
         EvictListener.class,
 })
 public class Player {
+    public static final int MAX_FACE_ID_LEN = 100;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
