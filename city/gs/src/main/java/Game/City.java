@@ -326,6 +326,13 @@ public class City {
             bs.values().forEach(f);
         }
     }
+    public void forEachGrid(GridIndexPair range, Consumer<Grid> f) {
+        for(int x = range.l.x; x <= range.r.x; ++x)
+        {
+            for(int y = range.l.y; y <= range.r.y; ++y)
+                f.accept(grids[x][y]);
+        }
+    }
     public void forAllGrid(Consumer<Grid> f) {
         for(int i = 0; i < this.grids.length; ++i) {
             for(int j = 0; j < this.grids[i].length; ++j) {

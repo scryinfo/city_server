@@ -18,10 +18,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 
 import java.lang.reflect.Method;
-import java.time.chrono.IsoChronology;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -388,7 +386,7 @@ public class GameSession {
 		this.write(Package.create(cmd));
 	}
 
-	public void queryMakertSummary(short cmd, Message message) {
+	public void queryMarketSummary(short cmd, Message message) {
 		Gs.Num c = (Gs.Num)message;
 		MetaItem mi = MetaData.getItem(c.getNum());
 		if(mi == null)
@@ -399,7 +397,7 @@ public class GameSession {
 			grid.forAllBuilding(building -> {
 				if(building instanceof IShelf) {
 					IShelf s = (IShelf)building;
-					n.addAndGet(s.getSaleNum(mi.id));
+					n.addAndGet(s.getSaleCount(mi.id));
 				}
 			});
 			builder.addInfoBuilder()
@@ -412,6 +410,26 @@ public class GameSession {
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
 	}
+    public void queryMarketDetail(short cmd, Message message) {
+	    Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
+        GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+        Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
+        City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(building instanceof IShelf) {
+					IShelf s = (IShelf)building;
+					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
+						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+					});
+				}
+			});
+        });
+        this.write(Package.create(cmd, builder.build()));
+    }
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
