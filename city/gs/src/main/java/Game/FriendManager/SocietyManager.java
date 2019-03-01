@@ -9,7 +9,8 @@ import Shared.Util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import common.Common;
 import gs.Gs;
 import gscode.GsCode;
@@ -21,9 +22,6 @@ public class SocietyManager
 {
     private static LoadingCache<UUID, Society> societyCache = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
-            .expireAfterAccess(Duration.ofMinutes(10))
-            .removalListener(objectInfo ->
-                    GameDb.evict(objectInfo.getValue()))
             .build(new CacheLoader<UUID, Society>()
             {
                 @Override
@@ -33,10 +31,14 @@ public class SocietyManager
                 }
 
             });
-    private static ImmutableSet<Integer> modifyPermission = ImmutableSet.of(
-            Gs.SocietyMember.Identity.ADMINISTRATOR_VALUE,
-            Gs.SocietyMember.Identity.CHAIRMAN_VALUE,
-            Gs.SocietyMember.Identity.VICE_CHAIRMAN_VALUE
+
+    private static final int modifyLevel = 8;
+    private static final int chairmanLevel = 10;
+    private static ImmutableMap<Gs.SocietyMember.Identity, Integer> permissionLevel = ImmutableMap.of(
+            Gs.SocietyMember.Identity.CHAIRMAN, chairmanLevel,
+            Gs.SocietyMember.Identity.VICE_CHAIRMAN, 9,
+            Gs.SocietyMember.Identity.ADMINISTRATOR, modifyLevel,
+            Gs.SocietyMember.Identity.MEMBER, 7
     );
 
     private static final long modifyInterval = 7 * 24 * 3600 * 1000;
@@ -50,7 +52,7 @@ public class SocietyManager
         if (System.currentTimeMillis() - lastQueryTime > queryInterval)
         {
             GameDb.getAllSociety().forEach(society ->
-                    societyInfoMap.put(society.getId(),society.toProto(true)));
+                    societyInfoMap.put(society.getId(),society.toSimpleProto()));
             lastQueryTime = System.currentTimeMillis();
         }
         return societyInfoMap.values();
@@ -62,10 +64,19 @@ public class SocietyManager
         if (GameDb.saveOrUpdSociety(society))
         {
             societyCache.put(society.getId(), society);
-            societyInfoMap.put(society.getId(), society.toProto(true));
+            societyInfoMap.put(society.getId(), society.toSimpleProto());
             return society;
         }
         return null;
+    }
+
+    public static Gs.SocietyInfo toSocietyDetailProto(Society society,Player player)
+    {
+        if (canModify(society.getIdentity(player.id())))
+        {
+            return society.toDetailProto(true);
+        }
+        return society.toDetailProto(false);
     }
 
     public static Society getSociety(UUID uuid)
@@ -73,19 +84,50 @@ public class SocietyManager
         return societyCache.getUnchecked(uuid);
     }
 
-    public static void increaseCount(UUID societyId)
+    public static void broadOnline(Player player)
     {
-        societyCache.getUnchecked(societyId).increaseCount();
+        if (player.getSocietyId() != null)
+        {
+            Society society = societyCache.getUnchecked(player.getSocietyId());
+            Gs.MemberChange.Builder builder = Gs.MemberChange.newBuilder();
+            builder.setSocietyId(Util.toByteString(society.getId()))
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setType(Gs.MemberChange.ChangeType.ONLINE);
+            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                    Gs.MemberChanges.newBuilder()
+                            .addAllChangeLists(Collections.singletonList(builder.build()))
+                            .build()));
+        }
     }
 
-    public static void decrementCount(UUID societyId)
+    //必须在allGameSessions.remove(id())之后调用
+    public static void broadOffline(Player player)
     {
-        Society society = societyCache.getIfPresent(societyId);
-        if (society != null && society.decrementCount() < 1)
+        if (player.getSocietyId() != null)
         {
-            societyCache.invalidate(society);
-            GameDb.evict(society);
+            Society society = societyCache.getUnchecked(player.getSocietyId());
+            Gs.MemberChange.Builder builder = Gs.MemberChange.newBuilder();
+            builder.setSocietyId(Util.toByteString(society.getId()))
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setType(Gs.MemberChange.ChangeType.OFFLINE);
+
+            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                    Gs.MemberChanges.newBuilder()
+                            .addAllChangeLists(Collections.singletonList(builder.build()))
+                            .build()));
+            if (Sets.intersection(GameServer.allGameSessions.keySet(),
+                    new HashSet<>(society.getMemberIds())).isEmpty())
+            {
+                societyCache.invalidate(society.getId());
+                GameDb.evict(society);
+            }
         }
+    }
+
+    private static boolean canModify(int identity)
+    {
+        return permissionLevel.get(Gs.SocietyMember.Identity.valueOf(
+                identity)) >= modifyLevel;
     }
 
     public static void modifySocietyName(UUID societyId, String name,
@@ -93,7 +135,7 @@ public class SocietyManager
     {
         Society society = societyCache.getUnchecked(societyId);
         if (society != null
-                && modifyPermission.contains(society.getIdentity(gameSession.getPlayer().id())))
+                && canModify(society.getIdentity(gameSession.getPlayer().id())))
         {
             if (System.currentTimeMillis() - society.getLastModify() < modifyInterval)
             {
@@ -118,7 +160,7 @@ public class SocietyManager
 
                     GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
                     GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
-                    societyInfoMap.put(society.getId(), society.toProto(true));
+                    societyInfoMap.put(society.getId(), society.toSimpleProto());
                 }
                 else
                 {
@@ -136,7 +178,7 @@ public class SocietyManager
     {
         Society society = societyCache.getUnchecked(societyId);
         if (society != null
-                && modifyPermission.contains(society.getIdentity(gameSession.getPlayer().id())))
+                && canModify(society.getIdentity(gameSession.getPlayer().id())))
         {
             society.setDeclaration(declaration);
             Society.SocietyNotice notice = new Society.SocietyNotice(gameSession.getPlayer().id(),
@@ -161,7 +203,7 @@ public class SocietyManager
     {
         Society society = societyCache.getUnchecked(societyId);
         if (society != null
-                && modifyPermission.contains(society.getIdentity(gameSession.getPlayer().id())))
+                && canModify(society.getIdentity(gameSession.getPlayer().id())))
         {
             society.setIntroduction(introduction);
             Society.SocietyNotice notice = new Society.SocietyNotice(gameSession.getPlayer().id(),
@@ -177,7 +219,7 @@ public class SocietyManager
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
             GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
-            societyInfoMap.put(society.getId(), society.toProto(true));
+            societyInfoMap.put(society.getId(), society.toSimpleProto());
         }
     }
 
@@ -192,8 +234,6 @@ public class SocietyManager
             Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
             builder.setSocietyId(Util.toByteString(societyId))
                     .setPlayerId(Util.toByteString(player.id()))
-                    .setPlayerFaceId(player.getFaceId())
-                    .setPlayerName(player.getName())
                     .setDescription(descp);
             GameServer.sendTo(getmodifyPermissionIds(society),
                     Package.create(GsCode.OpCode.newJoinReq_VALUE, builder.build()));
@@ -206,7 +246,7 @@ public class SocietyManager
     {
         List<UUID> list = new ArrayList<>();
         society.getMemberHashMap().forEach((k,v)->{
-            if (modifyPermission.contains(v.getIdentity()))
+            if (canModify(v.getIdentity()))
             {
                 list.add(k);
             }
@@ -223,13 +263,16 @@ public class SocietyManager
             UUID reqId = Util.toUuid(params.getPlayerId().toByteArray());
             if (society != null &&
                     !society.getMemberIds().contains(reqId)
-                    && modifyPermission.contains(society.getIdentity(handler.id())))
+                    && canModify(society.getIdentity(handler.id())))
             {
                 Player reqPlayer = GameDb.queryPlayer(reqId);
                 Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
                 society.getJoinMap().remove(reqId);
-                List<Object> updateList = new ArrayList<>();
-                updateList.add(society);
+                GameDb.saveOrUpdate(society);
+                boolean isSuccess = false;
+                Society.SocietyNotice notice = new Society.SocietyNotice(handler.id(),
+                        reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);
+
                 //已加入其他公会
                 if (reqPlayer.getSocietyId() != null)
                 {
@@ -240,23 +283,25 @@ public class SocietyManager
                 }
                 else if (params.getIsAgree())
                 {
-
+                    isSuccess = true;
                     society.getMemberHashMap().put(reqId,
                             new Society.SocietyMember(Gs.SocietyMember.Identity.MEMBER_VALUE));
-                    Society.SocietyNotice notice = new Society.SocietyNotice(handler.id(),
-                            reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);
                     society.addNotice(notice);
                     reqPlayer.setSocietyId(societyId);
-                    updateList.add(reqPlayer);
+                    GameDb.saveOrUpdate(Arrays.asList(reqPlayer,society));
+
                     builder.setSocietyId(Util.toByteString(societyId))
                             .setPlayerId(Util.toByteString(reqId))
                             .setHandleId(Util.toByteString(handler.id()))
                             .setServerFlag(true)
                             .setHandleFlag(true);
-                    //给申请人发送加入公会ID
-                    GameServer.sendTo(Collections.singletonList(reqId),
-                            Package.create(GsCode.OpCode.joinHandle_VALUE,
-                                    Gs.Id.newBuilder().setId(Util.toByteString(societyId)).build()));
+                    /**
+                     * TODO:
+                     * 2019/2/25
+                     * 发送邮件给申请人入会成功
+                     */
+
+
                 }
                 //拒绝
                 else
@@ -272,34 +317,188 @@ public class SocietyManager
                      * 发送邮件给申请人入会请求被拒绝 reqId
                      */
                 }
-
-                GameDb.saveOrUpdate(updateList);
                 //通知权限人清除该请求
                 GameServer.sendTo(getmodifyPermissionIds(society),
                         Package.create(GsCode.OpCode.delJoinReq_VALUE, builder.build()));
+
+                if (isSuccess)
+                {
+                    Gs.MemberChange.Builder mchange = Gs.MemberChange.newBuilder();
+                    mchange.setSocietyId(Util.toByteString(societyId))
+                            .setPlayerId(Util.toByteString(reqId))
+                            .setType(Gs.MemberChange.ChangeType.JOIN)
+                            .setInfo(society.getMemberHashMap().get(reqId).toProto(societyId, reqId));
+                    //通知所有人角色变更
+                    GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                            Gs.MemberChanges.newBuilder()
+                                    .addAllChangeLists(Collections.singletonList(mchange.build()))
+                                    .build()));
+                    //给申请人发送加入公会ID
+                    GameServer.sendTo(Collections.singletonList(reqId),
+                            Package.create(GsCode.OpCode.joinHandle_VALUE,
+                                    Gs.Id.newBuilder().setId(Util.toByteString(societyId)).build()));
+                    //入会公告
+                    GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                            notice.toProto(societyId)));
+
+                }
             }
         }
     }
 
-    public static List<Gs.JoinReq> getJoinReqList(UUID societyId, UUID playerId)
+
+    public static boolean exitSociety(UUID societyId, Player player)
     {
         Society society = societyCache.getUnchecked(societyId);
-        List<Gs.JoinReq> lists = new ArrayList<>();
         if (society != null &&
-                modifyPermission.contains(society.getIdentity(playerId)))
+                permissionLevel.get(
+                        Gs.SocietyMember.Identity.valueOf(society.getIdentity(player.id())))
+                        != chairmanLevel)
         {
-            society.getJoinMap().forEach((k,v)->{
-                Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
-                Player player = GameDb.queryPlayer(k);
-                builder.setSocietyId(Util.toByteString(societyId))
-                        .setPlayerId(Util.toByteString(k))
-                        .setDescription(v)
-                        .setPlayerName(player.getName())
-                        .setPlayerFaceId(player.getFaceId());
-                lists.add(builder.build());
-            });
-            return lists;
+            player.setSocietyId(null);
+            society.getMemberHashMap().remove(player.id());
+            Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), null,
+                    Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE);
+            society.addNotice(notice);
+            GameDb.saveOrUpdate(Arrays.asList(player, society));
+
+
+            Gs.MemberChange.Builder mChange = Gs.MemberChange.newBuilder();
+            mChange.setSocietyId(Util.toByteString(societyId))
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setType(Gs.MemberChange.ChangeType.EXIT);
+
+            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                    Gs.MemberChanges.newBuilder()
+                            .addAllChangeLists(Collections.singletonList(mChange.build()))
+                            .build()));
+
+            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                    notice.toProto(societyId)));
+
+            return true;
         }
-        return null;
+        return false;
+    }
+
+    public static boolean kickMember(UUID societyId, Player player, UUID kickId)
+    {
+        Society society = societyCache.getUnchecked(societyId);
+        if (society != null && society.getMemberIds().contains(kickId))
+        {
+            if (canOperation(society,player.id(),kickId))
+            {
+                Player kickPlayer = GameDb.queryPlayer(kickId);
+                kickPlayer.setSocietyId(null);
+                society.getMemberHashMap().remove(kickId);
+                Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), kickId,
+                        Gs.SocietyNotice.NoticeType.KICK_OUT_SOCIETY_VALUE);
+                society.addNotice(notice);
+                GameDb.saveOrUpdate(Arrays.asList(kickPlayer, society));
+
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                        notice.toProto(societyId)));
+                Gs.MemberChange.Builder mChange = Gs.MemberChange.newBuilder();
+                mChange.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(kickId))
+                        .setType(Gs.MemberChange.ChangeType.EXIT);
+
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.memberChange_VALUE,
+                        Gs.MemberChanges.newBuilder()
+                                .addAllChangeLists(Collections.singletonList(mChange.build()))
+                                .build()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean canOperation(Society society, UUID drivingId, UUID affectId)
+    {
+        return permissionLevel.get(society.getIdentityEnum(drivingId)) >
+                permissionLevel.get(society.getIdentityEnum(affectId));
+    }
+
+    public static boolean appointerPost(Player player, Gs.AppointerReq params)
+    {
+        UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+        UUID appointId = Util.toUuid(params.getPlayerId().toByteArray());
+        boolean isSuccess = false;
+        Society society = societyCache.getUnchecked(societyId);
+        if (society != null && society.getMemberIds().contains(appointId)
+                && canOperation(society, player.id(), appointId))
+        {
+            Gs.SocietyMember.Identity identity = params.getIdentity();
+            Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), appointId,
+                    getTypeByIdentity(identity).getNumber());
+            if (identity.equals(Gs.SocietyMember.Identity.CHAIRMAN) &&
+                    society.getIdentity(player.id()) == Gs.SocietyMember.Identity.CHAIRMAN_VALUE
+                    && society.getCreateId().equals(player.id()))
+            {
+                society.setCreateId(appointId);
+                society.getMemberHashMap().get(player.id()).setIdentity(Gs.SocietyMember.Identity.MEMBER_VALUE);
+                society.getMemberHashMap().get(appointId).setIdentity(Gs.SocietyMember.Identity.CHAIRMAN_VALUE);
+                society.addNotice(notice);
+                GameDb.saveOrUpdate(society);
+                societyInfoMap.put(societyId, society.toSimpleProto());
+
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                        notice.toProto(societyId)));
+                Gs.MemberChange.Builder mChange = Gs.MemberChange.newBuilder();
+                mChange.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(appointId))
+                        .setType(Gs.MemberChange.ChangeType.IDENTITY)
+                        .setIdentity(identity);
+                Gs.MemberChange.Builder mChange1 = Gs.MemberChange.newBuilder();
+                mChange1.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(player.id()))
+                        .setType(Gs.MemberChange.ChangeType.IDENTITY)
+                        .setIdentity(Gs.SocietyMember.Identity.MEMBER);
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.memberChange_VALUE,
+                        Gs.MemberChanges.newBuilder()
+                                .addAllChangeLists(Arrays.asList(mChange.build(), mChange1.build()))
+                                .build()));
+
+                isSuccess = true;
+            }
+            else if (permissionLevel.get(society.getIdentityEnum(player.id())) >
+                    permissionLevel.get(identity))
+            {
+                society.getMemberHashMap().get(appointId).setIdentity(identity.getNumber());
+
+                society.addNotice(notice);
+                GameDb.saveOrUpdate(society);
+
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                        notice.toProto(societyId)));
+
+                Gs.MemberChange.Builder mChange = Gs.MemberChange.newBuilder();
+                mChange.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(appointId))
+                        .setType(Gs.MemberChange.ChangeType.IDENTITY)
+                        .setIdentity(identity);
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.memberChange_VALUE,
+                        Gs.MemberChanges.newBuilder()
+                                .addAllChangeLists(Collections.singletonList(mChange.build()))
+                                .build()));
+                isSuccess = true;
+            }
+        }
+        return isSuccess;
+    }
+
+    private static Gs.SocietyNotice.NoticeType getTypeByIdentity(Gs.SocietyMember.Identity identity)
+    {
+        switch (identity) {
+            case VICE_CHAIRMAN:
+                return Gs.SocietyNotice.NoticeType.APPOINT_TO_VICE_CHAIRMAN;
+            case ADMINISTRATOR:
+                return Gs.SocietyNotice.NoticeType.APPOINT_TO_ADMINISTRATOR;
+            case CHAIRMAN:
+                return Gs.SocietyNotice.NoticeType.APPOINT_TO_CHAIRMAN;
+            case MEMBER:
+            default:
+                return Gs.SocietyNotice.NoticeType.APPOINT_TO_MEMBER;
+        }
     }
 }

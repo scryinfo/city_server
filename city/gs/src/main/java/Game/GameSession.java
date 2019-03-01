@@ -277,7 +277,8 @@ public class GameSession {
 		GameServer.allGameSessions.remove(id());
 		if (player.getSocietyId() != null)
 		{
-			SocietyManager.decrementCount(player.getSocietyId());
+			//必须在allGameSessions.remove(id())之后调用
+			SocietyManager.broadOffline(player);
 		}
 		Validator.getInstance().unRegist(accountName, token);
 	}
@@ -310,7 +311,7 @@ public class GameSession {
 		player.online();
 		if (player.getSocietyId() != null)
 		{
-			SocietyManager.increaseCount(player.getSocietyId());
+			SocietyManager.broadOnline(player);
 		}
 		sendSocialInfo();
 	}
@@ -1662,12 +1663,6 @@ public class GameSession {
 		{
 			return;
 		}
-		int cost = 10000;
-		if (player.money() < cost)
-		{
-			this.write(Package.fail(cmd,Common.Fail.Reason.moneyNotEnough));
-			return;
-		}
 		Society society = SocietyManager.createSociety(player.id(), name, declaration);
 		if (society == null)
 		{
@@ -1676,9 +1671,8 @@ public class GameSession {
 		else
 		{
 			player.setSocietyId(society.getId());
-			player.decMoney(cost);
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd, society.toProto(false)));
+			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
 		}
 	}
 
@@ -1721,7 +1715,7 @@ public class GameSession {
 		if (societyId.equals(player.getSocietyId()))
 		{
 			Society society = SocietyManager.getSociety(societyId);
-			this.write(Package.create(cmd, society.toProto(false)));
+			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
 		}
 	}
 
@@ -1741,7 +1735,7 @@ public class GameSession {
 		{
 			if (SocietyManager.reqJoinSociety(societyId,player,str))
 			{
-				this.write(Package.create(cmd));
+				this.write(Package.create(cmd,message));
 			}
 		}
 	}
@@ -1752,15 +1746,59 @@ public class GameSession {
 		SocietyManager.handleReqJoin(params,player);
 	}
 
-	public void getJoinReq(short cmd, Message message)
+	public void exitSociety(short cmd, Message message)
 	{
 		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
 		if (societyId.equals(player.getSocietyId()))
 		{
-			List<Gs.JoinReq> list = SocietyManager.getJoinReqList(societyId, player.id());
-			if (list != null)
+			if (SocietyManager.exitSociety(societyId, player))
 			{
-				this.write(Package.create(cmd, Gs.JoinReqList.newBuilder().addAllReqs(list).build()));
+				this.write(Package.create(cmd,
+						Gs.ByteBool.newBuilder()
+						.setB(true)
+						.setId(Util.toByteString(societyId))
+						.build()));
+			}
+		}
+	}
+
+	public void appointerPost(short cmd, Message message)
+	{
+		Gs.AppointerReq params = (Gs.AppointerReq) message;
+		UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			if (SocietyManager.appointerPost(player,params))
+			{
+				this.write(Package.create(cmd, message));
+			}
+		}
+	}
+
+	public void kickMember(short cmd, Message message)
+	{
+		Gs.Ids params = (Gs.Ids) message;
+		UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			if (SocietyManager.kickMember(societyId, player,
+					Util.toUuid(params.getPlayerId().toByteArray())))
+			{
+				this.write(Package.create(cmd, message));
+				GameSession session = GameServer.allGameSessions.get(Util.toUuid(params.getPlayerId().toByteArray()));
+				if (session != null)
+				{
+					session.write(Package.create(GsCode.OpCode.exitSociety_VALUE,
+							Gs.ByteBool.newBuilder()
+									.setB(false)
+									.setId(Util.toByteString(societyId))
+									.build()));
+				}
+				/**
+				 * TODO:
+				 * 2019/2/25
+				 * 邮件通知被踢出公会
+				 */
 			}
 		}
 	}

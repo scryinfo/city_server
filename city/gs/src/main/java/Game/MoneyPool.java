@@ -31,8 +31,7 @@ public class MoneyPool {
         this.n += n;
         //城市奖金池突破,奖金池达到1000,发送广播给前端,包括奖金池金额，时间 
         if(n>=1000){
-        	GameSession gs = GameServer.allGameSessions.get(id);
-        	gs.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
         			.setType(4)
         			.setCost(n)
                     .setTs(System.currentTimeMillis())

@@ -428,8 +428,7 @@ public class City {
         this.allBuilding.put(building.id(), building);
         //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
         if(allBuilding!=null&&allBuilding.size()>=100){
-        	GameSession gs = GameServer.allGameSessions.get(building.id());
-        	gs.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
         			.setType(5)
         			.setNum(allBuilding.size())
                     .setTs(System.currentTimeMillis())

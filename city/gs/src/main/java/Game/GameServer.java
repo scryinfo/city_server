@@ -63,6 +63,11 @@ public class GameServer {
             }
         });
     }
+
+    public static boolean isOnline(UUID id)
+    {
+        return allGameSessions.get(id) != null;
+    }
     public static void sendToAll(Package pack) {
         allClientChannels.writeAndFlush(pack);
     }
