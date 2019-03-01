@@ -37,6 +37,9 @@ public abstract class LineBase {
     @Column(nullable = false)
     boolean suspend = false;
 
+    @Column(nullable = false)
+    long ts = 0;      //生产开始时间
+
     protected LineBase() {
     }
     public abstract ItemKey newItemKey(UUID producerId, int qty);
@@ -56,6 +59,7 @@ public abstract class LineBase {
         this.targetNum = targetNum;
         this.workerNum = workerNum;
         this.itemLevel = itemLevel;
+        this.ts = System.currentTimeMillis();
     }
 
     Gs.Line toProto() {

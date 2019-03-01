@@ -29,8 +29,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract LineBase addLineImpl(MetaItem m, int workerNum, int targetNum, int itemLevel);
     public LineBase addLine(MetaItem m, int workerNum, int targetNum, int itemLevel) {
         LineBase l = this.addLineImpl(m, workerNum, targetNum, itemLevel);
+
         if(l != null)
-            this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(l.toProto()).build()));
+            this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(l.toProto()).setTs(l.ts).build()));
         return l;
     }
     @Override
