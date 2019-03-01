@@ -69,6 +69,7 @@ public abstract class LineBase {
                 .setNowCount(count)
                 .setTargetCount(targetNum)
                 .setWorkerNum(workerNum)
+                .setTs(ts)
                 .build();
     }
 
