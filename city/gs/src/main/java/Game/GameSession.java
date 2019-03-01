@@ -1095,6 +1095,14 @@ public class GameSession {
 		RentPara rentPara = new RentPara(c.getRentPreDay(),c.getRentDaysMin(), c.getRentDaysMax());
 		if(!rentPara.valid())
 			return;
+		if(c.getRentPreDay()>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setCost(c.getRentPreDay())
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		List<Coordinate> coordinates = new ArrayList<>(c.getCoordCount());
 		for(Gs.MiniIndex i : c.getCoordList()) {
 			coordinates.add(new Coordinate(i));
