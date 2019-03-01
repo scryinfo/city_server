@@ -90,10 +90,7 @@ public class GroundManager {
             }
         });
         for(UUID tid : del) {
-            rentGround.remove(tid).forEach(gi->this.summaryInfo.compute(gi.coordinate().toGridIndex(), (k,v)->{
-                v.rentingCount--;
-                return v;
-            }));
+            rentGround.remove(tid).forEach(gi->this.summaryInfo.get(gi.coordinate().toGridIndex()).rentingCount--);
         }
     }
     // role id --> all grounds belong to this role
@@ -247,10 +244,7 @@ public class GroundManager {
             GroundInfo i = info.get(c);
             i.rented(rentPara, tid, renter.id(), now);
             gis.add(i);
-            this.summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{
-                v.rentingCount--;
-                return v;
-            });
+            this.summaryInfo.get(i.coordinate().toGridIndex()).rentingCount--;
         }
         GameDb.saveOrUpdate(Arrays.asList(owner, renter, this));
         this.rentGround.put(tid, new HashSet<>(gis));
@@ -286,10 +280,7 @@ public class GroundManager {
                 return false;
             gis.add(i);
             if(!i.inSelling())
-                summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{
-                    v.sellingCount++;
-                    return v;
-                });
+                summaryInfo.get(i.coordinate().toGridIndex()).sellingCount++;
         }
         gis.forEach(i->{
             i.sell(price);
@@ -362,7 +353,7 @@ public class GroundManager {
             return v;
         });
         playerGround.computeIfAbsent(seller, k->new HashSet<>()).add(info);
-        summaryInfo.compute(info.coordinate().toGridIndex(), (k,v)->{v.sellingCount--;return v;});
+        summaryInfo.get(info.coordinate().toGridIndex()).sellingCount--;
     }
 
     public void addGround(UUID id, Collection<Coordinate> area) throws GroundAlreadySoldException {
@@ -377,6 +368,7 @@ public class GroundManager {
             info.put(c, i);
             gis.add(i);
             playerGround.computeIfAbsent(id, k->new HashSet<>()).add(i);
+            this.summaryInfo.computeIfAbsent(i.coordinate().toGridIndex(), k->new SummaryInfo());
         }
         this.broadcast(gis);
     }
@@ -391,7 +383,7 @@ public class GroundManager {
         }
         gis.forEach(i->{
             i.cancelSell();
-            summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{v.sellingCount--;return v;});
+            summaryInfo.get(i.coordinate().toGridIndex()).sellingCount--;
         });
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);
@@ -408,7 +400,7 @@ public class GroundManager {
         }
         gis.forEach(i->{
             i.endRent();
-            summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{v.rentingCount--;return v;});
+            summaryInfo.get(i.coordinate().toGridIndex()).rentingCount--;
         });
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);

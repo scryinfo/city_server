@@ -493,6 +493,7 @@ public class GameSession {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
 		Item item = new Item(c.getItem());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+
 		Building building = City.instance().getBuilding(id);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 			return;
