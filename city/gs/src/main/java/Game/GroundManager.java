@@ -235,6 +235,16 @@ public class GroundManager {
 
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(cost);
+        
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(owner.id()))
+                    .setBuyerId(Util.toByteString(renter.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 
         LogDb.rentGround(renter.id(), ownerId, cost, plist1);
         UUID tid = UUID.randomUUID();
@@ -310,6 +320,15 @@ public class GroundManager {
         Player seller = GameDb.queryPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(seller.id()))
+                    .setBuyerId(Util.toByteString(buyer.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
         List<LogDb.Positon> plist1 = new ArrayList<>();
         List<Gs.MiniIndex> miniIndexList = new ArrayList<>();
         for(Coordinate c : coordinates)
