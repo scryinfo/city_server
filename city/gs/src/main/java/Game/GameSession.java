@@ -1167,6 +1167,14 @@ public class GameSession {
 		Gs.GroundSale c = (Gs.GroundSale)message;
 		if(c.getPrice() <= 0)
 			return;
+		if(c.getPrice()>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setPlayerId(Util.toByteString(player.id()))
+                    .setCost(c.getPrice())
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		Set<Coordinate> coordinates = new HashSet<>();
 		for(Gs.MiniIndex i : c.getCoordList()) {
 			coordinates.add(new Coordinate(i));
