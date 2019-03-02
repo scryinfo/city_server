@@ -586,6 +586,15 @@ public class GameSession {
 				.setCount(itemBuy.n)
 				.build());
 		player.decMoney(cost);
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(seller.id()))
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		player.decMoney(freight);
 
 
@@ -635,14 +644,6 @@ public class GameSession {
 		player.lockMoney(orderId, cost);
 		s.markOrder(orderId);
 		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
-		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-					.setType(1)
-                    .setPlayerId(Util.toByteString(player.id()))
-                    .setCost(cost)
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-		}
 		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
 	}
 	public void exchangeSell(short cmd, Message message) {
@@ -1036,6 +1037,15 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
+		if(slot.rentPreDay>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(owner.id()))
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setCost(slot.rentPreDay)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -1170,14 +1180,6 @@ public class GameSession {
 		Gs.GroundSale c = (Gs.GroundSale)message;
 		if(c.getPrice() <= 0)
 			return;
-		if(c.getPrice()>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-					.setType(1)
-                    .setPlayerId(Util.toByteString(player.id()))
-                    .setCost(c.getPrice())
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-		}
 		Set<Coordinate> coordinates = new HashSet<>();
 		for(Gs.MiniIndex i : c.getCoordList()) {
 			coordinates.add(new Coordinate(i));
@@ -1338,6 +1340,15 @@ public class GameSession {
 			return;
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
+		if(sell.price>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(seller.id()))
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setCost(sell.price)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));

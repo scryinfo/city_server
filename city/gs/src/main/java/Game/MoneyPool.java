@@ -30,7 +30,7 @@ public class MoneyPool {
     public void add(long n) {
         this.n += n;
         //城市奖金池突破,奖金池达到1000,发送广播给前端,包括奖金池金额，时间 
-        if(n>=1000){
+        if(n>=10000000){
         	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
         			.setType(4)
         			.setCost(n)

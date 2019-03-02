@@ -55,11 +55,15 @@ public class Society
     @MapKeyColumn(name = "player_id")
     private Map<UUID, String> joinMap = new HashMap<>();
 
-    @PrePersist
-    @PreUpdate
-    private void updateMemberCount()
+    public void addMember(UUID id, SocietyMember member)
     {
-        this.memberCount = memberHashMap.size();
+        this.memberHashMap.put(id, member);
+        this.memberCount = this.memberHashMap.size();
+    }
+
+    public SocietyMember delMember(UUID id)
+    {
+        return this.memberHashMap.remove(id);
     }
 
     @Transient
@@ -76,7 +80,7 @@ public class Society
         this.lastModify = this.createTs = System.currentTimeMillis();
         this.name = name;
         this.declaration = declaration;
-        this.memberHashMap.put(createId, new SocietyMember(Gs.SocietyMember.Identity.CHAIRMAN_VALUE));
+        addMember(createId, new SocietyMember(Gs.SocietyMember.Identity.CHAIRMAN_VALUE));
         this.noticeList.add(new SocietyNotice(createId, null, Gs.SocietyNotice.NoticeType.CREATE_SOCIETY_VALUE));
     }
 

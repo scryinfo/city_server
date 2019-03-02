@@ -284,7 +284,7 @@ public class SocietyManager
                 else if (params.getIsAgree())
                 {
                     isSuccess = true;
-                    society.getMemberHashMap().put(reqId,
+                    society.addMember(reqId,
                             new Society.SocietyMember(Gs.SocietyMember.Identity.MEMBER_VALUE));
                     society.addNotice(notice);
                     reqPlayer.setSocietyId(societyId);
@@ -328,17 +328,21 @@ public class SocietyManager
                             .setPlayerId(Util.toByteString(reqId))
                             .setType(Gs.MemberChange.ChangeType.JOIN)
                             .setInfo(society.getMemberHashMap().get(reqId).toProto(societyId, reqId));
+
+                    //给申请人发送加入公会信息
+                    GameServer.sendTo(Collections.singletonList(reqId),
+                            Package.create(GsCode.OpCode.joinHandle_VALUE,
+                                    toSocietyDetailProto(society,reqPlayer)));
+
+                    List<UUID> list = society.getMemberIds();
+                    list.remove(reqId);
                     //通知所有人角色变更
-                    GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                    GameServer.sendTo(list,Package.create(GsCode.OpCode.memberChange_VALUE,
                             Gs.MemberChanges.newBuilder()
                                     .addAllChangeLists(Collections.singletonList(mchange.build()))
                                     .build()));
-                    //给申请人发送加入公会ID
-                    GameServer.sendTo(Collections.singletonList(reqId),
-                            Package.create(GsCode.OpCode.joinHandle_VALUE,
-                                    Gs.Id.newBuilder().setId(Util.toByteString(societyId)).build()));
                     //入会公告
-                    GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                    GameServer.sendTo(list,Package.create(GsCode.OpCode.noticeAdd_VALUE,
                             notice.toProto(societyId)));
 
                 }
@@ -356,7 +360,7 @@ public class SocietyManager
                         != chairmanLevel)
         {
             player.setSocietyId(null);
-            society.getMemberHashMap().remove(player.id());
+            society.delMember(player.id());
             Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), null,
                     Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE);
             society.addNotice(notice);
@@ -390,7 +394,7 @@ public class SocietyManager
             {
                 Player kickPlayer = GameDb.queryPlayer(kickId);
                 kickPlayer.setSocietyId(null);
-                society.getMemberHashMap().remove(kickId);
+                society.delMember(kickId);
                 Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), kickId,
                         Gs.SocietyNotice.NoticeType.KICK_OUT_SOCIETY_VALUE);
                 society.addNotice(notice);
