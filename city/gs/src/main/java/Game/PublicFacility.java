@@ -290,15 +290,6 @@ public class PublicFacility extends Building {
                         owner.addMoney(v.slot.rentPreDay);
                         v.payTs = now;
                     }
-            		if(v.slot.rentPreDay>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-            			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-            					.setType(1)
-                                .setSellerId(Util.toByteString(owner.id()))
-                                .setBuyerId(Util.toByteString(renter.id()))
-                                .setCost(v.slot.rentPreDay)
-                                .setTs(System.currentTimeMillis())
-                                .build()));
-            		}
                     GameDb.saveOrUpdate(Arrays.asList(renter, owner, this)); // seems we should disable select-before-update
                 }
             });
