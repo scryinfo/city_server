@@ -850,7 +850,10 @@ public class GameSession {
 		FactoryBase f = (FactoryBase) b;
 		if (f.lineFull())
 			return;
-		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum(), player.getGoodLevel(m.id));
+		int lv = 0;
+		if(m instanceof MetaGood)
+			lv = player.getGoodLevel(m.id);
+		LineBase line = f.addLine(m, c.getWorkerNum(), c.getTargetNum(), lv);
 		if(line != null)
 			GameDb.saveOrUpdate(f);
 	}
