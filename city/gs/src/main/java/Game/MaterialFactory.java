@@ -12,6 +12,7 @@ import gscode.GsCode;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity(name = "MaterialFactory")
@@ -20,8 +21,13 @@ public class MaterialFactory extends FactoryBase {
     }
 
     @Override
-    public int getSaleNum(int itemid) {
+    public int getSaleCount(int itemid) {
         return this.shelf.getSaleNum(itemid);
+    }
+
+    @Override
+    public Map<Item, Integer> getSaleDetail(int itemId) {
+        return this.shelf.getSaleDetail(itemId);
     }
 
     @Entity

@@ -326,6 +326,13 @@ public class City {
             bs.values().forEach(f);
         }
     }
+    public void forEachGrid(GridIndexPair range, Consumer<Grid> f) {
+        for(int x = range.l.x; x <= range.r.x; ++x)
+        {
+            for(int y = range.l.y; y <= range.r.y; ++y)
+                f.accept(grids[x][y]);
+        }
+    }
     public void forAllGrid(Consumer<Grid> f) {
         for(int i = 0; i < this.grids.length; ++i) {
             for(int j = 0; j < this.grids[i].length; ++j) {
@@ -421,8 +428,7 @@ public class City {
         this.allBuilding.put(building.id(), building);
         //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
         if(allBuilding!=null&&allBuilding.size()>=100){
-        	GameSession gs = GameServer.allGameSessions.get(building.id());
-        	gs.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
         			.setType(5)
         			.setNum(allBuilding.size())
                     .setTs(System.currentTimeMillis())

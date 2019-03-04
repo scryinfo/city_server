@@ -9,6 +9,7 @@ import gs.Gs;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -19,10 +20,17 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
         this.store = new Storage(meta.storeCapacity);
         this.shelf = new Shelf(meta.shelfCapacity);
     }
+
     @Override
-    public int getSaleNum(int itemid) {
-        return this.shelf.getSaleNum(itemid);
+    public Map<Item, Integer> getSaleDetail(int itemId) {
+        return this.shelf.getSaleDetail(itemId);
     }
+
+    @Override
+    public int getSaleCount(int itemId) {
+        return this.shelf.getSaleNum(itemId);
+    }
+
     @Transient
     private MetaRetailShop meta;
 

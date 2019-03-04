@@ -14,10 +14,9 @@ public class GameEventDispatcher extends DispatcherBase {
 		try {
 			table.put((short) GsCode.OpCode.login_VALUE, Wrapper.newWithMessage(Gs.Login.PARSER, GameSession.class,"login"));
 			table.put((short) GsCode.OpCode.heartBeat_VALUE, Wrapper.newWithMessage(Gs.HeartBeat.PARSER, GameSession.class, "heartBeat"));
-
-
-
-			table.put((short) GsCode.OpCode.queryMarketSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"queryMakertSummary"));
+			table.put((short) GsCode.OpCode.setRoleFaceId_VALUE, Wrapper.newWithMessageAsync(Gs.Str.PARSER, GameSession.class,"setRoleFaceId"));
+			table.put((short) GsCode.OpCode.queryMarketDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMarketDetail.PARSER, GameSession.class,"queryMarketDetail"));
+			table.put((short) GsCode.OpCode.queryMarketSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"queryMarketSummary"));
 			table.put((short) GsCode.OpCode.queryGroundSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryGroundSummary"));
 			table.put((short) GsCode.OpCode.createRole_VALUE, Wrapper.newWithMessageAsync(Gs.CreateRole.PARSER, GameSession.class,"createRole"));
 			table.put((short) GsCode.OpCode.queryPlayerBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryPlayerBuildings"));
@@ -125,7 +124,9 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			table.put((short) GsCode.OpCode.joinSociety_VALUE, Wrapper.newWithMessageAsync(Gs.ByteStr.PARSER, GameSession.class, "joinSociety"));
 			table.put((short) GsCode.OpCode.joinHandle_VALUE, Wrapper.newWithMessageAsync(Gs.JoinHandle.PARSER, GameSession.class, "joinHandle"));
-			table.put((short) GsCode.OpCode.getJoinReq_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "getJoinReq"));
+			table.put((short) GsCode.OpCode.exitSociety_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "exitSociety"));
+			table.put((short) GsCode.OpCode.appointerPost_VALUE, Wrapper.newWithMessageAsync(Gs.AppointerReq.PARSER, GameSession.class, "appointerPost"));
+			table.put((short) GsCode.OpCode.kickMember_VALUE, Wrapper.newWithMessageAsync(Gs.Ids.PARSER, GameSession.class, "kickMember"));
 			//===========================================================
 
 			//llb========================================================

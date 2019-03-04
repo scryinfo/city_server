@@ -32,6 +32,16 @@ public class Shelf {
     Content getContent(ItemKey id) {
         return slots.get(id);
     }
+
+    public Map<Item, Integer> getSaleDetail(int itemId) {
+        Map<Item, Integer> res = new HashMap<>();
+        this.slots.forEach((k,v)->{
+            if(k.meta.id == itemId)
+                res.put(new Item(k, v.n), v.price);
+        });
+        return res;
+    }
+
     public final static class SellInfo {
         public UUID producerId;
         public int qty;

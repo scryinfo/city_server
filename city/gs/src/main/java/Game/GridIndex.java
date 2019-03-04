@@ -15,6 +15,8 @@ public class GridIndex implements Comparable<GridIndex> {
     @Column(name = "y", nullable = false)
     public int y;
     GridIndex(int x, int y) {
+        if(x < 0 || x >= City.GridMaxX || y < 0 || y >= City.GridMaxY)
+            throw new IllegalArgumentException();
         this.x = x;
         this.y = y;
     }

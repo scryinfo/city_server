@@ -1,5 +1,7 @@
 package Game;
 
+import java.util.Map;
+
 public interface IShelf {
 
     boolean addshelf(Item mi, int price);
@@ -10,5 +12,7 @@ public interface IShelf {
 
     boolean setPrice(ItemKey id, int price);
 
-    int getSaleNum(int itemid);
+    int getSaleCount(int itemId);
+
+    Map<Item, Integer> getSaleDetail(int itemId);
 }

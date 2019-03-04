@@ -8,6 +8,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity(name = "ProduceDepartment")
@@ -20,12 +21,15 @@ public class ProduceDepartment extends FactoryBase {
         this.meta = meta;
     }
     @Override
-    public int getSaleNum(int itemid) {
-        return this.shelf.getSaleNum(itemid);
+    public int getSaleCount(int itemId) {
+        return this.shelf.getSaleNum(itemId);
     }
-    protected ProduceDepartment() {
-    }
+    protected ProduceDepartment() {}
 
+    @Override
+    public Map<Item, Integer> getSaleDetail(int itemId) {
+        return this.shelf.getSaleDetail(itemId);
+    }
     @Entity
     public final static class Line extends LineBase {
         public Line(MetaGood item, int targetNum, int workerNum, int itemLevel) {

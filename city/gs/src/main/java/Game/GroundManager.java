@@ -90,10 +90,7 @@ public class GroundManager {
             }
         });
         for(UUID tid : del) {
-            rentGround.remove(tid).forEach(gi->this.summaryInfo.compute(gi.coordinate().toGridIndex(), (k,v)->{
-                v.rentingCount--;
-                return v;
-            }));
+            rentGround.remove(tid).forEach(gi->this.summaryInfo.get(gi.coordinate().toGridIndex()).rentingCount--);
         }
     }
     // role id --> all grounds belong to this role
@@ -238,6 +235,16 @@ public class GroundManager {
 
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(cost);
+        
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(owner.id()))
+                    .setBuyerId(Util.toByteString(renter.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 
         LogDb.rentGround(renter.id(), ownerId, cost, plist1);
         UUID tid = UUID.randomUUID();
@@ -247,10 +254,7 @@ public class GroundManager {
             GroundInfo i = info.get(c);
             i.rented(rentPara, tid, renter.id(), now);
             gis.add(i);
-            this.summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{
-                v.rentingCount--;
-                return v;
-            });
+            this.summaryInfo.get(i.coordinate().toGridIndex()).rentingCount--;
         }
         GameDb.saveOrUpdate(Arrays.asList(owner, renter, this));
         this.rentGround.put(tid, new HashSet<>(gis));
@@ -286,10 +290,7 @@ public class GroundManager {
                 return false;
             gis.add(i);
             if(!i.inSelling())
-                summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{
-                    v.sellingCount++;
-                    return v;
-                });
+                summaryInfo.get(i.coordinate().toGridIndex()).sellingCount++;
         }
         gis.forEach(i->{
             i.sell(price);
@@ -319,6 +320,15 @@ public class GroundManager {
         Player seller = GameDb.queryPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(seller.id()))
+                    .setBuyerId(Util.toByteString(buyer.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
         List<LogDb.Positon> plist1 = new ArrayList<>();
         List<Gs.MiniIndex> miniIndexList = new ArrayList<>();
         for(Coordinate c : coordinates)
@@ -362,7 +372,7 @@ public class GroundManager {
             return v;
         });
         playerGround.computeIfAbsent(seller, k->new HashSet<>()).add(info);
-        summaryInfo.compute(info.coordinate().toGridIndex(), (k,v)->{v.sellingCount--;return v;});
+        summaryInfo.get(info.coordinate().toGridIndex()).sellingCount--;
     }
 
     public void addGround(UUID id, Collection<Coordinate> area) throws GroundAlreadySoldException {
@@ -377,6 +387,7 @@ public class GroundManager {
             info.put(c, i);
             gis.add(i);
             playerGround.computeIfAbsent(id, k->new HashSet<>()).add(i);
+            this.summaryInfo.computeIfAbsent(i.coordinate().toGridIndex(), k->new SummaryInfo());
         }
         this.broadcast(gis);
     }
@@ -391,7 +402,7 @@ public class GroundManager {
         }
         gis.forEach(i->{
             i.cancelSell();
-            summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{v.sellingCount--;return v;});
+            summaryInfo.get(i.coordinate().toGridIndex()).sellingCount--;
         });
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);
@@ -408,7 +419,7 @@ public class GroundManager {
         }
         gis.forEach(i->{
             i.endRent();
-            summaryInfo.compute(i.coordinate().toGridIndex(), (k,v)->{v.rentingCount--;return v;});
+            summaryInfo.get(i.coordinate().toGridIndex()).rentingCount--;
         });
         GameDb.saveOrUpdate(gis);
         this.broadcast(gis);

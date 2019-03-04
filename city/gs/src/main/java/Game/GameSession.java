@@ -18,10 +18,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 
 import java.lang.reflect.Method;
-import java.time.chrono.IsoChronology;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -279,7 +277,8 @@ public class GameSession {
 		GameServer.allGameSessions.remove(id());
 		if (player.getSocietyId() != null)
 		{
-			SocietyManager.decrementCount(player.getSocietyId());
+			//必须在allGameSessions.remove(id())之后调用
+			SocietyManager.broadOffline(player);
 		}
 		Validator.getInstance().unRegist(accountName, token);
 	}
@@ -312,13 +311,15 @@ public class GameSession {
 		player.online();
 		if (player.getSocietyId() != null)
 		{
-			SocietyManager.increaseCount(player.getSocietyId());
+			SocietyManager.broadOnline(player);
 		}
 		sendSocialInfo();
 	}
 
 	public void createRole(short cmd, Message message) {
 		Gs.CreateRole c = (Gs.CreateRole)message;
+		if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN)
+			return;
 		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
 		p.addMoney(999999999);
 		if(!GameDb.createPlayer(p)) {
@@ -388,7 +389,7 @@ public class GameSession {
 		this.write(Package.create(cmd));
 	}
 
-	public void queryMakertSummary(short cmd, Message message) {
+	public void queryMarketSummary(short cmd, Message message) {
 		Gs.Num c = (Gs.Num)message;
 		MetaItem mi = MetaData.getItem(c.getNum());
 		if(mi == null)
@@ -399,7 +400,7 @@ public class GameSession {
 			grid.forAllBuilding(building -> {
 				if(building instanceof IShelf) {
 					IShelf s = (IShelf)building;
-					n.addAndGet(s.getSaleNum(mi.id));
+					n.addAndGet(s.getSaleCount(mi.id));
 				}
 			});
 			builder.addInfoBuilder()
@@ -409,9 +410,36 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+	public void setRoleFaceId(short cmd, Message message) {
+		Gs.Str c = (Gs.Str) message;
+		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
+			return;
+		this.player.setFaceId(c.getStr());
+		GameDb.saveOrUpdate(player);
+	}
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
 	}
+    public void queryMarketDetail(short cmd, Message message) {
+	    Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
+        GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+        Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
+        City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(building instanceof IShelf) {
+					IShelf s = (IShelf)building;
+					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
+						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+					});
+				}
+			});
+        });
+        this.write(Package.create(cmd, builder.build()));
+    }
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -466,6 +494,7 @@ public class GameSession {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
 		Item item = new Item(c.getItem());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+
 		Building building = City.instance().getBuilding(id);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 			return;
@@ -557,6 +586,15 @@ public class GameSession {
 				.setCount(itemBuy.n)
 				.build());
 		player.decMoney(cost);
+		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(seller.id()))
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setCost(cost)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		player.decMoney(freight);
 
 
@@ -606,14 +644,6 @@ public class GameSession {
 		player.lockMoney(orderId, cost);
 		s.markOrder(orderId);
 		GameDb.saveOrUpdate(Arrays.asList(Exchange.instance(), player, s));
-		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-					.setType(1)
-                    .setPlayerId(Util.toByteString(player.id()))
-                    .setCost(cost)
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-		}
 		this.write(Package.create(cmd, Gs.Id.newBuilder().setId(Util.toByteString(orderId)).build()));
 	}
 	public void exchangeSell(short cmd, Message message) {
@@ -1004,6 +1034,15 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
+		if(slot.rentPreDay>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(owner.id()))
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setCost(slot.rentPreDay)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -1298,6 +1337,15 @@ public class GameSession {
 			return;
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
+		if(sell.price>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+					.setType(1)
+                    .setSellerId(Util.toByteString(seller.id()))
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setCost(sell.price)
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+		}
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
@@ -1634,12 +1682,6 @@ public class GameSession {
 		{
 			return;
 		}
-		int cost = 10000;
-		if (player.money() < cost)
-		{
-			this.write(Package.fail(cmd,Common.Fail.Reason.moneyNotEnough));
-			return;
-		}
 		Society society = SocietyManager.createSociety(player.id(), name, declaration);
 		if (society == null)
 		{
@@ -1648,9 +1690,8 @@ public class GameSession {
 		else
 		{
 			player.setSocietyId(society.getId());
-			player.decMoney(cost);
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd, society.toProto(false)));
+			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
 		}
 	}
 
@@ -1693,7 +1734,7 @@ public class GameSession {
 		if (societyId.equals(player.getSocietyId()))
 		{
 			Society society = SocietyManager.getSociety(societyId);
-			this.write(Package.create(cmd, society.toProto(false)));
+			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
 		}
 	}
 
@@ -1713,7 +1754,7 @@ public class GameSession {
 		{
 			if (SocietyManager.reqJoinSociety(societyId,player,str))
 			{
-				this.write(Package.create(cmd));
+				this.write(Package.create(cmd,message));
 			}
 		}
 	}
@@ -1724,15 +1765,59 @@ public class GameSession {
 		SocietyManager.handleReqJoin(params,player);
 	}
 
-	public void getJoinReq(short cmd, Message message)
+	public void exitSociety(short cmd, Message message)
 	{
 		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
 		if (societyId.equals(player.getSocietyId()))
 		{
-			List<Gs.JoinReq> list = SocietyManager.getJoinReqList(societyId, player.id());
-			if (list != null)
+			if (SocietyManager.exitSociety(societyId, player))
 			{
-				this.write(Package.create(cmd, Gs.JoinReqList.newBuilder().addAllReqs(list).build()));
+				this.write(Package.create(cmd,
+						Gs.ByteBool.newBuilder()
+						.setB(true)
+						.setId(Util.toByteString(societyId))
+						.build()));
+			}
+		}
+	}
+
+	public void appointerPost(short cmd, Message message)
+	{
+		Gs.AppointerReq params = (Gs.AppointerReq) message;
+		UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			if (SocietyManager.appointerPost(player,params))
+			{
+				this.write(Package.create(cmd, message));
+			}
+		}
+	}
+
+	public void kickMember(short cmd, Message message)
+	{
+		Gs.Ids params = (Gs.Ids) message;
+		UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+		if (societyId.equals(player.getSocietyId()))
+		{
+			if (SocietyManager.kickMember(societyId, player,
+					Util.toUuid(params.getPlayerId().toByteArray())))
+			{
+				this.write(Package.create(cmd, message));
+				GameSession session = GameServer.allGameSessions.get(Util.toUuid(params.getPlayerId().toByteArray()));
+				if (session != null)
+				{
+					session.write(Package.create(GsCode.OpCode.exitSociety_VALUE,
+							Gs.ByteBool.newBuilder()
+									.setB(false)
+									.setId(Util.toByteString(societyId))
+									.build()));
+				}
+				/**
+				 * TODO:
+				 * 2019/2/25
+				 * 邮件通知被踢出公会
+				 */
 			}
 		}
 	}

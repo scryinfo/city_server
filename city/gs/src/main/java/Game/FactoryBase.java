@@ -150,6 +150,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(l.id))
                 .setNowCount(l.count)
+                .setBuildingId(Util.toByteString(this.id()))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
@@ -162,7 +163,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         if(line == null)
             return false;
         Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();
+
         builder.setId(Util.toByteString(line.id));
+        builder.setBuildingId(Util.toByteString(this.id()));
         if(targetNum.isPresent()) {
             int t = targetNum.getAsInt();
             if(t < 0)
