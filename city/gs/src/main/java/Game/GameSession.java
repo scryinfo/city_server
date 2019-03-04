@@ -1835,14 +1835,13 @@ public class GameSession {
 	public void citizenDemand(short cmd) {
 		Map<Integer, Integer> map=NpcManager.instance().countNpcByType();
 		Gs.CountNpcMap.Builder bd=Gs.CountNpcMap.newBuilder();
+		Gs.CitizenDemand.Builder list = Gs.CitizenDemand.newBuilder();
 	    for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
+	    	bd.clear();
 			bd.setKey(entry.getKey());
 			bd.setValue(entry.getValue());
+			list.addCountNpcMap(bd.build());
 	    }
-		if(map!=null&&map.size()>0){
-			this.write(Package.create(GsCode.OpCode.CitizenDemand_VALUE,Gs.CitizenDemand.newBuilder()
-					.setCountNpcMap(1, bd.build())
-                    .build()));
-		}
+		this.write(Package.create(GsCode.OpCode.CitizenDemand_VALUE,list.build()));
 	}
 }
