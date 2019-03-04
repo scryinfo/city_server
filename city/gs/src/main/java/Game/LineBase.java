@@ -79,7 +79,8 @@ public abstract class LineBase {
         if(this.timer.update(diffNano))
         {
             accumulated += item.n * this.workerNum;
-            add = left();
+//            add = left(); //奇怪为什么这里要用四舍五入的算法
+            add = accumulated >= 1 ? 1:0;
             if(add > 0) {
                 this.count += add;
                 if(this.count >= this.targetNum) {
