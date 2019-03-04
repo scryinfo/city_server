@@ -137,6 +137,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.delMail_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "delMail"));
 
 			//===========================================================
+			table.put((short) GsCode.OpCode.CitizenDemand_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"citizenDemand"));
+			
 			if(GlobalConfig.debug()){
 
 			}
