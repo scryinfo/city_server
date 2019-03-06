@@ -140,4 +140,18 @@ public class NpcManager {
 
     public void hourTickAction(int nowHour) {
     }
+    public Map<Integer, Integer> countNpcByType(){
+  	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
+  	  //计算各类npc的大小
+	  for (Map.Entry<UUID, Npc> entry : allNpc.entrySet()) {
+		  Npc npc=entry.getValue();
+		  int type=npc.type();
+		  if(!countMap.containsKey(type)){ 
+			  countMap.put(type, 1);
+		  }else{ 
+			  countMap.put(type,countMap.get(type)+1); 
+		  }
+	  }
+	  return countMap;
+   }
 }

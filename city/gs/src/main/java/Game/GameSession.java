@@ -1034,15 +1034,6 @@ public class GameSession {
 		Player owner = GameDb.queryPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
-		if(slot.rentPreDay>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-					.setType(1)
-                    .setSellerId(Util.toByteString(owner.id()))
-                    .setBuyerId(Util.toByteString(player.id()))
-                    .setCost(slot.rentPreDay)
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-		}
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -1337,15 +1328,6 @@ public class GameSession {
 			return;
 		Player seller = GameDb.queryPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
-		if(sell.price>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			this.write(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-					.setType(1)
-                    .setSellerId(Util.toByteString(seller.id()))
-                    .setBuyerId(Util.toByteString(player.id()))
-                    .setCost(sell.price)
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-		}
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
@@ -1503,7 +1485,7 @@ public class GameSession {
 		//push offline message
 		List<OfflineMessage> lists = GameDb.getOfflineMsgAndDel(player.id());
 		lists.forEach(message -> {
-			ManagerCommunication.getInstance().sendMsgToPersion(this, message);
+			ManagerCommunication.getInstance().sendMsgToPerson(this, message);
 		});
 		//notify friend online
 		FriendManager.getInstance().broadcastStatue(player.id(), true);
@@ -1846,4 +1828,20 @@ public class GameSession {
 	}
 
 	//===========================================================
+	/**
+	 * 市民需求
+	 * @param cmd
+	 */
+	public void citizenDemand(short cmd) {
+		Map<Integer, Integer> map=NpcManager.instance().countNpcByType();
+		Gs.CountNpcMap.Builder bd=Gs.CountNpcMap.newBuilder();
+		Gs.CitizenDemand.Builder list = Gs.CitizenDemand.newBuilder();
+	    for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
+	    	bd.clear();
+			bd.setKey(entry.getKey());
+			bd.setValue(entry.getValue());
+			list.addCountNpcMap(bd.build());
+	    }
+		this.write(Package.create(GsCode.OpCode.CitizenDemand_VALUE,list.build()));
+	}
 }
