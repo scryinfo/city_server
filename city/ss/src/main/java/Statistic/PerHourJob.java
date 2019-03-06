@@ -24,8 +24,10 @@ public class PerHourJob implements org.quartz.Job {
         StatisticSession.setIsReady(false);
 
         long time1 = System.currentTimeMillis();
-        long endTime = time1 - time1%(1000 * 60  * 60);
+        long endTime = time1 - time1%(1000 * 60  * 60)- 1000 * 60  * 5;
         long startTime = endTime - 1000 * 60 * 60;
+        
+        long time=startTime+1000 * 60  * 5;  
 
 
         long nowTime = System.currentTimeMillis();
@@ -35,7 +37,7 @@ public class PerHourJob implements org.quartz.Job {
         //每种商品购买的npc人数,每小时统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertDayGoodsNpcNum(SummaryUtil.CountType.BYHOUR, documentList, startTime, SummaryUtil.getDayGoodsNpcNum());
+        SummaryUtil.insertDayGoodsNpcNum(SummaryUtil.CountType.BYHOUR, documentList, time, SummaryUtil.getDayGoodsNpcNum());
 
         //统计耗时
         StatisticSession.setIsReady(true);
