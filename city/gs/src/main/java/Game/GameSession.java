@@ -1829,19 +1829,17 @@ public class GameSession {
 
 	//===========================================================
 	/**
-	 * 市民需求
-	 * @param cmd
+	 * (市民需求)每种类型npc的数量
 	 */
-	public void citizenDemand(short cmd) {
+	public void eachTypeNpcNum(short cmd) {
 		Map<Integer, Integer> map=NpcManager.instance().countNpcByType();
 		Gs.CountNpcMap.Builder bd=Gs.CountNpcMap.newBuilder();
-		Gs.CitizenDemand.Builder list = Gs.CitizenDemand.newBuilder();
+		Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
 	    for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
-	    	bd.clear();
 			bd.setKey(entry.getKey());
 			bd.setValue(entry.getValue());
 			list.addCountNpcMap(bd.build());
 	    }
-		this.write(Package.create(GsCode.OpCode.CitizenDemand_VALUE,list.build()));
+		this.write(Package.create(cmd,list.build()));
 	}
 }

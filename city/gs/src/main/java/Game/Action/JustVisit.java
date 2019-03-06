@@ -3,6 +3,7 @@ package Game.Action;
 
 import Game.*;
 import Game.Meta.MetaBuilding;
+import Game.Meta.MetaItem;
 import Game.Meta.ProbBase;
 import Shared.LogDb;
 import Shared.Package;
@@ -53,6 +54,8 @@ public class JustVisit implements IAction {
             npc.decMoney(chosen.cost());
             LogDb.incomeVisit(owner.id(),chosen.type(),chosen.cost(),chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
+            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
+                    chosen.id(),chosen.type(),chosen.metaId());
             GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
             if (chosen.type() == MetaBuilding.APARTMENT) {
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
