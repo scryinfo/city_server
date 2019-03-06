@@ -1485,7 +1485,7 @@ public class GameSession {
 		//push offline message
 		List<OfflineMessage> lists = GameDb.getOfflineMsgAndDel(player.id());
 		lists.forEach(message -> {
-			ManagerCommunication.getInstance().sendMsgToPersion(this, message);
+			ManagerCommunication.getInstance().sendMsgToPerson(this, message);
 		});
 		//notify friend online
 		FriendManager.getInstance().broadcastStatue(player.id(), true);
