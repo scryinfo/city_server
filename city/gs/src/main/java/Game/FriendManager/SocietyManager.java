@@ -505,4 +505,21 @@ public class SocietyManager
                 return Gs.SocietyNotice.NoticeType.APPOINT_TO_MEMBER;
         }
     }
+
+    public static void sendMessageToEveryOne(Gs.CommunicationReq communicationReq, Player player)
+    {
+        UUID societyId = Util.toUuid(communicationReq.getChannelId().toByteArray());
+        if (societyId.equals(player.getSocietyId()))
+        {
+            Society society = societyCache.getUnchecked(societyId);
+            Gs.CommunicationProces.Builder builder = Gs.CommunicationProces.newBuilder();
+            builder.setId(Util.toByteString(player.id()))
+                    .setMsg(communicationReq.getMsg())
+                    .setTime(System.currentTimeMillis())
+                    .setChannel(communicationReq.getChannel())
+                    .setChannelId(communicationReq.getChannelId());
+            GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.roleCommunication_VALUE,
+                    builder.build()));
+        }
+    }
 }

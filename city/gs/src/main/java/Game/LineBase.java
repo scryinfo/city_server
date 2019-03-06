@@ -37,6 +37,9 @@ public abstract class LineBase {
     @Column(nullable = false)
     boolean suspend = false;
 
+    @Column(nullable = false)
+    long ts = 0;      //生产开始时间
+
     protected LineBase() {
     }
     public abstract ItemKey newItemKey(UUID producerId, int qty);
@@ -56,6 +59,7 @@ public abstract class LineBase {
         this.targetNum = targetNum;
         this.workerNum = workerNum;
         this.itemLevel = itemLevel;
+        this.ts = System.currentTimeMillis();
     }
 
     Gs.Line toProto() {
@@ -65,6 +69,7 @@ public abstract class LineBase {
                 .setNowCount(count)
                 .setTargetCount(targetNum)
                 .setWorkerNum(workerNum)
+                .setTs(ts)
                 .build();
     }
 
@@ -74,7 +79,8 @@ public abstract class LineBase {
         if(this.timer.update(diffNano))
         {
             accumulated += item.n * this.workerNum;
-            add = left();
+//            add = left(); //奇怪为什么这里要用四舍五入的算法
+            add = accumulated >= 1 ? 1:0;
             if(add > 0) {
                 this.count += add;
                 if(this.count >= this.targetNum) {
