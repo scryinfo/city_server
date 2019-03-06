@@ -2,6 +2,8 @@ package Statistic;
 
 import Shared.Package;
 import Shared.Util;
+import Statistic.SummaryUtil.CountType;
+
 import com.google.protobuf.Message;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -77,5 +79,13 @@ public class StatisticSession {
         builder.setMale(SummaryUtil.getSexInfo(true));
         builder.setFemale(SummaryUtil.getSexInfo(false));
         this.write(Package.create(cmd, builder.build()));
+    }
+    
+    public void queryGoodsNpcNum(short cmd)
+    {
+    	Ss.GoodsNpcNum.Builder builder = Ss.GoodsNpcNum.newBuilder();
+    	builder.setYestodayNpcNum(SummaryUtil.getGoodsNpcNum(CountType.BYDAY));
+    	builder.setHourNpcNum(SummaryUtil.getGoodsNpcNum(CountType.BYHOUR));
+    	this.write(Package.create(cmd, builder.build()));
     }
 }

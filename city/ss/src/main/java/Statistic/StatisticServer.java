@@ -54,6 +54,12 @@ public class StatisticServer {
         scheduler.scheduleJob(newJob(WeekJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
                 .build());
+        scheduler.scheduleJob(newJob(EverydayJob.class).build(), newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
+                .build());//每种商品购买的npc,每天凌晨1点执行 ,统计昨天的
+        scheduler.scheduleJob(newJob(PerHourJob.class).build(), newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 */1 * * ?"))
+                .build());//每种商品购买的npc,每隔1个小时执行,统计前一个小时的
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -86,8 +92,11 @@ public class StatisticServer {
     }
 
     public static void main(String[] args) throws Exception {
-        java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
-        GlobalConfig.init(args[0]);
-        new StatisticServer().run();
+//        java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
+//        GlobalConfig.init(args[0]);
+//        new StatisticServer().run();
+        String cronExpression = String.format("0 %d %d ? * %d", 0, 1,
+                0);
+        System.out.println(cronExpression);
     }
 }
