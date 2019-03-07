@@ -20,6 +20,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.BsonField;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -209,7 +210,8 @@ public class LogDb {
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.group("$tpi", new BsonField(null, null)),
+						Aggregates.count(KEY_TOTAL),
                         Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
