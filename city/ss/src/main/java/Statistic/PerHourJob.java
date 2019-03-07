@@ -37,7 +37,7 @@ public class PerHourJob implements org.quartz.Job {
         //每种商品购买的npc人数,每小时统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertNpcData(SummaryUtil.CountType.BYHOUR, documentList, time, SummaryUtil.getDayGoodsNpcNum());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, time, SummaryUtil.getDayGoodsNpcNum());
 
         //统计耗时
         StatisticSession.setIsReady(true);

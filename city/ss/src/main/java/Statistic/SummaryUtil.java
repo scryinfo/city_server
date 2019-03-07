@@ -35,6 +35,9 @@ public class SummaryUtil
     private static final String DAY_GOODS_NPC_NUM = "dayGoodsNpcNum";
     private static final String DAY_NPC_BUY_IN_SHELF = "dayNpcBuyInShelf";
     private static final String DAY_NPC_RENT_APARTMENT = "dayNpcRentApartment";
+    private static final String DAY_PLAYER_BUY_GROUND = "dayPlayerBuyGround";
+    private static final String DAY_PLAYER_BUY_IN_SHELF = "dayPlayerBuyInShelf";
+    private static final String DAY_PLAYER_RENT_GROUND = "dayPlayerRentGround";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -45,6 +48,9 @@ public class SummaryUtil
     private static MongoCollection<Document> dayGoodsNpcNum;
     private static MongoCollection<Document> dayNpcBuyInShelf;
     private static MongoCollection<Document> dayNpcRentApartment;
+    private static MongoCollection<Document> dayPlayerBuyGround;
+    private static MongoCollection<Document> dayPlayerBuyInShelf;
+    private static MongoCollection<Document> dayPlayerRentGround;
     public static void init()
     {
         MongoDatabase database = LogDb.getDatabase();
@@ -67,6 +73,12 @@ public class SummaryUtil
         dayNpcBuyInShelf = database.getCollection(DAY_NPC_BUY_IN_SHELF)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayNpcRentApartment = database.getCollection(DAY_NPC_RENT_APARTMENT)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerBuyGround = database.getCollection(DAY_PLAYER_BUY_GROUND)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerBuyInShelf = database.getCollection(DAY_PLAYER_BUY_IN_SHELF)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerRentGround = database.getCollection(DAY_PLAYER_RENT_GROUND)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -96,7 +108,7 @@ public class SummaryUtil
         return map;
     }
     
-    public static long getYesterdayNpcData(MongoCollection<Document> collection,CountType countType)
+    public static long getHistoryData(MongoCollection<Document> collection,CountType countType)
     {
     	long a=0;
         Map<Long, Long> map = new LinkedHashMap<>();
@@ -116,7 +128,7 @@ public class SummaryUtil
     	return a;
     }
     
-    public static long getTodayNpcData(MongoCollection<Document> collection)
+    public static long getTodayData(MongoCollection<Document> collection)
     {
     	long a=0;
         Calendar calendar = Calendar.getInstance();
@@ -178,7 +190,7 @@ public class SummaryUtil
         }
     }
 
-    public static void insertNpcData(CountType countType, List<Document> documentList,
+    public static void insertHistoryData(CountType countType, List<Document> documentList,
             long time,MongoCollection<Document> collection)
 	{
 		//document already owned : id,total
@@ -335,7 +347,21 @@ public class SummaryUtil
     {
     	return dayNpcRentApartment;
     }
-
+    
+    public static MongoCollection<Document> getDayPlayerBuyGround()
+    {
+    	return dayPlayerBuyGround;
+    }
+    
+    public static MongoCollection<Document> getDayPlayerBuyInShelf()
+    {
+    	return dayPlayerBuyInShelf;
+    }
+    
+    public static MongoCollection<Document> getDayPlayerRentGround()
+    {
+    	return dayPlayerRentGround;
+    }
     enum Type
     {
         INCOME(1),PAY(-1);

@@ -45,7 +45,7 @@ public class EverydayJob implements org.quartz.Job {
         //每种商品购买的npc人数,每天统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertNpcData(SummaryUtil.CountType.BYDAY, documentList, startDate.getTime(), SummaryUtil.getDayGoodsNpcNum());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startDate.getTime(), SummaryUtil.getDayGoodsNpcNum());
 
         //统计耗时
         StatisticSession.setIsReady(true);

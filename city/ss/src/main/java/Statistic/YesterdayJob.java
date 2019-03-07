@@ -43,13 +43,24 @@ public class YesterdayJob implements org.quartz.Job {
         LOGGER.debug("YesterdayJob start execute,time = " + timeStr);
 
         //统计昨天包括以前npc购买商品交易量
-        List<Document> documentList = LogDb.dayYesterdayNpcExchangeAmount(endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertNpcData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayNpcBuyInShelf());
+        List<Document> documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getNpcBuyInShelf());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayNpcBuyInShelf());
         
         //统计昨天包括以前npc租房交易量
-        documentList = LogDb.dayYesterdayNpcExchangeAmount(endTime, LogDb.getNpcRentApartment());
-        SummaryUtil.insertNpcData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayNpcRentApartment());
+        documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getNpcRentApartment());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayNpcRentApartment());
         
+        //统计昨天包括以前player购买别人出售中的地的交易量
+        documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getBuyGround());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerBuyGround());
+        
+        //统计昨天包括以前player购买货架商品的交易量
+        documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getBuyInShelf());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerBuyInShelf());
+        
+        //统计昨天包括以前player租别人的地的交易量
+        documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getRentGround());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerRentGround());
 
         //统计耗时
         StatisticSession.setIsReady(true);

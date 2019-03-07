@@ -85,8 +85,8 @@ public class StatisticSession {
     public void queryGoodsNpcNum(short cmd)
     {
     	Ss.GoodsNpcNum.Builder builder = Ss.GoodsNpcNum.newBuilder();
-    	builder.setYestodayNpcNum(SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYDAY));
-    	builder.setHourNpcNum(SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR));
+    	builder.setYestodayNpcNum(SummaryUtil.getHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYDAY));
+    	builder.setHourNpcNum(SummaryUtil.getHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR));
     	this.write(Package.create(cmd, builder.build()));
     }
     
@@ -94,11 +94,11 @@ public class StatisticSession {
     {
     	Ss.NpcExchangeAmount.Builder builder = Ss.NpcExchangeAmount.newBuilder();
     	//npc购买商品的交易量
-    	long yesterdayNpcBuyInShelf=SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
-    	long todayNpcBuyInShelf=SummaryUtil.getTodayNpcData(LogDb.getNpcBuyInShelf());
+    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
     	//npc租房的交易量
-    	long yesterdayNpcRentApartment=SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
-    	long todayNpcRentApartment=SummaryUtil.getTodayNpcData(LogDb.getNpcRentApartment());
+    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+    	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
     	
     	builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
     	this.write(Package.create(cmd, builder.build()));
@@ -108,14 +108,20 @@ public class StatisticSession {
     {
     	Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
     	//npc交易量
-    	long yesterdayNpcBuyInShelf=SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
-    	long todayNpcBuyInShelf=SummaryUtil.getTodayNpcData(LogDb.getNpcBuyInShelf());
-    	long yesterdayNpcRentApartment=SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
-      	long todayNpcRentApartment=SummaryUtil.getTodayNpcData(LogDb.getNpcRentApartment());
+    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+      	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
     	//player交易量
+    	long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
+    	long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
+    	long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
+    	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+    	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
+    	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
     	
-    	
-    	builder.setExchangeAmount(0l);
+    	builder.setExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment
+    			+yesterdayPlayerBuyGround+todayPlayerBuyGround+yesterdayPlayerBuyInShelf+todayPlayerBuyInShelf+yesterdayPlayerRentGround+todayPlayerRentGround);
     	this.write(Package.create(cmd, builder.build()));
     }
 }

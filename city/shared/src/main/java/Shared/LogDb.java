@@ -217,7 +217,7 @@ public class LogDb {
 		return documentList;
 	}
 	
-	public static List<Document> dayYesterdayNpcExchangeAmount(long endTime, MongoCollection<Document> collection)
+	public static List<Document> dayYesterdayExchangeAmount(long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
