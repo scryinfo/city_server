@@ -33,6 +33,8 @@ public class SummaryUtil
     private static final String DAY_GOODS = "dayGoods";
     private static final String DAY_RENTROOM = "dayRentRoom";
     private static final String DAY_GOODS_NPC_NUM = "dayGoodsNpcNum";
+    private static final String DAY_NPC_BUY_IN_SHELF = "dayNpcBuyInShelf";
+    private static final String DAY_NPC_RENT_APARTMENT = "dayNpcRentApartment";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -41,6 +43,8 @@ public class SummaryUtil
     private static MongoCollection<Document> dayGoods;
     private static MongoCollection<Document> dayRentRoom;
     private static MongoCollection<Document> dayGoodsNpcNum;
+    private static MongoCollection<Document> dayNpcBuyInShelf;
+    private static MongoCollection<Document> dayNpcRentApartment;
     public static void init()
     {
         MongoDatabase database = LogDb.getDatabase();
@@ -59,6 +63,10 @@ public class SummaryUtil
         dayRentRoom = database.getCollection(DAY_RENTROOM)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayGoodsNpcNum = database.getCollection(DAY_GOODS_NPC_NUM)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayNpcBuyInShelf = database.getCollection(DAY_NPC_BUY_IN_SHELF)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayNpcRentApartment = database.getCollection(DAY_NPC_RENT_APARTMENT)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -88,11 +96,11 @@ public class SummaryUtil
         return map;
     }
     
-    public static long getGoodsNpcNum(CountType countType)
+    public static long getYesterdayNpcData(MongoCollection<Document> collection,CountType countType)
     {
     	long a=0;
         Map<Long, Long> map = new LinkedHashMap<>();
-    	SummaryUtil.getDayGoodsNpcNum().find(and(
+        collection.find(and(
     					eq("type",countType.getValue())
     					))
         			.projection(fields(include("t", "a"), excludeId()))
@@ -104,6 +112,25 @@ public class SummaryUtil
                     });
     	for (Map.Entry<Long, Long> entry : map.entrySet()) {
 			a=entry.getValue();
+		}
+    	return a;
+    }
+    
+    public static long getTodayNpcData(MongoCollection<Document> collection)
+    {
+    	long a=0;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        
+        Date endDate = calendar.getTime();
+        long startTime=endDate.getTime();
+        long endTime = System.currentTimeMillis();
+        List<Document> documentList=LogDb.dayTodayNpcExchangeAmount(startTime,endTime,collection);
+        for(Document document : documentList) {
+        	a=document.getLong("total");
 		}
     	return a;
     }
@@ -151,7 +178,7 @@ public class SummaryUtil
         }
     }
 
-    public static void insertDayGoodsNpcNum(CountType countType, List<Document> documentList,
+    public static void insertNpcData(CountType countType, List<Document> documentList,
             long time,MongoCollection<Document> collection)
 	{
 		//document already owned : id,total
@@ -297,6 +324,16 @@ public class SummaryUtil
     public static MongoCollection<Document> getDayGoodsNpcNum()
     {
     	return dayGoodsNpcNum;
+    }
+    
+    public static MongoCollection<Document> getDayNpcBuyInShelf()
+    {
+    	return dayNpcBuyInShelf;
+    }
+    
+    public static MongoCollection<Document> getDayNpcRentApartment()
+    {
+    	return dayNpcRentApartment;
     }
 
     enum Type

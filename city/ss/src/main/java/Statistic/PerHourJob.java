@@ -32,18 +32,18 @@ public class PerHourJob implements org.quartz.Job {
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
-        LOGGER.debug("DayJob start execute,time = " + timeStr);
+        LOGGER.debug("PerHourJob start execute,time = " + timeStr);
 
         //每种商品购买的npc人数,每小时统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertDayGoodsNpcNum(SummaryUtil.CountType.BYHOUR, documentList, time, SummaryUtil.getDayGoodsNpcNum());
+        SummaryUtil.insertNpcData(SummaryUtil.CountType.BYHOUR, documentList, time, SummaryUtil.getDayGoodsNpcNum());
 
         //统计耗时
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));
-        LOGGER.debug(MessageFormat.format("DayJob end execute, time = {0}, consume = {1} ms",
+        LOGGER.debug(MessageFormat.format("PerHourJob end execute, time = {0}, consume = {1} ms",
                 timeStr, nowTime1 - nowTime));
     }
 }

@@ -1,17 +1,18 @@
 package Statistic;
 
+import java.util.UUID;
+
+import org.apache.log4j.Logger;
+
+import com.google.protobuf.Message;
+
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import Statistic.SummaryUtil.CountType;
-
-import com.google.protobuf.Message;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
-import org.apache.log4j.Logger;
 import ss.Ss;
-
-import java.util.Map;
-import java.util.UUID;
 
 // this class contain only getXXX method, that means the only purpose this class or this server
 // is get data from db
@@ -84,8 +85,27 @@ public class StatisticSession {
     public void queryGoodsNpcNum(short cmd)
     {
     	Ss.GoodsNpcNum.Builder builder = Ss.GoodsNpcNum.newBuilder();
-    	builder.setYestodayNpcNum(SummaryUtil.getGoodsNpcNum(CountType.BYDAY));
-    	builder.setHourNpcNum(SummaryUtil.getGoodsNpcNum(CountType.BYHOUR));
+    	builder.setYestodayNpcNum(SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYDAY));
+    	builder.setHourNpcNum(SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR));
     	this.write(Package.create(cmd, builder.build()));
     }
+    
+    public void queryNpcExchangeAmount(short cmd)
+    {
+    	Ss.NpcExchangeAmount.Builder builder = Ss.NpcExchangeAmount.newBuilder();
+    	long yesterdayNpcBuyInShelf=SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+    	long todayNpcBuyInShelf=SummaryUtil.getTodayNpcData(SummaryUtil.getDayNpcBuyInShelf());
+    	
+    	long yesterdayNpcRentApartment=SummaryUtil.getYesterdayNpcData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+    	long todayNpcRentApartment=SummaryUtil.getTodayNpcData(SummaryUtil.getDayNpcRentApartment());
+    	
+    	builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    
+    public void queryExchangeAmount(short cmd)
+    {
+    }
+    
+    
 }

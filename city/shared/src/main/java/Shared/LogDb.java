@@ -216,6 +216,43 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	
+	public static List<Document> dayYesterdayNpcExchangeAmount(long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								lt("t", endTime))),
+						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+						)
+				).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	
+	public static List<Document> dayTodayNpcExchangeAmount(long startTime,long endTime,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+						)
+				).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
 	public static void insertPlayerInfo(UUID uuid,boolean isMale)
 	{
