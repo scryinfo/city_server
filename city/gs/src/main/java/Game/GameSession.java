@@ -424,6 +424,7 @@ public class GameSession {
 	    Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
         GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
         Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
+        builder.setItemId(c.getItemId());
         City.instance().forEachGrid(center.toSyncRange(), (grid)->{
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
@@ -432,6 +433,7 @@ public class GameSession {
 					IShelf s = (IShelf)building;
 					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
 					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
 						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
 					});
