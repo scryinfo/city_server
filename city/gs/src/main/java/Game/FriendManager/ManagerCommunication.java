@@ -49,6 +49,7 @@ public class ManagerCommunication
                 messageToEveryone(communicationReq, player);
                 break;
             case GROUP:
+                SocietyManager.sendMessageToEveryOne(communicationReq, player);
                 break;
             case FRIEND:
             case UNKNOWN:
@@ -109,11 +110,11 @@ public class ManagerCommunication
                         communicationReq.getMsg(), player.getName());
                 message.setTime(System.currentTimeMillis());
                 //send to self
-                sendMsgToPersion(GameServer.allGameSessions.get(player.id()), message);
+                sendMsgToPerson(GameServer.allGameSessions.get(player.id()), message);
                 GameSession gameSession = GameServer.allGameSessions.get(friend_id);
                 if (gameSession != null)
                 {
-                    sendMsgToPersion(gameSession, message);
+                    sendMsgToPerson(gameSession, message);
                 }
                 //offline save message
                 else
@@ -124,7 +125,7 @@ public class ManagerCommunication
         }
     }
 
-    public void sendMsgToPersion(GameSession gameSession,OfflineMessage message)
+    public void sendMsgToPerson(GameSession gameSession, OfflineMessage message)
     {
         Gs.CommunicationProces.Builder builder = Gs.CommunicationProces.newBuilder();
         builder.setId(Util.toByteString(message.getFrom_id()))

@@ -29,8 +29,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract LineBase addLineImpl(MetaItem m, int workerNum, int targetNum, int itemLevel);
     public LineBase addLine(MetaItem m, int workerNum, int targetNum, int itemLevel) {
         LineBase l = this.addLineImpl(m, workerNum, targetNum, itemLevel);
+
         if(l != null)
-            this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(l.toProto()).build()));
+            this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(l.toProto()).setTs(l.ts).build()));
         return l;
     }
     @Override
@@ -137,7 +138,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         });
         for (UUID id : completedLines) {
             LineBase l = this.lines.remove(id);
-            //this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+            this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
         if(this.dbTimer.update(diffNano)) {
@@ -149,6 +150,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(l.id))
                 .setNowCount(l.count)
+                .setBuildingId(Util.toByteString(this.id()))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
@@ -161,7 +163,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         if(line == null)
             return false;
         Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();
+
         builder.setId(Util.toByteString(line.id));
+        builder.setBuildingId(Util.toByteString(this.id()));
         if(targetNum.isPresent()) {
             int t = targetNum.getAsInt();
             if(t < 0)

@@ -3,6 +3,7 @@ package Game.Action;
 
 import Game.*;
 import Game.Meta.MetaBuilding;
+import Game.Meta.MetaItem;
 import Game.Meta.ProbBase;
 import Shared.LogDb;
 import Shared.Package;
@@ -51,17 +52,10 @@ public class JustVisit implements IAction {
             Player owner = GameDb.queryPlayer(chosen.ownerId());
             owner.addMoney(chosen.cost());
             npc.decMoney(chosen.cost());
-    		if(chosen.cost()>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-    			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-    					.setType(1)
-                        .setSellerId(Util.toByteString(owner.id()))
-                        .setBuyerId(Util.toByteString(npc.id()))
-                        .setCost(chosen.cost())
-                        .setTs(System.currentTimeMillis())
-                        .build()));
-    		}
             LogDb.incomeVisit(owner.id(),chosen.type(),chosen.cost(),chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
+            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
+                    chosen.id(),chosen.type(),chosen.metaId());
             GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
             if (chosen.type() == MetaBuilding.APARTMENT) {
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()

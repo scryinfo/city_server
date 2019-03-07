@@ -1,14 +1,26 @@
 package Shared;
 
-import com.mongodb.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lt;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import org.bson.Document;
+
+import com.mongodb.Block;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
-import org.bson.Document;
-import java.util.*;
-
-import static com.mongodb.client.model.Filters.*;
+import com.mongodb.client.model.BsonField;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -32,6 +44,8 @@ public class LogDb {
 
 	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
+	
+	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
@@ -50,6 +64,9 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
+	
+	//npc rent apartment
+	private static MongoCollection<Document> npcRentApartment;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -83,6 +100,9 @@ public class LogDb {
 		playerInfo = database.getCollection(PLAYER_INFO)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buildingIncome = database.getCollection(BUILDING_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		
+		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -175,6 +195,25 @@ public class LogDb {
                         Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	
+	public static List<Document> dayNpcGoodsNum(long startTime, long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi",  Accumulators.sum(KEY_TOTAL, 1)),
+                        Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
 
@@ -313,7 +352,21 @@ public class LogDb {
 				.append("tp",buildType);
 		incomeVisit.insertOne(document);
 	}
-
+	
+	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
+			UUID ownerId, UUID bid, int type, int mId)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", npcId)
+				.append("d", sellId)
+				.append("p", price)
+				.append("a", n * price)
+				.append("o", ownerId)
+				.append("b", bid)
+				.append("tp", type)
+				.append("mid", mId);
+		npcRentApartment.insertOne(document);
+	}
 
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
@@ -368,6 +421,11 @@ public class LogDb {
 	public static MongoCollection<Document> getPlayerInfo()
 	{
 		return playerInfo;
+	}
+	
+	public static MongoCollection<Document> getNpcRentApartment()
+	{
+		return npcRentApartment;
 	}
 
 	public static class Positon

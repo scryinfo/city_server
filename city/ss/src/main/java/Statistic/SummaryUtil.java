@@ -32,6 +32,7 @@ public class SummaryUtil
     private static final String DAY_MATERIAL = "dayMaterial";
     private static final String DAY_GOODS = "dayGoods";
     private static final String DAY_RENTROOM = "dayRentRoom";
+    private static final String DAY_GOODS_NPC_NUM = "dayGoodsNpcNum";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -39,6 +40,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayMaterial;
     private static MongoCollection<Document> dayGoods;
     private static MongoCollection<Document> dayRentRoom;
+    private static MongoCollection<Document> dayGoodsNpcNum;
     public static void init()
     {
         MongoDatabase database = LogDb.getDatabase();
@@ -56,6 +58,8 @@ public class SummaryUtil
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayRentRoom = database.getCollection(DAY_RENTROOM)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayGoodsNpcNum = database.getCollection(DAY_GOODS_NPC_NUM)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
     public static long getSexInfo(boolean isMale)
@@ -83,7 +87,27 @@ public class SummaryUtil
                 });
         return map;
     }
-
+    
+    public static long getGoodsNpcNum(CountType countType)
+    {
+    	long a=0;
+        Map<Long, Long> map = new LinkedHashMap<>();
+    	SummaryUtil.getDayGoodsNpcNum().find(and(
+    					eq("type",countType.getValue())
+    					))
+        			.projection(fields(include("t", "a"), excludeId()))
+    				.sort(Sorts.descending("t"))
+    				.limit(1)
+    		        .forEach((Block<? super Document>) document ->
+                    {   
+                    	map.put(document.getLong("t"), document.getLong("a"));
+                    });
+    	for (Map.Entry<Long, Long> entry : map.entrySet()) {
+			a=entry.getValue();
+		}
+    	return a;
+    }
+    
     public static long getLastFullTime(long currentTime)
     {
         return currentTime - (currentTime % HOUR_MILLISECOND);
@@ -127,6 +151,18 @@ public class SummaryUtil
         }
     }
 
+    public static void insertDayGoodsNpcNum(CountType countType, List<Document> documentList,
+            long time,MongoCollection<Document> collection)
+	{
+		//document already owned : id,total
+		documentList.forEach(document ->
+				document.append(TIME, time)
+				.append(TYPE, countType.getValue()));
+		if (!documentList.isEmpty()) {
+			collection.insertMany(documentList);
+		}
+	}
+    
     public static Ss.EconomyInfos getPlayerEconomy(UUID playerId)
     {
         Ss.EconomyInfos.Builder builder = Ss.EconomyInfos.newBuilder();
@@ -257,6 +293,11 @@ public class SummaryUtil
     {
         return dayRentRoom;
     }
+    
+    public static MongoCollection<Document> getDayGoodsNpcNum()
+    {
+    	return dayGoodsNpcNum;
+    }
 
     enum Type
     {
@@ -271,5 +312,19 @@ public class SummaryUtil
         {
             return value;
         }
+    }
+    enum CountType
+    {
+    	BYDAY(1),BYHOUR(2);
+    	private int value;
+    	CountType(int i)
+    	{
+    		this.value = i;
+    	}
+    	
+    	public int getValue()
+    	{
+    		return value;
+    	}
     }
 }
