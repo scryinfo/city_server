@@ -79,6 +79,8 @@ public class Storage implements IStorage {
             if(c == null || c < -n)
                 return false;
             this.inHand.put(item, c+n);
+            if(this.inHand.get(item) == 0)
+                this.inHand.remove(item);
         }
         return true;
     }
