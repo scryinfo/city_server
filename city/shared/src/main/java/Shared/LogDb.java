@@ -210,8 +210,7 @@ public class LogDb {
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
-						Aggregates.group("$tpi", new BsonField(null, null)),
-						Aggregates.count(KEY_TOTAL),
+						Aggregates.group("$tpi",  Accumulators.sum(KEY_TOTAL, 1)),
                         Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
