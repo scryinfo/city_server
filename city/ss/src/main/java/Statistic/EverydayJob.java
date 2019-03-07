@@ -32,11 +32,11 @@ public class EverydayJob implements org.quartz.Job {
         calendar.set(Calendar.SECOND, 0);
         
         Date endDate = calendar.getTime();
-        long endTime=endDate.getTime();
+        long endTime=endDate.getTime()- 1000 * 60  * 5;
         
         calendar.add(Calendar.DATE, -1);
         Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
+        long startTime=startDate.getTime()- 1000 * 60  * 5;
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
@@ -45,7 +45,7 @@ public class EverydayJob implements org.quartz.Job {
         //每种商品购买的npc人数,每天统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertDayGoodsNpcNum(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayGoodsNpcNum());
+        SummaryUtil.insertDayGoodsNpcNum(SummaryUtil.CountType.BYDAY, documentList, startDate.getTime(), SummaryUtil.getDayGoodsNpcNum());
 
         //统计耗时
         StatisticSession.setIsReady(true);
