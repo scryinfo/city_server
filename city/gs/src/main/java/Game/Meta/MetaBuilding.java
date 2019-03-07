@@ -45,8 +45,8 @@ public class MetaBuilding {
                 if (n > 0)
                     npc.put(type, n);
             }
-            if (npc.values().stream().mapToInt(n -> n).sum() != workerNum)
-                throw new IllegalArgumentException();
+//            if (npc.values().stream().mapToInt(n -> n).sum() != workerNum)
+//                throw new IllegalArgumentException();
             for (int i = 0; i < startWorkHour.length; i++) {
                 int[] startWorkHour = ((List<Integer>)d.get("startWorkHour" + i)).stream().mapToInt(Integer::valueOf).toArray();
                 int[] workingHours = ((List<Integer>)d.get("workingHours" + i)).stream().mapToInt(Integer::valueOf).toArray();
