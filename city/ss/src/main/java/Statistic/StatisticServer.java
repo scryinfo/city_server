@@ -92,11 +92,8 @@ public class StatisticServer {
     }
 
     public static void main(String[] args) throws Exception {
-//        java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
-//        GlobalConfig.init(args[0]);
-//        new StatisticServer().run();
-        String cronExpression = String.format("0 %d %d ? * %d", 0, 1,
-                0);
-        System.out.println(cronExpression);
+        java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
+        GlobalConfig.init(args[0]);
+        new StatisticServer().run();
     }
 }
