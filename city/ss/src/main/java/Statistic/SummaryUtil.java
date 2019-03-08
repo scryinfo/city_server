@@ -144,6 +144,16 @@ public class SummaryUtil
     	return map;
     }
     
+    public static List<Document> queryCityBroadcast(MongoCollection<Document> collection)
+    {
+    	List<Document> documentList = new ArrayList<>();
+    	collection.find()
+    	.projection(fields(include("t", "s", "b", "c", "n", "tp"), excludeId()))
+    	.sort(Sorts.ascending("t"))
+    	.forEach((Block<? super Document>) documentList);
+    	return documentList;
+    }
+    
     public static long getTodayData(MongoCollection<Document> collection)
     {
     	long a=0;

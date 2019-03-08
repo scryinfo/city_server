@@ -1,9 +1,11 @@
 package Statistic;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.bson.Document;
 
 import com.google.protobuf.Message;
 
@@ -138,5 +140,22 @@ public class StatisticSession {
 			list.addGoodsNpcNumCurveMap(bd.build());
 	    }
 		this.write(Package.create(cmd,list.build()));
+    }
+    
+    public void queryCityBroadcast(short cmd)
+    {
+    	List<Document> listDocument=SummaryUtil.queryCityBroadcast(LogDb.getCityBroadcast());
+    	Ss.CityBroadcasts.Builder list = Ss.CityBroadcasts.newBuilder();
+    	Ss.CityBroadcast.Builder bd=Ss.CityBroadcast.newBuilder();
+    	for (Document document : listDocument) {
+    		bd.setSellerId(Util.toByteString(UUID.fromString(document.getString("s"))));
+    		bd.setBuyerId(Util.toByteString(UUID.fromString(document.getString("b"))));
+    		bd.setCost(document.getLong("c"));
+    		bd.setNum(document.getInteger("n"));
+    		bd.setType(document.getInteger("tp"));
+    		bd.setTs(document.getLong("t"));
+    		list.addCityBroadcast(bd.build());
+		}
+    	this.write(Package.create(cmd,list.build()));
     }
 }

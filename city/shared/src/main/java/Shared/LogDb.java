@@ -46,6 +46,7 @@ public class LogDb {
 	private static final String BUILDING_INCOME = "buildingIncome";
 	
 	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
+	private static final String CITY_BROADCAST = "cityBroadcast";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
@@ -67,6 +68,7 @@ public class LogDb {
 	
 	//npc rent apartment
 	private static MongoCollection<Document> npcRentApartment;
+	private static MongoCollection<Document> cityBroadcast;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -103,6 +105,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		
 		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		cityBroadcast = database.getCollection(CITY_BROADCAST)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -405,6 +409,23 @@ public class LogDb {
 		npcRentApartment.insertOne(document);
 	}
 
+	public static void  cityBroadcast(UUID sellerId, UUID buyerId, long cost, int num, int type)
+	{
+		//重大交易不删以前的提示，其他都要删除以前的提示
+		if(type!=1){
+			cityBroadcast.deleteMany(and(
+	    			eq("tp",type)
+	    			));
+		}
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("s", sellerId)
+				.append("b", buyerId)
+				.append("c", cost)
+				.append("n", num)
+				.append("tp", type);
+		cityBroadcast.insertOne(document);
+	}
+	
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
@@ -464,7 +485,12 @@ public class LogDb {
 	{
 		return npcRentApartment;
 	}
-
+	
+	public static MongoCollection<Document> getCityBroadcast()
+	{
+		return cityBroadcast;
+	}
+	
 	public static class Positon
 	{
 		int x;

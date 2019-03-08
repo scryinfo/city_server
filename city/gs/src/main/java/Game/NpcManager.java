@@ -1,13 +1,21 @@
 package Game;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import Game.Meta.MetaCity;
+import Shared.LogDb;
 import Shared.Package;
-import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class NpcManager {
     private static NpcManager instance = new NpcManager();
@@ -100,6 +108,7 @@ public class NpcManager {
         			.setNum(allNpc.size())
                     .setTs(System.currentTimeMillis())
                     .build()));
+            LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
         }
         int idx = Math.abs(npc.id().hashCode())% updateTimesAtCurrentTimeSection;
         if(reCalcuWaitToUpdate) {

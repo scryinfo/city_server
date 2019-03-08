@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Exceptions.GroundAlreadySoldException;
+import Game.Meta.MetaItem;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
@@ -244,6 +245,7 @@ public class GroundManager {
                     .setCost(cost)
                     .setTs(System.currentTimeMillis())
                     .build()));
+            LogDb.cityBroadcast(owner.id(),renter.id(),cost,0,1);
 		}
 
         LogDb.rentGround(renter.id(), ownerId, cost, plist1);
@@ -328,6 +330,7 @@ public class GroundManager {
                     .setCost(cost)
                     .setTs(System.currentTimeMillis())
                     .build()));
+			LogDb.cityBroadcast(seller.id(),buyer.id(),cost,0,1);
 		}
         List<LogDb.Positon> plist1 = new ArrayList<>();
         List<Gs.MiniIndex> miniIndexList = new ArrayList<>();

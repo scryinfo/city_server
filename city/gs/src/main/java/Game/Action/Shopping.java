@@ -1,14 +1,36 @@
 package Game.Action;
 
-import Game.*;
-import Game.Meta.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+
+import Game.BrandManager;
+import Game.Building;
+import Game.City;
+import Game.GameDb;
+import Game.GameServer;
+import Game.IShelf;
+import Game.ItemKey;
+import Game.Npc;
+import Game.Player;
+import Game.RetailShop;
+import Game.Shelf;
+import Game.Meta.AIBuy;
+import Game.Meta.AILux;
+import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
+import Game.Meta.MetaItem;
+import Game.Meta.ProbBase;
 import Shared.LogDb;
-import Shared.Package;
 import Shared.Util;
 import gs.Gs;
-import gscode.GsCode;
-
-import java.util.*;
 
 public class Shopping implements IAction {
     public Shopping(int aiId) {
