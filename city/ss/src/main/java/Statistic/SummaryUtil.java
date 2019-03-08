@@ -115,12 +115,12 @@ public class SummaryUtil
         collection.find(and(
     					eq("type",countType.getValue())
     					))
-        			.projection(fields(include("t", "a"), excludeId()))
-    				.sort(Sorts.descending("t"))
+        			.projection(fields(include("time", "total"), excludeId()))
+    				.sort(Sorts.descending("time"))
     				.limit(1)
     		        .forEach((Block<? super Document>) document ->
                     {   
-                    	map.put(document.getLong("t"), document.getLong("a"));
+                    	map.put(document.getLong("time"), document.getLong("total"));
                     });
     	for (Map.Entry<Long, Long> entry : map.entrySet()) {
 			a=entry.getValue();
@@ -134,12 +134,12 @@ public class SummaryUtil
     	collection.find(and(
     			eq("type",countType.getValue())
     			))
-    	.projection(fields(include("t", "a"), excludeId()))
-    	.sort(Sorts.descending("t"))
+    	.projection(fields(include("time", "total"), excludeId()))
+    	.sort(Sorts.descending("time"))
     	.limit(24)
     	.forEach((Block<? super Document>) document ->
     	{   
-    		map.put(document.getLong("t"), document.getLong("a"));
+    		map.put(document.getLong("time"), document.getLong("total"));
     	});
     	return map;
     }

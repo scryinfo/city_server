@@ -398,7 +398,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf) {
+				if(building instanceof IShelf && !building.canUseBy(player.id())) {
 					IShelf s = (IShelf)building;
 					n.addAndGet(s.getSaleCount(mi.id));
 				}
@@ -429,7 +429,7 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf) {
+				if(building instanceof IShelf && !building.canUseBy(player.id())) {
 					IShelf s = (IShelf)building;
 					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
