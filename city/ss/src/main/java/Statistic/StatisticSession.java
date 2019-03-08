@@ -1,5 +1,6 @@
 package Statistic;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -112,6 +113,7 @@ public class StatisticSession {
     	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
     	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
       	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+      	long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
     	//player交易量
     	long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
     	long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
@@ -119,9 +121,22 @@ public class StatisticSession {
     	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
     	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
     	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
+    	long playerExchangeAmount=yesterdayPlayerBuyGround+todayPlayerBuyGround+yesterdayPlayerBuyInShelf+todayPlayerBuyInShelf+yesterdayPlayerRentGround+todayPlayerRentGround;
     	
-    	builder.setExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment
-    			+yesterdayPlayerBuyGround+todayPlayerBuyGround+yesterdayPlayerBuyInShelf+todayPlayerBuyInShelf+yesterdayPlayerRentGround+todayPlayerRentGround);
+    	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
     	this.write(Package.create(cmd, builder.build()));
+    }
+    
+    public void queryGoodsNpcNumCurve(short cmd)
+    {
+		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR);
+		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
+		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
+	    for (Map.Entry<Long, Long> entry : map.entrySet()) { 
+			bd.setKey(entry.getKey());
+			bd.setValue(entry.getValue());
+			list.addGoodsNpcNumCurveMap(bd.build());
+	    }
+		this.write(Package.create(cmd,list.build()));
     }
 }

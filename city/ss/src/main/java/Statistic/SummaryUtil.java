@@ -128,6 +128,22 @@ public class SummaryUtil
     	return a;
     }
     
+    public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,CountType countType)
+    {
+    	Map<Long, Long> map = new LinkedHashMap<>();
+    	collection.find(and(
+    			eq("type",countType.getValue())
+    			))
+    	.projection(fields(include("t", "a"), excludeId()))
+    	.sort(Sorts.descending("t"))
+    	.limit(24)
+    	.forEach((Block<? super Document>) document ->
+    	{   
+    		map.put(document.getLong("t"), document.getLong("a"));
+    	});
+    	return map;
+    }
+    
     public static long getTodayData(MongoCollection<Document> collection)
     {
     	long a=0;

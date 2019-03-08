@@ -19,6 +19,7 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryGoodsNpcNum_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryGoodsNpcNum"));
             table.put((short) SsCode.OpCode.queryNpcExchangeAmount_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryNpcExchangeAmount"));
             table.put((short) SsCode.OpCode.queryExchangeAmount_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryExchangeAmount"));
+            table.put((short) SsCode.OpCode.queryGoodsNpcNumCurve_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryGoodsNpcNumCurve"));
         } catch (Exception e) {
             e.printStackTrace();
         }
