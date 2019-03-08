@@ -283,8 +283,9 @@ public abstract class Building {
     }
 
     // ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
-    public void makeReference(Npc npc) {
-        this.allStaff.add(npc);
+    public void takeAsWorker(Npc npc) {
+        if(npc.canWork())
+            this.allStaff.add(npc);
     }
 
     public void setDes(String des) {
@@ -366,7 +367,7 @@ public abstract class Building {
             for(Npc npc : NpcManager.instance().create(k, v, this, 0))
             {
                 npcs.add(npc);
-                allStaff.add(npc);
+                takeAsWorker(npc);
                 npc.goWork();
             }
         });
