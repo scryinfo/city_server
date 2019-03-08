@@ -400,7 +400,8 @@ public class GameSession {
 			grid.forAllBuilding(building -> {
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
 					IShelf s = (IShelf)building;
-					n.addAndGet(s.getSaleCount(mi.id));
+					if(s.getSaleCount(mi.id) > 0)
+						n.addAndGet(1);
 				}
 			});
 			builder.addInfoBuilder()
