@@ -60,7 +60,9 @@ public class StatisticServer {
         scheduler.scheduleJob(newJob(PerHourJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 55 */1 * * ?"))
                 .build());//每种商品购买的npc,每隔1个小时执行,统计前一个小时的
-
+        scheduler.scheduleJob(newJob(YesterdayJob.class).build(), newTrigger()
+        		.withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
+        		.build());//统计昨天包括以前的数据，每天凌晨1点统计
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         List<ChannelFuture> fs = new ArrayList<>();

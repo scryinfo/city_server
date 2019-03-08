@@ -1,17 +1,19 @@
 package Statistic;
 
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.log4j.Logger;
+
+import com.google.protobuf.Message;
+
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import Statistic.SummaryUtil.CountType;
-
-import com.google.protobuf.Message;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
-import org.apache.log4j.Logger;
 import ss.Ss;
-
-import java.util.Map;
-import java.util.UUID;
 
 // this class contain only getXXX method, that means the only purpose this class or this server
 // is get data from db
@@ -84,8 +86,57 @@ public class StatisticSession {
     public void queryGoodsNpcNum(short cmd)
     {
     	Ss.GoodsNpcNum.Builder builder = Ss.GoodsNpcNum.newBuilder();
-    	builder.setYestodayNpcNum(SummaryUtil.getGoodsNpcNum(CountType.BYDAY));
-    	builder.setHourNpcNum(SummaryUtil.getGoodsNpcNum(CountType.BYHOUR));
+    	builder.setYestodayNpcNum(SummaryUtil.getHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYDAY));
+    	builder.setHourNpcNum(SummaryUtil.getHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR));
     	this.write(Package.create(cmd, builder.build()));
+    }
+    
+    public void queryNpcExchangeAmount(short cmd)
+    {
+    	Ss.NpcExchangeAmount.Builder builder = Ss.NpcExchangeAmount.newBuilder();
+    	//npc购买商品的交易量
+    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+    	//npc租房的交易量
+    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+    	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+    	
+    	builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    
+    public void queryExchangeAmount(short cmd)
+    {
+    	Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
+    	//npc交易量
+    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+      	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+      	long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
+    	//player交易量
+    	long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
+    	long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
+    	long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
+    	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+    	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
+    	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
+    	long playerExchangeAmount=yesterdayPlayerBuyGround+todayPlayerBuyGround+yesterdayPlayerBuyInShelf+todayPlayerBuyInShelf+yesterdayPlayerRentGround+todayPlayerRentGround;
+    	
+    	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    
+    public void queryGoodsNpcNumCurve(short cmd)
+    {
+		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR);
+		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
+		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
+	    for (Map.Entry<Long, Long> entry : map.entrySet()) { 
+			bd.setKey(entry.getKey());
+			bd.setValue(entry.getValue());
+			list.addGoodsNpcNumCurveMap(bd.build());
+	    }
+		this.write(Package.create(cmd,list.build()));
     }
 }
