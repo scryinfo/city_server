@@ -132,6 +132,11 @@ public class Shelf {
         return builder.build();
     }
     public int getSaleNum(int itemid) {
-        return 0;
+        int res = 0;
+        for (Map.Entry<ItemKey, Content> e : slots.entrySet()) {
+            if(e.getKey().meta.id == itemid)
+                res += e.getValue().n;
+        }
+        return res;
     }
 }
