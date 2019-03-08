@@ -153,7 +153,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 .setId(Util.toByteString(l.id))
                 .setNowCount(l.count)
                 .setBuildingId(Util.toByteString(this.id()))
-                .setItemId(key.meta.id)
+                .setIKey(key.toProto())
                 .setNowCountInStore(this.availableQuantity(key.meta))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
