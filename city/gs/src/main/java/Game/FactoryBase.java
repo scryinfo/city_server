@@ -112,9 +112,10 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             }
             if(l.isSuspend()) {
                 assert l.left() > 0;
-                if(this.store.offset(l.newItemKey(ownerId(), l.itemLevel), l.left())) {
+                ItemKey key = l.newItemKey(ownerId(), l.itemLevel);
+                if(this.store.offset(key, l.left())) {
                     l.resume();
-                    broadcastLineInfo(l);
+                    broadcastLineInfo(l,key);
                 }
             }
             else {
@@ -125,8 +126,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     int add = l.update(diffNano);
                     if (add > 0) {
                         l.materialConsumed = false;
-                        if (this.store.offset(l.newItemKey(ownerId(), l.itemLevel), add)) {
-                            broadcastLineInfo(l);
+                        ItemKey key = l.newItemKey(ownerId(), l.itemLevel);
+                        if (this.store.offset(key, add)) {
+                            broadcastLineInfo(l,key);
                         } else {
                             //(加工厂/原料厂)仓库已满通知
                             MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
@@ -146,11 +148,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         }
     }
 
-    private void broadcastLineInfo(LineBase l) {
+    private void broadcastLineInfo(LineBase l,ItemKey key) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(l.id))
                 .setNowCount(l.count)
                 .setBuildingId(Util.toByteString(this.id()))
+                .setItemId(key.meta.id)
+                .setNowCountInStore(this.availableQuantity(key.meta))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
