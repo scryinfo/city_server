@@ -54,9 +54,6 @@ public class StatisticServer {
         scheduler.scheduleJob(newJob(WeekJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
                 .build());
-        scheduler.scheduleJob(newJob(EverydayJob.class).build(), newTrigger()
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
-                .build());//每种商品购买的npc,每天晚上12点开始执行 ,统计当天的
         scheduler.scheduleJob(newJob(PerHourJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 55 */1 * * ?"))
                 .build());//每种商品购买的npc,每隔1个小时执行,统计前一个小时的

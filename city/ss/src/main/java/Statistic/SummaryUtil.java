@@ -108,23 +108,38 @@ public class SummaryUtil
         return map;
     }
     
+    public static List<Document> getGoodsNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
+    {
+    	List<Document> documentList = new ArrayList<>();
+        collection.find(and(
+    					eq("time",time),
+    					eq("type",countType.getValue())
+    					))
+        			.projection(fields(include("time", "total", "id"), excludeId()))
+    		        .forEach((Block<? super Document>) document ->
+                    {   
+                    	documentList.add(document);
+                    });
+    	return documentList;
+    }
+    
     public static long getHistoryData(MongoCollection<Document> collection,CountType countType)
     {
     	long a=0;
-        Map<Long, Long> map = new LinkedHashMap<>();
-        collection.find(and(
-    					eq("type",countType.getValue())
-    					))
-        			.projection(fields(include("time", "total"), excludeId()))
-    				.sort(Sorts.descending("time"))
-    				.limit(1)
-    		        .forEach((Block<? super Document>) document ->
-                    {   
-                    	map.put(document.getLong("time"), document.getLong("total"));
-                    });
+    	Map<Long, Long> map = new LinkedHashMap<>();
+    	collection.find(and(
+    			eq("type",countType.getValue())
+    			))
+    	.projection(fields(include("time", "total"), excludeId()))
+    	.sort(Sorts.descending("time"))
+    	.limit(1)
+    	.forEach((Block<? super Document>) document ->
+    	{   
+    		map.put(document.getLong("time"), document.getLong("total"));
+    	});
     	for (Map.Entry<Long, Long> entry : map.entrySet()) {
-			a=entry.getValue();
-		}
+    		a=entry.getValue();
+    	}
     	return a;
     }
     

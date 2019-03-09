@@ -2,6 +2,8 @@ import Shared.LogDb;
 import Shared.Util;
 import Statistic.DayJob;
 import Statistic.SummaryUtil;
+
+import org.bson.Document;
 import org.quartz.JobExecutionException;
 import ss.Ss;
 
@@ -42,6 +44,20 @@ public class Test
         TimeUnit.SECONDS.sleep(5);
     }
 
+    @org.junit.Test
+    public void dayNpcGoodsNum()
+    {
+        LogDb.init("mongodb://192.168.0.51:27017", "city51");
+        SummaryUtil.init();
+        System.out.println(SummaryUtil.queryCityBroadcast(LogDb.getCityBroadcast()));
+        long time1 = System.currentTimeMillis();
+        long endTime = time1 - time1%(1000 * 60  * 60)- 1000 * 60  * 5;
+        long startTime = endTime - 1000 * 60 * 60;
+
+        //每种商品购买的npc人数,每小时统计一次
+        List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
+    }
+    
     @org.junit.Test
     public void getBuidingIncome()
     {
