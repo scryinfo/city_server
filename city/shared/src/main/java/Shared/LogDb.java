@@ -214,7 +214,7 @@ public class LogDb {
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
-						Aggregates.group("$tpi",  Accumulators.sum(KEY_TOTAL, 1)),
+						Aggregates.group("$tpi",  Accumulators.sum(KEY_TOTAL, 1l)),
                         Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
