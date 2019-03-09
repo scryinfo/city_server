@@ -150,7 +150,10 @@ public class SummaryUtil
     	collection.find()
     	.projection(fields(include("t", "s", "b", "c", "n", "tp"), excludeId()))
     	.sort(Sorts.ascending("t"))
-    	.forEach((Block<? super Document>) documentList);
+    	.forEach((Block<? super Document>) document ->
+        {
+        	documentList.add(document);
+        });
     	return documentList;
     }
     
