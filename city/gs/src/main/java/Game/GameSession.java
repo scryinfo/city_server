@@ -597,6 +597,7 @@ public class GameSession {
                     .setCost(cost)
                     .setTs(System.currentTimeMillis())
                     .build()));
+			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
 		}
 		player.decMoney(freight);
 
