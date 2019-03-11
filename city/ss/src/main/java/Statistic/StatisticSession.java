@@ -158,11 +158,11 @@ public class StatisticSession {
     	Ss.CityBroadcasts.Builder list = Ss.CityBroadcasts.newBuilder();
     	Ss.CityBroadcast.Builder bd=Ss.CityBroadcast.newBuilder();
     	for (Document document : listDocument) {
-    		if(document.getString("s")!=null){
-    			bd.setSellerId(Util.toByteString(UUID.fromString(document.getString("s"))));
+    		if(document.get("s")!=null){
+    			bd.setSellerId(Util.toByteString(UUID.fromString(document.get("s").toString())));
     		}
-            if(document.getString("b")!=null){
-            	bd.setBuyerId(Util.toByteString(UUID.fromString(document.getString("b"))));
+            if(document.get("b")!=null){
+            	bd.setBuyerId(Util.toByteString(UUID.fromString(document.get("b").toString())));
             }
     		bd.setCost(document.getLong("c"));
     		bd.setNum(document.getInteger("n"));
