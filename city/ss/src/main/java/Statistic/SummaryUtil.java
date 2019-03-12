@@ -16,6 +16,7 @@ import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import ss.Ss;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SummaryUtil
@@ -143,15 +144,20 @@ public class SummaryUtil
     	return a;
     }
     
-    public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,CountType countType)
+    public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,int id,CountType countType)
     {
+        long nowTime = System.currentTimeMillis();
+        long lastFullTime = getLastFullTime(nowTime);
+        long beforeDayTime = getBeforeDayStartTime(7, nowTime);
     	Map<Long, Long> map = new LinkedHashMap<>();
     	collection.find(and(
-    			eq("type",countType.getValue())
+    			eq("type",countType.getValue()),
+    			eq("id",id),
+                gte("time", beforeDayTime),
+                lte("time", lastFullTime)
     			))
     	.projection(fields(include("time", "total"), excludeId()))
     	.sort(Sorts.descending("time"))
-    	.limit(24)
     	.forEach((Block<? super Document>) document ->
     	{   
     		map.put(document.getLong("time"), document.getLong("total"));

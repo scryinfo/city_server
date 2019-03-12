@@ -139,9 +139,11 @@ public class StatisticSession {
     	this.write(Package.create(cmd, builder.build()));
     }
     
-    public void queryGoodsNpcNumCurve(short cmd)
+    public void queryGoodsNpcNumCurve(short cmd, Message message)
     {
-		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR);
+      	Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
+    	int id=g.getId();
+		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
 		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
 	    for (Map.Entry<Long, Long> entry : map.entrySet()) { 
