@@ -6,6 +6,7 @@ import Game.GameSession;
 import Game.Player;
 import Shared.Package;
 import Shared.Util;
+/*import com.google.common.base.Optional;*/
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -15,22 +16,27 @@ import common.Common;
 import gs.Gs;
 import gscode.GsCode;
 
-import java.time.Duration;
 import java.util.*;
 
 public class SocietyManager
 {
-    private static LoadingCache<UUID, Society> societyCache = CacheBuilder.newBuilder()
+    private static LoadingCache<UUID, Optional<Society>> societyCache = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
-            .build(new CacheLoader<UUID, Society>()
+            .build(new CacheLoader<UUID, Optional<Society>>()
             {
                 @Override
-                public Society load(UUID key)
+                public Optional<Society> load(UUID key)
                 {
-                    return GameDb.getSocietyById(key);
+                    return Optional.ofNullable(GameDb.getSocietyById(key));
                 }
 
             });
+
+    private static Society getSocietyFromCache(UUID key)
+    {
+        Optional<Society>  opt = societyCache.getUnchecked(key);
+        return opt.orElse(null);
+    }
 
     private static final int modifyLevel = 8;
     private static final int chairmanLevel = 10;
@@ -63,7 +69,7 @@ public class SocietyManager
         Society society = new Society(createId, name, declaration);
         if (GameDb.saveOrUpdSociety(society))
         {
-            societyCache.put(society.getId(), society);
+            societyCache.put(society.getId(), Optional.of(society));
             societyInfoMap.put(society.getId(), society.toSimpleProto());
             return society;
         }
@@ -81,22 +87,26 @@ public class SocietyManager
 
     public static Society getSociety(UUID uuid)
     {
-        return societyCache.getUnchecked(uuid);
+        return getSocietyFromCache(uuid);
     }
 
     public static void broadOnline(Player player)
     {
         if (player.getSocietyId() != null)
         {
-            Society society = societyCache.getUnchecked(player.getSocietyId());
-            Gs.MemberChange.Builder builder = Gs.MemberChange.newBuilder();
-            builder.setSocietyId(Util.toByteString(society.getId()))
-                    .setPlayerId(Util.toByteString(player.id()))
-                    .setType(Gs.MemberChange.ChangeType.ONLINE);
-            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
-                    Gs.MemberChanges.newBuilder()
-                            .addAllChangeLists(Collections.singletonList(builder.build()))
-                            .build()));
+            Society society = getSocietyFromCache(player.getSocietyId());
+            if (society != null)
+            {
+                Gs.MemberChange.Builder builder = Gs.MemberChange.newBuilder();
+                builder.setSocietyId(Util.toByteString(society.getId()))
+                        .setPlayerId(Util.toByteString(player.id()))
+                        .setType(Gs.MemberChange.ChangeType.ONLINE);
+                GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                        Gs.MemberChanges.newBuilder()
+                                .addAllChangeLists(Collections.singletonList(builder.build()))
+                                .build()));
+            }
+
         }
     }
 
@@ -105,21 +115,24 @@ public class SocietyManager
     {
         if (player.getSocietyId() != null)
         {
-            Society society = societyCache.getUnchecked(player.getSocietyId());
-            Gs.MemberChange.Builder builder = Gs.MemberChange.newBuilder();
-            builder.setSocietyId(Util.toByteString(society.getId()))
-                    .setPlayerId(Util.toByteString(player.id()))
-                    .setType(Gs.MemberChange.ChangeType.OFFLINE);
-
-            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
-                    Gs.MemberChanges.newBuilder()
-                            .addAllChangeLists(Collections.singletonList(builder.build()))
-                            .build()));
-            if (Sets.intersection(GameServer.allGameSessions.keySet(),
-                    new HashSet<>(society.getMemberIds())).isEmpty())
+            Society society = getSocietyFromCache(player.getSocietyId());
+            if (society != null)
             {
-                societyCache.invalidate(society.getId());
-                GameDb.evict(society);
+                Gs.MemberChange.Builder builder = Gs.MemberChange.newBuilder();
+                builder.setSocietyId(Util.toByteString(society.getId()))
+                        .setPlayerId(Util.toByteString(player.id()))
+                        .setType(Gs.MemberChange.ChangeType.OFFLINE);
+
+                GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                        Gs.MemberChanges.newBuilder()
+                                .addAllChangeLists(Collections.singletonList(builder.build()))
+                                .build()));
+                if (Sets.intersection(GameServer.allGameSessions.keySet(),
+                        new HashSet<>(society.getMemberIds())).isEmpty())
+                {
+                    societyCache.invalidate(society.getId());
+                    GameDb.evict(society);
+                }
             }
         }
     }
@@ -133,7 +146,7 @@ public class SocietyManager
     public static void modifySocietyName(UUID societyId, String name,
                                          GameSession gameSession, short cmd)
     {
-        Society society = societyCache.getUnchecked(societyId);
+        Society society = getSocietyFromCache(societyId);
         if (society != null
                 && canModify(society.getIdentity(gameSession.getPlayer().id())))
         {
@@ -176,7 +189,7 @@ public class SocietyManager
     public static void modifyDeclaration(UUID societyId, String declaration,
                                          GameSession gameSession, short cmd)
     {
-        Society society = societyCache.getUnchecked(societyId);
+        Society society = getSocietyFromCache(societyId);
         if (society != null
                 && canModify(society.getIdentity(gameSession.getPlayer().id())))
         {
@@ -201,7 +214,7 @@ public class SocietyManager
     public static void modifyIntroduction(UUID societyId, String introduction,
                                          GameSession gameSession, short cmd)
     {
-        Society society = societyCache.getUnchecked(societyId);
+        Society society = getSocietyFromCache(societyId);
         if (society != null
                 && canModify(society.getIdentity(gameSession.getPlayer().id())))
         {
@@ -225,7 +238,7 @@ public class SocietyManager
 
     public static boolean reqJoinSociety(UUID societyId, Player player,String descp)
     {
-        Society society = societyCache.getUnchecked(societyId);
+        Society society = getSocietyFromCache(societyId);
         if (society != null)
         {
             society.getJoinMap().put(player.id(),descp);
@@ -259,7 +272,7 @@ public class SocietyManager
         UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
         if (societyId.equals(handler.getSocietyId()))
         {
-            Society society = societyCache.getUnchecked(societyId);
+            Society society = getSocietyFromCache(societyId);
             UUID reqId = Util.toUuid(params.getPlayerId().toByteArray());
             if (society != null &&
                     !society.getMemberIds().contains(reqId)
@@ -353,41 +366,50 @@ public class SocietyManager
 
     public static boolean exitSociety(UUID societyId, Player player)
     {
-        Society society = societyCache.getUnchecked(societyId);
-        if (society != null &&
-                permissionLevel.get(
-                        Gs.SocietyMember.Identity.valueOf(society.getIdentity(player.id())))
-                        != chairmanLevel)
+        Society society = getSocietyFromCache(societyId);
+        if (society != null && society.getMemberIds().contains(player.id()))
         {
-            player.setSocietyId(null);
-            society.delMember(player.id());
-            Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), null,
-                    Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE);
-            society.addNotice(notice);
-            GameDb.saveOrUpdate(Arrays.asList(player, society));
+            if (permissionLevel.get(
+                    Gs.SocietyMember.Identity.valueOf(society.getIdentity(player.id())))
+                    != chairmanLevel)
+            {
+                player.setSocietyId(null);
+                society.delMember(player.id());
+                Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), null,
+                        Gs.SocietyNotice.NoticeType.EXIT_SOCIETY_VALUE);
+                society.addNotice(notice);
+                GameDb.saveOrUpdate(Arrays.asList(player, society));
 
 
-            Gs.MemberChange.Builder mChange = Gs.MemberChange.newBuilder();
-            mChange.setSocietyId(Util.toByteString(societyId))
-                    .setPlayerId(Util.toByteString(player.id()))
-                    .setType(Gs.MemberChange.ChangeType.EXIT);
+                Gs.MemberChange.Builder mChange = Gs.MemberChange.newBuilder();
+                mChange.setSocietyId(Util.toByteString(societyId))
+                        .setPlayerId(Util.toByteString(player.id()))
+                        .setType(Gs.MemberChange.ChangeType.EXIT);
 
-            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
-                    Gs.MemberChanges.newBuilder()
-                            .addAllChangeLists(Collections.singletonList(mChange.build()))
-                            .build()));
+                GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.memberChange_VALUE,
+                        Gs.MemberChanges.newBuilder()
+                                .addAllChangeLists(Collections.singletonList(mChange.build()))
+                                .build()));
 
-            GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,
-                    notice.toProto(societyId)));
-
-            return true;
+                GameServer.sendTo(society.getMemberIds(),Package.create(GsCode.OpCode.noticeAdd_VALUE,
+                        notice.toProto(societyId)));
+                return true;
+            }
+            else if (society.getMemberIds().size() == 1 )
+            {
+                player.setSocietyId(null);
+                GameDb.saveOrUpdateAndDelete(Collections.singletonList(player), Collections.singletonList(society));
+                societyCache.invalidate(societyId);
+                societyInfoMap.remove(societyId);
+                return true;
+            }
         }
         return false;
     }
 
     public static boolean kickMember(UUID societyId, Player player, UUID kickId)
     {
-        Society society = societyCache.getUnchecked(societyId);
+        Society society = getSocietyFromCache(societyId);
         if (society != null && society.getMemberIds().contains(kickId))
         {
             if (canOperation(society,player.id(),kickId))
@@ -428,7 +450,7 @@ public class SocietyManager
         UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
         UUID appointId = Util.toUuid(params.getPlayerId().toByteArray());
         boolean isSuccess = false;
-        Society society = societyCache.getUnchecked(societyId);
+        Society society = getSocietyFromCache(societyId);
         if (society != null && society.getMemberIds().contains(appointId)
                 && canOperation(society, player.id(), appointId))
         {
@@ -511,15 +533,18 @@ public class SocietyManager
         UUID societyId = Util.toUuid(communicationReq.getChannelId().toByteArray());
         if (societyId.equals(player.getSocietyId()))
         {
-            Society society = societyCache.getUnchecked(societyId);
-            Gs.CommunicationProces.Builder builder = Gs.CommunicationProces.newBuilder();
-            builder.setId(Util.toByteString(player.id()))
-                    .setMsg(communicationReq.getMsg())
-                    .setTime(System.currentTimeMillis())
-                    .setChannel(communicationReq.getChannel())
-                    .setChannelId(communicationReq.getChannelId());
-            GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.roleCommunication_VALUE,
-                    builder.build()));
+            Society society = getSocietyFromCache(societyId);
+            if (society != null)
+            {
+                Gs.CommunicationProces.Builder builder = Gs.CommunicationProces.newBuilder();
+                builder.setId(Util.toByteString(player.id()))
+                        .setMsg(communicationReq.getMsg())
+                        .setTime(System.currentTimeMillis())
+                        .setChannel(communicationReq.getChannel())
+                        .setChannelId(communicationReq.getChannelId());
+                GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.roleCommunication_VALUE,
+                        builder.build()));
+            }
         }
     }
 }

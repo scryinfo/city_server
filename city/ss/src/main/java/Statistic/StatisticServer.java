@@ -48,8 +48,7 @@ public class StatisticServer {
         scheduler.start();
 
         scheduler.scheduleJob(newJob(DayJob.class).build(), newTrigger()
-                .withSchedule(/*CronScheduleBuilder.dailyAtHourAndMinute(0,0)*/
-                        CronScheduleBuilder.cronSchedule("0 */10 * * * ?"))
+                .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0,0))
                 .build());
         scheduler.scheduleJob(newJob(WeekJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
