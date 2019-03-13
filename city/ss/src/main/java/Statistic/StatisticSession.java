@@ -95,7 +95,7 @@ public class StatisticSession {
     	Ss.GoodNpcNumInfo.Builder info = Ss.GoodNpcNumInfo.newBuilder();
     	List<Document> ls=SummaryUtil.getGoodsNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR,time);
     	for (Document document : ls) {
-    		info.setId(document.getLong("id"));
+    		info.setId(document.getInteger("id"));
     		info.setTotal(document.getLong("total"));
     		info.setTime(document.getLong("time"));
     		list.addGoodNpcNumInfo(info.build());
