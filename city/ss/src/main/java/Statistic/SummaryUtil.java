@@ -146,15 +146,23 @@ public class SummaryUtil
     
     public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,int id,CountType countType)
     {
-        long nowTime = System.currentTimeMillis();
-        long lastFullTime = getLastFullTime(nowTime);
-        long beforeDayTime = getBeforeDayStartTime(7, nowTime);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+        
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
     	Map<Long, Long> map = new LinkedHashMap<>();
     	collection.find(and(
     			eq("type",countType.getValue()),
     			eq("id",id),
-                gte("time", beforeDayTime),
-                lte("time", lastFullTime)
+                gte("time", startTime),
+                lte("time", endTime)
     			))
     	.projection(fields(include("time", "total"), excludeId()))
     	.sort(Sorts.descending("time"))
@@ -164,7 +172,6 @@ public class SummaryUtil
     	});
     	return map;
     }
-    
     public static List<Document> queryCityBroadcast(MongoCollection<Document> collection)
     {
     	List<Document> documentList = new ArrayList<>();
