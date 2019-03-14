@@ -174,4 +174,20 @@ public class StatisticSession {
 		}
     	this.write(Package.create(cmd,list.build()));
     }
+    
+    public void queryNpcTypeNum(short cmd, Message message)
+    {
+    	Ss.NpcTypeNumInfo m = (Ss.NpcTypeNumInfo)message;
+    	long time=m.getT();
+    	Ss.NpcTypeNum.Builder list = Ss.NpcTypeNum.newBuilder();
+    	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
+    	List<Document> ls=SummaryUtil.getNpcTypeNumHistoryData(SummaryUtil.getDayGoodsNpcNum(),time);
+    	for (Document document : ls) {
+    		info.setT(document.getLong("t"));
+    		info.setTp(document.getInteger("tp"));
+    		info.setN(document.getLong("n"));
+    		list.addNpcTypeNumInfo(info.build());
+		}
+    	this.write(Package.create(cmd, list.build()));
+    }
 }

@@ -1,7 +1,9 @@
 package Game;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,6 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import Game.Meta.MetaCity;
+import Game.Timers.PeriodicTimer;
 import Shared.LogDb;
 import Shared.Package;
 import gs.Gs;
@@ -148,6 +151,27 @@ public class NpcManager {
     }
 
     public void hourTickAction(int nowHour) {
+    }
+
+    public void countNpcNum(long diffNano) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        long endTime=startDate.getTime()+1000 * 60  * 55;
+        long nowTime = System.currentTimeMillis();
+        
+        PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(endTime-nowTime));
+        if (timer.update(diffNano)) {
+        	Map<Integer, Integer>  map=countNpcByType();//统计并入库
+            for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
+    			long countTime=endTime+1000 * 60  * 5;
+    			int type=entry.getKey();
+    			long total=entry.getValue();
+    			LogDb.npcTypeNum(countTime,type,total);
+    	    }
+        }
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();

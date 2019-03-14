@@ -223,6 +223,7 @@ public class City {
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
+        NpcManager.instance().countNpcNum(diffNano);
 
         // do this at last
         updateTimeSection(diffNano);

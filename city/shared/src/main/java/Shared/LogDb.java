@@ -47,6 +47,7 @@ public class LogDb {
 	
 	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
 	private static final String CITY_BROADCAST = "cityBroadcast";
+	private static final String NPC_TYPE_NUM = "npcTypeNum";
 	//---------------------------------------------------
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
@@ -69,6 +70,7 @@ public class LogDb {
 	//npc rent apartment
 	private static MongoCollection<Document> npcRentApartment;
 	private static MongoCollection<Document> cityBroadcast;
+	private static MongoCollection<Document> npcTypeNum;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -107,6 +109,8 @@ public class LogDb {
 		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityBroadcast = database.getCollection(CITY_BROADCAST)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		npcTypeNum = database.getCollection(NPC_TYPE_NUM)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -424,6 +428,14 @@ public class LogDb {
 				.append("n", num)
 				.append("tp", type);
 		cityBroadcast.insertOne(document);
+	}
+	
+	public static void  npcTypeNum(long time, int type, long n)
+	{
+		Document document = new Document("t", time);
+		document.append("tp", type)
+				.append("n", n);
+		npcTypeNum.insertOne(document);
 	}
 	
 	public static MongoCollection<Document> getNpcBuyInRetailCol()

@@ -124,6 +124,20 @@ public class SummaryUtil
     	return documentList;
     }
     
+    public static List<Document> getNpcTypeNumHistoryData(MongoCollection<Document> collection,long time)
+    {
+    	List<Document> documentList = new ArrayList<>();
+    	collection.find(and(
+    			eq("t",time)
+    			))
+    	.projection(fields(include("t", "tp", "n"), excludeId()))
+    	.forEach((Block<? super Document>) document ->
+    	{   
+    		documentList.add(document);
+    	});
+    	return documentList;
+    }
+    
     public static long getHistoryData(MongoCollection<Document> collection,CountType countType)
     {
     	long a=0;
