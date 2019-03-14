@@ -140,7 +140,7 @@ public class SummaryUtil
     	List<Document> documentList = new ArrayList<>();
     	collection.find(and(
                 gte("t", startTime),
-                lte("t", endTime)
+                lt("t", endTime)
     			))
     	.projection(fields(include("t", "tp", "n"), excludeId()))
     	.forEach((Block<? super Document>) document ->
@@ -188,7 +188,7 @@ public class SummaryUtil
     			eq("type",countType.getValue()),
     			eq("id",id),
                 gte("time", startTime),
-                lte("time", endTime)
+                lt("time", endTime)
     			))
     	.projection(fields(include("time", "total"), excludeId()))
     	.sort(Sorts.descending("time"))

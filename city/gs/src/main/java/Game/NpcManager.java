@@ -21,6 +21,19 @@ import gs.Gs;
 import gscode.GsCode;
 
 public class NpcManager {
+    static long endTime=0;
+    static long nowTime=0;
+    static long countTime=0;
+    static{
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        endTime=startDate.getTime()+1000 * 60  * 55;
+        nowTime = System.currentTimeMillis();
+		countTime=endTime+1000 * 60  * 5;
+    }
     private static NpcManager instance = new NpcManager();
     public static NpcManager instance() {
         return instance;
@@ -152,21 +165,11 @@ public class NpcManager {
 
     public void hourTickAction(int nowHour) {
     }
-
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((endTime-nowTime)/1000));
     public void countNpcNum(long diffNano) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        long endTime=startDate.getTime()+1000 * 60  * 55;
-        long nowTime = System.currentTimeMillis();
-        
-        PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(endTime-nowTime));
-        if (timer.update(diffNano)) {
+        if (this.timer.update(diffNano)) {
         	Map<Integer, Integer>  map=countNpcByType();//统计并入库
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
-    			long countTime=endTime+1000 * 60  * 5;
     			int type=entry.getKey();
     			long total=entry.getValue();
     			LogDb.npcTypeNum(countTime,type,total);
