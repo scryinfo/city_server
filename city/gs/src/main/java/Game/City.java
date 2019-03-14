@@ -24,6 +24,7 @@ import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
@@ -222,6 +223,7 @@ public class City {
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
+        NpcManager.instance().countNpcNum(diffNano);
 
         // do this at last
         updateTimeSection(diffNano);
@@ -433,6 +435,7 @@ public class City {
         			.setNum(allBuilding.size())
                     .setTs(System.currentTimeMillis())
                     .build()));
+        	LogDb.cityBroadcast(null,null,0l,allBuilding.size(),5);
         }
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
         GridIndex gi = building.coordinate().toGridIndex();

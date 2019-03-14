@@ -1,9 +1,12 @@
 package Statistic;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.bson.Document;
 
 import com.google.protobuf.Message;
 
@@ -11,6 +14,7 @@ import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import Statistic.SummaryUtil.CountType;
+import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import ss.Ss;
@@ -83,12 +87,20 @@ public class StatisticSession {
         this.write(Package.create(cmd, builder.build()));
     }
     
-    public void queryGoodsNpcNum(short cmd)
+    public void queryGoodsNpcNum(short cmd, Message message)
     {
-    	Ss.GoodsNpcNum.Builder builder = Ss.GoodsNpcNum.newBuilder();
-    	builder.setYestodayNpcNum(SummaryUtil.getHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYDAY));
-    	builder.setHourNpcNum(SummaryUtil.getHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR));
-    	this.write(Package.create(cmd, builder.build()));
+    	Ss.GoodNpcNumInfo m = (Ss.GoodNpcNumInfo)message;
+    	long time=m.getTime();
+    	Ss.GoodsNpcNum.Builder list = Ss.GoodsNpcNum.newBuilder();
+    	Ss.GoodNpcNumInfo.Builder info = Ss.GoodNpcNumInfo.newBuilder();
+    	List<Document> ls=SummaryUtil.getGoodsNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR,time);
+    	for (Document document : ls) {
+    		info.setId(document.getInteger("id"));
+    		info.setTotal(document.getLong("total"));
+    		info.setTime(document.getLong("time"));
+    		list.addGoodNpcNumInfo(info.build());
+		}
+    	this.write(Package.create(cmd, list.build()));
     }
     
     public void queryNpcExchangeAmount(short cmd)
@@ -127,9 +139,11 @@ public class StatisticSession {
     	this.write(Package.create(cmd, builder.build()));
     }
     
-    public void queryGoodsNpcNumCurve(short cmd)
+    public void queryGoodsNpcNumCurve(short cmd, Message message)
     {
-		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),CountType.BYHOUR);
+      	Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
+    	int id=g.getId();
+		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
 		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
 	    for (Map.Entry<Long, Long> entry : map.entrySet()) { 
@@ -138,5 +152,40 @@ public class StatisticSession {
 			list.addGoodsNpcNumCurveMap(bd.build());
 	    }
 		this.write(Package.create(cmd,list.build()));
+    }
+    
+    public void queryCityBroadcast(short cmd)
+    {
+    	List<Document> listDocument=SummaryUtil.queryCityBroadcast(LogDb.getCityBroadcast());
+    	Ss.CityBroadcasts.Builder list = Ss.CityBroadcasts.newBuilder();
+    	Ss.CityBroadcast.Builder bd=Ss.CityBroadcast.newBuilder();
+    	for (Document document : listDocument) {
+    		if(document.get("s")!=null){
+    			bd.setSellerId(Util.toByteString(UUID.fromString(document.get("s").toString())));
+    		}
+            if(document.get("b")!=null){
+            	bd.setBuyerId(Util.toByteString(UUID.fromString(document.get("b").toString())));
+            }
+    		bd.setCost(document.getLong("c"));
+    		bd.setNum(document.getInteger("n"));
+    		bd.setType(document.getInteger("tp"));
+    		bd.setTs(document.getLong("t"));
+    		list.addCityBroadcast(bd.build());
+		}
+    	this.write(Package.create(cmd,list.build()));
+    }
+    
+    public void queryNpcTypeNum(short cmd)
+    {
+    	Ss.NpcTypeNum.Builder list = Ss.NpcTypeNum.newBuilder();
+    	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
+    	List<Document> ls=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
+    	for (Document document : ls) {
+    		info.setT(document.getLong("t"));
+    		info.setTp(document.getInteger("tp"));
+    		info.setN(document.getLong("n"));
+    		list.addNpcTypeNumInfo(info.build());
+		}
+    	this.write(Package.create(cmd, list.build()));
     }
 }

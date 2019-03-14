@@ -597,6 +597,7 @@ public class GameSession {
                     .setCost(cost)
                     .setTs(System.currentTimeMillis())
                     .build()));
+			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
 		}
 		player.decMoney(freight);
 
@@ -1722,7 +1723,11 @@ public class GameSession {
 		if (societyId.equals(player.getSocietyId()))
 		{
 			Society society = SocietyManager.getSociety(societyId);
-			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
+			if (society != null)
+			{
+				this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
+			}
+
 		}
 	}
 
@@ -1744,6 +1749,7 @@ public class GameSession {
 			{
 				this.write(Package.create(cmd,message));
 			}
+			this.write(Package.fail(cmd));
 		}
 	}
 

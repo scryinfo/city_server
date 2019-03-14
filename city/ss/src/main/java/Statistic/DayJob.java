@@ -30,14 +30,9 @@ public class DayJob implements org.quartz.Job {
         //refuse all client request
         StatisticSession.setIsReady(false);
 
-        long time1 = System.currentTimeMillis();
-        long todayStartTime = /*SummaryUtil.todayStartTime(System.currentTimeMillis())*/
-                time1 - time1%(1000 * 60 * 10);
-        long yestodayStartTime = todayStartTime - 1000 * 60 * 10;
+        long todayStartTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
 
-        //for test
-        /*long yestodayStartTime = todayStartTime;
-        todayStartTime = todayStartTime + DAY_MILLISECOND;*/
+        long yestodayStartTime = todayStartTime - DAY_MILLISECOND;
 
 
         long nowTime = System.currentTimeMillis();

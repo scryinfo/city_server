@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -22,12 +24,20 @@ public class PerHourJob implements org.quartz.Job {
     {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime()- 1000 * 60  * 5;
+        
 
         long time1 = System.currentTimeMillis();
         long endTime = time1 - time1%(1000 * 60  * 60)- 1000 * 60  * 5;
-        long startTime = endTime - 1000 * 60 * 60;
+    //  long startTime1 = endTime - 1000 * 60 * 60;
         
-        long time=startTime+1000 * 60  * 5;  
+        long time=endTime+1000 * 60  * 5;  
 
 
         long nowTime = System.currentTimeMillis();

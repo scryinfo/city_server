@@ -1,14 +1,14 @@
 package Game;
 
-import gs.Gs;
-import gscode.GsCode;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import Shared.LogDb;
 import Shared.Package;
-
-import java.util.UUID;
+import gs.Gs;
+import gscode.GsCode;
 
 @Entity
 public class MoneyPool {
@@ -36,6 +36,7 @@ public class MoneyPool {
         			.setCost(n)
                     .setTs(System.currentTimeMillis())
                     .build()));
+        	LogDb.cityBroadcast(null,null,n,0,4);
         }
     }
     public long money() {

@@ -1,15 +1,37 @@
 package Game;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import Game.Meta.MetaCity;
+import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 import Shared.Package;
-import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 public class NpcManager {
+    static long endTime=0;
+    static long nowTime=0;
+    static{
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        endTime=startDate.getTime()+1000 * 60  * 55;
+        nowTime = System.currentTimeMillis();
+    }
     private static NpcManager instance = new NpcManager();
     public static NpcManager instance() {
         return instance;
@@ -100,6 +122,7 @@ public class NpcManager {
         			.setNum(allNpc.size())
                     .setTs(System.currentTimeMillis())
                     .build()));
+            LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
         }
         int idx = Math.abs(npc.id().hashCode())% updateTimesAtCurrentTimeSection;
         if(reCalcuWaitToUpdate) {
@@ -139,6 +162,23 @@ public class NpcManager {
     }
 
     public void hourTickAction(int nowHour) {
+    }
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((endTime-nowTime)/1000));
+    public void countNpcNum(long diffNano) {
+        if (this.timer.update(diffNano)) {
+        	Map<Integer, Integer>  map=countNpcByType();//统计并入库
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            Date startDate = calendar.getTime();
+            long countTime=startDate.getTime()+1000 * 60  * 60;
+            for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
+    			int type=entry.getKey();
+    			long total=entry.getValue();
+    			LogDb.npcTypeNum(countTime,type,total);
+    	    }
+        }
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();

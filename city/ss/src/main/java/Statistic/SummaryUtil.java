@@ -16,6 +16,7 @@ import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import ss.Ss;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SummaryUtil
@@ -108,40 +109,107 @@ public class SummaryUtil
         return map;
     }
     
+    public static List<Document> getGoodsNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
+    {
+    	List<Document> documentList = new ArrayList<>();
+        collection.find(and(
+    					eq("time",time),
+    					eq("type",countType.getValue())
+    					))
+        			.projection(fields(include("time", "total", "id"), excludeId()))
+    		        .forEach((Block<? super Document>) document ->
+                    {   
+                    	documentList.add(document);
+                    });
+    	return documentList;
+    }
+    
+    public static List<Document> getNpcTypeNumHistoryData(MongoCollection<Document> collection)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+        
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+    	List<Document> documentList = new ArrayList<>();
+    	collection.find(and(
+                gte("t", startTime),
+                lt("t", endTime)
+    			))
+    	.projection(fields(include("t", "tp", "n"), excludeId()))
+    	.sort(Sorts.ascending("t"))
+    	.forEach((Block<? super Document>) document ->
+    	{   
+    		documentList.add(document);
+    	});
+    	return documentList;
+    }
+    
     public static long getHistoryData(MongoCollection<Document> collection,CountType countType)
     {
     	long a=0;
-        Map<Long, Long> map = new LinkedHashMap<>();
-        collection.find(and(
-    					eq("type",countType.getValue())
-    					))
-        			.projection(fields(include("time", "total"), excludeId()))
-    				.sort(Sorts.descending("time"))
-    				.limit(1)
-    		        .forEach((Block<? super Document>) document ->
-                    {   
-                    	map.put(document.getLong("time"), document.getLong("total"));
-                    });
-    	for (Map.Entry<Long, Long> entry : map.entrySet()) {
-			a=entry.getValue();
-		}
-    	return a;
-    }
-    
-    public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,CountType countType)
-    {
     	Map<Long, Long> map = new LinkedHashMap<>();
     	collection.find(and(
     			eq("type",countType.getValue())
     			))
     	.projection(fields(include("time", "total"), excludeId()))
     	.sort(Sorts.descending("time"))
-    	.limit(24)
+    	.limit(1)
+    	.forEach((Block<? super Document>) document ->
+    	{   
+    		map.put(document.getLong("time"), document.getLong("total"));
+    	});
+    	for (Map.Entry<Long, Long> entry : map.entrySet()) {
+    		a=entry.getValue();
+    	}
+    	return a;
+    }
+    
+    public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,int id,CountType countType)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+        
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+    	Map<Long, Long> map = new LinkedHashMap<>();
+    	collection.find(and(
+    			eq("type",countType.getValue()),
+    			eq("id",id),
+                gte("time", startTime),
+                lt("time", endTime)
+    			))
+    	.projection(fields(include("time", "total"), excludeId()))
+    	.sort(Sorts.descending("time"))
     	.forEach((Block<? super Document>) document ->
     	{   
     		map.put(document.getLong("time"), document.getLong("total"));
     	});
     	return map;
+    }
+    public static List<Document> queryCityBroadcast(MongoCollection<Document> collection)
+    {
+    	List<Document> documentList = new ArrayList<>();
+    	collection.find()
+    	.projection(fields(include("t", "s", "b", "c", "n", "tp"), excludeId()))
+    	.sort(Sorts.ascending("t"))
+    	.forEach((Block<? super Document>) document ->
+        {
+        	documentList.add(document);
+        });
+    	return documentList;
     }
     
     public static long getTodayData(MongoCollection<Document> collection)
