@@ -124,11 +124,23 @@ public class SummaryUtil
     	return documentList;
     }
     
-    public static List<Document> getNpcTypeNumHistoryData(MongoCollection<Document> collection,long time)
+    public static List<Document> getNpcTypeNumHistoryData(MongoCollection<Document> collection)
     {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+        
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
     	List<Document> documentList = new ArrayList<>();
     	collection.find(and(
-    			eq("t",time)
+                gte("t", startTime),
+                lte("t", endTime)
     			))
     	.projection(fields(include("t", "tp", "n"), excludeId()))
     	.forEach((Block<? super Document>) document ->

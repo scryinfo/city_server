@@ -175,13 +175,11 @@ public class StatisticSession {
     	this.write(Package.create(cmd,list.build()));
     }
     
-    public void queryNpcTypeNum(short cmd, Message message)
+    public void queryNpcTypeNum(short cmd)
     {
-    	Ss.NpcTypeNumInfo m = (Ss.NpcTypeNumInfo)message;
-    	long time=m.getT();
     	Ss.NpcTypeNum.Builder list = Ss.NpcTypeNum.newBuilder();
     	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
-    	List<Document> ls=SummaryUtil.getNpcTypeNumHistoryData(SummaryUtil.getDayGoodsNpcNum(),time);
+    	List<Document> ls=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
     	for (Document document : ls) {
     		info.setT(document.getLong("t"));
     		info.setTp(document.getInteger("tp"));

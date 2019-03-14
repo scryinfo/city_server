@@ -503,6 +503,11 @@ public class LogDb {
 		return cityBroadcast;
 	}
 	
+	public static MongoCollection<Document> getNpcTypeNum()
+	{
+		return npcTypeNum;
+	}
+	
 	public static class Positon
 	{
 		int x;
