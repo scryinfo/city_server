@@ -143,6 +143,7 @@ public class SummaryUtil
                 lt("t", endTime)
     			))
     	.projection(fields(include("t", "tp", "n"), excludeId()))
+    	.sort(Sorts.ascending("t"))
     	.forEach((Block<? super Document>) document ->
     	{   
     		documentList.add(document);

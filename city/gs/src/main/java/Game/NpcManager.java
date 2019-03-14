@@ -23,7 +23,6 @@ import gscode.GsCode;
 public class NpcManager {
     static long endTime=0;
     static long nowTime=0;
-    static long countTime=0;
     static{
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -32,7 +31,6 @@ public class NpcManager {
         Date startDate = calendar.getTime();
         endTime=startDate.getTime()+1000 * 60  * 55;
         nowTime = System.currentTimeMillis();
-		countTime=endTime+1000 * 60  * 5;
     }
     private static NpcManager instance = new NpcManager();
     public static NpcManager instance() {
@@ -169,6 +167,12 @@ public class NpcManager {
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
         	Map<Integer, Integer>  map=countNpcByType();//统计并入库
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            Date startDate = calendar.getTime();
+            long countTime=startDate.getTime()+1000 * 60  * 60;
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
     			int type=entry.getKey();
     			long total=entry.getValue();
