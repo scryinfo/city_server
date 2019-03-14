@@ -111,6 +111,8 @@ public class GroundManager {
     public Gs.GroundSummary getGroundSummaryProto() {
         Gs.GroundSummary.Builder builder = Gs.GroundSummary.newBuilder();
         this.summaryInfo.forEach((k,v)->{
+            if(v.rentingCount == 0 && v.sellingCount == 0)
+                return;
             builder.addInfoBuilder()
                     .setIdx(k.toProto())
                     .setRentingN(v.rentingCount)
@@ -175,6 +177,7 @@ public class GroundManager {
         }
         for(GroundInfo i : gis) {
             i.renting(rentPara);
+            this.summaryInfo.get(i.coordinate().toGridIndex()).rentingCount++;
         }
         GameDb.saveOrUpdate(gis); // faster than GameDb.saveOrUpdate(this);
         this.broadcast(gis);
