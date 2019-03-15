@@ -1,6 +1,5 @@
 package Statistic;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,7 +13,6 @@ import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import Statistic.SummaryUtil.CountType;
-import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import ss.Ss;
@@ -177,15 +175,22 @@ public class StatisticSession {
     
     public void queryNpcTypeNum(short cmd)
     {
-    	Ss.NpcTypeNum.Builder list = Ss.NpcTypeNum.newBuilder();
+    	Ss.NpcHourTypeNum.Builder list = Ss.NpcHourTypeNum.newBuilder();
     	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
-    	List<Document> ls=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
-    	for (Document document : ls) {
-    		info.setT(document.getLong("t"));
-    		info.setTp(document.getInteger("tp"));
-    		info.setN(document.getLong("n"));
-    		list.addNpcTypeNumInfo(info.build());
-		}
+    	Ss.NpcTypeNumMap.Builder npcTypeNumMap = Ss.NpcTypeNumMap.newBuilder();
+    	Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
+    	if(map!=null&&map.size()>0){
+    	  	for (Map.Entry<Long, Map> entry : map.entrySet()) { 
+    	  		info.setT(entry.getKey());
+    	 		Map<Integer,Long> m=entry.getValue();
+    	  		for (Map.Entry<Integer,Long> e : m.entrySet()) { 
+    	  			npcTypeNumMap.setTp(e.getKey());
+    	    		npcTypeNumMap.setN(e.getValue());
+    	  		}
+    	  		info.setNpcTypeNumMap(npcTypeNumMap.build());
+    	  		list.addNpcTypeNumInfo(info.build());
+    		}
+    	}
     	this.write(Package.create(cmd, list.build()));
     }
 }

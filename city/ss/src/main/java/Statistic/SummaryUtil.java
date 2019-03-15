@@ -124,8 +124,9 @@ public class SummaryUtil
     	return documentList;
     }
     
-    public static List<Document> getNpcTypeNumHistoryData(MongoCollection<Document> collection)
+    public static Map<Long, Map> getNpcTypeNumHistoryData(MongoCollection<Document> collection)
     {
+    	Map<Long, Map> countMap= new TreeMap<Long, Map>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -137,18 +138,27 @@ public class SummaryUtil
         calendar.add(Calendar.DATE, -7);
         Date startDate = calendar.getTime();
         long startTime=startDate.getTime();
-    	List<Document> documentList = new ArrayList<>();
     	collection.find(and(
                 gte("t", startTime),
                 lt("t", endTime)
     			))
     	.projection(fields(include("t", "tp", "n"), excludeId()))
-    	.sort(Sorts.ascending("t"))
     	.forEach((Block<? super Document>) document ->
-    	{   
-    		documentList.add(document);
+    	{ 
+    	  long t=document.getLong("t");
+		  int tp=document.getInteger("tp");
+		  long n=document.getLong("n");
+		  if(!countMap.containsKey(t)){
+			  Map<Integer,Long> m=new HashMap<Integer,Long>();
+			  m.put(tp, n);
+			  countMap.put(t, m);
+		  }else{ 
+			  Map<Integer,Long> mm=countMap.get(t);
+			  mm.put(tp, n);
+			  countMap.put(t,mm); 
+		  }
     	});
-    	return documentList;
+    	return countMap;
     }
     
     public static long getHistoryData(MongoCollection<Document> collection,CountType countType)
