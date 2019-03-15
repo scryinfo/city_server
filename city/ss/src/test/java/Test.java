@@ -1,18 +1,30 @@
-import Shared.LogDb;
-import Shared.Util;
-import Statistic.DayJob;
-import Statistic.SummaryUtil;
-
-import org.bson.Document;
-import org.quartz.JobExecutionException;
-import ss.Ss;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.excludeId;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import org.bson.Document;
+import org.quartz.JobExecutionException;
+
+import com.mongodb.Block;
+import com.mongodb.client.MongoCollection;
+
+import Shared.LogDb;
+import Shared.Util;
+import Statistic.DayJob;
+import Statistic.SummaryUtil;
+import ss.Ss;
 
 public class Test
 {
@@ -49,13 +61,32 @@ public class Test
     {
         LogDb.init("mongodb://192.168.0.51:27017", "city51");
         SummaryUtil.init();
-        System.out.println(SummaryUtil.queryCityBroadcast(LogDb.getCityBroadcast()));
-        long time1 = System.currentTimeMillis();
-        long endTime = time1 - time1%(1000 * 60  * 60)- 1000 * 60  * 5;
-        long startTime = endTime - 1000 * 60 * 60;
-
-        //每种商品购买的npc人数,每小时统计一次
-        List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
+//        //每种商品购买的npc人数,每小时统计一次
+//       	long time=1552104000000l;
+//    	List<Document> documentList = new ArrayList<>();
+//    	MongoCollection<Document> collection=SummaryUtil.getDayGoodsNpcNum();
+//        collection.find(and(
+//    					eq("time",time),
+//    					eq("type",2)
+//    					))
+//        			.projection(fields(include("time", "total", "id"), excludeId()))
+//    		        .forEach((Block<? super Document>) document ->
+//                    {   
+//                    	documentList.add(document);
+//                    });
+//        System.out.println(documentList);
+    	
+    	Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
+    	if(map!=null&&map.size()>0){
+    	  	for (Map.Entry<Long, Map> entry : map.entrySet()) { 
+    	  		System.out.println(entry.getKey());
+    	 		Map<Integer,Long> m=entry.getValue();
+    	  		for (Map.Entry<Integer,Long> e : m.entrySet()) { 
+    	  			System.out.println("key--"+e.getKey());
+    	  			System.out.println("value--"+e.getValue());
+    	  		}
+    		}
+    	}
     }
     
     @org.junit.Test
