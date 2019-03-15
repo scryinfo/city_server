@@ -129,16 +129,16 @@ public class AccountSession {
                 cag.setAvailable(true);
             else
                 cag.setAvailable(false);
-            try {
-                for(RoleBriefInfo briefInfo : AccountDb.getRoleBriefInfos(this.accountName, gsInfo.getGameDbUrl())) {
-                    cag.addBriefInfoBuilder()
-                            .setId(Util.toByteString(briefInfo.id))
-                            .setName(briefInfo.name)
-                            .setLastLoginTime(briefInfo.lastLoginTs);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                for(RoleBriefInfo briefInfo : AccountDb.getRoleBriefInfos(this.accountName, gsInfo.getGameDbUrl())) {
+//                    cag.addBriefInfoBuilder()
+//                            .setId(Util.toByteString(briefInfo.id))
+//                            .setName(briefInfo.name)
+//                            .setLastLoginTime(briefInfo.lastLoginTs);
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
             ca.addInfos(cag);
         }
         return ca.build();
