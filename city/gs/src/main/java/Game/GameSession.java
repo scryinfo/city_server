@@ -1773,6 +1773,7 @@ public class GameSession {
 			if (SocietyManager.reqJoinSociety(societyId,player,str))
 			{
 				this.write(Package.create(cmd,message));
+				return;
 			}
 			this.write(Package.fail(cmd));
 		}
