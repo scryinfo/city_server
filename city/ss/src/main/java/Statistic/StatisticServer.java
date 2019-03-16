@@ -54,8 +54,8 @@ public class StatisticServer {
                 .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
                 .build());
         scheduler.scheduleJob(newJob(PerHourJob.class).build(), newTrigger()
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 55 */1 * * ?"))
-                .build());//每种商品购买的npc,每隔1个小时执行,统计前一个小时的
+                .withSchedule(CronScheduleBuilder.cronSchedule("*/10 * * * * ?"))
+                .build());//每种商品购买的npc,每10秒统计一次
         scheduler.scheduleJob(newJob(YesterdayJob.class).build(), newTrigger()
         		.withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
         		.build());//统计昨天包括以前的数据，每天凌晨1点统计
