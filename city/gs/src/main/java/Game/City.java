@@ -299,7 +299,7 @@ public class City {
 //        return -1;
 //    }
     LocalTime localTime() {
-        return Util.getLocalTime(this.meta.timeZone);
+        return LocalTime.now();//Util.getLocalTime(this.meta.timeZone);
     }
     public void add(Player p) {
         this.grids[p.getPosition().x][p.getPosition().y].playerComing(p.id());

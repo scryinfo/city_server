@@ -40,9 +40,9 @@ public class Util {
             delay = TimeUnit.HOURS.toMillis(hour-now_hour) + TimeUnit.MINUTES.toMillis(min-now_min) + TimeUnit.SECONDS.toMillis(-now_sec);
         return delay;
     }
-    public static LocalTime getLocalTime(int offset) {
-         return LocalTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(offset)));
-    }
+//    public static LocalTime getLocalTime(int offset) {
+//         return LocalTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(offset)));
+//    }
     public static UUID toUuid(byte[] bytes) {
         ByteBuffer bb = ByteBuffer.wrap(bytes); // if bytes.length < 16, getLong will throw java.nio.BufferUnderflowException
         long firstLong = bb.getLong();
