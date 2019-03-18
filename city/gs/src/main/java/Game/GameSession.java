@@ -1,15 +1,46 @@
 package Game;
 
-import Game.Exceptions.GroundAlreadySoldException;
-import Game.FriendManager.*;
-import Game.Meta.*;
-import Shared.*;
-import Shared.Package;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.log4j.Logger;
+
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+
+import Game.Exceptions.GroundAlreadySoldException;
+import Game.FriendManager.FriendManager;
+import Game.FriendManager.FriendRequest;
+import Game.FriendManager.ManagerCommunication;
+import Game.FriendManager.OfflineMessage;
+import Game.FriendManager.Society;
+import Game.FriendManager.SocietyManager;
+import Game.Meta.Formula;
+import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
+import Game.Meta.MetaItem;
+import Game.Meta.MetaMaterial;
+import Shared.GlobalConfig;
+import Shared.LogDb;
+import Shared.Package;
+import Shared.RoleBriefInfo;
+import Shared.Util;
+import Shared.Validator;
 import common.Common;
 import gs.Gs;
 import gscode.GsCode;
@@ -17,12 +48,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
-import org.apache.log4j.Logger;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -589,7 +614,7 @@ public class GameSession {
 				.setCount(itemBuy.n)
 				.build());
 		player.decMoney(cost);
-		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(seller.id()))
@@ -1748,6 +1773,7 @@ public class GameSession {
 			if (SocietyManager.reqJoinSociety(societyId,player,str))
 			{
 				this.write(Package.create(cmd,message));
+				return;
 			}
 			this.write(Package.fail(cmd));
 		}

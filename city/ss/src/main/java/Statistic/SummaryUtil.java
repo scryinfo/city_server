@@ -472,7 +472,7 @@ public class SummaryUtil
     }
     enum CountType
     {
-    	BYDAY(1),BYHOUR(2);
+    	BYDAY(1),BYHOUR(2),BYMINU(3),BYSECONDS(4);
     	private int value;
     	CountType(int i)
     	{

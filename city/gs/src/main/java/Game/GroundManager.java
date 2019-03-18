@@ -1,20 +1,33 @@
 package Game;
 
-import Game.Exceptions.GroundAlreadySoldException;
-import Game.Meta.MetaItem;
-import Shared.LogDb;
-import Shared.Package;
-import Shared.Util;
-import com.google.protobuf.Message;
-import gs.Gs;
-import gscode.GsCode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyClass;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.*;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import Game.Exceptions.GroundAlreadySoldException;
+import Shared.LogDb;
+import Shared.Package;
+import Shared.Util;
+import gs.Gs;
+import gscode.GsCode;
 
 @Entity
 public class GroundManager {
@@ -240,7 +253,7 @@ public class GroundManager {
         Player owner = GameDb.queryPlayer(ownerId);
         owner.addMoney(cost);
         
-		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(owner.id()))
@@ -325,7 +338,7 @@ public class GroundManager {
         Player seller = GameDb.queryPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
-		if(cost>=1000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(seller.id()))
