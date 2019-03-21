@@ -104,7 +104,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     protected void _update(long diffNano) {
         List<UUID> completedLines = new ArrayList<>();
-        this.lines.values().forEach(l -> {
+        Iterator<Map.Entry<UUID, LineBase>> iterator = this.lines.entrySet().iterator();
+        if(iterator.hasNext()){
+            LineBase l = iterator.next().getValue();//第一条生产线,当前生产线
             if(l.isPause()) {
                 if(l.isComplete())
                     completedLines.add(l.id);
@@ -137,10 +139,15 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                         }
                     }
                 }
-        });
-        for (UUID id : completedLines) {
-            LineBase l = this.lines.remove(id);
-            this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+        }
+        if (completedLines.size() > 0){
+            //for (UUID id : completedLines) {
+            UUID nextId = null;
+            if(iterator.hasNext()){
+                nextId = iterator.next().getKey(); //第二条生产线
+            }
+            LineBase l = this.lines.remove(completedLines.get(0));
+            this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
         if(this.dbTimer.update(diffNano)) {
