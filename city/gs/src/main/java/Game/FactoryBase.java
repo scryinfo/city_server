@@ -99,6 +99,10 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return lines.remove(lineId);
     }
 
+    protected  boolean __hasLineRemained(){
+        return lineSequence.size() > 0 && lines.size() > 0;
+    }
+
     public void updateLineQuality(int metaId, int lv) {
         this.lines.values().forEach(l->{
             if(l.item.id == metaId)
@@ -115,9 +119,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     protected void _update(long diffNano) {
         List<UUID> completedLines = new ArrayList<>();
-        Iterator<Map.Entry<UUID, LineBase>> iterator = this.lines.entrySet().iterator();
-        if(iterator.hasNext()){
-            LineBase l = iterator.next().getValue();//第一条生产线,当前生产线
+        if(__hasLineRemained()){
+            LineBase l =  lines.get(lineSequence.get(0));
             if(l.isPause()) {
                 if(l.isComplete())
                     completedLines.add(l.id);
@@ -152,10 +155,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
         }
         if (completedLines.size() > 0){
-            //for (UUID id : completedLines) {
             UUID nextId = null;
-            if(iterator.hasNext()){
-                nextId = iterator.next().getKey(); //第二条生产线
+            if(lineSequence.size() > 2){
+                nextId = lineSequence.get(1); //第二条生产线
             }
             LineBase l = __delLine(completedLines.get(0));
             this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
