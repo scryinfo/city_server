@@ -87,6 +87,17 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKeyColumn(name = "line_id")
     Map<UUID, LineBase> lines = new HashMap<>();
+    List<UUID>  lineSequence = new ArrayList<UUID>();
+
+    protected void __addLine(LineBase newLine){
+        lines.put(newLine.id,newLine);
+        lineSequence.add(newLine.id);
+    }
+
+    protected  LineBase __delLine(UUID lineId){
+        lineSequence.remove(lineId);
+        return lines.remove(lineId);
+    }
 
     public void updateLineQuality(int metaId, int lv) {
         this.lines.values().forEach(l->{
@@ -146,7 +157,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             if(iterator.hasNext()){
                 nextId = iterator.next().getKey(); //第二条生产线
             }
-            LineBase l = this.lines.remove(completedLines.get(0));
+            LineBase l = __delLine(completedLines.get(0));
             this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
@@ -257,6 +268,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
 
     public boolean delLine(UUID lineId) {
-        return this.lines.remove(lineId) != null;
+        return this.__delLine(lineId) != null ;
     }
 }

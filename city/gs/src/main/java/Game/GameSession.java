@@ -917,6 +917,24 @@ public class GameSession {
         else
             this.write(Package.fail(cmd));
 	}
+
+	public void ftySetLineOrder(short cmd, Message message) {
+		Gs.SetLineOrder c = (Gs.SetLineOrder) message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+		FactoryBase f = (FactoryBase) b;
+		/*OptionalInt tn = c.hasTargetNum()?OptionalInt.of(c.getTargetNum()):OptionalInt.empty();
+		OptionalInt wn = c.hasWorkerNum()?OptionalInt.of(c.getWorkerNum()):OptionalInt.empty();
+		boolean ok = f.changeLine(lineId, tn, wn);
+		if(ok)
+			this.write(Package.create(cmd, c));
+		else
+			this.write(Package.fail(cmd));*/
+	}
+
 	public void adAddSlot(short cmd, Message message) {
 		Gs.AddSlot c = (Gs.AddSlot)message;
 

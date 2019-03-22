@@ -83,7 +83,7 @@ public class ProduceDepartment extends FactoryBase {
         if(!(item instanceof MetaGood) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaGood)item, targetNum, workerNum, itemLevel);
-        lines.put(line.id, line);
+        __addLine(line);
         return line;
     }
 

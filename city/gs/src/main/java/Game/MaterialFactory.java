@@ -88,10 +88,11 @@ public class MaterialFactory extends FactoryBase {
 
     @Override
     protected LineBase addLineImpl(MetaItem item, int workerNum, int targetNum, int itemLevel) {
-        if(!(item instanceof MetaMaterial) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
+        if(!(item instanceof MetaMaterial) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaMaterial)item, targetNum, workerNum, itemLevel);
-        lines.put(line.id, line);
+        __addLine(line);
+        lineSequence.add(line.id);
         return line;
     }
 
