@@ -96,7 +96,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     protected void __addLine(LineBase newLine){
         lines.put(newLine.id,newLine);
-        lineSequence.add(newLine.id);
+        if(lineSequence.indexOf(newLine.id) < 0){
+            lineSequence.add(newLine.id);
+        }
     }
 
     protected  LineBase __delLine(UUID lineId){
@@ -127,9 +129,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         if(__hasLineRemained()){
             LineBase l =  lines.get(lineSequence.get(0));
             if(l.isPause()) {
-                if(l.isComplete())
+                if(l.isComplete()){
                     completedLines.add(l.id);
-                return;
+                }
             }
             if(l.isSuspend()) {
                 assert l.left() > 0;
@@ -161,7 +163,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         }
         if (completedLines.size() > 0){
             UUID nextId = null;
-            if(lineSequence.size() > 2){
+            if(lineSequence.size() >= 2){
                 nextId = lineSequence.get(1); //第二条生产线
             }
             LineBase l = __delLine(completedLines.get(0));

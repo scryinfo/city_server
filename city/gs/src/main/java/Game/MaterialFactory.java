@@ -68,7 +68,7 @@ public class MaterialFactory extends FactoryBase {
         Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
-        this.lines.values().forEach(line -> builder.addLine(line.toProto()));
+        this.lineSequence.forEach(uuid -> builder.addLine(this.lines.get(uuid).toProto()));
         return builder.build();
     }
     @Override
@@ -92,7 +92,6 @@ public class MaterialFactory extends FactoryBase {
             return null;
         Line line = new Line((MetaMaterial)item, targetNum, workerNum, itemLevel);
         __addLine(line);
-        lineSequence.add(line.id);
         return line;
     }
 
