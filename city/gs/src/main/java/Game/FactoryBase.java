@@ -13,6 +13,7 @@ import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
+import  java.util.ArrayList;
 
 @Entity
 public abstract class FactoryBase extends Building implements IStorage, IShelf {
@@ -87,7 +88,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKeyColumn(name = "line_id")
     Map<UUID, LineBase> lines = new HashMap<>();
-    List<UUID>  lineSequence = new ArrayList<UUID>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "line_UUIDList", joinColumns = @JoinColumn(name = "line_UUID"))
+    @OrderColumn
+    List<UUID>  lineSequence = new ArrayList<>();
 
     protected void __addLine(LineBase newLine){
         lines.put(newLine.id,newLine);
