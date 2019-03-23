@@ -898,7 +898,11 @@ public class GameSession {
 		FactoryBase f = (FactoryBase) b;
 		if(f.delLine(lineId)) {
 			GameDb.saveOrUpdate(f);
-			this.write(Package.create(cmd, c));
+			if(f.lineSequence.size() > 0){
+				this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(f.lineSequence.get(0))).build()));
+			}else{
+				this.write(Package.create(cmd, c));
+			}
 		}
 	}
 	public void ftyChangeLine(short cmd, Message message) {
@@ -925,14 +929,16 @@ public class GameSession {
 		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+	 	int pos = c.getLineOrder() - 1;
+
 		FactoryBase f = (FactoryBase) b;
-		/*OptionalInt tn = c.hasTargetNum()?OptionalInt.of(c.getTargetNum()):OptionalInt.empty();
-		OptionalInt wn = c.hasWorkerNum()?OptionalInt.of(c.getWorkerNum()):OptionalInt.empty();
-		boolean ok = f.changeLine(lineId, tn, wn);
-		if(ok)
+		if(pos >=0 && pos < f.lineSequence.size()){
+			f.lineSequence.remove(lineId);
+			f.lineSequence.add(pos,lineId);
 			this.write(Package.create(cmd, c));
-		else
-			this.write(Package.fail(cmd));*/
+		}else{
+			this.write(Package.fail(cmd));
+		}
 	}
 
 	public void adAddSlot(short cmd, Message message) {
