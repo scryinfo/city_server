@@ -10,17 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import Game.BrandManager;
-import Game.Building;
-import Game.City;
-import Game.GameDb;
-import Game.GameServer;
-import Game.IShelf;
-import Game.ItemKey;
-import Game.Npc;
-import Game.Player;
-import Game.RetailShop;
-import Game.Shelf;
+import Game.*;
 import Game.Meta.AIBuy;
 import Game.Meta.AILux;
 import Game.Meta.MetaBuilding;
@@ -101,6 +91,9 @@ public class Shopping implements IAction {
             Player owner = GameDb.queryPlayer(sellShop.ownerId());
             owner.addMoney(chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
+            ((IStorage)sellShop).consumeLock(chosen.getItemKey(), 1);
+
+            sellShop.updateTodayIncome(chosen.price);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 
             GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()

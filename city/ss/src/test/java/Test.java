@@ -1,17 +1,16 @@
+import static Statistic.SummaryUtil.DAY_MILLISECOND;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.excludeId;
 import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
@@ -94,39 +93,57 @@ public class Test
     {
         UUID player1 = UUID.fromString(p1);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
-        LogDb.init("mongodb://192.168.0.51:27017","city148");
+        LogDb.init("mongodb://192.168.0.51:27017","city149");
         SummaryUtil.init();
-        Map<Long,Long> map = SummaryUtil.getBuildIncomeById(player1);
-        map.forEach((k, v) ->{
+        SummaryUtil.init();
+        List<Ss.NodeIncome> list = SummaryUtil.getBuildDayIncomeById(player1);
+        list.forEach(i ->{
             System.out.println(formatter.format(LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(k), ZoneId.systemDefault()))
-                    + " : " + v);
+                    Instant.ofEpochMilli(i.getTime()), ZoneId.systemDefault())) + " : " + i.getIncome());
         });
+    }
+
+    @org.junit.Test
+    public void testBuildDayJob()
+    {
+        LogDb.init("mongodb://192.168.0.51:27017", "city149");
+        SummaryUtil.init();
+        long now = System.currentTimeMillis();
+        long beforTime = SummaryUtil.getBeforeDayStartTime(32, now);
+        long todayStartTime = SummaryUtil.todayStartTime(now);
+        long i = 0L;
+        for (i = beforTime; i < todayStartTime;
+             i = i + SummaryUtil.DAY_MILLISECOND)
+        {
+            List<Document> documentList = LogDb.buildingDayIncomeSummary(i, i+SummaryUtil.DAY_MILLISECOND);
+            SummaryUtil.insertBuildingDayIncome(documentList,i);
+        }
+
     }
     @org.junit.Test
     public void insertBuidingIncome() throws InterruptedException
     {
-        LogDb.init("mongodb://192.168.0.51:27017","city148");
+        LogDb.init("mongodb://192.168.0.51:27017","city149");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         UUID player1 = UUID.fromString(p1);
         UUID player2 = UUID.fromString(p2);
         long now = System.currentTimeMillis();
-        long beforTime = SummaryUtil.getBeforeDayStartTime(2, now);
-        long fullTime = SummaryUtil.getLastFullTime(now);
+        long beforTime = SummaryUtil.getBeforeDayStartTime(32, now);
+        long todayStartTime = SummaryUtil.todayStartTime(now);
         long i = 0L;
-        for (i = fullTime; i >= beforTime - SummaryUtil.HOUR_MILLISECOND;
-             i = i - SummaryUtil.HOUR_MILLISECOND)
+        for (i = beforTime; i < todayStartTime;
+             i = i + SummaryUtil.DAY_MILLISECOND)
         {
             //for test , time need add to method
-            /*long time =i + new Random().nextInt((int)SummaryUtil.HOUR_MILLISECOND-1);
+            long time =i + new Random().nextInt((int)SummaryUtil.DAY_MILLISECOND-1);
             LogDb.buildingIncome(player1, UUID.randomUUID(), 10, 0, 0, time);
             LogDb.buildingIncome(player2, UUID.randomUUID(), 10, 0, 0, time);
-            time =i + new Random().nextInt((int)SummaryUtil.HOUR_MILLISECOND-1);
-            LogDb.buildingIncome(player2, UUID.randomUUID(), 10, 0, 0, time);
-            LogDb.buildingIncome(player1, UUID.randomUUID(), 10, 0, 0, time);*/
+            time =i + new Random().nextInt((int)SummaryUtil.DAY_MILLISECOND-1);
+            LogDb.buildingIncome(player2, UUID.randomUUID(), 11, 0, 0, time);
+            LogDb.buildingIncome(player1, UUID.randomUUID(), 11, 0, 0, time);
         }
         System.out.println(formatter.format(LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(fullTime), ZoneId.systemDefault())));
+                Instant.ofEpochMilli(todayStartTime), ZoneId.systemDefault())));
         System.out.println(formatter.format(LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(beforTime), ZoneId.systemDefault())));
         System.out.println(formatter.format(LocalDateTime.ofInstant(

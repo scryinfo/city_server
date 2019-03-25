@@ -637,6 +637,7 @@ public class GameSession {
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
+		sellBuilding.updateTodayIncome(cost);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
 
@@ -1864,6 +1865,27 @@ public class GameSession {
 				 */
 			}
 		}
+	}
+
+	public void getPrivateBuildingCommonInfo(short cmd,Message message)
+	{
+		Gs.Bytes ids = (Gs.Bytes) message;
+		List<Building> buildings = new ArrayList<>(ids.getIdsCount());
+		for (ByteString bs : ids.getIdsList())
+		{
+            Building building = City.instance().getBuilding(Util.toUuid(bs.toByteArray()));
+            if (building != null && player.id().equals(building.ownerId()))
+            {
+                buildings.add(building);
+            }
+            else return;
+		}
+        Gs.PrivateBuildingInfos.Builder builder = Gs.PrivateBuildingInfos.newBuilder();
+        buildings.forEach(building ->
+        {
+            builder.addInfos(building.getPrivateBuildingInfo());
+        });
+        this.write(Package.create(cmd, builder.build()));
 	}
 
 	//===========================================================

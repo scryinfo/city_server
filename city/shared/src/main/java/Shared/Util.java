@@ -14,9 +14,8 @@ import org.bson.types.ObjectId;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.sql.Timestamp;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +25,11 @@ public class Util {
     private static final byte[] UUID_APPENDS = new byte[4];
     public static ByteString toByteString(ObjectId id) {
         return ByteString.copyFrom(id.toByteArray());
+    }
+
+    public static long getTodayStartTs()
+    {
+        return Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0))).getTime();
     }
     public static long getTimerDelay(int hour, int min)
     {

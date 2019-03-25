@@ -65,15 +65,10 @@ public class StatisticSession {
 
     public void queryBuildingIncome(short cmd, Message message)
     {
-        UUID buildingId = Util.toUuid((message).toByteArray());
+        UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
         Ss.BuildingIncome.Builder builder = Ss.BuildingIncome.newBuilder();
         builder.setBuildingId(Util.toByteString(buildingId));
-        SummaryUtil.getBuildIncomeById(buildingId).forEach((k,v) ->{
-            Ss.NodeIncome.Builder node = Ss.NodeIncome.newBuilder()
-                    .setIncome(v)
-                    .setTime(k);
-            builder.addNodes(node.build());
-        });
+		builder.addAllNodes(SummaryUtil.getBuildDayIncomeById(buildingId));
         this.write(Package.create(cmd, builder.build()));
     }
 

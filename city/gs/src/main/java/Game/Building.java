@@ -15,6 +15,10 @@ import gscode.GsCode;
 import io.netty.channel.ChannelId;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -225,6 +229,45 @@ public abstract class Building {
     private String des;
     private int emoticon;
     private boolean showBubble;
+
+    @Column(nullable = false)
+    private long todayIncome = 0;
+
+    @Column(nullable = false)
+    private long todayIncomeTs = 0;
+
+    private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
+
+    public void updateTodayIncome(long income)
+    {
+        if (System.currentTimeMillis() - todayIncomeTs >= DAY_MILLISECOND)
+        {
+            todayIncome = income;
+            todayIncomeTs = Util.getTodayStartTs();
+
+        }
+        else
+        {
+            todayIncome += income;
+        }
+    }
+
+    public Gs.PrivateBuildingInfo getPrivateBuildingInfo()
+    {
+        long now = System.currentTimeMillis();
+        Gs.PrivateBuildingInfo.Builder builder = Gs.PrivateBuildingInfo.newBuilder()
+                .setBuildId(Util.toByteString(id))
+                .setTime(now);
+        if (now - todayIncomeTs >= DAY_MILLISECOND)
+        {
+            builder.setTodayIncome(0);
+        }
+        else
+        {
+            builder.setTodayIncome(todayIncome);
+        }
+        return builder.build();
+    }
 
     @Transient
     private Set<Npc> allStaff = new HashSet<>();

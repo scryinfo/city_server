@@ -56,7 +56,10 @@ public class JustVisit implements IAction {
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
             LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
                     chosen.id(),chosen.type(),chosen.metaId());
-            GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
+            chosen.updateTodayIncome(chosen.cost());
+
+            GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
+
             if (chosen.type() == MetaBuilding.APARTMENT) {
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)
