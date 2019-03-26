@@ -518,6 +518,7 @@ public class GameSession {
 		if(player.extendBag())
 			this.write(Package.create(cmd));
 	}
+
 	public void shelfAdd(short cmd, Message message) throws Exception {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
 		Item item = new Item(c.getItem());
@@ -530,6 +531,31 @@ public class GameSession {
 			return;
 		IShelf s = (IShelf)building;
 		if(s.addshelf(item, c.getPrice())) {
+			GameDb.saveOrUpdate(s);
+			this.write(Package.create(cmd, c));
+		}
+		else
+			this.write(Package.fail(cmd));
+	}
+
+	public void setAutoReplenish(short cmd, Message message) throws Exception {
+		Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
+		ItemKey itemKey = new ItemKey(c.getItemkey());
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(id);
+		if(building == null || !(building instanceof IShelf) || !(building instanceof IStorage) || !building.canUseBy(player.id()) || building.outOfBusiness())
+			return;
+		if(building instanceof RetailShop && itemKey.meta instanceof MetaMaterial)
+			return;
+		IShelf s = (IShelf)building;
+		IStorage storage = (IStorage) building;
+		Shelf.Content i = s.getContent(itemKey);
+		//int itemQuantityAll = i.n + storage.availableQuantity(itemKey.meta);
+		if(s.setAutoReplenish(itemKey,c.getAutoRepOn())) {
+			//处理自动补货
+			if(i != null && i.autoReplenish){
+				s.updateAutoReplenish(itemKey,storage.availableQuantity(itemKey.meta));
+			}
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -584,9 +610,9 @@ public class GameSession {
 		// player can not buy things in retail shop
 		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || !(sellBuilding instanceof IStorage) || sellBuilding instanceof RetailShop || sellBuilding.canUseBy(player.id()) || sellBuilding.outOfBusiness())
 			return;
-        IStorage buyStore = IStorage.get(wid, player);
+		IStorage buyStore = IStorage.get(wid, player);
 		if(buyStore == null)
-		    return;
+			return;
 		IShelf sellShelf = (IShelf)sellBuilding;
 		Shelf.Content i = sellShelf.getContent(itemBuy.key);
 		if(i == null || i.price != c.getPrice() || i.n < itemBuy.n) {
@@ -617,11 +643,11 @@ public class GameSession {
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
-                    .setSellerId(Util.toByteString(seller.id()))
-                    .setBuyerId(Util.toByteString(player.id()))
-                    .setCost(cost)
-                    .setTs(System.currentTimeMillis())
-                    .build()));
+					.setSellerId(Util.toByteString(seller.id()))
+					.setBuyerId(Util.toByteString(player.id()))
+					.setCost(cost)
+					.setTs(System.currentTimeMillis())
+					.build()));
 			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
 		}
 		player.decMoney(freight);
@@ -1131,14 +1157,31 @@ public class GameSession {
 		if(player.money() < charge)
 			return;
 		Item item = new Item(c.getItem());
+		//如果运出的一方没有足够的存量进行锁定，那么操作失败
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
 			return;
 		}
+		//如果运入的一方没有足够的预留空间，那么操作失败
 		if(!dst.reserve(item.key.meta, item.n)) {
 			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
 			return;
+		}
+
+		IShelf srcShelf = (IShelf)src;
+		IShelf dstShelf = (IShelf)dst;
+		{//处理自动补货
+			Shelf.Content srcContent = srcShelf.getContent(item.key);
+			Shelf.Content dstContent = dstShelf.getContent(item.key);
+			if(srcContent != null && srcContent.autoReplenish){
+				//更新自动补货的货架
+				srcShelf.updateAutoReplenish(item.key,src.availableQuantity(item.key.meta));
+			}
+			if(dstContent != null && dstContent.autoReplenish){
+				//更新自动补货的货架
+				dstShelf.updateAutoReplenish(item.key,dst.availableQuantity(item.key.meta));
+			}
 		}
 		player.decMoney(charge);
 		MoneyPool.instance().add(charge);

@@ -12,7 +12,10 @@ public interface IShelf {
 
     boolean setPrice(ItemKey id, int price);
 
+    boolean setAutoReplenish(ItemKey id, boolean autoRepOn);
+
     int getSaleCount(int itemId);
 
+    void updateAutoReplenish(ItemKey k, int count);
     Map<Item, Integer> getSaleDetail(int itemId);
 }

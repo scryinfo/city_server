@@ -81,7 +81,7 @@ public class Shelf {
 
         int n;
         int price;
-
+        boolean autoReplenish;
         protected Content() {}
     }
 
