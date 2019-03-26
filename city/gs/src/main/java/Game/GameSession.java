@@ -548,13 +548,12 @@ public class GameSession {
 		if(building instanceof RetailShop && itemKey.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		IStorage storage = (IStorage) building;
 		Shelf.Content i = s.getContent(itemKey);
 		//int itemQuantityAll = i.n + storage.availableQuantity(itemKey.meta);
 		if(s.setAutoReplenish(itemKey,c.getAutoRepOn())) {
 			//处理自动补货
 			if(i != null && i.autoReplenish){
-				s.updateAutoReplenish(itemKey,storage.availableQuantity(itemKey.meta));
+				s.updateAutoReplenish(itemKey);
 			}
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
@@ -1176,11 +1175,11 @@ public class GameSession {
 			Shelf.Content dstContent = dstShelf.getContent(item.key);
 			if(srcContent != null && srcContent.autoReplenish){
 				//更新自动补货的货架
-				srcShelf.updateAutoReplenish(item.key,src.availableQuantity(item.key.meta));
+				srcShelf.updateAutoReplenish(item.key);
 			}
 			if(dstContent != null && dstContent.autoReplenish){
 				//更新自动补货的货架
-				dstShelf.updateAutoReplenish(item.key,dst.availableQuantity(item.key.meta));
+				dstShelf.updateAutoReplenish(item.key);
 			}
 		}
 		player.decMoney(charge);

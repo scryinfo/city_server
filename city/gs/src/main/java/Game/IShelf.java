@@ -16,6 +16,6 @@ public interface IShelf {
 
     int getSaleCount(int itemId);
 
-    void updateAutoReplenish(ItemKey k, int count);
+    void updateAutoReplenish(ItemKey k);
     Map<Item, Integer> getSaleDetail(int itemId);
 }
