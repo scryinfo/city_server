@@ -845,10 +845,10 @@ public class GameSession {
 		Gs.SetSalary c = (Gs.SetSalary) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || c.getSalary() < 40 || c.getSalary() > 100)
+		if(b == null || b.salaryRatioVerification(c.getSalaryRatio()) == false)
 			return;
-		b.setSalaryRatio(c.getSalary());
-		this.write(Package.create(cmd, c));
+		b.setSalaryRatio(c.getSalaryRatio());
+		this.write(Package.create(cmd, c.toBuilder().setTs(b.openingTs).build()));
 	}
 	public void setRent(short cmd, Message message) {
 		Gs.SetRent c = (Gs.SetRent) message;

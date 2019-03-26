@@ -222,6 +222,9 @@ public abstract class Building {
     @Column(nullable = false)
     protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
 
+    @Column(name = "ts", nullable = false)
+    long openingTs = 0;    //最新的开业时间
+
     @Column(nullable = false)
     private long constructCompleteTs;
 
@@ -296,6 +299,7 @@ public abstract class Building {
         if(!this.payOff(player))
             return false;
         state = Gs.BuildingState.OPERATE_VALUE;
+        openingTs = System.currentTimeMillis();
         this.calcuWorking(City.instance().currentHour());
         this.broadcastChange();
         return true;
@@ -501,6 +505,9 @@ public abstract class Building {
             this.working = (w == null ? this.working:w);
         }
         this.broadcastChange();
+    }
+    public boolean salaryRatioVerification(int salaryRatio){
+        return (salaryRatio == 50 || salaryRatio == 75 || salaryRatio == 100);
     }
     private Boolean isWorking(int nowHour) {
         Boolean res = null;
