@@ -540,7 +540,7 @@ public class GameSession {
 
 	public void setAutoReplenish(short cmd, Message message) throws Exception {
 		Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
-		ItemKey itemKey = new ItemKey(c.getItemkey());
+		ItemKey itemKey = new ItemKey(c.getIKey());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(id);
 		if(building == null || !(building instanceof IShelf) || !(building instanceof IStorage) || !building.canUseBy(player.id()) || building.outOfBusiness())

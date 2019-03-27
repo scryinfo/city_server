@@ -266,7 +266,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         Shelf.Content i = getContent(k);
         IStorage storage = (IStorage) this;
         if(i != null){
-            delshelf(k, i.n, false);
+            delshelf(k, i.n, true);
         }
         Item itemInStore = new Item(k,storage.availableQuantity(k.meta));
         addshelf(itemInStore,i.price);
