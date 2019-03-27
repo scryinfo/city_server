@@ -870,9 +870,9 @@ public class GameSession {
 		Gs.SetSalary c = (Gs.SetSalary) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || b.salaryRatioVerification(c.getSalaryRatio()) == false)
+		if(b == null || b.salaryRatioVerification(c.getSalary()) == false)
 			return;
-		b.setSalaryRatio(c.getSalaryRatio());
+		b.setSalaryRatio(c.getSalary());
 		this.write(Package.create(cmd, c.toBuilder().setTs(b.openingTs).build()));
 	}
 	public void setRent(short cmd, Message message) {
