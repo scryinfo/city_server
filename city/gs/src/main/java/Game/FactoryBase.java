@@ -151,7 +151,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                         l.materialConsumed = false;
                         ItemKey key = l.newItemKey(ownerId(), l.itemLevel);
                         if (this.store.offset(key, add)) {
+                            IShelf s = (IShelf)this;
+                            Shelf.Content i = s.getContent(key);
                             broadcastLineInfo(l,key);
+                            //处理自动补货
+                            if(i != null && i.autoReplenish){
+                                s.updateAutoReplenish(key);
+                            }
                         } else {
                             //(加工厂/原料厂)仓库已满通知
                             l.count -= add;
@@ -167,7 +173,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 nextId = lineSequence.get(1); //第二条生产线
             }
             LineBase l = __delLine(completedLines.get(0));
-            this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
+            if(nextId != null){
+                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
+            }else{
+                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+            }
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
         if(this.dbTimer.update(diffNano)) {
@@ -224,10 +234,10 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean shelfAddable(ItemKey k);
 
     @Override
-    public boolean addshelf(Item mi, int price) {
+    public boolean addshelf(Item mi, int price, boolean autoReplenish) {
         if(!shelfAddable(mi.key) || !this.store.has(mi.key, mi.n))
             return false;
-        if(this.shelf.add(mi, price)) {
+        if(this.shelf.add(mi, price,autoReplenish)) {
             this.store.lock(mi.key, mi.n);
             return true;
         }
@@ -243,6 +253,27 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean setAutoReplenish(ItemKey id, boolean autoRepOn){
+        Shelf.Content i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        this.shelf.add(new Item(id,i.n),i.price,autoRepOn);
+        return  true;
+    }
+
+    @Override
+    public void updateAutoReplenish(ItemKey k){
+        //更新货架： 执行一次下架上架操作
+        Shelf.Content i = getContent(k);
+        IStorage storage = (IStorage) this;
+        if(i != null){
+            delshelf(k, i.n, true);
+        }
+        Item itemInStore = new Item(k,storage.availableQuantity(k.meta));
+        addshelf(itemInStore,i.price, i.autoReplenish);
     }
 
     @Override
