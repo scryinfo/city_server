@@ -530,7 +530,7 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.addshelf(item, c.getPrice())) {
+		if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -1168,6 +1168,11 @@ public class GameSession {
 			return;
 		}
 
+		player.decMoney(charge);
+		MoneyPool.instance().add(charge);
+		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
+		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		IShelf srcShelf = (IShelf)src;
 		IShelf dstShelf = (IShelf)dst;
 		{//处理自动补货
@@ -1182,11 +1187,6 @@ public class GameSession {
 				dstShelf.updateAutoReplenish(item.key);
 			}
 		}
-		player.decMoney(charge);
-		MoneyPool.instance().add(charge);
-		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
-		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
-		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd, c));
 	}
