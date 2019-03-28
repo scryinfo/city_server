@@ -959,7 +959,13 @@ public class GameSession {
 
 		FactoryBase f = (FactoryBase) b;
 		if(pos >=0 && pos < f.lines.size()){
-			f.lines.removeIf( l -> l.id == lineId);
+			for (int i = f.lines.size() -1; i >= 0 ; i--) {
+				LineBase l = f.lines.get(i);
+				if(l.id.equals(lineId)){
+					f.lines.add(pos,f.lines.remove(i));
+					break;
+				}
+			}
 			this.write(Package.create(cmd, c));
 		}else{
 			this.write(Package.fail(cmd));

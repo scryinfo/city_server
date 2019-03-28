@@ -97,7 +97,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     protected  LineBase __delLine(UUID lineId){
         for (int i = lines.size() - 1; i >= 0 ; i--) {
-            if (lines.get(i).id == lineId){
+            if (lines.get(i).id.equals(lineId)){
                 return lines.remove(i);
             }
         }
