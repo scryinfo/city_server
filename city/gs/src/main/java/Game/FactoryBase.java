@@ -8,7 +8,6 @@ import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 import gscode.GsCode;
-import org.bson.types.ObjectId;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -86,32 +85,31 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    //@OrderColumn
     @MapKeyColumn(name = "line_id")
-    Map<UUID, LineBase> lines = new HashMap<>();
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "line_UUIDList", joinColumns = @JoinColumn(name = "line_UUID"))
-    @OrderColumn
-    List<UUID>  lineSequence = new ArrayList<>();
+    List<LineBase> lines = new ArrayList<>();
 
     protected void __addLine(LineBase newLine){
-        lines.put(newLine.id,newLine);
-        if(lineSequence.indexOf(newLine.id) < 0){
-            lineSequence.add(newLine.id);
+        if(lines.indexOf(newLine.id) < 0){
+            lines.add(newLine);
         }
     }
 
     protected  LineBase __delLine(UUID lineId){
-        lineSequence.remove(lineId);
-        return lines.remove(lineId);
+        for (int i = lines.size() - 1; i >= 0 ; i--) {
+            if (lines.get(i).id == lineId){
+                return lines.remove(i);
+            }
+        }
+        return null;
     }
 
     protected  boolean __hasLineRemained(){
-        return lineSequence.size() > 0 && lines.size() > 0;
+        return lines.size() > 0;
     }
 
     public void updateLineQuality(int metaId, int lv) {
-        this.lines.values().forEach(l->{
+        this.lines.forEach(l->{
             if(l.item.id == metaId)
                 l.itemLevel = lv;
         });
@@ -120,14 +118,14 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return lines.size() >= meta.lineNum;
     }
     public int freeWorkerNum() {
-        return this.meta.workerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
+        return this.meta.workerNum - lines.stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
     }
     protected abstract boolean consumeMaterial(LineBase line);
 
     protected void _update(long diffNano) {
         List<UUID> completedLines = new ArrayList<>();
         if(__hasLineRemained()){
-            LineBase l =  lines.get(lineSequence.get(0));
+            LineBase l =  lines.get(0);
             if(l.isPause()) {
                 if(l.isComplete()){
                     completedLines.add(l.id);
@@ -169,8 +167,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         }
         if (completedLines.size() > 0){
             UUID nextId = null;
-            if(lineSequence.size() >= 2){
-                nextId = lineSequence.get(1); //第二条生产线
+            if(lines.size() >= 2){
+                nextId = lines.get(1).id; //第二条生产线
             }
             LineBase l = __delLine(completedLines.get(0));
             if(nextId != null){
@@ -200,7 +198,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     private MetaFactoryBase meta;
 
     public boolean changeLine(UUID lineId, OptionalInt targetNum, OptionalInt workerNum) {
-        LineBase line = this.lines.get(lineId);
+        //LineBase line = this.lines.get(lineId);
+        LineBase line = null;
+        for (LineBase l: lines){
+            if (l.id == lineId){
+                line = l;
+            }
+        }
         if(line == null)
             return false;
         Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();

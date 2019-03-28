@@ -61,7 +61,7 @@ public class ProduceDepartment extends FactoryBase {
         Gs.ProduceDepartment.Builder builder = Gs.ProduceDepartment.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
-        this.lines.values().forEach(line -> builder.addLine(line.toProto()));
+        this.lines.forEach(line -> builder.addLine(line.toProto()));
         return builder.build();
     }
     @Override

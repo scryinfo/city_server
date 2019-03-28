@@ -924,8 +924,8 @@ public class GameSession {
 		FactoryBase f = (FactoryBase) b;
 		if(f.delLine(lineId)) {
 			GameDb.saveOrUpdate(f);
-			if(f.lineSequence.size() > 0){
-				this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(f.lineSequence.get(0))).build()));
+			if(f.lines.size() > 0){
+				this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(f.lines.get(0).id)).build()));
 			}else{
 				this.write(Package.create(cmd, c));
 			}
@@ -958,9 +958,8 @@ public class GameSession {
 	 	int pos = c.getLineOrder() - 1;
 
 		FactoryBase f = (FactoryBase) b;
-		if(pos >=0 && pos < f.lineSequence.size()){
-			f.lineSequence.remove(lineId);
-			f.lineSequence.add(pos,lineId);
+		if(pos >=0 && pos < f.lines.size()){
+			f.lines.removeIf( l -> l.id == lineId);
 			this.write(Package.create(cmd, c));
 		}else{
 			this.write(Package.fail(cmd));
