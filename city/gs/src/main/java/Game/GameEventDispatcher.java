@@ -139,7 +139,7 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			//===========================================================
 			table.put((short) GsCode.OpCode.eachTypeNpcNum_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"eachTypeNpcNum"));
-			
+			table.put((short) GsCode.OpCode.queryIndustryWages_VALUE, Wrapper.newWithMessage(Gs.QueryIndustryWages.PARSER,GameSession.class, "QueryIndustryWages"));
 			if(GlobalConfig.debug()){
 
 			}

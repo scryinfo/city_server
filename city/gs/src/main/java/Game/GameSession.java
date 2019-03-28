@@ -1968,4 +1968,44 @@ public class GameSession {
 	    }
 		this.write(Package.create(cmd,list.build()));
 	}
+
+	//查询行业平均工资
+	public void QueryIndustryWages(short cmd, Message message)
+	{
+		Gs.QueryIndustryWages msg = (Gs.QueryIndustryWages)message;
+		MetaBuilding buildingdata = null;
+		int tp = msg.getType();
+		switch(MetaBuilding.type(tp))
+		{
+			case MetaBuilding.TRIVIAL:
+				buildingdata = MetaData.getTrivialBuilding(tp);
+				break;
+			case MetaBuilding.MATERIAL:
+				buildingdata = MetaData.getMaterialFactory(tp);
+				break;
+			case MetaBuilding.PRODUCE:
+				buildingdata = MetaData.getProduceDepartment(tp);
+				break;
+			case MetaBuilding.RETAIL:
+				buildingdata = MetaData.getRetailShop(tp);
+				break;
+			case MetaBuilding.APARTMENT:
+				buildingdata = MetaData.getApartment(tp);
+				break;
+			case MetaBuilding.LAB:
+				buildingdata = MetaData.getLaboratory(tp);
+				break;
+			case MetaBuilding.PUBLIC:
+				buildingdata = MetaData.getPublicFacility(tp);
+				break;
+			case MetaBuilding.TALENT:
+				buildingdata = MetaData.getTalentCenter(tp);
+				break;
+		}
+		if(buildingdata != null){
+			this.write(Package.create(cmd, msg.toBuilder().setIndustryWages(buildingdata.salary).build()));
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
 }
