@@ -394,7 +394,7 @@ public class GroundManager {
         summaryInfo.get(info.coordinate().toGridIndex()).sellingCount--;
     }
 
-    public void addGround(UUID id, Collection<Coordinate> area) throws GroundAlreadySoldException {
+    public void addGround(UUID id, Collection<Coordinate> area, int price) throws GroundAlreadySoldException {
         for(Coordinate c : area) {
             if(info.containsKey(c))
                 throw new GroundAlreadySoldException();
@@ -403,6 +403,8 @@ public class GroundManager {
         for(Coordinate c : area) {
             GroundInfo i = new GroundInfo(c.x, c.y);
             i.ownerId = id;
+            i.auctionPrice = price;
+            i.auctionTs = System.currentTimeMillis();
             info.put(c, i);
             gis.add(i);
             playerGround.computeIfAbsent(id, k->new HashSet<>()).add(i);
