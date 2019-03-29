@@ -87,7 +87,9 @@ public class GroundInfo implements Serializable {
         Gs.GroundInfo.Builder builder = Gs.GroundInfo.newBuilder();
         builder.setOwnerId(Util.toByteString(ownerId))
                 .setX(x)
-                .setY(y);
+                .setY(y)
+                .setAuctionPrice(auctionPrice)
+                .setAuctionTs(auctionTs);
         if(inRenting()) {
             Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
             giBuilder.setRentDaysMin(rentDaysMin);

@@ -194,7 +194,7 @@ public class GameSession {
 				}
 				CoordPair cp = new CoordPair(new Coordinate(x1, y1), new Coordinate(x2, y2));
 				try {
-                    GroundManager.instance().addGround(id(), cp.toCoordinates());
+                    GroundManager.instance().addGround(id(), cp.toCoordinates(),0);
 				} catch (GroundAlreadySoldException e) {
 					e.printStackTrace();
 				}
