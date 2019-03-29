@@ -553,7 +553,7 @@ public class GameSession {
 		if(s.setAutoReplenish(itemKey,c.getAutoRepOn())) {
 			//处理自动补货
 			if(i != null && i.autoReplenish){
-				s.updateAutoReplenish(itemKey);
+				IShelf.updateAutoReplenish(s,itemKey);
 			}
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
@@ -1185,11 +1185,11 @@ public class GameSession {
 			Shelf.Content dstContent = dstShelf.getContent(item.key);
 			if(srcContent != null && srcContent.autoReplenish){
 				//更新自动补货的货架
-				srcShelf.updateAutoReplenish(item.key);
+				IShelf.updateAutoReplenish(srcShelf,item.key);
 			}
 			if(dstContent != null && dstContent.autoReplenish){
 				//更新自动补货的货架
-				dstShelf.updateAutoReplenish(item.key);
+				IShelf.updateAutoReplenish(dstShelf,item.key);
 			}
 		}
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));

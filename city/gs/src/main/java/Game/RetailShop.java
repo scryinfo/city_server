@@ -125,18 +125,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
     }
 
     @Override
-    public void updateAutoReplenish(ItemKey k){
-        //更新货架： 执行一次下架上架操作
-        Shelf.Content i = getContent(k);
-        if(i != null){
-            delshelf(k, i.n, false);
-        }
-        IStorage storage = (IStorage) this;
-        Item itemInStore = new Item(k,storage.availableQuantity(k.meta));
-        addshelf(itemInStore,i.price,i.autoReplenish);
-    }
-
-    @Override
     public boolean setPrice(ItemKey id, int price) {
         Shelf.Content i = this.shelf.getContent(id);
         if(i == null)

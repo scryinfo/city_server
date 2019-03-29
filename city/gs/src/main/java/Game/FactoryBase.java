@@ -154,7 +154,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                             broadcastLineInfo(l,key);
                             //处理自动补货
                             if(i != null && i.autoReplenish){
-                                s.updateAutoReplenish(key);
+                                IShelf.updateAutoReplenish(s,key);
                             }
                         } else {
                             //(加工厂/原料厂)仓库已满通知
@@ -266,18 +266,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             return false;
         this.shelf.add(new Item(id,i.n),i.price,autoRepOn);
         return  true;
-    }
-
-    @Override
-    public void updateAutoReplenish(ItemKey k){
-        //更新货架： 执行一次下架上架操作
-        Shelf.Content i = getContent(k);
-        IStorage storage = (IStorage) this;
-        if(i != null){
-            delshelf(k, i.n, true);
-        }
-        Item itemInStore = new Item(k,storage.availableQuantity(k.meta));
-        addshelf(itemInStore,i.price, i.autoReplenish);
     }
 
     @Override
