@@ -493,9 +493,9 @@ public abstract class Building {
 
     }
 
-    public void setSalaryRatio(int salaryRatio) {
+    public void setSalaryRatio(int salaryRatio, long ts) {
         this.salaryRatio = salaryRatio;
-        this.salaryRatioTs = System.currentTimeMillis();
+        this.salaryRatioTs = ts;
     }
 
     public void hourTickAction(int nowHour) {

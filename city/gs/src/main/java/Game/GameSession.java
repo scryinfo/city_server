@@ -875,8 +875,9 @@ public class GameSession {
 		Building b = City.instance().getBuilding(id);
 		if(b == null || b.salaryRatioVerification(c.getSalary()) == false)
 			return;
-		b.setSalaryRatio(c.getSalary());
-		this.write(Package.create(cmd, c.toBuilder().setTs(b.openingTs).build()));
+		long ts = System.currentTimeMillis();
+		b.setSalaryRatio(c.getSalary(), ts);
+		this.write(Package.create(cmd, c.toBuilder().setTs(ts).build()));
 	}
 	public void setRent(short cmd, Message message) {
 		Gs.SetRent c = (Gs.SetRent) message;
