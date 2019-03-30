@@ -120,7 +120,7 @@ public class Shelf {
         if(i == null || i.n < n)
             return false;
         i.n -= n;
-        if(i.n == 0)
+        if(i.n == 0 && i.autoReplenish == false)
             slots.remove(k);
         return true;
     }

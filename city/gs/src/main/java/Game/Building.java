@@ -217,6 +217,9 @@ public abstract class Building {
     private int salaryRatio;
 
     @Column(nullable = false)
+    private long salaryRatioTs;
+
+    @Column(nullable = false)
     private int happy = 0;
 
     @Column(nullable = false)
@@ -486,6 +489,7 @@ public abstract class Building {
 
     public void setSalaryRatio(int salaryRatio) {
         this.salaryRatio = salaryRatio;
+        this.salaryRatioTs = System.currentTimeMillis();
     }
 
     public void hourTickAction(int nowHour) {
