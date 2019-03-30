@@ -43,6 +43,7 @@ import Shared.Util;
 import Shared.Validator;
 import common.Common;
 import gs.Gs;
+import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -2012,5 +2013,41 @@ public class GameSession {
 		}else{
 			this.write(Package.fail(cmd));
 		}
+	}
+	public void queryMyBuildings(short cmd, Message message) {
+		Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
+		UUID id = Util.toUuid(msg.getId().toByteArray());
+//		Map<Integer,List<BuildingInfo>> map=new HashMap<Integer,List<BuildingInfo>>();
+		
+		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
+		Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
+		City.instance().forEachBuilding(id, b->{
+			BuildingInfo buildingInfo=b.myProto(id);
+			builder.setType(buildingInfo.getType());
+			builder.addInfo(buildingInfo);
+			list.addMyBuildingInfo(builder.build());
+			
+//			if(map.containsKey(buildingInfo.getType())){
+//				List<BuildingInfo> ls=map.get(buildingInfo.getType());
+//				ls.add(buildingInfo);
+//				map.put(buildingInfo.getType(), ls);
+//			}else{
+//				map.put(buildingInfo.getType(), new ArrayList<BuildingInfo>());
+//			}
+		 }
+		);
+//		if(map!=null&&map.size()>0){
+//			for (Entry<Integer, List<BuildingInfo>> entry : map.entrySet()) {
+//				builder.setType(entry.getKey());
+//				List<BuildingInfo> listBuilding=entry.getValue();
+//				for (BuildingInfo buildingInfo : listBuilding) {
+//					builder.addInfo(buildingInfo);
+//				}
+//				
+//				list.addMyBuildingInfo(builder.build());
+//			}
+//		}
+		
+		this.write(Package.create(cmd, list.build()));
 	}
 }

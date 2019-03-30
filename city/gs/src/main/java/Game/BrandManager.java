@@ -207,6 +207,14 @@ public class BrandManager {
         }
         return res;
     }
+    public int getBuildingBrandScore(UUID playerId,int buildingId) {
+    	int score=0;
+        Map<Integer, Integer> m = playerBuilding.get(playerId);
+        if(m != null) {
+        	score=m.getOrDefault(buildingId, 0);
+        }
+        return score;
+    }
     public List<Gs.IntNum> getGoodBrandProto(UUID playerId) {
         List<Gs.IntNum> res = new ArrayList<>();
         Map<Integer, Integer> m = playerGood.get(playerId);

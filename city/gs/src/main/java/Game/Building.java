@@ -455,7 +455,13 @@ public abstract class Building {
         builder.setBubble(this.showBubble);
         return builder.build();
     }
-
+    public Gs.BuildingInfo myProto(UUID playerId) {
+		Gs.BuildingInfo b=toProto();
+    	Gs.BuildingInfo.Builder builder=b.toBuilder();
+    	builder.setType(MetaBuilding.type(metaBuilding.id))
+    		   .setScore(BrandManager.instance().getBuildingBrandScore(playerId, metaBuilding.id));
+     	return builder.build(); 
+    }
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
