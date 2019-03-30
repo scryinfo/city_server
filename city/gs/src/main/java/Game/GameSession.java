@@ -2027,14 +2027,14 @@ public class GameSession {
 //			builder.setType(buildingInfo.getType());
 //			builder.addInfo(buildingInfo);
 //			list.addMyBuildingInfo(builder.build());
-			
+			List<BuildingInfo> ls=null;
 			if(map.containsKey(buildingInfo.getType())){
-				List<BuildingInfo> ls=map.get(buildingInfo.getType());
-				ls.add(buildingInfo);
-				map.put(buildingInfo.getType(), ls);
+				ls=map.get(buildingInfo.getType());
 			}else{
-				map.put(buildingInfo.getType(), new ArrayList<BuildingInfo>());
+				ls=new ArrayList<BuildingInfo>();
 			}
+			ls.add(buildingInfo);
+			map.put(buildingInfo.getType(), ls);
 		 }
 		);
 		if(map!=null&&map.size()>0){
