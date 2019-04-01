@@ -405,7 +405,7 @@ public class GameSession {
 			return;
 		}
 		if(b.startBusiness(player))
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd,c));
 	}
 	public void shutdownBusiness(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
@@ -414,7 +414,7 @@ public class GameSession {
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
 		b.shutdownBusiness();
-		this.write(Package.create(cmd));
+		this.write(Package.create(cmd,c));
 	}
 
 	public void queryMarketSummary(short cmd, Message message) {
