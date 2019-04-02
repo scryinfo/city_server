@@ -47,6 +47,7 @@ public class JustVisit implements IAction {
         logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
+            chosen.addFlowCount();
         }
         else {
             Player owner = GameDb.queryPlayer(chosen.ownerId());

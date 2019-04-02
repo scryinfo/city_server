@@ -74,5 +74,6 @@
 		<mapping class="Game.FriendManager.OfflineMessage"></mapping>
 		<mapping class="Game.Mail"></mapping>
 		<mapping class="Game.FriendManager.Society"></mapping>
+		<mapping class="Game.Contract.Contract"></mapping>
 	</session-factory>
 </hibernate-configuration> 

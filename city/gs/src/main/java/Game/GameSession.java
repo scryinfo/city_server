@@ -15,7 +15,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -1938,6 +1943,119 @@ public class GameSession {
         });
         this.write(Package.create(cmd, builder.build()));
 	}
+
+    public void closeContract(short cmd, Message message)
+    {
+        UUID bid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if (building != null && player.id().equals(building.ownerId())
+                && building instanceof IBuildingContract)
+        {
+			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+            if (!buildingContract.isSign() && buildingContract.isOpen())
+            {
+				buildingContract.closeContract();
+                GameDb.saveOrUpdate(building);
+                this.write(Package.create(cmd, message));
+            }
+            else this.write(Package.fail(cmd));
+        }
+    }
+    public void settingContract(short cmd, Message message)
+    {
+        Gs.ContractSetting setting = (Gs.ContractSetting) message;
+        UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        long price = setting.getPrice();
+        int hours = setting.getHours();
+        if (building != null && player.id().equals(building.ownerId())
+                && building instanceof IBuildingContract)
+        {
+			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+            if (hours > 0 && !buildingContract.isSign())
+            {
+				buildingContract.openOrSetContract(price, hours);
+                GameDb.saveOrUpdate(building);
+                this.write(Package.create(cmd, message));
+            }
+            else this.write(Package.fail(cmd));
+        }
+    }
+
+	public void cancelContract(short cmd, Message message)
+	{
+		UUID bid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if (building != null && player.id().equals(building.ownerId())
+				&& building instanceof IBuildingContract)
+		{
+			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+			if (buildingContract.isSign())
+			{
+				Contract contract = ContractManager.getInstance().getContractById(buildingContract.getContractId());
+				if (contract.getSignId().equals(player.id()))
+				{
+					if (ContractManager.getInstance().deleteContract(contract, (IBuildingContract) building))
+					{
+						this.write(Package.create(cmd, message));
+					}
+					else this.write(Package.fail(cmd));
+				}
+
+			}
+		}
+
+	}
+
+	public void signContract(short cmd, Message message)
+	{
+		Gs.SignContract signContract = (Gs.SignContract) message;
+		UUID bid = Util.toUuid(signContract.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if (building instanceof IBuildingContract)
+		{
+			//本人签约
+			if (player.id().equals(building.ownerId()))
+			{
+				BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+				if (buildingContract.isSign())
+				{
+					this.write(Package.fail(cmd));
+					return;
+				}
+				buildingContract.openOrSetContract(0, 0);
+				Contract contract = ContractManager.getInstance().signContract(player, (IBuildingContract) building);
+				this.write(Package.create(cmd,contract.toProto()));
+			}
+			else
+			{
+				BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+				long price = signContract.getPrice();
+				int hours = signContract.getHours();
+				if (!buildingContract.isOpen() || buildingContract.isSign()
+						|| price != buildingContract.getPrice() || hours != buildingContract.getDurationHour())
+				{
+					this.write(Package.fail(cmd));
+					return;
+				}
+				Contract contract = ContractManager.getInstance().signContract(player, (IBuildingContract) building);
+				this.write(Package.create(cmd,contract.toProto()));
+			}
+		}
+	}
+
+	public void getCompanyContracts(short cmd)
+	{
+		Gs.Contracts.Builder builder = Gs.Contracts.newBuilder();
+		builder.addAllContracts(ContractManager
+				.getInstance()
+				.getContractsBySignId(player.id())
+				.stream()
+				.map(Contract::toProto)
+				.collect(Collectors.toList()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 
 	//===========================================================
 

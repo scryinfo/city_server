@@ -83,6 +83,7 @@ public class Shopping implements IAction {
         });
         WeightInfo chosen = wi.get(ProbBase.randomIdx(wi.stream().mapToInt(WeightInfo::getW).toArray()));
         Building sellShop = City.instance().getBuilding(chosen.bId);
+        sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         if(chosen.price > npc.money())
             npc.hangOut(sellShop);

@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Contract.ContractManager;
 import Game.FriendManager.FriendManager;
 import Game.Meta.MetaData;
 import Shared.*;
@@ -113,6 +114,7 @@ public class GameServer {
         BrandManager.init();
         TechTradeCenter.init();
         MoneyPool.init();
+        ContractManager.getInstance().init();
         City.instance().run();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();

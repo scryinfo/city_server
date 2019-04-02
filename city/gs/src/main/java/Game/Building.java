@@ -15,6 +15,7 @@ import gscode.GsCode;
 import io.netty.channel.ChannelId;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -477,9 +478,29 @@ public abstract class Building {
         flowCount += 1;
         enterImpl(npc);
     }
+
+    public void addFlowCount()
+    {
+        flowCount += 1;
+    }
     public int getFlow() {
         return this.flow;
     }
+
+    @Transient
+    private float lift = 0;
+
+    public float getLift()
+    {
+        return lift;
+    }
+
+    public void updateLift()
+    {
+        float f = (float) this.flow / NpcManager.instance().getNpcCount();
+        lift = new BigDecimal(f).setScale(2, 1).floatValue();
+    }
+
     public void leave(Npc npc) {
         leaveImpl(npc);
     }
@@ -502,6 +523,7 @@ public abstract class Building {
         flow = flowCount;
         flowCount = 0;
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
+        updateLift();
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(MetaData.getDayId() != 0 && nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {

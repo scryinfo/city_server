@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import Game.Contract.ContractManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
@@ -220,6 +221,7 @@ public class City {
         GroundManager.instance().update(diffNano);
         Exchange.instance().update(diffNano);
         allBuilding.forEach((k,v)->v.update(diffNano));
+        ContractManager.getInstance().update();
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);

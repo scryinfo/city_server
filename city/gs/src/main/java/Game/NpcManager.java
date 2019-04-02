@@ -203,4 +203,9 @@ public class NpcManager {
 	  }
 	  return countMap;
    }
+
+    public long getNpcCount()
+    {
+        return allNpc.size();
+    }
 }

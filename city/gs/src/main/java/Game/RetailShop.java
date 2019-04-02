@@ -1,5 +1,9 @@
 package Game;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaRetailShop;
@@ -13,12 +17,14 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-public class RetailShop extends PublicFacility implements IShelf, IStorage {
+public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuildingContract
+{
     public RetailShop(MetaRetailShop meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
         this.store = new Storage(meta.storeCapacity);
         this.shelf = new Shelf(meta.shelfCapacity);
+        this.buildingContract = new BuildingContract(0, 0, false);
     }
 
     @Override
@@ -49,6 +55,10 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
         return this.qty;
     }
 
+    @Column(nullable = false)
+    @Embedded
+    private BuildingContract buildingContract;
+
     @PostLoad
     protected void _1() {
         super._1();
@@ -65,6 +75,8 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
         builder.setInfo(this.toProto());
         builder.setAd(genAdPart());
         builder.setQty(qty);
+        builder.setLift(getLift());
+        builder.setContractInfo(this.buildingContract.toProto());
         return builder.build();
     }
 
@@ -192,5 +204,11 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage {
 
     public List<Shelf.SellInfo> getSellInfo(int metaId) {
         return shelf.getSellInfo(metaId);
+    }
+
+    @Override
+    public BuildingContract getBuildingContract()
+    {
+        return buildingContract;
     }
 }

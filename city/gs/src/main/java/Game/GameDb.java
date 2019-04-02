@@ -1,6 +1,7 @@
 package Game;
 
 
+import Game.Contract.Contract;
 import Game.FriendManager.FriendRequest;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
@@ -126,6 +127,17 @@ public class GameDb {
 					});
 
 	//wxj============================================
+
+	public static List<Contract> getAllContract() {
+		Transaction transaction = session.beginTransaction();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Contract> criteria = builder.createQuery(Contract.class);
+		criteria.from(Contract.class);
+		List<Contract> res = session.createQuery(criteria).list();
+		transaction.commit();
+		return res;
+	}
+
 	public static List<Society> getAllSociety()
 	{
 		Session session = sessionFactory.openSession();
