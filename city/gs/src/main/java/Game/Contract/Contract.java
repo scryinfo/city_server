@@ -106,7 +106,8 @@ public class Contract
                 .setHours(signingHours)
                 .setLift(getLift())
                 .setBuildingId(Util.toByteString(sellerBuildingId))
-                .setSellerId(Util.toByteString(sellerId));
+                .setSellerId(Util.toByteString(sellerId))
+                .setPrice(price);
         return builder.build();
     }
 

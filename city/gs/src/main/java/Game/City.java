@@ -221,7 +221,7 @@ public class City {
         GroundManager.instance().update(diffNano);
         Exchange.instance().update(diffNano);
         allBuilding.forEach((k,v)->v.update(diffNano));
-        ContractManager.getInstance().update();
+        ContractManager.getInstance().update(diffNano);
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
@@ -265,6 +265,7 @@ public class City {
     private void hourTickAction(int nowHour) {
         NpcManager.instance().hourTickAction(nowHour);
         allBuilding.forEach((k,v)->v.hourTickAction(nowHour));
+        ContractManager.getInstance().hourTickAction(nowHour);
     }
 
     private void timeSectionTickAction(int newIndex, int nowHour, int hours) {

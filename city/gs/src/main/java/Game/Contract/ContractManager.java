@@ -12,6 +12,7 @@ public class ContractManager
     private ContractManager() { }
     private static ContractManager instance = new ContractManager();
     private Map<UUID, Contract> allContract = new HashMap<>();
+    private Map<UUID, Float> playerLiftMap = new HashMap<>();
 
     public static ContractManager getInstance()
     {
@@ -25,9 +26,11 @@ public class ContractManager
                     allContract.put(contract.getId(), contract);
                     clearByOutOfDate(contract);
                 });
+        updatePlayerLiftMap();
     }
 
-    public void update()
+    //按服务器帧率检查失效契约
+    public void update(long diffNano)
     {
         allContract.values().forEach(this::clearByOutOfDate);
     }
@@ -53,14 +56,12 @@ public class ContractManager
         }
         if (contract.getSellerBuildingId().equals(((Building)building).id()))
         {
-            allContract.remove(contract.getId());
+
             building.getBuildingContract().closeContract();
-            /**
-             * TODO:
-             * 2019/3/29
-             * 契约失效影响
-             */
             GameDb.saveOrUpdateAndDelete(Collections.singleton(building), Collections.singleton(contract));
+
+            allContract.remove(contract.getId());
+            updatePlayerLiftMapById(contract.getSignId(), -contract.getLift());
             return true;
         }
         return false;
@@ -82,15 +83,10 @@ public class ContractManager
                     building.getBuildingContract().getPrice());
         }
         building.getBuildingContract().sign(contract.getId());
-        /**
-         * TODO:
-         * 2019/4/1
-         * 契约生效影响
-         */
-
-
         GameDb.saveOrUpdate(Arrays.asList(building,contract));
+
         allContract.put(contract.getId(), contract);
+        updatePlayerLiftMapById(contract.getSignId(), contract.getLift());
         return contract;
     }
 
@@ -106,5 +102,29 @@ public class ContractManager
                 .filter(contract -> contract.getSignId().equals(signId))
                 .toArray(Contract[]::new));
     }
-    
+
+    private void updatePlayerLiftMap()
+    {
+        playerLiftMap.clear();
+        allContract.values().forEach(contract -> {
+            playerLiftMap.put(contract.getSignId(),
+                    playerLiftMap.getOrDefault(contract.getSignId(), 0f) + contract.getLift());
+        });
+    }
+
+    private void updatePlayerLiftMapById(UUID signId,float value)
+    {
+        playerLiftMap.put(signId, playerLiftMap.getOrDefault(signId, 0f) + value);
+    }
+
+    //按小时重置加成值
+    public void hourTickAction(int nowHour)
+    {
+        updatePlayerLiftMap();
+    }
+
+    public float getPlayerADLift(UUID playerId)
+    {
+        return playerLiftMap.getOrDefault(playerId, 0f);
+    }
 }

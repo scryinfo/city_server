@@ -145,8 +145,16 @@ public abstract class Building {
     public void deserializeBinaryMembers() throws InvalidProtocolBufferException {
         if(this.flowHistoryBinary == null)
             return;
+        long ts = 0;
         for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this.flowHistoryBinary).getIList())
+        {
             this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
+            if (i.getTs() >= ts) {
+                ts = i.getTs();
+                this.flow = i.getN();
+            }
+        }
+        updateLift();
     }
 
     public boolean hasTalent(UUID id) {
