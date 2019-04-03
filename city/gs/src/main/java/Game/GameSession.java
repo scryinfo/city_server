@@ -2033,7 +2033,9 @@ public class GameSession {
 				long price = signContract.getPrice();
 				int hours = signContract.getHours();
 				if (!buildingContract.isOpen() || buildingContract.isSign()
-						|| price != buildingContract.getPrice() || hours != buildingContract.getDurationHour())
+						|| price != buildingContract.getPrice()
+						|| hours != buildingContract.getDurationHour()
+						|| player.money() < price * hours)
 				{
 					this.write(Package.fail(cmd));
 					return;
