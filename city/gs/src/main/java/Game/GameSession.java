@@ -2033,7 +2033,9 @@ public class GameSession {
 				long price = signContract.getPrice();
 				int hours = signContract.getHours();
 				if (!buildingContract.isOpen() || buildingContract.isSign()
-						|| price != buildingContract.getPrice() || hours != buildingContract.getDurationHour())
+						|| price != buildingContract.getPrice()
+						|| hours != buildingContract.getDurationHour()
+						|| player.money() < price * hours)
 				{
 					this.write(Package.fail(cmd));
 					return;
@@ -2171,4 +2173,27 @@ public class GameSession {
 		
 		this.write(Package.create(cmd, list.build()));
 	}
+    public void queryMyEva(short cmd, Message message)
+    {
+        UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+        
+		Gs.Evas.Builder list = Gs.Evas.newBuilder();
+		Gs.Eva.Builder evaBuilder = Gs.Eva.newBuilder();
+		List<Eva> evaList=GameDb.getEvaInfoByPlayId(pid);
+		for (Eva eva : evaList) {
+			evaBuilder.setPid(Util.toByteString(eva.getPid()))
+					.setAt(eva.getAt())
+					.setBt(eva.getBt())
+					.setLv(eva.getLv())
+					.setCexp(eva.getCexp())
+					.setB(eva.getB());
+			list.addEva(evaBuilder.build());
+		}
+		this.write(Package.create(cmd, list.build()));
+    }
+    public void updateMyEva(short cmd, Message message)
+    {
+		Gs.Eva eva = (Gs.Eva)message;
+    	GameDb.saveOrUpdate(eva);
+    }
 }

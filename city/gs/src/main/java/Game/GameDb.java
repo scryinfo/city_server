@@ -958,5 +958,29 @@ public class GameDb {
 		list.forEach(o->res.put(o.mid, o.goodlv));
 		return res;
 	}
+	
+	public static List<Eva> getEvaInfoByPlayId(UUID pid)
+	{
+		List<Eva> list = new ArrayList<Eva>();
+		Session session = sessionFactory.openSession();
+		try
+		{
+			list = session.createQuery("FROM eva WHERE pid=:pid")
+					.setParameter("pid", pid)
+					.list();
+		}
+		catch (RuntimeException e)
+		{
+			logger.fatal("query player eva info failed");
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (session != null) {
+				session.close();
+			}
+		}
+		return list;
+	}
 }
 
