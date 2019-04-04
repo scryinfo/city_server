@@ -2145,9 +2145,6 @@ public class GameSession {
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.myProto(id);
-//			builder.setType(buildingInfo.getType());
-//			builder.addInfo(buildingInfo);
-//			list.addMyBuildingInfo(builder.build());
 			List<BuildingInfo> ls=null;
 			if(map.containsKey(buildingInfo.getType())){
 				ls=map.get(buildingInfo.getType());
