@@ -71,6 +71,7 @@ public class ContractManager
     {
         Building building1 = (Building) building;
         Contract contract = null;
+        List<Object> updates = new ArrayList<>();
         if (player.id().equals((building1.ownerId())))
         {
             contract = new Contract(player.id(), building1.ownerId(), building1.id(),
@@ -81,9 +82,17 @@ public class ContractManager
             contract = new Contract(player.id(), building1.ownerId(), building1.id(), System.currentTimeMillis(),
                     building.getBuildingContract().getDurationHour(),
                     building.getBuildingContract().getPrice());
+            Player seller = GameDb.queryPlayer(building1.ownerId());
+            player.decMoney(contract.getCost());
+            seller.addMoney(contract.getCost());
+            updates.add(player);
+            updates.add(seller);
         }
+        updates.add(contract);
+        updates.add(building);
         building.getBuildingContract().sign(contract.getId());
-        GameDb.saveOrUpdate(Arrays.asList(building,contract));
+
+        GameDb.saveOrUpdate(updates);
 
         allContract.put(contract.getId(), contract);
         updatePlayerLiftMapById(contract.getSignId(), contract.getLift());

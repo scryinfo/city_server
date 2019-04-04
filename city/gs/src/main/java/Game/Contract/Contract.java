@@ -120,4 +120,9 @@ public class Contract
     {
         return System.currentTimeMillis() >= getEndTs();
     }
+
+    public long getCost()
+    {
+        return price * signingHours;
+    }
 }
