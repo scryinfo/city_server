@@ -9,8 +9,8 @@ import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 
-@Entity
-@Table(name = "EVA")
+@Entity(name = "Eva")
+@Table(name = "Eva")
 public class Eva {
     private static final Logger logger = Logger.getLogger(Eva.class);
     @Id
@@ -34,6 +34,10 @@ public class Eva {
     @Column(name = "b")
     private long b;
     
+	public Eva() {
+		super();
+	}
+
 	public Eva(UUID pid, int at, int bt, int lv, long cexp, long b) {
 		super();
 	    this.id = UUID.randomUUID();

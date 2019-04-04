@@ -965,7 +965,7 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		try
 		{
-			list = session.createQuery("FROM eva WHERE pid=:pid")
+			list = session.createQuery("FROM Eva WHERE pid=:pid",Eva.class)
 					.setParameter("pid", pid)
 					.list();
 		}
