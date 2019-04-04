@@ -2166,10 +2166,9 @@ public class GameSession {
 			for (Entry<Integer, List<BuildingInfo>> entry : map.entrySet()) {
 				Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
 				builder.setType(entry.getKey());
-				List<BuildingInfo> listBuilding=entry.getValue();
-				for (BuildingInfo buildingInfo : listBuilding) {
+				entry.getValue().forEach(buildingInfo->{
 					builder.addInfo(buildingInfo);
-				}
+				});
 				
 				list.addMyBuildingInfo(builder.build());
 			}
@@ -2182,17 +2181,15 @@ public class GameSession {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
-		Gs.Eva.Builder evaBuilder = Gs.Eva.newBuilder();
-		List<Eva> evaList=GameDb.getEvaInfoByPlayId(pid);
-		for (Eva eva : evaList) {
-			evaBuilder.setPid(Util.toByteString(eva.getPid()))
+		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
+			list.addEva(Gs.Eva.newBuilder().setPid(Util.toByteString(eva.getPid()))
 					.setAt(eva.getAt())
 					.setBt(eva.getBt())
 					.setLv(eva.getLv())
 					.setCexp(eva.getCexp())
-					.setB(eva.getB());
-			list.addEva(evaBuilder.build());
-		}
+					.setB(eva.getB())
+					.build());
+		});
 		this.write(Package.create(cmd, list.build()));
     }
     public void updateMyEva(short cmd, Message message)
