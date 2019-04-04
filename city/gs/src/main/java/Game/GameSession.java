@@ -39,6 +39,7 @@ import Game.FriendManager.SocietyManager;
 import Game.Meta.Formula;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Meta.MetaEva;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
@@ -367,6 +368,12 @@ public class GameSession {
 			GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
 			this.write(Package.create(cmd, playerToRoleInfo(p)));
 			LogDb.insertPlayerInfo(p.id(),c.getMale());
+			//复制eva元数据信息到数据库
+			List<Eva> evaList=new ArrayList<Eva>();
+			MetaData.getAllEva().forEach(m->{
+				evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
+			});
+			GameDb.saveOrUpdate(evaList);
 		}
 	}
 
