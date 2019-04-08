@@ -4,16 +4,23 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -32,6 +39,7 @@ import Game.FriendManager.SocietyManager;
 import Game.Meta.Formula;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Meta.MetaEva;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
@@ -43,6 +51,7 @@ import Shared.Util;
 import Shared.Validator;
 import common.Common;
 import gs.Gs;
+import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -194,7 +203,7 @@ public class GameSession {
 				}
 				CoordPair cp = new CoordPair(new Coordinate(x1, y1), new Coordinate(x2, y2));
 				try {
-                    GroundManager.instance().addGround(id(), cp.toCoordinates());
+                    GroundManager.instance().addGround(id(), cp.toCoordinates(),0);
 				} catch (GroundAlreadySoldException e) {
 					e.printStackTrace();
 				}
@@ -359,6 +368,12 @@ public class GameSession {
 			GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
 			this.write(Package.create(cmd, playerToRoleInfo(p)));
 			LogDb.insertPlayerInfo(p.id(),c.getMale());
+			//复制eva元数据信息到数据库
+			List<Eva> evaList=new ArrayList<Eva>();
+			MetaData.getAllEva().forEach(m->{
+				evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
+			});
+			GameDb.saveOrUpdate(evaList);
 		}
 	}
 
@@ -402,7 +417,7 @@ public class GameSession {
 			return;
 		}
 		if(b.startBusiness(player))
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd,c));
 	}
 	public void shutdownBusiness(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
@@ -411,7 +426,7 @@ public class GameSession {
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
 		b.shutdownBusiness();
-		this.write(Package.create(cmd));
+		this.write(Package.create(cmd,c));
 	}
 
 	public void queryMarketSummary(short cmd, Message message) {
@@ -518,6 +533,7 @@ public class GameSession {
 		if(player.extendBag())
 			this.write(Package.create(cmd));
 	}
+
 	public void shelfAdd(short cmd, Message message) throws Exception {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
 		Item item = new Item(c.getItem());
@@ -529,7 +545,31 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.addshelf(item, c.getPrice())) {
+		if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
+			GameDb.saveOrUpdate(s);
+			this.write(Package.create(cmd, c));
+		}
+		else
+			this.write(Package.fail(cmd));
+	}
+
+	public void setAutoReplenish(short cmd, Message message) throws Exception {
+		Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
+		ItemKey itemKey = new ItemKey(c.getIKey());
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(id);
+		if(building == null || !(building instanceof IShelf) || !(building instanceof IStorage) || !building.canUseBy(player.id()) || building.outOfBusiness())
+			return;
+		if(building instanceof RetailShop && itemKey.meta instanceof MetaMaterial)
+			return;
+		IShelf s = (IShelf)building;
+		Shelf.Content i = s.getContent(itemKey);
+		//int itemQuantityAll = i.n + storage.availableQuantity(itemKey.meta);
+		if(s.setAutoReplenish(itemKey,c.getAutoRepOn())) {
+			//处理自动补货
+			if(i != null && i.autoReplenish){
+				IShelf.updateAutoReplenish(s,itemKey);
+			}
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -584,9 +624,9 @@ public class GameSession {
 		// player can not buy things in retail shop
 		if(sellBuilding == null || !(sellBuilding instanceof IShelf) || !(sellBuilding instanceof IStorage) || sellBuilding instanceof RetailShop || sellBuilding.canUseBy(player.id()) || sellBuilding.outOfBusiness())
 			return;
-        IStorage buyStore = IStorage.get(wid, player);
+		IStorage buyStore = IStorage.get(wid, player);
 		if(buyStore == null)
-		    return;
+			return;
 		IShelf sellShelf = (IShelf)sellBuilding;
 		Shelf.Content i = sellShelf.getContent(itemBuy.key);
 		if(i == null || i.price != c.getPrice() || i.n < itemBuy.n) {
@@ -617,11 +657,11 @@ public class GameSession {
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
-                    .setSellerId(Util.toByteString(seller.id()))
-                    .setBuyerId(Util.toByteString(player.id()))
-                    .setCost(cost)
-                    .setTs(System.currentTimeMillis())
-                    .build()));
+					.setSellerId(Util.toByteString(seller.id()))
+					.setBuyerId(Util.toByteString(player.id()))
+					.setCost(cost)
+					.setTs(System.currentTimeMillis())
+					.build()));
 			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
 		}
 		player.decMoney(freight);
@@ -637,6 +677,7 @@ public class GameSession {
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
+		sellBuilding.updateTodayIncome(cost);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
 
@@ -844,10 +885,11 @@ public class GameSession {
 		Gs.SetSalary c = (Gs.SetSalary) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || c.getSalary() < 40 || c.getSalary() > 100)
+		if(b == null || b.salaryRatioVerification(c.getSalary()) == false)
 			return;
-		b.setSalaryRatio(c.getSalary());
-		this.write(Package.create(cmd, c));
+		long ts = System.currentTimeMillis();
+		b.setSalaryRatio(c.getSalary(), ts);
+		this.write(Package.create(cmd, c.toBuilder().setTs(ts).build()));
 	}
 	public void setRent(short cmd, Message message) {
 		Gs.SetRent c = (Gs.SetRent) message;
@@ -898,7 +940,11 @@ public class GameSession {
 		FactoryBase f = (FactoryBase) b;
 		if(f.delLine(lineId)) {
 			GameDb.saveOrUpdate(f);
-			this.write(Package.create(cmd, c));
+			if(f.lines.size() > 0){
+				this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(f.lines.get(0).id)).build()));
+			}else{
+				this.write(Package.create(cmd, c));
+			}
 		}
 	}
 	public void ftyChangeLine(short cmd, Message message) {
@@ -917,6 +963,31 @@ public class GameSession {
         else
             this.write(Package.fail(cmd));
 	}
+
+	public void ftySetLineOrder(short cmd, Message message) {
+		Gs.SetLineOrder c = (Gs.SetLineOrder) message;
+		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+	 	int pos = c.getLineOrder() - 1;
+
+		FactoryBase f = (FactoryBase) b;
+		if(pos >=0 && pos < f.lines.size()){
+			for (int i = f.lines.size() -1; i >= 0 ; i--) {
+				LineBase l = f.lines.get(i);
+				if(l.id.equals(lineId)){
+					f.lines.add(pos,f.lines.remove(i));
+					break;
+				}
+			}
+			this.write(Package.create(cmd, c));
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
+
 	public void adAddSlot(short cmd, Message message) {
 		Gs.AddSlot c = (Gs.AddSlot)message;
 
@@ -1106,20 +1177,37 @@ public class GameSession {
 		if(player.money() < charge)
 			return;
 		Item item = new Item(c.getItem());
+		//如果运出的一方没有足够的存量进行锁定，那么操作失败
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
 			return;
 		}
+		//如果运入的一方没有足够的预留空间，那么操作失败
 		if(!dst.reserve(item.key.meta, item.n)) {
 			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
 			return;
 		}
+
 		player.decMoney(charge);
 		MoneyPool.instance().add(charge);
 		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
+		IShelf srcShelf = (IShelf)src;
+		IShelf dstShelf = (IShelf)dst;
+		{//处理自动补货
+			Shelf.Content srcContent = srcShelf.getContent(item.key);
+			Shelf.Content dstContent = dstShelf.getContent(item.key);
+			if(srcContent != null && srcContent.autoReplenish){
+				//更新自动补货的货架
+				IShelf.updateAutoReplenish(srcShelf,item.key);
+			}
+			if(dstContent != null && dstContent.autoReplenish){
+				//更新自动补货的货架
+				IShelf.updateAutoReplenish(dstShelf,item.key);
+			}
+		}
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd, c));
 	}
@@ -1842,6 +1930,142 @@ public class GameSession {
 		}
 	}
 
+	public void getPrivateBuildingCommonInfo(short cmd,Message message)
+	{
+		Gs.Bytes ids = (Gs.Bytes) message;
+		List<Building> buildings = new ArrayList<>(ids.getIdsCount());
+		for (ByteString bs : ids.getIdsList())
+		{
+            Building building = City.instance().getBuilding(Util.toUuid(bs.toByteArray()));
+            if (building != null && player.id().equals(building.ownerId()))
+            {
+                buildings.add(building);
+            }
+            else return;
+		}
+        Gs.PrivateBuildingInfos.Builder builder = Gs.PrivateBuildingInfos.newBuilder();
+        buildings.forEach(building ->
+        {
+            builder.addInfos(building.getPrivateBuildingInfo());
+        });
+        this.write(Package.create(cmd, builder.build()));
+	}
+
+    public void closeContract(short cmd, Message message)
+    {
+        UUID bid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if (building != null && player.id().equals(building.ownerId())
+                && building instanceof IBuildingContract)
+        {
+			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+            if (!buildingContract.isSign() && buildingContract.isOpen())
+            {
+				buildingContract.closeContract();
+                GameDb.saveOrUpdate(building);
+                this.write(Package.create(cmd, message));
+            }
+            else this.write(Package.fail(cmd));
+        }
+    }
+    public void settingContract(short cmd, Message message)
+    {
+        Gs.ContractSetting setting = (Gs.ContractSetting) message;
+        UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        long price = setting.getPrice();
+        int hours = setting.getHours();
+        if (building != null && player.id().equals(building.ownerId())
+                && building instanceof IBuildingContract)
+        {
+			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+            if (hours > 0 && !buildingContract.isSign())
+            {
+				buildingContract.openOrSetContract(price, hours);
+                GameDb.saveOrUpdate(building);
+                this.write(Package.create(cmd, message));
+            }
+            else this.write(Package.fail(cmd));
+        }
+    }
+
+	public void cancelContract(short cmd, Message message)
+	{
+		UUID bid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if (building != null && player.id().equals(building.ownerId())
+				&& building instanceof IBuildingContract)
+		{
+			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+			if (buildingContract.isSign())
+			{
+				Contract contract = ContractManager.getInstance().getContractById(buildingContract.getContractId());
+				if (contract.getSignId().equals(player.id()))
+				{
+					if (ContractManager.getInstance().deleteContract(contract, (IBuildingContract) building))
+					{
+						this.write(Package.create(cmd, message));
+					}
+					else this.write(Package.fail(cmd));
+				}
+
+			}
+		}
+
+	}
+
+	public void signContract(short cmd, Message message)
+	{
+		Gs.SignContract signContract = (Gs.SignContract) message;
+		UUID bid = Util.toUuid(signContract.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if (building instanceof IBuildingContract)
+		{
+			//本人签约
+			if (player.id().equals(building.ownerId()))
+			{
+				BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+				if (buildingContract.isSign())
+				{
+					this.write(Package.fail(cmd));
+					return;
+				}
+				buildingContract.openOrSetContract(0, 0);
+				Contract contract = ContractManager.getInstance().signContract(player, (IBuildingContract) building);
+				this.write(Package.create(cmd,contract.toProto()));
+			}
+			else
+			{
+				BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
+				long price = signContract.getPrice();
+				int hours = signContract.getHours();
+				if (!buildingContract.isOpen() || buildingContract.isSign()
+						|| price != buildingContract.getPrice()
+						|| hours != buildingContract.getDurationHour()
+						|| player.money() < price * hours)
+				{
+					this.write(Package.fail(cmd));
+					return;
+				}
+				Contract contract = ContractManager.getInstance().signContract(player, (IBuildingContract) building);
+				this.write(Package.create(cmd,contract.toProto()));
+			}
+		}
+	}
+
+	public void getCompanyContracts(short cmd)
+	{
+		Gs.Contracts.Builder builder = Gs.Contracts.newBuilder();
+		builder.addAllContracts(ContractManager
+				.getInstance()
+				.getContractsBySignId(player.id())
+				.stream()
+				.map(Contract::toProto)
+				.collect(Collectors.toList()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+
 	//===========================================================
 
 	//llb========================================================
@@ -1880,4 +2104,97 @@ public class GameSession {
 	    }
 		this.write(Package.create(cmd,list.build()));
 	}
+
+	//查询行业平均工资
+	public void QueryIndustryWages(short cmd, Message message)
+	{
+		Gs.QueryIndustryWages msg = (Gs.QueryIndustryWages)message;
+		MetaBuilding buildingdata = null;
+		int tp = msg.getType();
+		switch(MetaBuilding.type(tp))
+		{
+			case MetaBuilding.TRIVIAL:
+				buildingdata = MetaData.getTrivialBuilding(tp);
+				break;
+			case MetaBuilding.MATERIAL:
+				buildingdata = MetaData.getMaterialFactory(tp);
+				break;
+			case MetaBuilding.PRODUCE:
+				buildingdata = MetaData.getProduceDepartment(tp);
+				break;
+			case MetaBuilding.RETAIL:
+				buildingdata = MetaData.getRetailShop(tp);
+				break;
+			case MetaBuilding.APARTMENT:
+				buildingdata = MetaData.getApartment(tp);
+				break;
+			case MetaBuilding.LAB:
+				buildingdata = MetaData.getLaboratory(tp);
+				break;
+			case MetaBuilding.PUBLIC:
+				buildingdata = MetaData.getPublicFacility(tp);
+				break;
+			case MetaBuilding.TALENT:
+				buildingdata = MetaData.getTalentCenter(tp);
+				break;
+		}
+		if(buildingdata != null){
+			this.write(Package.create(cmd, msg.toBuilder().setIndustryWages(buildingdata.salary).build()));
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
+	public void queryMyBuildings(short cmd, Message message) {
+		Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
+		UUID id = Util.toUuid(msg.getId().toByteArray());
+		Map<Integer,List<BuildingInfo>> map=new HashMap<Integer,List<BuildingInfo>>();
+		
+		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
+		City.instance().forEachBuilding(id, b->{
+			BuildingInfo buildingInfo=b.myProto(id);
+			List<BuildingInfo> ls=null;
+			if(map.containsKey(buildingInfo.getType())){
+				ls=map.get(buildingInfo.getType());
+			}else{
+				ls=new ArrayList<BuildingInfo>();
+			}
+			ls.add(buildingInfo);
+			map.put(buildingInfo.getType(), ls);
+		 }
+		);
+		if(map!=null&&map.size()>0){
+			for (Entry<Integer, List<BuildingInfo>> entry : map.entrySet()) {
+				Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
+				builder.setType(entry.getKey());
+				entry.getValue().forEach(buildingInfo->{
+					builder.addInfo(buildingInfo);
+				});
+				
+				list.addMyBuildingInfo(builder.build());
+			}
+		}
+		
+		this.write(Package.create(cmd, list.build()));
+	}
+    public void queryMyEva(short cmd, Message message)
+    {
+        UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+        
+		Gs.Evas.Builder list = Gs.Evas.newBuilder();
+		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
+			list.addEva(Gs.Eva.newBuilder().setPid(Util.toByteString(eva.getPid()))
+					.setAt(eva.getAt())
+					.setBt(eva.getBt())
+					.setLv(eva.getLv())
+					.setCexp(eva.getCexp())
+					.setB(eva.getB())
+					.build());
+		});
+		this.write(Package.create(cmd, list.build()));
+    }
+    public void updateMyEva(short cmd, Message message)
+    {
+		Gs.Eva eva = (Gs.Eva)message;
+    	GameDb.saveOrUpdate(eva);
+    }
 }

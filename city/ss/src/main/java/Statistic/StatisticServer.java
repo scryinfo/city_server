@@ -1,6 +1,7 @@
 package Statistic;
 
 import Shared.*;
+import Statistic.BuildingJob.BuildingDayJob;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -50,6 +51,10 @@ public class StatisticServer {
         scheduler.scheduleJob(newJob(DayJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0,0))
                 .build());
+        scheduler.scheduleJob(newJob(BuildingDayJob.class).build(), newTrigger()
+                .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0,0))
+                .build());
+
         scheduler.scheduleJob(newJob(WeekJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.weeklyOnDayAndHourAndMinute(1,0,0))
                 .build());

@@ -61,7 +61,7 @@ public class ProduceDepartment extends FactoryBase {
         Gs.ProduceDepartment.Builder builder = Gs.ProduceDepartment.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
-        this.lines.values().forEach(line -> builder.addLine(line.toProto()));
+        this.lines.forEach(line -> builder.addLine(line.toProto()));
         return builder.build();
     }
     @Override
@@ -83,7 +83,7 @@ public class ProduceDepartment extends FactoryBase {
         if(!(item instanceof MetaGood) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaGood)item, targetNum, workerNum, itemLevel);
-        lines.put(line.id, line);
+        __addLine(line);
         return line;
     }
 

@@ -102,6 +102,16 @@ public class NpcManager {
         GameDb.saveOrUpdate(npcs); // generate the id
         for (Npc npc : npcs) {
             addImpl(npc);
+            // This is WRONG place to put this code here!!! comment out
+            //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
+//            if(allNpc!=null&&allNpc.size()>=500){
+//            	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+//            			.setType(2)
+//            			.setNum(allNpc.size())
+//                        .setTs(System.currentTimeMillis())
+//                        .build()));
+//                LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
+//            }
         }
         return npcs;
     }
@@ -109,10 +119,20 @@ public class NpcManager {
     public Npc create(UUID id, Building building, long salary) {
        Npc npc = new Npc(building, salary, id);
        addImpl(npc);
+       //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
+       if(allNpc!=null&&allNpc.size()>=500){
+       	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+       			.setType(2)
+       			.setNum(allNpc.size())
+                   .setTs(System.currentTimeMillis())
+                   .build()));
+           LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
+       }
        return npc;
     }
     private void addImpl(Npc npc) {
         allNpc.put(npc.id(), npc);
+        // This is WRONG place to put this code here!!! comment out
         //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
 //        if(allNpc!=null&&allNpc.size()>=500){
 //        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
@@ -193,10 +213,8 @@ public class NpcManager {
 	  return countMap;
    }
 
-    public Npc get(UUID id) {
-        return this.allNpc.get(id);
-    }
-    public int size() {
-        return this.allNpc.size();
+    public long getNpcCount()
+    {
+        return allNpc.size();
     }
 }

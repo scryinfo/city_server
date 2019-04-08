@@ -77,14 +77,15 @@ public class Shelf {
 
     @Embeddable
     public static final class Content {
-        public Content(int n, int price) {
+        public Content(int n, int price,boolean autoReplenish) {
             this.n = n;
             this.price = price;
+            this.autoReplenish = autoReplenish;
         }
 
         int n;
         int price;
-
+        boolean autoReplenish;
         protected Content() {}
     }
 
@@ -92,7 +93,7 @@ public class Shelf {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Content> slots = new HashMap<>();
 
-    public boolean add(Item item, int price) {
+    public boolean add(Item item, int price, boolean autoReplenish) {
         if(full())
             return false;
         Content content = slots.get(item.key);
@@ -100,18 +101,21 @@ public class Shelf {
             if(content.price != price)
                 return false;
             content.n += item.n;
+            content.autoReplenish = autoReplenish;
         }
         else {
-            content = new Content(item.n, price);
+            content = new Content(item.n, price, autoReplenish);
             slots.put(item.key, content);
         }
         return true;
     }
+
     private Gs.Shelf.Content toProto(ItemKey k, Content content) {
         return Gs.Shelf.Content.newBuilder()
                 .setK(k.toProto())
                 .setN(content.n)
                 .setPrice(content.price)
+                .setAutoReplenish(content.autoReplenish)
                 .build();
     }
     public boolean del(ItemKey k, int n) {
@@ -119,7 +123,7 @@ public class Shelf {
         if(i == null || i.n < n)
             return false;
         i.n -= n;
-        if(i.n == 0)
+        if(i.n == 0 && i.autoReplenish == false)
             slots.remove(k);
         return true;
     }

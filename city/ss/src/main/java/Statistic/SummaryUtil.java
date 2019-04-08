@@ -16,7 +16,6 @@ import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import ss.Ss;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SummaryUtil
@@ -39,6 +38,8 @@ public class SummaryUtil
     private static final String DAY_PLAYER_BUY_GROUND = "dayPlayerBuyGround";
     private static final String DAY_PLAYER_BUY_IN_SHELF = "dayPlayerBuyInShelf";
     private static final String DAY_PLAYER_RENT_GROUND = "dayPlayerRentGround";
+    private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
+
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -52,6 +53,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerBuyGround;
     private static MongoCollection<Document> dayPlayerBuyInShelf;
     private static MongoCollection<Document> dayPlayerRentGround;
+    private static MongoCollection<Document> dayBuildingIncome;
     public static void init()
     {
         MongoDatabase database = LogDb.getDatabase();
@@ -81,6 +83,9 @@ public class SummaryUtil
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerRentGround = database.getCollection(DAY_PLAYER_RENT_GROUND)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+
+        dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
     public static long getSexInfo(boolean isMale)
@@ -88,7 +93,7 @@ public class SummaryUtil
         return LogDb.getPlayerInfo().countDocuments(eq("male", isMale));
     }
 
-    public static Map<Long, Long> getBuildIncomeById(UUID bid)
+    /*public static Map<Long, Long> getBuildIncomeById(UUID bid)
     {
         long nowTime = System.currentTimeMillis();
         long lastFullTime = getLastFullTime(nowTime);
@@ -107,7 +112,9 @@ public class SummaryUtil
                     map.put(node, map.get(node) + document.getLong("a"));
                 });
         return map;
-    }
+    }*/
+
+
     
     public static List<Document> getGoodsNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
     {
@@ -456,6 +463,33 @@ public class SummaryUtil
     {
     	return dayPlayerRentGround;
     }
+
+    public static void insertBuildingDayIncome(List<Document> documentList,long time)
+    {
+        documentList.forEach(document -> {
+            document.append(TIME, time);
+        });
+        if (!documentList.isEmpty()) {
+            dayBuildingIncome.insertMany(documentList);
+        }
+    }
+
+    public static List<Ss.NodeIncome> getBuildDayIncomeById(UUID bid)
+    {
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
+        List<Ss.NodeIncome> list = new ArrayList<>();
+        dayBuildingIncome.find(and(eq(ID, bid),
+                gte(TIME, startTime)))
+                .sort(Sorts.ascending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    list.add(Ss.NodeIncome.newBuilder()
+                            .setTime(document.getLong(TIME))
+                            .setIncome(document.getLong(LogDb.KEY_TOTAL)).build());
+                });
+        return list;
+    }
+
     enum Type
     {
         INCOME(1),PAY(-1);

@@ -16,6 +16,11 @@ import io.netty.channel.ChannelId;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -141,8 +146,16 @@ public abstract class Building {
     public void deserializeBinaryMembers() throws InvalidProtocolBufferException {
         if(this.flowHistoryBinary == null)
             return;
+        long ts = 0;
         for(Db.FlowHistory.Info i : Db.FlowHistory.parseFrom(this.flowHistoryBinary).getIList())
+        {
             this.flowHistory.add(new FlowInfo(i.getTs(), i.getN()));
+            if (i.getTs() >= ts) {
+                ts = i.getTs();
+                this.flow = i.getN();
+            }
+        }
+        updateLift();
     }
 
     public boolean hasTalent(UUID id) {
@@ -215,10 +228,16 @@ public abstract class Building {
     private int salaryRatio;
 
     @Column(nullable = false)
+    private long salaryRatioTs;
+
+    @Column(nullable = false)
     private int happy = 0;
 
     @Column(nullable = false)
     protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
+
+    @Column(name = "ts", nullable = false)
+    long openingTs = 0;    //最新的开业时间
 
     @Column(nullable = false)
     private long constructCompleteTs;
@@ -227,6 +246,45 @@ public abstract class Building {
     private String des;
     private int emoticon;
     private boolean showBubble;
+
+    @Column(nullable = false)
+    private long todayIncome = 0;
+
+    @Column(nullable = false)
+    private long todayIncomeTs = 0;
+
+    private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
+
+    public void updateTodayIncome(long income)
+    {
+        if (System.currentTimeMillis() - todayIncomeTs >= DAY_MILLISECOND)
+        {
+            todayIncome = income;
+            todayIncomeTs = Util.getTodayStartTs();
+
+        }
+        else
+        {
+            todayIncome += income;
+        }
+    }
+
+    public Gs.PrivateBuildingInfo getPrivateBuildingInfo()
+    {
+        long now = System.currentTimeMillis();
+        Gs.PrivateBuildingInfo.Builder builder = Gs.PrivateBuildingInfo.newBuilder()
+                .setBuildId(Util.toByteString(id))
+                .setTime(now);
+        if (now - todayIncomeTs >= DAY_MILLISECOND)
+        {
+            builder.setTodayIncome(0);
+        }
+        else
+        {
+            builder.setTodayIncome(todayIncome);
+        }
+        return builder.build();
+    }
 
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
@@ -255,6 +313,7 @@ public abstract class Building {
         if(!this.payOff(player))
             return false;
         state = Gs.BuildingState.OPERATE_VALUE;
+        openingTs = System.currentTimeMillis();
         this.calcuWorking(City.instance().currentHour());
         this.broadcastChange();
         return true;
@@ -410,7 +469,13 @@ public abstract class Building {
         builder.setBubble(this.showBubble);
         return builder.build();
     }
-
+    public Gs.BuildingInfo myProto(UUID playerId) {
+		Gs.BuildingInfo b=toProto();
+    	Gs.BuildingInfo.Builder builder=b.toBuilder();
+    	builder.setType(MetaBuilding.type(metaBuilding.id))
+    		   .setScore(BrandManager.instance().getBuildingBrandScore(playerId, metaBuilding.id));
+     	return builder.build(); 
+    }
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
@@ -423,9 +488,29 @@ public abstract class Building {
         flowCount += 1;
         enterImpl(npc);
     }
+
+    public void addFlowCount()
+    {
+        flowCount += 1;
+    }
     public int getFlow() {
         return this.flow;
     }
+
+    @Transient
+    private float lift = 0;
+
+    public float getLift()
+    {
+        return lift;
+    }
+
+    public void updateLift()
+    {
+        float f = (float) this.flow / NpcManager.instance().getNpcCount();
+        lift = new BigDecimal(f).setScale(2, 1).floatValue();
+    }
+
     public void leave(Npc npc) {
         leaveImpl(npc);
     }
@@ -439,14 +524,16 @@ public abstract class Building {
 
     }
 
-    public void setSalaryRatio(int salaryRatio) {
+    public void setSalaryRatio(int salaryRatio, long ts) {
         this.salaryRatio = salaryRatio;
+        this.salaryRatioTs = ts;
     }
 
     public void hourTickAction(int nowHour) {
         flow = flowCount;
         flowCount = 0;
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
+        updateLift();
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(MetaData.getDayId() != 0 && nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
@@ -460,6 +547,9 @@ public abstract class Building {
             this.working = (w == null ? this.working:w);
         }
         this.broadcastChange();
+    }
+    public boolean salaryRatioVerification(int salaryRatio){
+        return (salaryRatio == 50 || salaryRatio == 75 || salaryRatio == 100);
     }
     private Boolean isWorking(int nowHour) {
         Boolean res = null;

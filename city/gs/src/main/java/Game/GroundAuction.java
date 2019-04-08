@@ -144,14 +144,15 @@ public class GroundAuction {
                 iter.remove();
                 assert (a.biderId() != null);
 
+
                 Player bider = GameDb.queryPlayer(a.biderId());
+                long p = bider.spentLockMoney(a.transactionId);
                 try {
-                    GroundManager.instance().addGround(bider.id(), a.meta.area);
+                    GroundManager.instance().addGround(bider.id(), a.meta.area, (int)p);
                 } catch (GroundAlreadySoldException e) {
                     e.printStackTrace();
                     continue;
                 }
-                long p = bider.spentLockMoney(a.transactionId);
                 MoneyPool.instance().add(p);
                 List<LogDb.Positon> plist1 = new ArrayList<>();
                 for(Coordinate c : a.meta.area)

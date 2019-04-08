@@ -41,6 +41,7 @@ public class MetaData {
     private static final String goodFormulaColName = "GoodFormular";
     private static final String talentColName = "Talent";
     private static final String talentLvCreateColName = "TalentLvCreate";
+    private static final String evaColName = "Eva";
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -196,6 +197,8 @@ public class MetaData {
         // Initial building ObjectId have no requirement to be identity all the time, so omit it
     }
     private static final List<InitialBuildingInfo> initialBuilding = new ArrayList<>();
+    private static final List<MetaEva> eva = new ArrayList<MetaEva>();
+    		
     public static final Formula getFormula(Formula.Key key) {
         return formula.get(key);
     }
@@ -221,6 +224,9 @@ public class MetaData {
     }
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
+    }
+    public static List<MetaEva> getAllEva() {
+    	return eva;
     }
     public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
@@ -359,6 +365,12 @@ public class MetaData {
             formula.put(m.key, m);
         });
     }
+    public static void initEva() {
+        mongoClient.getDatabase(dbName).getCollection(evaColName).find().forEach((Block<Document>) doc -> {
+            MetaEva m = new MetaEva(doc);
+            eva.add(m);
+        });
+    }
 	public static MetaNpc getNpc(int id) {
 		return npc.get(id);
 	}
@@ -385,5 +397,7 @@ public class MetaData {
 
         initFormula();
         initGoodFormula();
+        
+        initEva();
 	}
 }

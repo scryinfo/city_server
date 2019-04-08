@@ -2,17 +2,7 @@ package Game.Action;
 
 import java.util.*;
 
-import Game.BrandManager;
-import Game.Building;
-import Game.City;
-import Game.GameDb;
-import Game.GameServer;
-import Game.IShelf;
-import Game.ItemKey;
-import Game.Npc;
-import Game.Player;
-import Game.RetailShop;
-import Game.Shelf;
+import Game.*;
 import Game.Meta.AIBuy;
 import Game.Meta.AILux;
 import Game.Meta.MetaBuilding;
@@ -85,6 +75,7 @@ public class Shopping implements IAction {
         });
         WeightInfo chosen = wi.get(ProbBase.randomIdx(wi.stream().mapToInt(WeightInfo::getW).toArray()));
         Building sellShop = City.instance().getBuilding(chosen.bId);
+        sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         if(chosen.price > npc.money()) {
             npc.hangOut(sellShop);
@@ -95,7 +86,12 @@ public class Shopping implements IAction {
             Player owner = GameDb.queryPlayer(sellShop.ownerId());
             owner.addMoney(chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
-            //GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+
+            ((IStorage)sellShop).consumeLock(chosen.getItemKey(), 1);
+
+            sellShop.updateTodayIncome(chosen.price);
+            GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+
             GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))

@@ -289,6 +289,7 @@ public class Player {
         if (societyId != null) {
             builder.setSocietyId(Util.toByteString(societyId));
         }
+        builder.setEva(10000);//eva点数 临时用
         return builder.build();
     }
 

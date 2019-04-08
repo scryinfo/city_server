@@ -38,6 +38,8 @@ public class GroundInfo implements Serializable {
     int sellPrice;
     long rentBeginTs;
     long payTs;
+    int auctionPrice;   //拍地价格
+    long auctionTs;     //拍地的时间戳
     @Column(nullable = false)
     private GroundStatus status = GroundStatus.STATELESS;
     public GroundInfo(int x, int y) {
@@ -85,7 +87,9 @@ public class GroundInfo implements Serializable {
         Gs.GroundInfo.Builder builder = Gs.GroundInfo.newBuilder();
         builder.setOwnerId(Util.toByteString(ownerId))
                 .setX(x)
-                .setY(y);
+                .setY(y)
+                .setAuctionPrice(auctionPrice)
+                .setAuctionTs(auctionTs);
         if(inRenting()) {
             Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
             giBuilder.setRentDaysMin(rentDaysMin);

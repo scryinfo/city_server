@@ -1,24 +1,30 @@
 package Game;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.IBuildingContract;
 import Game.Meta.MetaApartment;
 import gs.Gs;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PostLoad;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.*;
 
 @Entity(name = "apartment")
-public class Apartment extends Building {
+public class Apartment extends Building implements IBuildingContract
+{
 
-    public Apartment(MetaApartment meta, Coordinate pos, UUID ownerId) {
+    public Apartment(MetaApartment meta, Coordinate pos, UUID ownerId)
+    {
         super(meta, pos, ownerId);
         this.meta = meta;
         this.qty = meta.qty;
+        this.buildingContract = new BuildingContract(0, 0, false);
     }
     @Transient
     private MetaApartment meta;
+
+    @Column(nullable = false)
+    @Embedded
+    private BuildingContract buildingContract;
 
     private int qty;
 
@@ -58,6 +64,8 @@ public class Apartment extends Building {
                 .setRenter(renters.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
                 .setQty(qty)
+                .setLift(getLift())
+                .setContractInfo(this.buildingContract.toProto())
                 .build();
     }
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
@@ -84,5 +92,11 @@ public class Apartment extends Building {
     @Override
     public boolean npcSelectable() {
         return meta.npc > this.renters.size();
+    }
+
+    @Override
+    public BuildingContract getBuildingContract()
+    {
+        return buildingContract;
     }
 }

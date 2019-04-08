@@ -42,6 +42,7 @@ public class JustVisit implements IAction {
         logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
+            chosen.addFlowCount();
             return null;
         }
         else {
@@ -52,7 +53,10 @@ public class JustVisit implements IAction {
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
             LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
                     chosen.id(),chosen.type(),chosen.metaId());
-            //GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
+            chosen.updateTodayIncome(chosen.cost());
+
+            GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
+
             if (chosen.type() == MetaBuilding.APARTMENT) {
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)

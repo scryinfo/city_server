@@ -278,6 +278,35 @@ public class LogDb {
 		buildingIncome.insertOne(document);
 	}
 
+	public static void buildingIncome(UUID bId,UUID payId,long cost,int type,int typeId,long time)
+	{
+		Document document = new Document("t", time);
+		document.append("b", bId)
+				.append("p", payId)
+				.append("a", cost)
+				.append("tp", type)
+				.append("tpi", typeId);
+		buildingIncome.insertOne(document);
+	}
+
+	public static List<Document> buildingDayIncomeSummary(long yestodayStartTime, long todayStartTime)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		buildingIncome.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group("$b", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
 								  UUID producerId, UUID bid, int type, int typeId)

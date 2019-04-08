@@ -68,7 +68,7 @@ public class MaterialFactory extends FactoryBase {
         Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
-        this.lines.values().forEach(line -> builder.addLine(line.toProto()));
+        this.lines.forEach(l -> builder.addLine(l.toProto()));
         return builder.build();
     }
     @Override
@@ -88,10 +88,10 @@ public class MaterialFactory extends FactoryBase {
 
     @Override
     protected LineBase addLineImpl(MetaItem item, int workerNum, int targetNum, int itemLevel) {
-        if(!(item instanceof MetaMaterial) || workerNum > this.freeWorkerNum() || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
+        if(!(item instanceof MetaMaterial) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaMaterial)item, targetNum, workerNum, itemLevel);
-        lines.put(line.id, line);
+        __addLine(line);
         return line;
     }
 

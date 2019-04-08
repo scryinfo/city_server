@@ -22,11 +22,6 @@ public class DayJob implements org.quartz.Job {
     public void execute(JobExecutionContext context) throws JobExecutionException
     {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
-        /*if (StatisticSession.isReady) {
-            System.out.println("-------------------job----" +
-                    formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault())));
-            return;
-        }*/
         //refuse all client request
         StatisticSession.setIsReady(false);
 

@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import Game.Contract.ContractManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
@@ -217,9 +218,8 @@ public class City {
         GroundManager.instance().update(diffNano);
         Exchange.instance().update(diffNano);
         allBuilding.forEach((k,v)->v.update(diffNano));
-        long now = System.nanoTime();
+        ContractManager.getInstance().update(diffNano);
         NpcManager.instance().update(diffNano);
-        System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-now));
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
@@ -262,6 +262,7 @@ public class City {
     private void hourTickAction(int nowHour) {
         NpcManager.instance().hourTickAction(nowHour);
         allBuilding.forEach((k,v)->v.hourTickAction(nowHour));
+        ContractManager.getInstance().hourTickAction(nowHour);
     }
 
     private void timeSectionTickAction(int newIndex, int nowHour, int hours) {
@@ -409,6 +410,15 @@ public class City {
         GameDb.saveOrUpdate(b); // let hibernate generate the id value
         List updates = b.hireNpc();
         take(b);
+        //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
+        if(allBuilding!=null&&allBuilding.size()>=100){
+        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+        			.setType(5)
+        			.setNum(allBuilding.size())
+                    .setTs(System.currentTimeMillis())
+                    .build()));
+        	LogDb.cityBroadcast(null,null,0l,allBuilding.size(),5);
+        }
         b.init();
         updates.add(b);
         GameDb.saveOrUpdate(updates);
@@ -428,15 +438,6 @@ public class City {
         assert building.type() != MetaBuilding.TRIVIAL;
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
-        //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
-        if(allBuilding!=null&&allBuilding.size()>=100){
-        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-        			.setType(5)
-        			.setNum(allBuilding.size())
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-        	LogDb.cityBroadcast(null,null,0l,allBuilding.size(),5);
-        }
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);

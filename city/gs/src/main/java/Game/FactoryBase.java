@@ -8,11 +8,11 @@ import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 import gscode.GsCode;
-import org.bson.types.ObjectId;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
+import  java.util.ArrayList;
 
 @Entity
 public abstract class FactoryBase extends Building implements IStorage, IShelf {
@@ -85,11 +85,31 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    //@OrderColumn
     @MapKeyColumn(name = "line_id")
-    Map<UUID, LineBase> lines = new HashMap<>();
+    List<LineBase> lines = new ArrayList<>();
+
+    protected void __addLine(LineBase newLine){
+        if(lines.indexOf(newLine.id) < 0){
+            lines.add(newLine);
+        }
+    }
+
+    protected  LineBase __delLine(UUID lineId){
+        for (int i = lines.size() - 1; i >= 0 ; i--) {
+            if (lines.get(i).id.equals(lineId)){
+                return lines.remove(i);
+            }
+        }
+        return null;
+    }
+
+    protected  boolean __hasLineRemained(){
+        return lines.size() > 0;
+    }
 
     public void updateLineQuality(int metaId, int lv) {
-        this.lines.values().forEach(l->{
+        this.lines.forEach(l->{
             if(l.item.id == metaId)
                 l.itemLevel = lv;
         });
@@ -98,17 +118,18 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return lines.size() >= meta.lineNum;
     }
     public int freeWorkerNum() {
-        return this.meta.workerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
+        return this.meta.workerNum - lines.stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
     }
     protected abstract boolean consumeMaterial(LineBase line);
 
     protected void _update(long diffNano) {
         List<UUID> completedLines = new ArrayList<>();
-        this.lines.values().forEach(l -> {
+        if(__hasLineRemained()){
+            LineBase l =  lines.get(0);
             if(l.isPause()) {
-                if(l.isComplete())
+                if(l.isComplete()){
                     completedLines.add(l.id);
-                return;
+                }
             }
             if(l.isSuspend()) {
                 assert l.left() > 0;
@@ -128,7 +149,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                         l.materialConsumed = false;
                         ItemKey key = l.newItemKey(ownerId(), l.itemLevel);
                         if (this.store.offset(key, add)) {
+                            IShelf s = (IShelf)this;
+                            Shelf.Content i = s.getContent(key);
                             broadcastLineInfo(l,key);
+                            //处理自动补货
+                            if(i != null && i.autoReplenish){
+                                IShelf.updateAutoReplenish(s,key);
+                            }
                         } else {
                             //(加工厂/原料厂)仓库已满通知
                             l.count -= add;
@@ -137,10 +164,18 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                         }
                     }
                 }
-        });
-        for (UUID id : completedLines) {
-            LineBase l = this.lines.remove(id);
-            this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+        }
+        if (completedLines.size() > 0){
+            UUID nextId = null;
+            if(lines.size() >= 2){
+                nextId = lines.get(1).id; //第二条生产线
+            }
+            LineBase l = __delLine(completedLines.get(0));
+            if(nextId != null){
+                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
+            }else{
+                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+            }
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
         if(this.dbTimer.update(diffNano)) {
@@ -163,7 +198,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     private MetaFactoryBase meta;
 
     public boolean changeLine(UUID lineId, OptionalInt targetNum, OptionalInt workerNum) {
-        LineBase line = this.lines.get(lineId);
+        //LineBase line = this.lines.get(lineId);
+        LineBase line = null;
+        for (LineBase l: lines){
+            if (l.id == lineId){
+                line = l;
+            }
+        }
         if(line == null)
             return false;
         Gs.LineInfo.Builder builder = Gs.LineInfo.newBuilder();
@@ -197,10 +238,10 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean shelfAddable(ItemKey k);
 
     @Override
-    public boolean addshelf(Item mi, int price) {
+    public boolean addshelf(Item mi, int price, boolean autoReplenish) {
         if(!shelfAddable(mi.key) || !this.store.has(mi.key, mi.n))
             return false;
-        if(this.shelf.add(mi, price)) {
+        if(this.shelf.add(mi, price,autoReplenish)) {
             this.store.lock(mi.key, mi.n);
             return true;
         }
@@ -216,6 +257,15 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean setAutoReplenish(ItemKey id, boolean autoRepOn){
+        Shelf.Content i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        this.shelf.add(new Item(id,i.n),i.price,autoRepOn);
+        return  true;
     }
 
     @Override
@@ -250,6 +300,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
 
     public boolean delLine(UUID lineId) {
-        return this.lines.remove(lineId) != null;
+        return this.__delLine(lineId) != null ;
     }
 }
