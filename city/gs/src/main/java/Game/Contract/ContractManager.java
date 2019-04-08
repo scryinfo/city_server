@@ -132,6 +132,7 @@ public class ContractManager
         updatePlayerLiftMap();
     }
 
+    //获取玩家人流量推广能力，20.5  --> 20.5%
     public float getPlayerADLift(UUID playerId)
     {
         return playerLiftMap.getOrDefault(playerId, 0f);

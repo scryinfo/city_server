@@ -151,7 +151,6 @@ public abstract class Building {
                 this.flow = i.getN();
             }
         }
-        updateLift();
     }
 
     public boolean hasTalent(UUID id) {
@@ -498,6 +497,10 @@ public abstract class Building {
 
     public float getLift()
     {
+        if (this.lift == 0)
+        {
+           updateLift();
+        }
         return lift;
     }
 
