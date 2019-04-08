@@ -132,6 +132,7 @@ public class GameDb {
 	//wxj============================================
 
 	public static List<Contract> getAllContract() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Contract> criteria = builder.createQuery(Contract.class);

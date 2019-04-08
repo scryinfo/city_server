@@ -180,41 +180,27 @@ public class GameServer {
         GameDb.startUp(args[1]);
         new GameServer().run();
     }
-    public static void main1(String[] args) throws Exception {
-        java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
-        GlobalConfig.init(args[0]);
-        GameDb.startUp(args[1]);
-
-        GameServer gs = new GameServer();
-        City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
-        NpcManager.instance(); // load all npc, npc will refer building(enter it)
-        GroundAuction.init();
-        GroundManager.init();
-        Exchange.init();
-        BrandManager.init();
-        TechTradeCenter.init();
-        MoneyPool.init();
-
-        System.out.println(NpcManager.instance().size());
-        Npc npc = NpcManager.instance().get(UUID.fromString("282f68d2-e991-41ce-9571-18ba668e64b2"));
-        for (int i = 0; i < 50; i++) {
-            long now = System.nanoTime();
-            npc.update(0);
-            logger.fatal(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - now));
-        }
-//        Player p = GameDb.getPlayer(UUID.fromString("2448f719-49e6-4949-baab-d4d186a895c0"));
-//        p.addMoney(111);
-//        GameDb.saveOrUpdate(p);
-
-//        Npc npc = GameDb.getNpc(UUID.fromString("282f68d2-e991-41ce-9571-18ba668e64b2"));
-//        npc.addMoney(111);
-//        GameDb.saveOrUpdate(npc);
-
-//        Player p = GameDb.getPlayer(UUID.fromString("2448f719-49e6-4949-baab-d4d186a895c0"));
-//        Transaction t  = GameDb.flush1();
-//        npc.addMoney(1);
-//        GameDb.flush2(t);
-//        p.decMoney(1);
-
-    }
+//    public static void main1(String[] args) throws Exception {
+//        java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
+//        GlobalConfig.init(args[0]);
+//        GameDb.startUp(args[1]);
+//
+//        GameServer gs = new GameServer();
+//        City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
+//        NpcManager.instance(); // load all npc, npc will refer building(enter it)
+//        GroundAuction.init();
+//        GroundManager.init();
+//        Exchange.init();
+//        BrandManager.init();
+//        TechTradeCenter.init();
+//        MoneyPool.init();
+//
+//        System.out.println(NpcManager.instance().size());
+//        Npc npc = NpcManager.instance().get(UUID.fromString("282f68d2-e991-41ce-9571-18ba668e64b2"));
+//        for (int i = 0; i < 50; i++) {
+//            long now = System.nanoTime();
+//            npc.update(0);
+//            logger.fatal(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - now));
+//        }
+//    }
 }
