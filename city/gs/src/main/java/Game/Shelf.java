@@ -4,15 +4,18 @@ import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
+@SelectBeforeUpdate(false)
 public class Shelf {
     @Id
-    private final UUID id = UUID.randomUUID();
+    @GeneratedValue
+    private UUID id;
     @Transient
     private int capacity;
 

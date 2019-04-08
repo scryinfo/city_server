@@ -135,8 +135,6 @@ public class GroundAuction {
         GameDb.saveOrUpdate(this); // let hibernate do the dirty check
     }
     public void update(long diffNano) {
-        loadAuction();
-
         Iterator<Entry> iter = this.auctions.values().iterator();
         while(iter.hasNext())
         {

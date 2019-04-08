@@ -13,6 +13,7 @@ import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.util.*;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Entity
+@SelectBeforeUpdate(false)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @EntityListeners({
         ConvertListener.class,
@@ -121,11 +123,10 @@ public abstract class Building {
     }
     public List<Building> getAllBuildingEffectMe(int type) {
         List<Building> res = new ArrayList<>();
-        GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
-        City.instance().forEachBuilding(gip, building -> {
-            if(building.npcSelectable() && !building.outOfBusiness() && building.type() == type && CoordPair.overlap(building.effectRange(), this.area()))
+        City.instance().forAllGrid(f-> f.forAllBuilding(building -> {
+            if(building.npcSelectable() && !building.outOfBusiness() && building.type() == type)
                 res.add(building);
-        });
+        }));
         return res;
     }
 
@@ -191,6 +192,7 @@ public abstract class Building {
 
 
     @Id
+    @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -263,7 +265,7 @@ public abstract class Building {
     }
 
     public void init() {
-        this.talentId = TalentManager.instance().getTalentIdsByBuildingId(this.id());
+        //this.talentId = TalentManager.instance().getTalentIdsByBuildingId(this.id());
         this.calcuWorking(City.instance().currentHour());
     }
 
@@ -348,7 +350,7 @@ public abstract class Building {
         return ownerId;
     }
     public Building(MetaBuilding meta, Coordinate pos, UUID ownerId) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.ownerId = ownerId;
         this.coordinate = pos;
         this.metaBuilding = meta;

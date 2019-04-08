@@ -1,14 +1,6 @@
 package Game.Action;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import Game.BrandManager;
 import Game.Building;
@@ -38,11 +30,11 @@ public class Shopping implements IAction {
     }
     private int aiId;
     @Override
-    public void act(Npc npc) {
+    public Set<Object> act(Npc npc) {
         logger.info("npc " + npc.id().toString() + " type " + npc.type() + " begin to shopping who located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(MetaBuilding.RETAIL);
         if(buildings.isEmpty())
-            return;
+            return null;
         logger.info("building num: " + buildings.size());
         AIBuy ai = MetaData.getAIBuy(aiId);
         MetaGood.Type type = ai.random(BrandManager.instance().getGoodWeightRatioWithType());
@@ -57,7 +49,7 @@ public class Shopping implements IAction {
         });
         logger.info("good meta ids this npc can buy: " + goodMetaIds);
         if(goodMetaIds.isEmpty())
-            return;
+            return null;
         Map<Integer, Integer> brandV = new HashMap<>();
         int sumBrandV = 0;
         for (Integer goodMetaId : goodMetaIds) {
@@ -94,15 +86,16 @@ public class Shopping implements IAction {
         WeightInfo chosen = wi.get(ProbBase.randomIdx(wi.stream().mapToInt(WeightInfo::getW).toArray()));
         Building sellShop = City.instance().getBuilding(chosen.bId);
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
-        if(chosen.price > npc.money())
+        if(chosen.price > npc.money()) {
             npc.hangOut(sellShop);
+            return null;
+        }
         else {
             npc.decMoney(chosen.price);
             Player owner = GameDb.queryPlayer(sellShop.ownerId());
             owner.addMoney(chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
-            GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
-
+            //GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
             GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))
@@ -112,12 +105,12 @@ public class Shopping implements IAction {
                     .setBid(sellShop.metaId())
                     .setItemId(chosen.meta.id)
                     .build());
-
             LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
                     chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
                     chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
             LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price, MetaItem.type(chosen.meta.id), chosen.meta.id);
+            return new HashSet(Arrays.asList(npc, owner, sellShop));
         }
     }
     private static final class WeightInfo {

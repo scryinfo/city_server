@@ -4,14 +4,17 @@ import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.util.*;
 
 @Entity
+@SelectBeforeUpdate(false)
 public class Storage implements IStorage {
     @Id
-    private final UUID id = UUID.randomUUID();
+    @GeneratedValue
+    private UUID id;
     public Storage(int capacity) {
         this.capacity = capacity;
     }

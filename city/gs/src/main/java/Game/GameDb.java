@@ -19,6 +19,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
@@ -52,8 +53,8 @@ import java.util.concurrent.TimeUnit;
 public class GameDb {
 	private static final Logger logger = Logger.getLogger(GameDb.class);
 	private static SessionFactory sessionFactory;
-	private static Session session;
-	private static final int BATCH_SIZE = 25;
+	//private static Session session;
+	private static final int BATCH_SIZE = 50;
 	private static String HIBERNATE_CFG_PATH;
 	private static SessionFactory buildSessionFactory() {
 		try {
@@ -72,28 +73,30 @@ public class GameDb {
 			.build(
 					new CacheLoader<UUID, Player>() {
 						public Player load(UUID id) {
+							Session session = sessionFactory.openSession();
 							Transaction transaction = session.beginTransaction();
 							Player res = session.get(Player.class, id);
 							transaction.commit();
+							session.close();
 							return res;
 						}
 					});
-	private static LoadingCache<UUID, Player> tmpPlayerCache = CacheBuilder.newBuilder()
-			.concurrencyLevel(1)
-			.expireAfterWrite(Duration.ofMinutes(2))
-			.maximumSize(2560)
-			.build(
-					new CacheLoader<UUID, Player>() {
-						public Player load(UUID id) {
-							StatelessSession s = sessionFactory.openStatelessSession();
-							Transaction transaction = s.beginTransaction();
-							Player res = (Player) s.get(Player.class, id);
-							transaction.commit();
-							s.close();
-							res.markTemp();
-							return res;
-						}
-					});
+//	private static LoadingCache<UUID, Player> tmpPlayerCache = CacheBuilder.newBuilder()
+//			.concurrencyLevel(1)
+//			.expireAfterWrite(Duration.ofMinutes(2))
+//			.maximumSize(2560)
+//			.build(
+//					new CacheLoader<UUID, Player>() {
+//						public Player load(UUID id) {
+//							StatelessSession s = sessionFactory.openStatelessSession();
+//							Transaction transaction = s.beginTransaction();
+//							Player res = (Player) s.get(Player.class, id);
+//							transaction.commit();
+//							s.close();
+//							res.markTemp();
+//							return res;
+//						}
+//					});
 	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
 			.concurrencyLevel(1)
 			.maximumSize(10240)
@@ -136,6 +139,7 @@ public class GameDb {
 
 	public static boolean saveOrUpdSociety(Society society)
 	{
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		boolean success = false;
 		try
@@ -150,11 +154,17 @@ public class GameDb {
 			logger.error(e.getMessage());
 			rollBack(transaction);
 		}
+		finally {
+			session.close();
+		}
 		return success;
 	}
 	public static Society getSocietyById(UUID id)
 	{
-		return session.get(Society.class, id);
+		Session session = sessionFactory.openSession();
+		Society res = session.get(Society.class, id);
+		session.close();
+		return res;
 	}
 
 	public static void invalidatePlayerInfoCache(UUID id)
@@ -321,7 +331,8 @@ public class GameDb {
 					.executeUpdate();
 			transaction.commit();
 			player.getBlacklist().add((player.id().equals(pid) ? fid : pid));
-			session.saveOrUpdate(player);
+			//session.saveOrUpdate(player);
+			GameDb.saveOrUpdate(player);
 		}
 		catch (RuntimeException e)
 		{
@@ -459,6 +470,7 @@ public class GameDb {
 
 	public static List<Talent> getTalent(Collection<UUID> talentIds) {
 		List<Talent> res = new ArrayList<>();
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -473,11 +485,13 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
+			session.close();
 		}
 		return res;
 	}
 	public static Talent getTalent(UUID id) {
 		Talent res = null;
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -488,11 +502,13 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
+			session.close();
 		}
 		return res;
 	}
 	public static Collection<Talent> getTalentByBuildingId(UUID id) {
 		Collection<Talent> res = null;
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -507,11 +523,13 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
+			session.close();
 		}
 		return res;
 	}
 	public static Collection<Talent> getTalentByPlayerId(UUID id) {
 		Collection<Talent> res = null;
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -526,31 +544,33 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
+			session.close();
 		}
 		return res;
 	}
 
-	public static void evict(Player player) {
-		playerCache.invalidate(player.id());
-		session.evict(player);
-	}
-
-	public static void evict(Object obj)
-	{
-		if (obj != null) {
-			session.evict(obj);
-		}
-	}
+//	public static void evict(Player player) {
+//		playerCache.invalidate(player.id());
+//		session.evict(player);
+//	}
+//
+//	public static void evict(Object obj)
+//	{
+//		if (obj != null) {
+//			session.evict(obj);
+//		}
+//	}
 	public static Player getPlayer(UUID id) {
-		tmpPlayerCache.invalidate(id);
+		//tmpPlayerCache.invalidate(id);
 		return playerCache.getUnchecked(id);
 	}
 	public static Player queryPlayer(UUID id) {
-		Player res = playerCache.getIfPresent(id);
-		if(res == null) {
-			res = tmpPlayerCache.getUnchecked(id);
-		}
-		return res;
+//		Player res = playerCache.getIfPresent(id);
+//		if(res == null) {
+//			res = tmpPlayerCache.getUnchecked(id);
+//		}
+//		return res;
+		return getPlayer(id);
 	}
 	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
 		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);
@@ -577,6 +597,7 @@ public class GameDb {
 		return l;
 	}
 	public static boolean createPlayer(Player p) {
+		Session session = sessionFactory.openSession();
 		boolean success = false;
 		Transaction transaction = null;
 		try
@@ -590,6 +611,9 @@ public class GameDb {
 		{ // the exception is complex, may be javax.PersistenceException, or HibernateException, or jdbc exception ...
 			e.printStackTrace();
 			rollBack(transaction);
+		}
+		finally {
+			session.close();
 		}
 		return success;
 	}
@@ -642,51 +666,66 @@ public class GameDb {
 		statelessSession.close();
 	}
 	public static MoneyPool getMoneyPool() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		MoneyPool res = session.get(MoneyPool.class, MoneyPool.ID);
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static BrandManager getBrandManager() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		BrandManager res = session.get(BrandManager.class, BrandManager.ID);
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static TechTradeCenter getTechTradeCenter() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		TechTradeCenter res = session.get(TechTradeCenter.class, TechTradeCenter.ID);
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static GroundManager getGroundManager() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		GroundManager res = session.get(GroundManager.class, GroundManager.ID);
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static GroundAuction getGroundAction() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		GroundAuction res = session.get(GroundAuction.class, GroundAuction.ID);
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static Exchange getExchange() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		Exchange res = session.get(Exchange.class, Exchange.ID);
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static List<Building> getAllBuilding() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Building> criteria = builder.createQuery(Building.class);
 		criteria.from(Building.class);
 		List<Building> res = session.createQuery(criteria).list();
 		transaction.commit();
+		session.close();
 		return res;
 	}
 	public static void saveOrUpdate(Collection objs) {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -704,10 +743,11 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
+			session.close();
 		}
 	}
-
 	public static void saveOrUpdate(Object o) {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -718,11 +758,12 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
-
+			session.close();
 		}
 	}
 
 	public static void delete(Object o) {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -734,11 +775,12 @@ public class GameDb {
 				transaction.rollback();
 		}
 		finally {
-
+			session.close();
 		}
 	}
 
 	public static void delete(Collection objs) {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -756,10 +798,11 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
-
+			session.close();
 		}
 	}
 	public static void saveOrUpdateAndDelete(Collection saveOrUpdates, Collection deletes) {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
 		try {
 			transaction = session.beginTransaction();
@@ -782,6 +825,7 @@ public class GameDb {
 			if(transaction != null)
 				transaction.rollback();
 		} finally {
+			session.close();
 		}
 	}
 
@@ -797,22 +841,31 @@ public class GameDb {
 		return logs;
 	}
 	public static List<Npc> getAllNpc() {
+		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Npc> criteria = builder.createQuery(Npc.class);
 		criteria.from(Npc.class);
 		List<Npc> res = session.createQuery(criteria).list();
 		transaction.commit();
+		session.close();
 		return res;
 	}
-
+	public static Npc getNpc(UUID id) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		Npc res = session.get(Npc.class, id);
+		transaction.commit();
+		session.close();
+		return res;
+	}
 	public static void startUp(String arg) {
 		HIBERNATE_CFG_PATH = arg;
 		sessionFactory = buildSessionFactory();
-		session = sessionFactory.openSession();
+		//session = sessionFactory.openSession();
 	}
 	public static void shutDown() {
-		session.close();
+		//session.close();
 		sessionFactory.close();
 	}
     public static Gs.ExchangeDealLogs getExchangeDealLog(UUID id) {

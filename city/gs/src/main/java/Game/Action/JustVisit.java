@@ -3,17 +3,12 @@ package Game.Action;
 
 import Game.*;
 import Game.Meta.MetaBuilding;
-import Game.Meta.MetaItem;
 import Game.Meta.ProbBase;
 import Shared.LogDb;
-import Shared.Package;
 import Shared.Util;
 import gs.Gs;
-import gscode.GsCode;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class JustVisit implements IAction {
     public JustVisit(int buildingType) {
@@ -22,11 +17,11 @@ public class JustVisit implements IAction {
 
     private int buildingType;
     @Override
-    public void act(Npc npc) {
+    public Set<Object> act(Npc npc) {
         logger.info("npc " + npc.id().toString() + " type " + npc.type() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
-            return;
+            return null;
         for (Building building : buildings) {
             logger.info("chosen building " + building.id().toString() + " located at: " + building.coordinate());
         }
@@ -47,6 +42,7 @@ public class JustVisit implements IAction {
         logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
+            return null;
         }
         else {
             Player owner = GameDb.queryPlayer(chosen.ownerId());
@@ -56,7 +52,7 @@ public class JustVisit implements IAction {
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
             LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
                     chosen.id(),chosen.type(),chosen.metaId());
-            GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
+            //GameDb.saveOrUpdate(Arrays.asList(npc, chosen));
             if (chosen.type() == MetaBuilding.APARTMENT) {
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)
@@ -67,6 +63,7 @@ public class JustVisit implements IAction {
                         .build());
             }
             npc.goFor(chosen);
+            return new HashSet<>(Arrays.asList(owner, npc, chosen));
         }
     }
 }

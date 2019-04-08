@@ -4,16 +4,33 @@ import Game.Action.IAction;
 import Game.Meta.AIBuilding;
 import Game.Meta.MetaData;
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@SelectBeforeUpdate(false)
 @Table(name = "NPC")
 public class Npc {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Npc npc = (Npc) o;
+        return Objects.equals(id, npc.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     private static final Logger logger = Logger.getLogger(Npc.class);
     public Npc(Building born, long money, int type) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.born = born;
         this.money = money;
         this.type = type;
@@ -30,6 +47,7 @@ public class Npc {
         return type() != 10 && type() != 11;
     }
     @Id
+    @GeneratedValue
     private UUID id;
 
     @Transient
@@ -94,14 +112,14 @@ public class Npc {
     public boolean hasApartment() {
         return this.apartment != null;
     }
-    public void update(long diffNano) {
+    public Set<Object> update(long diffNano) {
         if(this.born.outOfBusiness())
-            return;
+            return null;
         int id = chooseId();
         IAction.logger.info(this.id().toString() + " choose " + id);
         AIBuilding aiBuilding = MetaData.getAIBuilding(id);
         if(aiBuilding == null)
-           return;
+           return null;
 
         double idleRatio = 1.d;
         double sumFlow = City.instance().getSumFlow();
@@ -115,9 +133,9 @@ public class Npc {
         IAction action = aiBuilding.random(idleRatio, r, id);
         if(action == null) {
             logger.fatal("flow error, this building pos" + this.buildingLocated().coordinate() + " flow " + this.buildingLocated().getFlow());
-            return;
+            return null;
         }
-        action.act(this);
+        return action.act(this);
     }
 
     public int type() {

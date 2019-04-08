@@ -213,14 +213,13 @@ public class City {
     private int lastHour;
 
     public void update(long diffNano) {
-        if(this.metaAuctionLoadTimer.update(diffNano)) {
-//            GroundAuction.instance().loadMore();
-        }
         GroundAuction.instance().update(diffNano);
         GroundManager.instance().update(diffNano);
         Exchange.instance().update(diffNano);
         allBuilding.forEach((k,v)->v.update(diffNano));
+        long now = System.nanoTime();
         NpcManager.instance().update(diffNano);
+        System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-now));
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
@@ -407,6 +406,7 @@ public class City {
     public boolean addBuilding(Building b) {
         if(!this.canBuild(b))
             return false;
+        GameDb.saveOrUpdate(b); // let hibernate generate the id value
         List updates = b.hireNpc();
         take(b);
         b.init();

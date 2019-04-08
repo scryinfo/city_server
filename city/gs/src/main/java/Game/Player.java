@@ -1,7 +1,6 @@
 package Game;
 
 import Game.FriendManager.FriendManager;
-import Game.Listener.EvictListener;
 import Game.Meta.MetaData;
 import Shared.DatabaseInfo;
 import Shared.LogDb;
@@ -21,9 +20,6 @@ import java.util.*;
         @Index(name = "ACCNAME_IDX", columnList = DatabaseInfo.Game.Player.AccountName)
     }
 )
-@EntityListeners({
-        EvictListener.class,
-})
 public class Player {
     public static final int MAX_FACE_ID_LEN = 100;
     @Override
@@ -178,6 +174,7 @@ public class Player {
     @Id
     //@GeneratedValue(generator = "uuid2")
     //@GenericGenerator(name = "id", strategy = "uuid2")
+    @GeneratedValue
     private UUID id;
 
     @Column(name = DatabaseInfo.Game.Player.Name, unique = true, nullable = false)
@@ -233,7 +230,7 @@ public class Player {
     private GameSession session;
 
     public Player(String name, String account, boolean male, String companyName, String faceId) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.account = account;
         this.name = name;
         this.companyName = companyName;
@@ -323,9 +320,9 @@ public class Player {
     public void offline(){
         this.offlineTs = System.currentTimeMillis();
         GameDb.saveOrUpdate(this);
-        if(!this.talentIds.isEmpty()) {
-            TalentManager.instance().unload(this.talentIds);
-        }
+//        if(!this.talentIds.isEmpty()) {
+//            TalentManager.instance().unload(this.talentIds);
+//        }
     }
     @Transient
     Collection<UUID> talentIds;

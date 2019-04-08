@@ -12,14 +12,14 @@ public class TalentManager {
     public static TalentManager instance() {
         return instance;
     }
-    public void unload(Collection<UUID> talentIds) {
-        ArrayList<Talent> needToEvict = new ArrayList<>();
-        talentCache.asMap().values().forEach(t->{
-            if(talentIds.contains(t.id()) && t.isFree())
-                needToEvict.add(t);
-        });
-        GameDb.evict(needToEvict);
-    }
+//    public void unload(Collection<UUID> talentIds) {
+//        ArrayList<Talent> needToEvict = new ArrayList<>();
+//        talentCache.asMap().values().forEach(t->{
+//            if(talentIds.contains(t.id()) && t.isFree())
+//                needToEvict.add(t);
+//        });
+//        GameDb.evict(needToEvict);
+//    }
     public void del(Talent t) {
         talentCache.invalidate(t.id());
         GameDb.delete(t);

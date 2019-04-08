@@ -1,16 +1,6 @@
 package Game;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import Game.Meta.MetaCity;
@@ -41,15 +31,20 @@ public class NpcManager {
             return;
         if(waitToUpdate.isEmpty())
             return;
+        Set updates = new HashSet();
         Set<UUID> ids = waitToUpdate.get(updateIdx);
         Iterator<UUID> i = ids.iterator();
         while(i.hasNext()) {
             Npc npc = allNpc.get(i.next());
             if(npc == null)     // this npc be deleted
                 i.remove();
-            else
-                npc.update(diffNano);
+            else {
+                Set u = npc.update(diffNano);
+                if(u != null)
+                    updates.addAll(u);
+            }
         }
+        GameDb.saveOrUpdate(updates);
         if(reCalcuWaitToUpdate) {
             ids.forEach(id -> {
                 int idx = Math.abs(id.hashCode())%updateTimesAtNextTimeSection;
@@ -99,13 +94,16 @@ public class NpcManager {
         //waitToUpdate.forEach(s->s.removeAll(ids)); // can save this by check npc is null in saveOrUpdate
     }
     public List<Npc> create(int type, int n, Building building, int salary) {
-        List<Npc> res = new ArrayList<>();
+        List<Npc> npcs = new ArrayList<>();
         for(int i = 0; i < n; ++i) {
             Npc npc = new Npc(building, salary, type);
-            res.add(npc);
+            npcs.add(npc);
+        }
+        GameDb.saveOrUpdate(npcs); // generate the id
+        for (Npc npc : npcs) {
             addImpl(npc);
         }
-        return res;
+        return npcs;
     }
 
     public Npc create(UUID id, Building building, long salary) {
@@ -116,14 +114,14 @@ public class NpcManager {
     private void addImpl(Npc npc) {
         allNpc.put(npc.id(), npc);
         //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
-        if(allNpc!=null&&allNpc.size()>=500){
-        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-        			.setType(2)
-        			.setNum(allNpc.size())
-                    .setTs(System.currentTimeMillis())
-                    .build()));
-            LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
-        }
+//        if(allNpc!=null&&allNpc.size()>=500){
+//        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
+//        			.setType(2)
+//        			.setNum(allNpc.size())
+//                    .setTs(System.currentTimeMillis())
+//                    .build()));
+//            LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
+//        }
         int idx = Math.abs(npc.id().hashCode())% updateTimesAtCurrentTimeSection;
         if(reCalcuWaitToUpdate) {
             int nextIdx = Math.abs(npc.id().hashCode())%updateTimesAtNextTimeSection;
@@ -194,4 +192,11 @@ public class NpcManager {
 	  }
 	  return countMap;
    }
+
+    public Npc get(UUID id) {
+        return this.allNpc.get(id);
+    }
+    public int size() {
+        return this.allNpc.size();
+    }
 }

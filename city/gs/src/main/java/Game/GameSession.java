@@ -293,7 +293,7 @@ public class GameSession {
 		else
 		{
 			player.offline();
-			GameDb.evict(player);
+			//GameDb.evict(player);
 			logger.debug("account: " + player.getAccount() + " logout");
 
 			//Notify friends

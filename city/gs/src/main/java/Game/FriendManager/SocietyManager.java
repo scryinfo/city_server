@@ -131,7 +131,7 @@ public class SocietyManager
                         new HashSet<>(society.getMemberIds())).isEmpty())
                 {
                     societyCache.invalidate(society.getId());
-                    GameDb.evict(society);
+                    //GameDb.evict(society);
                 }
             }
         }
