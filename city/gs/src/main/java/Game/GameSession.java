@@ -39,7 +39,6 @@ import Game.FriendManager.SocietyManager;
 import Game.Meta.Formula;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
-import Game.Meta.MetaEva;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
@@ -641,7 +640,7 @@ public class GameSession {
 		// begin do modify
 		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n))
 			return;
-		Player seller = GameDb.queryPlayer(sellBuilding.ownerId());
+		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
 		seller.addMoney(cost);
 		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
@@ -1134,7 +1133,7 @@ public class GameSession {
 		int cost = slot.rentPreDay + slot.deposit;
 		if(player.money() < cost)
 			return;
-		Player owner = GameDb.queryPlayer(building.ownerId());
+		Player owner = GameDb.getPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
@@ -1446,7 +1445,7 @@ public class GameSession {
 			return;
 		if(!player.decMoney(sell.price))
 			return;
-		Player seller = GameDb.queryPlayer(sell.ownerId);
+		Player seller = GameDb.getPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
@@ -1657,7 +1656,7 @@ public class GameSession {
 		UUID targetId = Util.toUuid(addMsg.getId().toByteArray());
 		if (!FriendManager.playerFriends.getUnchecked(id()).contains(targetId))
 		{
-			if (GameDb.queryPlayer(targetId).getBlacklist().contains(player.id()))
+			if (GameDb.getPlayer(targetId).getBlacklist().contains(player.id()))
 			{
 				//邮件通知黑名单拒绝添加
 			}
@@ -1694,7 +1693,7 @@ public class GameSession {
 				!FriendManager.playerFriends.getUnchecked(player.id()).contains(sourceId))
 		{
 			FriendManager.getInstance().saveFriendship(sourceId, player.id());
-			Player temp = GameDb.queryPlayer(sourceId);
+			Player temp = GameDb.getPlayer(sourceId);
 			if (temp.getBlacklist().contains(player.id()))
 			{
 				temp.getBlacklist().remove(player.id());

@@ -3,7 +3,6 @@ package Game;
 import Game.Meta.MetaData;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
-import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
@@ -245,8 +244,8 @@ public class Exchange {
         MetaItem mi = MetaData.getItem(s.itemId);
         if(mi == null)
             return null;
-        Player seller = GameDb.queryPlayer(s.playerId);
-        Player buyer = GameDb.queryPlayer(b.playerId);
+        Player seller = GameDb.getPlayer(s.playerId);
+        Player buyer = GameDb.getPlayer(b.playerId);
 
         IStorage out = IStorage.get(s.buildingId, seller);
         if(out == null)

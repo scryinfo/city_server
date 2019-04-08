@@ -98,7 +98,7 @@ public class ManagerCommunication
         {
             UUID friend_id = Util.toUuid(communicationReq.getChannelId().toByteArray());
             //blacklist
-            if (GameDb.queryPlayer(friend_id).getBlacklist().contains(player.id())
+            if (GameDb.getPlayer(friend_id).getBlacklist().contains(player.id())
                     || player.getBlacklist().contains(friend_id))
             {
                 GameServer.allGameSessions.get(player.id()).write(Package.fail((short) GsCode.OpCode.roleCommunication_VALUE, Common.Fail.Reason.notAllow));

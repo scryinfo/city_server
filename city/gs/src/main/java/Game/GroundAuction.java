@@ -145,7 +145,7 @@ public class GroundAuction {
                 assert (a.biderId() != null);
 
 
-                Player bider = GameDb.queryPlayer(a.biderId());
+                Player bider = GameDb.getPlayer(a.biderId());
                 long p = bider.spentLockMoney(a.transactionId);
                 try {
                     GroundManager.instance().addGround(bider.id(), a.meta.area, (int)p);
@@ -204,7 +204,7 @@ public class GroundAuction {
             // unlock its money
             GameSession biderSession = GameServer.allGameSessions.get(a.biderId());
             if(biderSession == null) {
-                GameDb.queryPlayer(a.biderId()).groundBidingFail(bider.id(), a);
+                GameDb.getPlayer(a.biderId()).groundBidingFail(bider.id(), a);
             }
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);

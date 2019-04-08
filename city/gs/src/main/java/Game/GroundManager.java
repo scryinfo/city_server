@@ -250,7 +250,7 @@ public class GroundManager {
             miniIndexList.add(c.toProto());
         }
 
-        Player owner = GameDb.queryPlayer(ownerId);
+        Player owner = GameDb.getPlayer(ownerId);
         owner.addMoney(cost);
         
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
@@ -335,7 +335,7 @@ public class GroundManager {
         int cost = gis.size() * price;
         if(buyer.money() < cost)
             return false;
-        Player seller = GameDb.queryPlayer(sellerId);
+        Player seller = GameDb.getPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间

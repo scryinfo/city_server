@@ -17,10 +17,6 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -537,7 +533,7 @@ public abstract class Building {
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
         if(MetaData.getDayId() != 0 && nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
-            Player p = GameDb.queryPlayer(ownerId);
+            Player p = GameDb.getPlayer(ownerId);
             if(p != null) {
                 this.payOff(p);
             }

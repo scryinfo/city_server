@@ -278,7 +278,7 @@ public class SocietyManager
                     !society.getMemberIds().contains(reqId)
                     && canModify(society.getIdentity(handler.id())))
             {
-                Player reqPlayer = GameDb.queryPlayer(reqId);
+                Player reqPlayer = GameDb.getPlayer(reqId);
                 Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
                 society.getJoinMap().remove(reqId);
                 GameDb.saveOrUpdate(society);
@@ -414,7 +414,7 @@ public class SocietyManager
         {
             if (canOperation(society,player.id(),kickId))
             {
-                Player kickPlayer = GameDb.queryPlayer(kickId);
+                Player kickPlayer = GameDb.getPlayer(kickId);
                 kickPlayer.setSocietyId(null);
                 society.delMember(kickId);
                 Society.SocietyNotice notice = new Society.SocietyNotice(player.id(), kickId,

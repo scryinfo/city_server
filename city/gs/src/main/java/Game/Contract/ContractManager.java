@@ -82,7 +82,7 @@ public class ContractManager
             contract = new Contract(player.id(), building1.ownerId(), building1.id(), System.currentTimeMillis(),
                     building.getBuildingContract().getDurationHour(),
                     building.getBuildingContract().getPrice());
-            Player seller = GameDb.queryPlayer(building1.ownerId());
+            Player seller = GameDb.getPlayer(building1.ownerId());
             player.decMoney(contract.getCost());
             seller.addMoney(contract.getCost());
             updates.add(player);

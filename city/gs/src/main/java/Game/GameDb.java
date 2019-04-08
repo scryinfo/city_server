@@ -139,6 +139,7 @@ public class GameDb {
 		criteria.from(Contract.class);
 		List<Contract> res = session.createQuery(criteria).list();
 		transaction.commit();
+		session.close();
 		return res;
 	}
 
@@ -562,28 +563,8 @@ public class GameDb {
 		return res;
 	}
 
-//	public static void evict(Player player) {
-//		playerCache.invalidate(player.id());
-//		session.evict(player);
-//	}
-//
-//	public static void evict(Object obj)
-//	{
-//		if (obj != null) {
-//			session.evict(obj);
-//		}
-//	}
 	public static Player getPlayer(UUID id) {
-		//tmpPlayerCache.invalidate(id);
 		return playerCache.getUnchecked(id);
-	}
-	public static Player queryPlayer(UUID id) {
-//		Player res = playerCache.getIfPresent(id);
-//		if(res == null) {
-//			res = tmpPlayerCache.getUnchecked(id);
-//		}
-//		return res;
-		return getPlayer(id);
 	}
 	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
 		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);

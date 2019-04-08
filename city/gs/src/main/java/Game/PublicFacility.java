@@ -3,7 +3,6 @@ package Game;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaPublicFacility;
 import Game.Timers.PeriodicTimer;
-import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import com.google.protobuf.Message;
@@ -279,8 +278,8 @@ public class PublicFacility extends Building {
                     ids.add(k);
                 }
                 if(now - v.payTs >= TimeUnit.DAYS.toMillis(1)) {
-                    Player renter = GameDb.queryPlayer(v.renterId);
-                    Player owner = GameDb.queryPlayer(this.ownerId());
+                    Player renter = GameDb.getPlayer(v.renterId);
+                    Player owner = GameDb.getPlayer(this.ownerId());
                     if(!renter.decMoney(v.slot.rentPreDay)) {
                         long deposit = renter.spentLockMoney(v.slot.id);
                         owner.addMoney(deposit);
