@@ -39,18 +39,18 @@ public class Society
     @Column(nullable = false)
     private int memberCount;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "society_member", joinColumns = @JoinColumn(name = "society_id"))
     @MapKeyColumn(name = "member_id")
     private Map<UUID, SocietyMember> memberHashMap = new HashMap<>();
 
     //添加公会通知时，请使用addNotice()方法，以便插入时清理过期数据
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "society_notice", joinColumns = @JoinColumn(name = "society_id"))
     @OrderColumn
     private List<SocietyNotice> noticeList = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "society_join_req", joinColumns = @JoinColumn(name = "society_id"))
     @MapKeyColumn(name = "player_id")
     private Map<UUID, String> joinMap = new HashMap<>();

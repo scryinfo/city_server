@@ -413,7 +413,7 @@ public class Player {
         exchangeFavoriteItem.remove(itemId);
     }
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "player_exchange_favorite", joinColumns = @JoinColumn(name = "player_id"))
     private Set<Integer> exchangeFavoriteItem = new TreeSet<>();
 
