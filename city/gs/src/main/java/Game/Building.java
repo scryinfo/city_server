@@ -151,7 +151,6 @@ public abstract class Building {
                 this.flow = i.getN();
             }
         }
-        updateLift();
     }
 
     public boolean hasTalent(UUID id) {
@@ -454,6 +453,7 @@ public abstract class Building {
                 .setNpcFlow(this.flow)
                 .setState(Gs.BuildingState.valueOf(state))
                 .setSalary(salaryRatio)
+                .setSetSalaryTs(salaryRatioTs)
                 .setHappy(happy)
                 .setConstructCompleteTs(constructCompleteTs);
         if(this.name != null && this.name.length() > 0)
@@ -498,6 +498,10 @@ public abstract class Building {
 
     public float getLift()
     {
+        if (this.lift == 0)
+        {
+           updateLift();
+        }
         return lift;
     }
 

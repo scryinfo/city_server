@@ -23,8 +23,14 @@ public class ContractManager
     {
         GameDb.getAllContract().forEach(contract ->
                 {
-                    allContract.put(contract.getId(), contract);
-                    clearByOutOfDate(contract);
+                    if (isOutOfDate(contract))
+                    {
+                        deleteContract(contract);
+                    }
+                    else
+                    {
+                        allContract.put(contract.getId(), contract);
+                    }
                 });
         updatePlayerLiftMap();
     }
@@ -32,15 +38,18 @@ public class ContractManager
     //按服务器帧率检查失效契约
     public void update(long diffNano)
     {
-        allContract.values().forEach(this::clearByOutOfDate);
+        List<Contract> deletes = new ArrayList<>();
+        allContract.values().forEach(contract -> {
+            if (isOutOfDate(contract)) {
+                deletes.add(contract);
+            }
+        });
+        deletes.forEach(this::deleteContract);
     }
 
-    public void clearByOutOfDate(Contract contract)
+    public boolean isOutOfDate(Contract contract)
     {
-        if (!contract.isSelfSign() && contract.isOutOfDate())
-        {
-            this.deleteContract(contract);
-        }
+        return !contract.isSelfSign() && contract.isOutOfDate();
     }
 
     public boolean deleteContract(Contract contract)
@@ -132,6 +141,7 @@ public class ContractManager
         updatePlayerLiftMap();
     }
 
+    //获取玩家人流量推广能力，20.5  --> 20.5%
     public float getPlayerADLift(UUID playerId)
     {
         return playerLiftMap.getOrDefault(playerId, 0f);

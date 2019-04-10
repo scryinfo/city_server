@@ -35,6 +35,7 @@ public class Contract
 
     public Contract(UUID signId, UUID sellerId, UUID sellerBuildingId, long startTs, int signingHours,long price)
     {
+        this.id = UUID.randomUUID();
         this.signId = signId;
         this.sellerId = sellerId;
         this.sellerBuildingId = sellerBuildingId;
