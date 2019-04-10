@@ -453,6 +453,7 @@ public abstract class Building {
                 .setNpcFlow(this.flow)
                 .setState(Gs.BuildingState.valueOf(state))
                 .setSalary(salaryRatio)
+                .setSetSalaryTs(salaryRatioTs)
                 .setHappy(happy)
                 .setConstructCompleteTs(constructCompleteTs);
         if(this.name != null && this.name.length() > 0)
