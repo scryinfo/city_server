@@ -8,7 +8,7 @@ public final class MetaGood extends MetaItem
     public static final int LUX_SIZE = 4;
     public static Type goodType(int id) {
         Type res;
-        switch ((MetaItem.baseId(id))%100) {
+        switch (category(id)) {
             case 51:
                 res = Type.MAIN_FOOD;
                 break;
@@ -32,6 +32,11 @@ public final class MetaGood extends MetaItem
         }
         return res;
     }
+
+    public static int category(int id) {
+        return (MetaItem.baseId(id))%100;
+    }
+
     public enum Type {
         MAIN_FOOD,
         SUB_FOOD,
@@ -46,4 +51,7 @@ public final class MetaGood extends MetaItem
         this.lux = d.getInteger("lux");
     }
     public int lux;
+    public static boolean legalCategory(int category) {
+        return category >= Type.MAIN_FOOD.ordinal() && category < Type.ALL.ordinal();
+    }
 }

@@ -1299,89 +1299,87 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
-	public void labLineSetWorkerNum(short cmd, Message message) {
-		Gs.LabSetLineWorkerNum c = (Gs.LabSetLineWorkerNum)message;
-		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-			return;
-		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-		Laboratory lab = (Laboratory)building;
-		boolean ok = lab.setLineWorkerNum(lineId, c.getN());
-		if(ok) {
-			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, c));
-		}
-	}
-	public void labLineAdd(short cmd, Message message) {
-		Gs.LabAddLine c = (Gs.LabAddLine)message;
-		if(c.getType() != Formula.Type.INVENT.ordinal() && c.getType() != Formula.Type.RESEARCH.ordinal())
-			return;
+	public void labSetting(short cmd, Message message) {
+		Gs.LabSetting c = (Gs.LabSetting)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		Laboratory lab = (Laboratory)building;
-		Formula.Type type = Formula.Type.values()[c.getType()];
-		Formula formula = null;
-		if(type == Formula.Type.RESEARCH) {
-			if(!player.hasItem(c.getItemId()))
-				return;
-			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), player.getGoodLevel(c.getItemId())+1));
-		}
-		else if(type == Formula.Type.INVENT) {
-			formula = MetaData.getFormula(new Formula.Key(type, c.getItemId(), 0));
-		}
-		if(formula == null)
+		if(c.getMaxTimes() <= 0 || c.getPricePreTime() < 0)
 			return;
-		Laboratory.Line line = lab.addLine(formula, c.getWorkerNum());
-		if(line != null) {
-			GameDb.saveOrUpdate(lab);
-		}
-	}
-	public void labLineDel(short cmd, Message message) {
-		Gs.LabDelLine c = (Gs.LabDelLine)message;
-		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-			return;
-		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-		Laboratory lab = (Laboratory)building;
-		if(lab.delLine(lineId))
-			GameDb.saveOrUpdate(lab);
-	}
-	public void labLaunchLine(short cmd, Message message) {
-		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
-		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building == null || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-			return;
-		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-		Laboratory lab = (Laboratory)building;
-		Laboratory.Line line = lab.getLine(lineId);
-		if(line == null || building.outOfBusiness() || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
-			return;
-		Formula.Consume[] consumes = line.getConsumes();
-		if(consumes == null)
-			return;
-		boolean enoughMaterial = true;
-		for (Formula.Consume consume : consumes) {
-			if(consume.m == null)
-				continue;
-			if(lab.availableQuantity(consume.m) < consume.n*c.getPhase())
-				enoughMaterial = false;
-		}
-		if(!enoughMaterial)
-			return;
-		for (Formula.Consume consume : consumes) {
-			if(consume.m == null)
-				continue;
-			lab.offset(consume.m, -consume.n*c.getPhase());
-		}
-		line.launch(c.getPhase());
+		lab.setting(c.getMaxTimes(), c.getPricePreTime());
 		GameDb.saveOrUpdate(lab);
 		this.write(Package.create(cmd, c));
 	}
+	public void labLineAdd(short cmd, Message message) {
+		Gs.LabAddLine c = (Gs.LabAddLine)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+			return;
+		Laboratory lab = (Laboratory)building;
+		if(c.getTimes() <= 0 || c.getTimes() > lab.getMaxTimes())
+			return;
+		if(c.hasGoodCategory()) {
+			if(!MetaGood.legalCategory(c.getGoodCategory()))
+				return;
+		}
+
+		long cost = c.getTimes() * lab.getPricePreTime();
+		if(!player.decMoney(cost))
+			return;
+		lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes());
+		GameDb.saveOrUpdate(lab);
+		this.write(Package.create(cmd, c));
+	}
+	public void labLineCancel(short cmd, Message message) {
+		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+			return;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+		Laboratory lab = (Laboratory)building;
+		if(lab.delLine(lineId)) {
+			GameDb.saveOrUpdate(lab);
+			this.write(Package.create(cmd, c));
+		}
+		else
+			this.write(Package.fail(cmd));
+	}
+//	public void labLaunchLine(short cmd, Message message) {
+//		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
+//		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+//		Building building = City.instance().getBuilding(bid);
+//		if(building == null || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+//			return;
+//		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+//		Laboratory lab = (Laboratory)building;
+//		Laboratory.Line line = lab.getLine(lineId);
+//		if(line == null || building.outOfBusiness() || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
+//			return;
+//		Formula.Consume[] consumes = line.getConsumes();
+//		if(consumes == null)
+//			return;
+//		boolean enoughMaterial = true;
+//		for (Formula.Consume consume : consumes) {
+//			if(consume.m == null)
+//				continue;
+//			if(lab.availableQuantity(consume.m) < consume.n*c.getPhase())
+//				enoughMaterial = false;
+//		}
+//		if(!enoughMaterial)
+//			return;
+//		for (Formula.Consume consume : consumes) {
+//			if(consume.m == null)
+//				continue;
+//			lab.offset(consume.m, -consume.n*c.getPhase());
+//		}
+//		line.launch(c.getPhase());
+//		GameDb.saveOrUpdate(lab);
+//		this.write(Package.create(cmd, c));
+//	}
 	public void labRoll(short cmd, Message message) {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
@@ -1390,30 +1388,19 @@ public class GameSession {
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
-		Laboratory.Line line = lab.getLine(lineId);
-		if(line == null || line.isComplete())
-			return;
-		Laboratory.Line.UpdateResult r = line.roll();
+		Laboratory.RollResult r = lab.roll(lineId, player);
 		if(r != null) {
-			if(r.phaseChange) {
-				lab.broadcastLine(line);
+			Gs.LabRollACK.Builder builder = Gs.LabRollACK.newBuilder();
+			builder.setBuildingId(c.getBuildingId());
+			builder.setLineId(c.getLineId());
+			if(r.evaPoint > 0) {
+				builder.setEvaPoint(r.evaPoint);
 			}
 			else {
-				if(r.type == Formula.Type.INVENT) {
-					player.addItem(line.formula.key.targetId, 0);
-					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, 0);
-					lab.delLine(line.id);
-					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
-				}
-				if(r.type == Formula.Type.RESEARCH) {
-					OptionalInt lv = player.addItemLv(line.formula.key.targetId, r.v);
-					assert lv.isPresent();
-					TechTradeCenter.instance().techCompleteAction(line.formula.key.targetId, lv.getAsInt());
-					//lab.delLine(line.id);
-					GameDb.saveOrUpdate(Arrays.asList(lab, player, TechTradeCenter.instance()));
-				}
+				builder.addAllItemId(r.itemIds);
 			}
-			this.write(Package.create(cmd, c));
+			GameDb.saveOrUpdate(Arrays.asList(lab, player));
+			this.write(Package.create(cmd, builder.build()));
 		}
 		else
 			this.write(Package.fail(cmd));

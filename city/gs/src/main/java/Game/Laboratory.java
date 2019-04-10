@@ -1,8 +1,7 @@
 package Game;
 
-import Game.Meta.Formula;
+import Game.Meta.GoodFormula;
 import Game.Meta.MetaData;
-import Game.Meta.MetaItem;
 import Game.Meta.MetaLaboratory;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
@@ -15,14 +14,14 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Entity(name = "Laboratory")
-public class Laboratory extends Building implements IStorage {
+public class Laboratory extends Building {
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
+    private static final int RADIX = 100000;
     @Transient
     private MetaLaboratory meta;
 
     public Laboratory(MetaLaboratory meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        this.store = new Storage(meta.storeCapacity);
         this.meta = meta;
     }
 
@@ -40,8 +39,8 @@ public class Laboratory extends Building implements IStorage {
     @Override
     public Gs.Laboratory detailProto() {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
-        builder.setStore(this.store.toProto());
-        this.lines.values().forEach(line -> builder.addLine(line.toProto()));
+        this.inProcess.values().forEach(line -> builder.addInProcess(line.toProto()));
+        this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
         return builder.build();
     }
     @Override
@@ -61,245 +60,187 @@ public class Laboratory extends Building implements IStorage {
 
     @Override
     protected void _update(long diffNano) {
-        this.lines.values().forEach(l->l.update(diffNano));
+        Iterator<Line> iterator = this.inProcess.values().iterator();
+        while(iterator.hasNext()) {
+            Line l = iterator.next();
+            if(l.update(diffNano)) {
+                if(l.isComplete()) {
+                    iterator.remove();
+                    this.completed.put(l.id, l);
+                }
+            }
+        }
         if(this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
     }
-    public int freeWorkerNum() {
-        return this.meta.workerNum - lines.values().stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
-    }
-    public Line addLine(Formula formula, int workerNum) {
-        if(workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
-            return null;
-        if(this.freeWorkerNum() < workerNum)
-            return null;
-        Line line = new Line(workerNum, formula);
-        lines.put(line.id, line);
-        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
+    public Line addLine(int goodCategory, int times) {
+        Line line = new Line(goodCategory, times);
+        inProcess.put(line.id, line);
+        //this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
     }
 
     public boolean delLine(UUID lineId) {
-        if(lines.remove(lineId) != null) {
-            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
-                            Gs.LabDelLine.newBuilder()
-                                    .setBuildingId(Util.toByteString(id()))
-                                    .setLineId(Util.toByteString(lineId))
-                                    .build()));
+        Line line = this.inProcess.get(lineId);
+        if(line != null && line.isLaunched()) {
+//            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
+//                            Gs.LabDelLine.newBuilder()
+//                                    .setBuildingId(Util.toByteString(id()))
+//                                    .setLineId(Util.toByteString(lineId))
+//                                    .build()));
+            this.inProcess.remove(lineId);
             return true;
         }
         return false;
     }
 
-    public boolean setLineWorkerNum(UUID lineId, int n) {
-        Line line = lines.get(lineId);
-        if(line == null)
-            return false;
-        if(line.workerNum < n) {
-            if(this.freeWorkerNum() < n - line.workerNum)
-                return false;
-        }
-        line.workerNum = n;
-        return true;
+    public static final class RollResult {
+        List<Integer> itemIds;
+        int evaPoint;
     }
-
-    public Line getLine(UUID lineId) {
-        return lines.get(lineId);
+    public RollResult roll(UUID lineId, Player player) {
+        RollResult res = null;
+        Line l = this.inProcess.get(lineId);
+        if(l == null)
+             l = this.completed.get(lineId);
+        if(l != null && l.availableRoll > 0) {
+            res = new RollResult();
+            l.useRoll();
+            if(l.eva()) {
+                if(Prob.success(this.evaProb, RADIX)) {
+                    res.evaPoint++;
+                }
+            }
+            else {
+                if(Prob.success(this.goodProb, RADIX)) {
+                    res.itemIds = new ArrayList<>();
+                    Integer newId = MetaData.randomGood(l.goodCategory, player.itemIds());
+                    if(newId != null) {
+                        player.addItem(newId, 0);
+                        res.itemIds.add(newId);
+                        GoodFormula f = MetaData.getFormula(newId);
+                        for (GoodFormula.Info info : f.material) {
+                            if(!player.hasItem(info.item.id)) {
+                                player.addItem(info.item.id, 0);
+                                res.itemIds.add(info.item.id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return res;
     }
 
     public void broadcastLine(Line line) {
         Gs.LabLineInform.Builder builder = Gs.LabLineInform.newBuilder();
         builder.setBuildingId(Util.toByteString(this.id()));
         builder.setLine(line.toProto());
-        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineChange_VALUE, builder.build()));
+        this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineChangeInform_VALUE, builder.build()));
+    }
+
+    public void setting(int maxTimes, int pricePreTime) {
+        this.maxTimes = maxTimes;
+        this.pricePreTime = pricePreTime;
     }
 
     @Entity
     public static final class Line {
-        public Line(int workerNum, Formula formula) {
-            this.workerNum = workerNum;
-            this.formula = formula;
-            this.leftNano = TimeUnit.SECONDS.toNanos(formula.phaseSec);
-
-            this.type = formula.key.type.ordinal();
-            this.targetId = formula.key.targetId;
-            this.targetLv = formula.key.targetLv;
-
-            this.run = false;
+        public Line(int goodCategory, int times) {
+            this.goodCategory = goodCategory;
+            this.times = times;
             this.createTs = System.currentTimeMillis();
         }
 
         protected Line() {}
-        @PostLoad
-        void _1() {
-            this.formula = MetaData.getFormula(new Formula.Key(Formula.Type.values()[type], targetId, targetLv));
+
+        public boolean eva() {
+            return goodCategory == 0;
         }
         @Id
         final UUID id = UUID.randomUUID();
-        int workerNum;
 
-        @Transient
-        Formula formula;
-
-        Formula.Consume[] getConsumes() {
-            if(this.run)
-                return null;
-            return formula.consumes;
-        }
         boolean isComplete() {
-            return phase == formula.phase;
+            return times == usedRoll+availableRoll;
         }
         boolean isRunning() {
-            return this.run;
+            return isLaunched() && !isComplete();
         }
-        void launch(int phase) {
-            this.run = true;
-            this.rollTarget = phase;
+        void launch() {
+            beginProcessTs = System.currentTimeMillis();
         }
-        int type;
-        int targetId;
-        int targetLv;
-        long leftNano;
-        int phase;
-        int rollTarget;
-        boolean run;
+        int goodCategory;
+        long beginProcessTs;
         long createTs;
-        int roll;
-        private static final int RADIX = 100000;
+        int times;
+        int availableRoll;
+        int usedRoll;
+        @Transient
+        long currentRoundPassNano = 0;
+        @PostLoad
+        private void _1() {
+            if(isRunning())
+                currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - beginProcessTs)%TimeUnit.HOURS.toNanos(1);
+        }
+
         Gs.Laboratory.Line toProto() {
             return Gs.Laboratory.Line.newBuilder()
                     .setId(Util.toByteString(id))
-                    .setItemId(formula.key.targetId)
-                    .setType(formula.key.type.ordinal())
-                    .setLv(formula.key.targetLv)
-                    .setLeftSec((int) TimeUnit.NANOSECONDS.toSeconds(leftNano))
-                    .setPhase(phase)
-                    .setWorkerNum(workerNum)
+
+
                     .setCreateTs(createTs)
-                    .setRun(run)
-                    .setRoll(roll)
-                    .setRollTarget(rollTarget)
+
                     .build();
         }
 
-        public int leftPhase() {
-            return formula.phase - phase;
+
+        boolean update(long diffNano) {
+            if (!isRunning())
+                return false;
+
+            currentRoundPassNano += diffNano;
+            if (currentRoundPassNano >= TimeUnit.HOURS.toNanos(1)) {
+                currentRoundPassNano = 0;
+                this.availableRoll++;
+                return true;
+            }
+            return false;
         }
 
-        public static final class UpdateResult {
-            public UpdateResult(Formula.Type type, int v) {
-                this.type = type;
-                this.v = v;
-            }
-
-            public UpdateResult(boolean phaseChange) {
-                this.phaseChange = phaseChange;
-            }
-
-            Formula.Type type;
-            int v;
-            boolean phaseChange;
+        public boolean isLaunched() {
+            return beginProcessTs > 0;
         }
-        UpdateResult roll() {
-            if(roll > 0) {
-                --roll;
-                if(!Prob.success(formula.successChance[phase], 10000))
-                    return null;
 
-                if(formula.key.type == Formula.Type.RESEARCH) {
-                    if(Prob.success(formula.critiChance, RADIX))
-                        return new UpdateResult(formula.key.type, formula.critiV);
-                    return new UpdateResult(formula.key.type, 1);
-                }
-                if(formula.key.type == Formula.Type.INVENT) {
-                    int phaseAdd = 1;
-                    if(Prob.success(formula.critiChance, RADIX))
-                        phaseAdd = formula.critiV;
-                    phase += phaseAdd;
-                    phase = phase > formula.phase?formula.phase:phase;
-                    if(phase == formula.phase)
-                        return new UpdateResult(formula.key.type, formula.key.targetId);
-                    else
-                        return new UpdateResult(true);
-                }
-            }
-            return null;
-        }
-        void update(long diffNano) {
-            if (!run)
-                return;
-
-            leftNano -= diffNano * workerNum;
-            if (leftNano <= 0) {
-                leftNano = TimeUnit.SECONDS.toNanos(formula.phaseSec);
-                roll++;
-                if(roll == rollTarget)
-                    run = false;
-            }
+        public void useRoll() {
+            this.availableRoll--;
+            this.usedRoll++;
         }
     }
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKeyColumn(name = "line_id")
-    Map<UUID, Line> lines = new HashMap<>();
+    private Map<UUID, Line> inProcess = new HashMap<>();
 
-    @OneToOne(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "store_id")
-    private Storage store;
+    @OneToMany(fetch = FetchType.EAGER)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @MapKeyColumn(name = "line_id")
+    private Map<UUID, Line> completed = new HashMap<>();
 
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
 
+    private int pricePreTime;
+    private int maxTimes;
 
-    @Override
-    public boolean reserve(MetaItem m, int n) {
-        return store.reserve(m, n);
+    public int getMaxTimes() {
+        return maxTimes;
+    }
+    public int getPricePreTime() {
+        return pricePreTime;
     }
 
-    @Override
-    public boolean lock(ItemKey m, int n) {
-        return store.lock(m, n);
-    }
-
-    @Override
-    public boolean unLock(ItemKey m, int n) {
-        return store.unLock(m, n);
-    }
-
-    @Override
-    public Storage.AvgPrice consumeLock(ItemKey m, int n) {
-        return store.consumeLock(m, n);
-    }
-
-    @Override
-    public void consumeReserve(ItemKey m, int n, int price) {
-        store.consumeReserve(m, n, price);
-    }
-
-    @Override
-    public void markOrder(UUID orderId) {
-        store.markOrder(orderId);
-    }
-
-    @Override
-    public void clearOrder(UUID orderId) {
-        store.clearOrder(orderId);
-    }
-
-    @Override
-    public boolean delItem(ItemKey k) { return this.store.delItem(k); }
-
-    @Override
-    public int availableQuantity(MetaItem m) { return this.store.availableQuantity(m); }
-
-    @Override
-    public boolean has(ItemKey m, int n) { return this.store.has(m, n); }
-
-    @Override
-    public boolean offset(ItemKey item, int n) { return this.store.offset(item, n); }
-
-    @Override
-    public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
+    private int goodProb;
+    private int evaProb;
 }

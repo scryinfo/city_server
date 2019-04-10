@@ -1,5 +1,6 @@
 package Game.Meta;
 
+import Game.Prob;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -117,6 +118,23 @@ public class MetaData {
 
     public static MetaTalentCenter getTalentCenter(int id) {
         return talentCenter.get(id);
+    }
+
+    public static Integer randomGood(int goodCategory, Set<Integer> itemIds) {
+        Set<Integer> t = new HashSet<>();
+        t.addAll(good.keySet());
+        t.removeAll(itemIds);
+
+        List<Integer> candicate = new ArrayList<>();
+        Iterator<Integer> iterator = t.iterator();
+        while(iterator.hasNext()) {
+            int id = iterator.next();
+            if(MetaGood.category(id) == goodCategory)
+                candicate.add(id);
+        }
+        if(candicate.isEmpty())
+            return null;
+        return candicate.get(Prob.random(0, candicate.size()));
     }
 
     public static final class DayKey {

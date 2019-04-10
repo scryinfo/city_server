@@ -88,10 +88,9 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.cancelRentGround_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndexCollection.PARSER, GameSession.class,"cancelRentGround"));
 			table.put((short) GsCode.OpCode.cancelSellGround_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndexCollection.PARSER, GameSession.class,"cancelSellGround"));
 
-			table.put((short) GsCode.OpCode.labLineAdd_VALUE, Wrapper.newWithMessageAsync(Gs.LabAddLine.PARSER, GameSession.class,"labLineAdd"));
-			table.put((short) GsCode.OpCode.labLineDel_VALUE, Wrapper.newWithMessageAsync(Gs.LabDelLine.PARSER, GameSession.class,"labLineDel"));
-			table.put((short) GsCode.OpCode.labLineSetWorkerNum_VALUE, Wrapper.newWithMessageAsync(Gs.LabSetLineWorkerNum.PARSER, GameSession.class,"labLineSetWorkerNum"));
-			table.put((short) GsCode.OpCode.labLaunchLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabLaunchLine.PARSER, GameSession.class,"labLaunchLine"));
+			table.put((short) GsCode.OpCode.labAddLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabAddLine.PARSER, GameSession.class,"labLineAdd"));
+			table.put((short) GsCode.OpCode.labCancelLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabCancelLine.PARSER, GameSession.class,"labLineCancel"));
+			table.put((short) GsCode.OpCode.labSetting_VALUE, Wrapper.newWithMessageAsync(Gs.LabSetting.PARSER, GameSession.class,"labSetting"));
 			table.put((short) GsCode.OpCode.labRoll_VALUE, Wrapper.newWithMessageAsync(Gs.LabRoll.PARSER, GameSession.class,"labRoll"));
 
 			table.put((short) GsCode.OpCode.techTradeAdd_VALUE, Wrapper.newWithMessageAsync(Gs.TechTradeAdd.PARSER, GameSession.class,"techTradeAdd"));

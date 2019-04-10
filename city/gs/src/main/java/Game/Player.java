@@ -42,18 +42,11 @@ public class Player {
             return goodLv.get(mId) >= lv;
         return false;
     }
+    public Set<Integer> itemIds() {
+        return goodLv.keySet();
+    }
     public boolean hasItem(int mId) {
         return goodLv.keySet().contains(mId);
-    }
-    public void markTemp() {
-        this.temp = true;
-    }
-    @Transient
-    boolean temp = false;
-
-
-    public boolean isTemp() {
-        return temp;
     }
 
     public void addItem(int mId, int lv) {
