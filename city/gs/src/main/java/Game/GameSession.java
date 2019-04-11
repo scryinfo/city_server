@@ -39,6 +39,7 @@ import Game.FriendManager.SocietyManager;
 import Game.Meta.Formula;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Meta.MetaExperiences;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
@@ -2193,14 +2194,35 @@ public class GameSession {
     }
     public void updateMyEva(short cmd, Message message)
     {
+    	
+    	Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
 		Gs.Eva eva = (Gs.Eva)message;
+		int level=eva.getLv();
+		long cexp=eva.getCexp();
+		
+		if(level>=1){//计算等级
+			while(true){
+				MetaExperiences obj=map.get(level);
+				MetaExperiences obj1=map.get(level+1);
+				if((cexp-obj.exp)>0&&(cexp-obj.exp)<obj1.exp){
+					cexp=cexp-obj.exp; //减去升级需要的经验
+					level++;
+				}else{
+					break;
+				}
+			}
+		}
 		Eva e=new Eva();
 		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
 		e.setAt(eva.getAt());
 		e.setBt(eva.getBt().getNumber());
-		e.setLv(eva.getLv());
-		e.setCexp(eva.getCexp());
+		e.setLv(level);
+		e.setCexp(cexp);
 		e.setB(eva.getB());
     	GameDb.saveOrUpdate(eva);
+    	
+    	eva.toBuilder().setCexp(cexp).setLv(level);
+    	//返回客户端
+    	this.write(Package.create(cmd, eva));
     }
 }
