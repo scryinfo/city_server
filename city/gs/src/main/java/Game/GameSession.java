@@ -2170,7 +2170,7 @@ public class GameSession {
 		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
 			list.addEva(Gs.Eva.newBuilder().setPid(Util.toByteString(eva.getPid()))
 					.setAt(eva.getAt())
-					.setBt(eva.getBt())
+					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
 					.setLv(eva.getLv())
 					.setCexp(eva.getCexp())
 					.setB(eva.getB())
@@ -2181,6 +2181,13 @@ public class GameSession {
     public void updateMyEva(short cmd, Message message)
     {
 		Gs.Eva eva = (Gs.Eva)message;
+		Eva e=new Eva();
+		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
+		e.setAt(eva.getAt());
+		e.setBt(eva.getBt().getNumber());
+		e.setLv(eva.getLv());
+		e.setCexp(eva.getCexp());
+		e.setB(eva.getB());
     	GameDb.saveOrUpdate(eva);
     }
 }
