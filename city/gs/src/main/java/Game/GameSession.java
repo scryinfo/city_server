@@ -1329,9 +1329,10 @@ public class GameSession {
 		long cost = c.getTimes() * lab.getPricePreTime();
 		if(!player.decMoney(cost))
 			return;
-		lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes());
-		GameDb.saveOrUpdate(lab);
-		this.write(Package.create(cmd, c));
+		if(null != lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id())) {
+			GameDb.saveOrUpdate(lab);
+			this.write(Package.create(cmd, c));
+		}
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -1348,6 +1349,18 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
+	public void labExclusive(short cmd, Message message) {
+		Gs.LabExclusive c = (Gs.LabExclusive)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+			return;
+		Laboratory lab = (Laboratory)building;
+		lab.setExclusive(c.getExclusive());
+		GameDb.saveOrUpdate(lab);
+		this.write(Package.create(cmd, c));
+	}
+
 //	public void labLaunchLine(short cmd, Message message) {
 //		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
 //		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());

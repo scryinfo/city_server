@@ -35,13 +35,24 @@ public class Laboratory extends Building {
     @PostLoad
     private void _1() {
         this.meta = (MetaLaboratory) super.metaBuilding;
+        if(!this.inProcess.isEmpty()) {
+            Line line = this.inProcess.get(0);
+            if (line.isRunning())
+                line.currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - line.beginProcessTs) % TimeUnit.HOURS.toNanos(1);
+        }
     }
     @Override
     public Gs.Laboratory detailProto() {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
-        this.inProcess.values().forEach(line -> builder.addInProcess(line.toProto()));
+        this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
-        return builder.build();
+        return builder.setMaxTimes(this.maxTimes)
+                .setPricePreTime(this.pricePreTime)
+                .setProbEva(this.evaProb)
+                .setProbGood(this.goodProb)
+                .setRecommendPrice(0)
+                .setExclusive(this.exclusiveForOwner)
+                .build();
     }
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
@@ -60,29 +71,29 @@ public class Laboratory extends Building {
 
     @Override
     protected void _update(long diffNano) {
-        Iterator<Line> iterator = this.inProcess.values().iterator();
-        while(iterator.hasNext()) {
-            Line l = iterator.next();
-            if(l.update(diffNano)) {
-                if(l.isComplete()) {
-                    iterator.remove();
-                    this.completed.put(l.id, l);
-                }
+        if(!this.inProcess.isEmpty()) {
+            Line line = this.inProcess.get(0);
+            if(line.update(diffNano)) {
+                this.inProcess.remove(0);
+                this.completed.put(line.id, line);
+            }
+            if(this.dbTimer.update(diffNano)) {
+                GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
             }
         }
-        if(this.dbTimer.update(diffNano)) {
-            GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
-        }
     }
-    public Line addLine(int goodCategory, int times) {
-        Line line = new Line(goodCategory, times);
-        inProcess.put(line.id, line);
+
+    public Line addLine(int goodCategory, int times, UUID proposerId) {
+        if(exclusiveForOwner && !proposerId.equals(this.ownerId()))
+            return null;
+        Line line = new Line(goodCategory, times, proposerId);
+        inProcess.add(line);
         //this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
     }
 
     public boolean delLine(UUID lineId) {
-        Line line = this.inProcess.get(lineId);
+        Line line = this.findInProcess(lineId);
         if(line != null && line.isLaunched()) {
 //            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
 //                            Gs.LabDelLine.newBuilder()
@@ -95,13 +106,25 @@ public class Laboratory extends Building {
         return false;
     }
 
+    public void setExclusive(boolean exclusive) {
+        this.exclusiveForOwner = exclusive;
+    }
+
     public static final class RollResult {
         List<Integer> itemIds;
         int evaPoint;
     }
+    private Line findInProcess(UUID lineId) {
+        for (Line line : this.inProcess) {
+            if(line.id.equals(lineId)) {
+                return line;
+            }
+        }
+        return null;
+    }
     public RollResult roll(UUID lineId, Player player) {
         RollResult res = null;
-        Line l = this.inProcess.get(lineId);
+        Line l = this.findInProcess(lineId);
         if(l == null)
              l = this.completed.get(lineId);
         if(l != null && l.availableRoll > 0) {
@@ -147,10 +170,11 @@ public class Laboratory extends Building {
 
     @Entity
     public static final class Line {
-        public Line(int goodCategory, int times) {
+        public Line(int goodCategory, int times, UUID proposerId) {
             this.goodCategory = goodCategory;
             this.times = times;
             this.createTs = System.currentTimeMillis();
+            this.proposerId = proposerId;
         }
 
         protected Line() {}
@@ -159,8 +183,9 @@ public class Laboratory extends Building {
             return goodCategory == 0;
         }
         @Id
-        final UUID id = UUID.randomUUID();
-
+        @GeneratedValue
+        UUID id;
+        UUID proposerId;
         boolean isComplete() {
             return times == usedRoll+availableRoll;
         }
@@ -178,27 +203,25 @@ public class Laboratory extends Building {
         int usedRoll;
         @Transient
         long currentRoundPassNano = 0;
-        @PostLoad
-        private void _1() {
-            if(isRunning())
-                currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - beginProcessTs)%TimeUnit.HOURS.toNanos(1);
-        }
+
 
         Gs.Laboratory.Line toProto() {
             return Gs.Laboratory.Line.newBuilder()
                     .setId(Util.toByteString(id))
-
-
-                    .setCreateTs(createTs)
-
+                    .setCreateTs(this.createTs)
+                    .setAvailableRoll(this.availableRoll)
+                    .setBeginProcessTs(this.beginProcessTs)
+                    .setGoodCategory(this.goodCategory)
+                    .setProposerId(Util.toByteString(this.proposerId))
+                    .setTimes(this.times)
+                    .setUsedRoll(this.usedRoll)
                     .build();
         }
 
 
         boolean update(long diffNano) {
-            if (!isRunning())
-                return false;
-
+            if(!isLaunched())
+                this.launch();
             currentRoundPassNano += diffNano;
             if (currentRoundPassNano >= TimeUnit.HOURS.toNanos(1)) {
                 currentRoundPassNano = 0;
@@ -220,8 +243,8 @@ public class Laboratory extends Building {
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyColumn(name = "line_id")
-    private Map<UUID, Line> inProcess = new HashMap<>();
+    @OrderColumn
+    private List<Line> inProcess = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
@@ -243,4 +266,5 @@ public class Laboratory extends Building {
 
     private int goodProb;
     private int evaProb;
+    private boolean exclusiveForOwner;
 }

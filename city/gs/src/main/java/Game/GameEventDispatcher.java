@@ -92,6 +92,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.labCancelLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabCancelLine.PARSER, GameSession.class,"labLineCancel"));
 			table.put((short) GsCode.OpCode.labSetting_VALUE, Wrapper.newWithMessageAsync(Gs.LabSetting.PARSER, GameSession.class,"labSetting"));
 			table.put((short) GsCode.OpCode.labRoll_VALUE, Wrapper.newWithMessageAsync(Gs.LabRoll.PARSER, GameSession.class,"labRoll"));
+			table.put((short) GsCode.OpCode.labExclusive_VALUE, Wrapper.newWithMessageAsync(Gs.Bool.PARSER, GameSession.class,"labExclusive"));
 
 			table.put((short) GsCode.OpCode.techTradeAdd_VALUE, Wrapper.newWithMessageAsync(Gs.TechTradeAdd.PARSER, GameSession.class,"techTradeAdd"));
 			table.put((short) GsCode.OpCode.techTradeBuy_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"techTradeBuy"));
