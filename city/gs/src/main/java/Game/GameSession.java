@@ -2222,7 +2222,7 @@ public class GameSession {
 		e.setLv(level);
 		e.setCexp(cexp);
 		e.setB(eva.getB());
-    	GameDb.saveOrUpdate(eva);
+    	GameDb.saveOrUpdate(e);
     	
     	eva.toBuilder().setCexp(cexp).setLv(level);
     	this.write(Package.create(cmd, eva));
