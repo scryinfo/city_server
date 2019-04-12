@@ -22,6 +22,29 @@ import java.util.*;
 )
 public class Player {
     public static final int MAX_FACE_ID_LEN = 100;
+
+    public List<UUID> getPayedPromotions() {
+        return payedPromotions;
+    }
+
+    private List<UUID> payedPromotions = new ArrayList<>();
+    private List<UUID> productionPromos = new ArrayList<>();
+
+    public void addPayedPromotion(UUID newPromo){
+    if(payedPromotions.indexOf(newPromo) < 0) {
+        payedPromotions.add(newPromo);
+        }
+    }
+
+    public void delpayedPromotion(UUID newPromo)
+        {
+        for (int i = payedPromotions.size() - 1; i >= 0 ; i--) {
+            if (payedPromotions.get(i).equals(newPromo)){
+                payedPromotions.remove(i);
+            }
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

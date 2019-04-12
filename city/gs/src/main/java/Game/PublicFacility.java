@@ -4,6 +4,7 @@ import Game.Meta.MetaItem;
 import Game.Meta.MetaPublicFacility;
 import Game.Timers.PeriodicTimer;
 import Shared.Package;
+import Shared.PackageEncoder;
 import Shared.Util;
 import com.google.protobuf.Message;
 import gs.Gs;
@@ -13,6 +14,11 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import Shared.GlobalConfig;
+import org.apache.log4j.Logger;
+import Game.Meta.MetaExperiences;
+import Game.Meta.MetaData;
+import Game.Contract.ContractManager;
 
 @Entity(name = "PublicFacility")
 public class PublicFacility extends Building {
@@ -21,6 +27,149 @@ public class PublicFacility extends Building {
         this.meta = meta;
         this.qty = meta.qty;
     }
+    private static final Logger logger = Logger.getLogger(PackageEncoder.class);
+
+    public int getCurPromPricePerHour() {
+        return curPromPricePerHour;
+    }
+
+    private int curPromPricePerHour = 0;		//推广价格
+
+    public long getPromRemainTime() {
+        return promRemainTime;
+    }
+
+    private long promRemainTime = 0;		//可推广时间
+    private boolean takeOnNewOrder = false;	//接受新订单
+    private long GuidedPrice = 0;			//缓存的指导价格
+
+    public List<UUID> getSelledPromotions() {
+        return selledPromotion;
+    }
+
+    List<UUID> selledPromotion = new ArrayList<>();
+
+    public UUID getLastPromotion(){
+        return selledPromotion.get(selledPromotion.size());
+    }
+    public void addSelledPromotion(UUID promoId){
+        if(selledPromotion.indexOf(promoId) < 0){
+            selledPromotion.add(promoId);
+        }
+    }
+
+    public void delSelledPromotion(UUID promoId){
+        selledPromotion.remove(promoId);
+    }
+
+    public void setNewOrderOn(boolean on){
+        takeOnNewOrder = on;
+    }
+    public void updateNewOrderPrice(int Price){
+        curPromPricePerHour = Price;
+    }
+    public boolean comsumeAvaliableTime(long newOrderTime){
+        if(promRemainTime - newOrderTime < 0){
+            return  false;
+        }
+        promRemainTime -= newOrderTime;
+        return  true;
+    }
+    private long getGuidedPrice(){
+        //TODO
+        //这个价格应该从 统计服 上请求
+        return GuidedPrice;
+    }
+
+    /*
+		* 每小时计算一次，广告主品牌值根据当前广告公司推广能力进行累计
+			* 基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
+			* 单项推广能力 = 基础推广力 * （1 + %单项eva能力提升） *（1+%流量提升）
+				单项eva能力提升 = 从eva等级表中取出的p（百分百 percent）的值除以 10 万
+			* 1个工人1小时能增加的知名度（新增字段到PublicFacility）
+		* 依赖数据分析
+			* 数据
+				* 工资发放比例、建筑NPC数量
+				* 1个工人1小时能增加的知名度
+				* 流量提升
+			* 有的
+				* 工资发放比例、建筑NPC数量
+					allSalary()
+				* 1个工人1小时能增加的知名度
+					meta.output1P1Hour;
+				* 单项eva能力提升
+					* 配置表
+						* Eva 能力表
+						* Eva 等级表
+					* 二者关系
+						* Eva能力表共享Eva等级表
+						player 维护
+							List<Eva> list = new ArrayList<Eva>();
+							提升的是二级类，比如 食品
+					* 计算
+						public class Eva {
+						queryMyEva
+				* 流量提升
+					Game.Contract.ContractManager#getPlayerADLift
+		* 行为分析
+			* 不用通知客户端，直接更新数据库
+		*/
+    public float excutePromotion(PromoOrder promo){
+        //计算公式：
+			/*
+				* 基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
+				* 单项推广能力 = 基础推广力 * （1 + %单项eva能力提升） *（1+%流量提升）
+					单项eva能力提升 = 从eva等级表中取出的p（百分百 percent）的值除以 10 万
+			*/
+
+        //1、 发放工资比例 *建筑NPC数量
+        Building bd = City.instance().getBuilding(promo.sellerId);
+
+        if(bd == null){
+            if(GlobalConfig.DEBUGLOG){
+                logger.fatal("PromotionMgr.queryPromotion: isSeller is true but building not exist!");
+            }
+            return 0.f;
+        }
+
+        PublicFacility fcySeller = (PublicFacility) bd ;
+        int salaryAdd = fcySeller.allSalary();
+        //private MetaPublicFacility meta;
+        //2、 1个工人1小时产出
+        int workerAdd1H = meta.output1P1Hour;
+			/*
+				gs.proto
+				message Eva
+				   required bytes pid = 1; //playerid
+				   required int32 at = 2;  //a类型：只能填  原料itemid（2101001） 商品itemid（2251001） 建筑大类ID（13-零售店，14-住宅,15-研究所,16-推广公司,17-仓库） 商品大类ID（2251-主食。。。）
+				   //推广公司的买家是零售店 1613 ；推广公司的买家是住宅 1614 ；   研究所下面的两项能力155，156
+				   required Btype bt = 3;  //b类型：1=品质   2=品牌   3=生产速度  4=推广能力    5=发明提升  6=EVA提升    7=仓库提升
+				   required int32 lv = 4;  //级别   -1为品牌加成  级别>= 1为可生产   级别 = 0 不可生产,可依靠发明提升为1，-1和0时，不计算等级
+				   required int64 cexp = 5;//当前经验值
+				   optional int64 b = 6;   //品牌
+			*/
+        //3、 计算Eva单项提升能力
+        List<Eva> sellerEvas = GameDb.getEvaInfoByPlayId(promo.sellerId);
+        int objType = promo.buildingType > 0 ? promo.buildingType : promo.productionType;
+        int abType = Gs.Eva.Btype.PromotionAbility.getNumber();
+        //查看是否有该广告商推广能力的Eva提升
+        int evaAdd = 0;
+        for(int i = 0 ; i < sellerEvas.size(); i++){
+            Eva eva = sellerEvas.get(i);
+            if(eva.checkType(objType,abType)){
+                //根据取到的eva的等级，取出对应的能力值
+                Integer level=eva.getLv();
+                Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
+                MetaExperiences evaAddMe= map.get(level);
+                evaAdd = evaAddMe.p;
+                break;
+            }
+        }
+        //4、 流量提升
+        float flowRatios = ContractManager.getInstance().getPlayerADLift(promo.sellerId);
+        return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
+    }
+
     @Column(nullable = false)
     protected int qty;
 

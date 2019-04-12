@@ -27,4 +27,5 @@ public class GlobalConfig {
 	public static boolean product() {
 		return product;
 	}
+	public static final boolean DEBUGLOG = false;
 }

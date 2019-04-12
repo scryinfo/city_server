@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -987,6 +986,245 @@ public class GameSession {
 		}
 	}
 
+	//adQueryPromotion
+	public void queryPromotion(short cmd, Message message) {
+		/*
+				查询广告列表，分两种情况
+				1、 广告商（卖家）查询
+				2、 广告主（买家）查询
+				方式： 都是通过 promotionId 查询
+			*/
+		Gs.queryPromotion queryPromotion = (Gs.queryPromotion) message;
+		boolean isSeller = queryPromotion.getIsSeller();
+		UUID id = Util.toUuid(queryPromotion.getPlayerId().toByteArray());
+		Player player =  GameDb.getPlayer(id);
+		//获取 payedPromotion
+		if(player == null){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("PromotionMgr.queryPromotion: isSeller is false but player not exist!");
+			}
+			return;
+		}
+
+		List<UUID> promoIDs = new ArrayList<>();
+		if( isSeller ){
+			//获取 selledPromotion
+			if(!queryPromotion.hasSellerBuildingId()){
+				if(GlobalConfig.DEBUGLOG){
+					logger.fatal("PromotionMgr.queryPromotion: isSeller is true but SellerBuildingId is null!");
+				}
+				return;
+			}
+			Building bd = City.instance().getBuilding(Util.toUuid(queryPromotion.getSellerBuildingId().toByteArray()));
+
+			if(bd == null){
+				if(GlobalConfig.DEBUGLOG){
+					logger.fatal("PromotionMgr.queryPromotion: isSeller is true but building not exist!");
+				}
+				return;
+			}
+
+			PublicFacility fcySeller = (PublicFacility) bd ;
+			promoIDs = fcySeller.getSelledPromotions();
+		}else{
+			promoIDs = player.getPayedPromotions();
+		}
+		List<PromoOrder> promotions = new ArrayList<>() ;
+		PromotionMgr.instance().getPromotins(promoIDs,promotions);
+		Gs.queryPromotion.Builder newPromotions = queryPromotion.newBuilder();
+
+		for (int i = 0; i < promotions.size(); i++) {
+			newPromotions.addPromotions(promotions.get(i).toProto());
+		}
+		//返回给客户端
+		this.write(Package.create(cmd, newPromotions.build()));
+	}
+
+	//adRemoveOrder
+	public void removeOrder(short cmd, Message message) {
+		Gs.removeOrder gs_removeOrder = (Gs.removeOrder) message;
+		UUID promoId = Util.toUuid(gs_removeOrder.getPromotionId().toByteArray());
+		PromoOrder promoOrder = PromotionMgr.instance().getPromotion(promoId);
+		if(promoOrder == null){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.removeOrder(): PromoOrder which Id equals "+promoId+" not find!");
+			}
+			return;
+		}
+		//更新广告商玩家信息中广告列表
+		Building sellerBuilding = City.instance().getBuilding(promoOrder.sellerBuildingId);
+		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
+		fcySeller.delSelledPromotion(promoId);
+
+		GameDb.saveOrUpdate(fcySeller);
+
+		//发送客户端通知
+		this.write(Package.create(cmd, gs_removeOrder);
+	}
+
+	//adAddNewOrder
+	public void addNewOrder(short cmd, Message message) {
+		Gs.addNewOrder gs_addNewOrder = (Gs.addNewOrder) message;
+		//UUID id = Util.toUuid(gs_addNewOrder.getSellerBuildingId().toByteArray());
+		UUID sellerBuildingId = Util.toUuid(gs_addNewOrder.getSellerBuildingId().toByteArray());
+		UUID buyerPlayerId = Util.toUuid(gs_addNewOrder.getBuyerPlayerId().toByteArray());
+		//检查是否是推广公司
+		Building b = City.instance().getBuilding(sellerBuildingId);
+		if(b == null || b.outOfBusiness())
+			return;
+		//检查推广的目标类型
+		//1、建筑类型，包括零售店（RETAIL）、 住宅（APARTMENT）
+		//2、商品类型：服装、食品
+		//客户端及填写了商品类型又填写了建筑类型时，优先级怎么处理？
+		boolean hasBuildingType = gs_addNewOrder.hasBuildingType();
+		boolean hasProducerId = gs_addNewOrder.hasProductionType();
+
+		if(hasProducerId && hasBuildingType){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): buildingType and productionType can't be avaliable at the same time.");
+			}
+			return;
+		}
+
+		Building sellerBuilding = City.instance().getBuilding(sellerBuildingId);
+		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
+		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
+		Player buyer =  GameDb.getPlayer(buyerPlayerId);
+
+		PromoOrder newOrder = new PromoOrder();
+		//订单记录该价格（ 需要记录吗？）
+		newOrder.setTransactionPrice(fcySeller.getCurPromPricePerHour());
+
+		//购买的时长是否合法
+		if(gs_addNewOrder.getPromDuration() > fcySeller.getPromRemainTime()){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): PromDuration required by client greater than sellerBuilding's remained.");
+			}
+			return;
+		}
+		if(sellerBuilding == null){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): building instance of sellerBuilding not find which Id equals to"+newOrder.sellerBuildingId);
+			}
+			return;
+		}
+		if(buyer == null){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): Buyer not find which Id equals to"+newOrder.sellerBuildingId);
+			}
+			return;
+		}
+
+		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
+		int fee = fcySeller.curPromPricePerHour * gs_addNewOrder.getPromDuration();
+		if(buyer.money() < fee){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): PromDuration required by client greater than sellerBuilding's remained.");
+			}
+			gameSession.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
+			return;
+		}
+
+		//添加订单
+			/*
+				订单ID： promotionId
+				* 广告推广能力和品牌值增加的计算
+					* 当前广告执行期间，每小时计算一次，广告主品牌值根据当前广告公司推广能力进行累计，
+						比如：广告主品牌值为 10000， 当前广告公司的推广能力为1000，那么计算之后为 11000；
+						下一次整点为 12000 ，如此累计
+					* 广告推广力计算为整点全局更新，即便是 1点59打的广告，2点整也会执行一次广告计算。
+					* 每次更新增加的品牌值增量为：
+						* 当前广告公司推广能力 * 更新时长/1小时
+						* 更新时长 ：
+							* 如果该广告第一次执行整点更新，那么“更新时长”为该该广告开始时间起计算到这个整点的时长
+							* 非第一次整点更新，更新时长 为1个小时
+				* promotionId 可以使用索引作为ID吗（需要全局唯一吗）？
+					* 哪些地方会依赖到这个数据？
+						* 广告主会记录这个ID，Npc消费决策时会访问该广告主的品牌值
+							* 因为品牌值整点已经更新，所以消费决策只需要直接使用该广告主的品牌值，不需要单独计算。
+							* 需要考察现在npc的消费决策，看看原来如何计算品牌值的
+						* 这个更新放在哪儿比较好？
+							* 放在推广公司建筑中
+							* 放在全局的广告管理器中
+					* 一旦 promoOrderQueue 因为广告商撤销为自己打的广告订单，那么整个
+				* promotionId 放在哪儿好？
+					* 放在广告公司实例中？
+						* 消费决策要会先找出广告公司
+							* 整点更新品牌值，消费决策直接读取
+					* 所以 promotionId 要放在建筑本身是可以的
+						* 但是如果要考虑到后边统计方便，还是拧出来，放到一个管理器中，那么就必须使用 UUID
+							*
+			*/
+			/*
+				UUID 生成：
+					this.id = UUID.randomUUID();
+				UUID 转换传输时需转换成 byte[]
+					startBusiness Util.toUuid(gs_addNewOrder.getId().toByteArray());
+					也就是说，目前传输是使用的 byte 数组来存放的，服务使用的UUID是从byte数组转换过来的，
+					转换使用的方法是 UUID toUuid(byte[] bytes)
+			*/
+
+		//获取该广告公司最后一个广告
+		UUID lastPromotion = fcySeller.getLastPromotion();
+		PromoOrder lastOd = PromotionMgr.instance().getPromotion(lastPromotion);
+		if(lastOd == null){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): PromoOrder not find in promoOrderQueue which id equals "+lastPromotion);
+			}
+			return;
+		}
+
+		if(!fcySeller.comsumeAvaliableTime(newOrder.promDuration)){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.addNewOrder(): fcySeller.comsumeAvaliableTime return false");
+			}
+			return;
+		}
+		newOrder.promotionId = UUID.randomUUID();
+		newOrder.buyerId = buyerPlayerId;
+		newOrder.sellerBuildingId = sellerBuildingId;
+		newOrder.sellerId = seller.id();
+		newOrder.buildingType = gs_addNewOrder.getBuildingType();
+
+		//计算 promStartTs， 先取出广告公司中的所有广告promotionId 列表，计算新广告的起点
+		newOrder.promStartTs = lastOd.promStartTs + lastOd.promDuration;
+		newOrder.promProgress = 0;
+
+		if(hasBuildingType){
+				/*
+				由 PromotionMgr 统一维护所有广告的增删改查比较好。集中更新、方便统计。让建筑中维护的话，
+				还得给每个建筑单独增加一个update。
+				维护策略
+				增： PromotionMgr 维护，建筑只更新对应的 promotionId 列表
+				删： PromotionMgr 维护，建筑只更新对应的 promotionId 列表
+					* 目前只有广告商可以删除自己的PromoOrder，这种情况是频率非常低的。
+				改： PromotionMgr 维护，结果值更新到建筑的品牌值
+				查： PromotionMgr 维护
+				*/
+			newOrder.buildingType = gs_addNewOrder.getBuildingType();
+		}else{
+			newOrder.productionType = gs_addNewOrder.getProductionType();
+		}
+		PromotionMgr.instance().addNewOrder(newOrder);
+
+		GameDb.saveOrUpdate(this);
+		//
+
+		//结账
+		buyer.decMoney(fee);
+		seller.addMoney(fee);
+
+		//更新买家玩家信息中的广告缓存
+		buyer.addPayedPromotion(newOrder.promotionId);
+		GameDb.saveOrUpdate(buyer);
+		//更新广告商广告列表
+		fcySeller.addSelledPromotion(newOrder.promotionId);
+		GameDb.saveOrUpdate(fcySeller);
+
+		//发送客户端通知
+		this.write(Package.create(cmd, gs_addNewOrder));
+		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
+	}
 	public void adAddSlot(short cmd, Message message) {
 		Gs.AddSlot c = (Gs.AddSlot)message;
 

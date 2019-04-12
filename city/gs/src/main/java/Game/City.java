@@ -263,6 +263,7 @@ public class City {
         NpcManager.instance().hourTickAction(nowHour);
         allBuilding.forEach((k,v)->v.hourTickAction(nowHour));
         ContractManager.getInstance().hourTickAction(nowHour);
+        PromotionMgr.instance().update(nowHour);
     }
 
     private void timeSectionTickAction(int newIndex, int nowHour, int hours) {
