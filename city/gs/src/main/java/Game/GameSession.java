@@ -2194,9 +2194,9 @@ public class GameSession {
 			Society society = SocietyManager.getSociety(societyId);
 			if (society != null)
 			{
-				this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
+				this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society)));
 
 			}
-
 	}
+
 }

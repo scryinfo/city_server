@@ -551,4 +551,9 @@ public class SocietyManager
             }
         }
     }
+
+    public static Gs.SocietyInfo toSocietyDetailProto(Society society)
+    {
+            return society.toDetailProto(true);
+    }
 }
