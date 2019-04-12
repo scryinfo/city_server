@@ -26,6 +26,14 @@ public class Laboratory extends Building {
     }
 
     protected Laboratory() {}
+    protected void setSalaryRatioAction(){
+        calcuProb();
+    }
+
+    private void calcuProb() {
+        this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
+        this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());
+    }
 
     @Override
     public int quality() {
@@ -40,13 +48,14 @@ public class Laboratory extends Building {
             if (line.isRunning())
                 line.currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - line.beginProcessTs) % TimeUnit.HOURS.toNanos(1);
         }
+        calcuProb();
     }
     @Override
     public Gs.Laboratory detailProto() {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
-        return builder.setMaxTimes(this.maxTimes)
+        return builder.setSellTimes(this.sellTimes)
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(this.evaProb)
                 .setProbGood(this.goodProb)
@@ -164,7 +173,7 @@ public class Laboratory extends Building {
     }
 
     public void setting(int maxTimes, int pricePreTime) {
-        this.maxTimes = maxTimes;
+        this.sellTimes = maxTimes;
         this.pricePreTime = pricePreTime;
     }
 
@@ -255,16 +264,18 @@ public class Laboratory extends Building {
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
 
     private int pricePreTime;
-    private int maxTimes;
+    private int sellTimes;
 
-    public int getMaxTimes() {
-        return maxTimes;
+    public int getSellTimes() {
+        return sellTimes;
     }
     public int getPricePreTime() {
         return pricePreTime;
     }
 
+    @Transient
     private int goodProb;
+    @Transient
     private int evaProb;
     private boolean exclusiveForOwner;
 }

@@ -36,7 +36,6 @@ import Game.FriendManager.ManagerCommunication;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Game.FriendManager.SocietyManager;
-import Game.Meta.Formula;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
@@ -1306,9 +1305,9 @@ public class GameSession {
 		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		Laboratory lab = (Laboratory)building;
-		if(c.getMaxTimes() <= 0 || c.getPricePreTime() < 0)
+		if(c.getSellTimes() < 0 || c.getPricePreTime() < 0)
 			return;
-		lab.setting(c.getMaxTimes(), c.getPricePreTime());
+		lab.setting(c.getSellTimes(), c.getPricePreTime());
 		GameDb.saveOrUpdate(lab);
 		this.write(Package.create(cmd, c));
 	}
@@ -1316,19 +1315,23 @@ public class GameSession {
 		Gs.LabAddLine c = (Gs.LabAddLine)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-			return;
-		Laboratory lab = (Laboratory)building;
-		if(c.getTimes() <= 0 || c.getTimes() > lab.getMaxTimes())
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory))
 			return;
 		if(c.hasGoodCategory()) {
 			if(!MetaGood.legalCategory(c.getGoodCategory()))
 				return;
 		}
+		Laboratory lab = (Laboratory)building;
+		if(!building.canUseBy(player.id())) {
+			if(!c.hasTimes())
+				return;
+			if(c.getTimes() <= 0 || c.getTimes() > lab.getSellTimes())
+				return;
+			long cost = c.getTimes() * lab.getPricePreTime();
+			if(!player.decMoney(cost))
+				return;
+		}
 
-		long cost = c.getTimes() * lab.getPricePreTime();
-		if(!player.decMoney(cost))
-			return;
 		if(null != lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id())) {
 			GameDb.saveOrUpdate(lab);
 			this.write(Package.create(cmd, c));
