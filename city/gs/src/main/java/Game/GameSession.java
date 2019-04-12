@@ -2187,7 +2187,7 @@ public class GameSession {
 		Gs.Eva eva = (Gs.Eva)message;
     	GameDb.saveOrUpdate(eva);
     }
-
+	//未在公会中根据id查询公会信息
 	public void getOneSocietyInfo(short cmd, Message message)
 	{
 		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
