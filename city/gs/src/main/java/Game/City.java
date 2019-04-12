@@ -451,14 +451,14 @@ public class City {
     }
 
     private void calcuTerrain(Building building) {
-        for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
+       /* for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
                 if(building.type() == MetaBuilding.TRIVIAL)
                     terrain[x][y] = TERRIAN_TRIVIAL;
                 else
                     terrain[x][y] = TERRIAN_PLAYER;
             }
-        }
+        }*/
     }
 
     public long calcuPlayerStaff(UUID playerId)

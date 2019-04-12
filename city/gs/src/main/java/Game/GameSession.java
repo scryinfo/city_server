@@ -682,10 +682,11 @@ public class GameSession {
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 		this.write(Package.create(cmd, c));
-/*		//货架商品出售通知
+
+		//货架商品出售通知
 		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
 		int[] itemIdAndNum = {itemId, itemBuy.n};
-		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);*/
+		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
@@ -1912,6 +1913,9 @@ public class GameSession {
 				 * 2019/2/25
 				 * 邮件通知被踢出公会
 				 */
+
+				MailBox.instance().sendMail(Mail.MailType.SOCIETY_KICK_OUT.getMailType(),Util.toUuid(params.getPlayerId().toByteArray()),null,new UUID[]{societyId},null);
+				
 			}
 		}
 	}
@@ -2159,7 +2163,7 @@ public class GameSession {
 				list.addMyBuildingInfo(builder.build());
 			}
 		}
-		
+
 		this.write(Package.create(cmd, list.build()));
 	}
     public void queryMyEva(short cmd, Message message)
@@ -2183,4 +2187,16 @@ public class GameSession {
 		Gs.Eva eva = (Gs.Eva)message;
     	GameDb.saveOrUpdate(eva);
     }
+
+	public void getOneSocietyInfo(short cmd, Message message)
+	{
+		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+			Society society = SocietyManager.getSociety(societyId);
+			if (society != null)
+			{
+				this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society,player)));
+
+			}
+
+	}
 }

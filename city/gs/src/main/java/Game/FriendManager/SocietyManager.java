@@ -1,9 +1,6 @@
 package Game.FriendManager;
 
-import Game.GameDb;
-import Game.GameServer;
-import Game.GameSession;
-import Game.Player;
+import Game.*;
 import Shared.Package;
 import Shared.Util;
 /*import com.google.common.base.Optional;*/
@@ -269,22 +266,22 @@ public class SocietyManager
 
     public static void handleReqJoin(Gs.JoinHandle params, Player handler)
     {
-        UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
-        if (societyId.equals(handler.getSocietyId()))
+        UUID societyId = Util.toUuid(params.getSocietyId().toByteArray()); // 拿到申请加入的公会id
+        if (societyId.equals(handler.getSocietyId()))  //保证当前处理人已经在公会中
         {
-            Society society = getSocietyFromCache(societyId);
-            UUID reqId = Util.toUuid(params.getPlayerId().toByteArray());
+            Society society = getSocietyFromCache(societyId);  // 缓存中查找公会
+            UUID reqId = Util.toUuid(params.getPlayerId().toByteArray()); //获取申请人id
             if (society != null &&
                     !society.getMemberIds().contains(reqId)
                     && canModify(society.getIdentity(handler.id())))
             {
-                Player reqPlayer = GameDb.getPlayer(reqId);
+                Player reqPlayer = GameDb.getPlayer(reqId);  // 获取申请人信息
                 Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
                 society.getJoinMap().remove(reqId);
                 GameDb.saveOrUpdate(society);
                 boolean isSuccess = false;
                 Society.SocietyNotice notice = new Society.SocietyNotice(handler.id(),
-                        reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);
+                        reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);  // 创建公会公告
 
                 //已加入其他公会
                 if (reqPlayer.getSocietyId() != null)
@@ -314,7 +311,9 @@ public class SocietyManager
                      * 发送邮件给申请人入会成功
                      */
 
-
+                    Mail mail = new Mail(Mail.MailType.ADD_SOCIETY_SUCCESS.getMailType(),reqId,null,new UUID[]{societyId},null);
+                    GameDb.saveOrUpdate(mail);
+                    GameServer.sendTo(Arrays.asList(reqId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
                 }
                 //拒绝
                 else
@@ -329,6 +328,11 @@ public class SocietyManager
                      * 2019/2/22
                      * 发送邮件给申请人入会请求被拒绝 reqId
                      */
+
+                    Mail mail = new Mail(Mail.MailType.ADD_SOCIETY_FAIL.getMailType(),reqId,null,new UUID[]{societyId},null);
+                    GameDb.saveOrUpdate(mail);
+                    GameServer.sendTo(Arrays.asList(reqId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
+
                 }
                 //通知权限人清除该请求
                 GameServer.sendTo(getmodifyPermissionIds(society),

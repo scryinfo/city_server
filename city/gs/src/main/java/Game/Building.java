@@ -327,11 +327,10 @@ public abstract class Building {
         this.happy = HAPPY_MIN;
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
         this.broadcastChange();
-/*
-        //员工满意度通知
+
+        //停工通知
         UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
-        MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
-*/
+        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
     }
 
     public void setName(String name) {
@@ -481,8 +480,13 @@ public abstract class Building {
     protected abstract void leaveImpl(Npc npc);
     // there is no need to remember which npc is in this building now
     public void enter(Npc npc) {
-        flowCount += 1;
+        addFlowCount();
+//        flowCount += 1;
         enterImpl(npc);
+        //住宅入住通知
+        int[] num = {flowCount};
+        UUID[] apartmentOwerIdAndBid = {this.ownerId,id()};
+        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);
     }
 
     public void addFlowCount()
@@ -601,11 +605,9 @@ public abstract class Building {
         }
         else
             happy = HAPPY_MIN;
-/*
             //员工满意度通知
             UUID[] ownerIdAndBuildingId = {p.id(),this.id()};
             MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),p.id(),null,ownerIdAndBuildingId,null);
-*/
         return false;
     }
     private void calcuHappy() {
