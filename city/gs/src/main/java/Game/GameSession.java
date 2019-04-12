@@ -1059,7 +1059,7 @@ public class GameSession {
 		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知
-		this.write(Package.create(cmd, gs_removeOrder);
+		this.write(Package.create(cmd, gs_removeOrder));
 	}
 
 	//adAddNewOrder
@@ -1116,12 +1116,12 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = fcySeller.curPromPricePerHour * gs_addNewOrder.getPromDuration();
+		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_addNewOrder.getPromDuration();
 		if(buyer.money() < fee){
 			if(GlobalConfig.DEBUGLOG){
 				logger.fatal("GameSession.addNewOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
-			gameSession.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
 

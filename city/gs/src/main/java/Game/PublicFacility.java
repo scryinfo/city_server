@@ -47,6 +47,9 @@ public class PublicFacility extends Building {
         return selledPromotion;
     }
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "PubFacility_promo", joinColumns = @JoinColumn(name = "selled_id"))
+    @OrderColumn
     List<UUID> selledPromotion = new ArrayList<>();
 
     public UUID getLastPromotion(){

@@ -8,6 +8,7 @@ import Shared.Package;
 import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
@@ -27,8 +28,10 @@ public class Player {
         return payedPromotions;
     }
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "player_promo", joinColumns = @JoinColumn(name = "payed_id"))
+    @OrderColumn
     private List<UUID> payedPromotions = new ArrayList<>();
-    private List<UUID> productionPromos = new ArrayList<>();
 
     public void addPayedPromotion(UUID newPromo){
     if(payedPromotions.indexOf(newPromo) < 0) {
