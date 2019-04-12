@@ -2097,14 +2097,10 @@ public class GameSession {
 	 * (市民需求)每种类型npc的数量
 	 */
 	public void eachTypeNpcNum(short cmd) {
-		Map<Integer, Integer> map=NpcManager.instance().countNpcByType();
-		Gs.CountNpcMap.Builder bd=Gs.CountNpcMap.newBuilder();
 		Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
-	    for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
-			bd.setKey(entry.getKey());
-			bd.setValue(entry.getValue());
-			list.addCountNpcMap(bd.build());
-	    }
+	    NpcManager.instance().countNpcByType().forEach((k,v)->{
+	    	list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
+	    });
 		this.write(Package.create(cmd,list.build()));
 	}
 
@@ -2156,26 +2152,24 @@ public class GameSession {
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.myProto(id);
 			List<BuildingInfo> ls=null;
-			if(map.containsKey(buildingInfo.getType())){
-				ls=map.get(buildingInfo.getType());
+			int type=buildingInfo.getType();
+			if(map.containsKey(type)){
+				ls=map.get(type);
 			}else{
 				ls=new ArrayList<BuildingInfo>();
 			}
 			ls.add(buildingInfo);
-			map.put(buildingInfo.getType(), ls);
+			map.put(type, ls);
 		 }
 		);
-		if(map!=null&&map.size()>0){
-			for (Entry<Integer, List<BuildingInfo>> entry : map.entrySet()) {
-				Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
-				builder.setType(entry.getKey());
-				entry.getValue().forEach(buildingInfo->{
-					builder.addInfo(buildingInfo);
-				});
-				
-				list.addMyBuildingInfo(builder.build());
-			}
-		}
+		map.forEach((k,v)->{
+			Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
+			builder.setType(k);
+			v.forEach(buildingInfo->{
+				builder.addInfo(buildingInfo);
+			});
+			list.addMyBuildingInfo(builder.build());
+		});
 		
 		this.write(Package.create(cmd, list.build()));
 	}
@@ -2185,7 +2179,8 @@ public class GameSession {
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
-			list.addEva(Gs.Eva.newBuilder().setPid(Util.toByteString(eva.getPid()))
+			list.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
+					.setPid(Util.toByteString(eva.getPid()))
 					.setAt(eva.getAt())
 					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
 					.setLv(eva.getLv())
@@ -2207,21 +2202,23 @@ public class GameSession {
 			do{
 				MetaExperiences obj=map.get(level);
 				exp=obj.exp;
-				cexp=cexp-exp; //减去升级需要的经验
-				level++;
+				if(cexp>=exp){
+					cexp=cexp-exp; //减去升级需要的经验
+					level++;  
+				}
 			}while(cexp>=exp);
 		}
 		
 		Eva e=new Eva();
+		e.setId(Util.toUuid(eva.getId().toByteArray()));
 		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
 		e.setAt(eva.getAt());
 		e.setBt(eva.getBt().getNumber());
 		e.setLv(level);
 		e.setCexp(cexp);
 		e.setB(eva.getB());
-    	GameDb.saveOrUpdate(eva);
+    	GameDb.saveOrUpdate(e);
     	
-    	eva.toBuilder().setCexp(cexp).setLv(level);
-    	this.write(Package.create(cmd, eva));
+    	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).build()));
     }
 }
