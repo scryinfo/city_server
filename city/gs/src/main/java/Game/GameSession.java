@@ -2185,7 +2185,8 @@ public class GameSession {
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
-			list.addEva(Gs.Eva.newBuilder().setPid(Util.toByteString(eva.getPid()))
+			list.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
+					.setPid(Util.toByteString(eva.getPid()))
 					.setAt(eva.getAt())
 					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
 					.setLv(eva.getLv())
@@ -2207,8 +2208,10 @@ public class GameSession {
 			do{
 				MetaExperiences obj=map.get(level);
 				exp=obj.exp;
-				cexp=cexp-exp; //减去升级需要的经验
-				level++;
+				if(cexp>=exp){
+					cexp=cexp-exp; //减去升级需要的经验
+					level++;  
+				}
 			}while(cexp>=exp);
 		}
 		
