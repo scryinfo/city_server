@@ -83,12 +83,15 @@ public class Laboratory extends Building {
         if(!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
             if(line.update(diffNano)) {
-                this.inProcess.remove(0);
-                this.completed.put(line.id, line);
+                if(line.isComplete()) {
+                    this.inProcess.remove(0);
+                    this.completed.put(line.id, line);
+                }
             }
-            if(this.dbTimer.update(diffNano)) {
-                GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
-            }
+        }
+        //GameDb.saveOrUpdate(this);
+        if(this.dbTimer.update(diffNano)) {
+            GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
     }
 
@@ -232,7 +235,7 @@ public class Laboratory extends Building {
             if(!isLaunched())
                 this.launch();
             currentRoundPassNano += diffNano;
-            if (currentRoundPassNano >= TimeUnit.HOURS.toNanos(1)) {
+            if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1)) {
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -253,11 +256,13 @@ public class Laboratory extends Building {
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @OrderColumn
+    @JoinColumn(name = "labId1")
     private List<Line> inProcess = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyColumn(name = "line_id")
+    @MapKeyColumn(name = "id")
+    @JoinColumn(name = "labId2")
     private Map<UUID, Line> completed = new HashMap<>();
 
     @Transient

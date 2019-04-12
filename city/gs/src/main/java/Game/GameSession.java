@@ -1332,10 +1332,10 @@ public class GameSession {
 			if(!player.decMoney(cost))
 				return;
 		}
-
-		if(null != lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id())) {
-			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, c));
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
+		if(null != line) {
+			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
+			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
 	}
 	public void labLineCancel(short cmd, Message message) {
