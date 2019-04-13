@@ -87,9 +87,9 @@ public class Laboratory extends Building {
                     this.inProcess.remove(0);
                     this.completed.put(line.id, line);
                 }
+                broadcastLine(line);
             }
         }
-        //GameDb.saveOrUpdate(this);
         if(this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
@@ -106,13 +106,13 @@ public class Laboratory extends Building {
 
     public boolean delLine(UUID lineId) {
         Line line = this.findInProcess(lineId);
-        if(line != null && line.isLaunched()) {
+        if(line != null && !line.isLaunched()) {
 //            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
 //                            Gs.LabDelLine.newBuilder()
 //                                    .setBuildingId(Util.toByteString(id()))
 //                                    .setLineId(Util.toByteString(lineId))
 //                                    .build()));
-            this.inProcess.remove(lineId);
+            this.inProcess.remove(line);
             return true;
         }
         return false;
@@ -121,7 +121,9 @@ public class Laboratory extends Building {
     public void setExclusive(boolean exclusive) {
         this.exclusiveForOwner = exclusive;
     }
-
+    public boolean isExclusiveForOwner() {
+        return this.exclusiveForOwner;
+    }
     public static final class RollResult {
         List<Integer> itemIds;
         int evaPoint;
@@ -145,6 +147,7 @@ public class Laboratory extends Building {
             if(l.eva()) {
                 if(Prob.success(this.evaProb, RADIX)) {
                     res.evaPoint++;
+                    player.addEvaPoint(1);
                 }
             }
             else {
