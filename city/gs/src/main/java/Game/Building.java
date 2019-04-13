@@ -219,6 +219,10 @@ public abstract class Building {
     @Transient
     protected boolean working;
 
+    public int getSalaryRatio() {
+        return salaryRatio;
+    }
+
     @Column(nullable = false)
     protected int salaryRatio;
 
@@ -283,6 +287,10 @@ public abstract class Building {
 
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
+
+    public int getWorkerNum(){
+        return metaBuilding.workerNum;
+    }
 
     public long getAllStaffSize()
     {
