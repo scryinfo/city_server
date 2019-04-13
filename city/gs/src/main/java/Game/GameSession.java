@@ -2219,6 +2219,10 @@ public class GameSession {
 		e.setB(eva.getB());
     	GameDb.saveOrUpdate(e);
     	
-    	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).build()));
+    	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
+    	player.decEva(eva.getDecEva());
+       	GameDb.saveOrUpdate(player);
+       	
+    	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
     }
 }

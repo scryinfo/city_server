@@ -378,7 +378,12 @@ public class Player {
         sendMoney();
         return m;
     }
-
+    public boolean decEva(int eva) {
+        if(eva<0)
+            return false;
+        this.eva -= eva;
+        return true;
+    }
     public void groundBidingFail(UUID id, GroundAuction.Entry a) {
         int m = (int) this.unlockMoney(a.transactionId);
         GameDb.saveOrUpdate(this);
