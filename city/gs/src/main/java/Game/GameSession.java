@@ -685,7 +685,7 @@ public class GameSession {
 
 		//货架商品出售通知
 		UUID[] sellBuildingId = {sellBuilding.id()};
-		int metaId = sellBuilding.metaId();
+		int metaId = sellBuilding.metaId();  //建筑类型id
 		int[] itemIdAndNum = {metaId,itemId, itemBuy.n};
 		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingId,itemIdAndNum);
 	}
