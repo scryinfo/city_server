@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 public class Grid {
     public static final int SYNC_RANGE_NUM = 9;
     public static final int SYNC_RANGE_DELTA = (int) (Math.sqrt(SYNC_RANGE_NUM) - 2);
+
     private int x;
 
     public int getX() {

@@ -158,7 +158,6 @@ public class City {
 
         this.lastHour = this.localTime().getHour();
     }
-
     private void loadSysBuildings() {
         for(MetaData.InitialBuildingInfo i : MetaData.getAllInitialBuilding())
         {
@@ -311,6 +310,9 @@ public class City {
         this.grids[old.x][old.y].playerLeaving(p.id());
         this.grids[p.getPosition().x][p.getPosition().y].playerComing(p.id());
         this.updateVisibilityRelocate(p, old);
+    }
+    public void forEachBuilding(Consumer<Building> f) {
+        this.allBuilding.values().forEach(f);
     }
     public void forEachBuilding(List<GridIndex> index, Consumer<Building> f) {
         for(GridIndex idx : index)

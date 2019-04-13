@@ -449,6 +449,21 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+	public void queryLabSummary(short cmd) {
+		Gs.LabSummary.Builder builder = Gs.LabSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.LabSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof Laboratory && !building.outOfBusiness() && !((Laboratory)building).isExclusiveForOwner())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
 	public void setRoleFaceId(short cmd, Message message) {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
