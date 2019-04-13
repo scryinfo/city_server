@@ -225,6 +225,9 @@ public class Player {
     @Column
     private int eva;
 
+    public void addEvaPoint(int d) {
+        this.eva += d;
+    }
     public Player(String name, String account, boolean male, String companyName, String faceId) {
         //this.id = UUID.randomUUID();
         this.account = account;

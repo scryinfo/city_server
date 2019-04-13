@@ -187,20 +187,7 @@ public class GameServer {
 //
 //        GameServer gs = new GameServer();
 //        City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
-//        NpcManager.instance(); // load all npc, npc will refer building(enter it)
-//        GroundAuction.init();
-//        GroundManager.init();
-//        Exchange.init();
-//        BrandManager.init();
-//        TechTradeCenter.init();
-//        MoneyPool.init();
 //
-//        System.out.println(NpcManager.instance().size());
-//        Npc npc = NpcManager.instance().get(UUID.fromString("282f68d2-e991-41ce-9571-18ba668e64b2"));
-//        for (int i = 0; i < 50; i++) {
-//            long now = System.nanoTime();
-//            npc.update(0);
-//            logger.fatal(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - now));
-//        }
+//
 //    }
 }
