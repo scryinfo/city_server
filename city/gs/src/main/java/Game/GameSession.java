@@ -986,22 +986,22 @@ public class GameSession {
 		}
 	}
 
-	//adQueryPromotion
-	public void queryPromotion(short cmd, Message message) {
+	//adAdQueryPromotion
+	public void AdQueryPromotion(short cmd, Message message) {
 		/*
 				查询广告列表，分两种情况
 				1、 广告商（卖家）查询
 				2、 广告主（买家）查询
 				方式： 都是通过 promotionId 查询
 			*/
-		Gs.queryPromotion queryPromotion = (Gs.queryPromotion) message;
-		boolean isSeller = queryPromotion.getIsSeller();
-		UUID id = Util.toUuid(queryPromotion.getPlayerId().toByteArray());
+		Gs.AdQueryPromotion AdQueryPromotion = (Gs.AdQueryPromotion) message;
+		boolean isSeller = AdQueryPromotion.getIsSeller();
+		UUID id = Util.toUuid(AdQueryPromotion.getPlayerId().toByteArray());
 		Player player =  GameDb.getPlayer(id);
 		//获取 payedPromotion
 		if(player == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("PromotionMgr.queryPromotion: isSeller is false but player not exist!");
+				logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is false but player not exist!");
 			}
 			return;
 		}
@@ -1009,17 +1009,17 @@ public class GameSession {
 		List<UUID> promoIDs = new ArrayList<>();
 		if( isSeller ){
 			//获取 selledPromotion
-			if(!queryPromotion.hasSellerBuildingId()){
+			if(!AdQueryPromotion.hasSellerBuildingId()){
 				if(GlobalConfig.DEBUGLOG){
-					logger.fatal("PromotionMgr.queryPromotion: isSeller is true but SellerBuildingId is null!");
+					logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is true but SellerBuildingId is null!");
 				}
 				return;
 			}
-			Building bd = City.instance().getBuilding(Util.toUuid(queryPromotion.getSellerBuildingId().toByteArray()));
+			Building bd = City.instance().getBuilding(Util.toUuid(AdQueryPromotion.getSellerBuildingId().toByteArray()));
 
 			if(bd == null){
 				if(GlobalConfig.DEBUGLOG){
-					logger.fatal("PromotionMgr.queryPromotion: isSeller is true but building not exist!");
+					logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is true but building not exist!");
 				}
 				return;
 			}
@@ -1031,7 +1031,7 @@ public class GameSession {
 		}
 		List<PromoOrder> promotions = new ArrayList<>() ;
 		PromotionMgr.instance().getPromotins(promoIDs,promotions);
-		Gs.queryPromotion.Builder newPromotions = queryPromotion.newBuilder();
+		Gs.AdQueryPromotion.Builder newPromotions = AdQueryPromotion.newBuilder();
 
 		for (int i = 0; i < promotions.size(); i++) {
 			newPromotions.addPromotions(promotions.get(i).toProto());
@@ -1040,14 +1040,14 @@ public class GameSession {
 		this.write(Package.create(cmd, newPromotions.build()));
 	}
 
-	//adRemoveOrder
-	public void removeOrder(short cmd, Message message) {
-		Gs.removeOrder gs_removeOrder = (Gs.removeOrder) message;
-		UUID promoId = Util.toUuid(gs_removeOrder.getPromotionId().toByteArray());
+	//adAdRemovePromoOrder
+	public void AdRemovePromoOrder(short cmd, Message message) {
+		Gs.AdRemovePromoOrder gs_AdRemovePromoOrder = (Gs.AdRemovePromoOrder) message;
+		UUID promoId = Util.toUuid(gs_AdRemovePromoOrder.getPromotionId().toByteArray());
 		PromoOrder promoOrder = PromotionMgr.instance().getPromotion(promoId);
 		if(promoOrder == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.removeOrder(): PromoOrder which Id equals "+promoId+" not find!");
+				logger.fatal("GameSession.AdRemovePromoOrder(): PromoOrder which Id equals "+promoId+" not find!");
 			}
 			return;
 		}
@@ -1059,15 +1059,15 @@ public class GameSession {
 		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知
-		this.write(Package.create(cmd, gs_removeOrder));
+		this.write(Package.create(cmd, gs_AdRemovePromoOrder));
 	}
 
-	//adAddNewOrder
-	public void addNewOrder(short cmd, Message message) {
-		Gs.addNewOrder gs_addNewOrder = (Gs.addNewOrder) message;
-		//UUID id = Util.toUuid(gs_addNewOrder.getSellerBuildingId().toByteArray());
-		UUID sellerBuildingId = Util.toUuid(gs_addNewOrder.getSellerBuildingId().toByteArray());
-		UUID buyerPlayerId = Util.toUuid(gs_addNewOrder.getBuyerPlayerId().toByteArray());
+	//adAddNewPromoOrder
+	public void AdAddNewPromoOrder(short cmd, Message message) {
+		Gs.AdAddNewPromoOrder gs_AdAddNewPromoOrder = (Gs.AdAddNewPromoOrder) message;
+		//UUID id = Util.toUuid(gs_AdAddNewPromoOrder.getSellerBuildingId().toByteArray());
+		UUID sellerBuildingId = Util.toUuid(gs_AdAddNewPromoOrder.getSellerBuildingId().toByteArray());
+		UUID buyerPlayerId = Util.toUuid(gs_AdAddNewPromoOrder.getBuyerPlayerId().toByteArray());
 		//检查是否是推广公司
 		Building b = City.instance().getBuilding(sellerBuildingId);
 		if(b == null || b.outOfBusiness())
@@ -1076,12 +1076,12 @@ public class GameSession {
 		//1、建筑类型，包括零售店（RETAIL）、 住宅（APARTMENT）
 		//2、商品类型：服装、食品
 		//客户端及填写了商品类型又填写了建筑类型时，优先级怎么处理？
-		boolean hasBuildingType = gs_addNewOrder.hasBuildingType();
-		boolean hasProducerId = gs_addNewOrder.hasProductionType();
+		boolean hasBuildingType = gs_AdAddNewPromoOrder.hasBuildingType();
+		boolean hasProducerId = gs_AdAddNewPromoOrder.hasProductionType();
 
 		if(hasProducerId && hasBuildingType){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): buildingType and productionType can't be avaliable at the same time.");
+				logger.fatal("GameSession.AdAddNewPromoOrder(): buildingType and productionType can't be avaliable at the same time.");
 			}
 			return;
 		}
@@ -1096,30 +1096,30 @@ public class GameSession {
 		newOrder.setTransactionPrice(fcySeller.getCurPromPricePerHour());
 
 		//购买的时长是否合法
-		if(gs_addNewOrder.getPromDuration() > fcySeller.getPromRemainTime()){
+		if(gs_AdAddNewPromoOrder.getPromDuration() > fcySeller.getPromRemainTime()){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): PromDuration required by client greater than sellerBuilding's remained.");
+				logger.fatal("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
 			return;
 		}
 		if(sellerBuilding == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): building instance of sellerBuilding not find which Id equals to"+newOrder.sellerBuildingId);
+				logger.fatal("GameSession.AdAddNewPromoOrder(): building instance of sellerBuilding not find which Id equals to"+newOrder.sellerBuildingId);
 			}
 			return;
 		}
 		if(buyer == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): Buyer not find which Id equals to"+newOrder.sellerBuildingId);
+				logger.fatal("GameSession.AdAddNewPromoOrder(): Buyer not find which Id equals to"+newOrder.sellerBuildingId);
 			}
 			return;
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_addNewOrder.getPromDuration();
+		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
 		if(buyer.money() < fee){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): PromDuration required by client greater than sellerBuilding's remained.");
+				logger.fatal("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
@@ -1159,7 +1159,7 @@ public class GameSession {
 				UUID 生成：
 					this.id = UUID.randomUUID();
 				UUID 转换传输时需转换成 byte[]
-					startBusiness Util.toUuid(gs_addNewOrder.getId().toByteArray());
+					startBusiness Util.toUuid(gs_AdAddNewPromoOrder.getId().toByteArray());
 					也就是说，目前传输是使用的 byte 数组来存放的，服务使用的UUID是从byte数组转换过来的，
 					转换使用的方法是 UUID toUuid(byte[] bytes)
 			*/
@@ -1169,14 +1169,14 @@ public class GameSession {
 		PromoOrder lastOd = PromotionMgr.instance().getPromotion(lastPromotion);
 		if(lastOd == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): PromoOrder not find in promoOrderQueue which id equals "+lastPromotion);
+				logger.fatal("GameSession.AdAddNewPromoOrder(): PromoOrder not find in promoOrderQueue which id equals "+lastPromotion);
 			}
 			return;
 		}
 
 		if(!fcySeller.comsumeAvaliableTime(newOrder.promDuration)){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.addNewOrder(): fcySeller.comsumeAvaliableTime return false");
+				logger.fatal("GameSession.AdAddNewPromoOrder(): fcySeller.comsumeAvaliableTime return false");
 			}
 			return;
 		}
@@ -1184,7 +1184,7 @@ public class GameSession {
 		newOrder.buyerId = buyerPlayerId;
 		newOrder.sellerBuildingId = sellerBuildingId;
 		newOrder.sellerId = seller.id();
-		newOrder.buildingType = gs_addNewOrder.getBuildingType();
+		newOrder.buildingType = gs_AdAddNewPromoOrder.getBuildingType();
 
 		//计算 promStartTs， 先取出广告公司中的所有广告promotionId 列表，计算新广告的起点
 		newOrder.promStartTs = lastOd.promStartTs + lastOd.promDuration;
@@ -1201,11 +1201,11 @@ public class GameSession {
 				改： PromotionMgr 维护，结果值更新到建筑的品牌值
 				查： PromotionMgr 维护
 				*/
-			newOrder.buildingType = gs_addNewOrder.getBuildingType();
+			newOrder.buildingType = gs_AdAddNewPromoOrder.getBuildingType();
 		}else{
-			newOrder.productionType = gs_addNewOrder.getProductionType();
+			newOrder.productionType = gs_AdAddNewPromoOrder.getProductionType();
 		}
-		PromotionMgr.instance().addNewOrder(newOrder);
+		PromotionMgr.instance().AdAddNewPromoOrder(newOrder);
 
 		GameDb.saveOrUpdate(this);
 		//
@@ -1222,7 +1222,7 @@ public class GameSession {
 		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知
-		this.write(Package.create(cmd, gs_addNewOrder));
+		this.write(Package.create(cmd, gs_AdAddNewPromoOrder));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
 	}
 	public void adAddSlot(short cmd, Message message) {

@@ -130,7 +130,7 @@ public class PublicFacility extends Building {
 
         if(bd == null){
             if(GlobalConfig.DEBUGLOG){
-                logger.fatal("PromotionMgr.queryPromotion: isSeller is true but building not exist!");
+                logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is true but building not exist!");
             }
             return 0.f;
         }
