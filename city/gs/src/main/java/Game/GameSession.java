@@ -684,9 +684,10 @@ public class GameSession {
 		this.write(Package.create(cmd, c));
 
 		//货架商品出售通知
-		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
-		int[] itemIdAndNum = {itemId, itemBuy.n};
-		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);
+		UUID[] sellBuildingId = {sellBuilding.id()};
+		int metaId = sellBuilding.metaId();
+		int[] itemIdAndNum = {metaId,itemId, itemBuy.n};
+		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingId,itemIdAndNum);
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
