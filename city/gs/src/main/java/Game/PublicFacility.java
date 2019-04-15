@@ -101,9 +101,9 @@ public class PublicFacility extends Building {
     //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
     private float curPromoAbility = 0;
 
-    /*@ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "PubFacility_promo", joinColumns = @JoinColumn(name = "selled_id"))
-    @OrderColumn*/
+    @OrderColumn
     private List<UUID> selledPromotion = new ArrayList<>();
 
     public UUID getLastPromotion(){
