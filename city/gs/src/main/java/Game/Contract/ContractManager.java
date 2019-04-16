@@ -4,8 +4,10 @@ import Game.Building;
 import Game.City;
 import Game.GameDb;
 import Game.Player;
+import Game.Timers.PeriodicTimer;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class ContractManager
 {
@@ -13,6 +15,8 @@ public class ContractManager
     private static ContractManager instance = new ContractManager();
     private Map<UUID, Contract> allContract = new HashMap<>();
     private Map<UUID, Float> playerLiftMap = new HashMap<>();
+
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
     public static ContractManager getInstance()
     {
@@ -35,16 +39,19 @@ public class ContractManager
         updatePlayerLiftMap();
     }
 
-    //按服务器帧率检查失效契约
+    //检查失效契约
     public void update(long diffNano)
     {
-        List<Contract> deletes = new ArrayList<>();
-        allContract.values().forEach(contract -> {
-            if (isOutOfDate(contract)) {
-                deletes.add(contract);
-            }
-        });
-        deletes.forEach(this::deleteContract);
+        if (timer.update(diffNano))
+        {
+            List<Contract> deletes = new ArrayList<>();
+            allContract.values().forEach(contract -> {
+                if (isOutOfDate(contract)) {
+                    deletes.add(contract);
+                }
+            });
+            deletes.forEach(this::deleteContract);
+        }
     }
 
     public boolean isOutOfDate(Contract contract)

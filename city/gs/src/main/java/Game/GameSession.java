@@ -21,6 +21,8 @@ import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
 import Game.Contract.IBuildingContract;
+import Game.League.LeagueInfo;
+import Game.League.LeagueManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -2083,6 +2085,90 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	public void getLeagueInfo(short cmd, Message message)
+	{
+		int techId = ((Gs.Num) message).getNum();
+		Gs.LeagueInfo leagueInfo = LeagueManager.getInstance().queryProtoLeagueInfo(player.id(), techId);
+		this.write(Package.create(cmd,leagueInfo));
+	}
+
+	public void setLeagueInfo(short cmd, Message message)
+	{
+		Gs.LeagueInfoSetting setting = (Gs.LeagueInfoSetting) message;
+		if (LeagueManager.getInstance().settingLeagueInfo(player.id(), setting))
+		{
+			Gs.LeagueInfoSetting.Builder builder = Gs.LeagueInfoSetting.newBuilder()
+					.setTechId(setting.getTechId())
+					.setSetting(
+							Gs.LeagueSetting.newBuilder()
+									.setIsSettingOpen(true)
+									.setPrice(setting.getSetting().getPrice())
+									.setMaxHours(setting.getSetting().getMaxHours())
+									.setMinHours(setting.getSetting().getMinHours())
+									.build()
+					);
+			this.write(Package.create(cmd, builder.build()));
+		}
+		else
+		{
+			this.write(Package.fail(cmd));
+		}
+	}
+
+	public void closeLeagueInfo(short cmd, Message message)
+	{
+		int techId = ((Gs.Num) message).getNum();
+		if (LeagueManager.getInstance().closeLeagueInfo(player.id(), techId))
+		{
+			this.write(Package.create(cmd,message));
+		}
+		else
+		{
+			this.write(Package.fail(cmd));
+		}
+	}
+
+	public void queryLeagueTechList(short cmd, Message message)
+	{
+		int techId = ((Gs.Num) message).getNum();
+		Gs.LeagueTechList.Builder builder = Gs.LeagueTechList.newBuilder();
+		builder.setTechId(techId);
+		LeagueManager.getInstance().getOpenedLeagueInfoByTechId(techId)
+				.forEach(leagueInfo -> {
+					Gs.LeagueTech.Builder techBuilder = Gs.LeagueTech.newBuilder();
+					techBuilder.setOwnerId(Util.toByteString(leagueInfo.getUid().getPlayerId()))
+						.setSetting(leagueInfo.toSettingProto())
+						.addAllTechInfo(LeagueManager.getInstance().getLeagueTechInfo(leagueInfo))
+						.setJoinBCount(leagueInfo.getMemberSize())
+						.setOwnerBcount(LeagueManager.getInstance().getLeagueInfoOwnerBcount(leagueInfo));
+					builder.addTechList(techBuilder.build());
+				});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryBuildingListByPlayerTech(short cmd, Message message)
+	{
+		Gs.ByteNum ident = (Gs.ByteNum) message;
+		UUID pid = Util.toUuid(ident.getId().toByteArray());
+		int techId = ident.getNum();
+		Gs.TechBuildingPoss.Builder builder = Gs.TechBuildingPoss.newBuilder();
+		builder.setIdentity(ident);
+		LeagueManager.getInstance().getBuildingListByPlayerTech(pid, techId)
+				.forEach(building -> builder.addPosInfo(building.toPositionProto()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void joinLeague(short cmd, Message message)
+	{
+		Gs.JoinLeague joinLeague = (Gs.JoinLeague) message;
+		if (LeagueManager.getInstance().joinLeague(player, joinLeague)) {
+			this.write(Package.create(cmd,joinLeague));
+		}
+		else
+		{
+			this.write(Package.fail(cmd));
+		}
+	}
 
 	//===========================================================
 

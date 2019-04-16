@@ -2,6 +2,7 @@ package Game;
 
 import Game.Contract.ContractManager;
 import Game.FriendManager.FriendManager;
+import Game.League.LeagueManager;
 import Game.Meta.MetaData;
 import Shared.*;
 import Shared.Package;
@@ -117,7 +118,9 @@ public class GameServer {
         TechTradeCenter.init();
         MoneyPool.init();
         ContractManager.getInstance().init();
+        LeagueManager.getInstance().init();
         City.instance().run();
+
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();

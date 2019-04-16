@@ -48,7 +48,11 @@ public class LogDb {
 	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
 	private static final String CITY_BROADCAST = "cityBroadcast";
 	private static final String NPC_TYPE_NUM = "npcTypeNum";
+
+	private static final String FLOW_AND_LIFT = "flowAndLift";
 	//---------------------------------------------------
+	private static MongoCollection<Document> flowAndLift;
+
 	private static MongoCollection<Document> npcBuyInRetailCol; // table in the log database
 	private static MongoCollection<Document> paySalary; // table in the log database
 
@@ -111,6 +115,8 @@ public class LogDb {
 		cityBroadcast = database.getCollection(CITY_BROADCAST)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		npcTypeNum = database.getCollection(NPC_TYPE_NUM)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		flowAndLift = database.getCollection(FLOW_AND_LIFT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -306,6 +312,17 @@ public class LogDb {
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
+	}
+
+	public static void flowAndLift(UUID buildingId,int flowcount,float lift)
+	{
+		long now = System.currentTimeMillis();
+		long time = now - now % 3600000;
+		Document document = new Document().append("t", time)
+				.append("b", buildingId)
+				.append("f", flowcount)
+				.append("l", lift);
+		flowAndLift.insertOne(document);
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,

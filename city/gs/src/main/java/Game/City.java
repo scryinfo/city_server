@@ -2,13 +2,7 @@ package Game;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import Game.Contract.ContractManager;
+import Game.League.LeagueManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
@@ -135,6 +130,28 @@ public class City {
         return instance;
     }
 
+    public  int getPlayerBcountByBtype(UUID playerId,int btype)
+    {
+        Map<UUID, Building> bmap = this.playerBuilding.get(playerId);
+        if (bmap != null)
+        {
+            return (int) bmap.values().stream().filter(building -> building.type() == btype).count();
+        }
+        return 0;
+    }
+
+    public List<Building> getPlayerBListByBtype(UUID playerId, int btype)
+    {
+        Map<UUID, Building> bmap = this.playerBuilding.get(playerId);
+        if (bmap != null)
+        {
+            return Arrays.asList(bmap.values().stream()
+                    .filter(building -> building.type() == btype)
+                    .toArray(Building[]::new));
+        }
+        return new ArrayList<>();
+    }
+
     private City(MetaCity meta) {
         this.meta = meta;
         GridX = meta.gridX;
@@ -222,6 +239,7 @@ public class City {
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
+        LeagueManager.getInstance().update(diffNano);
 
         // do this at last
         updateTimeSection(diffNano);
