@@ -1,6 +1,7 @@
 package Game;
 
 import DB.Db;
+import Game.Contract.IBuildingContract;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
@@ -442,6 +443,18 @@ public abstract class Building {
     public Coordinate coordinate() {
         return coordinate;
     }
+
+    public Gs.TechBuildingPos toPositionProto()
+    {
+        return Gs.TechBuildingPos.newBuilder()
+                .setBid(Util.toByteString(id))
+                .setMId(metaBuilding.id)
+                .setPos(Gs.MiniIndex.newBuilder()
+                        .setX(this.coordinate.x)
+                        .setY(this.coordinate.y))
+                .build();
+    }
+
     public Gs.BuildingInfo toProto() {
         Gs.BuildingInfo.Builder builder = Gs.BuildingInfo.newBuilder();
         builder.setId(Util.toByteString(id))
@@ -550,7 +563,17 @@ public abstract class Building {
             this.working = (w == null ? this.working:w);
         }
         this.broadcastChange();
+        this.recordFlowAndLift();
     }
+
+    protected void recordFlowAndLift()
+    {
+        if (this instanceof IBuildingContract)
+        {
+            LogDb.flowAndLift(this.id, this.flow, this.lift);
+        }
+    }
+
     public boolean salaryRatioVerification(int salaryRatio){
         return (salaryRatio == 50 || salaryRatio == 75 || salaryRatio == 100);
     }

@@ -2,15 +2,12 @@ package Game;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.apache.log4j.Logger;
 
 @Entity(name = "Eva")
-@Table(name = "Eva")
+@Table(name = "Eva",indexes = {@Index(columnList = "pid")})
 public class Eva {
     private static final Logger logger = Logger.getLogger(Eva.class);
     @Id

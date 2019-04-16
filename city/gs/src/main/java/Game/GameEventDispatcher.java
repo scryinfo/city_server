@@ -137,6 +137,14 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.cancelContract_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "cancelContract"));
 			table.put((short) GsCode.OpCode.signContract_VALUE, Wrapper.newWithMessageAsync(Gs.SignContract.PARSER, GameSession.class, "signContract"));
 			table.put((short) GsCode.OpCode.getCompanyContracts_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "getCompanyContracts"));
+
+			table.put((short) GsCode.OpCode.getLeagueInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "getLeagueInfo"));
+			table.put((short) GsCode.OpCode.setLeagueInfo_VALUE, Wrapper.newWithMessageAsync(Gs.LeagueInfoSetting.PARSER, GameSession.class, "setLeagueInfo"));
+			table.put((short) GsCode.OpCode.closeLeagueInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "closeLeagueInfo"));
+			table.put((short) GsCode.OpCode.queryLeagueTechList_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryLeagueTechList"));
+			table.put((short) GsCode.OpCode.queryBuildingListByPlayerTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingListByPlayerTech"));
+			table.put((short) GsCode.OpCode.joinLeague_VALUE, Wrapper.newWithMessageAsync(Gs.JoinLeague.PARSER, GameSession.class, "joinLeague"));
+
 			//===========================================================
 
 			//llb========================================================

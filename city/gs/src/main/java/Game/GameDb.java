@@ -20,7 +20,6 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.dialect.Dialect;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
@@ -31,7 +30,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.File;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -130,6 +128,54 @@ public class GameDb {
 					});
 
 	//wxj============================================
+    public static void Update(Collection objs) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            int i = 0;
+            for (Object o : objs) {
+                session.update(o);
+                ++i;
+                if (i % BATCH_SIZE == 0) {
+                    session.flush();
+                }
+            }
+            transaction.commit();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            if(transaction != null)
+                transaction.rollback();
+        } finally {
+            session.close();
+        }
+    }
+
+	public static List<Eva> getEvaInfo(UUID playerId, int techId)
+	{
+		Session session = sessionFactory.openSession();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Eva> query = builder.createQuery(Eva.class);
+		Root root = query.from(Eva.class);
+		query.where(
+				builder.and(
+						builder.equal(root.get("pid"), playerId)
+						, builder.equal(root.get("at"), techId)));
+		return session.createQuery(query).list();
+	}
+
+	public static <T> List<T> getAllFromOneEntity(Class<T> c)
+	{
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<T> criteria = builder.createQuery(c);
+		criteria.from(c);
+		List<T> res = session.createQuery(criteria).list();
+		transaction.commit();
+		session.close();
+		return res;
+	}
 
 	public static List<Contract> getAllContract() {
 		Session session = sessionFactory.openSession();
