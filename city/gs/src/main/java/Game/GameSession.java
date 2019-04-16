@@ -1001,7 +1001,34 @@ public class GameSession {
 		}
 	}
 
-	//adAdQueryPromotion
+	//adQueryPromoCurAbilitys
+	public void adQueryPromoCurAbilitys(short cmd, Message message) {
+		Gs.AdQueryPromoCurAbilitys gs_queryPromoCurAbility = (Gs.AdQueryPromoCurAbilitys) message;
+		UUID sellerBuildingId = Util.toUuid(gs_queryPromoCurAbility.getSellerBuildingId().toByteArray());
+		//检查是否是推广公司
+		Building sellerBuilding = City.instance().getBuilding(sellerBuildingId);
+		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
+
+		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.adQueryPromoCurAbilitys: building type of seller is not PublicFacility!");
+			}
+			return;
+		}
+
+		List<Integer> types = new ArrayList<>(gs_queryPromoCurAbility.getTypeIdsCount());
+		Gs.AdQueryPromoCurAbilitys.Builder builder = gs_queryPromoCurAbility.newBuilder();
+		for (int tp : gs_queryPromoCurAbility.getTypeIdsList())
+		{
+			int bsTp = tp/100;
+			int subTp = tp % 100;
+			Integer value = (int)fcySeller.calculatePromoAbility(tp);
+			builder.getCurAbilitysList().add(value);
+		}
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	//adQueryPromotion
 	public void AdQueryPromotion(short cmd, Message message) {
 		/*
 				查询广告列表，分两种情况
@@ -1055,7 +1082,7 @@ public class GameSession {
 		this.write(Package.create(cmd, newPromotions.build()));
 	}
 
-	//adAdRemovePromoOrder
+	//adRemovePromoOrder
 	public void AdRemovePromoOrder(short cmd, Message message) {
 		Gs.AdRemovePromoOrder gs_AdRemovePromoOrder = (Gs.AdRemovePromoOrder) message;
 		UUID promoId = Util.toUuid(gs_AdRemovePromoOrder.getPromotionId().toByteArray());
@@ -1204,7 +1231,7 @@ public class GameSession {
 		//计算 promStartTs， 先取出广告公司中的所有广告promotionId 列表，计算新广告的起点
 		newOrder.promStartTs = lastOd.promStartTs + lastOd.promDuration;
 		newOrder.promProgress = 0;
-
+		fcySeller.setNewPromoStartTs(newOrder.promStartTs+gs_AdAddNewPromoOrder.getPromDuration());
 		if(hasBuildingType){
 				/*
 				由 PromotionMgr 统一维护所有广告的增删改查比较好。集中更新、方便统计。让建筑中维护的话，

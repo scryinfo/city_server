@@ -14,7 +14,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import Shared.GlobalConfig;
+
 import org.apache.log4j.Logger;
 import Game.Meta.MetaExperiences;
 import Game.Meta.MetaData;
@@ -39,9 +39,34 @@ public class PublicFacility extends Building {
         return promRemainTime;
     }
 
+    public List<UUID> getSelledPromotion() {
+        return selledPromotion;
+    }
+
     private long promRemainTime = 0;		//可推广时间
+
+    public boolean isTakeOnNewOrder() {
+        return takeOnNewOrder;
+    }
+
     private boolean takeOnNewOrder = false;	//接受新订单
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
     private long GuidedPrice = 0;			//缓存的指导价格
+
+    public long getNewPromoStartTs() {
+        return newPromoStartTs;
+    }
+
+    public void setNewPromoStartTs(long startTs) {
+        this.newPromoStartTs = startTs;
+    }
+
+    private long newPromoStartTs = -1;			    //新推广开始时间，如果之前有推广，那么startTs为最后一个推广结束之时
+
 
     public List<UUID> getSelledPromotions() {
         return selledPromotion;
@@ -51,7 +76,7 @@ public class PublicFacility extends Building {
         return curPromoAbility;
     }
 
-    private float calculatePromoAbility(int inObjType) {
+    public float calculatePromoAbility(int inObjType) {
         //计算公式：
 			/*
 				* 基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
@@ -116,6 +141,9 @@ public class PublicFacility extends Building {
     }
 
     public void delSelledPromotion(UUID promoId){
+        //更新推广公司广告列表中所有推广的起点
+        PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion);
+        //删除缓存的推广ID
         selledPromotion.remove(promoId);
     }
 
@@ -408,9 +436,9 @@ public class PublicFacility extends Building {
         builder.setQty(qty);
         builder.setTicketPrice(this.tickPrice);
         builder.setVisitorCount(visitorCount);
-        this.selledPromotion.forEach(id -> builder.addSelledPromotions(Util.toByteString(id)));
-        Player player = GameDb.getPlayer(this.ownerId());
-        player.getPayedPromotions().forEach(id -> builder.addPayedPromotions(Util.toByteString(id)));
+        builder.setCurPromPricePerHour(this.getCurPromPricePerHour());
+        builder.setPromRemainTime(this.getPromRemainTime());
+        builder.setTakeOnNewOrder(this.isTakeOnNewOrder());
         return builder.build();
     }
     protected Gs.Advertisement genAdPart() {

@@ -19,6 +19,7 @@ public class MetaPublicFacility extends MetaBuilding {
         this.minDayToRent = d.getInteger("minDayToRent");
         this.maxDayToRent = d.getInteger("maxDayToRent");
         this.maxRentPreDay = d.getInteger("maxRentPreDay");
+        this.output1P1Hour = d.getInteger("output1P1Hour");
         this.depositRatio = d.getInteger("depositRatio");
     }
 }
