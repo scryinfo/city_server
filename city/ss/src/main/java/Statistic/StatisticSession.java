@@ -72,6 +72,11 @@ public class StatisticSession {
         this.write(Package.create(cmd, builder.build()));
     }
 
+	public void queryBuildingFlowAndLift(short cmd, Message message)
+	{
+
+	}
+
     public void queryAllPlayerSex(short cmd)
     {
         Ss.SexInfo.Builder builder = Ss.SexInfo.newBuilder();

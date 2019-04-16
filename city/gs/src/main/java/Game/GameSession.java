@@ -2041,6 +2041,10 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if (building instanceof IBuildingContract)
 		{
+			if (building.outOfBusiness())
+			{
+				this.write(Package.fail(cmd));
+			}
 			//本人签约
 			if (player.id().equals(building.ownerId()))
 			{
@@ -2082,6 +2086,25 @@ public class GameSession {
 				.stream()
 				.map(Contract::toProto)
 				.collect(Collectors.toList()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryContractSummary(short cmd)
+	{
+		Gs.ContractSummary.Builder builder = Gs.ContractSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.ContractSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof IBuildingContract
+						&& !building.outOfBusiness()
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
 		this.write(Package.create(cmd, builder.build()));
 	}
 

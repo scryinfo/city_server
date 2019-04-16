@@ -137,6 +137,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.cancelContract_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "cancelContract"));
 			table.put((short) GsCode.OpCode.signContract_VALUE, Wrapper.newWithMessageAsync(Gs.SignContract.PARSER, GameSession.class, "signContract"));
 			table.put((short) GsCode.OpCode.getCompanyContracts_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "getCompanyContracts"));
+			table.put((short) GsCode.OpCode.queryContractSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryContractSummary"));
+
 
 			table.put((short) GsCode.OpCode.getLeagueInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "getLeagueInfo"));
 			table.put((short) GsCode.OpCode.setLeagueInfo_VALUE, Wrapper.newWithMessageAsync(Gs.LeagueInfoSetting.PARSER, GameSession.class, "setLeagueInfo"));
