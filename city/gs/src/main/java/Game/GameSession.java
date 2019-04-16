@@ -1429,13 +1429,12 @@ public class GameSession {
 				builder.setEvaPoint(r.evaPoint);
 			}
 			else {
-				builder.addAllItemId(r.itemIds);
+				if(r.itemIds != null)
+					builder.addAllItemId(r.itemIds);
 			}
 			GameDb.saveOrUpdate(Arrays.asList(lab, player));
 			this.write(Package.create(cmd, builder.build()));
 		}
-		else
-			this.write(Package.fail(cmd));
 	}
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;

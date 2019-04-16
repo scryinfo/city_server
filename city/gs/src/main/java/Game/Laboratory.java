@@ -159,7 +159,7 @@ public class Laboratory extends Building {
                         res.itemIds.add(newId);
                         GoodFormula f = MetaData.getFormula(newId);
                         for (GoodFormula.Info info : f.material) {
-                            if(!player.hasItem(info.item.id)) {
+                            if(info != null && !player.hasItem(info.item.id)) {
                                 player.addItem(info.item.id, 0);
                                 res.itemIds.add(info.item.id);
                             }
@@ -168,6 +168,8 @@ public class Laboratory extends Building {
                 }
             }
         }
+        if(l.isComplete() && l.availableRoll == 0)
+            this.completed.remove(l.id);
         return res;
     }
 
@@ -262,9 +264,9 @@ public class Laboratory extends Building {
     @JoinColumn(name = "labId1")
     private List<Line> inProcess = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval=true)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyColumn(name = "id")
+    @MapKey(name = "id")
     @JoinColumn(name = "labId2")
     private Map<UUID, Line> completed = new HashMap<>();
 
