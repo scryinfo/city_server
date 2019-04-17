@@ -2108,6 +2108,35 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	public void queryContractGridDetail(short cmd, Message message)
+	{
+		Gs.GridIndex gridIndex = (Gs.GridIndex) message;
+		Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
+		builder.setIdx(gridIndex);
+		City.instance().forAllGrid(grid ->
+		{
+			if (grid.getX() == gridIndex.getX() && grid.getY() == gridIndex.getY())
+			{
+
+				grid.forAllBuilding(building ->
+				{
+					if(building instanceof IBuildingContract
+							&& !building.outOfBusiness()
+							&& !((IBuildingContract) building).getBuildingContract().isSign())
+					{
+						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
+						b.setOwnerId(Util.toByteString(building.ownerId()))
+								.setBuildingId(Util.toByteString(building.id()))
+								.setPos(building.coordinate().toProto())
+								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
+								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice());
+					}
+				});
+			}
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void getLeagueInfo(short cmd, Message message)
 	{
 		int techId = ((Gs.Num) message).getNum();
