@@ -2035,6 +2035,10 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if (building instanceof IBuildingContract)
 		{
+			if (building.outOfBusiness())
+			{
+				this.write(Package.fail(cmd));
+			}
 			//本人签约
 			if (player.id().equals(building.ownerId()))
 			{
@@ -2076,6 +2080,54 @@ public class GameSession {
 				.stream()
 				.map(Contract::toProto)
 				.collect(Collectors.toList()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryContractSummary(short cmd)
+	{
+		Gs.ContractSummary.Builder builder = Gs.ContractSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.ContractSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof IBuildingContract
+						&& !building.outOfBusiness()
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryContractGridDetail(short cmd, Message message)
+	{
+		Gs.GridIndex gridIndex = (Gs.GridIndex) message;
+		Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
+		builder.setIdx(gridIndex);
+		City.instance().forAllGrid(grid ->
+		{
+			if (grid.getX() == gridIndex.getX() && grid.getY() == gridIndex.getY())
+			{
+
+				grid.forAllBuilding(building ->
+				{
+					if(building instanceof IBuildingContract
+							&& !building.outOfBusiness()
+							&& !((IBuildingContract) building).getBuildingContract().isSign())
+					{
+						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
+						b.setOwnerId(Util.toByteString(building.ownerId()))
+								.setBuildingName(building.getName())
+								.setPos(building.coordinate().toProto())
+								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
+								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice());
+					}
+				});
+			}
+		});
 		this.write(Package.create(cmd, builder.build()));
 	}
 

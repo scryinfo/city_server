@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 
 import com.mongodb.Block;
@@ -312,6 +313,15 @@ public class LogDb {
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
+	}
+
+	public static List<Document> queryBuildingFlowAndLift(long startTime,UUID buildingId)
+	{
+		List<Document> list = new ArrayList<>();
+		 flowAndLift.find(and(eq("b",buildingId),gte("t", startTime)))
+				.sort(Sorts.ascending("t"))
+				 .forEach((Block<? super Document>) list::add);
+		return list;
 	}
 
 	public static void flowAndLift(UUID buildingId,int flowcount,float lift)
