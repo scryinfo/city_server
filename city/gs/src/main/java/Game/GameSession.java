@@ -494,11 +494,38 @@ public class GameSession {
 					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
 						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
 					});
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
 				}
 			});
         });
         this.write(Package.create(cmd, builder.build()));
     }
+	public void queryLabDetail(short cmd, Message message) {
+		Gs.QueryLabDetail c = (Gs.QueryLabDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.LabDetail.Builder builder = Gs.LabDetail.newBuilder();
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.LabDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(building instanceof Laboratory && !building.canUseBy(player.id())) {
+					Laboratory s = (Laboratory)building;
+					Gs.LabDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
+					bb.setEvaProb(s.getEvaProb());
+					bb.setGoodProb(s.getGoodProb());
+					bb.setPrice(s.getPricePreTime());
+					bb.setAvailableTimes(s.getSellTimes());
+					bb.setQueuedTimes(s.getQueuedTimes());
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
+				}
+			});
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -1382,38 +1409,6 @@ public class GameSession {
 		this.write(Package.create(cmd, c));
 	}
 
-//	public void labLaunchLine(short cmd, Message message) {
-//		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
-//		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-//		Building building = City.instance().getBuilding(bid);
-//		if(building == null || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-//			return;
-//		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-//		Laboratory lab = (Laboratory)building;
-//		Laboratory.Line line = lab.getLine(lineId);
-//		if(line == null || building.outOfBusiness() || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
-//			return;
-//		Formula.Consume[] consumes = line.getConsumes();
-//		if(consumes == null)
-//			return;
-//		boolean enoughMaterial = true;
-//		for (Formula.Consume consume : consumes) {
-//			if(consume.m == null)
-//				continue;
-//			if(lab.availableQuantity(consume.m) < consume.n*c.getPhase())
-//				enoughMaterial = false;
-//		}
-//		if(!enoughMaterial)
-//			return;
-//		for (Formula.Consume consume : consumes) {
-//			if(consume.m == null)
-//				continue;
-//			lab.offset(consume.m, -consume.n*c.getPhase());
-//		}
-//		line.launch(c.getPhase());
-//		GameDb.saveOrUpdate(lab);
-//		this.write(Package.create(cmd, c));
-//	}
 	public void labRoll(short cmd, Message message) {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());

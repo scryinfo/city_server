@@ -124,6 +124,21 @@ public class Laboratory extends Building {
     public boolean isExclusiveForOwner() {
         return this.exclusiveForOwner;
     }
+
+    public int getEvaProb() {
+        return this.evaProb;
+    }
+
+    public int getGoodProb() {
+        return this.goodProb;
+    }
+
+    public int getQueuedTimes() {
+        int times = this.inProcess.stream().mapToInt(l->l.times).sum();
+        times -= this.inProcess.isEmpty()?0:this.inProcess.get(0).usedRoll+this.inProcess.get(0).availableRoll;
+        return times;
+    }
+
     public static final class RollResult {
         List<Integer> itemIds;
         int evaPoint;
