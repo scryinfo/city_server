@@ -1277,10 +1277,7 @@ public class GameSession {
 			newOrder.productionType = gs_AdAddNewPromoOrder.getProductionType();
 		}
 		PromotionMgr.instance().AdAddNewPromoOrder(newOrder);
-
-		GameDb.saveOrUpdate(this);
-		//
-
+		GameDb.saveOrUpdate(PromotionMgr.instance());
 		//结账
 		buyer.decMoney(fee);
 		seller.addMoney(fee);
