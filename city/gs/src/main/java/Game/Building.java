@@ -362,10 +362,6 @@ public abstract class Building {
         this.showBubble = showBubble;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
     @Embeddable
     static class FlowInfo {
         int ts;
