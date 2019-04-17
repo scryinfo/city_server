@@ -339,6 +339,11 @@ public abstract class Building {
         this.name = name;
     }
 
+    public String getName()
+    {
+        return name == null ? "" : name;
+    }
+
     // ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
     public void takeAsWorker(Npc npc) {
         if(npc.canWork())

@@ -2126,7 +2126,7 @@ public class GameSession {
 					{
 						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
 						b.setOwnerId(Util.toByteString(building.ownerId()))
-								.setBuildingId(Util.toByteString(building.id()))
+								.setBuildingName(building.getName())
 								.setPos(building.coordinate().toProto())
 								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
 								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice());
