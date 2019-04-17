@@ -603,8 +603,10 @@ public class GameSession {
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
-		else
-			this.write(Package.fail(cmd));
+		else{
+			//this.write(Package.fail(cmd));
+			this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
+		}
 	}
 	public void shelfSet(short cmd, Message message) throws Exception {
 		Gs.ShelfSet c = (Gs.ShelfSet)message;
@@ -1017,13 +1019,13 @@ public class GameSession {
 		}
 
 		List<Integer> types = new ArrayList<>(gs_queryPromoCurAbility.getTypeIdsCount());
-		Gs.AdQueryPromoCurAbilitys.Builder builder = gs_queryPromoCurAbility.newBuilder();
+		Gs.AdQueryPromoCurAbilitys.Builder builder = gs_queryPromoCurAbility.toBuilder();
 		for (int tp : gs_queryPromoCurAbility.getTypeIdsList())
 		{
 			int bsTp = tp/100;
 			int subTp = tp % 100;
 			Integer value = (int)fcySeller.calculatePromoAbility(tp);
-			builder.getCurAbilitysList().add(value);
+			builder.addCurAbilitys(value);
 		}
 		this.write(Package.create(cmd, builder.build()));
 	}
@@ -1104,6 +1106,29 @@ public class GameSession {
 		this.write(Package.create(cmd, gs_AdRemovePromoOrder));
 	}
 
+	//adjustPromoSellingSetting
+	public void AdjustPromoSellingSetting(short cmd, Message message) {
+		Gs.AdjustPromoSellingSetting adjustPromo = (Gs.AdjustPromoSellingSetting) message;
+		UUID sellerBuildingId = Util.toUuid(adjustPromo.getSellerBuildingId().toByteArray());
+		//检查是否是推广公司
+		Building b = City.instance().getBuilding(sellerBuildingId);
+		Building sellerBuilding = City.instance().getBuilding(sellerBuildingId);
+		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
+		if(b == null || fcySeller == null){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.AdjustPromoSellingSetting(): can't find the building instance which id equals to "+sellerBuildingId);
+			}
+			return;
+		}
+		fcySeller.setCurPromPricePerHour(adjustPromo.getPricePerHour());
+		fcySeller.setPromRemainTime(adjustPromo.getRemainTime());
+		fcySeller.setTakeOnNewOrder(adjustPromo.getTakeOnNewOrder());
+		GameDb.saveOrUpdate(fcySeller);
+
+		//发送客户端通知
+		this.write(Package.create(cmd, adjustPromo));
+	}
+
 	//adAddNewPromoOrder
 	public void AdAddNewPromoOrder(short cmd, Message message) {
 		Gs.AdAddNewPromoOrder gs_AdAddNewPromoOrder = (Gs.AdAddNewPromoOrder) message;
@@ -1112,8 +1137,12 @@ public class GameSession {
 		UUID buyerPlayerId = Util.toUuid(gs_AdAddNewPromoOrder.getBuyerPlayerId().toByteArray());
 		//检查是否是推广公司
 		Building b = City.instance().getBuilding(sellerBuildingId);
-		if(b == null || b.outOfBusiness())
+		if(b == null || b.outOfBusiness()){
+			if(GlobalConfig.DEBUGLOG){
+				logger.fatal("GameSession.AdAddNewPromoOrder(): can't find the building instance which id equals to "+sellerBuildingId);
+			}
 			return;
+		}
 		//检查推广的目标类型
 		//1、建筑类型，包括零售店（RETAIL）、 住宅（APARTMENT）
 		//2、商品类型：服装、食品

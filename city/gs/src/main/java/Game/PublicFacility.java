@@ -33,6 +33,10 @@ public class PublicFacility extends Building {
         return curPromPricePerHour;
     }
 
+    public void setCurPromPricePerHour(int curPromPricePerHour) {
+        this.curPromPricePerHour = curPromPricePerHour;
+    }
+
     private int curPromPricePerHour = 0;		//推广价格
 
     public long getPromRemainTime() {
@@ -43,10 +47,18 @@ public class PublicFacility extends Building {
         return selledPromotion;
     }
 
+    public void setPromRemainTime(long promRemainTime) {
+        this.promRemainTime = promRemainTime;
+    }
+
     private long promRemainTime = 0;		//可推广时间
 
     public boolean isTakeOnNewOrder() {
         return takeOnNewOrder;
+    }
+
+    public void setTakeOnNewOrder(boolean takeOnNewOrder) {
+        this.takeOnNewOrder = takeOnNewOrder;
     }
 
     private boolean takeOnNewOrder = false;	//接受新订单
