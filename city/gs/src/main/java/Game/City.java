@@ -225,6 +225,8 @@ public class City {
 
         // do this at last
         updateTimeSection(diffNano);
+
+        PromotionMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

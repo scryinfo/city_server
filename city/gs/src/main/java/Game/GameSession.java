@@ -1188,7 +1188,7 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
+		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/3600000;
 		if(buyer.money() < fee){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
@@ -1254,6 +1254,12 @@ public class GameSession {
 			}
 			return;
 		}
+
+		//临时处理不匹配的情况
+		if(lastOd == null && lastPromotion != null){
+			fcySeller.delSelledPromotion(lastPromotion);
+		}
+
 		newOrder.promotionId = UUID.randomUUID();
 		newOrder.buyerId = buyerPlayerId;
 		newOrder.sellerBuildingId = sellerBuildingId;
@@ -1263,6 +1269,8 @@ public class GameSession {
 		//计算 promStartTs， 先取出广告公司中的所有广告promotionId 列表，计算新广告的起点
 		newOrder.promStartTs = lastOd.promStartTs + lastOd.promDuration;
 		newOrder.promProgress = 0;
+		//客户端发过来的时间单位是毫秒
+		newOrder.promDuration = gs_AdAddNewPromoOrder.getPromDuration();
 		fcySeller.setNewPromoStartTs(newOrder.promStartTs+gs_AdAddNewPromoOrder.getPromDuration());
 		fcySeller.setPromRemainTime(fcySeller.getPromRemainTime() - gs_AdAddNewPromoOrder.getPromDuration());
 
