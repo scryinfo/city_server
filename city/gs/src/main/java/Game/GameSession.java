@@ -1075,7 +1075,7 @@ public class GameSession {
 		}
 		List<PromoOrder> promotions = new ArrayList<>() ;
 		PromotionMgr.instance().getPromotins(promoIDs,promotions);
-		Gs.AdQueryPromotion.Builder newPromotions = AdQueryPromotion.newBuilder();
+		Gs.AdQueryPromotion.Builder newPromotions = AdQueryPromotion.toBuilder();
 
 		for (int i = 0; i < promotions.size(); i++) {
 			newPromotions.addPromotions(promotions.get(i).toProto());
@@ -1240,7 +1240,7 @@ public class GameSession {
 		UUID lastPromotion = fcySeller.getLastPromotion();
 
 		PromoOrder lastOd = null;
-		if(lastPromotion != null){
+		if(lastPromotion == null){
 			lastOd = new PromoOrder();
 			lastOd.promStartTs = System.currentTimeMillis();
 			lastOd.promDuration = 0;
@@ -1264,6 +1264,8 @@ public class GameSession {
 		newOrder.promStartTs = lastOd.promStartTs + lastOd.promDuration;
 		newOrder.promProgress = 0;
 		fcySeller.setNewPromoStartTs(newOrder.promStartTs+gs_AdAddNewPromoOrder.getPromDuration());
+		fcySeller.setPromRemainTime(fcySeller.getPromRemainTime() - gs_AdAddNewPromoOrder.getPromDuration());
+
 		if(hasBuildingType){
 				/*
 				由 PromotionMgr 统一维护所有广告的增删改查比较好。集中更新、方便统计。让建筑中维护的话，
@@ -1293,7 +1295,7 @@ public class GameSession {
 		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知
-		this.write(Package.create(cmd, gs_AdAddNewPromoOrder));
+		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
 	}
 	public void adAddSlot(short cmd, Message message) {
