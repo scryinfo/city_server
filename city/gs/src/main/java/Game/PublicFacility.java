@@ -144,6 +144,9 @@ public class PublicFacility extends Building {
     private List<UUID> selledPromotion = new ArrayList<>();
 
     public UUID getLastPromotion(){
+        if(selledPromotion.size() == 0){
+            return null;
+        }
         return selledPromotion.get(selledPromotion.size()-1);
     }
     public void addSelledPromotion(UUID promoId){

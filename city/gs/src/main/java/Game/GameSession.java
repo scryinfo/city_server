@@ -1238,12 +1238,14 @@ public class GameSession {
 
 		//获取该广告公司最后一个广告
 		UUID lastPromotion = fcySeller.getLastPromotion();
-		PromoOrder lastOd = PromotionMgr.instance().getPromotion(lastPromotion);
-		if(lastOd == null){
-			if(GlobalConfig.DEBUGLOG){
-				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromoOrder not find in promoOrderQueue which id equals "+lastPromotion);
-			}
-			return;
+
+		PromoOrder lastOd = null;
+		if(lastPromotion != null){
+			lastOd = new PromoOrder();
+			lastOd.promStartTs = System.currentTimeMillis();
+			lastOd.promDuration = 0;
+		}else{
+			lastOd = PromotionMgr.instance().getPromotion(lastPromotion);
 		}
 
 		if(!fcySeller.comsumeAvaliableTime(newOrder.promDuration)){
