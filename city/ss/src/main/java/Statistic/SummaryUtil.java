@@ -7,6 +7,8 @@ import com.mongodb.Block;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+
+import static Shared.LogDb.KEY_TOTAL;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -25,6 +27,7 @@ public class SummaryUtil
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String TIME = "time";
+    private static final String TIMETYPE = "timeType";
     private static final String DAY_SELLGROUND = "daySellGround";
     private static final String DAY_RENTGROUND = "dayRentGround";
     private static final String DAY_TRANSFER = "dayTransfer";
@@ -40,6 +43,9 @@ public class SummaryUtil
     private static final String DAY_PLAYER_RENT_GROUND = "dayPlayerRentGround";
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
 
+    //--ly
+    public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
+
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -54,6 +60,10 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerBuyInShelf;
     private static MongoCollection<Document> dayPlayerRentGround;
     private static MongoCollection<Document> dayBuildingIncome;
+
+    //--ly
+    private static MongoCollection<Document> playerExchangeAmount;
+
     public static void init()
     {
         MongoDatabase database = LogDb.getDatabase();
@@ -85,6 +95,8 @@ public class SummaryUtil
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
         dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -333,20 +345,20 @@ public class SummaryUtil
         Document projectObject = new Document()
                 .append(TYPE, "$_id._id." + TYPE)
                 .append("tpi", "$_id._id.tpi")
-                .append(LogDb.KEY_TOTAL, "$" + LogDb.KEY_TOTAL)
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
                 .append("_id", 0);
 
         collection.aggregate(
                 Arrays.asList(
                         Aggregates.match(eq(ID, playerId)),
-                        Aggregates.group(groupObject, Accumulators.sum(LogDb.KEY_TOTAL, "$" + LogDb.KEY_TOTAL)),
+                        Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$" + KEY_TOTAL)),
                         Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) document ->
         {
             int incomeType = document.getInteger(TYPE);
             int goodsId = document.getInteger("tpi");
-            long total = (long) document.get(LogDb.KEY_TOTAL);
+            long total = (long) document.get(KEY_TOTAL);
             map.computeIfAbsent(goodsId,
                     k -> Ss.EconomyInfo.newBuilder().setType(bType).setId(goodsId));
             if (incomeType == Type.INCOME.getValue())
@@ -378,17 +390,17 @@ public class SummaryUtil
         collection.aggregate(
                 Arrays.asList(
                         Aggregates.match(eq(ID, playerId)),
-                        Aggregates.group("$" + TYPE, Accumulators.sum(LogDb.KEY_TOTAL, "$" + LogDb.KEY_TOTAL))
+                        Aggregates.group("$" + TYPE, Accumulators.sum(KEY_TOTAL, "$" + KEY_TOTAL))
                 )
         ).forEach((Block<? super Document>) document ->
         {
             if ((int) document.get("_id") == Type.INCOME.getValue())
             {
-                builder.setIncome((long) document.get(LogDb.KEY_TOTAL));
+                builder.setIncome((long) document.get(KEY_TOTAL));
             }
             else
             {
-                builder.setPay((long) document.get(LogDb.KEY_TOTAL));
+                builder.setPay((long) document.get(KEY_TOTAL));
             }
         });
         return builder.build();
@@ -485,10 +497,11 @@ public class SummaryUtil
                 {
                     list.add(Ss.NodeIncome.newBuilder()
                             .setTime(document.getLong(TIME))
-                            .setIncome(document.getLong(LogDb.KEY_TOTAL)).build());
+                            .setIncome(document.getLong(KEY_TOTAL)).build());
                 });
         return list;
     }
+
 
     enum Type
     {
@@ -504,7 +517,7 @@ public class SummaryUtil
             return value;
         }
     }
-    enum CountType
+    public enum CountType
     {
     	BYDAY(1),BYHOUR(2),BYMINU(3),BYSECONDS(4);
     	private int value;
@@ -518,4 +531,114 @@ public class SummaryUtil
     		return value;
     	}
     }
+
+    enum ExchangeType {
+        MATERIAL(1),GOODS(2),BUYGROUND(3),RENTGROUND(4), LABORATORY(5), storage(6);
+        private int value;
+        ExchangeType(int i)
+        {
+            this.value = i;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
+    }
+
+    //--ly
+    public static MongoCollection<Document> getPlayerExchangeAmount()
+    {
+        return playerExchangeAmount;
+    }
+
+    public static void insertPlayerExchangeData(CountType countType,ExchangeType exchangeType,List<Document> documentList,
+                                         long time,MongoCollection<Document> collection)
+    {
+        //document already owned : id,totalqueryPlayerGoodsCurve
+        documentList.forEach(document ->
+                document.append(TIME, time)
+                        .append(TYPE, exchangeType.getValue())
+                        .append(TIMETYPE,countType.getValue()));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
+
+
+    //玩家交易汇总表中查询截止当前时间交易量。
+    public static List<Document> dayTodayPlayerExchangeAmount(long startTime,long endTime,MongoCollection<Document> collection,SummaryUtil.CountType countType)
+    {
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        collection.aggregate(
+                Arrays.asList(
+                        Aggregates.match(and(
+                                eq("timeType", countType.getValue()),
+                                gte("t", startTime),
+                                lt("t", endTime))),
+                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total")),
+                        Aggregates.project(projectObject)
+                )
+        ).forEach((Block<? super Document>) documentList::add);
+        return documentList;
+    }
+
+    public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
+    {
+        long a=0;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        Date endDate = calendar.getTime();
+        long startTime=endDate.getTime();
+        long endTime = System.currentTimeMillis();
+        List<Document> documentList= dayTodayPlayerExchangeAmount(startTime,endTime,collection,CountType.BYSECONDS);
+        for(Document document : documentList) {
+            a=document.getLong("total");
+        }
+        return a;
+    }
+
+    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, Long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+        Map<Long, Long> map = new LinkedHashMap<>();
+        // 有id的是商品或原料的tpi 没有id的是土地
+        Long ss = null;
+        if (null != id && id > 0) {
+            ss = id;
+        }
+        collection.find(and(
+                eq("timeType", countType.getValue()),
+                eq("type", exchangeType),
+                eq("id", ss),
+                gte("time", startTime),
+                lt("time", endTime)
+        ))
+                .projection(fields(include("time", "total"), excludeId()))
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) document ->
+                {
+                    map.put(document.getLong("time"), document.getLong("total"));
+                });
+        return map;
+    }
+
 }

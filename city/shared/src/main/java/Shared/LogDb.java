@@ -236,7 +236,7 @@ public class LogDb {
 				Arrays.asList(
 						Aggregates.match(and(
 								lt("t", endTime))),
-						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
+							Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
 						Aggregates.project(projectObject)
 						)
 				).forEach((Block<? super Document>) documentList::add);
@@ -536,7 +536,7 @@ public class LogDb {
 	{
 		return npcTypeNum;
 	}
-	
+
 	public static class Positon
 	{
 		int x;
@@ -559,4 +559,51 @@ public class LogDb {
 			return new Document().append("x", x).append("y", y);
 		}
 	}
+
+	//--ly
+	public static List<Document> dayPlyaerExchange1(long startTime, long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t",startTime),
+								lt("t", endTime))),
+						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+
+	public static List<Document> dayPlyaerExchange2(long startTime, long endTime, MongoCollection<Document> collection,boolean isGoods)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		int tp = TP_TYPE_GOODS;
+		if (!isGoods) {
+			tp = TP_TYPE_MATERIAL;
+		}
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", tp),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+
 }

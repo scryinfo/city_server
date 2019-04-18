@@ -184,32 +184,29 @@ public class NpcManager {
     PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((endTime-nowTime)/1000));
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
-        	Map<Integer, Integer>  map=countNpcByType();//统计并入库
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             Date startDate = calendar.getTime();
             long countTime=startDate.getTime()+1000 * 60  * 60;
-            for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
-    			int type=entry.getKey();
-    			long total=entry.getValue();
-    			LogDb.npcTypeNum(countTime,type,total);
-    	    }
+            countNpcByType().forEach((k,v)->{
+            	LogDb.npcTypeNum(countTime,k,v);//统计并入库
+            });
         }
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
   	  //计算各类npc的大小
-	  for (Map.Entry<UUID, Npc> entry : allNpc.entrySet()) {
-		  Npc npc=entry.getValue();
-		  int type=npc.type();
+	  allNpc.forEach((k,v)->{
+		  int type=v.type();
 		  if(!countMap.containsKey(type)){ 
 			  countMap.put(type, 1);
 		  }else{ 
 			  countMap.put(type,countMap.get(type)+1); 
 		  }
-	  }
+	  });
+	  
 	  return countMap;
    }
 

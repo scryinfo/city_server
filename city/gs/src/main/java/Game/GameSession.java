@@ -36,9 +36,9 @@ import Game.FriendManager.ManagerCommunication;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Game.FriendManager.SocietyManager;
-import Game.Meta.Formula;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Meta.MetaExperiences;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
@@ -450,6 +450,21 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+	public void queryLabSummary(short cmd) {
+		Gs.LabSummary.Builder builder = Gs.LabSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.LabSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof Laboratory && !building.outOfBusiness() && !((Laboratory)building).isExclusiveForOwner())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
 	public void setRoleFaceId(short cmd, Message message) {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
@@ -682,12 +697,10 @@ public class GameSession {
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 		this.write(Package.create(cmd, c));
-
-		//货架商品出售通知
-		UUID[] sellBuildingId = {sellBuilding.id()};
-		int metaId = sellBuilding.metaId();  //建筑类型id
-		int[] itemIdAndNum = {metaId,itemId, itemBuy.n};
-		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingId,itemIdAndNum);
+/*		//货架商品出售通知
+		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
+		int[] itemIdAndNum = {itemId, itemBuy.n};
+		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);*/
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
@@ -1308,9 +1321,9 @@ public class GameSession {
 		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
 		Laboratory lab = (Laboratory)building;
-		if(c.getMaxTimes() <= 0 || c.getPricePreTime() < 0)
+		if(c.getSellTimes() < 0 || c.getPricePreTime() < 0)
 			return;
-		lab.setting(c.getMaxTimes(), c.getPricePreTime());
+		lab.setting(c.getSellTimes(), c.getPricePreTime());
 		GameDb.saveOrUpdate(lab);
 		this.write(Package.create(cmd, c));
 	}
@@ -1318,22 +1331,27 @@ public class GameSession {
 		Gs.LabAddLine c = (Gs.LabAddLine)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-			return;
-		Laboratory lab = (Laboratory)building;
-		if(c.getTimes() <= 0 || c.getTimes() > lab.getMaxTimes())
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory))
 			return;
 		if(c.hasGoodCategory()) {
 			if(!MetaGood.legalCategory(c.getGoodCategory()))
 				return;
 		}
-
-		long cost = c.getTimes() * lab.getPricePreTime();
-		if(!player.decMoney(cost))
-			return;
-		lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes());
-		GameDb.saveOrUpdate(lab);
-		this.write(Package.create(cmd, c));
+		Laboratory lab = (Laboratory)building;
+		if(!building.canUseBy(player.id())) {
+			if(!c.hasTimes())
+				return;
+			if(c.getTimes() <= 0 || c.getTimes() > lab.getSellTimes())
+				return;
+			long cost = c.getTimes() * lab.getPricePreTime();
+			if(!player.decMoney(cost))
+				return;
+		}
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
+		if(null != line) {
+			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
+			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
+		}
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -1350,6 +1368,18 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
+	public void labExclusive(short cmd, Message message) {
+		Gs.LabExclusive c = (Gs.LabExclusive)message;
+		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+			return;
+		Laboratory lab = (Laboratory)building;
+		lab.setExclusive(c.getExclusive());
+		GameDb.saveOrUpdate(lab);
+		this.write(Package.create(cmd, c));
+	}
+
 //	public void labLaunchLine(short cmd, Message message) {
 //		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
 //		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
@@ -1914,9 +1944,6 @@ public class GameSession {
 				 * 2019/2/25
 				 * 邮件通知被踢出公会
 				 */
-
-				MailBox.instance().sendMail(Mail.MailType.SOCIETY_KICK_OUT.getMailType(),Util.toUuid(params.getPlayerId().toByteArray()),null,new UUID[]{societyId},null);
-				
 			}
 		}
 	}
@@ -2085,14 +2112,10 @@ public class GameSession {
 	 * (市民需求)每种类型npc的数量
 	 */
 	public void eachTypeNpcNum(short cmd) {
-		Map<Integer, Integer> map=NpcManager.instance().countNpcByType();
-		Gs.CountNpcMap.Builder bd=Gs.CountNpcMap.newBuilder();
 		Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
-	    for (Map.Entry<Integer, Integer> entry : map.entrySet()) { 
-			bd.setKey(entry.getKey());
-			bd.setValue(entry.getValue());
-			list.addCountNpcMap(bd.build());
-	    }
+	    NpcManager.instance().countNpcByType().forEach((k,v)->{
+	    	list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
+	    });
 		this.write(Package.create(cmd,list.build()));
 	}
 
@@ -2144,27 +2167,25 @@ public class GameSession {
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.myProto(id);
 			List<BuildingInfo> ls=null;
-			if(map.containsKey(buildingInfo.getType())){
-				ls=map.get(buildingInfo.getType());
+			int type=buildingInfo.getType();
+			if(map.containsKey(type)){
+				ls=map.get(type);
 			}else{
 				ls=new ArrayList<BuildingInfo>();
 			}
 			ls.add(buildingInfo);
-			map.put(buildingInfo.getType(), ls);
+			map.put(type, ls);
 		 }
 		);
-		if(map!=null&&map.size()>0){
-			for (Entry<Integer, List<BuildingInfo>> entry : map.entrySet()) {
-				Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
-				builder.setType(entry.getKey());
-				entry.getValue().forEach(buildingInfo->{
-					builder.addInfo(buildingInfo);
-				});
-				
-				list.addMyBuildingInfo(builder.build());
-			}
-		}
-
+		map.forEach((k,v)->{
+			Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
+			builder.setType(k);
+			v.forEach(buildingInfo->{
+				builder.addInfo(buildingInfo);
+			});
+			list.addMyBuildingInfo(builder.build());
+		});
+		
 		this.write(Package.create(cmd, list.build()));
 	}
     public void queryMyEva(short cmd, Message message)
@@ -2173,9 +2194,10 @@ public class GameSession {
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
-			list.addEva(Gs.Eva.newBuilder().setPid(Util.toByteString(eva.getPid()))
+			list.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
+					.setPid(Util.toByteString(eva.getPid()))
 					.setAt(eva.getAt())
-					.setBt(eva.getBt())
+					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
 					.setLv(eva.getLv())
 					.setCexp(eva.getCexp())
 					.setB(eva.getB())
@@ -2185,19 +2207,50 @@ public class GameSession {
     }
     public void updateMyEva(short cmd, Message message)
     {
-		Gs.Eva eva = (Gs.Eva)message;
-    	GameDb.saveOrUpdate(eva);
+    	Gs.Eva eva = (Gs.Eva)message;
+		int level=eva.getLv();
+		long cexp=eva.getCexp();
+    	Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
+    	
+		if(level>=1){//计算等级
+			long exp=0l;
+			do{
+				MetaExperiences obj=map.get(level);
+				exp=obj.exp;
+				if(cexp>=exp){
+					cexp=cexp-exp; //减去升级需要的经验
+					level++;  
+				}
+			}while(cexp>=exp);
+		}
+		
+		Eva e=new Eva();
+		e.setId(Util.toUuid(eva.getId().toByteArray()));
+		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
+		e.setAt(eva.getAt());
+		e.setBt(eva.getBt().getNumber());
+		e.setLv(level);
+		e.setCexp(cexp);
+		e.setB(eva.getB());
+    	GameDb.saveOrUpdate(e);
+    	
+    	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
+    	player.decEva(eva.getDecEva());
+       	GameDb.saveOrUpdate(player);
+       	
+    	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
     }
+
 	//未在公会中根据id查询公会信息
 	public void getOneSocietyInfo(short cmd, Message message)
 	{
 		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-			Society society = SocietyManager.getSociety(societyId);
-			if (society != null)
-			{
-				this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society)));
+		Society society = SocietyManager.getSociety(societyId);
+		if (society != null)
+		{
+			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society)));
 
-			}
+		}
 	}
 
 }

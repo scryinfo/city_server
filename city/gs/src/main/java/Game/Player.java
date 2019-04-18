@@ -221,7 +221,13 @@ public class Player {
 
     @Transient
     private GameSession session;
+    
+    @Column
+    private int eva;
 
+    public void addEvaPoint(int d) {
+        this.eva += d;
+    }
     public Player(String name, String account, boolean male, String companyName, String faceId) {
         //this.id = UUID.randomUUID();
         this.account = account;
@@ -235,6 +241,7 @@ public class Player {
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
         this.createTs = System.currentTimeMillis();
+        this.eva=0;
     }
     @PostLoad
     void _init() {
@@ -282,7 +289,7 @@ public class Player {
         if (societyId != null) {
             builder.setSocietyId(Util.toByteString(societyId));
         }
-        builder.setEva(10000);//eva点数 临时用
+        builder.setEva(eva);//eva点数 
         return builder.build();
     }
 
@@ -374,7 +381,12 @@ public class Player {
         sendMoney();
         return m;
     }
-
+    public boolean decEva(int eva) {
+        if(eva<0)
+            return false;
+        this.eva -= eva;
+        return true;
+    }
     public void groundBidingFail(UUID id, GroundAuction.Entry a) {
         int m = (int) this.unlockMoney(a.transactionId);
         GameDb.saveOrUpdate(this);

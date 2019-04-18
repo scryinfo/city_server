@@ -5,8 +5,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -24,27 +22,38 @@ public class PerHourJob implements org.quartz.Job {
     {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
-        
-
-        long time1 = System.currentTimeMillis();
-        long endTime = time1 - time1%(1000 * 10);
+        long time = System.currentTimeMillis();
+        long endTime = time - time%(1000 * 60  * 60);
+        long startTime = endTime - 1000 * 60 * 60;
 
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("PerHourJob start execute,time = " + timeStr);
 
-        //每种商品购买的npc人数,每10秒统计一次
+        //每种商品购买的npc人数,每小时统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, startTime, SummaryUtil.getDayGoodsNpcNum());
+
+
+
+        //buy ground
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.BUYGROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        //rent ground
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.RENTGROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+        //buy goods in Shelf
+        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+        //buy material in Shelf
+        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+
 
         //统计耗时
         StatisticSession.setIsReady(true);
@@ -52,5 +61,6 @@ public class PerHourJob implements org.quartz.Job {
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));
         LOGGER.debug(MessageFormat.format("PerHourJob end execute, time = {0}, consume = {1} ms",
                 timeStr, nowTime1 - nowTime));
+
     }
 }

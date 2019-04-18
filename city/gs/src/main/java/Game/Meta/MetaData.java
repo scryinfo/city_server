@@ -43,6 +43,7 @@ public class MetaData {
     private static final String talentColName = "Talent";
     private static final String talentLvCreateColName = "TalentLvCreate";
     private static final String evaColName = "Eva";
+    private static final String expColName = "Experiences";
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -216,6 +217,7 @@ public class MetaData {
     }
     private static final List<InitialBuildingInfo> initialBuilding = new ArrayList<>();
     private static final List<MetaEva> eva = new ArrayList<MetaEva>();
+    private static final Map<Integer,MetaExperiences> experiences = new HashMap<Integer,MetaExperiences>();
     		
     public static final Formula getFormula(Formula.Key key) {
         return formula.get(key);
@@ -245,6 +247,9 @@ public class MetaData {
     }
     public static List<MetaEva> getAllEva() {
     	return eva;
+    }
+    public static Map<Integer,MetaExperiences> getAllExperiences() {
+    	return experiences;
     }
     public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
@@ -389,6 +394,12 @@ public class MetaData {
             eva.add(m);
         });
     }
+    public static void initExperiences() {
+    	mongoClient.getDatabase(dbName).getCollection(expColName).find().forEach((Block<Document>) doc -> {
+    		MetaExperiences m = new MetaExperiences(doc);
+    		experiences.put(m.lv,m);
+    	});
+    }
 	public static MetaNpc getNpc(int id) {
 		return npc.get(id);
 	}
@@ -417,5 +428,6 @@ public class MetaData {
         initGoodFormula();
         
         initEva();
+        initExperiences();
 	}
 }

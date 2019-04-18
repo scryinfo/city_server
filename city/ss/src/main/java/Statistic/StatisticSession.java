@@ -139,11 +139,11 @@ public class StatisticSession {
 		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
 		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
-	    for (Map.Entry<Long, Long> entry : map.entrySet()) { 
-			bd.setKey(entry.getKey());
-			bd.setValue(entry.getValue());
+	    map.forEach((k,v)->{
+	    	bd.setKey(k);
+			bd.setValue(v);
 			list.addGoodsNpcNumCurveMap(bd.build());
-	    }
+	    });
 		this.write(Package.create(cmd,list.build()));
     }
     
@@ -174,18 +174,46 @@ public class StatisticSession {
     	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
     	Ss.NpcTypeNumMap.Builder npcTypeNumMap = Ss.NpcTypeNumMap.newBuilder();
     	Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
-    	if(map!=null&&map.size()>0){
-    	  	for (Map.Entry<Long, Map> entry : map.entrySet()) { 
-    	  		info.setT(entry.getKey());
-    	 		Map<Integer,Long> m=entry.getValue();
-    	  		for (Map.Entry<Integer,Long> e : m.entrySet()) { 
-    	  			npcTypeNumMap.setTp(e.getKey());
-    	    		npcTypeNumMap.setN(e.getValue());
-    	  		}
-    	  		info.setNpcTypeNumMap(npcTypeNumMap.build());
-    	  		list.addNpcTypeNumInfo(info.build());
-    		}
-    	}
+    	map.forEach((k,v)->{
+     		info.setT(k);
+     		Map<Integer,Long> m=v;
+	  		m.forEach((k1,v1)->{
+	  			npcTypeNumMap.setTp(k1);
+	    		npcTypeNumMap.setN(v1);
+	  		});
+	  		info.setNpcTypeNumMap(npcTypeNumMap.build());
+	  		list.addNpcTypeNumInfo(info.build());
+    	});
+    	
     	this.write(Package.create(cmd, list.build()));
     }
+
+    //---ly
+
+    public void queryPlayerExchangeAmount(short cmd) {
+        Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
+        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
+        builder.setPlayExchangeAmount(playerExchangeAmount);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    // 查询一周曲线图
+	public void queryPlayerGoodsCurve(short cmd, Message message) {
+		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
+		long id = curve.getId();
+
+		Ss.PlayerGoodsCurve.ExchangeType exchangeType = curve.getExchangeType();
+		Map<Long, Long> map=SummaryUtil.queryPlayerGoodsCurve(SummaryUtil.getPlayerExchangeAmount(),id,exchangeType,CountType.BYHOUR);
+		Ss.PlayerGoodsCurveMap.Builder bmap = Ss.PlayerGoodsCurveMap.newBuilder();
+		Ss.PlayerGoodsCurve.Builder list = Ss.PlayerGoodsCurve.newBuilder();
+		list.setExchangeType(exchangeType);
+		map.forEach((k,v)->{
+			bmap.setKey(k);
+			bmap.setValue(v);
+			list.addPlayerGoodsCurveMap(bmap.build());
+		});
+		this.write(Package.create(cmd,list.build()));
+
+	}
+
 }

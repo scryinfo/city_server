@@ -220,7 +220,7 @@ public abstract class Building {
     protected boolean working;
 
     @Column(nullable = false)
-    private int salaryRatio;
+    protected int salaryRatio;
 
     @Column(nullable = false)
     private long salaryRatioTs;
@@ -531,7 +531,10 @@ public abstract class Building {
     public void setSalaryRatio(int salaryRatio, long ts) {
         this.salaryRatio = salaryRatio;
         this.salaryRatioTs = ts;
+        this.setSalaryRatioAction();
     }
+
+    protected void setSalaryRatioAction(){}
 
     public void hourTickAction(int nowHour) {
         flow = flowCount;
