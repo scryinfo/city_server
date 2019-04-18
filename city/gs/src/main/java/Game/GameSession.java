@@ -132,7 +132,7 @@ public class GameSession {
 				}
 			} catch (Exception e) {
 				if(GlobalConfig.debug())
-					logger.fatal(Throwables.getStackTraceAsString(e));
+					GlobalConfig.cityError(Throwables.getStackTraceAsString(e));
 				else
 					this.close();
 			}
@@ -757,7 +757,7 @@ public class GameSession {
 		}
 		IStorage s = IStorage.get(bid, player);
 		if(s == null) {
-			logger.fatal("building not exist" + bid);
+			GlobalConfig.cityError("building not exist" + bid);
 			return;
 		}
 		s.clearOrder(id);
@@ -1013,7 +1013,7 @@ public class GameSession {
 
 		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.adQueryPromoCurAbilitys: building type of seller is not PublicFacility!");
+				GlobalConfig.cityError("GameSession.adQueryPromoCurAbilitys: building type of seller is not PublicFacility!");
 			}
 			return;
 		}
@@ -1045,7 +1045,7 @@ public class GameSession {
 		//获取 payedPromotion
 		if(player == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is false but player not exist!");
+				GlobalConfig.cityError("PromotionMgr.AdQueryPromotion: isSeller is false but player not exist!");
 			}
 			return;
 		}
@@ -1055,7 +1055,7 @@ public class GameSession {
 			//获取 selledPromotion
 			if(!AdQueryPromotion.hasSellerBuildingId()){
 				if(GlobalConfig.DEBUGLOG){
-					logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is true but SellerBuildingId is null!");
+					GlobalConfig.cityError("PromotionMgr.AdQueryPromotion: isSeller is true but SellerBuildingId is null!");
 				}
 				return;
 			}
@@ -1063,7 +1063,7 @@ public class GameSession {
 
 			if(bd == null){
 				if(GlobalConfig.DEBUGLOG){
-					logger.fatal("PromotionMgr.AdQueryPromotion: isSeller is true but building not exist!");
+					GlobalConfig.cityError("PromotionMgr.AdQueryPromotion: isSeller is true but building not exist!");
 				}
 				return;
 			}
@@ -1091,7 +1091,7 @@ public class GameSession {
 		PromoOrder promoOrder = PromotionMgr.instance().getPromotion(promoId);
 		if(promoOrder == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdRemovePromoOrder(): PromoOrder which Id equals "+promoId+" not find!");
+				GlobalConfig.cityError("GameSession.AdRemovePromoOrder(): PromoOrder which Id equals "+promoId+" not find!");
 			}
 			return;
 		}
@@ -1114,9 +1114,10 @@ public class GameSession {
 		Building b = City.instance().getBuilding(sellerBuildingId);
 		Building sellerBuilding = City.instance().getBuilding(sellerBuildingId);
 		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
+
 		if(b == null || fcySeller == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdjustPromoSellingSetting(): can't find the building instance which id equals to "+sellerBuildingId);
+				GlobalConfig.cityError("GameSession.AdjustPromoSellingSetting(): can't find the building instance which id equals to "+sellerBuildingId);
 			}
 			return;
 		}
@@ -1139,7 +1140,7 @@ public class GameSession {
 		Building b = City.instance().getBuilding(sellerBuildingId);
 		if(b == null || b.outOfBusiness()){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): can't find the building instance which id equals to "+sellerBuildingId);
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): can't find the building instance which id equals to "+sellerBuildingId);
 			}
 			return;
 		}
@@ -1152,7 +1153,7 @@ public class GameSession {
 
 		if(hasProducerId && hasBuildingType){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): buildingType and productionType can't be avaliable at the same time.");
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): buildingType and productionType can't be avaliable at the same time.");
 			}
 			return;
 		}
@@ -1169,19 +1170,19 @@ public class GameSession {
 		//购买的时长是否合法
 		if(gs_AdAddNewPromoOrder.getPromDuration() > fcySeller.getPromRemainTime()){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
 			return;
 		}
 		if(sellerBuilding == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): building instance of sellerBuilding not find which Id equals to"+newOrder.sellerBuildingId);
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): building instance of sellerBuilding not find which Id equals to"+newOrder.sellerBuildingId);
 			}
 			return;
 		}
 		if(buyer == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): Buyer not find which Id equals to"+newOrder.sellerBuildingId);
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): Buyer not find which Id equals to"+newOrder.sellerBuildingId);
 			}
 			return;
 		}
@@ -1190,7 +1191,7 @@ public class GameSession {
 		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
 		if(buyer.money() < fee){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
@@ -1240,14 +1241,14 @@ public class GameSession {
 		PromoOrder lastOd = PromotionMgr.instance().getPromotion(lastPromotion);
 		if(lastOd == null){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): PromoOrder not find in promoOrderQueue which id equals "+lastPromotion);
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromoOrder not find in promoOrderQueue which id equals "+lastPromotion);
 			}
 			return;
 		}
 
 		if(!fcySeller.comsumeAvaliableTime(newOrder.promDuration)){
 			if(GlobalConfig.DEBUGLOG){
-				logger.fatal("GameSession.AdAddNewPromoOrder(): fcySeller.comsumeAvaliableTime return false");
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): fcySeller.comsumeAvaliableTime return false");
 			}
 			return;
 		}
@@ -1862,7 +1863,7 @@ public class GameSession {
 		}
 		catch (ExecutionException e)
 		{
-			logger.fatal("GameSession.toDoOnline(): push blacklist failed.");
+			GlobalConfig.cityError("GameSession.toDoOnline(): push blacklist failed.");
 			e.printStackTrace();
 		}
 		this.write(Package.create(GsCode.OpCode.getBlacklist_VALUE, builder1.build()));
@@ -1897,7 +1898,7 @@ public class GameSession {
 			}
 			catch (ExecutionException e)
 			{
-				logger.fatal("get player name failed : id=" + from_id);
+				GlobalConfig.cityError("get player name failed : id=" + from_id);
 				e.printStackTrace();
 			}
 			builder.setId(Util.toByteString(from_id))

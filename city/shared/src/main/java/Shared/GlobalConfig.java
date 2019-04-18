@@ -1,5 +1,7 @@
 package Shared;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 
 public class GlobalConfig {
@@ -28,4 +30,6 @@ public class GlobalConfig {
 		return product;
 	}
 	public static final boolean DEBUGLOG = false;
+	private static final Logger logger = Logger.getLogger(GlobalConfig.class);
+	public static final void cityError(String msg){logger.fatal("[cityError] "+msg);}
 }

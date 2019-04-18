@@ -68,6 +68,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.adAddNewPromoOrder_VALUE, Wrapper.newWithMessageAsync(Gs.AdAddNewPromoOrder.PARSER, GameSession.class,"AdAddNewPromoOrder"));
 			table.put((short) GsCode.OpCode.adRemovePromoOrder_VALUE, Wrapper.newWithMessageAsync(Gs.AdRemovePromoOrder.PARSER, GameSession.class,"AdRemovePromoOrder"));
 			table.put((short) GsCode.OpCode.adQueryPromoCurAbilitys_VALUE, Wrapper.newWithMessageAsync(Gs.AdQueryPromoCurAbilitys.PARSER, GameSession.class,"adQueryPromoCurAbilitys"));
+			table.put((short) GsCode.OpCode.adjustPromoSellingSetting_VALUE, Wrapper.newWithMessageAsync(Gs.AdjustPromoSellingSetting.PARSER, GameSession.class,"AdjustPromoSellingSetting"));
 
 			table.put((short) GsCode.OpCode.delItem_VALUE, Wrapper.newWithMessageAsync(Gs.DelItem.PARSER, GameSession.class,"delItem"));
 
