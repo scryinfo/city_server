@@ -1188,7 +1188,7 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = (fcySeller.getCurPromPricePerHour()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/3600000;
+		int fee = (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
 		if(buyer.money() < fee){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");

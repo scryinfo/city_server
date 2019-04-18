@@ -33,6 +33,11 @@ public class PublicFacility extends Building {
         return curPromPricePerHour;
     }
 
+    //获取每毫秒价格
+    public int getCurPromPricePerMs() {
+        return curPromPricePerHour/3600000;
+    }
+
     public void setCurPromPricePerHour(int curPromPricePerHour) {
         this.curPromPricePerHour = curPromPricePerHour;
     }
