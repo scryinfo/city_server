@@ -511,6 +511,8 @@ public class GameSession {
 			grid.forAllBuilding(building->{
 				if(building instanceof Laboratory && !building.canUseBy(player.id())) {
 					Laboratory s = (Laboratory)building;
+					if(s.isExclusiveForOwner())
+						return;
 					Gs.LabDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
 					bb.setPos(building.coordinate().toProto());
@@ -1375,6 +1377,13 @@ public class GameSession {
 			long cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
 				return;
+
+			lab.updateTodayIncome(cost);
+			if(c.hasGoodCategory())
+				lab.updateTotalGoodIncome(cost, c.getTimes());
+			else
+				lab.updateTotalEvaIncome(cost, c.getTimes());
+			LogDb.buildingIncome(lab.id(), player.id(), cost, 0, 0);
 		}
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
 		if(null != line) {
