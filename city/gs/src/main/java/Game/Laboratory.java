@@ -61,6 +61,10 @@ public class Laboratory extends Building {
                 .setProbGood(this.goodProb)
                 .setRecommendPrice(0)
                 .setExclusive(this.exclusiveForOwner)
+                .setTotalEvaIncome(this.totalEvaIncome)
+                .setTotalEvaTimes(this.totalEvaTimes)
+                .setTotalGoodIncome(this.totalGoodIncome)
+                .setTotalGoodTimes(this.totalGoodTimes)
                 .build();
     }
     @Override
@@ -137,6 +141,16 @@ public class Laboratory extends Building {
         int times = this.inProcess.stream().mapToInt(l->l.times).sum();
         times -= this.inProcess.isEmpty()?0:this.inProcess.get(0).usedRoll+this.inProcess.get(0).availableRoll;
         return times;
+    }
+
+    public void updateTotalGoodIncome(long cost, int times) {
+        this.totalGoodIncome += cost;
+        this.totalGoodTimes += times;
+    }
+
+    public void updateTotalEvaIncome(long cost, int times) {
+        this.totalEvaIncome += cost;
+        this.totalEvaTimes += times;
     }
 
     public static final class RollResult {
@@ -303,4 +317,9 @@ public class Laboratory extends Building {
     @Transient
     private int evaProb;
     private boolean exclusiveForOwner;
+
+    private long totalEvaIncome;
+    private int totalEvaTimes;
+    private long totalGoodIncome;
+    private int totalGoodTimes;
 }
