@@ -1040,15 +1040,23 @@ public class GameDb {
 		return res;
 	}
 	
-	public static List<Eva> getEvaInfoByPlayId(UUID pid)
+	public static List<Eva> getEvaInfoList(UUID pid,Integer itemId)
 	{
 		List<Eva> list = new ArrayList<Eva>();
 		Session session = sessionFactory.openSession();
 		try
 		{
-			list = session.createQuery("FROM Eva WHERE pid=:pid",Eva.class)
-					.setParameter("pid", pid)
-					.list();
+			if(itemId==null){
+				list = session.createQuery("FROM Eva WHERE pid=:pid",Eva.class)
+						.setParameter("pid", pid)
+						.list();
+			}else{
+				list = session.createQuery("FROM Eva WHERE pid=:pid and at=:at",Eva.class)
+						.setParameter("pid", pid)
+						.setParameter("at", itemId)
+						.list();
+			}
+			
 		}
 		catch (RuntimeException e)
 		{
