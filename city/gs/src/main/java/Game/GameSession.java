@@ -2102,8 +2102,7 @@ public class GameSession {
 			g.forAllBuilding(building -> {
 				if(building instanceof IBuildingContract
 						&& !building.outOfBusiness()
-						&& !((IBuildingContract) building).getBuildingContract().isSign()
-						&& !building.ownerId().equals(player.id()))
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
 					n.incrementAndGet();
 			});
 			b.setCount(n.intValue());
@@ -2125,8 +2124,7 @@ public class GameSession {
 				{
 					if(building instanceof IBuildingContract
 							&& !building.outOfBusiness()
-							&& !((IBuildingContract) building).getBuildingContract().isSign()
-							&& !building.ownerId().equals(player.id()))
+							&& !((IBuildingContract) building).getBuildingContract().isSign())
 					{
 						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
 						b.setOwnerId(Util.toByteString(building.ownerId()))
