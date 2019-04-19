@@ -163,7 +163,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryMyEva"));
 			table.put((short) GsCode.OpCode.updateMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.Eva.PARSER, GameSession.class,"updateMyEva"));
 			table.put((short) GsCode.OpCode.queryMyBrands_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryMyBrands"));
-			
+			table.put((short) GsCode.OpCode.queryMyBrandDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBrandDetail.PARSER, GameSession.class,"queryMyBrandDetail"));
 
 			if(GlobalConfig.debug()){
 
