@@ -22,6 +22,8 @@ import Game.Contract.ContractManager;
 
 @Entity(name = "PublicFacility")
 public class PublicFacility extends Building {
+    PublicFacility(){}
+
     public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
@@ -147,8 +149,12 @@ public class PublicFacility extends Building {
     @CollectionTable(name = "PubFacility_promo", joinColumns = @JoinColumn(name = "selled_id"))
     @OrderColumn*/
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "Pub_promo", joinColumns = @JoinColumn(name = "pid", referencedColumnName = "ownerId"))
+    @Column(name="pid")
+    private UUID pid;
+
+    //@ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "Pub_promo", joinColumns = @JoinColumn(name = "pid", referencedColumnName = "pid"))
     private List<UUID> selledPromotion = new ArrayList<>();
 
     public UUID getLastPromotion(){
@@ -423,7 +429,7 @@ public class PublicFacility extends Building {
         qty += 1;
         return ad;
     }
-    protected PublicFacility() {}
+    //protected PublicFacility() {}
 
     @Override
     public int quality() {
