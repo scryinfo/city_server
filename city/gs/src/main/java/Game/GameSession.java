@@ -1259,12 +1259,12 @@ public class GameSession {
 		}
 
 		//临时处理不匹配的情况,正常情况下不会出现这种情况
-		if(lastOrder == null && lastPromotion != null){
-			//fcySeller.delSelledPromotion(lastPromotion);
+		if(lastOrder == null && !lastPromotion.equals(null)){
+			fcySeller.delSelledPromotion(lastPromotion);
 			if(GlobalConfig.DEBUGLOG) {
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): lastOrder == null && lastPromotion != null");
 			}
-			return;
+			//return;
 		}
 
 		newOrder.promotionId = UUID.randomUUID();
