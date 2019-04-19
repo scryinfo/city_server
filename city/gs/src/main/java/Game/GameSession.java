@@ -49,6 +49,7 @@ import Shared.Package;
 import Shared.RoleBriefInfo;
 import Shared.Util;
 import Shared.Validator;
+import antlr.StringUtils;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -2382,9 +2383,12 @@ public class GameSession {
     	Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
     	int type=msg.getType();
     	UUID bId = Util.toUuid(msg.getBId().toByteArray());
-		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+	//	UUID pId = Util.toUuid(msg.getPId().toByteArray());
 		
         Building build=City.instance().getBuilding(bId);
+        UUID techPlayId=build.getTechPlayId();
+        UUID pId =(techPlayId!=null?techPlayId:Util.toUuid(msg.getPId().toByteArray())); //优先查询加盟玩家技术
+        
         Gs.BuildingInfo buildInfo = build.myProto(pId);
         
         Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();

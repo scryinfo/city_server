@@ -351,6 +351,10 @@ public abstract class Building {
 		this.techPlayId = techPlayId;
 	}
 
+	public UUID getTechPlayId() {
+		return techPlayId;
+	}
+
 	// ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
     public void takeAsWorker(Npc npc) {
         if(npc.canWork())
