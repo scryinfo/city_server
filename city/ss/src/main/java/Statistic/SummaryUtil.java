@@ -27,7 +27,7 @@ public class SummaryUtil
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String TIME = "time";
-    private static final String TIMETYPE = "timeType";
+    private static final String COUNTTYPE = "countType";
     private static final String DAY_SELLGROUND = "daySellGround";
     private static final String DAY_RENTGROUND = "dayRentGround";
     private static final String DAY_TRANSFER = "dayTransfer";
@@ -559,7 +559,7 @@ public class SummaryUtil
         documentList.forEach(document ->
                 document.append(TIME, time)
                         .append(TYPE, exchangeType.getValue())
-                        .append(TIMETYPE,countType.getValue()));
+                        .append(COUNTTYPE,countType.getValue()));
         if (!documentList.isEmpty()) {
             collection.insertMany(documentList);
         }
@@ -577,9 +577,9 @@ public class SummaryUtil
         collection.aggregate(
                 Arrays.asList(
                         Aggregates.match(and(
-                                eq("timeType", countType.getValue()),
-                                gte("t", startTime),
-                                lt("t", endTime))),
+                                eq(COUNTTYPE, countType.getValue()),
+                                gte(TIME, startTime),
+                                lt(TIME, endTime))),
                         Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total")),
                         Aggregates.project(projectObject)
                 )
@@ -601,7 +601,7 @@ public class SummaryUtil
         long endTime = System.currentTimeMillis();
         List<Document> documentList= dayTodayPlayerExchangeAmount(startTime,endTime,collection,CountType.BYSECONDS);
         for(Document document : documentList) {
-            a=document.getLong("total");
+            a=document.getLong(KEY_TOTAL);
         }
         return a;
     }
@@ -626,17 +626,17 @@ public class SummaryUtil
             ss = id;
         }
         collection.find(and(
-                eq("timeType", countType.getValue()),
-                eq("type", exchangeType),
-                eq("id", ss),
-                gte("time", startTime),
-                lt("time", endTime)
+                eq(COUNTTYPE, countType.getValue()),
+                eq(TYPE, exchangeType),
+                eq(ID, ss),
+                gte(TIME, startTime),
+                lt(TIME, endTime)
         ))
-                .projection(fields(include("time", "total"), excludeId()))
-                .sort(Sorts.descending("time"))
+                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+                .sort(Sorts.descending(TIME))
                 .forEach((Block<? super Document>) document ->
                 {
-                    map.put(document.getLong("time"), document.getLong("total"));
+                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
                 });
         return map;
     }
