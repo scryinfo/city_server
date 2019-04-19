@@ -26,6 +26,7 @@ public class PublicFacility extends Building {
 
     public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
+        this.pid = ownerId;
         this.meta = meta;
         this.qty = meta.qty;
     }
