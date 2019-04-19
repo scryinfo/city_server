@@ -439,7 +439,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+				if(building instanceof IShelf) {
 					IShelf s = (IShelf)building;
 					if(s.getSaleCount(mi.id) > 0)
 						n.addAndGet(1);
@@ -486,7 +486,7 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+				if(building instanceof IShelf) {
 					IShelf s = (IShelf)building;
 					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
@@ -509,7 +509,7 @@ public class GameSession {
 			Gs.LabDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof Laboratory && !building.canUseBy(player.id())) {
+				if(building instanceof Laboratory) {
 					Laboratory s = (Laboratory)building;
 					if(s.isExclusiveForOwner())
 						return;
