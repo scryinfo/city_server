@@ -230,6 +230,9 @@ public class MetaData {
     public static final GoodFormula getFormula(int goodId) {
         return goodFormula.get(goodId);
     }
+    public static final Set<Integer> getBuildingTech(int id) {
+    	return buildingTech.get(id);
+    }
     public static final MetaMaterial getMaterial(int id) {
         return material.get(id);
     }

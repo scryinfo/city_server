@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -17,12 +17,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import Game.Contract.BuildingContract;
-import Game.Contract.Contract;
-import Game.Contract.ContractManager;
-import Game.Contract.IBuildingContract;
-import Game.League.LeagueInfo;
-import Game.League.LeagueManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -31,6 +25,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.FriendManager;
 import Game.FriendManager.FriendRequest;
@@ -38,6 +36,7 @@ import Game.FriendManager.ManagerCommunication;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Game.FriendManager.SocietyManager;
+import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaExperiences;
@@ -2103,8 +2102,7 @@ public class GameSession {
 			g.forAllBuilding(building -> {
 				if(building instanceof IBuildingContract
 						&& !building.outOfBusiness()
-						&& !((IBuildingContract) building).getBuildingContract().isSign()
-						&& !building.ownerId().equals(player.id()))
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
 					n.incrementAndGet();
 			});
 			b.setCount(n.intValue());
@@ -2126,8 +2124,7 @@ public class GameSession {
 				{
 					if(building instanceof IBuildingContract
 							&& !building.outOfBusiness()
-							&& !((IBuildingContract) building).getBuildingContract().isSign()
-							&& !building.ownerId().equals(player.id()))
+							&& !((IBuildingContract) building).getBuildingContract().isSign())
 					{
 						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
 						b.setOwnerId(Util.toByteString(building.ownerId()))
@@ -2336,7 +2333,7 @@ public class GameSession {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
-		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
+		GameDb.getEvaInfoList(pid,null).forEach(eva->{
 			list.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
 					.setPid(Util.toByteString(eva.getPid()))
 					.setAt(eva.getAt())
@@ -2382,5 +2379,40 @@ public class GameSession {
        	GameDb.saveOrUpdate(player);
        	
     	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
+    }
+    public void queryMyBrands(short cmd, Message message)
+    {
+    	Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
+    	int type=msg.getType();
+    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		
+        Building build=City.instance().getBuilding(bId);
+        Gs.BuildingInfo buildInfo = build.myProto(pId);
+        
+        Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
+		Set<Integer> set=MetaData.getBuildingTech(type);
+		Iterator<Integer> it = set.iterator();  
+		while (it.hasNext()) {  
+			Integer itemId = it.next();  
+			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+			band.setMetaId(itemId)
+			  	.setBrand(buildInfo.getBrand());
+			  //.setQuality(buildInfo.getQuality());
+			
+    		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
+    			band.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
+    					.setPid(Util.toByteString(eva.getPid()))
+    					.setAt(eva.getAt())
+    					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
+    					.setLv(eva.getLv())
+    					.setCexp(eva.getCexp())
+    					.setB(eva.getB())
+    					.build());
+    		});
+    		
+    		list.addBrand(band.build());
+		}  
+    	this.write(Package.create(cmd, list.build()));
     }
 }

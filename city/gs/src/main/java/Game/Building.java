@@ -487,7 +487,8 @@ public abstract class Building {
 		Gs.BuildingInfo b=toProto();
     	Gs.BuildingInfo.Builder builder=b.toBuilder();
     	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setScore(BrandManager.instance().getBuildingBrandScore(playerId, metaBuilding.id));
+    		   .setBrand(BrandManager.instance().getBuildingBrandScore(playerId, metaBuilding.id))
+    		   .setQuality(quality());
      	return builder.build(); 
     }
     public abstract Message detailProto();
