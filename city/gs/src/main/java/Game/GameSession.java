@@ -2100,10 +2100,13 @@ public class GameSession {
 			b.setIdx(gi.toProto());
 			AtomicInteger n = new AtomicInteger();
 			g.forAllBuilding(building -> {
-				if(building instanceof IBuildingContract
+				if (building instanceof IBuildingContract
 						&& !building.outOfBusiness()
+						&& ((IBuildingContract) building).getBuildingContract().isOpen()
 						&& !((IBuildingContract) building).getBuildingContract().isSign())
+				{
 					n.incrementAndGet();
+				}
 			});
 			b.setCount(n.intValue());
 		});
@@ -2122,8 +2125,9 @@ public class GameSession {
 
 				grid.forAllBuilding(building ->
 				{
-					if(building instanceof IBuildingContract
+					if (building instanceof IBuildingContract
 							&& !building.outOfBusiness()
+							&& ((IBuildingContract) building).getBuildingContract().isOpen()
 							&& !((IBuildingContract) building).getBuildingContract().isSign())
 					{
 						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
