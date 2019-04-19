@@ -207,6 +207,9 @@ public abstract class Building {
 
     @Column(nullable = false)
     private UUID ownerId;
+    
+    @Column
+    private UUID techPlayId;
 
     @Embedded
     private Coordinate coordinate;
@@ -344,7 +347,11 @@ public abstract class Building {
         return name == null ? "" : name;
     }
 
-    // ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
+	public void setTechPlayId(UUID techPlayId) {
+		this.techPlayId = techPlayId;
+	}
+
+	// ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
     public void takeAsWorker(Npc npc) {
         if(npc.canWork())
             this.allStaff.add(npc);
@@ -468,6 +475,7 @@ public abstract class Building {
                         .setX(this.coordinate.x)
                         .setY(this.coordinate.y))
                 .setOwnerId(Util.toByteString(ownerId))
+                .setTechPlayId(Util.toByteString(techPlayId))
                 .setNpcFlow(this.flow)
                 .setState(Gs.BuildingState.valueOf(state))
                 .setSalary(salaryRatio)

@@ -2435,4 +2435,14 @@ public class GameSession {
         });
 		this.write(Package.create(cmd, list.build()));
     }
+    
+    public void updateMyBrandDetail(short cmd,Message message){
+    	Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
+    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
+    	UUID pId = Util.toUuid(msg.getPId().toByteArray());
+        Building build=City.instance().getBuilding(bId);
+        build.setTechPlayId(pId);
+        GameDb.saveOrUpdate(build);
+        this.write(Package.create(cmd, build.toProto()));
+    }
 }
