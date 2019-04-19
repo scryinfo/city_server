@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +35,7 @@ import Game.FriendManager.ManagerCommunication;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Game.FriendManager.SocietyManager;
+import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
@@ -2338,14 +2338,7 @@ public class GameSession {
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		GameDb.getEvaInfoList(pid,null).forEach(eva->{
-			list.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
-					.setPid(Util.toByteString(eva.getPid()))
-					.setAt(eva.getAt())
-					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
-					.setLv(eva.getLv())
-					.setCexp(eva.getCexp())
-					.setB(eva.getB())
-					.build());
+			list.addEva(eva.toProto());
 		});
 		this.write(Package.create(cmd, list.build()));
     }
@@ -2395,28 +2388,51 @@ public class GameSession {
         Gs.BuildingInfo buildInfo = build.myProto(pId);
         
         Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
-		Set<Integer> set=MetaData.getBuildingTech(type);
-		Iterator<Integer> it = set.iterator();  
-		while (it.hasNext()) {  
-			Integer itemId = it.next();  
+		MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
-			band.setMetaId(itemId)
-			  	.setBrand(buildInfo.getBrand());
-			  //.setQuality(buildInfo.getQuality());
-			
+			band.setItemId(itemId).setBrand(buildInfo.getBrand());
     		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-    			band.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
-    					.setPid(Util.toByteString(eva.getPid()))
-    					.setAt(eva.getAt())
-    					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
-    					.setLv(eva.getLv())
-    					.setCexp(eva.getCexp())
-    					.setB(eva.getB())
-    					.build());
+    			band.addEva(eva.toProto());
     		});
-    		
     		list.addBrand(band.build());
-		}  
+		});
     	this.write(Package.create(cmd, list.build()));
+    }
+    
+    public void queryMyBrandDetail(short cmd,Message message){
+    	Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
+    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
+    	UUID pId = Util.toUuid(msg.getPId().toByteArray());
+        int itemId=msg.getItemId();
+        List<UUID> ls=new ArrayList<UUID>();
+        ls.add(pId);
+        
+        Set<LeagueInfo.UID> set=LeagueManager.getInstance().getBuildingLeagueTech(bId); //加盟的技术
+        for (LeagueInfo.UID info : set) {
+    		int techId=info.getTechId();
+			if(itemId==techId){
+				ls.add(info.getPlayerId());
+				break;
+			}
+		}
+        
+        Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
+        ls.forEach(playerId->{
+			Player player=GameDb.getPlayer(playerId);
+		    Building build=City.instance().getBuilding(bId);
+		    Gs.BuildingInfo buildInfo = build.myProto(playerId);
+			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
+		    
+			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();
+			detail.setPId(Util.toByteString(playerId));
+		    detail.setName(player.getName()).setBrand(buildInfo.getBrand());
+			
+    		GameDb.getEvaInfoList(playerId,itemId).forEach(eva->{
+    			detail.addEva(eva.toProto());
+    		});
+    		detail.setLeaveTime(leaveTime);
+			list.addDetail(detail.build());
+        });
+		this.write(Package.create(cmd, list.build()));
     }
 }

@@ -119,6 +119,15 @@ public class LeagueManager
         }
         return builder.build();
     }
+    
+    public long queryProtoLeagueMemberLeaveTime(UUID playerId, int techId, UUID buildingId)
+    {
+    	LeagueInfo.UID uid = new LeagueInfo.UID(playerId, techId);
+    	LeagueInfo leagueInfo = leagueInfoMap.get(uid);
+    	LeagueInfo.Member member=leagueInfo.getMember(buildingId);
+    	long leaveTime=member.leaveTime();
+    	return leaveTime;
+    }
 
     private List<Gs.LeagueInfo.TechInfo> getAllTechInfo(UUID playerId, int techId)
     {

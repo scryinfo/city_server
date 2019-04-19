@@ -107,6 +107,18 @@ public class LeagueInfo
         return joinMemberList;
     }
 
+    public LeagueInfo.Member getMember(UUID buildingId)
+    {
+    	LeagueInfo.Member m=null;
+        for (Member member : members) {
+        	if(buildingId.equals(member.buildingId)){
+    			m= member;
+    			break;
+    		}
+		}
+    	return m;
+    }
+    
     public Gs.LeagueSetting toSettingProto()
     {
         if (isOpen)
@@ -181,6 +193,11 @@ public class LeagueInfo
         {
             return System.currentTimeMillis() > startTs + signHours * 36000000;
         }
+        
+        public long leaveTime(){
+        	return startTs + signHours * 36000000;
+        }
+        
         public Member()
         {
         }
