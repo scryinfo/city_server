@@ -456,6 +456,7 @@ public class PublicFacility extends Building {
         builder.setQty(qty);
         builder.setTicketPrice(this.tickPrice);
         builder.setVisitorCount(visitorCount);
+        builder.setSelledPromCount(this.getSelledPromotion().size());
         builder.setNewPromoStartTs(this.getNewPromoStartTs());
         builder.setCurPromPricePerHour(this.getCurPromPricePerHour());
         builder.setPromRemainTime(this.getPromRemainTime());

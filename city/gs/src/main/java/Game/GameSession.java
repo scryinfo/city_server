@@ -1162,18 +1162,21 @@ public class GameSession {
 		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
 		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
 		Player buyer =  GameDb.getPlayer(buyerPlayerId);
+		boolean selfPromo = buyerPlayerId == sellerBuilding.ownerId();
 
 		PromoOrder newOrder = new PromoOrder();
 		//订单记录该价格（ 需要记录吗？）
 		newOrder.setTransactionPrice(fcySeller.getCurPromPricePerHour());
 
 		//购买的时长是否合法
-		if(gs_AdAddNewPromoOrder.getPromDuration() > fcySeller.getPromRemainTime()){
+		//广告商给自添加推广不用考虑可用时间
+		if(!selfPromo && gs_AdAddNewPromoOrder.getPromDuration() > fcySeller.getPromRemainTime()){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
 			return;
 		}
+
 		if(sellerBuilding == null){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): building instance of sellerBuilding not find which Id equals to"+newOrder.sellerBuildingId);
@@ -1188,7 +1191,7 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
+		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
 		if(buyer.money() < fee){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
@@ -1239,13 +1242,13 @@ public class GameSession {
 		//获取该广告公司最后一个广告
 		UUID lastPromotion = fcySeller.getLastPromotion();
 
-		PromoOrder lastOd = null;
+		PromoOrder lastOrder = null;
 		if(lastPromotion == null){
-			lastOd = new PromoOrder();
-			lastOd.promStartTs = System.currentTimeMillis();
-			lastOd.promDuration = 0;
+			lastOrder = new PromoOrder();
+			lastOrder.promStartTs = System.currentTimeMillis();
+			lastOrder.promDuration = 0;
 		}else{
-			lastOd = PromotionMgr.instance().getPromotion(lastPromotion);
+			lastOrder = PromotionMgr.instance().getPromotion(lastPromotion);
 		}
 
 		if(!fcySeller.comsumeAvaliableTime(newOrder.promDuration)){
@@ -1255,9 +1258,13 @@ public class GameSession {
 			return;
 		}
 
-		//临时处理不匹配的情况
-		if(lastOd == null && lastPromotion != null){
-			fcySeller.delSelledPromotion(lastPromotion);
+		//临时处理不匹配的情况,正常情况下不会出现这种情况
+		if(lastOrder == null && lastPromotion != null){
+			//fcySeller.delSelledPromotion(lastPromotion);
+			if(GlobalConfig.DEBUGLOG) {
+				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): lastOrder == null && lastPromotion != null");
+			}
+			return;
 		}
 
 		newOrder.promotionId = UUID.randomUUID();
@@ -1267,7 +1274,7 @@ public class GameSession {
 		newOrder.buildingType = gs_AdAddNewPromoOrder.getBuildingType();
 
 		//计算 promStartTs， 先取出广告公司中的所有广告promotionId 列表，计算新广告的起点
-		newOrder.promStartTs = lastOd.promStartTs + lastOd.promDuration;
+		newOrder.promStartTs = lastOrder.promStartTs + lastOrder.promDuration;
 		newOrder.promProgress = 0;
 		//客户端发过来的时间单位是毫秒
 		newOrder.promDuration = gs_AdAddNewPromoOrder.getPromDuration();
