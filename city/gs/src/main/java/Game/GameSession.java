@@ -1162,7 +1162,8 @@ public class GameSession {
 		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
 		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
 		Player buyer =  GameDb.getPlayer(buyerPlayerId);
-		boolean selfPromo = buyerPlayerId == sellerBuilding.ownerId();
+		boolean selfPromo = buyerPlayerId.equals(sellerBuilding.ownerId()) ;
+		//boolean selfPromo = buyerPlayerId == sellerBuilding.ownerId();
 
 		PromoOrder newOrder = new PromoOrder();
 		//订单记录该价格（ 需要记录吗？）
@@ -1279,7 +1280,7 @@ public class GameSession {
 		//客户端发过来的时间单位是毫秒
 		newOrder.promDuration = gs_AdAddNewPromoOrder.getPromDuration();
 		fcySeller.setNewPromoStartTs(newOrder.promStartTs+gs_AdAddNewPromoOrder.getPromDuration());
-		fcySeller.setPromRemainTime(fcySeller.getPromRemainTime() - gs_AdAddNewPromoOrder.getPromDuration());
+		fcySeller.setPromRemainTime(fcySeller.getPromRemainTime() - (selfPromo ? 0: gs_AdAddNewPromoOrder.getPromDuration()));
 
 		if(hasBuildingType){
 				/*

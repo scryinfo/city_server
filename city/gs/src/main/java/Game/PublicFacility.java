@@ -24,6 +24,11 @@ import Game.Contract.ContractManager;
 public class PublicFacility extends Building {
     PublicFacility(){}
 
+    @Override
+    protected void finalize(){
+        System.out.println("PublicFacility finalize");
+    }
+
     public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.pid = ownerId;
