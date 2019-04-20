@@ -16,10 +16,7 @@ public class PromotionMgr {
     private UUID id;
 
     @OneToMany(mappedBy="promoMgr",fetch = FetchType.EAGER)
-    //@OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    //@MapKey(name = "id")
-    //@JoinColumn(name = "PromotionMgr_id")
     private Map<UUID, PromoOrder> promotions = new HashMap<>();
 
     private static long _elapsedtime = 0 ;    //上次更新时间
