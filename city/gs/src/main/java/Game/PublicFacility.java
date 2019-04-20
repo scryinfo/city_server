@@ -159,7 +159,11 @@ public class PublicFacility extends Building {
     private UUID pid;*/
 
     //@ElementCollection(fetch = FetchType.EAGER)
-    @ElementCollection()
+    /*@ElementCollection()
+    @JoinColumn(name = "id_selled")*/
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @OrderColumn
     @JoinColumn(name = "id_selled")
     private List<UUID> selledPromotion = new ArrayList<>();
 
@@ -175,11 +179,11 @@ public class PublicFacility extends Building {
         }
     }
 
-    public void delSelledPromotion(UUID promoId){
-        //更新推广公司广告列表中所有推广的起点
-        PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion);
+    public PromoOrder delSelledPromotion(UUID promoId){
         //删除缓存的推广ID
         selledPromotion.remove(promoId);
+        //更新推广公司广告列表中所有推广的起点
+        return PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion);
     }
 
     public void setNewOrderOn(boolean on){
