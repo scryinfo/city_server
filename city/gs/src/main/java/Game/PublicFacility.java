@@ -31,7 +31,7 @@ public class PublicFacility extends Building {
 
     public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        this.pid = ownerId;
+//        this.pid = ownerId;
         this.meta = meta;
         this.qty = meta.qty;
     }
@@ -155,12 +155,12 @@ public class PublicFacility extends Building {
     @CollectionTable(name = "PubFacility_promo", joinColumns = @JoinColumn(name = "selled_id"))
     @OrderColumn*/
 
-    @Column(name="pid")
-    private UUID pid;
+    /*@Column(name="pid")
+    private UUID pid;*/
 
     //@ElementCollection(fetch = FetchType.EAGER)
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "Pub_promo", joinColumns = @JoinColumn(name = "pid", referencedColumnName = "pid"))
+    @ElementCollection()
+    @JoinColumn(name = "id_selled")
     private List<UUID> selledPromotion = new ArrayList<>();
 
     public UUID getLastPromotion(){
