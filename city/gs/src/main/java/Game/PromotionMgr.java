@@ -107,7 +107,6 @@ public class PromotionMgr {
 			* 行为分析
 				* 不用通知客户端，直接更新数据库
 			*/
-        boolean haschange = false;
         List<UUID> idToRemove = new ArrayList<>();
         Set<Entry<UUID, PromoOrder>> setOfEntries = promotions.entrySet();
         Iterator<Entry<UUID, PromoOrder>> iterator = setOfEntries.iterator();
@@ -144,13 +143,12 @@ public class PromotionMgr {
                 //paras: 第一个是广告id，第二个是广告商建筑id
                 MailBox.instance().sendMail(Mail.MailType.AD_PROMOTION_EXPIRE.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, null);
                 idToRemove.add(entry.getKey());
-                haschange = true;
             }
         }
-        for (int i = 0; i < idToRemove.size(); i++) {
-            promotions.remove(idToRemove.get(i));
-        }
-        if(haschange){
+        if(idToRemove.size() > 0){
+            for (int i = 0; i < idToRemove.size(); i++) {
+                promotions.remove(idToRemove.get(i));
+            }
             GameDb.saveOrUpdate(this);
         }
     }
