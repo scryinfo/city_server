@@ -627,6 +627,7 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+
 	public static void initGroundManager() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -635,6 +636,16 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+
+	public static void initPromotionMgr() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(PromotionMgr.class, PromotionMgr.ID) == null)
+			statelessSession.insert(new PromotionMgr());
+		transaction.commit();
+		statelessSession.close();
+	}
+
 	public static void initExchange() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -695,6 +706,14 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		GroundAuction res = session.get(GroundAuction.class, GroundAuction.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
+	public static PromotionMgr getPromotionMgr() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		PromotionMgr res = session.get(PromotionMgr.class, PromotionMgr.ID);
 		transaction.commit();
 		session.close();
 		return res;

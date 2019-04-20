@@ -8,12 +8,12 @@ import java.util.Map.Entry;
 
 @Entity(name = "PromotionMgr")
 public class PromotionMgr {
+    public static final int ID = 0;
     PromotionMgr(){
         int t = 0 ;
     }
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private Integer id ;
 
     @OneToMany(mappedBy="promoMgr",fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
@@ -23,7 +23,12 @@ public class PromotionMgr {
     //public static final long _upDelta = 3600*1000000000;   //更新间隔，单位是纳秒, 3600为一个小时
     public static final long _upDelta = 10*1000000000;   //更新间隔，单位是纳秒, 3600为一个小时
 
-    private static PromotionMgr instance = new PromotionMgr();
+    private static PromotionMgr instance ;
+    public static void init() {
+        GameDb.initPromotionMgr();
+        instance = GameDb.getPromotionMgr();
+    }
+
     public static PromotionMgr instance() {
         return instance;
     }
@@ -142,7 +147,9 @@ public class PromotionMgr {
                 haschange = true;
             }
         }
-        idToRemove.forEach(id->promotions.remove(id));
+        for (int i = 0; i < idToRemove.size(); i++) {
+            promotions.remove(idToRemove.get(i));
+        }
         if(haschange){
             GameDb.saveOrUpdate(this);
         }

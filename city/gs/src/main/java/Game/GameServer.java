@@ -112,6 +112,7 @@ public class GameServer {
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
         GroundManager.init();
+        PromotionMgr.init();
         Exchange.init();
         BrandManager.init();
         TechTradeCenter.init();
