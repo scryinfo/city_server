@@ -517,7 +517,7 @@ public class SummaryUtil
             return value;
         }
     }
-    public enum CountType
+      enum CountType
     {
     	BYDAY(1),BYHOUR(2),BYMINU(3),BYSECONDS(4);
     	private int value;
@@ -566,9 +566,33 @@ public class SummaryUtil
     }
 
 
-    //玩家交易汇总表中查询截止当前时间交易量。
-    public static List<Document> dayTodayPlayerExchangeAmount(long startTime,long endTime,MongoCollection<Document> collection,SummaryUtil.CountType countType)
+//    public static List<Document> dayTodayPlayerExchangeAmount(MongoCollection<Document> collection,SummaryUtil.CountType countType)
+//    {
+//        List<Document> documentList = new ArrayList<>();
+//        Document projectObject = new Document()
+//                .append("id", "$_id")
+//                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+//                .append("_id",0);
+//        collection.aggregate(
+//                Arrays.asList(
+//                        Aggregates.match(and(
+//                                eq(COUNTTYPE, countType.getValue()),
+//                                gte(TIME, startTime),
+//                                lt(TIME, endTime))),
+//                        Aggregates.match(eq(COUNTTYPE, countType.getValue())),
+//                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total")),
+//                        Aggregates.project(projectObject)
+//                )
+//        ).forEach((Block<? super Document>) documentList::add);
+//        return documentList;
+//    }
+
+
+    //玩家交易汇总表中查询开服截止当前时间玩家交易量。
+    public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
     {
+        long a=0;
+        Map<Long, Long> map = new LinkedHashMap<>();
         List<Document> documentList = new ArrayList<>();
         Document projectObject = new Document()
                 .append("id", "$_id")
@@ -576,32 +600,14 @@ public class SummaryUtil
                 .append("_id",0);
         collection.aggregate(
                 Arrays.asList(
-                        Aggregates.match(and(
-                                eq(COUNTTYPE, countType.getValue()),
-                                gte(TIME, startTime),
-                                lt(TIME, endTime))),
+                        Aggregates.match(eq(COUNTTYPE, countType.getValue())),
                         Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total")),
                         Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) documentList::add);
-        return documentList;
-    }
-
-    public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
-    {
-        long a=0;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long startTime=endDate.getTime();
-        long endTime = System.currentTimeMillis();
-        List<Document> documentList= dayTodayPlayerExchangeAmount(startTime,endTime,collection,CountType.BYSECONDS);
-        for(Document document : documentList) {
-            a=document.getLong(KEY_TOTAL);
+        documentList.forEach((document -> map.put(document.getLong("time"), document.getLong("total"))));
+        for (Map.Entry<Long, Long> entry : map.entrySet()) {
+            a=entry.getValue();
         }
         return a;
     }
@@ -627,7 +633,7 @@ public class SummaryUtil
         }
         collection.find(and(
                 eq(COUNTTYPE, countType.getValue()),
-                eq(TYPE, exchangeType),
+                eq(TYPE, exchangeType.getNumber()),
                 eq(ID, ss),
                 gte(TIME, startTime),
                 lt(TIME, endTime)
