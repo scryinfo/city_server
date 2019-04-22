@@ -13,7 +13,7 @@ public class PromotionMgr {
         int t = 0 ;
     }
     @Id
-    private Integer id ;
+    private Integer id = ID;
 
     @OneToMany(mappedBy="promoMgr",fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
