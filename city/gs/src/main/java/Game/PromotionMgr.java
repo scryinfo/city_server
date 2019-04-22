@@ -1,5 +1,9 @@
 package Game;
 
+import Shared.Package;
+import Shared.Util;
+import gs.Gs;
+import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -140,9 +144,12 @@ public class PromotionMgr {
                 //更新广告商广告列表
                 GameDb.delete(fcySeller.delSelledPromotion(promotion.promotionId));
                 GameDb.saveOrUpdate(fcySeller);
+                idToRemove.add(entry.getKey());
                 //paras: 第一个是广告id，第二个是广告商建筑id
                 MailBox.instance().sendMail(Mail.MailType.AD_PROMOTION_EXPIRE.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, null);
-                idToRemove.add(entry.getKey());
+                //发送给广告商
+                GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
+                        Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,Gs.AdRemovePromoOrder.newBuilder().setPromotionId(Util.toByteString(promotion.promotionId)).build()));
             }
         }
         if(idToRemove.size() > 0){
