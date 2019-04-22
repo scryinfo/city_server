@@ -2384,11 +2384,9 @@ public class GameSession {
     	Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
     	int type=msg.getType();
     	UUID bId = Util.toUuid(msg.getBId().toByteArray());
-	//	UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
 		
         Building build=City.instance().getBuilding(bId);
-        UUID techPlayId=build.getTechPlayId();
-        UUID pId =(techPlayId!=null?techPlayId:Util.toUuid(msg.getPId().toByteArray())); //优先查询加盟玩家技术
         
         Gs.BuildingInfo buildInfo = build.myProto(pId);
         
@@ -2397,7 +2395,12 @@ public class GameSession {
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setBrand(buildInfo.getBrand());
     		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-    			band.addEva(eva.toProto());
+    	        UUID techPlayId=eva.getTechPlayId();//优先查询加盟玩家技术
+    	        if(techPlayId!=null){
+    	            Eva e=EvaManager.getInstance().getEva(techPlayId, eva.getAt(), eva.getBt());
+    	 			band.addEva(e.toProto());
+    	        }
+     			band.addEva(eva.toProto());
     		});
     		list.addBrand(band.build());
 		});
@@ -2442,12 +2445,11 @@ public class GameSession {
     }
     
     public void updateMyBrandDetail(short cmd,Message message){
-    	Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
-    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
-    	UUID pId = Util.toUuid(msg.getPId().toByteArray());
-        Building build=City.instance().getBuilding(bId);
-        build.setTechPlayId(pId);
-        GameDb.saveOrUpdate(build);
-        this.write(Package.create(cmd, build.toProto()));
+    	Gs.UpdateMyBrandDetail msg = (Gs.UpdateMyBrandDetail)message;
+		UUID pId = Util.toUuid(msg.getPid().toByteArray());
+        Eva e=EvaManager.getInstance().getEva(pId, msg.getAt(), msg.getBt());
+        e.setTechPlayId(pId);
+        GameDb.saveOrUpdate(e);
+        this.write(Package.create(cmd, e.toProto()));
     }
 }

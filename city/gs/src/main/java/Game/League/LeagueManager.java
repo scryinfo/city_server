@@ -65,11 +65,6 @@ public class LeagueManager
                 }
                 removes.forEach(member -> {
                     buildingLeagueInfo.get(member.getBuildingId()).remove(leagueInfo.getUid());
-                    
-                    //清空建筑对应的加盟玩家技术
-                    Building build=City.instance().getBuilding(member.getBuildingId());
-                    build.setTechPlayId(null);
-                    GameDb.saveOrUpdate(build);
                 });
             });
             GameDb.Update(updateList);
