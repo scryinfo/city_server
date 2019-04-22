@@ -16,7 +16,9 @@ import Shared.LogDb;
 
 public class PerHourJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(PerHourJob.class);
-
+    //基础数据表中没有id，给客户端指定id
+    public final static int BUYGROUND_ID = 999;
+    public final static int RENTGROUND_ID = 888;
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException
     {
@@ -39,10 +41,10 @@ public class PerHourJob implements org.quartz.Job {
 
 
         //buy ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround());
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.BUYGROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround());
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.RENTGROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy goods in Shelf

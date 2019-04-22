@@ -561,7 +561,7 @@ public class LogDb {
 	}
 
 	//--ly
-	public static List<Document> dayPlyaerExchange1(long startTime, long endTime, MongoCollection<Document> collection)
+	public static List<Document> dayPlyaerExchange1(long startTime, long endTime, MongoCollection<Document> collection,int id)
 	{
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
@@ -573,7 +573,7 @@ public class LogDb {
 						Aggregates.match(and(
 								gte("t",startTime),
 								lt("t", endTime))),
-						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.group(id,  Accumulators.sum(KEY_TOTAL, "$a")),
 						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);

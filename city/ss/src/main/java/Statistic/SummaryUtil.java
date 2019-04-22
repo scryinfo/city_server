@@ -555,7 +555,7 @@ public class SummaryUtil
     public static void insertPlayerExchangeData(CountType countType,ExchangeType exchangeType,List<Document> documentList,
                                          long time,MongoCollection<Document> collection)
     {
-        //document already owned : id,totalqueryPlayerGoodsCurve
+        //document already owned : id,total
         documentList.forEach(document ->
                 document.append(TIME, time)
                         .append(TYPE, exchangeType.getValue())
@@ -612,7 +612,7 @@ public class SummaryUtil
         return a;
     }
 
-    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, Long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
+    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -626,15 +626,11 @@ public class SummaryUtil
         Date startDate = calendar.getTime();
         long startTime=startDate.getTime();
         Map<Long, Long> map = new LinkedHashMap<>();
-        // 有id的是商品或原料的tpi 没有id的是土地
-        Long ss = null;
-        if (null != id && id > 0) {
-            ss = id;
-        }
+
         collection.find(and(
                 eq(COUNTTYPE, countType.getValue()),
                 eq(TYPE, exchangeType.getNumber()),
-                eq(ID, ss),
+                eq(ID, id),
                 gte(TIME, startTime),
                 lt(TIME, endTime)
         ))
