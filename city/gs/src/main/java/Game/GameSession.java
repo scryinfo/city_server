@@ -28,6 +28,8 @@ import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
 import Game.Contract.IBuildingContract;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.FriendManager;
 import Game.FriendManager.FriendRequest;
@@ -49,7 +51,6 @@ import Shared.Package;
 import Shared.RoleBriefInfo;
 import Shared.Util;
 import Shared.Validator;
-import antlr.StringUtils;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -374,7 +375,7 @@ public class GameSession {
 			MetaData.getAllEva().forEach(m->{
 				evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
 			});
-			GameDb.saveOrUpdate(evaList);
+			EvaManager.getInstance().addEvaList(evaList);
 		}
 	}
 
@@ -2338,7 +2339,7 @@ public class GameSession {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
-		GameDb.getEvaInfoList(pid,null).forEach(eva->{
+		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
 		});
 		this.write(Package.create(cmd, list.build()));
@@ -2370,7 +2371,7 @@ public class GameSession {
 		e.setLv(level);
 		e.setCexp(cexp);
 		e.setB(eva.getB());
-    	GameDb.saveOrUpdate(e);
+    	EvaManager.getInstance().updateEva(e);
     	
     	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
     	player.decEva(eva.getDecEva());
