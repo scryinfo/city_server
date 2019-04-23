@@ -1,26 +1,48 @@
 package Game;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.persistence.AttributeConverter;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.SelectBeforeUpdate;
+
+import com.google.common.collect.EvictingQueue;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+
 import DB.Db;
 import Game.Contract.IBuildingContract;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
-import com.google.common.collect.EvictingQueue;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
-import org.hibernate.annotations.SelectBeforeUpdate;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Entity
 @SelectBeforeUpdate(false)
@@ -484,11 +506,14 @@ public abstract class Building {
         return builder.build();
     }
     public Gs.BuildingInfo myProto(UUID playerId) {
+    	int buildingBrand = BrandManager.instance().getBuilding(ownerId, type());
+    	Eva e=EvaManager.getInstance().getEva(playerId, type(), Gs.Eva.Btype.Quality_VALUE);
 		Gs.BuildingInfo b=toProto();
     	Gs.BuildingInfo.Builder builder=b.toBuilder();
     	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setBrand(BrandManager.instance().getBuildingBrandScore(playerId, metaBuilding.id))
-    		   .setQuality(quality());
+    		   .setBrand(buildingBrand)
+    		   .setQuality(quality())
+    		   .setEva(e.toProto());
      	return builder.build(); 
     }
     public abstract Message detailProto();
