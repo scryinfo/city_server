@@ -2313,15 +2313,9 @@ public class GameSession {
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.myProto(id);
-			List<BuildingInfo> ls=null;
 			int type=buildingInfo.getType();
-			if(map.containsKey(type)){
-				ls=map.get(type);
-			}else{
-				ls=new ArrayList<BuildingInfo>();
-			}
-			ls.add(buildingInfo);
-			map.put(type, ls);
+			map.computeIfAbsent(type,
+                    k -> new ArrayList<BuildingInfo>()).add(buildingInfo);
 		 }
 		);
 		map.forEach((k,v)->{
