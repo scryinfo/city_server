@@ -77,5 +77,6 @@
 		<mapping class="Game.Contract.Contract"></mapping>
 		<mapping class="Game.Eva.Eva"></mapping>
 		<mapping class="Game.League.LeagueInfo"></mapping>
+		<mapping class="Game.League.BrandLeague"></mapping>
 	</session-factory>
 </hibernate-configuration> 
