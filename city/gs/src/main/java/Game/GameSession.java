@@ -2253,4 +2253,10 @@ public class GameSession {
 		}
 	}
 
+	//查询注册过的玩家数量
+	public void getPlayerAmount(short cmd) {
+		long playerAmount = GameDb.getPlayerAmount();
+		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
+	}
+
 }

@@ -153,6 +153,8 @@ public class GameEventDispatcher extends DispatcherBase {
 
 
 			table.put((short) GsCode.OpCode.getOneSocietyInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "getOneSocietyInfo"));
+			table.put((short) GsCode.OpCode.getPlayerAmount_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerAmount"));
+
 			if(GlobalConfig.debug()){
 
 			}
