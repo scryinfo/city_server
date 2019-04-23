@@ -1040,8 +1040,8 @@ public class GameSession {
 			*/
 		Gs.AdQueryPromotion AdQueryPromotion = (Gs.AdQueryPromotion) message;
 		boolean isSeller = AdQueryPromotion.getIsSeller();
-		UUID id = Util.toUuid(AdQueryPromotion.getPlayerId().toByteArray());
-		Player player =  GameDb.getPlayer(id);
+		UUID buyerId = Util.toUuid(AdQueryPromotion.getPlayerId().toByteArray());
+		Player player =  GameDb.getPlayer(buyerId);
 		//获取 payedPromotion
 		if(player == null){
 			if(GlobalConfig.DEBUGLOG){
@@ -1051,7 +1051,7 @@ public class GameSession {
 		}
 
 		List<UUID> promoIDs = new ArrayList<>();
-		if( isSeller ){
+		if( isSeller || AdQueryPromotion.hasSellerBuildingId()){
 			//获取 selledPromotion
 			if(!AdQueryPromotion.hasSellerBuildingId()){
 				if(GlobalConfig.DEBUGLOG){
@@ -1101,6 +1101,8 @@ public class GameSession {
 		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId);
 		tslist.forEach(ts->gs_AdRemovePromoOrder.toBuilder().addPromoTsChanged(ts.toProto()));
 		GameDb.saveOrUpdate(fcySeller);
+		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
+		seller.delpayedPromotion(promoId);
 
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdRemovePromoOrder));

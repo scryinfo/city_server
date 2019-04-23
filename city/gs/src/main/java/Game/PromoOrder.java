@@ -13,7 +13,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
+@Embeddable
 class PromoOdTs{
     PromoOdTs(UUID pid, long startTs){
         promotionId = pid;

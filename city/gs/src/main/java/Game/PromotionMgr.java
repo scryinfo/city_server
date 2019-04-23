@@ -145,7 +145,9 @@ public class PromotionMgr {
                 buyer.delpayedPromotion(promotion.promotionId);
                 GameDb.saveOrUpdate(buyer);
                 //更新广告商广告列表
-                GameDb.delete(fcySeller.delSelledPromotion(promotion.promotionId));
+                PromoOrder pm = PromotionMgr.instance().getPromotion(promotion.promotionId);
+                fcySeller.delSelledPromotion(promotion.promotionId);
+                GameDb.delete(pm);
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
                 //paras: 第一个是广告id，第二个是广告商建筑id
@@ -153,7 +155,9 @@ public class PromotionMgr {
                 //发送给广告商
                 GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
                         Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,
-                                Gs.AdRemovePromoOrder.newBuilder().setPromotionId(Util.toByteString(promotion.promotionId)).build()));
+                                Gs.AdRemovePromoOrder.newBuilder().setPromotionId(Util.toByteString(promotion.promotionId))
+                                        .setBuildingId(Util.toByteString(promotion.sellerBuildingId))
+                                        .build()));
             }
         }
         if(idToRemove.size() > 0){
