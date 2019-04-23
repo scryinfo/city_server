@@ -37,6 +37,7 @@ import Game.FriendManager.ManagerCommunication;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Game.FriendManager.SocietyManager;
+import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
@@ -2395,9 +2396,10 @@ public class GameSession {
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setBrand(buildInfo.getBrand());
     		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-    	        UUID techPlayId=eva.getTechPlayId();//优先查询加盟玩家技术
-    	        if(techPlayId!=null){
-    	            Eva e=EvaManager.getInstance().getEva(techPlayId, eva.getAt(), eva.getBt());
+    			//优先查询加盟玩家技术
+    			BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
+    	        if(bl!=null){
+    	            Eva e=EvaManager.getInstance().getEva(bl.getPlayerId(), eva.getAt(), eva.getBt());
     	 			band.addEva(e.toProto());
     	        }
      			band.addEva(eva.toProto());
@@ -2420,7 +2422,6 @@ public class GameSession {
     		int techId=info.getTechId();
 			if(itemId==techId){
 				ls.add(info.getPlayerId());
-				break;
 			}
 		}
         
@@ -2432,8 +2433,11 @@ public class GameSession {
 			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
 		    
 			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();
-			detail.setPId(Util.toByteString(playerId));
-		    detail.setName(player.getName()).setBrand(buildInfo.getBrand());
+			detail.setBId(Util.toByteString(bId))
+			      .setTechId(itemId)
+			      .setPId(Util.toByteString(playerId))
+			      .setName(player.getName())
+			      .setBrand(buildInfo.getBrand());
 			
     		GameDb.getEvaInfoList(playerId,itemId).forEach(eva->{
     			detail.addEva(eva.toProto());
@@ -2445,11 +2449,11 @@ public class GameSession {
     }
     
     public void updateMyBrandDetail(short cmd,Message message){
-    	Gs.UpdateMyBrandDetail msg = (Gs.UpdateMyBrandDetail)message;
-		UUID pId = Util.toUuid(msg.getPid().toByteArray());
-        Eva e=EvaManager.getInstance().getEva(pId, msg.getAt(), msg.getBt());
-        e.setTechPlayId(pId);
-        GameDb.saveOrUpdate(e);
-        this.write(Package.create(cmd, e.toProto()));
+    	Gs.BrandLeague msg = (Gs.BrandLeague)message;
+		UUID bId = Util.toUuid(msg.getBId().toByteArray());
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		int techId=msg.getTechId();
+		LeagueManager.getInstance().addBrandLeague(bId,techId,pId);
+        this.write(Package.create(cmd, msg));
     }
 }

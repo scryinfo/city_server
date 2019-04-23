@@ -36,6 +36,7 @@ public class LeagueManager
     private Map<LeagueInfo.UID, LeagueInfo> leagueInfoMap = new HashMap<>();
     //key = buildingId
     private Map<UUID, Set<LeagueInfo.UID>> buildingLeagueInfo = new HashMap<>();
+    private Map<UUID, Set<BrandLeague>> brandLeagueMap = new HashMap<UUID, Set<BrandLeague>>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
     public void init()
@@ -48,6 +49,11 @@ public class LeagueManager
                                 k -> new HashSet<>()).add(leagueInfo.getUid());
                     });
                 } );
+        GameDb.getAllFromOneEntity(BrandLeague.class).forEach(
+        		bl ->{
+        			brandLeagueMap.computeIfAbsent(bl.getBuildingId(),
+        					k -> new HashSet<>()).add(bl);
+        		} );
     }
 
     public void update(long diffNano)
@@ -67,8 +73,7 @@ public class LeagueManager
                     buildingLeagueInfo.get(member.getBuildingId()).remove(leagueInfo.getUid());
                     
                     //清空建筑对应的加盟玩家技术
-                    BrandLeague bl=new BrandLeague(member.getBuildingId(),leagueInfo.getUid().getPlayerId(),leagueInfo.getUid().getTechId());
-                    GameDb.delete(bl);
+        			delBrandLeague(member.getBuildingId(),leagueInfo.getUid().getTechId(),leagueInfo.getUid().getPlayerId());
                 });
             });
             GameDb.Update(updateList);
@@ -261,5 +266,40 @@ public class LeagueManager
     {
          return buildingLeagueInfo.get(buildingId) == null ?
                  new HashSet<LeagueInfo.UID>() : buildingLeagueInfo.get(buildingId);
+    }
+    
+    public Set<BrandLeague> getBrandLeagueList(UUID buildingId)
+    {
+    	return brandLeagueMap.get(buildingId) == null ?
+    			new HashSet<BrandLeague>() : brandLeagueMap.get(buildingId);
+    }
+    
+    public BrandLeague getBrandLeague(UUID buildingId,int techId)
+    {
+    	Set<BrandLeague> set=getBrandLeagueList(buildingId);
+    	for (BrandLeague brandLeague : set) {
+    		if(techId==brandLeague.getTechId()){
+    			return brandLeague;
+    		}
+		}
+		return null;
+    }
+    
+    public void addBrandLeague(UUID buildingId,int techId,UUID playerId)
+    {
+    	BrandLeague bl=new BrandLeague(buildingId,techId,playerId);
+    	Set<BrandLeague> set=getBrandLeagueList(buildingId);
+    	set.add(bl);
+    	brandLeagueMap.put(buildingId, set);
+    	GameDb.saveOrUpdate(bl);
+    }
+    
+    public void delBrandLeague(UUID buildingId,int techId,UUID playerId)
+    {
+    	BrandLeague bl=new BrandLeague(buildingId,techId,playerId);
+    	Set<BrandLeague> set=getBrandLeagueList(buildingId);
+    	set.remove(bl);
+    	brandLeagueMap.put(buildingId, set);
+    	GameDb.delete(bl);
     }
 }

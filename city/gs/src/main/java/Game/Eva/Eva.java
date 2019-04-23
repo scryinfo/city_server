@@ -38,9 +38,6 @@ public class Eva {
     @Column(name = "b")
     private long b;
     
-    @Column
-    private UUID techPlayId;
-    
 	public Eva() {
 		super();
 	}
@@ -64,8 +61,7 @@ public class Eva {
 				.setBt(Gs.Eva.Btype.valueOf(bt)) 
 				.setLv(lv)
 				.setCexp(cexp)
-				.setB(b)
-				.setTechPlayId(Util.toByteString(techPlayId));
+				.setB(b);
         return builder.build();
     }
     
@@ -123,13 +119,5 @@ public class Eva {
 
 	public void setB(long b) {
 		this.b = b;
-	}
-	
-	public void setTechPlayId(UUID techPlayId) {
-		this.techPlayId = techPlayId;
-	}
-
-	public UUID getTechPlayId() {
-		return techPlayId;
 	}
 }
