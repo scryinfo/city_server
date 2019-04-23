@@ -1098,8 +1098,8 @@ public class GameSession {
 		//更新广告商玩家信息中广告列表
 		Building sellerBuilding = City.instance().getBuilding(promoOrder.sellerBuildingId);
 		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
-		fcySeller.delSelledPromotion(promoId);
-
+		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId);
+		tslist.forEach(ts->gs_AdRemovePromoOrder.toBuilder().addPromoTsChanged(ts.toProto()));
 		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知

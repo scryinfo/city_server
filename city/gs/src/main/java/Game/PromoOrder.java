@@ -14,6 +14,17 @@ import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+class PromoOdTs{
+    PromoOdTs(UUID pid, long startTs){
+        promotionId = pid;
+        promStartTs = startTs;
+    }
+    Gs.PromoOdTs toProto(){
+        return Gs.PromoOdTs.newBuilder().setPromotionId(Util.toByteString(promotionId)).setPromStartTs(promStartTs).build();
+    }
+    UUID promotionId;
+    long promStartTs;	//推广开始时间
+}
 
 @Entity(name = "PromoOrder")
 public class PromoOrder {

@@ -43,16 +43,18 @@ public class PromotionMgr {
         }
     }
 
-    public PromoOrder AdRemovePromoOrder(UUID id, List<UUID> promotionIds){
+    public List<PromoOdTs> AdRemovePromoOrder(UUID id, List<UUID> promotionIds){
         long nextTs = 0;
         int findPos = -1 ;
+        List<PromoOdTs> changed = new ArrayList<>();
         /*
         ts计算公式： 下一个推广的promStartTs = 上一个推广的promStartTs + 上一个推广的 promDuration
         在一个循环中，需要把要删除的推广的promDuration设置为0；如果要删除的推广在第一个位置，那么promStartTs设置为0，
         其后的推广执行上述“ts计算公式”就都能正确更新。
         */
         for (int i = 0; i < promotionIds.size(); i++) {
-            PromoOrder promo = promotions.get(promotionIds.get(i));
+            UUID pid = promotionIds.get(i);
+            PromoOrder promo = promotions.get(pid);
             if(promo == null){
                 continue;
             }
@@ -66,9 +68,10 @@ public class PromotionMgr {
                 promo.promStartTs = nextTs;
             }
             nextTs = promo.promStartTs + promo.promDuration;
+            changed.add(new PromoOdTs(pid,promo.promStartTs));
         }
         //更新完之后，移除掉要删除的推广。
-        return promotions.remove(id);
+        return changed;
     }
     public PromoOrder getPromotion(UUID id){
         return  promotions.get(id);
@@ -149,7 +152,8 @@ public class PromotionMgr {
                 MailBox.instance().sendMail(Mail.MailType.AD_PROMOTION_EXPIRE.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, null);
                 //发送给广告商
                 GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
-                        Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,Gs.AdRemovePromoOrder.newBuilder().setPromotionId(Util.toByteString(promotion.promotionId)).build()));
+                        Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,
+                                Gs.AdRemovePromoOrder.newBuilder().setPromotionId(Util.toByteString(promotion.promotionId)).build()));
             }
         }
         if(idToRemove.size() > 0){
