@@ -2396,7 +2396,7 @@ public class GameSession {
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setBrand(buildInfo.getBrand());
     		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-    			//优先查询加盟玩家技术
+    			//优先查询建筑正在使用的某项加盟技术
     			BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
     	        if(bl!=null){
     	            Eva e=EvaManager.getInstance().getEva(bl.getPlayerId(), eva.getAt(), eva.getBt());
@@ -2421,7 +2421,7 @@ public class GameSession {
         for (LeagueInfo.UID info : set) {
     		int techId=info.getTechId();
 			if(itemId==techId){
-				ls.add(info.getPlayerId());
+				ls.add(info.getPlayerId());//某项技术可能加盟多个，但是只能使用其中一个
 			}
 		}
         

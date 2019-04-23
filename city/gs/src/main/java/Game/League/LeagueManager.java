@@ -72,7 +72,7 @@ public class LeagueManager
                 removes.forEach(member -> {
                     buildingLeagueInfo.get(member.getBuildingId()).remove(leagueInfo.getUid());
                     
-                    //清空建筑对应的加盟玩家技术
+                    //删除建筑某项过期的加盟技术
         			delBrandLeague(member.getBuildingId(),leagueInfo.getUid().getTechId(),leagueInfo.getUid().getPlayerId());
                 });
             });
