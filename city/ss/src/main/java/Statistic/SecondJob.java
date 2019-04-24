@@ -17,11 +17,12 @@ import org.quartz.JobExecutionException;
 import Shared.LogDb;
 import sun.rmi.runtime.Log;
 
+import static Statistic.PerHourJob.BUYGROUND_ID;
+import static Statistic.PerHourJob.RENTGROUND_ID;
+
 public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
-    //基础数据表中没有id，给客户端指定id
-    public final static int BUYGROUND_ID = 999;
-    public final static int RENTGROUND_ID = 888;
+
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException
     {
