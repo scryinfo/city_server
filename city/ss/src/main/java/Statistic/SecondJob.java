@@ -15,6 +15,10 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import Shared.LogDb;
+import sun.rmi.runtime.Log;
+
+import static Statistic.PerHourJob.BUYGROUND_ID;
+import static Statistic.PerHourJob.RENTGROUND_ID;
 
 public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
@@ -45,6 +49,24 @@ public class SecondJob implements org.quartz.Job {
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
+
+
+        //buy ground
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        //rent ground
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+        //buy goods in Shelf
+        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+        //buy material in Shelf
+        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+
 
         //统计耗时
         StatisticSession.setIsReady(true);

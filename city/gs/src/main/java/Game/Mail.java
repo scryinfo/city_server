@@ -40,7 +40,10 @@ public class Mail {
         LAND_SALE(13),
         LAND_RENT(14),
         SHELF_SALE(15),
-        APARTMENT_CHECK_IN(16);
+        APARTMENT_CHECK_IN(16),
+        SOCIETY_KICK_OUT(17),
+        ADD_SOCIETY_SUCCESS(18),
+        ADD_SOCIETY_FAIL(19);
 
         private int mailType;
 

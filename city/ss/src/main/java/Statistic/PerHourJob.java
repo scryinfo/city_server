@@ -16,7 +16,9 @@ import Shared.LogDb;
 
 public class PerHourJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(PerHourJob.class);
-
+    //基础数据表中没有id，给客户端指定id
+    public final static int BUYGROUND_ID = 999;
+    public final static int RENTGROUND_ID = 888;
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException
     {
@@ -36,11 +38,31 @@ public class PerHourJob implements org.quartz.Job {
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, startTime, SummaryUtil.getDayGoodsNpcNum());
 
+
+
+        //buy ground
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        //rent ground
+        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+        //buy goods in Shelf
+        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+        //buy material in Shelf
+        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+
+
+
         //统计耗时
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));
         LOGGER.debug(MessageFormat.format("PerHourJob end execute, time = {0}, consume = {1} ms",
                 timeStr, nowTime1 - nowTime));
+
     }
 }

@@ -1,9 +1,6 @@
 package Game.FriendManager;
 
-import Game.GameDb;
-import Game.GameServer;
-import Game.GameSession;
-import Game.Player;
+import Game.*;
 import Shared.Package;
 import Shared.Util;
 /*import com.google.common.base.Optional;*/
@@ -314,7 +311,9 @@ public class SocietyManager
                      * 发送邮件给申请人入会成功
                      */
 
-
+                    Mail mail = new Mail(Mail.MailType.ADD_SOCIETY_SUCCESS.getMailType(),reqId,null,new UUID[]{societyId},null);
+                    GameDb.saveOrUpdate(mail);
+                    GameServer.sendTo(Arrays.asList(reqId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
                 }
                 //拒绝
                 else
@@ -329,6 +328,11 @@ public class SocietyManager
                      * 2019/2/22
                      * 发送邮件给申请人入会请求被拒绝 reqId
                      */
+
+                    Mail mail = new Mail(Mail.MailType.ADD_SOCIETY_FAIL.getMailType(),reqId,null,new UUID[]{societyId},null);
+                    GameDb.saveOrUpdate(mail);
+                    GameServer.sendTo(Arrays.asList(reqId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
+
                 }
                 //通知权限人清除该请求
                 GameServer.sendTo(getmodifyPermissionIds(society),
@@ -546,5 +550,10 @@ public class SocietyManager
                         builder.build()));
             }
         }
+    }
+
+    public static Gs.SocietyInfo toSocietyDetailProto(Society society)
+    {
+            return society.toDetailProto(true);
     }
 }
