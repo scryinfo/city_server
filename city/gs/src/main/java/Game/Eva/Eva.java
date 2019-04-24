@@ -1,16 +1,20 @@
-package Game;
+package Game.Eva;
 
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 
+import Shared.Util;
+import gs.Gs;
+
 @Entity(name = "Eva")
-@Table(name = "Eva")
+@Table(name = "Eva",indexes = {@Index(columnList = "pid")})
 public class Eva {
     private static final Logger logger = Logger.getLogger(Eva.class);
     @Id
@@ -49,6 +53,18 @@ public class Eva {
 		this.b = b;
 	}
 
+    public Gs.Eva toProto() {
+        Gs.Eva.Builder builder = Gs.Eva.newBuilder();
+        builder.setId(Util.toByteString(id))
+				.setPid(Util.toByteString(pid))
+				.setAt(at)
+				.setBt(Gs.Eva.Btype.valueOf(bt)) 
+				.setLv(lv)
+				.setCexp(cexp)
+				.setB(b);
+        return builder.build();
+    }
+    
 	public UUID getId() {
 		return id;
 	}

@@ -118,7 +118,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return lines.size() >= meta.lineNum;
     }
     public int freeWorkerNum() {
-        return this.meta.workerNum - lines.stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
+        return this.meta.workerNum - lines.stream().map(l -> l.workerNum).reduce(0, Integer::sum);
     }
     protected abstract boolean consumeMaterial(LineBase line);
 

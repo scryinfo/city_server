@@ -29,6 +29,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.FriendManager;
 import Game.FriendManager.FriendRequest;
@@ -36,6 +42,9 @@ import Game.FriendManager.ManagerCommunication;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Game.FriendManager.SocietyManager;
+import Game.League.BrandLeague;
+import Game.League.LeagueInfo;
+import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaExperiences;
@@ -372,7 +381,7 @@ public class GameSession {
 			MetaData.getAllEva().forEach(m->{
 				evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
 			});
-			GameDb.saveOrUpdate(evaList);
+			EvaManager.getInstance().addEvaList(evaList);
 		}
 	}
 
@@ -492,11 +501,40 @@ public class GameSession {
 					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
 						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
 					});
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
 				}
 			});
         });
         this.write(Package.create(cmd, builder.build()));
     }
+	public void queryLabDetail(short cmd, Message message) {
+		Gs.QueryLabDetail c = (Gs.QueryLabDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.LabDetail.Builder builder = Gs.LabDetail.newBuilder();
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.LabDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(building instanceof Laboratory && !building.canUseBy(player.id())) {
+					Laboratory s = (Laboratory)building;
+					if(s.isExclusiveForOwner())
+						return;
+					Gs.LabDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
+					bb.setEvaProb(s.getEvaProb());
+					bb.setGoodProb(s.getGoodProb());
+					bb.setPrice(s.getPricePreTime());
+					bb.setAvailableTimes(s.getSellTimes());
+					bb.setQueuedTimes(s.getQueuedTimes());
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
+				}
+			});
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -1346,6 +1384,13 @@ public class GameSession {
 			long cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
 				return;
+
+			lab.updateTodayIncome(cost);
+			if(c.hasGoodCategory())
+				lab.updateTotalGoodIncome(cost, c.getTimes());
+			else
+				lab.updateTotalEvaIncome(cost, c.getTimes());
+			LogDb.buildingIncome(lab.id(), player.id(), cost, 0, 0);
 		}
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
 		if(null != line) {
@@ -1380,38 +1425,6 @@ public class GameSession {
 		this.write(Package.create(cmd, c));
 	}
 
-//	public void labLaunchLine(short cmd, Message message) {
-//		Gs.LabLaunchLine c = (Gs.LabLaunchLine) message;
-//		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-//		Building building = City.instance().getBuilding(bid);
-//		if(building == null || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
-//			return;
-//		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-//		Laboratory lab = (Laboratory)building;
-//		Laboratory.Line line = lab.getLine(lineId);
-//		if(line == null || building.outOfBusiness() || line.isComplete() || line.isRunning() || line.leftPhase() < c.getPhase() || c.getPhase() <= 0)
-//			return;
-//		Formula.Consume[] consumes = line.getConsumes();
-//		if(consumes == null)
-//			return;
-//		boolean enoughMaterial = true;
-//		for (Formula.Consume consume : consumes) {
-//			if(consume.m == null)
-//				continue;
-//			if(lab.availableQuantity(consume.m) < consume.n*c.getPhase())
-//				enoughMaterial = false;
-//		}
-//		if(!enoughMaterial)
-//			return;
-//		for (Formula.Consume consume : consumes) {
-//			if(consume.m == null)
-//				continue;
-//			lab.offset(consume.m, -consume.n*c.getPhase());
-//		}
-//		line.launch(c.getPhase());
-//		GameDb.saveOrUpdate(lab);
-//		this.write(Package.create(cmd, c));
-//	}
 	public void labRoll(short cmd, Message message) {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
@@ -1429,7 +1442,8 @@ public class GameSession {
 				builder.setEvaPoint(r.evaPoint);
 			}
 			else {
-				builder.addAllItemId(r.itemIds);
+				if(r.itemIds != null)
+					builder.addAllItemId(r.itemIds);
 			}
 			GameDb.saveOrUpdate(Arrays.asList(lab, player));
 			this.write(Package.create(cmd, builder.build()));
@@ -2039,6 +2053,10 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if (building instanceof IBuildingContract)
 		{
+			if (building.outOfBusiness())
+			{
+				this.write(Package.fail(cmd));
+			}
 			//本人签约
 			if (player.id().equals(building.ownerId()))
 			{
@@ -2083,6 +2101,142 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	public void queryContractSummary(short cmd)
+	{
+		Gs.ContractSummary.Builder builder = Gs.ContractSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.ContractSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if (building instanceof IBuildingContract
+						&& !building.outOfBusiness()
+						&& ((IBuildingContract) building).getBuildingContract().isOpen()
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
+				{
+					n.incrementAndGet();
+				}
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryContractGridDetail(short cmd, Message message)
+	{
+		Gs.GridIndex gridIndex = (Gs.GridIndex) message;
+		Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
+		builder.setIdx(gridIndex);
+		City.instance().forAllGrid(grid ->
+		{
+			if (grid.getX() == gridIndex.getX() && grid.getY() == gridIndex.getY())
+			{
+
+				grid.forAllBuilding(building ->
+				{
+					if (building instanceof IBuildingContract
+							&& !building.outOfBusiness()
+							&& ((IBuildingContract) building).getBuildingContract().isOpen()
+							&& !((IBuildingContract) building).getBuildingContract().isSign())
+					{
+						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
+						b.setOwnerId(Util.toByteString(building.ownerId()))
+								.setBuildingName(building.getName())
+								.setPos(building.coordinate().toProto())
+								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
+								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice());
+					}
+				});
+			}
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void getLeagueInfo(short cmd, Message message)
+	{
+		int techId = ((Gs.Num) message).getNum();
+		Gs.LeagueInfo leagueInfo = LeagueManager.getInstance().queryProtoLeagueInfo(player.id(), techId);
+		this.write(Package.create(cmd,leagueInfo));
+	}
+
+	public void setLeagueInfo(short cmd, Message message)
+	{
+		Gs.LeagueInfoSetting setting = (Gs.LeagueInfoSetting) message;
+		if (LeagueManager.getInstance().settingLeagueInfo(player.id(), setting))
+		{
+			Gs.LeagueInfoSetting.Builder builder = Gs.LeagueInfoSetting.newBuilder()
+					.setTechId(setting.getTechId())
+					.setSetting(
+							Gs.LeagueSetting.newBuilder()
+									.setIsSettingOpen(true)
+									.setPrice(setting.getSetting().getPrice())
+									.setMaxHours(setting.getSetting().getMaxHours())
+									.setMinHours(setting.getSetting().getMinHours())
+									.build()
+					);
+			this.write(Package.create(cmd, builder.build()));
+		}
+		else
+		{
+			this.write(Package.fail(cmd));
+		}
+	}
+
+	public void closeLeagueInfo(short cmd, Message message)
+	{
+		int techId = ((Gs.Num) message).getNum();
+		if (LeagueManager.getInstance().closeLeagueInfo(player.id(), techId))
+		{
+			this.write(Package.create(cmd,message));
+		}
+		else
+		{
+			this.write(Package.fail(cmd));
+		}
+	}
+
+	public void queryLeagueTechList(short cmd, Message message)
+	{
+		int techId = ((Gs.Num) message).getNum();
+		Gs.LeagueTechList.Builder builder = Gs.LeagueTechList.newBuilder();
+		builder.setTechId(techId);
+		LeagueManager.getInstance().getOpenedLeagueInfoByTechId(techId)
+				.forEach(leagueInfo -> {
+					Gs.LeagueTech.Builder techBuilder = Gs.LeagueTech.newBuilder();
+					techBuilder.setOwnerId(Util.toByteString(leagueInfo.getUid().getPlayerId()))
+						.setSetting(leagueInfo.toSettingProto())
+						.addAllTechInfo(LeagueManager.getInstance().getLeagueTechInfo(leagueInfo))
+						.setJoinBCount(leagueInfo.getMemberSize())
+						.setOwnerBcount(LeagueManager.getInstance().getLeagueInfoOwnerBcount(leagueInfo));
+					builder.addTechList(techBuilder.build());
+				});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryBuildingListByPlayerTech(short cmd, Message message)
+	{
+		Gs.ByteNum ident = (Gs.ByteNum) message;
+		UUID pid = Util.toUuid(ident.getId().toByteArray());
+		int techId = ident.getNum();
+		Gs.TechBuildingPoss.Builder builder = Gs.TechBuildingPoss.newBuilder();
+		builder.setIdentity(ident);
+		LeagueManager.getInstance().getBuildingListByPlayerTech(pid, techId)
+				.forEach(building -> builder.addPosInfo(building.toPositionProto()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void joinLeague(short cmd, Message message)
+	{
+		Gs.JoinLeague joinLeague = (Gs.JoinLeague) message;
+		if (LeagueManager.getInstance().joinLeague(player, joinLeague)) {
+			this.write(Package.create(cmd,joinLeague));
+		}
+		else
+		{
+			this.write(Package.fail(cmd));
+		}
+	}
 
 	//===========================================================
 
@@ -2166,15 +2320,9 @@ public class GameSession {
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.myProto(id);
-			List<BuildingInfo> ls=null;
 			int type=buildingInfo.getType();
-			if(map.containsKey(type)){
-				ls=map.get(type);
-			}else{
-				ls=new ArrayList<BuildingInfo>();
-			}
-			ls.add(buildingInfo);
-			map.put(type, ls);
+			map.computeIfAbsent(type,
+                    k -> new ArrayList<BuildingInfo>()).add(buildingInfo);
 		 }
 		);
 		map.forEach((k,v)->{
@@ -2193,15 +2341,8 @@ public class GameSession {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
-		GameDb.getEvaInfoByPlayId(pid).forEach(eva->{
-			list.addEva(Gs.Eva.newBuilder().setId(Util.toByteString(eva.getId()))
-					.setPid(Util.toByteString(eva.getPid()))
-					.setAt(eva.getAt())
-					.setBt(Gs.Eva.Btype.valueOf(eva.getBt())) 
-					.setLv(eva.getLv())
-					.setCexp(eva.getCexp())
-					.setB(eva.getB())
-					.build());
+		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
+			list.addEva(eva.toProto());
 		});
 		this.write(Package.create(cmd, list.build()));
     }
@@ -2232,13 +2373,89 @@ public class GameSession {
 		e.setLv(level);
 		e.setCexp(cexp);
 		e.setB(eva.getB());
-    	GameDb.saveOrUpdate(e);
+    	EvaManager.getInstance().updateEva(e);
     	
     	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
     	player.decEva(eva.getDecEva());
        	GameDb.saveOrUpdate(player);
        	
     	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
+    }
+    public void queryMyBrands(short cmd, Message message)
+    {
+    	Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
+    	int type=msg.getType();
+    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+
+        Building build=City.instance().getBuilding(bId);
+
+        Gs.BuildingInfo buildInfo = build.myProto(pId);
+
+        Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
+		MetaData.getBuildingTech(type).forEach(itemId->{
+			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+			band.setItemId(itemId).setBrand(buildInfo.getBrand());
+    		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
+    			//优先查询建筑正在使用的某项加盟技术
+    			BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
+    	        if(bl!=null){
+    	            Eva e=EvaManager.getInstance().getEva(bl.getPlayerId(), eva.getAt(), eva.getBt());
+    	 			band.addEva(e.toProto());
+    	        }
+     			band.addEva(eva.toProto());
+    		});
+    		list.addBrand(band.build());
+		});
+    	this.write(Package.create(cmd, list.build()));
+    }
+
+    public void queryMyBrandDetail(short cmd,Message message){
+    	Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
+    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
+    	UUID pId = Util.toUuid(msg.getPId().toByteArray());
+        int itemId=msg.getItemId();
+        List<UUID> ls=new ArrayList<UUID>();
+        ls.add(pId);
+
+        Set<LeagueInfo.UID> set=LeagueManager.getInstance().getBuildingLeagueTech(bId); //加盟的技术
+        for (LeagueInfo.UID info : set) {
+    		int techId=info.getTechId();
+			if(itemId==techId){
+				ls.add(info.getPlayerId());//某项技术可能加盟多个，但是只能使用其中一个
+			}
+		}
+
+        Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
+        ls.forEach(playerId->{
+			Player player=GameDb.getPlayer(playerId);
+		    Building build=City.instance().getBuilding(bId);
+		    Gs.BuildingInfo buildInfo = build.myProto(playerId);
+			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
+
+			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();
+			detail.setBId(Util.toByteString(bId))
+			      .setTechId(itemId)
+			      .setPId(Util.toByteString(playerId))
+			      .setName(player.getName())
+			      .setBrand(buildInfo.getBrand());
+
+    		GameDb.getEvaInfoList(playerId,itemId).forEach(eva->{
+    			detail.addEva(eva.toProto());
+    		});
+    		detail.setLeaveTime(leaveTime);
+			list.addDetail(detail.build());
+        });
+		this.write(Package.create(cmd, list.build()));
+    }
+
+    public void updateMyBrandDetail(short cmd,Message message){
+    	Gs.BrandLeague msg = (Gs.BrandLeague)message;
+		UUID bId = Util.toUuid(msg.getBId().toByteArray());
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		int techId=msg.getTechId();
+		LeagueManager.getInstance().addBrandLeague(bId,techId,pId);
+        this.write(Package.create(cmd, msg));
     }
 
 	//未在公会中根据id查询公会信息
