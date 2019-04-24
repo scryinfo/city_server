@@ -219,4 +219,33 @@ public class StatisticSession {
     	
     	this.write(Package.create(cmd, list.build()));
     }
+
+    //---ly
+
+    public void queryPlayerExchangeAmount(short cmd) {
+        Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
+        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
+        builder.setPlayExchangeAmount(playerExchangeAmount);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    // 查询一周曲线图
+	public void queryPlayerGoodsCurve(short cmd, Message message) {
+		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
+		long id = curve.getId();
+
+		Ss.PlayerGoodsCurve.ExchangeType exchangeType = curve.getExchangeType();
+		Map<Long, Long> map=SummaryUtil.queryPlayerGoodsCurve(SummaryUtil.getPlayerExchangeAmount(),id,exchangeType,CountType.BYHOUR);
+		Ss.PlayerGoodsCurveMap.Builder bmap = Ss.PlayerGoodsCurveMap.newBuilder();
+		Ss.PlayerGoodsCurve.Builder list = Ss.PlayerGoodsCurve.newBuilder();
+		list.setExchangeType(exchangeType);
+		map.forEach((k,v)->{
+			bmap.setKey(k);
+			bmap.setValue(v);
+			list.addPlayerGoodsCurveMap(bmap.build());
+		});
+		this.write(Package.create(cmd,list.build()));
+
+	}
+
 }

@@ -1088,6 +1088,28 @@ public class GameDb {
 		return list;
 	}
 
+	public static long getPlayerAmount() {
+		long amount = 0;
+		Transaction transaction = null;
+		StatelessSession session = null;
+		try {
+			session = sessionFactory.openStatelessSession();
+			transaction = session.beginTransaction();
+			amount = (long) session.createSQLQuery("select count (ID) FROM PLAYER").uniqueResult();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			transaction.rollback();
+			logger.fatal("query player Amount failure");
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		return amount;
+	}
+
+
 	//集散中心增加的操作
 	//1.获取租户信息根据建筑id
 	public static List<WareHouseRenter> getAllRenterByBuilderId(UUID bid){

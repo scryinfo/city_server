@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -16,6 +17,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -1443,6 +1448,8 @@ public class GameSession {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player));
 			this.write(Package.create(cmd, builder.build()));
 		}
+		else
+			this.write(Package.fail(cmd));
 	}
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
@@ -2138,7 +2145,8 @@ public class GameSession {
 								.setBuildingName(building.getName())
 								.setPos(building.coordinate().toProto())
 								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
-								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice());
+								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
+								.setMId(building.metaId());
 					}
 				});
 			}
@@ -2380,11 +2388,11 @@ public class GameSession {
     	int type=msg.getType();
     	UUID bId = Util.toUuid(msg.getBId().toByteArray());
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
-		
+
         Building build=City.instance().getBuilding(bId);
-        
+
         Gs.BuildingInfo buildInfo = build.myProto(pId);
-        
+
         Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
@@ -2402,7 +2410,7 @@ public class GameSession {
 		});
     	this.write(Package.create(cmd, list.build()));
     }
-    
+
     public void queryMyBrandDetail(short cmd,Message message){
     	Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
     	UUID bId = Util.toUuid(msg.getBId().toByteArray());
@@ -2410,7 +2418,7 @@ public class GameSession {
         int itemId=msg.getItemId();
         List<UUID> ls=new ArrayList<UUID>();
         ls.add(pId);
-        
+
         Set<LeagueInfo.UID> set=LeagueManager.getInstance().getBuildingLeagueTech(bId); //加盟的技术
         for (LeagueInfo.UID info : set) {
     		int techId=info.getTechId();
@@ -2418,21 +2426,21 @@ public class GameSession {
 				ls.add(info.getPlayerId());//某项技术可能加盟多个，但是只能使用其中一个
 			}
 		}
-        
+
         Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
         ls.forEach(playerId->{
 			Player player=GameDb.getPlayer(playerId);
 		    Building build=City.instance().getBuilding(bId);
 		    Gs.BuildingInfo buildInfo = build.myProto(playerId);
 			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
-		    
+
 			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();
 			detail.setBId(Util.toByteString(bId))
 			      .setTechId(itemId)
 			      .setPId(Util.toByteString(playerId))
 			      .setName(player.getName())
 			      .setBrand(buildInfo.getBrand());
-			
+
     		GameDb.getEvaInfoList(playerId,itemId).forEach(eva->{
     			detail.addEva(eva.toProto());
     		});
@@ -2441,7 +2449,7 @@ public class GameSession {
         });
 		this.write(Package.create(cmd, list.build()));
     }
-    
+
     public void updateMyBrandDetail(short cmd,Message message){
     	Gs.BrandLeague msg = (Gs.BrandLeague)message;
 		UUID bId = Util.toUuid(msg.getBId().toByteArray());
@@ -2450,4 +2458,23 @@ public class GameSession {
 		LeagueManager.getInstance().addBrandLeague(bId,techId,pId);
         this.write(Package.create(cmd, msg));
     }
+
+	//未在公会中根据id查询公会信息
+	public void getOneSocietyInfo(short cmd, Message message)
+	{
+		UUID societyId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		Society society = SocietyManager.getSociety(societyId);
+		if (society != null)
+		{
+			this.write(Package.create(cmd, SocietyManager.toSocietyDetailProto(society)));
+
+		}
+	}
+
+	//查询注册过的玩家数量
+	public void getPlayerAmount(short cmd) {
+		long playerAmount = GameDb.getPlayerAmount();
+		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
+	}
+
 }
