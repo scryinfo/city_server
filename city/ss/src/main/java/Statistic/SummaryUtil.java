@@ -533,7 +533,7 @@ public class SummaryUtil
     }
 
     enum ExchangeType {
-        MATERIAL(1),GOODS(2),BUYGROUND(3),RENTGROUND(4), LABORATORY(5), storage(6);
+        MATERIAL(1),GOODS(2),GROUND(3),PUBLICITY(4), LABORATORY(5), storage(6);
         private int value;
         ExchangeType(int i)
         {

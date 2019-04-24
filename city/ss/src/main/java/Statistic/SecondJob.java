@@ -52,10 +52,10 @@ public class SecondJob implements org.quartz.Job {
 
         //buy ground
         documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.BUYGROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
         documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.RENTGROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy goods in Shelf
         documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
