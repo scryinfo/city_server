@@ -242,6 +242,11 @@ public abstract class Building {
     @Transient
     protected boolean working;
 
+    @Transient
+    protected Integer distance;//距离
+    @Transient
+    protected Integer charge;  //运费
+
     @Column(nullable = false)
     protected int salaryRatio;
 
@@ -503,6 +508,13 @@ public abstract class Building {
         if(this.emoticon > 0)
             builder.setEmoticon(this.emoticon);
         builder.setBubble(this.showBubble);
+        /*设置其他信息*/
+        if(distance!=null&&charge!=null){
+            Gs.BuildingInfo.otherInfo.Builder otherBuilder = Gs.BuildingInfo.otherInfo.newBuilder();
+            otherBuilder.setCharge(this.charge);
+            otherBuilder.setDistance(this.distance);
+            builder.setOther(otherBuilder);
+        }
         return builder.build();
     }
     public Gs.BuildingInfo myProto(UUID playerId) {
