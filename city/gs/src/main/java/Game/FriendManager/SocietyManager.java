@@ -266,22 +266,22 @@ public class SocietyManager
 
     public static void handleReqJoin(Gs.JoinHandle params, Player handler)
     {
-        UUID societyId = Util.toUuid(params.getSocietyId().toByteArray()); // 拿到申请加入的公会id
-        if (societyId.equals(handler.getSocietyId()))  //保证当前处理人已经在公会中
+        UUID societyId = Util.toUuid(params.getSocietyId().toByteArray());
+        if (societyId.equals(handler.getSocietyId()))
         {
-            Society society = getSocietyFromCache(societyId);  // 缓存中查找公会
-            UUID reqId = Util.toUuid(params.getPlayerId().toByteArray()); //获取申请人id
+            Society society = getSocietyFromCache(societyId);
+            UUID reqId = Util.toUuid(params.getPlayerId().toByteArray());
             if (society != null &&
                     !society.getMemberIds().contains(reqId)
                     && canModify(society.getIdentity(handler.id())))
             {
-                Player reqPlayer = GameDb.getPlayer(reqId);  // 获取申请人信息
+                Player reqPlayer = GameDb.getPlayer(reqId);
                 Gs.JoinReq.Builder builder = Gs.JoinReq.newBuilder();
                 society.getJoinMap().remove(reqId);
                 GameDb.saveOrUpdate(society);
                 boolean isSuccess = false;
                 Society.SocietyNotice notice = new Society.SocietyNotice(handler.id(),
-                        reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);  // 创建公会公告
+                        reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);
 
                 //已加入其他公会
                 if (reqPlayer.getSocietyId() != null)
