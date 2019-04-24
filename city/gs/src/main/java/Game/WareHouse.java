@@ -310,19 +310,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
         this.renters = renters;
     }
 
-/*
-    @Override
-    public boolean addToShoppingCart(ShopCart cart) {
-        return this.shelf.addToShoppingCart(cart);
-    }
 
-    @Override
-    public boolean removeFromShoppingCart(ShopCart cart) {
-        return this.shelf.removeFromShoppingCart(cart);
-    }
-*/
-
-    //@Override
     public Shelf getShelf() {
         return this.shelf;
     }
@@ -335,6 +323,9 @@ public class WareHouse extends Building implements IStorage, IShelf {
     public void addRenter(WareHouseRenter renter){
         renters.add(renter);
     }
-
+    @Override
+    public boolean delItem(Item item) {
+        return this.store.delItem(item);
+    }
 
 }

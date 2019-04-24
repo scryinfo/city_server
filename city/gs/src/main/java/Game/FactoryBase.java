@@ -302,4 +302,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public boolean delLine(UUID lineId) {
         return this.__delLine(lineId) != null ;
     }
+
+    @Override
+    public boolean delItem(Item item) {
+        return this.store.delItem(item);
+    }
 }
