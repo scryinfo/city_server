@@ -759,6 +759,48 @@ public class GameDb {
 			session.close();
 		}
 	}
+	//数据库更新后，清理缓存，适用于数据量很大的应用场景
+    public static void saveOrUpdateAndClear(Collection objs) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            int i = 0;
+            for (Object o : objs) {
+                session.saveOrUpdate(o);
+                ++i;
+                if (i % BATCH_SIZE == 0) {
+                    session.flush();
+                }
+            }
+            session.clear(); //清除缓存，避免内存开销太大
+            transaction.commit();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            if(transaction != null)
+                transaction.rollback();
+        } finally {
+            session.close();
+        }
+    }
+	public static void saveOrUpdateAndClear(Object o) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			session.saveOrUpdate(o);
+			session.flush();
+			session.clear(); //清除缓存，避免内存开销太大
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+			session.close();
+		}
+	}
+
 	public static void saveOrUpdate(Object o) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = null;

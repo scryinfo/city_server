@@ -495,6 +495,13 @@ public class PublicFacility extends Building {
         builder.addPublicFacility((Gs.PublicFacility) this.detailProto());
     }
 
+    public void addPromoAbRecord( UUID buildingId, int typeId, long ts, int value ){
+        //人流量
+        //eva
+        Record newRecord = new Record(buildingId,typeId, ts, value);
+        GameDb.saveOrUpdateAndClear( newRecord );
+    }
+
     @Override
     protected void _update(long diffNano) {
         final long now = System.currentTimeMillis();
