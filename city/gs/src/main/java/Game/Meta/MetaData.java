@@ -47,6 +47,7 @@ public class MetaData {
     private static final String evaColName = "Eva";
     private static final String expColName = "Experiences";
     private static final String buildingTechName = "BuildingTech";
+    private static final String warehouseColName = "WareHouse";//集散中心
 
     //global field
     private static SysPara sysPara;
@@ -71,6 +72,7 @@ public class MetaData {
     private static final HashMap<Formula.Key, Formula> formula = new HashMap<>();
     private static final HashMap<Integer, GoodFormula> goodFormula = new HashMap<>();
     private static final HashMap<Integer, Set<Integer>> buildingTech = new HashMap<>();
+    private static final TreeMap<Integer, MetaWarehouse> warehouse = new TreeMap<>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
@@ -204,8 +206,8 @@ public class MetaData {
                 return laboratory.get(id);
             case MetaBuilding.PUBLIC:
                 return publicFacility.get(id);
-            case MetaBuilding.TALENT:
-                return talentCenter.get(id);
+            case MetaBuilding.WAREHOUSE:
+                return warehouse.get(id);//集散中心（替换以前的人才中心）
         }
         return null;
     }
@@ -223,7 +225,7 @@ public class MetaData {
     private static final List<InitialBuildingInfo> initialBuilding = new ArrayList<>();
     private static final List<MetaEva> eva = new ArrayList<MetaEva>();
     private static final Map<Integer,MetaExperiences> experiences = new HashMap<Integer,MetaExperiences>();
-    		
+
     public static final Formula getFormula(Formula.Key key) {
         return formula.get(key);
     }
@@ -408,6 +410,11 @@ public class MetaData {
             MetaTalentCenter m = new MetaTalentCenter(doc);
             talentCenter.put(m.id, m);
         });
+        //集散中心的初始化建筑
+        mongoClient.getDatabase(dbName).getCollection(warehouseColName).find().forEach((Block<Document>) doc -> {
+            MetaWarehouse m = new MetaWarehouse(doc);
+            warehouse.put(m.id, m);
+        });
     }
 
     public static void initGoodFormula() {
@@ -460,7 +467,7 @@ public class MetaData {
 
         initFormula();
         initGoodFormula();
-        
+
         initEva();
         initExperiences();
 
