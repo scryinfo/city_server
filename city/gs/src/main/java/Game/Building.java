@@ -507,14 +507,16 @@ public abstract class Building {
         int type=MetaBuilding.type(metaBuilding.id);
     	builder.setType(type);
     	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
-           	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+    	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
         	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	   	//单个建筑
         	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
-          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
-          	//单个建筑
-        	double brand=brandMap.get(type());
+           	double brand=brandMap.get(type());
         	double quality=qtyMap.get(type());
+        	brandMap.clear();
+        	qtyMap.clear();
         	//所有建筑
+          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
         	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
         	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
         	double totalBrand=brandMap.get(type());
