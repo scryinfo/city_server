@@ -438,7 +438,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf) {
+				if(!building.outOfBusiness() && building instanceof IShelf) {
 					IShelf s = (IShelf)building;
 					if(s.getSaleCount(mi.id) > 0)
 						n.addAndGet(1);
@@ -485,7 +485,7 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf) {
+				if(!building.outOfBusiness() && building instanceof IShelf) {
 					IShelf s = (IShelf)building;
 					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
@@ -508,7 +508,7 @@ public class GameSession {
 			Gs.LabDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof Laboratory) {
+				if(!building.outOfBusiness() && building instanceof Laboratory) {
 					Laboratory s = (Laboratory)building;
 					if(s.isExclusiveForOwner())
 						return;
@@ -522,6 +522,7 @@ public class GameSession {
 					bb.setQueuedTimes(s.getQueuedTimes());
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());
 				}
 			});
 		});
@@ -1363,6 +1364,8 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory))
 			return;
+		if(c.getTimes() <= 0)
+			return;
 		if(c.hasGoodCategory()) {
 			if(!MetaGood.legalCategory(c.getGoodCategory()))
 				return;
@@ -1371,7 +1374,7 @@ public class GameSession {
 		if(!building.canUseBy(player.id())) {
 			if(!c.hasTimes())
 				return;
-			if(c.getTimes() <= 0 || c.getTimes() > lab.getSellTimes())
+			if(c.getTimes() > lab.getSellTimes())
 				return;
 			long cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
