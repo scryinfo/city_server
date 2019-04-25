@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -26,11 +28,9 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.SelectBeforeUpdate;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.EvictingQueue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.mchange.v2.lang.StringUtils;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
@@ -507,16 +507,24 @@ public abstract class Building {
         return builder.build();
     }
     public Gs.BuildingInfo myProto(UUID playerId) {
-    	int buildingBrand = BrandManager.instance().getBuilding(ownerId, type());
-    	Eva e=EvaManager.getInstance().getEva(playerId, type(), Gs.Eva.Btype.Quality_VALUE);
+    	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+    	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
+      	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+      	//单个建筑
+    	double brand=brandMap.get(type());
+    	double quality=qtyMap.get(type());
+    	//所有建筑
+    	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+    	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+    	double totalBrand=brandMap.get(type());
+    	double totalQuality=qtyMap.get(type());
+    	
 		Gs.BuildingInfo b=toProto();
     	Gs.BuildingInfo.Builder builder=b.toBuilder();
     	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setBrand(buildingBrand)
-    		   .setQuality(quality());
-     	if(e!=null){
-     		builder.setEva(e.toProto());
-    	}
+    		   .setBrand((int)Math.ceil(brand/totalBrand*100))
+    		   .setQuality((int)Math.ceil(quality/totalQuality*100));
      	return builder.build(); 
     }
     public abstract Message detailProto();
