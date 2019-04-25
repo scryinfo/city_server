@@ -25,7 +25,9 @@ import Shared.GlobalConfig;
 
 @Entity(name = "PublicFacility")
 public class PublicFacility extends Building implements Ticker{
-    PublicFacility(){}
+    PublicFacility(){
+        TickManager.instance().registerTick(this);
+    }
 
     @Override
     public  void tick(long deltaTime){
@@ -42,7 +44,6 @@ public class PublicFacility extends Building implements Ticker{
 //        this.pid = ownerId;
         this.meta = meta;
         this.qty = meta.qty;
-        TickManager.instance().registerTick(this);
     }
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
