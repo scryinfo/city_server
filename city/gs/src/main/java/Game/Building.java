@@ -1,26 +1,50 @@
 package Game;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.persistence.AttributeConverter;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.SelectBeforeUpdate;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.EvictingQueue;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.mchange.v2.lang.StringUtils;
+
 import DB.Db;
 import Game.Contract.IBuildingContract;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
-import com.google.common.collect.EvictingQueue;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
-import org.hibernate.annotations.SelectBeforeUpdate;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Entity
 @SelectBeforeUpdate(false)
@@ -207,7 +231,7 @@ public abstract class Building {
 
     @Column(nullable = false)
     private UUID ownerId;
-
+    
     @Embedded
     private Coordinate coordinate;
 
@@ -328,11 +352,10 @@ public abstract class Building {
         this.happy = HAPPY_MIN;
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
         this.broadcastChange();
-/*
-        //员工满意度通知
+
+        //停工通知
         UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
-        MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
-*/
+        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
     }
 
     public void setName(String name) {
@@ -344,7 +367,7 @@ public abstract class Building {
         return name == null ? "" : name;
     }
 
-    // ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
+	// ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
     public void takeAsWorker(Npc npc) {
         if(npc.canWork())
             this.allStaff.add(npc);
@@ -484,11 +507,16 @@ public abstract class Building {
         return builder.build();
     }
     public Gs.BuildingInfo myProto(UUID playerId) {
+    	int buildingBrand = BrandManager.instance().getBuilding(ownerId, type());
+    	Eva e=EvaManager.getInstance().getEva(playerId, type(), Gs.Eva.Btype.Quality_VALUE);
 		Gs.BuildingInfo b=toProto();
     	Gs.BuildingInfo.Builder builder=b.toBuilder();
     	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setBrand(BrandManager.instance().getBuildingBrandScore(playerId, metaBuilding.id))
+    		   .setBrand(buildingBrand)
     		   .setQuality(quality());
+     	if(e!=null){
+     		builder.setEva(e.toProto());
+    	}
      	return builder.build(); 
     }
     public abstract Message detailProto();
@@ -500,8 +528,13 @@ public abstract class Building {
     protected abstract void leaveImpl(Npc npc);
     // there is no need to remember which npc is in this building now
     public void enter(Npc npc) {
-        flowCount += 1;
+        addFlowCount();
+//        flowCount += 1;
         enterImpl(npc);
+        //住宅入住通知
+        int[] num = {flowCount};
+        UUID[] apartmentOwerIdAndBid = {this.ownerId,id()};
+        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);
     }
 
     public void addFlowCount()
@@ -633,11 +666,9 @@ public abstract class Building {
         }
         else
             happy = HAPPY_MIN;
-/*
             //员工满意度通知
             UUID[] ownerIdAndBuildingId = {p.id(),this.id()};
             MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),p.id(),null,ownerIdAndBuildingId,null);
-*/
         return false;
     }
     private void calcuHappy() {

@@ -75,7 +75,8 @@
 		<mapping class="Game.Mail"></mapping>
 		<mapping class="Game.FriendManager.Society"></mapping>
 		<mapping class="Game.Contract.Contract"></mapping>
-		<mapping class="Game.Eva"></mapping>
+		<mapping class="Game.Eva.Eva"></mapping>
 		<mapping class="Game.League.LeagueInfo"></mapping>
+		<mapping class="Game.League.BrandLeague"></mapping>
 	</session-factory>
 </hibernate-configuration> 
