@@ -171,8 +171,11 @@ public class PublicFacility extends Building implements Ticker{
             Integer level=eva.getLv();
             Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
             MetaExperiences evaAddMe= map.get(level);
-            evaAdd = evaAddMe.p;
-            evaPromoCur.put(eva.getAt(),evaAddMe.p);
+            if(evaAddMe != null){
+                evaAdd = evaAddMe.p;
+                evaPromoCur.put(eva.getAt(),evaAddMe.p);
+                int t = 0 ;
+            }
         }
         //4、 流量提升
         flowPromoCur = (int)ContractManager.getInstance().getPlayerADLift(this.ownerId());
