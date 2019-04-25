@@ -511,16 +511,16 @@ public abstract class Building {
         	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
     	   	//单个建筑
         	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
-           	double brand=brandMap.get(type());
-        	double quality=qtyMap.get(type());
+           	double brand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double quality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
         	brandMap.clear();
         	qtyMap.clear();
         	//所有建筑
           	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
         	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
         	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-        	double totalBrand=brandMap.get(type());
-        	double totalQuality=qtyMap.get(type());
+        	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
         	builder.setBrand((int)Math.ceil(brand/totalBrand*100))
 		       	   .setQuality((int)Math.ceil(quality/totalQuality*100));
     	}
