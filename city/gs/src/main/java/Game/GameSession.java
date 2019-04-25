@@ -1137,13 +1137,14 @@ public class GameSession {
 		Building sellerBuilding = City.instance().getBuilding(promoOrder.sellerBuildingId);
 		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
 		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId);
-		tslist.forEach(ts->gs_AdRemovePromoOrder.toBuilder().addPromoTsChanged(ts.toProto()));
+		Gs.AdRemovePromoOrder.Builder newMsg = gs_AdRemovePromoOrder.toBuilder();
+		tslist.forEach(ts->newMsg.addPromoTsChanged(ts.toProto()));
 		GameDb.saveOrUpdate(fcySeller);
 		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
 		seller.delpayedPromotion(promoId);
 
 		//发送客户端通知
-		this.write(Package.create(cmd, gs_AdRemovePromoOrder));
+		this.write(Package.create(cmd, newMsg.build()));
 	}
 
 	//adjustPromoSellingSetting

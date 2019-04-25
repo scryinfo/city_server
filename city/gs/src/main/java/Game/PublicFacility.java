@@ -136,7 +136,7 @@ public class PublicFacility extends Building {
         int evaAdd = 0;
         Iterator<Eva> it = sellerEvas.iterator();
         while (it.hasNext()){
-            Eva eva =  (Eva)it;
+            Eva eva =  it.next();
             if(eva.checkType(objType,abType)){
                 //根据取到的eva的等级，取出对应的能力值
                 Integer level=eva.getLv();
