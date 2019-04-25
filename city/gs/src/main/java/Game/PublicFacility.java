@@ -144,6 +144,8 @@ public class PublicFacility extends Building {
                 Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
                 MetaExperiences evaAddMe= map.get(level);
                 evaAdd = evaAddMe.p;
+                //添加Eva历史记录
+                addPromoAbRecord(fcySeller.id(),(short)inObjType,evaAdd);
                 break;
             }
         }
@@ -160,6 +162,8 @@ public class PublicFacility extends Building {
         }*/
         //4、 流量提升
         float flowRatios = ContractManager.getInstance().getPlayerADLift(this.ownerId());
+        //添加流量历史记录
+        addPromoAbRecord(fcySeller.id(),(short)(-1),evaAdd);
         return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
     }
 

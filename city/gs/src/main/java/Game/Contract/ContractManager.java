@@ -13,8 +13,8 @@ public class ContractManager
 {
     private ContractManager() { }
     private static ContractManager instance = new ContractManager();
-    private Map<UUID, Contract> allContract = new HashMap<>();
-    private Map<UUID, Float> playerLiftMap = new HashMap<>();
+    private Map<UUID, Contract> allContract = new HashMap<>();  //UUID: Contract.id
+    private Map<UUID, Float> playerLiftMap = new HashMap<>();   //UUID: signId
 
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
