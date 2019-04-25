@@ -24,9 +24,14 @@ import Game.Contract.ContractManager;
 import Shared.GlobalConfig;
 
 @Entity(name = "PublicFacility")
-public class PublicFacility extends Building {
+public class PublicFacility extends Building implements Ticker{
     PublicFacility(){}
 
+    @Override
+    public  void tick(long deltaTime){
+        updatePromoAbility();
+        int t = 0 ;
+    }
     @Override
     protected void finalize(){
         System.out.println("PublicFacility finalize");
@@ -37,6 +42,7 @@ public class PublicFacility extends Building {
 //        this.pid = ownerId;
         this.meta = meta;
         this.qty = meta.qty;
+        TickManager.instance().registerTick(this);
     }
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
@@ -100,11 +106,26 @@ public class PublicFacility extends Building {
         return selledPromotion;
     }
 
+    public int getFlowPromoCur() {
+        return flowPromoCur;
+    }
+
+    public void setFlowPromoCur(int flowPromoCur) {
+        this.flowPromoCur = flowPromoCur;
+    }
+
+    //流量推广力缓存
+    @Transient
+    private int flowPromoCur = 0;
+    //eva推广力缓存
+    @Transient
+    private Map<Integer,Integer>evaPromoCur = new HashMap<>();
+
     public float getCurPromoAbility() {
         return curPromoAbility;
     }
 
-    public float calculatePromoAbility(int inObjType) {
+    public float getAllPromoTypeAbility(int inObjType){
         //计算公式：
 			/*
 				* 基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
@@ -130,41 +151,31 @@ public class PublicFacility extends Building {
 				   optional int64 b = 6;   //品牌
 			*/
         //3、 计算Eva单项提升能力
+        //查看是否有该广告商推广能力的Eva提升
+        int evaAdd = evaPromoCur.getOrDefault(inObjType,0);
+        //4、 流量提升
+        float flowRatios = getFlowPromoCur();
+        return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
+    }
+
+    public void updatePromoAbility() {
+        //3、 计算Eva单项提升能力
         Set<Eva> sellerEvas = EvaManager.getInstance().getEvaList(this.ownerId());
-        int objType = inObjType;
         int abType = Gs.Eva.Btype.PromotionAbility.getNumber();
         //查看是否有该广告商推广能力的Eva提升
         int evaAdd = 0;
         Iterator<Eva> it = sellerEvas.iterator();
         while (it.hasNext()){
             Eva eva =  it.next();
-            if(eva.checkType(objType,abType)){
-                //根据取到的eva的等级，取出对应的能力值
-                Integer level=eva.getLv();
-                Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-                MetaExperiences evaAddMe= map.get(level);
-                evaAdd = evaAddMe.p;
-                //添加Eva历史记录
-                addPromoAbRecord(fcySeller.id(),(short)inObjType,evaAdd);
-                break;
-            }
+            //根据取到的eva的等级，取出对应的能力值
+            Integer level=eva.getLv();
+            Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
+            MetaExperiences evaAddMe= map.get(level);
+            evaAdd = evaAddMe.p;
+            evaPromoCur.put(eva.getAt(),evaAddMe.p);
         }
-        /*for(int i = 0 ; i < sellerEvas.size(); i++){
-            Eva eva =  sellerEvas.get(i);
-            if(eva.checkType(objType,abType)){
-                //根据取到的eva的等级，取出对应的能力值
-                Integer level=eva.getLv();
-                Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-                MetaExperiences evaAddMe= map.get(level);
-                evaAdd = evaAddMe.p;
-                break;
-            }
-        }*/
         //4、 流量提升
-        float flowRatios = ContractManager.getInstance().getPlayerADLift(this.ownerId());
-        //添加流量历史记录
-        addPromoAbRecord(fcySeller.id(),(short)(-1),evaAdd);
-        return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
+        flowPromoCur = (int)ContractManager.getInstance().getPlayerADLift(this.ownerId());
     }
 
     //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
@@ -259,7 +270,7 @@ public class PublicFacility extends Building {
 			* 不用通知客户端，直接更新数据库
 		*/
     public float excutePromotion(PromoOrder promo){
-        return calculatePromoAbility(promo.buildingType > 0 ? promo.buildingType: promo.productionType);
+        return getAllPromoTypeAbility(promo.buildingType > 0 ? promo.buildingType : promo.productionType);
     }
 
     @Column(nullable = false)

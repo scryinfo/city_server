@@ -1062,7 +1062,7 @@ public class GameSession {
 		{
 			int bsTp = tp/100;
 			int subTp = tp % 100;
-			Integer value = (int)fcySeller.calculatePromoAbility(tp);
+			Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
 			builder.addCurAbilitys(value);
 		}
 		this.write(Package.create(cmd, builder.build()));

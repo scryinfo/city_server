@@ -588,6 +588,9 @@ public abstract class Building {
 
     protected void setSalaryRatioAction(){}
 
+    public void spectialTickAction(long nowHour) {
+
+    }
     public void hourTickAction(int nowHour) {
         flow = flowCount;
         flowCount = 0;
