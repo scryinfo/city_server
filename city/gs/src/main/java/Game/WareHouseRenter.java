@@ -320,17 +320,12 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         builder.addHouseRenter(this.toProto());
     }
 
-/*    @Override
-    public boolean addToShoppingCart(ShopCart cart) {
-        return this.shelf.addToShoppingCart(cart);
+    public static void test(){
+        System.out.println("开始执行++++++++++WareHourseRenter"+System.currentTimeMillis());
     }
 
     @Override
-    public boolean removeFromShoppingCart(ShopCart cart) {
-        return this.shelf.removeFromShoppingCart(cart);
-    }*/
-
-    public static void test(){
-        System.out.println("开始执行++++++++++WareHourseRenter"+System.currentTimeMillis());
+    public boolean delItem(Item item) {
+        return this.store.delItem(item);
     }
 }
