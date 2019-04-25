@@ -504,28 +504,25 @@ public abstract class Building {
         if(this.emoticon > 0)
             builder.setEmoticon(this.emoticon);
         builder.setBubble(this.showBubble);
+        int type=MetaBuilding.type(metaBuilding.id);
+    	builder.setType(type);
+    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
+           	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+        	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+        	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
+          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+          	//单个建筑
+        	double brand=brandMap.get(type());
+        	double quality=qtyMap.get(type());
+        	//所有建筑
+        	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+        	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+        	double totalBrand=brandMap.get(type());
+        	double totalQuality=qtyMap.get(type());
+        	builder.setBrand((int)Math.ceil(brand/totalBrand*100))
+		       	   .setQuality((int)Math.ceil(quality/totalQuality*100));
+    	}
         return builder.build();
-    }
-    public Gs.BuildingInfo myProto(UUID playerId) {
-    	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
-    	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-    	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
-      	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
-      	//单个建筑
-    	double brand=brandMap.get(type());
-    	double quality=qtyMap.get(type());
-    	//所有建筑
-    	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
-    	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-    	double totalBrand=brandMap.get(type());
-    	double totalQuality=qtyMap.get(type());
-    	
-		Gs.BuildingInfo b=toProto();
-    	Gs.BuildingInfo.Builder builder=b.toBuilder();
-    	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setBrand((int)Math.ceil(brand/totalBrand*100))
-    		   .setQuality((int)Math.ceil(quality/totalQuality*100));
-     	return builder.build(); 
     }
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
