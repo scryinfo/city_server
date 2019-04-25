@@ -1355,6 +1355,35 @@ public class GameSession {
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
 	}
+
+	public void AdGetPromoAbilityHistory(short cmd, Message message) {
+		Gs.AdGetPromoAbilityHistory GetRds = (Gs.AdGetPromoAbilityHistory) message;
+		Gs.AdGetPromoAbilityHistory.Builder newbuilder = Gs.AdGetPromoAbilityHistory.newBuilder();
+		UUID sellerBuildingId = Util.toUuid(GetRds.getSellerBuildingId().toByteArray());
+		//开始时间，以小时为单位
+		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs) - 1;
+		List userList = null;
+		GetRds.getTypeIdsList().forEach(tpid->{
+			if(tpid > 0){
+				//eva
+				GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
+			}else{
+				//人流量
+				Building building = City.instance().getBuilding(sellerBuildingId);
+				GameDb.getFlow_records(tsSart, building.ownerId());
+			}
+			Gs.Records.Builder rds = Gs.Records.newBuilder();
+			rds.setBuildingId(Util.toByteString(sellerBuildingId));
+			rds.setTypeId(tpid);
+			userList.forEach(record->{
+				Record rd = (Record) record;
+				rds.addList(rd.toproto());
+			});
+			newbuilder.addRecordsList(rds.build());
+		});
+		this.write(Package.create(cmd, newbuilder.build()));
+	}
+
 	public void adAddSlot(short cmd, Message message) {
 		Gs.AddSlot c = (Gs.AddSlot)message;
 

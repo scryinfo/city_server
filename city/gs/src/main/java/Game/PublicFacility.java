@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import Game.Meta.MetaExperiences;
 import Game.Meta.MetaData;
 import Game.Contract.ContractManager;
+import Shared.GlobalConfig;
 
 @Entity(name = "PublicFacility")
 public class PublicFacility extends Building {
@@ -509,13 +510,45 @@ public class PublicFacility extends Building {
         builder.addPublicFacility((Gs.PublicFacility) this.detailProto());
     }
 
-    public void addPromoAbRecord( UUID buildingId, int typeId, long ts, int value ){
-        //人流量
-        //eva
-        Record newRecord = new Record(buildingId,typeId, ts, value);
-        GameDb.saveOrUpdateAndClear( newRecord );
+    public EvaRecord getlastEvaRecord(UUID bid, short tid){
+        //重新开服,需要获取一下上次的记录
+        return GameDb.getlastEvaRecord(bid,tid);
+    }
+    public FlowRecord getlastFlowRecord(UUID inPid){
+        return GameDb.getlastFlowRecord(inPid);
     }
 
+    public void addPromoAbRecord( UUID buildingId, short typeId, int value ){
+        //记录的时间间隔为 PromotionMgr._upDeltaMsint ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
+        int ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
+        if(typeId < 1){
+            //人流量
+            Building bd = City.instance().getBuilding(buildingId);
+            if(bd == null){
+                if(GlobalConfig.DEBUGLOG){
+                    GlobalConfig.cityError("PublicFacility.addPromoAbRecord: building not exist!");
+                }
+                return;
+            }
+            UUID pid = bd.ownerId();
+            FlowRecord lastRecord = getlastFlowRecord(pid);
+            //只记录变化的，减少数据量
+            if(lastRecord.ts == ts){
+                return;
+            }
+            FlowRecord newRecord = new FlowRecord(pid,ts, value);
+            GameDb.saveOrUpdateAndClear( newRecord );
+        }else{
+            //eva
+            EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
+            //只记录变化的，减少数据量
+            if(lastRecord.ts == ts){
+                return;
+            }
+            EvaRecord newRecord = new EvaRecord(buildingId,typeId, ts, value);
+            GameDb.saveOrUpdateAndClear( newRecord );
+        }
+    }
     @Override
     protected void _update(long diffNano) {
         final long now = System.currentTimeMillis();

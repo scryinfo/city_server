@@ -24,9 +24,9 @@ public class PromotionMgr {
     private Map<UUID, PromoOrder> promotions = new HashMap<>();
 
     private static long _elapsedtime = 0 ;    //上次更新时间
-    //public static final long _upDelta = 3600*1000000000;   //更新间隔，单位是纳秒, 3600为一个小时
-    public static final long _upDelta = 10*1000000000;   //更新间隔，单位是纳秒, 3600为一个小时
-
+    //public static final long _upDeltaNs = 3600*1000000000;    //更新间隔，单位是纳秒, 3600为一个小时
+    public static final long _upDeltaNs = 10*1000000000;        //更新间隔，单位是纳秒, 3600为一个小时Ns
+    public static final long _upDeltaMs = _upDeltaNs/1000000;   //更新间隔,毫秒
     private static PromotionMgr instance ;
     public static void init() {
         GameDb.initPromotionMgr();
@@ -66,9 +66,9 @@ public class PromotionMgr {
                 findPos = i;
             }else if(findPos >= 0){
                 promo.promStartTs = nextTs;
+                changed.add(new PromoOdTs(pid,promo.promStartTs));
             }
             nextTs = promo.promStartTs + promo.promDuration;
-            changed.add(new PromoOdTs(pid,promo.promStartTs));
         }
         //更新完之后，移除掉要删除的推广。
         return changed;
@@ -83,7 +83,7 @@ public class PromotionMgr {
     }
     public void update(long diffNano) {
 
-        if(_elapsedtime < _upDelta){
+        if(_elapsedtime < _upDeltaNs){
             _elapsedtime += diffNano;
             return;
         }else{

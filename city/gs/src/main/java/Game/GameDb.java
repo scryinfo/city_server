@@ -167,6 +167,52 @@ public class GameDb {
         }
     }
 
+	public static  EvaRecord getlastEvaRecord(UUID bid, short tid){
+		Session session = sessionFactory.openSession();
+		//重新开服,需要获取一下上次的记录
+		int tsSart = (int)(System.currentTimeMillis() - PromotionMgr._upDeltaMs);
+		Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
+				.setParameter("tsSt",tsSart)
+				.setParameter("bdid",bid)
+				.setParameter("tpid",tid);
+		List userList = query.list();
+		if(userList.size() > 0){
+			return (EvaRecord)userList.get(userList.size()-1);
+		}
+		return new EvaRecord();
+	}
+	public static FlowRecord getlastFlowRecord(UUID inPid){
+		Session session = sessionFactory.openSession();
+		//重新开服,需要获取一下上次的记录
+		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs - 1);
+		Query query = session.createQuery("from flow_records Record where ts>=:tsSt and playerId is :pid and typeId is :tpid")
+				.setParameter("tsSt",tsSart)
+				.setParameter("pid",inPid);
+		List userList = query.list();
+		if(userList.size() > 0){
+			return (FlowRecord)userList.get(userList.size()-1);
+		}
+		return new FlowRecord();
+	}
+
+	public static List getEva_records(int tsSart,UUID bid,int tid){
+		Session session = sessionFactory.openSession();
+		//eva
+		Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
+				.setParameter("tsSt",tsSart)
+				.setParameter("bdid",bid)
+				.setInteger("tpid",tid);
+		return query.list();
+	}
+	public static List getFlow_records(int tsSart,UUID pid){
+		Session session = sessionFactory.openSession();
+		//人流量
+		Query query = session.createQuery( "from flow_records Record where ts>=:tsSt and playerId is :pid" )
+				.setParameter("tsSt",tsSart)
+				.setParameter("pid",pid);
+		return query.list();
+	}
+
 	public static List<Eva> getEvaInfo(UUID playerId, int techId)
 	{
 		Session session = sessionFactory.openSession();
