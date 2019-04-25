@@ -1,5 +1,8 @@
 package Statistic;
 
+import static Statistic.PerHourJob.BUYGROUND_ID;
+import static Statistic.PerHourJob.RENTGROUND_ID;
+
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -15,10 +18,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import Shared.LogDb;
-import sun.rmi.runtime.Log;
-
-import static Statistic.PerHourJob.BUYGROUND_ID;
-import static Statistic.PerHourJob.RENTGROUND_ID;
 
 public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);

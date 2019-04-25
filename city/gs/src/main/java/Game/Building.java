@@ -26,9 +26,11 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.SelectBeforeUpdate;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.EvictingQueue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.mchange.v2.lang.StringUtils;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
@@ -523,8 +525,10 @@ public abstract class Building {
     	Gs.BuildingInfo.Builder builder=b.toBuilder();
     	builder.setType(MetaBuilding.type(metaBuilding.id))
     		   .setBrand(buildingBrand)
-    		   .setQuality(quality())
-    		   .setEva(e.toProto());
+    		   .setQuality(quality());
+     	if(e!=null){
+     		builder.setEva(e.toProto());
+    	}
      	return builder.build(); 
     }
     public abstract Message detailProto();
