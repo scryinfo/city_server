@@ -61,6 +61,10 @@ public class Laboratory extends Building {
                 .setProbGood(this.goodProb)
                 .setRecommendPrice(0)
                 .setExclusive(this.exclusiveForOwner)
+                .setTotalEvaIncome(this.totalEvaIncome)
+                .setTotalEvaTimes(this.totalEvaTimes)
+                .setTotalGoodIncome(this.totalGoodIncome)
+                .setTotalGoodTimes(this.totalGoodTimes)
                 .build();
     }
     @Override
@@ -124,6 +128,31 @@ public class Laboratory extends Building {
     public boolean isExclusiveForOwner() {
         return this.exclusiveForOwner;
     }
+
+    public int getEvaProb() {
+        return this.evaProb;
+    }
+
+    public int getGoodProb() {
+        return this.goodProb;
+    }
+
+    public int getQueuedTimes() {
+        int times = this.inProcess.stream().mapToInt(l->l.times).sum();
+        times -= this.inProcess.isEmpty()?0:this.inProcess.get(0).usedRoll+this.inProcess.get(0).availableRoll;
+        return times;
+    }
+
+    public void updateTotalGoodIncome(long cost, int times) {
+        this.totalGoodIncome += cost;
+        this.totalGoodTimes += times;
+    }
+
+    public void updateTotalEvaIncome(long cost, int times) {
+        this.totalEvaIncome += cost;
+        this.totalEvaTimes += times;
+    }
+
     public static final class RollResult {
         List<Integer> itemIds;
         int evaPoint;
@@ -159,7 +188,7 @@ public class Laboratory extends Building {
                         res.itemIds.add(newId);
                         GoodFormula f = MetaData.getFormula(newId);
                         for (GoodFormula.Info info : f.material) {
-                            if(!player.hasItem(info.item.id)) {
+                            if(info != null && !player.hasItem(info.item.id)) {
                                 player.addItem(info.item.id, 0);
                                 res.itemIds.add(info.item.id);
                             }
@@ -168,6 +197,8 @@ public class Laboratory extends Building {
                 }
             }
         }
+        if(l.isComplete() && l.availableRoll == 0)
+            this.completed.remove(l.id);
         return res;
     }
 
@@ -262,9 +293,9 @@ public class Laboratory extends Building {
     @JoinColumn(name = "labId1")
     private List<Line> inProcess = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval=true)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyColumn(name = "id")
+    @MapKey(name = "id")
     @JoinColumn(name = "labId2")
     private Map<UUID, Line> completed = new HashMap<>();
 
@@ -286,4 +317,9 @@ public class Laboratory extends Building {
     @Transient
     private int evaProb;
     private boolean exclusiveForOwner;
+
+    private long totalEvaIncome;
+    private int totalEvaTimes;
+    private long totalGoodIncome;
+    private int totalGoodTimes;
 }

@@ -17,6 +17,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import ss.Ss;
 
+import static Statistic.SummaryUtil.DAY_MILLISECOND;
+
 // this class contain only getXXX method, that means the only purpose this class or this server
 // is get data from db
 
@@ -71,6 +73,36 @@ public class StatisticSession {
 		builder.addAllNodes(SummaryUtil.getBuildDayIncomeById(buildingId));
         this.write(Package.create(cmd, builder.build()));
     }
+
+	public void queryBuildingFlow(short cmd, Message message)
+	{
+		UUID buildingId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
+		long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
+		Ss.BuildingFlow.Builder builder = Ss.BuildingFlow.newBuilder().setBid(((Ss.Id) message).getId());
+		LogDb.queryBuildingFlowAndLift(startTime, buildingId).forEach(document ->
+		{
+			builder.addNodes(Ss.BuildingFlow.Node.newBuilder()
+					.setTime(document.getLong("t"))
+					.setFlow(document.getInteger("f"))
+					.build());
+		});
+		this.write(Package.create(cmd,builder.build()));
+	}
+
+	public void queryBuildingLift(short cmd, Message message)
+	{
+		UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
+		long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
+		Ss.BuildingLift.Builder builder = Ss.BuildingLift.newBuilder().setBid(((Ss.Id) message).getId());
+		LogDb.queryBuildingFlowAndLift(startTime, buildingId).forEach(document ->
+		{
+			builder.addNodes(Ss.BuildingLift.Node.newBuilder()
+					.setTime(document.getLong("t"))
+					.setLift((Float) document.get("l"))
+					.build());
+		});
+		this.write(Package.create(cmd,builder.build()));
+	}
 
     public void queryAllPlayerSex(short cmd)
     {
@@ -187,4 +219,33 @@ public class StatisticSession {
     	
     	this.write(Package.create(cmd, list.build()));
     }
+
+    //---ly
+
+    public void queryPlayerExchangeAmount(short cmd) {
+        Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
+        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
+        builder.setPlayExchangeAmount(playerExchangeAmount);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    // 查询一周曲线图
+	public void queryPlayerGoodsCurve(short cmd, Message message) {
+		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
+		long id = curve.getId();
+
+		Ss.PlayerGoodsCurve.ExchangeType exchangeType = curve.getExchangeType();
+		Map<Long, Long> map=SummaryUtil.queryPlayerGoodsCurve(SummaryUtil.getPlayerExchangeAmount(),id,exchangeType,CountType.BYHOUR);
+		Ss.PlayerGoodsCurveMap.Builder bmap = Ss.PlayerGoodsCurveMap.newBuilder();
+		Ss.PlayerGoodsCurve.Builder list = Ss.PlayerGoodsCurve.newBuilder();
+		list.setExchangeType(exchangeType);
+		map.forEach((k,v)->{
+			bmap.setKey(k);
+			bmap.setValue(v);
+			list.addPlayerGoodsCurveMap(bmap.build());
+		});
+		this.write(Package.create(cmd,list.build()));
+
+	}
+
 }

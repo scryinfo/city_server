@@ -118,7 +118,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return lines.size() >= meta.lineNum;
     }
     public int freeWorkerNum() {
-        return this.meta.workerNum - lines.stream().mapToInt(l -> l.workerNum).reduce(0, Integer::sum);
+        return this.meta.workerNum - lines.stream().map(l -> l.workerNum).reduce(0, Integer::sum);
     }
     protected abstract boolean consumeMaterial(LineBase line);
 
@@ -176,6 +176,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             }else{
                 this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
             }
+            //生产线完成通知
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
         if(this.dbTimer.update(diffNano)) {

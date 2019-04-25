@@ -1,6 +1,8 @@
 package Game.Meta;
 
+import Game.Building;
 import Game.Prob;
+import com.google.common.collect.ImmutableSet;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -44,6 +46,8 @@ public class MetaData {
     private static final String talentLvCreateColName = "TalentLvCreate";
     private static final String evaColName = "Eva";
     private static final String expColName = "Experiences";
+    private static final String buildingTechName = "BuildingTech";
+
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -66,6 +70,7 @@ public class MetaData {
     private static final HashMap<Integer, MetaGood> good = new HashMap<>();
     private static final HashMap<Formula.Key, Formula> formula = new HashMap<>();
     private static final HashMap<Integer, GoodFormula> goodFormula = new HashMap<>();
+    private static final HashMap<Integer, Set<Integer>> buildingTech = new HashMap<>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
@@ -225,6 +230,9 @@ public class MetaData {
     public static final GoodFormula getFormula(int goodId) {
         return goodFormula.get(goodId);
     }
+    public static final Set<Integer> getBuildingTech(int id) {
+    	return buildingTech.get(id);
+    }
     public static final MetaMaterial getMaterial(int id) {
         return material.get(id);
     }
@@ -336,6 +344,32 @@ public class MetaData {
                 defaultToUseItemId.add(m.id);
         });
     }
+
+    public static void initBuildingTech()
+    {
+        mongoClient.getDatabase(dbName).getCollection(buildingTechName).find().forEach((Block<? super Document>) document -> {
+            buildingTech.put(document.getInteger("_id"),
+                    ImmutableSet.copyOf(((List<Integer>) document.get("ats"))));
+        });
+
+    }
+
+    public static Set<Integer> getTechsByBuilding(Building building)
+    {
+        return buildingTech.get(building.type());
+    }
+
+    public static Set<Integer> getBuildingTypeByTech(int techId)
+    {
+        Set<Integer> bid = new HashSet<>();
+        buildingTech.forEach((k,v)->{
+            if (v.contains(techId)) {
+                bid.add(k);
+            }
+        });
+        return bid;
+    }
+
     public static void initBuilding() {
         mongoClient.getDatabase(dbName).getCollection(trivialBuildingColName).find().forEach((Block<Document>) doc -> {
             MetaBuilding m = new MetaBuilding(doc);
@@ -429,5 +463,7 @@ public class MetaData {
         
         initEva();
         initExperiences();
+
+        initBuildingTech();
 	}
 }

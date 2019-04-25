@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,12 +16,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import Game.Contract.ContractManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
+import Game.Contract.ContractManager;
+import Game.Eva.EvaManager;
+import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
@@ -135,6 +138,28 @@ public class City {
         return instance;
     }
 
+    public  int getPlayerBcountByBtype(UUID playerId,int btype)
+    {
+        Map<UUID, Building> bmap = this.playerBuilding.get(playerId);
+        if (bmap != null)
+        {
+            return (int) bmap.values().stream().filter(building -> building.type() == btype).count();
+        }
+        return 0;
+    }
+
+    public List<Building> getPlayerBListByBtype(UUID playerId, int btype)
+    {
+        Map<UUID, Building> bmap = this.playerBuilding.get(playerId);
+        if (bmap != null)
+        {
+            return Arrays.asList(bmap.values().stream()
+                    .filter(building -> building.type() == btype)
+                    .toArray(Building[]::new));
+        }
+        return new ArrayList<>();
+    }
+
     private City(MetaCity meta) {
         this.meta = meta;
         GridX = meta.gridX;
@@ -222,6 +247,7 @@ public class City {
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
+        LeagueManager.getInstance().update(diffNano);
 
         // do this at last
         updateTimeSection(diffNano);
@@ -456,14 +482,14 @@ public class City {
     }
 
     private void calcuTerrain(Building building) {
-        for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
+       /* for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
                 if(building.type() == MetaBuilding.TRIVIAL)
                     terrain[x][y] = TERRIAN_TRIVIAL;
                 else
                     terrain[x][y] = TERRIAN_PLAYER;
             }
-        }
+        }*/
     }
 
     public long calcuPlayerStaff(UUID playerId)
