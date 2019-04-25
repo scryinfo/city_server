@@ -1,5 +1,7 @@
 package Game;
 
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaPublicFacility;
 import Game.Timers.PeriodicTimer;
@@ -127,13 +129,14 @@ public class PublicFacility extends Building {
 				   optional int64 b = 6;   //品牌
 			*/
         //3、 计算Eva单项提升能力
-        List<Eva> sellerEvas = GameDb.getEvaInfoByPlayId(this.ownerId());
+        Set<Eva> sellerEvas = EvaManager.getInstance().getEvaList(this.ownerId());
         int objType = inObjType;
         int abType = Gs.Eva.Btype.PromotionAbility.getNumber();
         //查看是否有该广告商推广能力的Eva提升
         int evaAdd = 0;
-        for(int i = 0 ; i < sellerEvas.size(); i++){
-            Eva eva = sellerEvas.get(i);
+        Iterator<Eva> it = sellerEvas.iterator();
+        while (it.hasNext()){
+            Eva eva =  (Eva)it;
             if(eva.checkType(objType,abType)){
                 //根据取到的eva的等级，取出对应的能力值
                 Integer level=eva.getLv();
@@ -143,6 +146,17 @@ public class PublicFacility extends Building {
                 break;
             }
         }
+        /*for(int i = 0 ; i < sellerEvas.size(); i++){
+            Eva eva =  sellerEvas.get(i);
+            if(eva.checkType(objType,abType)){
+                //根据取到的eva的等级，取出对应的能力值
+                Integer level=eva.getLv();
+                Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
+                MetaExperiences evaAddMe= map.get(level);
+                evaAdd = evaAddMe.p;
+                break;
+            }
+        }*/
         //4、 流量提升
         float flowRatios = ContractManager.getInstance().getPlayerADLift(this.ownerId());
         return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
