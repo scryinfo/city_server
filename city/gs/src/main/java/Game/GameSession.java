@@ -439,7 +439,7 @@ public class GameSession {
 
 	public void queryMarketSummary(short cmd, Message message) {
 		Gs.Num c = (Gs.Num)message;
-		MetaItem mi = MetaData.getItem(c.getNum());
+		MetaItem mi = MetaData.getItem(c.getNum()); //获取商品类型
 		if(mi == null)
 			return;
 		Gs.MarketSummary.Builder builder = Gs.MarketSummary.newBuilder();
@@ -447,9 +447,19 @@ public class GameSession {
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
-					IShelf s = (IShelf)building;
-					if(s.getSaleCount(mi.id) > 0)
-						n.addAndGet(1);
+					//如果是集散中心并且有租户，就还要从租户中获取上架信息
+					if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
+						WareHouse wareHouse = (WareHouse) building;
+						wareHouse.getRenters().forEach(r->{
+							IShelf rs = (IShelf)building;
+							if(rs.getSaleCount(mi.id) > 0)
+								n.addAndGet(1);
+						});
+					}else {
+						IShelf s = (IShelf) building;
+						if (s.getSaleCount(mi.id) > 0)
+							n.addAndGet(1);
+					}
 				}
 			});
 			builder.addInfoBuilder()
@@ -484,30 +494,50 @@ public class GameSession {
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
 	}
-    public void queryMarketDetail(short cmd, Message message) {
-	    Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
-        GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
-        Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
-        builder.setItemId(c.getItemId());
-        City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+	public void queryMarketDetail(short cmd, Message message) {
+		Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
+		builder.setItemId(c.getItemId());
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
+				//如果该建筑有货架并且并非当前玩家的
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
-					IShelf s = (IShelf)building;
-					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-					bb.setId(Util.toByteString(building.id()));
-					bb.setPos(building.coordinate().toProto());
-					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
-						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
-					});
-					bb.setOwnerId(Util.toByteString(building.ownerId()));
-					bb.setName(building.getName());
+					if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
+						((WareHouse)building).getRenters().forEach(r->{
+							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
+								IShelf s = (IShelf)building;
+								Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+								bb.setId(Util.toByteString(building.id()));
+								bb.setPos(building.coordinate().toProto());
+								s.getSaleDetail(c.getItemId()).forEach((k,v)->{
+									bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setRenterId(Util.toByteString(r.getRenterId()));
+								});
+								bb.setOwnerId(Util.toByteString(building.ownerId()));
+								bb.setName(building.getName());
+								bb.setMetaId(building.metaId());//建筑类型id
+							}
+						});
+					}else {
+						IShelf s = (IShelf) building;
+						Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+						bb.setId(Util.toByteString(building.id()));
+						bb.setPos(building.coordinate().toProto());
+						s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+							bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+						});
+						bb.setOwnerId(Util.toByteString(building.ownerId()));
+						bb.setName(building.getName());
+						bb.setMetaId(building.metaId());//建筑类型id
+					}
 				}
 			});
-        });
-        this.write(Package.create(cmd, builder.build()));
-    }
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void queryLabDetail(short cmd, Message message) {
 		Gs.QueryLabDetail c = (Gs.QueryLabDetail)message;
 		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());

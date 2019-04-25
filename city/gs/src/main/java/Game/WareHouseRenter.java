@@ -237,7 +237,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     @Override
     public int getSaleCount(int itemId) {
-        return 0;
+        return this.shelf.getSaleNum(itemId);
     }
 
     @Override
