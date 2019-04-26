@@ -130,7 +130,6 @@ public class GameServer {
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
         GroundManager.init();
-        TickManager.init();
         PromotionMgr.init();
         Exchange.init();
         BrandManager.init();
@@ -139,6 +138,7 @@ public class GameServer {
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
         EvaManager.getInstance().init();
+        TickManager.init();
         City.instance().run();
 
 

@@ -20,7 +20,7 @@ public class TickManager {
 
     public static void init() {
         GameDb.initTickMgr();
-        tickManager = GameDb.getTickMgr();
+        tickManager = GameDb.getTickMgr(tickManager);
         if(tickManager._tickerList == null)
             tickManager._tickerList = new ArrayList<>();
     }

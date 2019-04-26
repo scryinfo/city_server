@@ -1358,19 +1358,21 @@ public class GameSession {
 
 	public void AdGetPromoAbilityHistory(short cmd, Message message) {
 		Gs.AdGetPromoAbilityHistory GetRds = (Gs.AdGetPromoAbilityHistory) message;
-		Gs.AdGetPromoAbilityHistory.Builder newbuilder = Gs.AdGetPromoAbilityHistory.newBuilder();
+		Gs.AdGetPromoAbilityHistory.Builder newbuilder = GetRds.toBuilder();
 		UUID sellerBuildingId = Util.toUuid(GetRds.getSellerBuildingId().toByteArray());
 		//开始时间，以小时为单位
 		int tsSart = (int)(GetRds.getStartTs()/PromotionMgr._upDeltaMs) - 1;
 		List userList = null;
-		GetRds.getTypeIdsList().forEach(tpid->{
+		for (int i = 0; i < GetRds.getTypeIdsList().size(); i++) {
+			int tpid = GetRds.getTypeIdsList().get(i);
 			if(tpid > 0){
 				//eva
-				GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
-			}else{
+				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
+			}
+			else{
 				//人流量
 				Building building = City.instance().getBuilding(sellerBuildingId);
-				GameDb.getFlow_records(tsSart, building.ownerId());
+				userList.addAll(GameDb.getFlow_records(tsSart, building.ownerId())) ;
 			}
 			Gs.Records.Builder rds = Gs.Records.newBuilder();
 			rds.setBuildingId(Util.toByteString(sellerBuildingId));
@@ -1380,7 +1382,21 @@ public class GameSession {
 				rds.addList(rd.toproto());
 			});
 			newbuilder.addRecordsList(rds.build());
-		});
+		}
+		/*GetRds.getTypeIdsList().forEach(tpid->{
+			if(tpid > 0){
+				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
+			}else{
+			}
+			Gs.Records.Builder rds = Gs.Records.newBuilder();
+			rds.setBuildingId(Util.toByteString(sellerBuildingId));
+			rds.setTypeId(tpid);
+			userList.forEach(record->{
+				Record rd = (Record) record;
+				rds.addList(rd.toproto());
+			});
+			newbuilder.addRecordsList(rds.build());
+		});*/
 		this.write(Package.create(cmd, newbuilder.build()));
 	}
 

@@ -304,7 +304,7 @@ public class City {
 
     //特殊的tick
     private static long _elapsedtime = 0 ;      //上次更新时间
-    public static final int second = 10;        //tick间隔时间，秒为单位
+    public static final int second = 5;        //tick间隔时间，秒为单位
     public static final long _upDeltaNs = TimeUnit.MILLISECONDS.toNanos(1000*second); //间隔时间换算成纳秒
     private void specialTick(long diffNano){
         if(_elapsedtime < _upDeltaNs){

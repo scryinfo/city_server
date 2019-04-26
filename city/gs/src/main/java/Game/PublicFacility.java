@@ -42,6 +42,8 @@ public class PublicFacility extends Building{
 
     @Override
     public  void tick(long deltaTime){
+        if(deltaTime == 0)
+            return;
         updatePromoAbility();
     }
     @Override
@@ -551,7 +553,7 @@ public class PublicFacility extends Building{
 
     public void addPromoAbRecord( UUID buildingId, short typeId, int value ){
         //记录的时间间隔为 PromotionMgr._upDeltaMsint ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
-        int ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
+        int ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs/1000);
         if(typeId < 1){
             //人流量
             Building bd = City.instance().getBuilding(buildingId);

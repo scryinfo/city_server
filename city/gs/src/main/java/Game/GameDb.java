@@ -853,13 +853,14 @@ public class GameDb {
 		session.close();
 		return res;
 	}
-	public static TickManager getTickMgr() {
+	public static TickManager getTickMgr(TickManager mgr) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
-		TickManager res = session.get(TickManager.class, TickManager.ID);
+		mgr = session.get(TickManager.class, TickManager.ID);
 		transaction.commit();
+		mgr._tickerList.forEach(ticker -> ticker.tick(0));
 		session.close();
-		return res;
+		return mgr;
 	}
 
 	public static PromotionMgr getPromotionMgr() {
