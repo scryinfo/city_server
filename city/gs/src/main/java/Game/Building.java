@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -272,6 +274,34 @@ public abstract class Building implements Ticker{
 
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
 
+    @Transient
+    private int todayVisitor = 0;
+
+    @Transient
+    private long todayVisitorTs = 0;
+
+    public void increaseTodayVisit()
+    {
+        if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
+        {
+            todayVisitor = 1;
+            todayVisitorTs = Util.getTodayStartTs();
+        }
+        else
+        {
+            todayVisitor++;
+        }
+    }
+
+    public int getTodayVisitor()
+    {
+        if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
+        {
+           return 0;
+        }
+        return todayVisitor;
+    }
+
     public void updateTodayIncome(long income)
     {
         if (System.currentTimeMillis() - todayIncomeTs >= DAY_MILLISECOND)
@@ -497,7 +527,8 @@ public abstract class Building implements Ticker{
                 .setSalary(salaryRatio)
                 .setSetSalaryTs(salaryRatioTs)
                 .setHappy(happy)
-                .setConstructCompleteTs(constructCompleteTs);
+                .setConstructCompleteTs(constructCompleteTs)
+                .setTodayVisitor(this.getTodayVisitor());
         if(this.name != null && this.name.length() > 0)
             builder.setName(this.name);
         if(this.des != null && this.des.length() > 0)
@@ -505,18 +536,29 @@ public abstract class Building implements Ticker{
         if(this.emoticon > 0)
             builder.setEmoticon(this.emoticon);
         builder.setBubble(this.showBubble);
+        int type=MetaBuilding.type(metaBuilding.id);
+    	builder.setType(type);
+    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
+    	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+        	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	   	//单个建筑
+        	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
+           	double brand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double quality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+        	brandMap.clear();
+        	qtyMap.clear();
+        	//所有建筑
+          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+        	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+        	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+        	double totalBrand=((brandMap!=null&&brandMap.size()>0&&brandMap.get(type())!=null)?brandMap.get(type()):0);
+        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0&&qtyMap.get(type())!=null)?qtyMap.get(type()):0);
+        	
+        	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
+        	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
+        	builder.setBrand(bd).setQuality(qty);
+    	}
         return builder.build();
-    }
-    public Gs.BuildingInfo myProto(UUID playerId) {
-    	int buildingBrand = BrandManager.instance().getBuilding(ownerId, type());
-    	Eva e=EvaManager.getInstance().getEva(playerId, type(), Gs.Eva.Btype.Quality_VALUE);
-		Gs.BuildingInfo b=toProto();
-    	Gs.BuildingInfo.Builder builder=b.toBuilder();
-    	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setBrand(buildingBrand)
-    		   .setQuality(quality())
-    		   .setEva(e.toProto());
-     	return builder.build(); 
     }
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);

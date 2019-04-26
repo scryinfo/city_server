@@ -445,7 +445,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+				if(!building.outOfBusiness() && building instanceof IShelf) {
 					IShelf s = (IShelf)building;
 					if(s.getSaleCount(mi.id) > 0)
 						n.addAndGet(1);
@@ -492,7 +492,7 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+				if(!building.outOfBusiness() && building instanceof IShelf) {
 					IShelf s = (IShelf)building;
 					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
@@ -515,7 +515,7 @@ public class GameSession {
 			Gs.LabDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof Laboratory && !building.canUseBy(player.id())) {
+				if(!building.outOfBusiness() && building instanceof Laboratory) {
 					Laboratory s = (Laboratory)building;
 					if(s.isExclusiveForOwner())
 						return;
@@ -529,6 +529,7 @@ public class GameSession {
 					bb.setQueuedTimes(s.getQueuedTimes());
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());
 				}
 			});
 		});
@@ -885,7 +886,15 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
+	}
+
+	private void updateBuildingVisitor(Building building)
+	{
+		if (!building.ownerId().equals(player.id())) {
+			building.increaseTodayVisit();
+		}
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
@@ -894,6 +903,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
@@ -904,6 +914,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.PRODUCE)
             return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
 	public void detailPublicFacility(short cmd, Message message) {
@@ -913,6 +924,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.PUBLIC)
 			return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailLaboratory(short cmd, Message message) {
@@ -922,6 +934,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.LAB)
             return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
@@ -931,6 +944,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.RETAIL)
             return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
 
@@ -1717,17 +1731,20 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory))
 			return;
+		if(c.getTimes() <= 0)
+			return;
 		if(c.hasGoodCategory()) {
 			if(!MetaGood.legalCategory(c.getGoodCategory()))
 				return;
 		}
 		Laboratory lab = (Laboratory)building;
+		long cost = 0;
 		if(!building.canUseBy(player.id())) {
 			if(!c.hasTimes())
 				return;
-			if(c.getTimes() <= 0 || c.getTimes() > lab.getSellTimes())
+			if(c.getTimes() > lab.getSellTimes())
 				return;
-			long cost = c.getTimes() * lab.getPricePreTime();
+			cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
 				return;
 
@@ -1738,7 +1755,7 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost, c.getTimes());
 			LogDb.buildingIncome(lab.id(), player.id(), cost, 0, 0);
 		}
-		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id(), cost);
 		if(null != line) {
 			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
@@ -2473,29 +2490,28 @@ public class GameSession {
 	{
 		Gs.GridIndex gridIndex = (Gs.GridIndex) message;
 		Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
-		builder.setIdx(gridIndex);
-		City.instance().forAllGrid(grid ->
+		City.instance().forEachGrid(new GridIndex(gridIndex.getX(), gridIndex.getY()).toSyncRange(),
+				grid ->
 		{
-			if (grid.getX() == gridIndex.getX() && grid.getY() == gridIndex.getY())
+			Gs.ContractGridDetail.GridInfo.Builder infoBuilder = builder.addGridInfoBuilder();
+			infoBuilder.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building ->
 			{
-
-				grid.forAllBuilding(building ->
+				if (building instanceof IBuildingContract
+						&& !building.outOfBusiness()
+						&& ((IBuildingContract) building).getBuildingContract().isOpen()
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
 				{
-					if (building instanceof IBuildingContract
-							&& !building.outOfBusiness()
-							&& ((IBuildingContract) building).getBuildingContract().isOpen()
-							&& !((IBuildingContract) building).getBuildingContract().isSign())
-					{
-						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
-						b.setOwnerId(Util.toByteString(building.ownerId()))
-								.setBuildingName(building.getName())
-								.setPos(building.coordinate().toProto())
-								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
-								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
-								.setMId(building.metaId());
-					}
-				});
-			}
+					Gs.ContractGridDetail.BuildingInfo.Builder b = infoBuilder.addInfoBuilder();
+					b.setOwnerId(Util.toByteString(building.ownerId()))
+							.setBuildingName(building.getName())
+							.setPos(building.coordinate().toProto())
+							.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
+							.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
+							.setMId(building.metaId())
+							.setLift(building.getLift());
+				}
+			});
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
@@ -2666,7 +2682,7 @@ public class GameSession {
 		
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
-			BuildingInfo buildingInfo=b.myProto(id);
+			BuildingInfo buildingInfo=b.toProto();
 			int type=buildingInfo.getType();
 			map.computeIfAbsent(type,
                     k -> new ArrayList<BuildingInfo>()).add(buildingInfo);
@@ -2737,7 +2753,7 @@ public class GameSession {
 
         Building build=City.instance().getBuilding(bId);
 
-        Gs.BuildingInfo buildInfo = build.myProto(pId);
+        Gs.BuildingInfo buildInfo = build.toProto();
 
         Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		MetaData.getBuildingTech(type).forEach(itemId->{
@@ -2777,7 +2793,7 @@ public class GameSession {
         ls.forEach(playerId->{
 			Player player=GameDb.getPlayer(playerId);
 		    Building build=City.instance().getBuilding(bId);
-		    Gs.BuildingInfo buildInfo = build.myProto(playerId);
+		    Gs.BuildingInfo buildInfo = build.toProto();
 			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
 
 			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();

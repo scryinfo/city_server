@@ -18,6 +18,7 @@ import io.netty.channel.ChannelId;
 import ss.Ss;
 
 import static Statistic.SummaryUtil.DAY_MILLISECOND;
+import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
 // this class contain only getXXX method, that means the only purpose this class or this server
 // is get data from db
@@ -77,7 +78,7 @@ public class StatisticSession {
 	public void queryBuildingFlow(short cmd, Message message)
 	{
 		UUID buildingId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
-		long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
+		long startTime = System.currentTimeMillis() - HOUR_MILLISECOND * 24;
 		Ss.BuildingFlow.Builder builder = Ss.BuildingFlow.newBuilder().setBid(((Ss.Id) message).getId());
 		LogDb.queryBuildingFlowAndLift(startTime, buildingId).forEach(document ->
 		{
@@ -92,7 +93,7 @@ public class StatisticSession {
 	public void queryBuildingLift(short cmd, Message message)
 	{
 		UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
-		long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
+		long startTime = System.currentTimeMillis() - HOUR_MILLISECOND * 24;
 		Ss.BuildingLift.Builder builder = Ss.BuildingLift.newBuilder().setBid(((Ss.Id) message).getId());
 		LogDb.queryBuildingFlowAndLift(startTime, buildingId).forEach(document ->
 		{

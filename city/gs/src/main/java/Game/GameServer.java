@@ -132,7 +132,6 @@ public class GameServer {
         GroundManager.init();
         PromotionMgr.init();
         Exchange.init();
-        BrandManager.init();
         TechTradeCenter.init();
         MoneyPool.init();
         ContractManager.getInstance().init();
@@ -140,6 +139,7 @@ public class GameServer {
         EvaManager.getInstance().init();
         TickManager.init();
         City.instance().run();
+        BrandManager.init();
 
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
