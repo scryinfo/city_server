@@ -2149,7 +2149,8 @@ public class GameSession {
 								.setPos(building.coordinate().toProto())
 								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
 								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
-								.setMId(building.metaId());
+								.setMId(building.metaId())
+								.setLift(building.getLift());
 					}
 				});
 			}
