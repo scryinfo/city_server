@@ -2131,30 +2131,28 @@ public class GameSession {
 	{
 		Gs.GridIndex gridIndex = (Gs.GridIndex) message;
 		Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
-		builder.setIdx(gridIndex);
-		City.instance().forAllGrid(grid ->
+		City.instance().forEachGrid(new GridIndex(gridIndex.getX(), gridIndex.getY()).toSyncRange(),
+				grid ->
 		{
-			if (grid.getX() == gridIndex.getX() && grid.getY() == gridIndex.getY())
+			Gs.ContractGridDetail.GridInfo.Builder infoBuilder = builder.addGridInfoBuilder();
+			infoBuilder.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building ->
 			{
-
-				grid.forAllBuilding(building ->
+				if (building instanceof IBuildingContract
+						&& !building.outOfBusiness()
+						&& ((IBuildingContract) building).getBuildingContract().isOpen()
+						&& !((IBuildingContract) building).getBuildingContract().isSign())
 				{
-					if (building instanceof IBuildingContract
-							&& !building.outOfBusiness()
-							&& ((IBuildingContract) building).getBuildingContract().isOpen()
-							&& !((IBuildingContract) building).getBuildingContract().isSign())
-					{
-						Gs.ContractGridDetail.Info.Builder b = builder.addInfoBuilder();
-						b.setOwnerId(Util.toByteString(building.ownerId()))
-								.setBuildingName(building.getName())
-								.setPos(building.coordinate().toProto())
-								.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
-								.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
-								.setMId(building.metaId())
-								.setLift(building.getLift());
-					}
-				});
-			}
+					Gs.ContractGridDetail.BuildingInfo.Builder b = infoBuilder.addInfoBuilder();
+					b.setOwnerId(Util.toByteString(building.ownerId()))
+							.setBuildingName(building.getName())
+							.setPos(building.coordinate().toProto())
+							.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
+							.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
+							.setMId(building.metaId())
+							.setLift(building.getLift());
+				}
+			});
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
