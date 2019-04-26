@@ -1379,12 +1379,13 @@ public class GameSession {
 				return;
 		}
 		Laboratory lab = (Laboratory)building;
+		long cost = 0;
 		if(!building.canUseBy(player.id())) {
 			if(!c.hasTimes())
 				return;
 			if(c.getTimes() > lab.getSellTimes())
 				return;
-			long cost = c.getTimes() * lab.getPricePreTime();
+			cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
 				return;
 
@@ -1395,7 +1396,7 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost, c.getTimes());
 			LogDb.buildingIncome(lab.id(), player.id(), cost, 0, 0);
 		}
-		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id(), cost);
 		if(null != line) {
 			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
