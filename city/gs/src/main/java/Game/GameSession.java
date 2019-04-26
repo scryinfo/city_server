@@ -2498,7 +2498,7 @@ public class GameSession {
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
-	//2.获取玩家的建筑信息（包含、仓库、运费和距离）
+	//2.获取玩家的建筑信息（建筑信息）
 	public void getPlayerBuildingDetail(short cmd,Message message){
 		Gs.Id bid = (Gs.Id) message;//当前建筑的id
 		Building srcBuilding = City.instance().getBuilding(Util.toUuid(bid.toByteArray()));

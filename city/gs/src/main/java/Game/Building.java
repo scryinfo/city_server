@@ -559,19 +559,7 @@ public abstract class Building {
     	}
         return builder.build();
     }
-    public Gs.BuildingInfo myProto(UUID playerId) {
-    	int buildingBrand = BrandManager.instance().getBuilding(ownerId, type());
-    	Eva e=EvaManager.getInstance().getEva(playerId, type(), Gs.Eva.Btype.Quality_VALUE);
-		Gs.BuildingInfo b=toProto();
-    	Gs.BuildingInfo.Builder builder=b.toBuilder();
-    	builder.setType(MetaBuilding.type(metaBuilding.id))
-    		   .setBrand(buildingBrand)
-    		   .setQuality(quality());
-     	if(e!=null){
-     		builder.setEva(e.toProto());
-    	}
-     	return builder.build();
-    }
+
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
