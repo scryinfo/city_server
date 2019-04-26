@@ -528,13 +528,6 @@ public abstract class Building {
         	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
         	builder.setBrand(bd).setQuality(qty);
     	}
-        /*设置其他信息*/
-        if(distance!=null&&charge!=null){
-            Gs.BuildingInfo.otherInfo.Builder otherBuilder = Gs.BuildingInfo.otherInfo.newBuilder();
-            otherBuilder.setCharge(this.charge);
-            otherBuilder.setDistance(this.distance);
-            builder.setOther(otherBuilder);
-        }
         return builder.build();
     }
     public Gs.BuildingInfo myProto(UUID playerId) {
