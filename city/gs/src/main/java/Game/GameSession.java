@@ -1361,7 +1361,7 @@ public class GameSession {
 		Gs.AdGetPromoAbilityHistory.Builder newbuilder = Gs.AdGetPromoAbilityHistory.newBuilder();
 		UUID sellerBuildingId = Util.toUuid(GetRds.getSellerBuildingId().toByteArray());
 		//开始时间，以小时为单位
-		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs) - 1;
+		int tsSart = (int)(GetRds.getStartTs()/PromotionMgr._upDeltaMs) - 1;
 		List userList = null;
 		GetRds.getTypeIdsList().forEach(tpid->{
 			if(tpid > 0){

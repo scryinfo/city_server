@@ -1,24 +1,40 @@
 package Game;
 
+import org.hibernate.annotations.Cascade;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import java.util.*;
 
-
+@Entity(name = "TickManager")
 public class TickManager {
+    public static final int ID = 0;
+    @Id
+    private Integer id = ID;
 
     public static TickManager instance(){
-        if(tickManager == null){
-            tickManager = new TickManager();
-            tickManager._tickerList = new ArrayList<>();
-        }
         return  tickManager;
     }
 
-    private static TickManager tickManager;
-    List<Ticker> _tickerList;
-    public void registerTick(Ticker obj){
-        _tickerList.add(obj);
+    public static void init() {
+        GameDb.initTickMgr();
+        tickManager = GameDb.getTickMgr();
+        if(tickManager._tickerList == null)
+            tickManager._tickerList = new ArrayList<>();
     }
-    public void unRegisterTick(Ticker obj){
+
+    private static TickManager tickManager;
+    //@OneToMany(mappedBy = "tickManager", orphanRemoval = true)
+    @OneToMany(orphanRemoval = true)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    List<Building> _tickerList;
+    public void registerTick(Building obj){
+        _tickerList.add(obj);
+        GameDb.saveOrUpdate(this);
+    }
+    public void unRegisterTick(Building obj){
         _tickerList.remove(obj);
     }
     public void tick(long delta){

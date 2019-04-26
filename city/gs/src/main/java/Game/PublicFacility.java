@@ -24,15 +24,25 @@ import Game.Contract.ContractManager;
 import Shared.GlobalConfig;
 
 @Entity(name = "PublicFacility")
-public class PublicFacility extends Building implements Ticker{
+@DiscriminatorValue("1")
+public class PublicFacility extends Building{
     PublicFacility(){
-        TickManager.instance().registerTick(this);
     }
+
+    public TickManager getTickMgr() {
+        return tickMgr;
+    }
+
+    public void setTickMgr(TickManager tickMgr) {
+        this.tickMgr = tickMgr;
+    }
+
+    @ManyToOne
+    private TickManager tickMgr;
 
     @Override
     public  void tick(long deltaTime){
         updatePromoAbility();
-        int t = 0 ;
     }
     @Override
     protected void finalize(){
@@ -41,9 +51,10 @@ public class PublicFacility extends Building implements Ticker{
 
     public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
-//        this.pid = ownerId;
         this.meta = meta;
         this.qty = meta.qty;
+        TickManager.instance().registerTick(this);
+        setTickMgr(TickManager.instance());
     }
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
@@ -175,11 +186,12 @@ public class PublicFacility extends Building implements Ticker{
             if(evaAddMe != null){
                 evaAdd = evaAddMe.p;
                 evaPromoCur.put(eva.getAt(),evaAddMe.p);
-                int t = 0 ;
+                addPromoAbRecord(this.id(),(short) eva.getAt(),evaAdd);
             }
         }
         //4、 流量提升
         flowPromoCur = (int)ContractManager.getInstance().getPlayerADLift(this.ownerId());
+        addPromoAbRecord(this.id(),(short)(0),flowPromoCur);
     }
 
     //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
@@ -556,7 +568,7 @@ public class PublicFacility extends Building implements Ticker{
                 return;
             }
             FlowRecord newRecord = new FlowRecord(pid,ts, value);
-            GameDb.saveOrUpdateAndClear( newRecord );
+            GameDb.saveOrUpdate( newRecord );
         }else{
             //eva
             EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
@@ -565,7 +577,7 @@ public class PublicFacility extends Building implements Ticker{
                 return;
             }
             EvaRecord newRecord = new EvaRecord(buildingId,typeId, ts, value);
-            GameDb.saveOrUpdateAndClear( newRecord );
+            GameDb.saveOrUpdate( newRecord );
         }
     }
     @Override

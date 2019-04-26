@@ -11,18 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.annotations.SelectBeforeUpdate;
 
@@ -50,19 +39,25 @@ import io.netty.channel.ChannelId;
 @EntityListeners({
         ConvertListener.class,
 })
-public abstract class Building {
+public abstract class Building implements Ticker{
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
 
     private static final int HAPPY_MAX = 0;
     private static final int HAPPY_MIN = 4;
 
-    protected Building() {}
+    protected Building() {
+
+    }
 
     public static double distance(Building a, Building b) {
         return Coordinate.distance(a.coordinate(), b.coordinate());
     }
 
+    @ManyToOne
+    private TickManager tickManager;
+
+    public void tick(long deltaTime){};
     public abstract int quality();
     boolean canUseBy(UUID userId) {
         return ownerId.equals(userId);

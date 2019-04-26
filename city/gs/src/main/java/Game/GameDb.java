@@ -169,48 +169,74 @@ public class GameDb {
 
 	public static  EvaRecord getlastEvaRecord(UUID bid, short tid){
 		Session session = sessionFactory.openSession();
-		//重新开服,需要获取一下上次的记录
-		int tsSart = (int)(System.currentTimeMillis() - PromotionMgr._upDeltaMs);
-		Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
-				.setParameter("tsSt",tsSart)
-				.setParameter("bdid",bid)
-				.setParameter("tpid",tid);
-		List userList = query.list();
+		List userList = null;
+		try{
+			//重新开服,需要获取一下上次的记录
+			int tsSart = (int)(System.currentTimeMillis() - PromotionMgr._upDeltaMs);
+			Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
+					.setParameter("tsSt",tsSart)
+					.setParameter("bdid",bid)
+					.setParameter("tpid",tid);
+			userList = query.list();
+		}catch (Exception e){
+			return new EvaRecord(bid,tid,0,0);
+		}
 		if(userList.size() > 0){
 			return (EvaRecord)userList.get(userList.size()-1);
 		}
-		return new EvaRecord();
+		return new EvaRecord(bid,tid,0,0);
 	}
 	public static FlowRecord getlastFlowRecord(UUID inPid){
 		Session session = sessionFactory.openSession();
 		//重新开服,需要获取一下上次的记录
+		List userList = null;
 		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs - 1);
+		try{
 		Query query = session.createQuery("from flow_records Record where ts>=:tsSt and playerId is :pid and typeId is :tpid")
 				.setParameter("tsSt",tsSart)
 				.setParameter("pid",inPid);
-		List userList = query.list();
+			userList = query.list();
+		}catch (Exception e){
+			return new FlowRecord(inPid,0,0);
+		}
 		if(userList.size() > 0){
 			return (FlowRecord)userList.get(userList.size()-1);
 		}
-		return new FlowRecord();
+		return new FlowRecord(inPid,0,0);
 	}
 
 	public static List getEva_records(int tsSart,UUID bid,int tid){
+		List ret = null;
 		Session session = sessionFactory.openSession();
+		try{
+			Query query = session.createQuery("FROM eva_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND buildingId IS :bdid AND typeId IS :tpid")
+					.setParameter("tsSt",tsSart)
+					.setParameter("tsEd",tsSart + 30)
+					.setParameter("bdid",bid)
+					.setInteger("tpid",tid);
+			ret = query.list();
+		}
+		catch (Exception e){
+			int t = 0 ;
+		}
 		//eva
-		Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
-				.setParameter("tsSt",tsSart)
-				.setParameter("bdid",bid)
-				.setInteger("tpid",tid);
-		return query.list();
+		return  ret;
 	}
 	public static List getFlow_records(int tsSart,UUID pid){
-		Session session = sessionFactory.openSession();
-		//人流量
-		Query query = session.createQuery( "from flow_records Record where ts>=:tsSt and playerId is :pid" )
-				.setParameter("tsSt",tsSart)
-				.setParameter("pid",pid);
-		return query.list();
+    	List ret = null;
+    	try{
+			Session session = sessionFactory.openSession();
+			//人流量
+			Query query = session.createQuery( "FROM flow_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND playerId IS :pid" )
+					.setParameter("tsSt",tsSart)
+					.setParameter("tsEd",tsSart + 30)
+					.setParameter("pid",pid);
+			ret = query.list();
+		}catch (Exception e){
+			int t = 0;
+		}
+
+		return ret;
 	}
 
 	public static List<Eva> getEvaInfo(UUID playerId, int techId)
@@ -754,6 +780,15 @@ public class GameDb {
 		statelessSession.close();
 	}
 
+	public static void initTickMgr() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(TickManager.class, TickManager.ID) == null)
+			statelessSession.insert(new TickManager());
+		transaction.commit();
+		statelessSession.close();
+	}
+
 	public static void initExchange() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -818,6 +853,15 @@ public class GameDb {
 		session.close();
 		return res;
 	}
+	public static TickManager getTickMgr() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		TickManager res = session.get(TickManager.class, TickManager.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
+
 	public static PromotionMgr getPromotionMgr() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
