@@ -276,6 +276,7 @@ public abstract class Building {
     private long todayIncomeTs = 0;
 
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
+
     @Transient
     private int todayVisitor = 0;
 
@@ -299,7 +300,7 @@ public abstract class Building {
     {
         if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
         {
-            return 0;
+           return 0;
         }
         return todayVisitor;
     }
@@ -525,7 +526,8 @@ public abstract class Building {
                 .setSalary(salaryRatio)
                 .setSetSalaryTs(salaryRatioTs)
                 .setHappy(happy)
-                .setConstructCompleteTs(constructCompleteTs);
+                .setConstructCompleteTs(constructCompleteTs)
+                .setTodayVisitor(this.getTodayVisitor());
         if(this.name != null && this.name.length() > 0)
             builder.setName(this.name);
         if(this.des != null && this.des.length() > 0)
