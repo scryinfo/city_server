@@ -33,7 +33,7 @@ public class WareHouseManager {
                     //删除租的仓库
                     wareHouse.getRenters().remove(renter);
                     //renter
-                    renter.setWareHouse(null);//清楚关系
+                    renter.setWareHouse(null);//清楚关系关系
                    GameDb.delete(renter);
                    System.out.println("已删除");
                 }
