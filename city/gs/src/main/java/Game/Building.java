@@ -528,6 +528,25 @@ public abstract class Building {
     		   .setQuality(quality());
      	if(e!=null){
      		builder.setEva(e.toProto());
+        int type=MetaBuilding.type(metaBuilding.id);
+    	builder.setType(type);
+    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
+    	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+        	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	   	//单个建筑
+        	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
+           	double brand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double quality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+        	brandMap.clear();
+        	qtyMap.clear();
+        	//所有建筑
+          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+        	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+        	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+        	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+        	builder.setBrand((int)Math.ceil(brand/totalBrand*100))
+		       	   .setQuality((int)Math.ceil(quality/totalQuality*100));
     	}
      	return builder.build(); 
     }
@@ -694,21 +713,5 @@ public abstract class Building {
             happy = 3;
         else if(salaryRatio < 40 && salaryRatio >= 0)
             happy = HAPPY_MIN;
-    }
-
-    public long getTodayIncome() {
-        return todayIncome;
-    }
-
-    public void setTodayIncome(long todayIncome) {
-        this.todayIncome = todayIncome;
-    }
-
-    public long getTodayIncomeTs() {
-        return todayIncomeTs;
-    }
-
-    public void setTodayIncomeTs(long todayIncomeTs) {
-        this.todayIncomeTs = todayIncomeTs;
     }
 }

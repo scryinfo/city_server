@@ -1,5 +1,7 @@
 package Game;
 
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
@@ -12,6 +14,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 public class BrandManager {
@@ -26,6 +29,7 @@ public class BrandManager {
         GameDb.initBrandManager();
         instance = GameDb.getBrandManager();
         instance.refineCache();
+        instance.getAllBuildingBrandOrQuality();
     }
 
     @Id
@@ -72,10 +76,16 @@ public class BrandManager {
     }
     public void update(long diffNano) {
         if(dbSaveTimer.update(diffNano))
-            GameDb.saveOrUpdate(this);
+        	GameDb.saveOrUpdate(this);
+        if(brandQualityTimer.update(diffNano)){
+        	getAllBuildingBrandOrQuality();
+        }
+            
     }
     @Transient
     private PeriodicTimer dbSaveTimer = new PeriodicTimer(2*60*1000);
+    @Transient
+    private PeriodicTimer brandQualityTimer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(1));
     public void update(UUID playerId, int mid, int add) {
         BrandInfo i = allBrandInfo.computeIfAbsent(new BrandKey(playerId, mid), k->new BrandInfo(k));
         i.v += add;
@@ -239,4 +249,37 @@ public class BrandManager {
     @MapKey(name = "key")
     @JoinColumn(name = "brand_manager_id")
     private Map<BrandKey, BrandInfo> allBrandInfo = new HashMap<>();
+    
+    @Transient
+    private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
+	
+    public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
+    	int buildingBrand = BrandManager.instance().getBuilding(b.ownerId(), b.type());
+    	Eva brandEva=EvaManager.getInstance().getEva(b.ownerId(), b.type(), Gs.Eva.Btype.Brand_VALUE);
+    	Eva qualityEva=EvaManager.getInstance().getEva(b.ownerId(), b.type(), Gs.Eva.Btype.Quality_VALUE);
+     	if(brandEva!=null){
+     		if(brandEva.getLv()>0){
+     			brandMap.computeIfAbsent(b.type(), k->((brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+brandEva.getLv()/100d))));
+     		}
+    	}
+     	if(qualityEva!=null){
+     		if(qualityEva.getLv()>0){
+     			qtyMap.computeIfAbsent(b.type(), k->((qtyMap.get(b.type())!=null?qtyMap.get(b.type()):0)+new Double(b.quality()*(1+qualityEva.getLv()/100d))));
+     		}
+     	}
+    }
+    
+    public void getAllBuildingBrandOrQuality(){
+    	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+    	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	City.instance().forEachBuilding((Building b)->{
+    		getBuildingBrandOrQuality(b,brandMap,qtyMap);
+    	});
+    	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
+    	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
+    }
+    
+    public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
+    	return totalBrandQualityMap;
+    }
 }

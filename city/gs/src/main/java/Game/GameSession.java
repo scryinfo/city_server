@@ -2346,7 +2346,7 @@ public class GameSession {
 		
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
-			BuildingInfo buildingInfo=b.myProto(id);
+			BuildingInfo buildingInfo=b.toProto();
 			int type=buildingInfo.getType();
 			map.computeIfAbsent(type,
                     k -> new ArrayList<BuildingInfo>()).add(buildingInfo);
@@ -2417,7 +2417,7 @@ public class GameSession {
 
         Building build=City.instance().getBuilding(bId);
 
-        Gs.BuildingInfo buildInfo = build.myProto(pId);
+        Gs.BuildingInfo buildInfo = build.toProto();
 
         Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		MetaData.getBuildingTech(type).forEach(itemId->{
@@ -2457,7 +2457,7 @@ public class GameSession {
         ls.forEach(playerId->{
 			Player player=GameDb.getPlayer(playerId);
 		    Building build=City.instance().getBuilding(bId);
-		    Gs.BuildingInfo buildInfo = build.myProto(playerId);
+		    Gs.BuildingInfo buildInfo = build.toProto();
 			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
 
 			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();
