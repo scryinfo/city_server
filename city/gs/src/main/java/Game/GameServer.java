@@ -131,13 +131,13 @@ public class GameServer {
         GroundAuction.init();
         GroundManager.init();
         Exchange.init();
-        BrandManager.init();
         TechTradeCenter.init();
         MoneyPool.init();
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
         EvaManager.getInstance().init();
         City.instance().run();
+        BrandManager.init();
 
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
