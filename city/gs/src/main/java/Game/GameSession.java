@@ -885,7 +885,15 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.APARTMENT)
 			return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
+	}
+
+	private void updateBuildingVisitor(Building building)
+	{
+		if (!building.ownerId().equals(player.id())) {
+			building.increaseTodayVisit();
+		}
 	}
 	public void detailMaterialFactory(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
@@ -894,6 +902,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.MATERIAL)
 			return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
@@ -904,6 +913,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.PRODUCE)
             return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
 	public void detailPublicFacility(short cmd, Message message) {
@@ -913,6 +923,7 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.PUBLIC)
 			return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
     public void detailLaboratory(short cmd, Message message) {
@@ -922,6 +933,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.LAB)
             return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
@@ -931,6 +943,7 @@ public class GameSession {
         if(b == null || b.type() != MetaBuilding.RETAIL)
             return;
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
 
