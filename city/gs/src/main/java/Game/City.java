@@ -248,7 +248,7 @@ public class City {
         MailBox.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
         LeagueManager.getInstance().update(diffNano);
-
+        WareHouseManager.instance().update(diffNano);
         // do this at last
         updateTimeSection(diffNano);
     }
