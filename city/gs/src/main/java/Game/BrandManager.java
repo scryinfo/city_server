@@ -1,20 +1,39 @@
 package Game;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
+
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
+import Game.League.BrandLeague;
+import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import gs.Gs;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Cascade;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Entity
 public class BrandManager {
@@ -254,9 +273,15 @@ public class BrandManager {
     private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
 	
     public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
-    	int buildingBrand = BrandManager.instance().getBuilding(b.ownerId(), b.type());
-    	Eva brandEva=EvaManager.getInstance().getEva(b.ownerId(), b.type(), Gs.Eva.Btype.Brand_VALUE);
-    	Eva qualityEva=EvaManager.getInstance().getEva(b.ownerId(), b.type(), Gs.Eva.Btype.Quality_VALUE);
+    	UUID playerId=b.ownerId();
+    	//住宅和零售店的techId是13和14
+    	BrandLeague bl=LeagueManager.getInstance().getBrandLeague(b.id(), b.type());
+    	if(bl!=null){//优先查询加盟玩家技术
+    		playerId=bl.getPlayerId();
+    	}
+    	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
+    	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
+    	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
      	if(brandEva!=null){
      		if(brandEva.getLv()>0){
      			brandMap.computeIfAbsent(b.type(), k->((brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+brandEva.getLv()/100d))));
