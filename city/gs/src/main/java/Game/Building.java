@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -101,8 +103,8 @@ public abstract class Building {
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
-            case MetaBuilding.WAREHOUSE:
-                return new WareHouse(MetaData.getWarehouse(id),pos,ownerId);
+            case MetaBuilding.TALENT:
+                return new TalentCenter(MetaData.getTalentCenter(id), pos, ownerId);
         }
         return null;
     }
@@ -243,11 +245,6 @@ public abstract class Building {
 
     @Transient
     protected boolean working;
-
-    @Transient
-    protected Integer distance;//距离
-    @Transient
-    protected Integer charge;  //运费
 
     @Column(nullable = false)
     protected int salaryRatio;
@@ -509,6 +506,28 @@ public abstract class Building {
         if(this.emoticon > 0)
             builder.setEmoticon(this.emoticon);
         builder.setBubble(this.showBubble);
+        int type=MetaBuilding.type(metaBuilding.id);
+    	builder.setType(type);
+    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
+    	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+        	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	   	//单个建筑
+        	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
+           	double brand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double quality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+        	brandMap.clear();
+        	qtyMap.clear();
+        	//所有建筑
+          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+        	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+        	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+        	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+
+        	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
+        	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
+        	builder.setBrand(bd).setQuality(qty);
+    	}
         /*设置其他信息*/
         if(distance!=null&&charge!=null){
             Gs.BuildingInfo.otherInfo.Builder otherBuilder = Gs.BuildingInfo.otherInfo.newBuilder();
@@ -529,7 +548,7 @@ public abstract class Building {
      	if(e!=null){
      		builder.setEva(e.toProto());
     	}
-     	return builder.build(); 
+     	return builder.build();
     }
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
@@ -694,21 +713,5 @@ public abstract class Building {
             happy = 3;
         else if(salaryRatio < 40 && salaryRatio >= 0)
             happy = HAPPY_MIN;
-    }
-
-    public long getTodayIncome() {
-        return todayIncome;
-    }
-
-    public void setTodayIncome(long todayIncome) {
-        this.todayIncome = todayIncome;
-    }
-
-    public long getTodayIncomeTs() {
-        return todayIncomeTs;
-    }
-
-    public void setTodayIncomeTs(long todayIncomeTs) {
-        this.todayIncomeTs = todayIncomeTs;
     }
 }

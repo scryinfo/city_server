@@ -99,10 +99,10 @@ public class Laboratory extends Building {
         }
     }
 
-    public Line addLine(int goodCategory, int times, UUID proposerId) {
+    public Line addLine(int goodCategory, int times, UUID proposerId, long cost) {
         if(exclusiveForOwner && !proposerId.equals(this.ownerId()))
             return null;
-        Line line = new Line(goodCategory, times, proposerId);
+        Line line = new Line(goodCategory, times, proposerId, cost);
         inProcess.add(line);
         //this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
@@ -216,11 +216,12 @@ public class Laboratory extends Building {
 
     @Entity
     public static final class Line {
-        public Line(int goodCategory, int times, UUID proposerId) {
+        public Line(int goodCategory, int times, UUID proposerId, long cost) {
             this.goodCategory = goodCategory;
             this.times = times;
             this.createTs = System.currentTimeMillis();
             this.proposerId = proposerId;
+            this.payCost = cost;
         }
 
         protected Line() {}
@@ -247,6 +248,7 @@ public class Laboratory extends Building {
         int times;
         int availableRoll;
         int usedRoll;
+        long payCost;
         @Transient
         long currentRoundPassNano = 0;
 
@@ -261,6 +263,7 @@ public class Laboratory extends Building {
                     .setProposerId(Util.toByteString(this.proposerId))
                     .setTimes(this.times)
                     .setUsedRoll(this.usedRoll)
+                    .setPay((int) this.payCost)
                     .build();
         }
 

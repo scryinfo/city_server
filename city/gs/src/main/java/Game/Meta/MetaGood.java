@@ -1,36 +1,22 @@
 package Game.Meta;
 
-import Game.Meta.MetaItem;
 import org.bson.Document;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 public final class MetaGood extends MetaItem
 {
+    private static Map<Integer, Type> mapping = new TreeMap<>();
+    static {
+        int base = 51;
+        for (int i = 0; i < Type.ALL.ordinal(); i++) {
+            mapping.put(base+i, Type.values()[i]);
+        }
+    }
     public static final int LUX_SIZE = 4;
     public static Type goodType(int id) {
-        Type res;
-        switch (category(id)) {
-            case 51:
-                res = Type.MAIN_FOOD;
-                break;
-            case 52:
-                res = Type.SUB_FOOD;
-                break;
-            case 53:
-                res = Type.CLOTHING;
-                break;
-            case 54:
-                res = Type.ACCESSORY;
-                break;
-            case 55:
-                res = Type.SPORT;
-                break;
-            case 56:
-                res = Type.DIGITAL;
-                break;
-            default:
-                throw new IllegalArgumentException(Integer.toString(id));
-        }
-        return res;
+        return mapping.get(category(id));
     }
 
     public static int category(int id) {
@@ -52,6 +38,6 @@ public final class MetaGood extends MetaItem
     }
     public int lux;
     public static boolean legalCategory(int category) {
-        return category >= Type.MAIN_FOOD.ordinal() && category < Type.ALL.ordinal();
+        return mapping.keySet().contains(category);
     }
 }
