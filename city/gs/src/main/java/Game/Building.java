@@ -550,8 +550,10 @@ public abstract class Building {
         	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
         	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
         	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
-        	builder.setBrand((int)Math.ceil(brand/totalBrand*100))
-		       	   .setQuality((int)Math.ceil(quality/totalQuality*100));
+        	
+        	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
+        	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
+        	builder.setBrand(bd).setQuality(qty);
     	}
         return builder.build();
     }
