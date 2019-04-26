@@ -101,7 +101,7 @@ public abstract class Building {
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
-            case MetaBuilding.TALENT:
+            case MetaBuilding.WAREHOUSE:
                 return new TalentCenter(MetaData.getTalentCenter(id), pos, ownerId);
         }
         return null;
