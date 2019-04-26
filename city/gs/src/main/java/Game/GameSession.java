@@ -1383,20 +1383,6 @@ public class GameSession {
 			});
 			newbuilder.addRecordsList(rds.build());
 		}
-		/*GetRds.getTypeIdsList().forEach(tpid->{
-			if(tpid > 0){
-				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
-			}else{
-			}
-			Gs.Records.Builder rds = Gs.Records.newBuilder();
-			rds.setBuildingId(Util.toByteString(sellerBuildingId));
-			rds.setTypeId(tpid);
-			userList.forEach(record->{
-				Record rd = (Record) record;
-				rds.addList(rd.toproto());
-			});
-			newbuilder.addRecordsList(rds.build());
-		});*/
 		this.write(Package.create(cmd, newbuilder.build()));
 	}
 
