@@ -448,18 +448,17 @@ public class GameSession {
 			grid.forAllBuilding(building -> {
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
 					//如果是集散中心并且有租户，就还要从租户中获取上架信息
-					if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
+					/*if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
 						WareHouse wareHouse = (WareHouse) building;
 						wareHouse.getRenters().forEach(r->{
 							IShelf rs = (IShelf)building;
 							if(rs.getSaleCount(mi.id) > 0)
 								n.addAndGet(1);
 						});
-					}else {
-						IShelf s = (IShelf) building;
-						if (s.getSaleCount(mi.id) > 0)
-							n.addAndGet(1);
-					}
+					}*/
+					IShelf s = (IShelf) building;
+					if (s.getSaleCount(mi.id) > 0)
+						n.addAndGet(1);
 				}
 			});
 			builder.addInfoBuilder()
@@ -505,7 +504,7 @@ public class GameSession {
 			grid.forAllBuilding(building->{
 				//如果该建筑有货架并且并非当前玩家的
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
-					if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
+					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
 						((WareHouse)building).getRenters().forEach(r->{
 							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
 								IShelf s = (IShelf)building;
@@ -520,18 +519,17 @@ public class GameSession {
 								bb.setMetaId(building.metaId());//建筑类型id
 							}
 						});
-					}else {
-						IShelf s = (IShelf) building;
-						Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-						bb.setId(Util.toByteString(building.id()));
-						bb.setPos(building.coordinate().toProto());
-						s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
-							bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
-						});
-						bb.setOwnerId(Util.toByteString(building.ownerId()));
-						bb.setName(building.getName());
-						bb.setMetaId(building.metaId());//建筑类型id
-					}
+					}*/
+					IShelf s = (IShelf) building;
+					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
+					s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+					});
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());//建筑类型id
 				}
 			});
 		});
