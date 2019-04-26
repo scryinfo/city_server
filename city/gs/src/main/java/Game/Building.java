@@ -276,6 +276,33 @@ public abstract class Building {
     private long todayIncomeTs = 0;
 
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
+    @Transient
+    private int todayVisitor = 0;
+
+    @Transient
+    private long todayVisitorTs = 0;
+
+    public void increaseTodayVisit()
+    {
+        if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
+        {
+            todayVisitor = 1;
+            todayVisitorTs = Util.getTodayStartTs();
+        }
+        else
+        {
+            todayVisitor++;
+        }
+    }
+
+    public int getTodayVisitor()
+    {
+        if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
+        {
+            return 0;
+        }
+        return todayVisitor;
+    }
 
     public void updateTodayIncome(long income)
     {

@@ -1401,12 +1401,13 @@ public class GameSession {
 				return;
 		}
 		Laboratory lab = (Laboratory)building;
+		long cost = 0;
 		if(!building.canUseBy(player.id())) {
 			if(!c.hasTimes())
 				return;
 			if(c.getTimes() > lab.getSellTimes())
 				return;
-			long cost = c.getTimes() * lab.getPricePreTime();
+			cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
 				return;
 
@@ -1417,7 +1418,7 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost, c.getTimes());
 			LogDb.buildingIncome(lab.id(), player.id(), cost, 0, 0);
 		}
-		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id());
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id(), cost);
 		if(null != line) {
 			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
@@ -2504,18 +2505,18 @@ public class GameSession {
 		Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();
 		City.instance().forEachBuilding(player.id(), (Building b)->{
 			//计算距离(向上取整)
-			b.distance = (int)Math.ceil(Building.distance(srcBuilding, b));
+			/*b.distance = (int)Math.ceil(Building.distance(srcBuilding, b));
 			//计算运费（距离x运费比例）
-			b.charge=b.distance*(MetaData.getSysPara().transferChargeRatio);
+			b.charge=b.distance*(MetaData.getSysPara().transferChargeRatio);*/
 			b.appendDetailProto(builder);
 		});
 		//根据玩家id获取租的仓库
 		List<WareHouseRenter> renter = GameDb.getWareHouseRenterByPlayerId(player.id());
 		renter.forEach(w->{
 			//计算距离(向上取整)
-			w.getWareHouse().distance = (int)Math.ceil(Building.distance(srcBuilding, w.getWareHouse()));
+			/*w.getWareHouse().distance = (int)Math.ceil(Building.distance(srcBuilding, w.getWareHouse()));
 			//计算运费（距离x运费比例）
-			w.getWareHouse().charge=w.getWareHouse().distance*(MetaData.getSysPara().transferChargeRatio);
+			w.getWareHouse().charge=w.getWareHouse().distance*(MetaData.getSysPara().transferChargeRatio);*/
 			w.appendDetailProto(builder);
 		});
 		this.write(Package.create(cmd, builder.build()));
@@ -2536,12 +2537,17 @@ public class GameSession {
 					this.write(Package.fail(cmd));
 					return;
 				}
+				if(info.getRentCapacity()==0)
+					return;
 				//修改剩余容量，仓库剩余容量要减少,只需要增加仓库的使用大小
 				wh.store.setOtherUseSize(info.getRentCapacity());
+				wh.setRentCapacity(info.getRentCapacity());
 			}
+
 			if(!info.hasRent())
 				return;
 			wh.setRent(info.getRent());
+
 			if(!info.hasMinHourToRent()||info.getMinHourToRent()<wh.metaWarehouse.minHourToRent)
 				return;
 			wh.setMinHourToRent(info.getMinHourToRent());

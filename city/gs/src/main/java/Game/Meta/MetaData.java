@@ -264,6 +264,9 @@ public class MetaData {
     public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
     }
+    public static MetaWarehouse getWarehouse(int id){//从缓存中获取集散中心
+        return warehouse.get(id);
+    }
 	public static void init(String uri){
 		try{
 			mongoClient = new MongoClient(new MongoClientURI(uri));
