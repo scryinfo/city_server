@@ -3382,7 +3382,6 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd,builder.build()));
 	}
-
 	//16.运输
 	public void transportGood(short cmd,Message message) throws Exception {
 		Gs.TransportGood t = (Gs.TransportGood) message;
