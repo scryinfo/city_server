@@ -1122,7 +1122,6 @@ public class GameDb {
 		session.close();
 		return list;
 	}
-
 	//2.查询所有的租户
 	public static List<WareHouseRenter> getAllRenter() {
 		Session session = sessionFactory.openSession();
