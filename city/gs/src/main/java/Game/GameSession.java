@@ -3383,6 +3383,56 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
+	//16.运输
+	public void transportGood(short cmd,Message message) throws Exception {
+		Gs.TransportGood t = (Gs.TransportGood) message;
+		UUID srcId = Util.toUuid(t.getSrc().toByteArray());
+		UUID dstId = Util.toUuid(t.getDst().toByteArray());
+		IStorage src = IStorage.get(srcId, player);
+		IStorage dst = IStorage.get(dstId, player);
+		Item item = new Item(t.getItem());
+		if (t.hasSrcOrderId())
+			src = WareHouseUtil.getWareRenter(srcId, t.getSrcOrderId());
+		if(t.hasDstOrderId())
+			dst=WareHouseUtil.getWareRenter(dstId, t.getSrcOrderId());
+		if(src == null || dst == null)
+			return;
+		//运费=距离*运费比例*数量
+		int charge  = (int) Math.ceil(IStorage.distance(src, dst)) * item.n * MetaData.getSysPara().transferChargeRatio;
+		if(player.money() < charge)
+			return;
+		if(!src.lock(item.key, item.n)) {
+			this.write(Package.fail(cmd));
+			return;
+		}
+		if(!dst.reserve(item.key.meta, item.n)) {
+			src.unLock(item.key, item.n);
+			this.write(Package.fail(cmd));
+			return;
+		}
+		player.decMoney(charge);
+		MoneyPool.instance().add(charge);
+		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
+		dst.consumeReserve(item.key, item.n, (int) avg.avg);
+		IShelf srcShelf = (IShelf)src;
+		IShelf dstShelf = (IShelf)dst;
+		{//处理自动补货
+			Shelf.Content srcContent = srcShelf.getContent(item.key);
+			Shelf.Content dstContent = dstShelf.getContent(item.key);
+			if(srcContent != null && srcContent.autoReplenish){
+				//更新自动补货的货架
+				IShelf.updateAutoReplenish(srcShelf,item.key);
+			}
+			if(dstContent != null && dstContent.autoReplenish){
+				//更新自动补货的货架
+				IShelf.updateAutoReplenish(dstShelf,item.key);
+			}
+		}
+		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
+		this.write(Package.create(cmd,t));
+	}
+
 
 
 	//未在公会中根据id查询公会信息
