@@ -493,30 +493,49 @@ public class GameSession {
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
 	}
-    public void queryMarketDetail(short cmd, Message message) {
-	    Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
-        GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
-        Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
-        builder.setItemId(c.getItemId());
-        City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+	public void queryMarketDetail(short cmd, Message message) {
+		Gs.QueryMarketDetail c = (Gs.QueryMarketDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.MarketDetail.Builder builder = Gs.MarketDetail.newBuilder();
+		builder.setItemId(c.getItemId());
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(!building.outOfBusiness() && building instanceof IShelf) {
-					IShelf s = (IShelf)building;
+				//如果该建筑有货架并且并非当前玩家的
+				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
+						((WareHouse)building).getRenters().forEach(r->{
+							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
+								IShelf s = (IShelf)building;
+								Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+								bb.setId(Util.toByteString(building.id()));
+								bb.setPos(building.coordinate().toProto());
+								s.getSaleDetail(c.getItemId()).forEach((k,v)->{
+									bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setRenterId(Util.toByteString(r.getRenterId()));
+								});
+								bb.setOwnerId(Util.toByteString(building.ownerId()));
+								bb.setName(building.getName());
+								bb.setMetaId(building.metaId());//建筑类型id
+							}
+						});
+					}*/
+					IShelf s = (IShelf) building;
 					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 					bb.setId(Util.toByteString(building.id()));
 					bb.setPos(building.coordinate().toProto());
-					s.getSaleDetail(c.getItemId()).forEach((k,v)->{
+					s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
 						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
 					});
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());//建筑类型id
+
 				}
 			});
-        });
-        this.write(Package.create(cmd, builder.build()));
-    }
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
 	public void queryLabDetail(short cmd, Message message) {
 		Gs.QueryLabDetail c = (Gs.QueryLabDetail)message;
 		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
@@ -2495,6 +2514,7 @@ public class GameSession {
 			return;
 		}
 		registBuildingDetail(b);
+		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
@@ -2530,32 +2550,26 @@ public class GameSession {
 		if(b == null || b.type() != MetaBuilding.WAREHOUSE)
 			return;
 		WareHouse wh= (WareHouse) b;
-		if (wh.canUseBy(player.id())) {
-			if (info.hasRentCapacity()) {
-				//判断是不是有这么多容量可以出租
-				if(wh.store.availableSize()<info.getRentCapacity()) {
-					this.write(Package.fail(cmd));
-					return;
-				}
-				if(info.getRentCapacity()==0)
-					return;
-				//修改剩余容量，仓库剩余容量要减少,只需要增加仓库的使用大小
-				wh.store.setOtherUseSize(info.getRentCapacity());
-				wh.setRentCapacity(info.getRentCapacity());
-			}
-
-			if(!info.hasRent())
-				return;
-			wh.setRent(info.getRent());
-
-			if(!info.hasMinHourToRent()||info.getMinHourToRent()<wh.metaWarehouse.minHourToRent)
-				return;
-			wh.setMinHourToRent(info.getMinHourToRent());
-			if(info.getMaxHourToRent()<wh.metaWarehouse.maxHourToRent&&info.getMaxHourToRent()>=info.getMinHourToRent())
-				wh.setMaxHourToRent(info.getMaxHourToRent());
-			else
-				return;
+		if (!wh.canUseBy(player.id())||!info.hasRentCapacity()||info.getRentCapacity()==0)
+			return;
+		wh.store.setOtherUseSize(0);
+		//判断是不是有这么多容量可以出租
+		if(wh.store.availableSize()<info.getRentCapacity()) {
+			this.write(Package.fail(cmd));
+			return;
 		}
+		//修改剩余容量，仓库剩余容量要减少,只需要增加仓库的使用大小
+		wh.store.setOtherUseSize(info.getRentCapacity());
+		wh.setRentCapacity(info.getRentCapacity());
+		if(!info.hasRent())
+			return;
+		wh.setRent(info.getRent());
+		if(!info.hasMinHourToRent()||info.getMinHourToRent()<wh.metaWarehouse.minHourToRent)
+			return;
+		wh.setMinHourToRent(info.getMinHourToRent());
+		if(info.getMaxHourToRent()>wh.metaWarehouse.maxHourToRent||info.getMaxHourToRent()<info.getMinHourToRent())
+			return;
+		wh.setMaxHourToRent(info.getMaxHourToRent());
 		GameDb.saveOrUpdate(wh);
 		this.write(Package.create(cmd,info));
 	}
