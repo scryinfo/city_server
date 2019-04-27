@@ -572,7 +572,8 @@ public class PublicFacility extends Building{
                 return;
             }
             FlowRecord newRecord = new FlowRecord(pid,ts, value);
-            GameDb.saveOrUpdate( newRecord );
+            //GameDb.saveOrUpdateAndClear( newRecord );
+            GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear FlowRecord");
         }else{
             //eva
             EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
@@ -581,7 +582,8 @@ public class PublicFacility extends Building{
                 return;
             }
             EvaRecord newRecord = new EvaRecord(buildingId,typeId, ts, value);
-            GameDb.saveOrUpdate( newRecord );
+            GameDb.saveOrUpdateAndClear( newRecord );
+            GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear EvaRecord");
         }
     }
     @Override
