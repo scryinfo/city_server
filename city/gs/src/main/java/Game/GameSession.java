@@ -1593,7 +1593,8 @@ public class GameSession {
 
 	public void delItem(short cmd, Message message) throws Exception {
 		Gs.DelItem c = (Gs.DelItem)message;
-		ItemKey k = new ItemKey(c.getItem());
+		Item it = new Item(c.getItem());
+		ItemKey k = it.key;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		IStorage storage = IStorage.get(id, player);
 		if(storage == null)

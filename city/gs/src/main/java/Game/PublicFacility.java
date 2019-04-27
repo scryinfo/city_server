@@ -188,7 +188,9 @@ public class PublicFacility extends Building{
             if(evaAddMe != null){
                 evaAdd = evaAddMe.p;
                 evaPromoCur.put(eva.getAt(),evaAddMe.p);
-                addPromoAbRecord(this.id(),(short) eva.getAt(),evaAdd);
+                if(eva.getAt() >= 1600 && eva.getAt() <= 1699){
+                    addPromoAbRecord(this.id(),(short) eva.getAt(),evaAdd);
+                }
             }
         }
         //4、 流量提升
