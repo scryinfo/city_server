@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Meta.MetaItem;
+import Game.OrderGenerateUtil.OrderCodeFactory;
 import Shared.Util;
 import gs.Gs;
 
@@ -48,14 +49,14 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     private Long beginTs;    //租用的开始时间
     private Integer hourToRent; //租赁时间
     private Integer rent;       //租金
-    public WareHouseRenter(Long orderId,
-                           UUID renterId,
-                           WareHouse wareHouse,
-                           Integer rentCapacity,
-                           Long beginTs,
-                           Integer hourToRent,
-                           Integer rent) {
-        this.orderId = orderId;
+    public WareHouseRenter(
+            UUID renterId,
+            WareHouse wareHouse,
+            Integer rentCapacity,
+            Long beginTs,
+            Integer hourToRent,
+            Integer rent) {
+        this.orderId = OrderCodeFactory.getOrderId(this.wareHouse.metaId());//自动生成订单号
         this.renterId = renterId;
         this.wareHouse = wareHouse;
         this.rentCapacity = rentCapacity;

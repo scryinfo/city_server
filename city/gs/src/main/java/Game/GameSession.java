@@ -501,7 +501,6 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				//如果该建筑有货架并且并非当前玩家的
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
 					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
 						((WareHouse)building).getRenters().forEach(r->{
@@ -520,16 +519,18 @@ public class GameSession {
 						});
 					}*/
 					IShelf s = (IShelf) building;
-					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-					bb.setId(Util.toByteString(building.id()));
-					bb.setPos(building.coordinate().toProto());
-					s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
-						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
-					});
-					bb.setOwnerId(Util.toByteString(building.ownerId()));
-					bb.setName(building.getName());
-					bb.setMetaId(building.metaId());//建筑类型id
-
+					Map<Item, Integer> ItemMap = s.getSaleDetail(c.getItemId());
+					if(ItemMap.size()>0){
+						Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+						bb.setId(Util.toByteString(building.id()));
+						bb.setPos(building.coordinate().toProto());
+						s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+							bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+						});
+						bb.setOwnerId(Util.toByteString(building.ownerId()));
+						bb.setName(building.getName());
+						bb.setMetaId(building.metaId());//建筑类型id
+					}
 				}
 			});
 		});
@@ -2942,8 +2943,6 @@ public class GameSession {
 	//5.租用集散中心仓库
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
-		//订单编号
-		long orderNumber = rentInfo.getOrderNumber();
 		//建筑id
 		UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
 		//租户id
@@ -2982,22 +2981,23 @@ public class GameSession {
 		//4.1玩家开销
 		player.decMoney(rent);
 		MoneyPool.instance().add(rent);
-		//4.2记录仓库出租日志
-		LogDb.rentWarehouseIncome(orderNumber,bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
-		//4.3建筑主人获利
+		//4.2建筑主人获利
 		UUID owner = building.ownerId();
-		//4.4增加建筑主人的收入
+		//4.3增加建筑主人的收入
 		Player player = GameDb.getPlayer(owner);
 		player.addMoney(rent);
 		GameDb.saveOrUpdate(player);
-		//4.创建租户对象
-		WareHouseRenter wareHouseRenter = new WareHouseRenter(orderNumber, renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
+		//5.创建租户对象
+		WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
+		//6.记录仓库出租日志
+		LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
 		wareHouse.addRenter(wareHouseRenter);
 		wareHouse.updateTodayRentIncome(rent);//修改今日货架收入
 		wareHouseRenter.setWareHouse(wareHouse);
 		GameDb.saveOrUpdate(wareHouse);
 		WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
-		this.write(Package.create(cmd,rentInfo));
+		Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
+		this.write(Package.create(cmd,builder.build()));
 	}
 
 	//6.获取所有上架的商品
@@ -3385,6 +3385,55 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd,builder.build()));
 	}
+	//16.运输
+	public void transportGood(short cmd,Message message) throws Exception {
+		Gs.TransportGood t = (Gs.TransportGood) message;
+		UUID srcId = Util.toUuid(t.getSrc().toByteArray());
+		UUID dstId = Util.toUuid(t.getDst().toByteArray());
+		IStorage src = IStorage.get(srcId, player);
+		IStorage dst = IStorage.get(dstId, player);
+		Item item = new Item(t.getItem());
+		if (t.hasSrcOrderId())
+			src = WareHouseUtil.getWareRenter(srcId, t.getSrcOrderId());
+		if(t.hasDstOrderId())
+			dst=WareHouseUtil.getWareRenter(dstId, t.getSrcOrderId());
+		if(src == null || dst == null)
+			return;
+		//运费=距离*运费比例*数量
+		int charge  = (int) Math.ceil(IStorage.distance(src, dst)) * item.n * MetaData.getSysPara().transferChargeRatio;
+		if(player.money() < charge)
+			return;
+		if(!src.lock(item.key, item.n)) {
+			this.write(Package.fail(cmd));
+			return;
+		}
+		if(!dst.reserve(item.key.meta, item.n)) {
+			src.unLock(item.key, item.n);
+			this.write(Package.fail(cmd));
+			return;
+		}
+		player.decMoney(charge);
+		MoneyPool.instance().add(charge);
+		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
+		dst.consumeReserve(item.key, item.n, (int) avg.avg);
+		IShelf srcShelf = (IShelf)src;
+		IShelf dstShelf = (IShelf)dst;
+		{//处理自动补货
+			Shelf.Content srcContent = srcShelf.getContent(item.key);
+			Shelf.Content dstContent = dstShelf.getContent(item.key);
+			if(srcContent != null && srcContent.autoReplenish){
+				//更新自动补货的货架
+				IShelf.updateAutoReplenish(srcShelf,item.key);
+			}
+			if(dstContent != null && dstContent.autoReplenish){
+				//更新自动补货的货架
+				IShelf.updateAutoReplenish(dstShelf,item.key);
+			}
+		}
+		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
+		this.write(Package.create(cmd,t));
+	}
 
 
 
@@ -3404,6 +3453,11 @@ public class GameSession {
 	public void getPlayerAmount(short cmd) {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
+	}
+
+	//查询城市主页queryCityInde
+	public void queryCityIndex(){
+
 	}
 
 }
