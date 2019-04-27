@@ -328,4 +328,5 @@ public class WareHouse extends Building implements IStorage, IShelf {
         return this.store.delItem(item);
     }
 
+
 }
