@@ -71,6 +71,7 @@ public class PromotionMgr {
             nextTs = promo.promStartTs + promo.promDuration;
         }
         //更新完之后，移除掉要删除的推广。
+        promotions.remove(id);
         return changed;
     }
     public PromoOrder getPromotion(UUID id){
