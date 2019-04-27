@@ -730,4 +730,20 @@ public abstract class Building implements Ticker{
         else if(salaryRatio < 40 && salaryRatio >= 0)
             happy = HAPPY_MIN;
     }
+
+    public long getTodayIncomeTs() {
+        return todayIncomeTs;
+    }
+
+    public void setTodayIncomeTs(long todayIncomeTs) {
+        this.todayIncomeTs = todayIncomeTs;
+    }
+
+    public long getTodayIncome() {
+        return todayIncome;
+    }
+
+    public void setTodayIncome(long todayIncome) {
+        this.todayIncome = todayIncome;
+    }
 }
