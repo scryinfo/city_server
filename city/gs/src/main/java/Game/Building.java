@@ -17,9 +17,11 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.SelectBeforeUpdate;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.EvictingQueue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.mchange.v2.lang.StringUtils;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
@@ -551,15 +553,16 @@ public abstract class Building implements Ticker{
           	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
         	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
         	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-        	double totalBrand=((brandMap!=null&&brandMap.size()>0&&brandMap.get(type())!=null)?brandMap.get(type()):0);
-        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0&&qtyMap.get(type())!=null)?qtyMap.get(type()):0);
-        	
+        	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
+        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+
         	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
         	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
         	builder.setBrand(bd).setQuality(qty);
     	}
         return builder.build();
     }
+
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 

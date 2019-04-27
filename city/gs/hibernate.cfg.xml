@@ -15,7 +15,7 @@
 		</property>
 		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">
-			jdbc:postgresql://192.168.0.51/50
+			jdbc:postgresql://192.168.0.51/107
 		</property>
 		<property name="hibernate.connection.username">
 			postgres
@@ -78,5 +78,7 @@
 		<mapping class="Game.Eva.Eva"></mapping>
 		<mapping class="Game.League.LeagueInfo"></mapping>
 		<mapping class="Game.League.BrandLeague"></mapping>
+		<mapping class="Game.WareHouse"></mapping>
+		<mapping class="Game.WareHouseRenter"></mapping>
 	</session-factory>
 </hibernate-configuration> 

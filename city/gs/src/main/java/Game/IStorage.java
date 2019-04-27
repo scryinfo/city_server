@@ -46,4 +46,5 @@ public interface IStorage {
 
     boolean offset(ItemKey item, int n);
     boolean offset(MetaItem item, int n);
+    boolean delItem(Item item);
 }

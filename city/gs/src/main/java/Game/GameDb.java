@@ -1261,5 +1261,37 @@ public class GameDb {
 		return amount;
 	}
 
+
+	//集散中心增加的操作
+	//1.获取租户信息根据建筑id
+	public static List<WareHouseRenter> getAllRenterByBuilderId(UUID bid){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<WareHouseRenter> list = session.createQuery("FROM WareHouseRenter r where wareHouse.id=:x ",WareHouseRenter.class)
+				.setParameter("x", bid)
+				.list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
+	//2.查询所有的租户
+	public static List<WareHouseRenter> getAllRenter() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<WareHouseRenter> list = session.createCriteria(WareHouseRenter.class).list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
+	//3.根据租户id查询所有的租户信息
+	public static List<WareHouseRenter> getWareHouseRenterByPlayerId(UUID playerId){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<WareHouseRenter> list = session.createQuery("From WareHouseRenter where renterId =:x", WareHouseRenter.class)
+				.setParameter("x", playerId).list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
 }
 
