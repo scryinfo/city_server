@@ -2828,7 +2828,6 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(player,seller,sellStorage));
 		this.write(Package.create(cmd,inShelf));
 	}
-
 	//8.上架
 	public void putAway(short cmd, Message message) throws Exception {
 		Gs.PutAway c = (Gs.PutAway) message;
