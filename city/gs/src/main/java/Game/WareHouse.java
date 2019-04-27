@@ -36,9 +36,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
     @OneToMany(mappedBy = "wareHouse",cascade ={CascadeType.ALL},fetch = FetchType.EAGER)//让租户维护关系
     protected Set<WareHouseRenter> renters = new HashSet<>();//租户信息
 
-    /*@Transient
-    private Map<UUID, WareHouseRenter> rentersMap = new HashMap<>(); //租户,对应多个租户*/
-
     //初始化原型、建筑坐标、建筑拥有者id
     public WareHouse(MetaWarehouse meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
