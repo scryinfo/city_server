@@ -172,7 +172,7 @@ public class GameDb {
 		List userList = null;
 		try{
 			//重新开服,需要获取一下上次的记录
-			int tsSart = (int)(System.currentTimeMillis() - PromotionMgr._upDeltaMs);
+			int tsSart = (int)(System.currentTimeMillis()/1000 - PromotionMgr._upDeltaMs);
 			Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
 					.setParameter("tsSt",tsSart)
 					.setParameter("bdid",bid)
