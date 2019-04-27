@@ -2940,8 +2940,6 @@ public class GameSession {
 	//5.租用集散中心仓库
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
-		//订单编号
-		long orderNumber = rentInfo.getOrderNumber();
 		//建筑id
 		UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
 		//租户id
@@ -2980,22 +2978,23 @@ public class GameSession {
 		//4.1玩家开销
 		player.decMoney(rent);
 		MoneyPool.instance().add(rent);
-		//4.2记录仓库出租日志
-		LogDb.rentWarehouseIncome(orderNumber,bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
-		//4.3建筑主人获利
+		//4.2建筑主人获利
 		UUID owner = building.ownerId();
-		//4.4增加建筑主人的收入
+		//4.3增加建筑主人的收入
 		Player player = GameDb.getPlayer(owner);
 		player.addMoney(rent);
 		GameDb.saveOrUpdate(player);
-		//4.创建租户对象
-		WareHouseRenter wareHouseRenter = new WareHouseRenter(orderNumber, renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
+		//5.创建租户对象
+		WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
+		//6.记录仓库出租日志
+		LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
 		wareHouse.addRenter(wareHouseRenter);
 		wareHouse.updateTodayRentIncome(rent);//修改今日货架收入
 		wareHouseRenter.setWareHouse(wareHouse);
 		GameDb.saveOrUpdate(wareHouse);
 		WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
-		this.write(Package.create(cmd,rentInfo));
+		Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
+		this.write(Package.create(cmd,builder.build()));
 	}
 
 	//6.获取所有上架的商品
