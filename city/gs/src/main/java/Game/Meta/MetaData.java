@@ -375,6 +375,10 @@ public class MetaData {
         return bid;
     }
 
+    public static HashMap<Integer, MetaGroundAuction> getGroundAuction() {
+        return groundAuction;
+    }
+
     public static void initBuilding() {
         mongoClient.getDatabase(dbName).getCollection(trivialBuildingColName).find().forEach((Block<Document>) doc -> {
             MetaBuilding m = new MetaBuilding(doc);
