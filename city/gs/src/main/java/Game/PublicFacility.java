@@ -568,7 +568,7 @@ public class PublicFacility extends Building{
             UUID pid = bd.ownerId();
             FlowRecord lastRecord = getlastFlowRecord(pid);
             //只记录变化的，减少数据量
-            if(lastRecord.ts == ts){
+            if(lastRecord.value == value){
                 return;
             }
             FlowRecord newRecord = new FlowRecord(pid,ts, value);
@@ -577,7 +577,7 @@ public class PublicFacility extends Building{
             //eva
             EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
             //只记录变化的，减少数据量
-            if(lastRecord.ts == ts){
+            if(lastRecord.value == value){
                 return;
             }
             EvaRecord newRecord = new EvaRecord(buildingId,typeId, ts, value);
