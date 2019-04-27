@@ -98,8 +98,8 @@ public abstract class Building implements Ticker{
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
-            case MetaBuilding.TALENT:
-                return new TalentCenter(MetaData.getTalentCenter(id), pos, ownerId);
+            case MetaBuilding.WAREHOUSE:
+                return new WareHouse(MetaData.getWarehouse(id), pos, ownerId);
         }
         return null;
     }
