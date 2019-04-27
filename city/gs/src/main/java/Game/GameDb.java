@@ -1132,17 +1132,7 @@ public class GameDb {
 		session.close();
 		return list;
 	}
-
-	//3.
-	public static WareHouseRenter getWareHouseRenterByid(Long orderid){
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		WareHouseRenter wareHouseRenter = session.get(WareHouseRenter.class, orderid);
-		transaction.commit();
-		session.close();
-		return wareHouseRenter;
-	}
-	//4.根据租户id查询所有的租户信息
+	//3.根据租户id查询所有的租户信息
 	public static List<WareHouseRenter> getWareHouseRenterByPlayerId(UUID playerId){
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -1151,23 +1141,6 @@ public class GameDb {
 		transaction.commit();
 		session.close();
 		return list;
-	}
-
-	public static List<WareHouse>  getAllWareHouse(){
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		List<WareHouse> wareHouses = session.createQuery("From WareHouse", WareHouse.class).list();
-		transaction.commit();
-		session.close();
-		return wareHouses;
-	}
-	public static void delRenterById(Long id){
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		WareHouseRenter renter = session.get(WareHouseRenter.class, id);
-		session.delete(renter);
-		transaction.commit();
-		session.close();
 	}
 }
 
