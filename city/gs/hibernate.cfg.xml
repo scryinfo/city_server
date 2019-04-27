@@ -80,5 +80,13 @@
 		<mapping class="Game.League.BrandLeague"></mapping>
 		<mapping class="Game.WareHouse"></mapping>
 		<mapping class="Game.WareHouseRenter"></mapping>
+		<mapping class="Game.PromotionMgr"></mapping>
+		<mapping class="Game.PromoOrder"></mapping>
+		<mapping class="Game.PromoOdTs"></mapping>
+		<mapping class="Game.TickManager"></mapping>		
+		<mapping class="Game.Ticker"></mapping>		
+		<mapping class="Game.Record"></mapping>		
+		<mapping class="Game.FlowRecord"></mapping>		
+		<mapping class="Game.EvaRecord"></mapping>		
 	</session-factory>
 </hibernate-configuration> 
