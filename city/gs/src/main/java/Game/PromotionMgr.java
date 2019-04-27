@@ -60,7 +60,7 @@ public class PromotionMgr {
             }
             if(id.equals(promotionIds.get(i))){
                 if(i == 0){
-                    promo.promStartTs = 0 ;
+                    promo.promStartTs = System.currentTimeMillis();
                 }
                 promo.promDuration= 0 ;
                 findPos = i;

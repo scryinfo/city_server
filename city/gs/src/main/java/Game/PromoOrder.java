@@ -43,6 +43,8 @@ public class PromoOrder {
     long promDuration;	//推广时长
     int promProgress;	//推广进度
     int promotedTotal;  //总的推广力增加值，用来计算平均值
+    int transactionPrice; //成交价， 成交时，广告商 PublicFacility 中 curPromPricePerHour
+
 
     public void setPromoMgr(PromotionMgr promoMgr) {
         this.promoMgr = promoMgr;
@@ -51,15 +53,13 @@ public class PromoOrder {
     public PromotionMgr getPromoMgr() {
         return promoMgr;
     }
-
     @ManyToOne
     private PromotionMgr promoMgr;
+
 
     public void setTransactionPrice(int transactionPrice) {
         this.transactionPrice = transactionPrice;
     }
-
-    int transactionPrice; //成交价， 成交时，广告商 PublicFacility 中 curPromPricePerHour
 
     public Gs.Promotion toProto()
     {
@@ -72,6 +72,7 @@ public class PromoOrder {
                 .setProductionType(productionType)
                 .setPromStartTs(promStartTs)
                 .setPromDuration(promDuration)
+                .setTransactionPrice(transactionPrice)
                 .setPromProgress(promProgress);
         return builder.build();
     }
