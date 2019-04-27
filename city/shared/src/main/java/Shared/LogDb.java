@@ -51,7 +51,7 @@ public class LogDb {
 	private static final String NPC_TYPE_NUM = "npcTypeNum";
 
 	private static final String FLOW_AND_LIFT = "flowAndLift";
-	//租用仓库的营收记录
+	//集散中心租用仓库的收入记录
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
