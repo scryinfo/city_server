@@ -501,7 +501,6 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				//如果该建筑有货架并且并非当前玩家的
 				if(building instanceof IShelf && !building.canUseBy(player.id())) {
 					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
 						((WareHouse)building).getRenters().forEach(r->{
@@ -520,16 +519,18 @@ public class GameSession {
 						});
 					}*/
 					IShelf s = (IShelf) building;
-					Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-					bb.setId(Util.toByteString(building.id()));
-					bb.setPos(building.coordinate().toProto());
-					s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
-						bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
-					});
-					bb.setOwnerId(Util.toByteString(building.ownerId()));
-					bb.setName(building.getName());
-					bb.setMetaId(building.metaId());//建筑类型id
-
+					Map<Item, Integer> ItemMap = s.getSaleDetail(c.getItemId());
+					if(ItemMap.size()>0){
+						Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+						bb.setId(Util.toByteString(building.id()));
+						bb.setPos(building.coordinate().toProto());
+						s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+							bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+						});
+						bb.setOwnerId(Util.toByteString(building.ownerId()));
+						bb.setName(building.getName());
+						bb.setMetaId(building.metaId());//建筑类型id
+					}
 				}
 			});
 		});
@@ -3450,6 +3451,11 @@ public class GameSession {
 	public void getPlayerAmount(short cmd) {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
+	}
+
+	//查询城市主页queryCityInde
+	public void queryCityIndex(){
+
 	}
 
 }
