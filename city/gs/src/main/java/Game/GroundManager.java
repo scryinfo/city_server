@@ -280,9 +280,12 @@ public class GroundManager {
         this.broadcast(gis);
         
         //租别人的地算玩家自己的地
-        if(playerGround!=null&&playerGround.size()>0&&playerGround.get(renter.id())!=null){
-        	Set<GroundInfo> s=playerGround.get(renter.id());
-        	s.addAll(new HashSet<>(gis));
+        if(playerGround!=null&&playerGround.size()>0){
+        	Set<GroundInfo> s=new HashSet<>(gis);
+        	if(playerGround.get(renter.id())!=null){
+              	s=playerGround.get(renter.id());
+            	s.addAll(new HashSet<>(gis));
+        	}
         	playerGround.put(renter.id(),s);
         }
 
