@@ -482,6 +482,23 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void queryPromoSummary(short cmd) {
+		Gs.PromoSummary.Builder builder = Gs.PromoSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.PromoSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof PublicFacility && !building.outOfBusiness() && !((PublicFacility)building).isTakeOnNewOrder())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void setRoleFaceId(short cmd, Message message) {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
@@ -564,6 +581,42 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void queryPromoDetail(short cmd, Message message) {
+		Gs.QueryPromoDetail c = (Gs.QueryPromoDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.PromoDetail.Builder builder = Gs.PromoDetail.newBuilder();
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.PromoDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(!building.outOfBusiness() && building instanceof PublicFacility) {
+					PublicFacility s = (PublicFacility)building;
+					if(!s.isTakeOnNewOrder())
+						return;
+					Gs.PromoDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
+
+					for (int tp : bb.getTypeIdsList())
+					{
+						int bsTp = tp/100;
+						int subTp = tp % 100;
+						Integer value = (int)s.getAllPromoTypeAbility(tp);
+						bb.addCurAbilitys(value);
+					}
+					bb.setPricePerHour(s.getCurPromPricePerHour());
+					bb.setRemainTime(s.getPromRemainTime());
+					bb.setQueuedTimes(s.getNewPromoStartTs());
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());
+				}
+			});
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack

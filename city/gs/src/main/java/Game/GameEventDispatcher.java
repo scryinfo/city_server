@@ -19,6 +19,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryMarketSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"queryMarketSummary"));
 			table.put((short) GsCode.OpCode.queryGroundSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryGroundSummary"));
 			table.put((short) GsCode.OpCode.queryLabSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryLabSummary"));
+			table.put((short) GsCode.OpCode.adQueryPromoSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryPromoSummary"));
 			table.put((short) GsCode.OpCode.createRole_VALUE, Wrapper.newWithMessageAsync(Gs.CreateRole.PARSER, GameSession.class,"createRole"));
 			table.put((short) GsCode.OpCode.queryPlayerBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryPlayerBuildings"));
 			table.put((short) GsCode.OpCode.getAllBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllBuildingDetail"));
@@ -44,6 +45,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.setBuildingInfo_VALUE, Wrapper.newWithMessageAsync(Gs.SetBuildingInfo.PARSER, GameSession.class,"setBuildingInfo"));
 			table.put((short) GsCode.OpCode.queryMoneyPoolInfo_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryMoneyPoolInfo"));
 			table.put((short) GsCode.OpCode.queryLabDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryLabDetail.PARSER, GameSession.class,"queryLabDetail"));
+			table.put((short) GsCode.OpCode.adQueryPromoDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryPromoDetail.PARSER, GameSession.class,"queryPromoDetail"));
 
 			table.put((short) GsCode.OpCode.exchangeItemList_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"exchangeItemList"));
 			table.put((short) GsCode.OpCode.exchangeBuy_VALUE, Wrapper.newWithMessageAsync(Gs.ExchangeBuy.PARSER, GameSession.class,"exchangeBuy"));

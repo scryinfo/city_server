@@ -572,7 +572,7 @@ public class PublicFacility extends Building{
                 return;
             }
             FlowRecord newRecord = new FlowRecord(pid,ts, value);
-            //GameDb.saveOrUpdateAndClear( newRecord );
+            GameDb.saveOrUpdateAndClear( newRecord );
             GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear FlowRecord");
         }else{
             //eva
