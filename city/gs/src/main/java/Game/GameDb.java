@@ -205,13 +205,13 @@ public class GameDb {
 		return new FlowRecord(inPid,0,0);
 	}
 
-	public static List getEva_records(int tsSart,UUID bid,int tid){
+	public static List getEva_records(int tsSart,UUID bid,int tid, int count){
 		List ret = null;
 		Session session = sessionFactory.openSession();
 		try{
 			Query query = session.createQuery("FROM eva_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND buildingId IS :bdid AND typeId IS :tpid")
 					.setParameter("tsSt",tsSart)
-					.setParameter("tsEd",tsSart + 30)
+					.setParameter("tsEd",tsSart + count)
 					.setParameter("bdid",bid)
 					.setInteger("tpid",tid);
 			ret = query.list();
@@ -222,14 +222,14 @@ public class GameDb {
 		//eva
 		return  ret;
 	}
-	public static List getFlow_records(int tsSart,UUID pid){
+	public static List getFlow_records(int tsSart,UUID pid, int count){
     	List ret = null;
     	try{
 			Session session = sessionFactory.openSession();
 			//人流量
 			Query query = session.createQuery( "FROM flow_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND playerId IS :pid" )
 					.setParameter("tsSt",tsSart)
-					.setParameter("tsEd",tsSart + 30)
+					.setParameter("tsEd",tsSart + count)
 					.setParameter("pid",pid);
 			ret = query.list();
 		}catch (Exception e){

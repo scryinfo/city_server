@@ -1405,16 +1405,17 @@ public class GameSession {
 		//开始时间，以小时为单位
 		int tsSart = (int)(GetRds.getStartTs()/PromotionMgr._upDeltaMs) - 1;
 		List userList = null;
+		int RecordsCount = GetRds.hasRecordsCount() ? (GetRds.getRecordsCount() < 30 ? GetRds.getRecordsCount(): 30)  :30;
 		for (int i = 0; i < GetRds.getTypeIdsList().size(); i++) {
 			int tpid = GetRds.getTypeIdsList().get(i);
 			if(tpid > 0){
 				//eva
-				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
+				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid, RecordsCount);
 			}
 			else{
 				//人流量
 				Building building = City.instance().getBuilding(sellerBuildingId);
-				userList.addAll(GameDb.getFlow_records(tsSart, building.ownerId())) ;
+				userList.addAll(GameDb.getFlow_records(tsSart, building.ownerId(),RecordsCount)) ;
 			}
 			Gs.Records.Builder rds = Gs.Records.newBuilder();
 			rds.setBuildingId(Util.toByteString(sellerBuildingId));
