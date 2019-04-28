@@ -3482,7 +3482,7 @@ public class GameSession {
         citySummary.setAvgSalary(avgSalary);
 		//6.设置城市摘要
 		builder.setSummary(citySummary);
-        //7.设置工资涨幅（需要计算，还不确定,我这里暂定7%）
+        //7.设置工资涨幅（需要计算，还不确定,我这里暂定7%，每7天统计一下）
         builder.setSalaryIncre(7);
         builder.setSocialWelfare(7);
         builder.setMoneyPool(MoneyPool.instance().money());
