@@ -134,7 +134,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     }
 
-
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) { //上架
         return false;

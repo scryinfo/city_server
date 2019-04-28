@@ -3490,5 +3490,4 @@ public class GameSession {
 		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
 		builder.setExchangeNum(amount);
     }
-
 }
