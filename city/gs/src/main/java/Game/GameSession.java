@@ -57,6 +57,7 @@ import Shared.Validator;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
+import gs.Gs.MaterialInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -3604,5 +3605,37 @@ public class GameSession {
 		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
 		builder.setExchangeNum(amount);
 	}
-
+    //修改建筑名称
+    public void updateBuildingName(short cmd, Message message)
+    {
+		Gs.UpdateBuildingName msg = (Gs.UpdateBuildingName) message;
+		UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		building.setName(msg.getName());
+		GameDb.saveOrUpdate(building);
+		this.write(Package.create(cmd, building.toProto()));
+    }
+    //查询原料厂信息
+    public void queryMaterialInfo(short cmd, Message message)
+    {
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
+    	
+    	Gs.MaterialInfo.Builder builder=Gs.MaterialInfo.newBuilder();
+    	builder.setSalary(building.salaryRatio);
+    	builder.setStaffNum(building.getWorkerNum());
+    	MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
+    		Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
+    		MetaMaterial material=MetaData.getMaterial(itemId);
+        	Eva e=EvaManager.getInstance().getEva(playerId, itemId, Gs.Eva.Btype.ProduceSpeed.getNumber());
+        	b.setItemId(itemId);
+        	b.setIsUsed(material.useDirectly);
+        	b.setNumOneSec(material.n);
+        	b.setEva(e!=null?e.toProto():null);
+    	});
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    
 }

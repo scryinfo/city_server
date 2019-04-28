@@ -99,7 +99,7 @@ public class StatisticSession {
 		{
 			builder.addNodes(Ss.BuildingLift.Node.newBuilder()
 					.setTime(document.getLong("t"))
-					.setLift((Float) document.get("l"))
+					.setLift((float) (double)document.get("l"))
 					.build());
 		});
 		this.write(Package.create(cmd,builder.build()));

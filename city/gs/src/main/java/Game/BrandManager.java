@@ -284,12 +284,12 @@ public class BrandManager {
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
      	if(brandEva!=null){
      		if(brandEva.getLv()>0){
-     			brandMap.put(b.type(), (brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+brandEva.getLv()/100d)));
+     			brandMap.put(b.type(), (brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+(brandEva.getLv()-1)/100d)));
      		}
     	}
      	if(qualityEva!=null){
      		if(qualityEva.getLv()>0){
-     			qtyMap.put(b.type(), (qtyMap.get(b.type())!=null?qtyMap.get(b.type()):0)+new Double(b.quality()*(1+qualityEva.getLv()/100d)));
+     			qtyMap.put(b.type(), (qtyMap.get(b.type())!=null?qtyMap.get(b.type()):0)+new Double(b.quality()*(1+(qualityEva.getLv()-1)/100d)));
      		}
      	}
     }
