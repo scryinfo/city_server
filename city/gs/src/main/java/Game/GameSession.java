@@ -3509,15 +3509,22 @@ public class GameSession {
 		//7.设置工资涨幅（需要计算，还不确定,间隔是7天统计一下）
 		Long salarys1 = CitySalaryUtil.getSumSalaryByDays(14, 7);//前7天工资
 		Long salarys2 = CitySalaryUtil.getSumSalaryByDays(7, 0);//最近7天工资
-		//计算增幅（本次统计-上次统计）/上次统计
+		//计算增幅（本次7天内统计-前7天内统计）/上次统计
 		long incryRate = (salarys2 - salarys1) / salarys1 ;
 		builder.setSalaryIncre((int) incryRate);
-		//市民保障福利（平均工资）
-		builder.setSocialWelfare(7);
+		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);//全程交易量
+		//8.市民保障福利（平均工资）,计算公式：社会保障的比例计算  （社保福利是平均工资的3%+全程交易量的%2）/奖金池
+		//8.1.计算福利待遇
+		Double socialSalary = avgSalary*0.03+amount*0.02;//社保人员的工资
+		//8.2统计福利人员人数(10类型和11类型)
+		Map<Integer, Integer> npcMap = NpcManager.instance().countNpcByType();
+		int socialNum = npcMap.get(10) + npcMap.get(11);
+		long socialWelfare = Math.round((socialSalary *socialNum)/ MoneyPool.instance().money());//比例
+		builder.setSocialWelfare((int) socialWelfare);
 		builder.setMoneyPool(MoneyPool.instance().money());
-		//全程玩家交易信息
-		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
+		//9.全程玩家交易信息
 		builder.setExchangeNum(amount);
+		this.write(Package.create(cmd,builder.build()));
 	}
 
 }
