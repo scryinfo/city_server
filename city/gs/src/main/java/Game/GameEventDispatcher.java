@@ -68,6 +68,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.adSetTicket_VALUE, Wrapper.newWithMessageAsync(Gs.AdSetTicket.PARSER, GameSession.class,"adSetTicket"));
 			table.put((short) GsCode.OpCode.adSetSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdSetSlot.PARSER, GameSession.class,"adSetSlot"));
 			table.put((short) GsCode.OpCode.adQueryPromotion_VALUE, Wrapper.newWithMessageAsync(Gs.AdQueryPromotion.PARSER, GameSession.class,"AdQueryPromotion"));
+			table.put((short) GsCode.OpCode.adGetAllMyFlowSign_VALUE, Wrapper.newWithMessageAsync(Gs.GetAllMyFlowSign.PARSER, GameSession.class,"GetAllMyFlowSign"));
 			table.put((short) GsCode.OpCode.adAddNewPromoOrder_VALUE, Wrapper.newWithMessageAsync(Gs.AdAddNewPromoOrder.PARSER, GameSession.class,"AdAddNewPromoOrder"));
 			table.put((short) GsCode.OpCode.adRemovePromoOrder_VALUE, Wrapper.newWithMessageAsync(Gs.AdRemovePromoOrder.PARSER, GameSession.class,"AdRemovePromoOrder"));
 			table.put((short) GsCode.OpCode.adGetPromoAbilityHistory_VALUE, Wrapper.newWithMessageAsync(Gs.AdGetPromoAbilityHistory.PARSER, GameSession.class,"AdGetPromoAbilityHistory"));

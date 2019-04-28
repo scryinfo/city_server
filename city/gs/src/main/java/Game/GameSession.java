@@ -1163,6 +1163,32 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	//adGetAllMyFlowSign
+	public void GetAllMyFlowSign(short cmd, Message message) {
+		Gs.GetAllMyFlowSign reqMsg = (Gs.GetAllMyFlowSign) message;
+		UUID buildingId = Util.toUuid(reqMsg.getBuildingId().toByteArray());
+		List<UUID> promoIDs = new ArrayList<>();
+		Building bd = City.instance().getBuilding(buildingId);
+		if(bd == null || !(bd instanceof PublicFacility)){
+			if(GlobalConfig.DEBUGLOG){
+				GlobalConfig.cityError("GetAllMyFlowSign: Invalid buildingId ="+buildingId.toString());
+			}
+			return;
+		}
+		PublicFacility fcySeller = (PublicFacility) bd ;
+		List<Contract> clist = ContractManager.getInstance().getAllMySign(GameDb.getPlayer(buildingId).id());
+		Gs.GetAllMyFlowSign.Builder newPromotions = reqMsg.toBuilder();
+		for (Contract contract : clist) {
+			newPromotions.addInfo(Gs.GetAllMyFlowSign.flowInfo.newBuilder()
+					.setBuildingName(City.instance().getBuilding(contract.getSellerBuildingId()).getName())
+					.setSellerBuildingId(Util.toByteString(contract.getSellerBuildingId()))
+					.setStartTs(contract.getStartTs())
+					.setSigningHours(contract.getSigningHours())
+			);
+		}
+		//返回给客户端
+		this.write(Package.create(cmd, newPromotions.build()));
+	}
 	//adQueryPromotion
 	public void AdQueryPromotion(short cmd, Message message) {
 		/*
