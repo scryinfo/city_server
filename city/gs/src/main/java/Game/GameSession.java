@@ -21,6 +21,9 @@ import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
 import Game.Contract.IBuildingContract;
+import Game.Meta.*;
+import Game.Util.PlayerExchangeAmountUtil;
+import Game.Util.WareHouseUtil;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -45,12 +48,6 @@ import Game.FriendManager.SocietyManager;
 import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
-import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
-import Game.Meta.MetaExperiences;
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import Game.Meta.MetaMaterial;
 import Shared.GlobalConfig;
 import Shared.LogDb;
 import Shared.Package;
@@ -105,7 +102,7 @@ public class GameSession {
 		return valid;
 	}
 	public void update(long diffNano){
-		
+
 	}
 
 	public GameSession(ChannelHandlerContext ctx){
@@ -2797,7 +2794,7 @@ public class GameSession {
 		Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
 		UUID id = Util.toUuid(msg.getId().toByteArray());
 		Map<Integer,List<BuildingInfo>> map=new HashMap<Integer,List<BuildingInfo>>();
-		
+
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.toProto();
@@ -2814,13 +2811,13 @@ public class GameSession {
 			});
 			list.addMyBuildingInfo(builder.build());
 		});
-		
+
 		this.write(Package.create(cmd, list.build()));
 	}
     public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        
+
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
@@ -2833,7 +2830,7 @@ public class GameSession {
 		int level=eva.getLv();
 		long cexp=eva.getCexp();
     	Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-    	
+
 		if(level>=1){//计算等级
 			long exp=0l;
 			do{
@@ -2841,11 +2838,11 @@ public class GameSession {
 				exp=obj.exp;
 				if(cexp>=exp){
 					cexp=cexp-exp; //减去升级需要的经验
-					level++;  
+					level++;
 				}
 			}while(cexp>=exp);
 		}
-		
+
 		Eva e=new Eva();
 		e.setId(Util.toUuid(eva.getId().toByteArray()));
 		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
@@ -2855,11 +2852,11 @@ public class GameSession {
 		e.setCexp(cexp);
 		e.setB(eva.getB());
     	EvaManager.getInstance().updateEva(e);
-    	
+
     	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
     	player.decEva(eva.getDecEva());
        	GameDb.saveOrUpdate(player);
-       	
+
     	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
     }
     public void queryMyBrands(short cmd, Message message)
@@ -3542,9 +3539,70 @@ public class GameSession {
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
 	}
 
-	//查询城市主页queryCityInde
-	public void queryCityIndex(){
-
+	//查询城市主页
+	public void queryCityIndex(short cmd){
+		Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
+		//1.城市信息(名称)
+		MetaCity city = MetaData.getCity();
+		builder.setCityName(city.name);
+		//2.人口信息
+		Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
+		//2.1统计男女人数
+		List<Player> players = GameDb.getAllPlayer();
+		int man=0;
+		int woman=0;
+		for (Player p : players) {
+			if(p.isMale())
+				man++;
+			else
+				woman++;
+		}
+		//2.2.统计所有npc的数量
+		long npcNum = NpcManager.instance().getNpcCount();
+		humanInfo.setBoy(man);
+		humanInfo.setGirl(woman);
+		humanInfo.setCitizens(npcNum);
+		builder.setSexNum(humanInfo);
+		//3.设置城市摘要信息
+		Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
+		Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
+		//3.1.所有的土地数量
+		int groundSum = 0;
+		//3.2.土地拍卖的所有数量
+		for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
+			MetaGroundAuction value = mg.getValue();
+			groundSum+=value.area.size();
+		}
+		//3.3已经拍出去的数量
+		int auctionNum = GameDb.countGroundInfo();
+		groundInfo.setTotalNum(groundSum).setAuctionNum(auctionNum);
+		citySummary.setGroundInfo(groundInfo);
+		//4.设置城市运费
+		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
+		//5.设置平均工资(需要计算)
+		long avgSalary=0;
+		long sumSalary=0;
+		List<Building> buildings = new ArrayList<>();
+		//后去到所有的城市
+		City.instance().forEachBuilding(b->{
+			buildings.add(b);
+		});
+		for (Building b : buildings) {
+			int type = MetaBuilding.type(b.metaId());
+			MetaBuilding meta = MetaData.getBuilding(type);
+			sumSalary += meta.salary * b.salaryRatio;
+		}
+		avgSalary = sumSalary / buildings.size();
+		citySummary.setAvgSalary(avgSalary);
+		//6.设置城市摘要
+		builder.setSummary(citySummary);
+		//7.设置工资涨幅（需要计算，还不确定,我这里暂定7%，每7天统计一下）
+		builder.setSalaryIncre(7);
+		builder.setSocialWelfare(7);
+		builder.setMoneyPool(MoneyPool.instance().money());
+		//全程玩家交易信息
+		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
+		builder.setExchangeNum(amount);
 	}
 
 }

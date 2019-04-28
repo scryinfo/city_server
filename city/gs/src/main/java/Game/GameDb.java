@@ -1293,5 +1293,23 @@ public class GameDb {
 		session.close();
 		return list;
 	}
+	public static  List<Player> getAllPlayer(){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List list = session.createCriteria(Player.class).list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
+
+	//统计已经拍出去的地数量
+	public static int countGroundInfo(){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		int size = session.createCriteria(GroundInfo.class).list().size();
+		transaction.commit();
+		session.close();
+		return size;
+	}
 }
 
