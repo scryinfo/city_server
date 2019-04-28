@@ -186,7 +186,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     @Override
     public boolean lock(ItemKey m, int n) { //锁住货物（你要运输的货物，必须要锁住）
-        return this.lock(m,n);
+        return store.lock(m, n);
     }
 
     @Override
