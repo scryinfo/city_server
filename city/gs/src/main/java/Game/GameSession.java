@@ -1684,7 +1684,7 @@ public class GameSession {
 		IStorage storage = IStorage.get(id, player);
 		if(storage == null)
 			return;
-		if(storage.delItem(k))
+		if(storage.delItem(it))
 		{
 			GameDb.saveOrUpdate(storage);
 			this.write(Package.create(cmd, c));
