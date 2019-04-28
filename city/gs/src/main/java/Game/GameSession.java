@@ -21,6 +21,7 @@ import Game.Contract.Contract;
 import Game.Contract.ContractManager;
 import Game.Contract.IBuildingContract;
 import Game.Meta.*;
+import Game.Util.CitySalaryUtil;
 import Game.Util.PlayerExchangeAmountUtil;
 import Game.Util.WareHouseUtil;
 import org.apache.log4j.Logger;
@@ -615,7 +616,6 @@ public class GameSession {
 		Gs.ShelfAdd c = (Gs.ShelfAdd)message;
 		Item item = new Item(c.getItem());
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
-
 		Building building = City.instance().getBuilding(id);
 		if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 			return;
@@ -3495,21 +3495,24 @@ public class GameSession {
 		long avgSalary=0;
 		long sumSalary=0;
 		List<Building> buildings = new ArrayList<>();
-		//后去到所有的城市
+		//获取到所有的城市用于获取实发工资
 		City.instance().forEachBuilding(b->{
 			buildings.add(b);
 		});
 		for (Building b : buildings) {
-			int type = MetaBuilding.type(b.metaId());
-			MetaBuilding meta = MetaData.getBuilding(type);
-			sumSalary += meta.salary * b.salaryRatio;
+			sumSalary += b.singleSalary();
 		}
 		avgSalary = sumSalary / buildings.size();
 		citySummary.setAvgSalary(avgSalary);
 		//6.设置城市摘要
 		builder.setSummary(citySummary);
-		//7.设置工资涨幅（需要计算，还不确定,我这里暂定7%，每7天统计一下）
-		builder.setSalaryIncre(7);
+		//7.设置工资涨幅（需要计算，还不确定,间隔是7天统计一下）
+		Long salarys1 = CitySalaryUtil.getSumSalaryByDays(14, 7);//前7天工资
+		Long salarys2 = CitySalaryUtil.getSumSalaryByDays(7, 0);//最近7天工资
+		//计算增幅（本次统计-上次统计）/上次统计
+		long incryRate = (salarys2 - salarys1) / salarys1 ;
+		builder.setSalaryIncre((int) incryRate);
+		//市民保障福利（平均工资）
 		builder.setSocialWelfare(7);
 		builder.setMoneyPool(MoneyPool.instance().money());
 		//全程玩家交易信息
