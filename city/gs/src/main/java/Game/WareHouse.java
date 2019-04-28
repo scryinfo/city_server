@@ -222,16 +222,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
         return this.store.delItem(mi);
     }
 
-  /*  @Override
-    public boolean delItem(Item item) {
-        return this.store.delItem(item);
-    }
-*/
-/*    @Override
-    public boolean delItems(ItemKey key, int num) {
-        return this.store.delItems(key,num);
-    }*/
-
     @Override
     public int availableQuantity(MetaItem m) {//空闲数量，也就我仓库中空闲的数目
         return this.store.availableQuantity(m);
