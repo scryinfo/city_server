@@ -20,6 +20,7 @@ import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
 import Game.Contract.IBuildingContract;
+import Game.Util.WareHouseUtil;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -104,7 +105,7 @@ public class GameSession {
 		return valid;
 	}
 	public void update(long diffNano){
-		
+
 	}
 
 	public GameSession(ChannelHandlerContext ctx){
@@ -2709,7 +2710,7 @@ public class GameSession {
 		Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
 		UUID id = Util.toUuid(msg.getId().toByteArray());
 		Map<Integer,List<BuildingInfo>> map=new HashMap<Integer,List<BuildingInfo>>();
-		
+
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.toProto();
@@ -2726,13 +2727,13 @@ public class GameSession {
 			});
 			list.addMyBuildingInfo(builder.build());
 		});
-		
+
 		this.write(Package.create(cmd, list.build()));
 	}
     public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        
+
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
@@ -2745,7 +2746,7 @@ public class GameSession {
 		int level=eva.getLv();
 		long cexp=eva.getCexp();
     	Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-    	
+
 		if(level>=1){//计算等级
 			long exp=0l;
 			do{
@@ -2753,11 +2754,11 @@ public class GameSession {
 				exp=obj.exp;
 				if(cexp>=exp){
 					cexp=cexp-exp; //减去升级需要的经验
-					level++;  
+					level++;
 				}
 			}while(cexp>=exp);
 		}
-		
+
 		Eva e=new Eva();
 		e.setId(Util.toUuid(eva.getId().toByteArray()));
 		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
@@ -2767,11 +2768,11 @@ public class GameSession {
 		e.setCexp(cexp);
 		e.setB(eva.getB());
     	EvaManager.getInstance().updateEva(e);
-    	
+
     	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
     	player.decEva(eva.getDecEva());
        	GameDb.saveOrUpdate(player);
-       	
+
     	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
     }
     public void queryMyBrands(short cmd, Message message)
