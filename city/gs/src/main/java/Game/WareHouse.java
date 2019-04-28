@@ -134,7 +134,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     }
 
-
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) { //上架
         return false;
@@ -157,7 +156,11 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     @Override
     public boolean setPrice(ItemKey id, int price) {//设置价格
-        return false;
+        Shelf.Content i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        i.price = price;
+        return true;
     }
 
     @Override
@@ -186,7 +189,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     @Override
     public boolean lock(ItemKey m, int n) { //锁住货物（你要运输的货物，必须要锁住）
-        return this.lock(m,n);
+        return store.lock(m, n);
     }
 
     @Override
@@ -219,45 +222,26 @@ public class WareHouse extends Building implements IStorage, IShelf {
         return this.store.delItem(mi);
     }
 
-  /*  @Override
-    public boolean delItem(Item item) {
-        return this.store.delItem(item);
-    }
-*/
-/*    @Override
-    public boolean delItems(ItemKey key, int num) {
-        return this.store.delItems(key,num);
-    }*/
-
     @Override
     public int availableQuantity(MetaItem m) {//空闲数量，也就我仓库中空闲的数目
-        return 0;
+        return this.store.availableQuantity(m);
     }
 
     @Override
     public boolean has(ItemKey m, int n) {//是否有我指定货物
-        return false;
+        return this.store.has(m,n);
     }
 
     @Override
     public boolean offset(ItemKey item, int n) {//抵消
-        return false;
+        return this.store.offset(item,n);
     }
 
     @Override
     public boolean offset(MetaItem item, int n) {
-        return false;
+        return this.store.offset(item,n);
     }
 
-    /*@Override
-    public boolean removeTrafficList(ItemKey m) {
-        return this.store.removeTrafficList(m);
-    }
-
-    @Override
-    public boolean updateTrafficList(ItemKey m, int n) {
-        return this.store.updateTrafficList(m,n);
-    }*/
 
     public int getRent() {
         return rent;

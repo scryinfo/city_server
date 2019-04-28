@@ -1,5 +1,8 @@
-package Game;
+package Game.Util;
 
+import Game.City;
+import Game.WareHouse;
+import Game.WareHouseRenter;
 import com.google.protobuf.ByteString;
 import gs.Gs;
 
