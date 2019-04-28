@@ -223,17 +223,25 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     @Override
     public Shelf.Content getContent(ItemKey id) {
-        return null;
+        return shelf.getContent(id);
     }
 
     @Override
     public boolean setPrice(ItemKey id, int price) {
-        return false;
+        Shelf.Content i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        i.price = price;
+        return true;
     }
 
     @Override
     public boolean setAutoReplenish(ItemKey id, boolean autoRepOn) {
-        return false;
+        Shelf.Content i = this.shelf.getContent(id);
+        if(i == null)
+            return false;
+        this.shelf.add(new Item(id,i.n),i.price,autoRepOn);
+        return  true;
     }
 
     @Override
@@ -243,77 +251,68 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     @Override
     public Map<Item, Integer> getSaleDetail(int itemId) {
-        return null;
+        return shelf.getSaleDetail(itemId);
     }
 
     @Override
     public boolean reserve(MetaItem m, int n) {
-        return false;
+        return store.reserve(m,n);
     }
 
     @Override
     public boolean lock(ItemKey m, int n) {
-        return false;
+        return store.lock(m,n);
     }
 
     @Override
     public boolean unLock(ItemKey m, int n) {
-        return false;
+            return store.unLock(m, n);
     }
 
     @Override
     public Storage.AvgPrice consumeLock(ItemKey m, int n) {
-        return null;
+        return store.consumeLock(m, n);
     }
 
     @Override
     public void consumeReserve(ItemKey m, int n, int price) {
-
+        store.consumeReserve(m, n, price);
     }
 
     @Override
     public void markOrder(UUID orderId) {
-
+        store.markOrder(orderId);
     }
 
     @Override
     public void clearOrder(UUID orderId) {
-
+        store.clearOrder(orderId);
     }
 
     @Override
     public boolean delItem(ItemKey mi) {
-        return false;
+        return this.store.delItem(mi);
     }
 
-  /*  @Override
-    public boolean delItem(Item item) {
-        return this.store.delItem(item);
-    }
-
-    @Override
-    public boolean delItems(ItemKey key, int num) {
-        return false;
-    }*/
 
     @Override
     public int availableQuantity(MetaItem m) {
-        return 0;
+        return this.store.availableQuantity(m);
     }
 
     @Override
     public boolean has(ItemKey m, int n) {
-        return false;
+        return this.store.has(m,n);
     }
 
     @Override
     public boolean offset(ItemKey item, int n) {
-        return false;
+        return this.store.offset(item,n);
     }
 
     @Override
     public boolean offset(MetaItem item, int n) {
-        return false;
+        return this.store.offset(item,n);
     }
 
 

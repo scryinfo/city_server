@@ -12,6 +12,7 @@ import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
+import Game.Util.PlayerExchangeAmountUtil;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -3480,15 +3481,15 @@ public class GameSession {
         }
         avgSalary = sumSalary / buildings.size();
         citySummary.setAvgSalary(avgSalary);
-        builder.setSummary(citySummary);
-        //6.设置城市摘要
+		//6.设置城市摘要
+		builder.setSummary(citySummary);
         //7.设置工资涨幅（需要计算，还不确定,我这里暂定7%）
         builder.setSalaryIncre(7);
         builder.setSocialWelfare(7);
         builder.setMoneyPool(MoneyPool.instance().money());
-       // builder.setExchangeNum();//全城玩家交易信息,在统计模块中
-
-
+        //全程玩家交易信息
+		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
+		builder.setExchangeNum(amount);
     }
 
 }
