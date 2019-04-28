@@ -445,7 +445,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+				if(building instanceof IShelf && !building.outOfBusiness()) {
 					//如果是集散中心并且有租户，就还要从租户中获取上架信息
 					/*if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
 						WareHouse wareHouse = (WareHouse) building;
@@ -518,7 +518,7 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf && !building.canUseBy(player.id())) {
+				if(building instanceof IShelf && !building.outOfBusiness()) {
 					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
 						((WareHouse)building).getRenters().forEach(r->{
 							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
@@ -536,8 +536,7 @@ public class GameSession {
 						});
 					}*/
 					IShelf s = (IShelf) building;
-					Map<Item, Integer> ItemMap = s.getSaleDetail(c.getItemId());
-					if(ItemMap.size()>0){
+					if(s.getSaleCount(c.getItemId())>0){
 						Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
 						bb.setId(Util.toByteString(building.id()));
 						bb.setPos(building.coordinate().toProto());
