@@ -153,4 +153,17 @@ public class ContractManager
     {
         return playerLiftMap.getOrDefault(playerId, 0f);
     }
+
+    public List<Contract> getAllMySign(UUID playerId)
+    {
+        List<Contract> list = new ArrayList<>();
+        allContract.values().forEach(contract ->
+        {
+            if (contract.getSignId().equals(playerId))
+            {
+                list.add(contract);
+            }
+        });
+        return list;
+    }
 }

@@ -1,5 +1,36 @@
 package Game;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import Game.Contract.BuildingContract;
+import Game.Contract.Contract;
+import Game.Contract.ContractManager;
+import Game.Contract.IBuildingContract;
+import Game.Meta.*;
+import Game.Util.PlayerExchangeAmountUtil;
+import Game.Util.WareHouseUtil;
+import org.apache.log4j.Logger;
+
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -7,20 +38,21 @@ import Game.Contract.IBuildingContract;
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
-import Game.FriendManager.*;
+import Game.FriendManager.FriendManager;
+import Game.FriendManager.FriendRequest;
+import Game.FriendManager.ManagerCommunication;
+import Game.FriendManager.OfflineMessage;
+import Game.FriendManager.Society;
+import Game.FriendManager.SocietyManager;
 import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
-import Game.Meta.*;
-import Game.Util.PlayerExchangeAmountUtil;
-import Game.Util.WareHouseUtil;
-import Shared.*;
+import Shared.GlobalConfig;
+import Shared.LogDb;
 import Shared.Package;
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
+import Shared.RoleBriefInfo;
+import Shared.Util;
+import Shared.Validator;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -29,13 +61,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
-import org.apache.log4j.Logger;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -76,7 +101,7 @@ public class GameSession {
 		return valid;
 	}
 	public void update(long diffNano){
-		
+
 	}
 
 	public GameSession(ChannelHandlerContext ctx){
@@ -417,7 +442,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf&&!building.outOfBusiness()) {
+				if(building instanceof IShelf && !building.outOfBusiness()) {
 					//如果是集散中心并且有租户，就还要从租户中获取上架信息
 					/*if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
 						WareHouse wareHouse = (WareHouse) building;
@@ -473,36 +498,35 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf&&!building.outOfBusiness()) {
+				if(building instanceof IShelf && !building.outOfBusiness()) {
 					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
 						((WareHouse)building).getRenters().forEach(r->{
-                            IShelf s = (IShelf)building;
-                             Map<Item, Integer> ItemMap = s.getSaleDetail(c.getItemId());
-                             if(ItemMap.size()>0){
-                                Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-                                bb.setId(Util.toByteString(building.id()));
-                                bb.setPos(building.coordinate().toProto());
-                                s.getSaleDetail(c.getItemId()).forEach((k,v)->{
-                                    bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setRenterId(Util.toByteString(r.getRenterId()));
-                                });
-                                bb.setOwnerId(Util.toByteString(building.ownerId()));
-                                bb.setName(building.getName());
-                                bb.setMetaId(building.metaId());//建筑类型id
-                            }
+							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
+								IShelf s = (IShelf)building;
+								Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+								bb.setId(Util.toByteString(building.id()));
+								bb.setPos(building.coordinate().toProto());
+								s.getSaleDetail(c.getItemId()).forEach((k,v)->{
+									bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setRenterId(Util.toByteString(r.getRenterId()));
+								});
+								bb.setOwnerId(Util.toByteString(building.ownerId()));
+								bb.setName(building.getName());
+								bb.setMetaId(building.metaId());//建筑类型id
+							}
 						});
 					}*/
-                    IShelf s = (IShelf) building;
-                    if(s.getSaleCount(c.getItemId())>0){
-                        Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-                        bb.setId(Util.toByteString(building.id()));
-                        bb.setPos(building.coordinate().toProto());
-                        s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
-                            bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
-                        });
-                        bb.setOwnerId(Util.toByteString(building.ownerId()));
-                        bb.setName(building.getName());
-                        bb.setMetaId(building.metaId());//建筑类型id
-                    }
+					IShelf s = (IShelf) building;
+					if(s.getSaleCount(c.getItemId())>0){
+						Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+						bb.setId(Util.toByteString(building.id()));
+						bb.setPos(building.coordinate().toProto());
+						s.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+							bb.addSaleBuilder().setItem(k.toProto()).setPrice(v);
+						});
+						bb.setOwnerId(Util.toByteString(building.ownerId()));
+						bb.setName(building.getName());
+						bb.setMetaId(building.metaId());//建筑类型id
+					}
 				}
 			});
 		});
@@ -1378,16 +1402,17 @@ public class GameSession {
 		//开始时间，以小时为单位
 		int tsSart = (int)(GetRds.getStartTs()/PromotionMgr._upDeltaMs) - 1;
 		List userList = null;
+		int RecordsCount = GetRds.hasRecordsCount() ? (GetRds.getRecordsCount() < 30 ? GetRds.getRecordsCount(): 30)  :30;
 		for (int i = 0; i < GetRds.getTypeIdsList().size(); i++) {
 			int tpid = GetRds.getTypeIdsList().get(i);
 			if(tpid > 0){
 				//eva
-				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid);
+				userList = GameDb.getEva_records(tsSart,sellerBuildingId,tpid, RecordsCount);
 			}
 			else{
 				//人流量
 				Building building = City.instance().getBuilding(sellerBuildingId);
-				userList.addAll(GameDb.getFlow_records(tsSart, building.ownerId())) ;
+				userList.addAll(GameDb.getFlow_records(tsSart, building.ownerId(),RecordsCount)) ;
 			}
 			Gs.Records.Builder rds = Gs.Records.newBuilder();
 			rds.setBuildingId(Util.toByteString(sellerBuildingId));
@@ -1565,7 +1590,8 @@ public class GameSession {
 
 	public void delItem(short cmd, Message message) throws Exception {
 		Gs.DelItem c = (Gs.DelItem)message;
-		ItemKey k = new ItemKey(c.getItem());
+		Item it = new Item(c.getItem());
+		ItemKey k = it.key;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		IStorage storage = IStorage.get(id, player);
 		if(storage == null)
@@ -2680,7 +2706,7 @@ public class GameSession {
 		Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
 		UUID id = Util.toUuid(msg.getId().toByteArray());
 		Map<Integer,List<BuildingInfo>> map=new HashMap<Integer,List<BuildingInfo>>();
-		
+
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
 			BuildingInfo buildingInfo=b.toProto();
@@ -2697,13 +2723,13 @@ public class GameSession {
 			});
 			list.addMyBuildingInfo(builder.build());
 		});
-		
+
 		this.write(Package.create(cmd, list.build()));
 	}
     public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        
+
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
@@ -2716,7 +2742,7 @@ public class GameSession {
 		int level=eva.getLv();
 		long cexp=eva.getCexp();
     	Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-    	
+
 		if(level>=1){//计算等级
 			long exp=0l;
 			do{
@@ -2724,11 +2750,11 @@ public class GameSession {
 				exp=obj.exp;
 				if(cexp>=exp){
 					cexp=cexp-exp; //减去升级需要的经验
-					level++;  
+					level++;
 				}
 			}while(cexp>=exp);
 		}
-		
+
 		Eva e=new Eva();
 		e.setId(Util.toUuid(eva.getId().toByteArray()));
 		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
@@ -2738,11 +2764,11 @@ public class GameSession {
 		e.setCexp(cexp);
 		e.setB(eva.getB());
     	EvaManager.getInstance().updateEva(e);
-    	
+
     	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
     	player.decEva(eva.getDecEva());
        	GameDb.saveOrUpdate(player);
-       	
+
     	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
     }
     public void queryMyBrands(short cmd, Message message)
@@ -3355,7 +3381,6 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd,builder.build()));
 	}
-
 	//16.运输
 	public void transportGood(short cmd,Message message) throws Exception {
 		Gs.TransportGood t = (Gs.TransportGood) message;
@@ -3425,69 +3450,71 @@ public class GameSession {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
 	}
-    //查询城市主页
-    public void queryCityIndex(short cmd){
-        Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
-        //1.城市信息(名称)
-        MetaCity city = MetaData.getCity();
-        builder.setCityName(city.name);
-        //2.人口信息
-        Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
-        //2.1统计男女人数
-        List<Player> players = GameDb.getAllPlayer();
-        int man=0;
-        int woman=0;
-        for (Player p : players) {
-            if(p.isMale())
-                man++;
-            else
-                woman++;
-        }
-        //2.2.统计所有npc的数量
-        long npcNum = NpcManager.instance().getNpcCount();
-        humanInfo.setBoy(man);
-        humanInfo.setGirl(woman);
-        humanInfo.setCitizens(npcNum);
-        builder.setSexNum(humanInfo);
-        //3.设置城市摘要信息
-        Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
-        Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
-        //3.1.所有的土地数量
-        int groundSum = 0;
-        //3.2.土地拍卖的所有数量
-        for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
-            MetaGroundAuction value = mg.getValue();
-            groundSum+=value.area.size();
-        }
-        //3.3已经拍出去的数量
-        int auctionNum = GameDb.countGroundInfo();
-        groundInfo.setTotalNum(groundSum).setAuctionNum(auctionNum);
-        citySummary.setGroundInfo(groundInfo);
-        //4.设置城市运费
-        citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
-        //5.设置平均工资(需要计算)
-        long avgSalary=0;
-        long sumSalary=0;
-        List<Building> buildings = new ArrayList<>();
-        //后去到所有的城市
-        City.instance().forEachBuilding(b->{
-            buildings.add(b);
-        });
-        for (Building b : buildings) {
-            int type = MetaBuilding.type(b.metaId());
-            MetaBuilding meta = MetaData.getBuilding(type);
-            sumSalary += meta.salary * b.salaryRatio;
-        }
-        avgSalary = sumSalary / buildings.size();
-        citySummary.setAvgSalary(avgSalary);
+
+	//查询城市主页
+	public void queryCityIndex(short cmd){
+		Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
+		//1.城市信息(名称)
+		MetaCity city = MetaData.getCity();
+		builder.setCityName(city.name);
+		//2.人口信息
+		Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
+		//2.1统计男女人数
+		List<Player> players = GameDb.getAllPlayer();
+		int man=0;
+		int woman=0;
+		for (Player p : players) {
+			if(p.isMale())
+				man++;
+			else
+				woman++;
+		}
+		//2.2.统计所有npc的数量
+		long npcNum = NpcManager.instance().getNpcCount();
+		humanInfo.setBoy(man);
+		humanInfo.setGirl(woman);
+		humanInfo.setCitizens(npcNum);
+		builder.setSexNum(humanInfo);
+		//3.设置城市摘要信息
+		Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
+		Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
+		//3.1.所有的土地数量
+		int groundSum = 0;
+		//3.2.土地拍卖的所有数量
+		for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
+			MetaGroundAuction value = mg.getValue();
+			groundSum+=value.area.size();
+		}
+		//3.3已经拍出去的数量
+		int auctionNum = GameDb.countGroundInfo();
+		groundInfo.setTotalNum(groundSum).setAuctionNum(auctionNum);
+		citySummary.setGroundInfo(groundInfo);
+		//4.设置城市运费
+		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
+		//5.设置平均工资(需要计算)
+		long avgSalary=0;
+		long sumSalary=0;
+		List<Building> buildings = new ArrayList<>();
+		//后去到所有的城市
+		City.instance().forEachBuilding(b->{
+			buildings.add(b);
+		});
+		for (Building b : buildings) {
+			int type = MetaBuilding.type(b.metaId());
+			MetaBuilding meta = MetaData.getBuilding(type);
+			sumSalary += meta.salary * b.salaryRatio;
+		}
+		avgSalary = sumSalary / buildings.size();
+		citySummary.setAvgSalary(avgSalary);
 		//6.设置城市摘要
 		builder.setSummary(citySummary);
-        //7.设置工资涨幅（需要计算，还不确定,我这里暂定7%，每7天统计一下）
-        builder.setSalaryIncre(7);
-        builder.setSocialWelfare(7);
-        builder.setMoneyPool(MoneyPool.instance().money());
-        //全程玩家交易信息
+		//7.设置工资涨幅（需要计算，还不确定,我这里暂定7%，每7天统计一下）
+		builder.setSalaryIncre(7);
+		builder.setSocialWelfare(7);
+		builder.setMoneyPool(MoneyPool.instance().money());
+		//全程玩家交易信息
 		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
 		builder.setExchangeNum(amount);
-    }
+	}
+
 }

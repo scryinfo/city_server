@@ -188,7 +188,9 @@ public class PublicFacility extends Building{
             if(evaAddMe != null){
                 evaAdd = evaAddMe.p;
                 evaPromoCur.put(eva.getAt(),evaAddMe.p);
-                addPromoAbRecord(this.id(),(short) eva.getAt(),evaAdd);
+                if(eva.getAt() >= 1600 && eva.getAt() <= 1699){
+                    addPromoAbRecord(this.id(),(short) eva.getAt(),evaAdd);
+                }
             }
         }
         //4、 流量提升
@@ -566,20 +568,22 @@ public class PublicFacility extends Building{
             UUID pid = bd.ownerId();
             FlowRecord lastRecord = getlastFlowRecord(pid);
             //只记录变化的，减少数据量
-            if(lastRecord.ts == ts){
+            if(lastRecord.value == value){
                 return;
             }
             FlowRecord newRecord = new FlowRecord(pid,ts, value);
-            GameDb.saveOrUpdate( newRecord );
+            //GameDb.saveOrUpdateAndClear( newRecord );
+            GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear FlowRecord");
         }else{
             //eva
             EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
             //只记录变化的，减少数据量
-            if(lastRecord.ts == ts){
+            if(lastRecord.value == value){
                 return;
             }
             EvaRecord newRecord = new EvaRecord(buildingId,typeId, ts, value);
-            GameDb.saveOrUpdate( newRecord );
+            GameDb.saveOrUpdateAndClear( newRecord );
+            GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear EvaRecord");
         }
     }
     @Override

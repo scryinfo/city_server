@@ -320,10 +320,6 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         builder.addHouseRenter(this.toProto());
     }
 
-    public static void test(){
-        System.out.println("开始执行++++++++++WareHourseRenter"+System.currentTimeMillis());
-    }
-
     @Override
     public boolean delItem(Item item) {
         return this.store.delItem(item);

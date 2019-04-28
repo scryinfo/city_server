@@ -3,10 +3,11 @@ package Game;
 import Shared.Package;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.log4j.Logger;
 
 public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
 	private GameSession session;
-
+    private static final Logger logger = Logger.getLogger(GameEventHandler.class);
 //    @Override
 //    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 //        super.userEventTriggered(ctx, evt);
@@ -35,8 +36,10 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Package msg) {
-        if(!GameEventDispatcher.getInstance().process(msg, session))
+        if(!GameEventDispatcher.getInstance().process(msg, session)) {
+            logger.debug("incorrect request, server disconnect actively");
             ctx.close();
+        }
     }
 
 //    @Override
