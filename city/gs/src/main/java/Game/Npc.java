@@ -3,6 +3,7 @@ package Game;
 import Game.Action.IAction;
 import Game.Meta.AIBuilding;
 import Game.Meta.MetaData;
+import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
@@ -98,6 +99,12 @@ public class Npc {
     @PostLoad
     private void _2() {
         this.born = City.instance().getBuilding(this.adapterData.buildingId);
+        if(GlobalConfig.DEBUGLOG){
+            if(this.born == null){
+                int t = 0 ;
+                return;
+            }
+        }
         this.born.takeAsWorker(this);
         this.tempBuilding = this.adapterData.tempBuildingId==null?null:City.instance().getBuilding(this.adapterData.tempBuildingId);
         this.apartment = this.adapterData.apartmentId==null?null: (Apartment) City.instance().getBuilding(this.adapterData.apartmentId);

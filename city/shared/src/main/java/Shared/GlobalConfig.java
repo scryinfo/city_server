@@ -36,7 +36,7 @@ public class GlobalConfig {
 	public static boolean product() {
 		return product;
 	}
-	public static final boolean DEBUGLOG = false;
+	public static final boolean DEBUGLOG = true;
 	public static final boolean SPECTIALTICK = true;
 	private static final Logger logger = Logger.getLogger(GlobalConfig.class);
 	public static final void cityError(String msg){logger.fatal("[cityError] "+msg);}

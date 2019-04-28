@@ -1,5 +1,6 @@
 package Game;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -423,8 +424,10 @@ public class GameSession {
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
-		if(b.startBusiness(player))
+		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
+			GameDb.saveOrUpdate(Arrays.asList(b,player));
+		}
 	}
 	public void shutdownBusiness(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
@@ -1176,15 +1179,21 @@ public class GameSession {
 			return;
 		}
 		PublicFacility fcySeller = (PublicFacility) bd ;
-		List<Contract> clist = ContractManager.getInstance().getAllMySign(GameDb.getPlayer(buildingId).id());
+		Player player =  GameDb.getPlayer(fcySeller.ownerId());
+		List<Contract> clist = ContractManager.getInstance().getAllMySign(player.id());
 		Gs.GetAllMyFlowSign.Builder newPromotions = reqMsg.toBuilder();
 		for (Contract contract : clist) {
-			newPromotions.addInfo(Gs.GetAllMyFlowSign.flowInfo.newBuilder()
-					.setBuildingName(City.instance().getBuilding(contract.getSellerBuildingId()).getName())
-					.setSellerBuildingId(Util.toByteString(contract.getSellerBuildingId()))
+			Building sbd = City.instance().getBuilding(contract.getSellerBuildingId());
+			Gs.GetAllMyFlowSign.flowInfo.Builder flowInfobd =  Gs.GetAllMyFlowSign.flowInfo.newBuilder();
+			flowInfobd.setSellerBuildingId(Util.toByteString(contract.getSellerBuildingId()))
+					.setBuildingName(sbd.getName())
 					.setStartTs(contract.getStartTs())
 					.setSigningHours(contract.getSigningHours())
-			);
+					.setLift(contract.getLift())
+					.setSellerPlayerId(Util.toByteString(sbd.ownerId()))
+					.setPricePerHour((int)(contract.getPrice()))
+					.setTypeId(sbd.type());
+			newPromotions.addInfo(flowInfobd);
 		}
 		//返回给客户端
 		this.write(Package.create(cmd, newPromotions.build()));
