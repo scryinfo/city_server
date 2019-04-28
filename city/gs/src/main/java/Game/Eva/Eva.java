@@ -120,4 +120,11 @@ public class Eva {
 	public void setB(long b) {
 		this.b = b;
 	}
+
+	public boolean checkType(int at, int bt){
+		if(at == getAt() && bt == getBt()){
+			return true;
+		}
+		return false;
+	}
 }

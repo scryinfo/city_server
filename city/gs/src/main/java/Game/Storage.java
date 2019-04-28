@@ -68,6 +68,9 @@ public class Storage implements IStorage {
         }
         return true;
     }
+
+
+
     public boolean offset(ItemKey item, final int n) {
         if(n == 0)
             return true;
@@ -116,6 +119,9 @@ public class Storage implements IStorage {
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Integer> locked = new HashMap<>();
+
+    @Column(name = "other_use_size")
+    private int otherUseSize=0;//其他使用容量，集散中心仓库出租需要设置此容量
 
     void setCapacity(int capacity) {
         this.capacity = capacity;
@@ -189,6 +195,17 @@ public class Storage implements IStorage {
     }
 
     @Override
+    public boolean delItem(Item item) {
+        if(!this.has(item.key, item.n))
+            return false;
+        if(inHand.get(item.key)==item.n){       //删除货物
+            inHand.remove(item.key);
+        }else {
+            this.inHand.put(item.key, inHand.get(item.key) - item.n);   //从已有的仓库中删除指定的数量
+        }
+        return true;
+    }
+    @Override
     public int availableQuantity(MetaItem m) {
         return inHand.entrySet().stream().filter(e->e.getKey().meta == m).mapToInt(e->e.getValue()).sum();
     }
@@ -200,7 +217,7 @@ public class Storage implements IStorage {
     Set<UUID> order = new HashSet<>();
 
     public int usedSize() {
-        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + locked.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum();
+        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + locked.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum()-otherUseSize;
     }
     public int availableSize() {
         return capacity - usedSize();
@@ -215,4 +232,15 @@ public class Storage implements IStorage {
     public boolean full() {
         return capacity == usedSize();
     }
+
+    /*OtherUseSize*/
+    public int getOtherUseSize() {
+        return otherUseSize;
+    }
+
+    public void setOtherUseSize(int otherUseSize) {
+        this.otherUseSize = otherUseSize;
+    }
+
+
 }

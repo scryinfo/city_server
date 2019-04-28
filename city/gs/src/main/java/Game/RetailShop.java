@@ -195,6 +195,11 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     @Override
     public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
 
+    @Override
+    public boolean delItem(Item item) {
+        return store.delItem(item);
+    }
+
     public Collection<Integer> getMetaIdsInShelf(MetaGood.Type type, int lux) {
         return shelf.getMetaIds(type, lux);
     }

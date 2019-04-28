@@ -167,6 +167,78 @@ public class GameDb {
         }
     }
 
+	public static  EvaRecord getlastEvaRecord(UUID bid, short tid){
+		Session session = sessionFactory.openSession();
+		List userList = null;
+		try{
+			//重新开服,需要获取一下上次的记录
+			int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs/1000 - PromotionMgr._upDeltaMs);
+			Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
+					.setParameter("tsSt",tsSart)
+					.setParameter("bdid",bid)
+					.setParameter("tpid",tid);
+			userList = query.list();
+		}catch (Exception e){
+			return new EvaRecord(bid,tid,0,0);
+		}
+		if(userList.size() > 0){
+			return (EvaRecord)userList.get(userList.size()-1);
+		}
+		return new EvaRecord(bid,tid,0,0);
+	}
+	public static FlowRecord getlastFlowRecord(UUID inPid){
+		Session session = sessionFactory.openSession();
+		//重新开服,需要获取一下上次的记录
+		List userList = null;
+		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs - 1);
+		try{
+		Query query = session.createQuery("from flow_records Record where ts>=:tsSt and playerId is :pid and typeId is :tpid")
+				.setParameter("tsSt",tsSart)
+				.setParameter("pid",inPid);
+			userList = query.list();
+		}catch (Exception e){
+			return new FlowRecord(inPid,0,0);
+		}
+		if(userList.size() > 0){
+			return (FlowRecord)userList.get(userList.size()-1);
+		}
+		return new FlowRecord(inPid,0,0);
+	}
+
+	public static List getEva_records(int tsSart,UUID bid,int tid, int count){
+		List ret = null;
+		Session session = sessionFactory.openSession();
+		try{
+			Query query = session.createQuery("FROM eva_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND buildingId IS :bdid AND typeId IS :tpid")
+					.setParameter("tsSt",tsSart)
+					.setParameter("tsEd",tsSart + count)
+					.setParameter("bdid",bid)
+					.setInteger("tpid",tid);
+			ret = query.list();
+		}
+		catch (Exception e){
+			int t = 0 ;
+		}
+		//eva
+		return  ret;
+	}
+	public static List getFlow_records(int tsSart,UUID pid, int count){
+    	List ret = null;
+    	try{
+			Session session = sessionFactory.openSession();
+			//人流量
+			Query query = session.createQuery( "FROM flow_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND playerId IS :pid" )
+					.setParameter("tsSt",tsSart)
+					.setParameter("tsEd",tsSart + count)
+					.setParameter("pid",pid);
+			ret = query.list();
+		}catch (Exception e){
+			int t = 0;
+		}
+
+		return ret;
+	}
+
 	public static List<Eva> getEvaInfo(UUID playerId, int techId)
 	{
 		Session session = sessionFactory.openSession();
@@ -689,6 +761,7 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+
 	public static void initGroundManager() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -697,6 +770,25 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+
+	public static void initPromotionMgr() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(PromotionMgr.class, PromotionMgr.ID) == null)
+			statelessSession.insert(new PromotionMgr());
+		transaction.commit();
+		statelessSession.close();
+	}
+
+	public static void initTickMgr() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(TickManager.class, TickManager.ID) == null)
+			statelessSession.insert(new TickManager());
+		transaction.commit();
+		statelessSession.close();
+	}
+
 	public static void initExchange() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -761,6 +853,24 @@ public class GameDb {
 		session.close();
 		return res;
 	}
+	public static TickManager getTickMgr(TickManager mgr) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		mgr = session.get(TickManager.class, TickManager.ID);
+		transaction.commit();
+		mgr._tickerList.forEach(ticker -> ticker.tick(0));
+		session.close();
+		return mgr;
+	}
+
+	public static PromotionMgr getPromotionMgr() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		PromotionMgr res = session.get(PromotionMgr.class, PromotionMgr.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
 	public static Exchange getExchange() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -802,6 +912,48 @@ public class GameDb {
 			session.close();
 		}
 	}
+	//数据库更新后，清理缓存，适用于数据量很大的应用场景
+    public static void saveOrUpdateAndClear(Collection objs) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            int i = 0;
+            for (Object o : objs) {
+                session.saveOrUpdate(o);
+                ++i;
+                if (i % BATCH_SIZE == 0) {
+                    session.flush();
+                }
+            }
+            session.clear(); //清除缓存，避免内存开销太大
+            transaction.commit();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            if(transaction != null)
+                transaction.rollback();
+        } finally {
+            session.close();
+        }
+    }
+	public static void saveOrUpdateAndClear(Object o) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			session.saveOrUpdate(o);
+			session.flush();
+			session.clear(); //清除缓存，避免内存开销太大
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+			session.close();
+		}
+	}
+
 	public static void saveOrUpdate(Object o) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
@@ -1109,5 +1261,37 @@ public class GameDb {
 		return amount;
 	}
 
+
+	//集散中心增加的操作
+	//1.获取租户信息根据建筑id
+	public static List<WareHouseRenter> getAllRenterByBuilderId(UUID bid){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<WareHouseRenter> list = session.createQuery("FROM WareHouseRenter r where wareHouse.id=:x ",WareHouseRenter.class)
+				.setParameter("x", bid)
+				.list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
+	//2.查询所有的租户
+	public static List<WareHouseRenter> getAllRenter() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<WareHouseRenter> list = session.createCriteria(WareHouseRenter.class).list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
+	//3.根据租户id查询所有的租户信息
+	public static List<WareHouseRenter> getWareHouseRenterByPlayerId(UUID playerId){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<WareHouseRenter> list = session.createQuery("From WareHouseRenter where renterId =:x", WareHouseRenter.class)
+				.setParameter("x", playerId).list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
 }
 

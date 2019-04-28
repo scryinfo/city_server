@@ -13,8 +13,8 @@ public class ContractManager
 {
     private ContractManager() { }
     private static ContractManager instance = new ContractManager();
-    private Map<UUID, Contract> allContract = new HashMap<>();
-    private Map<UUID, Float> playerLiftMap = new HashMap<>();
+    private Map<UUID, Contract> allContract = new HashMap<>();  //UUID: Contract.id
+    private Map<UUID, Float> playerLiftMap = new HashMap<>();   //UUID: signId
 
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
@@ -152,5 +152,18 @@ public class ContractManager
     public float getPlayerADLift(UUID playerId)
     {
         return playerLiftMap.getOrDefault(playerId, 0f);
+    }
+
+    public List<Contract> getAllMySign(UUID playerId)
+    {
+        List<Contract> list = new ArrayList<>();
+        allContract.values().forEach(contract ->
+        {
+            if (contract.getSignId().equals(playerId))
+            {
+                list.add(contract);
+            }
+        });
+        return list;
     }
 }

@@ -10,6 +10,7 @@ public class MetaPublicFacility extends MetaBuilding {
     public int maxDayToRent;
     public int maxRentPreDay;
     public int depositRatio;
+    public int output1P1Hour;
     MetaPublicFacility(Document d) {
         super(d);
         this.adNum = d.getInteger("adNum");
@@ -18,6 +19,7 @@ public class MetaPublicFacility extends MetaBuilding {
         this.minDayToRent = d.getInteger("minDayToRent");
         this.maxDayToRent = d.getInteger("maxDayToRent");
         this.maxRentPreDay = d.getInteger("maxRentPreDay");
+        this.output1P1Hour = d.getInteger("output1P1Hour");
         this.depositRatio = d.getInteger("depositRatio");
     }
 }

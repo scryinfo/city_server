@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
@@ -248,9 +249,11 @@ public class City {
         MailBox.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
         LeagueManager.getInstance().update(diffNano);
-
+        WareHouseManager.instance().update(diffNano);
         // do this at last
         updateTimeSection(diffNano);
+        specialTick(diffNano);
+        //PromotionMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
@@ -260,9 +263,10 @@ public class City {
     public int currentHour() {
         return lastHour;
     }
+
     private void updateTimeSection(long diffNano) {
         int nowHour = this.localTime().getHour();
-        if(lastHour != nowHour)
+        if(nowHour != lastHour)
         {
             hourTickAction(nowHour);
             if(lastHour > nowHour)
@@ -288,6 +292,7 @@ public class City {
         NpcManager.instance().hourTickAction(nowHour);
         allBuilding.forEach((k,v)->v.hourTickAction(nowHour));
         ContractManager.getInstance().hourTickAction(nowHour);
+        PromotionMgr.instance().update(nowHour);
     }
 
     private void timeSectionTickAction(int newIndex, int nowHour, int hours) {
@@ -295,6 +300,20 @@ public class City {
         boolean dayPass = newIndex == 0;
         NpcManager.instance().timeSectionTick(newIndex, nowHour, hours);
         allBuilding.forEach((k,v)->v.timeSectionTick(newIndex, nowHour, hours));
+    }
+
+    //特殊的tick
+    private static long _elapsedtime = 0 ;      //上次更新时间
+    public static final int second = 20;        //tick间隔时间，秒为单位
+    public static final long _upDeltaNs = TimeUnit.MILLISECONDS.toNanos(1000*second); //间隔时间换算成纳秒
+    private void specialTick(long diffNano){
+        if(_elapsedtime < _upDeltaNs){
+            _elapsedtime += diffNano;
+            return;
+        }else{
+            _elapsedtime = 0;
+        }
+        TickManager.instance().tick(diffNano);
     }
 
     public long leftMsToNextTimeSection() {

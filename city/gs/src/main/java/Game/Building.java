@@ -13,24 +13,15 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.annotations.SelectBeforeUpdate;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.EvictingQueue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.mchange.v2.lang.StringUtils;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
@@ -52,19 +43,25 @@ import io.netty.channel.ChannelId;
 @EntityListeners({
         ConvertListener.class,
 })
-public abstract class Building {
+public abstract class Building implements Ticker{
     private static final int MAX_FLOW_SIZE = 30*24;
     private static final int PAYMENT_HOUR = 8;
 
     private static final int HAPPY_MAX = 0;
     private static final int HAPPY_MIN = 4;
 
-    protected Building() {}
+    protected Building() {
+
+    }
 
     public static double distance(Building a, Building b) {
         return Coordinate.distance(a.coordinate(), b.coordinate());
     }
 
+    @ManyToOne
+    private TickManager tickManager;
+
+    public void tick(long deltaTime){};
     public abstract int quality();
     boolean canUseBy(UUID userId) {
         return ownerId.equals(userId);
@@ -101,8 +98,8 @@ public abstract class Building {
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
-            case MetaBuilding.TALENT:
-                return new TalentCenter(MetaData.getTalentCenter(id), pos, ownerId);
+            case MetaBuilding.WAREHOUSE:
+                return new WareHouse(MetaData.getWarehouse(id), pos, ownerId);
         }
         return null;
     }
@@ -244,6 +241,10 @@ public abstract class Building {
     @Transient
     protected boolean working;
 
+    public int getSalaryRatio() {
+        return salaryRatio;
+    }
+
     @Column(nullable = false)
     protected int salaryRatio;
 
@@ -274,6 +275,34 @@ public abstract class Building {
     private long todayIncomeTs = 0;
 
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
+
+    @Transient
+    private int todayVisitor = 0;
+
+    @Transient
+    private long todayVisitorTs = 0;
+
+    public void increaseTodayVisit()
+    {
+        if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
+        {
+            todayVisitor = 1;
+            todayVisitorTs = Util.getTodayStartTs();
+        }
+        else
+        {
+            todayVisitor++;
+        }
+    }
+
+    public int getTodayVisitor()
+    {
+        if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
+        {
+           return 0;
+        }
+        return todayVisitor;
+    }
 
     public void updateTodayIncome(long income)
     {
@@ -308,6 +337,10 @@ public abstract class Building {
 
     @Transient
     private Set<Npc> allStaff = new HashSet<>();
+
+    public int getWorkerNum(){
+        return metaBuilding.workerNum;
+    }
 
     public long getAllStaffSize()
     {
@@ -496,7 +529,8 @@ public abstract class Building {
                 .setSalary(salaryRatio)
                 .setSetSalaryTs(salaryRatioTs)
                 .setHappy(happy)
-                .setConstructCompleteTs(constructCompleteTs);
+                .setConstructCompleteTs(constructCompleteTs)
+                .setTodayVisitor(this.getTodayVisitor());
         if(this.name != null && this.name.length() > 0)
             builder.setName(this.name);
         if(this.des != null && this.des.length() > 0)
@@ -521,11 +555,14 @@ public abstract class Building {
         	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
         	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
         	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
-        	builder.setBrand((int)Math.ceil(brand/totalBrand*100))
-		       	   .setQuality((int)Math.ceil(quality/totalQuality*100));
+
+        	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
+        	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
+        	builder.setBrand(bd).setQuality(qty);
     	}
         return builder.build();
     }
+
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
@@ -591,6 +628,9 @@ public abstract class Building {
 
     protected void setSalaryRatioAction(){}
 
+    public void spectialTickAction(long nowHour) {
+
+    }
     public void hourTickAction(int nowHour) {
         flow = flowCount;
         flowCount = 0;
@@ -689,5 +729,21 @@ public abstract class Building {
             happy = 3;
         else if(salaryRatio < 40 && salaryRatio >= 0)
             happy = HAPPY_MIN;
+    }
+
+    public long getTodayIncomeTs() {
+        return todayIncomeTs;
+    }
+
+    public void setTodayIncomeTs(long todayIncomeTs) {
+        this.todayIncomeTs = todayIncomeTs;
+    }
+
+    public long getTodayIncome() {
+        return todayIncome;
+    }
+
+    public void setTodayIncome(long todayIncome) {
+        this.todayIncome = todayIncome;
     }
 }

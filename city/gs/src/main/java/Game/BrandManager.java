@@ -284,12 +284,12 @@ public class BrandManager {
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
      	if(brandEva!=null){
      		if(brandEva.getLv()>0){
-     			brandMap.computeIfAbsent(b.type(), k->((brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+brandEva.getLv()/100d))));
+     			brandMap.put(b.type(), (brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+brandEva.getLv()/100d)));
      		}
     	}
      	if(qualityEva!=null){
      		if(qualityEva.getLv()>0){
-     			qtyMap.computeIfAbsent(b.type(), k->((qtyMap.get(b.type())!=null?qtyMap.get(b.type()):0)+new Double(b.quality()*(1+qualityEva.getLv()/100d))));
+     			qtyMap.put(b.type(), (qtyMap.get(b.type())!=null?qtyMap.get(b.type()):0)+new Double(b.quality()*(1+qualityEva.getLv()/100d)));
      		}
      	}
     }
@@ -298,7 +298,9 @@ public class BrandManager {
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
     	City.instance().forEachBuilding((Building b)->{
-    		getBuildingBrandOrQuality(b,brandMap,qtyMap);
+    		if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
+    			getBuildingBrandOrQuality(b,brandMap,qtyMap);
+    		}
     	});
     	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
     	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);

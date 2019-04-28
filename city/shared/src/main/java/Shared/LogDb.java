@@ -51,6 +51,8 @@ public class LogDb {
 	private static final String NPC_TYPE_NUM = "npcTypeNum";
 
 	private static final String FLOW_AND_LIFT = "flowAndLift";
+	//集散中心租用仓库的收入记录
+	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -76,6 +78,8 @@ public class LogDb {
 	private static MongoCollection<Document> npcRentApartment;
 	private static MongoCollection<Document> cityBroadcast;
 	private static MongoCollection<Document> npcTypeNum;
+	//player rent warehouse
+	private static MongoCollection<Document> rentWarehouseIncome;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -118,6 +122,9 @@ public class LogDb {
 		npcTypeNum = database.getCollection(NPC_TYPE_NUM)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		flowAndLift = database.getCollection(FLOW_AND_LIFT)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//租用仓库
+		rentWarehouseIncome = database.getCollection(RENT_WAREHOUSE_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -243,7 +250,7 @@ public class LogDb {
 				Arrays.asList(
 						Aggregates.match(and(
 								lt("t", endTime))),
-							Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
 						Aggregates.project(projectObject)
 						)
 				).forEach((Block<? super Document>) documentList::add);
@@ -493,7 +500,21 @@ public class LogDb {
 				.append("n", n);
 		npcTypeNum.insertOne(document);
 	}
-	
+
+	//租用仓库记录：租用开始时间、结束时间、租用时长、租金、租用者、集散中心建筑id、订单编号、租用大小等数据
+	public static void rentWarehouseIncome(Long orderId,UUID bid,UUID renterId,Long startTime,Long endTime,int hourToRent,int rent,int rentCapacity){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("o", orderId)
+				.append("b", bid)
+				.append("r", renterId)
+				.append("s", startTime)
+				.append("e", endTime)
+				.append("h", hourToRent)
+				.append("rent", rent)
+				.append("c", rentCapacity);
+		rentWarehouseIncome.insertOne(document);
+	}
+
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
@@ -562,6 +583,10 @@ public class LogDb {
 	public static MongoCollection<Document> getNpcTypeNum()
 	{
 		return npcTypeNum;
+	}
+
+	public static MongoCollection<Document> getRentWarehouseIncome() {
+		return rentWarehouseIncome;
 	}
 
 	public static class Positon

@@ -35,6 +35,10 @@ public class Shelf {
     Content getContent(ItemKey id) {
         return slots.get(id);
     }
+    public int getContentCount(ItemKey id){
+        Content ct = slots.get(id);
+        return ct != null ? ct.getCount(): -1;
+    }
 
     public Map<Item, Integer> getSaleDetail(int itemId) {
         Map<Item, Integer> res = new HashMap<>();
@@ -82,7 +86,7 @@ public class Shelf {
             this.price = price;
             this.autoReplenish = autoReplenish;
         }
-
+        public int getCount(){return  n; }
         int n;
         int price;
         boolean autoReplenish;

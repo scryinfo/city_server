@@ -27,6 +27,7 @@ import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
+import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 
 @Entity
@@ -277,6 +278,16 @@ public class GroundManager {
         GameDb.saveOrUpdate(Arrays.asList(owner, renter, this));
         this.rentGround.put(tid, new HashSet<>(gis));
         this.broadcast(gis);
+        
+        //租别人的地算玩家自己的地
+        if(playerGround!=null&&playerGround.size()>0){
+        	Set<GroundInfo> s=new HashSet<>(gis);
+        	if(playerGround.get(renter.id())!=null){
+              	s=playerGround.get(renter.id());
+            	s.addAll(new HashSet<>(gis));
+        	}
+        	playerGround.put(renter.id(),s);
+        }
 
         GameServer.sendIncomeNotity(ownerId,Gs.IncomeNotify.newBuilder()
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)

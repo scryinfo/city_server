@@ -34,7 +34,7 @@ public class Mail {
         SCIENTIFIC_PAYOFFS(7),
         INVENTIONS(8),
         LAND_AUCTION(9),
-        AD_SPACE_EXPIRE(10),
+        AD_PROMOTION_EXPIRE(10),
         LAND_AUCTION_HIGHER(11),
         ADD_FRIEND_SUCCESS(12),
         LAND_SALE(13),
