@@ -55,6 +55,7 @@ public class PublicFacility extends Building{
         super(meta, pos, ownerId);
         this.meta = meta;
         this.qty = meta.qty;
+        this.curflowPromoAbTotall = -1;
         TickManager.instance().registerTick(this);
         setTickMgr(TickManager.instance());
     }
@@ -200,7 +201,7 @@ public class PublicFacility extends Building{
 
     //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
     private float curPromoAbility = 0;
-
+    private int curflowPromoAbTotall = -1;
     /*@ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "PubFacility_promo", joinColumns = @JoinColumn(name = "selled_id"))
     @OrderColumn*/
@@ -531,6 +532,7 @@ public class PublicFacility extends Building{
         builder.setCurPromPricePerHour(this.getCurPromPricePerHour());
         builder.setPromRemainTime(this.getPromRemainTime());
         builder.setTakeOnNewOrder(this.isTakeOnNewOrder());
+        builder.setCurflowPromoAbTotall(updateflowPromoTotall ());
         return builder.build();
     }
     protected Gs.Advertisement genAdPart() {
@@ -539,6 +541,12 @@ public class PublicFacility extends Building{
         this.rent.values().forEach(v->builder.addSoldSlot(v.toProto()));
         this.ad.values().forEach(v->builder.addAd(v.toProto()));
         return builder.build();
+    }
+    private int updateflowPromoTotall (){
+        List<UUID> promoIDs = new ArrayList<>();
+        Player player =  GameDb.getPlayer(ownerId());
+        curflowPromoAbTotall = (int)ContractManager.getInstance().getPlayerADLift(player.id());
+        return curflowPromoAbTotall;
     }
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
