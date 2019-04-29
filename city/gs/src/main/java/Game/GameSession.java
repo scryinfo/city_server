@@ -1,5 +1,6 @@
 package Game;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,10 @@ import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
 import Game.Contract.IBuildingContract;
+import Game.Meta.*;
+import Game.Util.CitySalaryUtil;
+import Game.Util.PlayerExchangeAmountUtil;
+import Game.Util.WareHouseUtil;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -44,12 +49,6 @@ import Game.FriendManager.SocietyManager;
 import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
-import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
-import Game.Meta.MetaExperiences;
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import Game.Meta.MetaMaterial;
 import Shared.GlobalConfig;
 import Shared.LogDb;
 import Shared.Package;
@@ -59,6 +58,7 @@ import Shared.Validator;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
+import gs.Gs.MaterialInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -104,7 +104,7 @@ public class GameSession {
 		return valid;
 	}
 	public void update(long diffNano){
-		
+
 	}
 
 	public GameSession(ChannelHandlerContext ctx){
@@ -190,8 +190,8 @@ public class GameSession {
 						item = new Item(new ItemKey(mi, player.id(), 0), n);
 					player.getBag().consumeReserve(item.key, n, 1);
 				}
-                GameDb.saveOrUpdate(player);
-                break;
+				GameDb.saveOrUpdate(player);
+				break;
 			}
 			case addground: {
 				int x1 = cheat.paras[0];
@@ -210,12 +210,12 @@ public class GameSession {
 				}
 				CoordPair cp = new CoordPair(new Coordinate(x1, y1), new Coordinate(x2, y2));
 				try {
-                    GroundManager.instance().addGround(id(), cp.toCoordinates(),0);
+					GroundManager.instance().addGround(id(), cp.toCoordinates(),0);
 				} catch (GroundAlreadySoldException e) {
 					e.printStackTrace();
 				}
-                GameDb.saveOrUpdate(GroundManager.instance());
-                break;
+				GameDb.saveOrUpdate(GroundManager.instance());
+				break;
 			}
 			case invent: {
 				int mId = cheat.paras[0];
@@ -393,7 +393,7 @@ public class GameSession {
 		if(!this.player.setPosition(index))
 			return;
 	}
-//	public void queryMetaGroundAuction(short cmd) {
+	//	public void queryMetaGroundAuction(short cmd) {
 //		Set<MetaGroundAuction> auctions = MetaData.getNonFinishedGroundAuction();
 //		Gs.MetaGroundAuction.Builder builder = Gs.MetaGroundAuction.newBuilder();
 //		for(MetaGroundAuction m : auctions) {
@@ -423,8 +423,10 @@ public class GameSession {
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
-		if(b.startBusiness(player))
+		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
+			GameDb.saveOrUpdate(Arrays.asList(b,player));
+		}
 	}
 	public void shutdownBusiness(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
@@ -482,6 +484,23 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void queryPromoSummary(short cmd) {
+		Gs.PromoSummary.Builder builder = Gs.PromoSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.PromoSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof PublicFacility && !building.outOfBusiness() && !((PublicFacility)building).isTakeOnNewOrder())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void setRoleFaceId(short cmd, Message message) {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
@@ -566,6 +585,42 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void queryPromoDetail(short cmd, Message message) {
+		Gs.QueryPromoDetail c = (Gs.QueryPromoDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.PromoDetail.Builder builder = Gs.PromoDetail.newBuilder();
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.PromoDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(!building.outOfBusiness() && building instanceof PublicFacility) {
+					PublicFacility s = (PublicFacility)building;
+					if(!s.isTakeOnNewOrder())
+						return;
+					Gs.PromoDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
+
+					for (int tp : bb.getTypeIdsList())
+					{
+						int bsTp = tp/100;
+						int subTp = tp % 100;
+						Integer value = (int)s.getAllPromoTypeAbility(tp);
+						bb.addCurAbilitys(value);
+					}
+					bb.setPricePerHour(s.getCurPromPricePerHour());
+					bb.setRemainTime(s.getPromRemainTime());
+					bb.setQueuedTimes(s.getNewPromoStartTs());
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());
+				}
+			});
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -938,16 +993,16 @@ public class GameSession {
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
-    public void detailProduceDepartment(short cmd, Message message) {
-        Gs.Id c = (Gs.Id) message;
-        UUID id = Util.toUuid(c.getId().toByteArray());
-        Building b = City.instance().getBuilding(id);
-        if(b == null || b.type() != MetaBuilding.PRODUCE)
-            return;
+	public void detailProduceDepartment(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.PRODUCE)
+			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-        this.write(Package.create(cmd, b.detailProto()));
-    }
+		this.write(Package.create(cmd, b.detailProto()));
+	}
 	public void detailPublicFacility(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
@@ -958,28 +1013,28 @@ public class GameSession {
 		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
 	}
-    public void detailLaboratory(short cmd, Message message) {
-        Gs.Id c = (Gs.Id) message;
-        UUID id = Util.toUuid(c.getId().toByteArray());
-        Building b = City.instance().getBuilding(id);
-        if(b == null || b.type() != MetaBuilding.LAB)
-            return;
+	public void detailLaboratory(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.LAB)
+			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-        this.write(Package.create(cmd, b.detailProto()));
-    }
-    public void detailRetailShop(short cmd, Message message) {
-        Gs.Id c = (Gs.Id) message;
-        UUID id = Util.toUuid(c.getId().toByteArray());
-        Building b = City.instance().getBuilding(id);
-        if(b == null || b.type() != MetaBuilding.RETAIL)
-            return;
+		this.write(Package.create(cmd, b.detailProto()));
+	}
+	public void detailRetailShop(short cmd, Message message) {
+		Gs.Id c = (Gs.Id) message;
+		UUID id = Util.toUuid(c.getId().toByteArray());
+		Building b = City.instance().getBuilding(id);
+		if(b == null || b.type() != MetaBuilding.RETAIL)
+			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-        this.write(Package.create(cmd, b.detailProto()));
-    }
+		this.write(Package.create(cmd, b.detailProto()));
+	}
 
-    public void setSalaryRatio(short cmd, Message message) {
+	public void setSalaryRatio(short cmd, Message message) {
 		Gs.SetSalary c = (Gs.SetSalary) message;
 		UUID id = Util.toUuid(c.getBuildingId().toByteArray());
 		Building b = City.instance().getBuilding(id);
@@ -1052,14 +1107,14 @@ public class GameSession {
 		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-        FactoryBase f = (FactoryBase) b;
-        OptionalInt tn = c.hasTargetNum()?OptionalInt.of(c.getTargetNum()):OptionalInt.empty();
-        OptionalInt wn = c.hasWorkerNum()?OptionalInt.of(c.getWorkerNum()):OptionalInt.empty();
-        boolean ok = f.changeLine(lineId, tn, wn);
-        if(ok)
-            this.write(Package.create(cmd, c));
-        else
-            this.write(Package.fail(cmd));
+		FactoryBase f = (FactoryBase) b;
+		OptionalInt tn = c.hasTargetNum()?OptionalInt.of(c.getTargetNum()):OptionalInt.empty();
+		OptionalInt wn = c.hasWorkerNum()?OptionalInt.of(c.getWorkerNum()):OptionalInt.empty();
+		boolean ok = f.changeLine(lineId, tn, wn);
+		if(ok)
+			this.write(Package.create(cmd, c));
+		else
+			this.write(Package.fail(cmd));
 	}
 
 	public void ftySetLineOrder(short cmd, Message message) {
@@ -1069,7 +1124,7 @@ public class GameSession {
 		if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.PRODUCE && b.type() != MetaBuilding.MATERIAL) || !b.ownerId().equals(player.id()))
 			return;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-	 	int pos = c.getLineOrder() - 1;
+		int pos = c.getLineOrder() - 1;
 
 		FactoryBase f = (FactoryBase) b;
 		if(pos >=0 && pos < f.lines.size()){
@@ -1113,6 +1168,38 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	//adGetAllMyFlowSign
+	public void GetAllMyFlowSign(short cmd, Message message) {
+		Gs.GetAllMyFlowSign reqMsg = (Gs.GetAllMyFlowSign) message;
+		UUID buildingId = Util.toUuid(reqMsg.getBuildingId().toByteArray());
+		List<UUID> promoIDs = new ArrayList<>();
+		Building bd = City.instance().getBuilding(buildingId);
+		if(bd == null || !(bd instanceof PublicFacility)){
+			if(GlobalConfig.DEBUGLOG){
+				GlobalConfig.cityError("GetAllMyFlowSign: Invalid buildingId ="+buildingId.toString());
+			}
+			return;
+		}
+		PublicFacility fcySeller = (PublicFacility) bd ;
+		Player player =  GameDb.getPlayer(fcySeller.ownerId());
+		List<Contract> clist = ContractManager.getInstance().getAllMySign(player.id());
+		Gs.GetAllMyFlowSign.Builder newPromotions = reqMsg.toBuilder();
+		for (Contract contract : clist) {
+			Building sbd = City.instance().getBuilding(contract.getSellerBuildingId());
+			Gs.GetAllMyFlowSign.flowInfo.Builder flowInfobd =  Gs.GetAllMyFlowSign.flowInfo.newBuilder();
+			flowInfobd.setSellerBuildingId(Util.toByteString(contract.getSellerBuildingId()))
+					.setBuildingName(sbd.getName())
+					.setStartTs(contract.getStartTs())
+					.setSigningHours(contract.getSigningHours())
+					.setLift(contract.getLift())
+					.setSellerPlayerId(Util.toByteString(sbd.ownerId()))
+					.setPricePerHour((int)(contract.getPrice()))
+					.setTypeId(sbd.type());
+			newPromotions.addInfo(flowInfobd);
+		}
+		//返回给客户端
+		this.write(Package.create(cmd, newPromotions.build()));
+	}
 	//adQueryPromotion
 	public void AdQueryPromotion(short cmd, Message message) {
 		/*
@@ -1602,7 +1689,7 @@ public class GameSession {
 		IStorage storage = IStorage.get(id, player);
 		if(storage == null)
 			return;
-		if(storage.delItem(k))
+		if(storage.delItem(it))
 		{
 			GameDb.saveOrUpdate(storage);
 			this.write(Package.create(cmd, c));
@@ -2195,12 +2282,12 @@ public class GameSession {
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
 
-    public void getGroundInfo(short cmd)
-    {
-        Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
-        builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
-        this.write(Package.create(cmd, builder.build()));
-    }
+	public void getGroundInfo(short cmd)
+	{
+		Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
+		builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+		this.write(Package.create(cmd, builder.build()));
+	}
 
 	public void createSociety(short cmd, Message message)
 	{
@@ -2310,9 +2397,9 @@ public class GameSession {
 			{
 				this.write(Package.create(cmd,
 						Gs.ByteBool.newBuilder()
-						.setB(true)
-						.setId(Util.toByteString(societyId))
-						.build()));
+								.setB(true)
+								.setId(Util.toByteString(societyId))
+								.build()));
 			}
 		}
 	}
@@ -2364,58 +2451,58 @@ public class GameSession {
 		List<Building> buildings = new ArrayList<>(ids.getIdsCount());
 		for (ByteString bs : ids.getIdsList())
 		{
-            Building building = City.instance().getBuilding(Util.toUuid(bs.toByteArray()));
-            if (building != null && player.id().equals(building.ownerId()))
-            {
-                buildings.add(building);
-            }
-            else return;
+			Building building = City.instance().getBuilding(Util.toUuid(bs.toByteArray()));
+			if (building != null && player.id().equals(building.ownerId()))
+			{
+				buildings.add(building);
+			}
+			else return;
 		}
-        Gs.PrivateBuildingInfos.Builder builder = Gs.PrivateBuildingInfos.newBuilder();
-        buildings.forEach(building ->
-        {
-            builder.addInfos(building.getPrivateBuildingInfo());
-        });
-        this.write(Package.create(cmd, builder.build()));
+		Gs.PrivateBuildingInfos.Builder builder = Gs.PrivateBuildingInfos.newBuilder();
+		buildings.forEach(building ->
+		{
+			builder.addInfos(building.getPrivateBuildingInfo());
+		});
+		this.write(Package.create(cmd, builder.build()));
 	}
 
-    public void closeContract(short cmd, Message message)
-    {
-        UUID bid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        Building building = City.instance().getBuilding(bid);
-        if (building != null && player.id().equals(building.ownerId())
-                && building instanceof IBuildingContract)
-        {
+	public void closeContract(short cmd, Message message)
+	{
+		UUID bid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if (building != null && player.id().equals(building.ownerId())
+				&& building instanceof IBuildingContract)
+		{
 			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
-            if (!buildingContract.isSign() && buildingContract.isOpen())
-            {
+			if (!buildingContract.isSign() && buildingContract.isOpen())
+			{
 				buildingContract.closeContract();
-                GameDb.saveOrUpdate(building);
-                this.write(Package.create(cmd, message));
-            }
-            else this.write(Package.fail(cmd));
-        }
-    }
-    public void settingContract(short cmd, Message message)
-    {
-        Gs.ContractSetting setting = (Gs.ContractSetting) message;
-        UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
-        Building building = City.instance().getBuilding(bid);
-        long price = setting.getPrice();
-        int hours = setting.getHours();
-        if (building != null && player.id().equals(building.ownerId())
-                && building instanceof IBuildingContract)
-        {
+				GameDb.saveOrUpdate(building);
+				this.write(Package.create(cmd, message));
+			}
+			else this.write(Package.fail(cmd));
+		}
+	}
+	public void settingContract(short cmd, Message message)
+	{
+		Gs.ContractSetting setting = (Gs.ContractSetting) message;
+		UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		long price = setting.getPrice();
+		int hours = setting.getHours();
+		if (building != null && player.id().equals(building.ownerId())
+				&& building instanceof IBuildingContract)
+		{
 			BuildingContract buildingContract = ((IBuildingContract) building).getBuildingContract();
-            if (hours > 0 && !buildingContract.isSign())
-            {
+			if (hours > 0 && !buildingContract.isSign())
+			{
 				buildingContract.openOrSetContract(price, hours);
-                GameDb.saveOrUpdate(building);
-                this.write(Package.create(cmd, message));
-            }
-            else this.write(Package.fail(cmd));
-        }
-    }
+				GameDb.saveOrUpdate(building);
+				this.write(Package.create(cmd, message));
+			}
+			else this.write(Package.fail(cmd));
+		}
+	}
 
 	public void cancelContract(short cmd, Message message)
 	{
@@ -2519,35 +2606,35 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
-    public void queryContractGridDetail(short cmd, Message message)
-    {
-        Gs.GridIndex gridIndex = (Gs.GridIndex) message;
-        Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
-        City.instance().forEachGrid(new GridIndex(gridIndex.getX(), gridIndex.getY()).toSyncRange(),
-                grid ->
-                {
-                    Gs.ContractGridDetail.GridInfo.Builder infoBuilder = builder.addGridInfoBuilder();
-                    infoBuilder.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
-                    grid.forAllBuilding(building ->
-                    {
-                        if (building instanceof IBuildingContract
-                                && !building.outOfBusiness()
-                                && ((IBuildingContract) building).getBuildingContract().isOpen()
-                                && !((IBuildingContract) building).getBuildingContract().isSign())
-                        {
-                            Gs.ContractGridDetail.BuildingInfo.Builder b = infoBuilder.addInfoBuilder();
-                            b.setOwnerId(Util.toByteString(building.ownerId()))
-                                    .setBuildingName(building.getName())
-                                    .setPos(building.coordinate().toProto())
-                                    .setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
-                                    .setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
-                                    .setMId(building.metaId())
-                                    .setLift(building.getLift());
-                        }
-                    });
-                });
-        this.write(Package.create(cmd, builder.build()));
-    }
+	public void queryContractGridDetail(short cmd, Message message)
+	{
+		Gs.GridIndex gridIndex = (Gs.GridIndex) message;
+		Gs.ContractGridDetail.Builder builder = Gs.ContractGridDetail.newBuilder();
+		City.instance().forEachGrid(new GridIndex(gridIndex.getX(), gridIndex.getY()).toSyncRange(),
+				grid ->
+				{
+					Gs.ContractGridDetail.GridInfo.Builder infoBuilder = builder.addGridInfoBuilder();
+					infoBuilder.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+					grid.forAllBuilding(building ->
+					{
+						if (building instanceof IBuildingContract
+								&& !building.outOfBusiness()
+								&& ((IBuildingContract) building).getBuildingContract().isOpen()
+								&& !((IBuildingContract) building).getBuildingContract().isSign())
+						{
+							Gs.ContractGridDetail.BuildingInfo.Builder b = infoBuilder.addInfoBuilder();
+							b.setOwnerId(Util.toByteString(building.ownerId()))
+									.setBuildingName(building.getName())
+									.setPos(building.coordinate().toProto())
+									.setHours(((IBuildingContract) building).getBuildingContract().getDurationHour())
+									.setPrice(((IBuildingContract) building).getBuildingContract().getPrice())
+									.setMId(building.metaId())
+									.setLift(building.getLift());
+						}
+					});
+				});
+		this.write(Package.create(cmd, builder.build()));
+	}
 
 	public void getLeagueInfo(short cmd, Message message)
 	{
@@ -2601,10 +2688,10 @@ public class GameSession {
 				.forEach(leagueInfo -> {
 					Gs.LeagueTech.Builder techBuilder = Gs.LeagueTech.newBuilder();
 					techBuilder.setOwnerId(Util.toByteString(leagueInfo.getUid().getPlayerId()))
-						.setSetting(leagueInfo.toSettingProto())
-						.addAllTechInfo(LeagueManager.getInstance().getLeagueTechInfo(leagueInfo))
-						.setJoinBCount(leagueInfo.getMemberSize())
-						.setOwnerBcount(LeagueManager.getInstance().getLeagueInfoOwnerBcount(leagueInfo));
+							.setSetting(leagueInfo.toSettingProto())
+							.addAllTechInfo(LeagueManager.getInstance().getLeagueTechInfo(leagueInfo))
+							.setJoinBCount(leagueInfo.getMemberSize())
+							.setOwnerBcount(LeagueManager.getInstance().getLeagueInfoOwnerBcount(leagueInfo));
 					builder.addTechList(techBuilder.build());
 				});
 		this.write(Package.create(cmd, builder.build()));
@@ -2663,9 +2750,9 @@ public class GameSession {
 	 */
 	public void eachTypeNpcNum(short cmd) {
 		Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
-	    NpcManager.instance().countNpcByType().forEach((k,v)->{
-	    	list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
-	    });
+		NpcManager.instance().countNpcByType().forEach((k,v)->{
+			list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
+		});
 		this.write(Package.create(cmd,list.build()));
 	}
 
@@ -2712,14 +2799,14 @@ public class GameSession {
 		Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
 		UUID id = Util.toUuid(msg.getId().toByteArray());
 		Map<Integer,List<BuildingInfo>> map=new HashMap<Integer,List<BuildingInfo>>();
-		
+
 		Gs.MyBuildingInfos.Builder list = Gs.MyBuildingInfos.newBuilder();
 		City.instance().forEachBuilding(id, b->{
-			BuildingInfo buildingInfo=b.toProto();
-			int type=buildingInfo.getType();
-			map.computeIfAbsent(type,
-                    k -> new ArrayList<BuildingInfo>()).add(buildingInfo);
-		 }
+					BuildingInfo buildingInfo=b.toProto();
+					int type=buildingInfo.getType();
+					map.computeIfAbsent(type,
+							k -> new ArrayList<BuildingInfo>()).add(buildingInfo);
+				}
 		);
 		map.forEach((k,v)->{
 			Gs.MyBuildingInfo.Builder builder = Gs.MyBuildingInfo.newBuilder();
@@ -2729,26 +2816,26 @@ public class GameSession {
 			});
 			list.addMyBuildingInfo(builder.build());
 		});
-		
+
 		this.write(Package.create(cmd, list.build()));
 	}
-    public void queryMyEva(short cmd, Message message)
-    {
-        UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        
+	public void queryMyEva(short cmd, Message message)
+	{
+		UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
 		});
 		this.write(Package.create(cmd, list.build()));
-    }
-    public void updateMyEva(short cmd, Message message)
-    {
-    	Gs.Eva eva = (Gs.Eva)message;
+	}
+	public void updateMyEva(short cmd, Message message)
+	{
+		Gs.Eva eva = (Gs.Eva)message;
 		int level=eva.getLv();
 		long cexp=eva.getCexp();
-    	Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-    	
+		Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
+
 		if(level>=1){//计算等级
 			long exp=0l;
 			do{
@@ -2756,11 +2843,11 @@ public class GameSession {
 				exp=obj.exp;
 				if(cexp>=exp){
 					cexp=cexp-exp; //减去升级需要的经验
-					level++;  
+					level++;
 				}
 			}while(cexp>=exp);
 		}
-		
+
 		Eva e=new Eva();
 		e.setId(Util.toUuid(eva.getId().toByteArray()));
 		e.setPid(Util.toUuid(eva.getPid().toByteArray()));
@@ -2769,90 +2856,90 @@ public class GameSession {
 		e.setLv(level);
 		e.setCexp(cexp);
 		e.setB(eva.getB());
-    	EvaManager.getInstance().updateEva(e);
-    	
-    	Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
-    	player.decEva(eva.getDecEva());
-       	GameDb.saveOrUpdate(player);
-       	
-    	this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
-    }
-    public void queryMyBrands(short cmd, Message message)
-    {
-    	Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
-    	int type=msg.getType();
-    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
+		EvaManager.getInstance().updateEva(e);
+
+		Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
+		player.decEva(eva.getDecEva());
+		GameDb.saveOrUpdate(player);
+
+		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
+	}
+	public void queryMyBrands(short cmd, Message message)
+	{
+		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
+		int type=msg.getType();
+		UUID bId = Util.toUuid(msg.getBId().toByteArray());
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
 
-        Building build=City.instance().getBuilding(bId);
+		Building build=City.instance().getBuilding(bId);
 
-        Gs.BuildingInfo buildInfo = build.toProto();
+		Gs.BuildingInfo buildInfo = build.toProto();
 
-        Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
+		Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setBrand(buildInfo.getBrand());
-    		GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-    			//优先查询建筑正在使用的某项加盟技术
-    			BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
-    	        if(bl!=null){
-    	            Eva e=EvaManager.getInstance().getEva(bl.getPlayerId(), eva.getAt(), eva.getBt());
-    	 			band.addEva(e.toProto());
-    	        }
-     			band.addEva(eva.toProto());
-    		});
-    		list.addBrand(band.build());
+			GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
+				//优先查询建筑正在使用的某项加盟技术
+				BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
+				if(bl!=null){
+					Eva e=EvaManager.getInstance().getEva(bl.getPlayerId(), eva.getAt(), eva.getBt());
+					band.addEva(e.toProto());
+				}
+				band.addEva(eva.toProto());
+			});
+			list.addBrand(band.build());
 		});
-    	this.write(Package.create(cmd, list.build()));
-    }
+		this.write(Package.create(cmd, list.build()));
+	}
 
-    public void queryMyBrandDetail(short cmd,Message message){
-    	Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
-    	UUID bId = Util.toUuid(msg.getBId().toByteArray());
-    	UUID pId = Util.toUuid(msg.getPId().toByteArray());
-        int itemId=msg.getItemId();
-        List<UUID> ls=new ArrayList<UUID>();
-        ls.add(pId);
+	public void queryMyBrandDetail(short cmd,Message message){
+		Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
+		UUID bId = Util.toUuid(msg.getBId().toByteArray());
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		int itemId=msg.getItemId();
+		List<UUID> ls=new ArrayList<UUID>();
+		ls.add(pId);
 
-        Set<LeagueInfo.UID> set=LeagueManager.getInstance().getBuildingLeagueTech(bId); //加盟的技术
-        for (LeagueInfo.UID info : set) {
-    		int techId=info.getTechId();
+		Set<LeagueInfo.UID> set=LeagueManager.getInstance().getBuildingLeagueTech(bId); //加盟的技术
+		for (LeagueInfo.UID info : set) {
+			int techId=info.getTechId();
 			if(itemId==techId){
 				ls.add(info.getPlayerId());//某项技术可能加盟多个，但是只能使用其中一个
 			}
 		}
 
-        Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
-        ls.forEach(playerId->{
+		Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
+		ls.forEach(playerId->{
 			Player player=GameDb.getPlayer(playerId);
-		    Building build=City.instance().getBuilding(bId);
-		    Gs.BuildingInfo buildInfo = build.toProto();
+			Building build=City.instance().getBuilding(bId);
+			Gs.BuildingInfo buildInfo = build.toProto();
 			long leaveTime=LeagueManager.getInstance().queryProtoLeagueMemberLeaveTime(playerId,itemId,bId);
 
 			Gs.MyBrandDetail.BrandDetail.Builder detail = Gs.MyBrandDetail.BrandDetail.newBuilder();
 			detail.setBId(Util.toByteString(bId))
-			      .setTechId(itemId)
-			      .setPId(Util.toByteString(playerId))
-			      .setName(player.getName())
-			      .setBrand(buildInfo.getBrand());
+					.setTechId(itemId)
+					.setPId(Util.toByteString(playerId))
+					.setName(player.getName())
+					.setBrand(buildInfo.getBrand());
 
-    		GameDb.getEvaInfoList(playerId,itemId).forEach(eva->{
-    			detail.addEva(eva.toProto());
-    		});
-    		detail.setLeaveTime(leaveTime);
+			GameDb.getEvaInfoList(playerId,itemId).forEach(eva->{
+				detail.addEva(eva.toProto());
+			});
+			detail.setLeaveTime(leaveTime);
 			list.addDetail(detail.build());
-        });
+		});
 		this.write(Package.create(cmd, list.build()));
-    }
+	}
 
-    public void updateMyBrandDetail(short cmd,Message message){
-    	Gs.BrandLeague msg = (Gs.BrandLeague)message;
+	public void updateMyBrandDetail(short cmd,Message message){
+		Gs.BrandLeague msg = (Gs.BrandLeague)message;
 		UUID bId = Util.toUuid(msg.getBId().toByteArray());
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
 		int techId=msg.getTechId();
 		LeagueManager.getInstance().addBrandLeague(bId,techId,pId);
-        this.write(Package.create(cmd, msg));
-    }
+		this.write(Package.create(cmd, msg));
+	}
 
 
 	//1.集散中心详情数据获取
@@ -3457,9 +3544,112 @@ public class GameSession {
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
 	}
 
-	//查询城市主页queryCityInde
-	public void queryCityIndex(){
+	//查询城市主页
+	public void queryCityIndex(short cmd){
+		Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
+		//1.城市信息(名称)
+		MetaCity city = MetaData.getCity();
+		builder.setCityName(city.name);
+		//2.人口信息
+		Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
+		//2.1统计男女人数
+		List<Player> players = GameDb.getAllPlayer();
+		int man=0;
+		int woman=0;
+		for (Player p : players) {
+			if(p.isMale())
+				man++;
+			else
+				woman++;
+		}
+		//2.2.统计所有npc的数量
+		long npcNum = NpcManager.instance().getNpcCount();
+		humanInfo.setBoy(man);
+		humanInfo.setGirl(woman);
+		humanInfo.setCitizens(npcNum);
+		builder.setSexNum(humanInfo);
+		//3.设置城市摘要信息
+		Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
+		Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
+		//3.1.所有的土地数量
+		int groundSum = 0;
+		//3.2.土地拍卖的所有数量
+		for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
+			MetaGroundAuction value = mg.getValue();
+			groundSum+=value.area.size();
+		}
+		//3.3已经拍出去的数量
+		int auctionNum = GameDb.countGroundInfo();
+		groundInfo.setTotalNum(groundSum).setAuctionNum(auctionNum);
+		citySummary.setGroundInfo(groundInfo);
+		//4.设置城市运费
+		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
+		//5.设置平均工资(需要计算)
+		long avgSalary=0;
+		long sumSalary=0;
+		List<Building> buildings = new ArrayList<>();
+		//获取到所有的城市用于获取实发工资
+		City.instance().forEachBuilding(b->{
+			buildings.add(b);
+		});
+		for (Building b : buildings) {
+			sumSalary += b.singleSalary();
+		}
+		avgSalary = sumSalary / buildings.size();
+		citySummary.setAvgSalary(avgSalary);
+		//6.设置城市摘要
+		builder.setSummary(citySummary);
+		//7.设置工资涨幅（需要计算，还不确定,间隔是7天统计一下）
+		Long salarys1 = CitySalaryUtil.getSumSalaryByDays(14, 7);//前7天工资
+		Long salarys2 = CitySalaryUtil.getSumSalaryByDays(7, 0);//最近7天工资
+		//计算增幅（本次7天内统计-前7天内统计）/上次统计
+		long incryRate = (salarys2 - salarys1) / salarys1 ;
+		builder.setSalaryIncre((int) incryRate);
+		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);//全程交易量
+		//8.市民保障福利（平均工资）,计算公式：社会保障的比例计算  （社保福利是平均工资的3%+全程交易量的%2）/奖金池
+		//8.1.计算福利待遇
+		Double socialSalary = avgSalary*0.03+amount*0.02;//社保人员的工资
+		//8.2统计福利人员人数(10类型和11类型)
+		Map<Integer, Integer> npcMap = NpcManager.instance().countNpcByType();
+		int socialNum = npcMap.get(10) + npcMap.get(11);
+		long socialWelfare = Math.round((socialSalary *socialNum)/ MoneyPool.instance().money());//比例
+		builder.setSocialWelfare((int) socialWelfare);
+		builder.setMoneyPool(MoneyPool.instance().money());
+		//9.全程玩家交易信息
+		builder.setExchangeNum(amount);
+		this.write(Package.create(cmd,builder.build()));
+	}
+	//修改建筑名称
+	public void updateBuildingName(short cmd, Message message)
+	{
+		Gs.UpdateBuildingName msg = (Gs.UpdateBuildingName) message;
+		UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		building.setName(msg.getName());
+		GameDb.saveOrUpdate(building);
+		this.write(Package.create(cmd, building.toProto()));
+	}
+	//查询原料厂信息
+	public void queryMaterialInfo(short cmd, Message message)
+	{
+		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
 
+		Gs.MaterialInfo.Builder builder=Gs.MaterialInfo.newBuilder();
+		builder.setSalary(building.salaryRatio);
+		builder.setStaffNum(building.getWorkerNum());
+		MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
+			Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
+			MetaMaterial material=MetaData.getMaterial(itemId);
+			Eva e=EvaManager.getInstance().getEva(playerId, itemId, Gs.Eva.Btype.ProduceSpeed.getNumber());
+			b.setItemId(itemId);
+			b.setIsUsed(material.useDirectly);
+			b.setNumOneSec(material.n);
+			b.setEva(e!=null?e.toProto():null);
+		});
+		this.write(Package.create(cmd, builder.build()));
 	}
 
 }
