@@ -29,6 +29,14 @@ public class Contract
     @Column(nullable = false)
     private int signingHours;
 
+    public long getPrice() {
+        return price;
+    }
+
+    public void setPrice(long price) {
+        this.price = price;
+    }
+
     @Column(nullable = false)
     private long price;
 

@@ -1,5 +1,6 @@
 package Game;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +57,7 @@ import Shared.Validator;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
+import gs.Gs.MaterialInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -420,8 +422,10 @@ public class GameSession {
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
-		if(b.startBusiness(player))
+		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
+			GameDb.saveOrUpdate(Arrays.asList(b,player));
+		}
 	}
 	public void shutdownBusiness(short cmd, Message message) {
 		Gs.Id c = (Gs.Id)message;
@@ -479,6 +483,23 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void queryPromoSummary(short cmd) {
+		Gs.PromoSummary.Builder builder = Gs.PromoSummary.newBuilder();
+		City.instance().forAllGrid(g->{
+			Gs.PromoSummary.Info.Builder b = builder.addInfoBuilder();
+			GridIndex gi = new GridIndex(g.getX(),g.getY());
+			b.setIdx(gi.toProto());
+			AtomicInteger n = new AtomicInteger();
+			g.forAllBuilding(building -> {
+				if(building instanceof PublicFacility && !building.outOfBusiness() && !((PublicFacility)building).isTakeOnNewOrder())
+					n.incrementAndGet();
+			});
+			b.setCount(n.intValue());
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void setRoleFaceId(short cmd, Message message) {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
@@ -560,6 +581,42 @@ public class GameSession {
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
+
+	public void queryPromoDetail(short cmd, Message message) {
+		Gs.QueryPromoDetail c = (Gs.QueryPromoDetail)message;
+		GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+		Gs.PromoDetail.Builder builder = Gs.PromoDetail.newBuilder();
+		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
+			Gs.PromoDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			grid.forAllBuilding(building->{
+				if(!building.outOfBusiness() && building instanceof PublicFacility) {
+					PublicFacility s = (PublicFacility)building;
+					if(!s.isTakeOnNewOrder())
+						return;
+					Gs.PromoDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+					bb.setId(Util.toByteString(building.id()));
+					bb.setPos(building.coordinate().toProto());
+
+					for (int tp : bb.getTypeIdsList())
+					{
+						int bsTp = tp/100;
+						int subTp = tp % 100;
+						Integer value = (int)s.getAllPromoTypeAbility(tp);
+						bb.addCurAbilitys(value);
+					}
+					bb.setPricePerHour(s.getCurPromPricePerHour());
+					bb.setRemainTime(s.getPromRemainTime());
+					bb.setQueuedTimes(s.getNewPromoStartTs());
+					bb.setOwnerId(Util.toByteString(building.ownerId()));
+					bb.setName(building.getName());
+					bb.setMetaId(building.metaId());
+				}
+			});
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	public void queryPlayerInfo(short cmd, Message message) throws ExecutionException {
 		Gs.Bytes c = (Gs.Bytes) message;
 		if(c.getIdsCount() > 200 || c.getIdsCount() == 0) // attack
@@ -1107,6 +1164,38 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	//adGetAllMyFlowSign
+	public void GetAllMyFlowSign(short cmd, Message message) {
+		Gs.GetAllMyFlowSign reqMsg = (Gs.GetAllMyFlowSign) message;
+		UUID buildingId = Util.toUuid(reqMsg.getBuildingId().toByteArray());
+		List<UUID> promoIDs = new ArrayList<>();
+		Building bd = City.instance().getBuilding(buildingId);
+		if(bd == null || !(bd instanceof PublicFacility)){
+			if(GlobalConfig.DEBUGLOG){
+				GlobalConfig.cityError("GetAllMyFlowSign: Invalid buildingId ="+buildingId.toString());
+			}
+			return;
+		}
+		PublicFacility fcySeller = (PublicFacility) bd ;
+		Player player =  GameDb.getPlayer(fcySeller.ownerId());
+		List<Contract> clist = ContractManager.getInstance().getAllMySign(player.id());
+		Gs.GetAllMyFlowSign.Builder newPromotions = reqMsg.toBuilder();
+		for (Contract contract : clist) {
+			Building sbd = City.instance().getBuilding(contract.getSellerBuildingId());
+			Gs.GetAllMyFlowSign.flowInfo.Builder flowInfobd =  Gs.GetAllMyFlowSign.flowInfo.newBuilder();
+			flowInfobd.setSellerBuildingId(Util.toByteString(contract.getSellerBuildingId()))
+					.setBuildingName(sbd.getName())
+					.setStartTs(contract.getStartTs())
+					.setSigningHours(contract.getSigningHours())
+					.setLift(contract.getLift())
+					.setSellerPlayerId(Util.toByteString(sbd.ownerId()))
+					.setPricePerHour((int)(contract.getPrice()))
+					.setTypeId(sbd.type());
+			newPromotions.addInfo(flowInfobd);
+		}
+		//返回给客户端
+		this.write(Package.create(cmd, newPromotions.build()));
+	}
 	//adQueryPromotion
 	public void AdQueryPromotion(short cmd, Message message) {
 		/*
@@ -1596,7 +1685,7 @@ public class GameSession {
 		IStorage storage = IStorage.get(id, player);
 		if(storage == null)
 			return;
-		if(storage.delItem(k))
+		if(storage.delItem(it))
 		{
 			GameDb.saveOrUpdate(storage);
 			this.write(Package.create(cmd, c));
@@ -3516,5 +3605,37 @@ public class GameSession {
 		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);
 		builder.setExchangeNum(amount);
 	}
-
+    //修改建筑名称
+    public void updateBuildingName(short cmd, Message message)
+    {
+		Gs.UpdateBuildingName msg = (Gs.UpdateBuildingName) message;
+		UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		building.setName(msg.getName());
+		GameDb.saveOrUpdate(building);
+		this.write(Package.create(cmd, building.toProto()));
+    }
+    //查询原料厂信息
+    public void queryMaterialInfo(short cmd, Message message)
+    {
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
+    	
+    	Gs.MaterialInfo.Builder builder=Gs.MaterialInfo.newBuilder();
+    	builder.setSalary(building.salaryRatio);
+    	builder.setStaffNum(building.getWorkerNum());
+    	MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
+    		Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
+    		MetaMaterial material=MetaData.getMaterial(itemId);
+        	Eva e=EvaManager.getInstance().getEva(playerId, itemId, Gs.Eva.Btype.ProduceSpeed.getNumber());
+        	b.setItemId(itemId);
+        	b.setIsUsed(material.useDirectly);
+        	b.setNumOneSec(material.n);
+        	b.setEva(e!=null?e.toProto():null);
+    	});
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    
 }
