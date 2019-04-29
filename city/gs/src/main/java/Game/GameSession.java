@@ -554,7 +554,10 @@ public class GameSession {
 					bb.setGoodProb(s.getGoodProb());
 					bb.setPrice(s.getPricePreTime());
 					bb.setAvailableTimes(s.getSellTimes());
-					bb.setQueuedTimes(s.getQueuedTimes());
+					if(s.getQueuedTimes() > 0)
+						bb.setQueuedTimes((int) (System.currentTimeMillis()+s.getQueuedTimes()*3600*1000));
+					else
+						bb.setQueuedTimes(0);
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
 					bb.setMetaId(building.metaId());
