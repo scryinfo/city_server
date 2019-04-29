@@ -491,7 +491,7 @@ public class GameSession {
 			b.setIdx(gi.toProto());
 			AtomicInteger n = new AtomicInteger();
 			g.forAllBuilding(building -> {
-				if(building instanceof PublicFacility && !building.outOfBusiness() && !((PublicFacility)building).isTakeOnNewOrder())
+				if(building instanceof PublicFacility && !building.outOfBusiness() &&  ((PublicFacility)building).isTakeOnNewOrder())
 					n.incrementAndGet();
 			});
 			b.setCount(n.intValue());
@@ -588,8 +588,10 @@ public class GameSession {
 		City.instance().forEachGrid(center.toSyncRange(), (grid)->{
 			Gs.PromoDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+			gb.addAllTypeIds(c.getTypeIdsList());
 			grid.forAllBuilding(building->{
-				if(!building.outOfBusiness() && building instanceof PublicFacility) {
+				if(!building.outOfBusiness() && building instanceof PublicFacility
+						&& ((PublicFacility)building).isTakeOnNewOrder()) {
 					PublicFacility s = (PublicFacility)building;
 					if(!s.isTakeOnNewOrder())
 						return;
@@ -597,7 +599,7 @@ public class GameSession {
 					bb.setId(Util.toByteString(building.id()));
 					bb.setPos(building.coordinate().toProto());
 
-					for (int tp : bb.getTypeIdsList())
+					for (int tp : c.getTypeIdsList())
 					{
 						int bsTp = tp/100;
 						int subTp = tp % 100;
