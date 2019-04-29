@@ -2978,61 +2978,11 @@ public class GameSession {
 	//5.租用集散中心仓库
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
-		//建筑id
-		UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
-		//租户id
-		UUID renterId = Util.toUuid(rentInfo.getRenterId().toByteArray());
-		//租用时间
-		int hourToRent = rentInfo.getHourToRent();
-		//仓库容量
-		int rentCapacity = rentInfo.getRentCapacity();
-		//租金
-		int rent = rentInfo.getRent();
-		Long startTime = rentInfo.getStartTime();
-		//1.判断建筑是不是集散中心，不是则return
-		Building building = City.instance().getBuilding(bid);
-		if(!(building instanceof WareHouse)||building==null){
+		Gs.rentWareHouse rentWareHouse = WareHouseManager.instance().rentWareHouse(player, rentInfo);
+		if(rentWareHouse!=null)
+			this.write(Package.create(cmd,rentWareHouse));
+		else
 			this.write(Package.fail(cmd));
-			return;
-		}
-		//2.判断仓库容量是否充足
-		WareHouse wareHouse= (WareHouse) building;
-		if(wareHouse.getRentCapacity()-wareHouse.getRentUsedCapacity()<rentCapacity){
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//3.判断玩家是否有足够的钱
-		if(player.money()<rent){
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//4.租户是否是当前玩家
-		if(player.id()!=renterId){
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//4.修改集散中心信息
-		wareHouse.setRentUsedCapacity(wareHouse.getRentUsedCapacity()+rentCapacity);
-		//4.1玩家开销
-		player.decMoney(rent);
-		MoneyPool.instance().add(rent);
-		//4.2建筑主人获利
-		UUID owner = building.ownerId();
-		//4.3增加建筑主人的收入
-		Player player = GameDb.getPlayer(owner);
-		player.addMoney(rent);
-		GameDb.saveOrUpdate(player);
-		//5.创建租户对象
-		WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
-		//6.记录仓库出租日志
-		LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
-		wareHouse.addRenter(wareHouseRenter);
-		wareHouse.updateTodayRentIncome(rent);//修改今日货架收入
-		wareHouseRenter.setWareHouse(wareHouse);
-		GameDb.saveOrUpdate(wareHouse);
-		WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
-		Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
-		this.write(Package.create(cmd,builder.build()));
 	}
 
 	//6.获取所有上架的商品
