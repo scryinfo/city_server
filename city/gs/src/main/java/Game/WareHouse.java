@@ -6,10 +6,7 @@ import Shared.Util;
 import gs.Gs;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity(name = "WareHouse")
 public class WareHouse extends Building implements IStorage, IShelf {
@@ -309,5 +306,20 @@ public class WareHouse extends Building implements IStorage, IShelf {
         return this.store.delItem(item);
     }
 
+    //到期删除租户
+    public Set<WareHouseRenter> rentersOverdueAndRemove(){
+        Set<WareHouseRenter> set = new HashSet<>();
+        Iterator<WareHouseRenter> iterator = renters.iterator();
+        while (iterator.hasNext())
+        {
+            WareHouseRenter renter = iterator.next();
+            if (renter.isOverTime())
+            {
+                set.add(renter);
+                iterator.remove();
+            }
+        }
+        return set;
+    }
 
 }
