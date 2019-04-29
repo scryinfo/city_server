@@ -70,4 +70,7 @@ public class EvaManager
     	});
 		GameDb.saveOrUpdate(evaList);
     }
+    public double computePercent(Eva eva){
+    	return ((eva!=null&&eva.getLv()>0)?(eva.getLv()-1)/100d:0);
+    }
 }

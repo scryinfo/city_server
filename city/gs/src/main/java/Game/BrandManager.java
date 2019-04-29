@@ -309,4 +309,7 @@ public class BrandManager {
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
     	return totalBrandQualityMap;
     }
+    public double getValFromMap(Map<Integer,Double> map,int type){
+    	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
+    }
 }

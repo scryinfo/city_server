@@ -35,8 +35,12 @@ public final class MetaGood extends MetaItem
     MetaGood(Document d) {
         super(d);
         this.lux = d.getInteger("lux");
+        this.brand = d.getInteger("brand");
+        this.quality = d.getInteger("quality");
     }
     public int lux;
+    public int brand;
+    public int quality;
     public static boolean legalCategory(int category) {
         return mapping.keySet().contains(category);
     }
