@@ -6,5 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 public interface Ticker {
     public abstract void tick(long deltaTime);
+    public default void postAddToWorld(){};
 }
 
