@@ -2,6 +2,7 @@ package Game;
 
 import Game.Meta.MetaWarehouse;
 import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 import Shared.Util;
 import com.google.protobuf.ByteString;
 import com.sun.org.apache.regexp.internal.RE;
@@ -58,11 +59,13 @@ public class WareHouseManager {
             return false;
         WareHouse wareHouse = (WareHouse) building;
         wareHouse.store.setOtherUseSize(0);//清空仓库的其他使用容量
+        //获取已经租出去的容量(你设置的值必须比已经租出去的容量大，否则设置失败)
         if(wareHouse.canUseBy(playerId)&&capacity>=0
                 &&minHours>=wareHouse.metaWarehouse.minHourToRent
                 &&minHours<=maxHours
                 &&maxHours<=wareHouse.metaWarehouse.maxHourToRent
-                &&wareHouse.store.availableSize()>=capacity&&money>=0){
+                &&wareHouse.store.availableSize()>=capacity&&money>=0
+                &&capacity>=wareHouse.getRentUsedCapacity()){
             wareHouse.store.setOtherUseSize(capacity);
             wareHouse.setRentCapacity(capacity);
             wareHouse.setMinHourToRent(minHours);
@@ -74,5 +77,46 @@ public class WareHouseManager {
             return true;
         }else
             return false;
+    }
+
+    public Gs.rentWareHouse rentWareHouse(Player player,Gs.rentWareHouse rentInfo){
+        UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
+        UUID renterId = Util.toUuid(rentInfo.getRenterId().toByteArray());
+        int hourToRent = rentInfo.getHourToRent();
+        int rentCapacity = rentInfo.getRentCapacity();
+        int rent = rentInfo.getRent();
+        Long startTime = rentInfo.getStartTime();
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof WareHouse)||building==null)
+            return null;
+        WareHouse wareHouse= (WareHouse) building;
+        //租金等于多少1小时1个容量
+        if(wareHouse.getRentCapacity()-wareHouse.getRentUsedCapacity()>=rentCapacity
+                &&player.money()>=rent
+                &&player.id()!=renterId
+                &&hourToRent>=wareHouse.getMinHourToRent()
+                &&hourToRent<=wareHouse.getMaxHourToRent()
+                &&rentCapacity>0
+                &&rent==wareHouse.getRent()*hourToRent*rentCapacity){
+            wareHouse.setRentUsedCapacity(wareHouse.getRentUsedCapacity()+rentCapacity);
+            UUID owner = wareHouse.ownerId();
+            Player bOwner = GameDb.getPlayer(owner);
+            player.decMoney(rent);
+            bOwner.addMoney(rent);
+            MoneyPool.instance().add(rent);
+            WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
+            LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
+            wareHouse.addRenter(wareHouseRenter);
+            wareHouse.updateTodayRentIncome(rent);//修改今日出租收入
+            wareHouseRenter.setWareHouse(wareHouse);
+            List updateList = new ArrayList();
+            updateList.addAll(Arrays.asList(player, wareHouse, bOwner));
+            GameDb.saveOrUpdate(updateList);
+            //更新缓存数据
+            wareHouseMap.put(wareHouse.id(),wareHouse);
+            Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
+            return builder.build();
+        } else
+            return null;
     }
 }
