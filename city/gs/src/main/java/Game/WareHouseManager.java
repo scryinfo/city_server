@@ -13,11 +13,12 @@ public class WareHouseManager {
     public static Map<UUID, WareHouse> wareHouseMap = new HashMap<>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
-    public void init(){
-        GameDb.getAllFromOneEntity(WareHouse.class).forEach(
-            wareHouse ->{
-                wareHouseMap.put(wareHouse.id(), wareHouse);
-            } );
+    static {
+        City.instance().forEachBuilding(b->{
+            if(b instanceof  WareHouse){
+                wareHouseMap.put(b.id(), (WareHouse) b);
+            }
+        });
     }
 
     //定时检查任务

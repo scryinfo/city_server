@@ -140,7 +140,6 @@ public class GameServer {
         TickManager.init();
         City.instance().run();
         BrandManager.init();
-        WareHouseManager.instance().init();
 
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
