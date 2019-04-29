@@ -56,9 +56,12 @@ public class PublicFacility extends Building{
         this.meta = meta;
         this.qty = meta.qty;
         this.curflowPromoAbTotall = -1;
+    }
+    @Override
+    public void postAddToWorld(){
         TickManager.instance().registerTick(this);
         setTickMgr(TickManager.instance());
-    }
+    };
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
     public int getCurPromPricePerHour() {

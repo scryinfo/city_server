@@ -60,7 +60,6 @@ public abstract class Building implements Ticker{
 
     @ManyToOne
     private TickManager tickManager;
-
     public void tick(long deltaTime){};
     public abstract int quality();
     boolean canUseBy(UUID userId) {

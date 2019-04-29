@@ -652,10 +652,13 @@ public class GameSession {
 		Building building = Building.create(mid, ul, player.id());
 		building.setName(player.getCompanyName());
 		boolean ok = City.instance().addBuilding(building);
-		if(!ok)
+		if(!ok){
 			this.write(Package.fail(cmd));
-		else
+		}
+		else{
+			building.postAddToWorld();
 			this.write(Package.create(cmd, building.toProto()));
+		}
 	}
 	public void delBuilding(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
