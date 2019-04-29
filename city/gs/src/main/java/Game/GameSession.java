@@ -2952,34 +2952,10 @@ public class GameSession {
 	//3.设置仓库出租信息
 	public void setWareHouseRent(short cmd, Message message){
 		Gs.setWareHouseRent info = (Gs.setWareHouseRent) message;
-		//建筑id
-		UUID bid = Util.toUuid(info.getBuildingId().toByteArray());
-		Building b = City.instance().getBuilding(bid);
-		if(b == null || b.type() != MetaBuilding.WAREHOUSE)
-			return;
-		WareHouse wh= (WareHouse) b;
-		if (!wh.canUseBy(player.id())||!info.hasRentCapacity()||info.getRentCapacity()==0)
-			return;
-		wh.store.setOtherUseSize(0);
-		//判断是不是有这么多容量可以出租
-		if(wh.store.availableSize()<info.getRentCapacity()) {
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//修改剩余容量，仓库剩余容量要减少,只需要增加仓库的使用大小
-		wh.store.setOtherUseSize(info.getRentCapacity());
-		wh.setRentCapacity(info.getRentCapacity());
-		if(!info.hasRent())
-			return;
-		wh.setRent(info.getRent());
-		if(!info.hasMinHourToRent()||info.getMinHourToRent()<wh.metaWarehouse.minHourToRent)
-			return;
-		wh.setMinHourToRent(info.getMinHourToRent());
-		if(info.getMaxHourToRent()>wh.metaWarehouse.maxHourToRent||info.getMaxHourToRent()<info.getMinHourToRent())
-			return;
-		wh.setMaxHourToRent(info.getMaxHourToRent());
-		GameDb.saveOrUpdate(wh);
-		this.write(Package.create(cmd,info));
+		if(WareHouseManager.instance().settingWareHouseRentInfo(player.id(),info)){
+			this.write(Package.create(cmd, info));
+		}else
+		this.write(Package.fail(cmd));
 	}
 
 	//4.删除指定个数的商品

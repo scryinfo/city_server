@@ -1,6 +1,11 @@
 package Game;
 
+import Game.Meta.MetaWarehouse;
 import Game.Timers.PeriodicTimer;
+import Shared.Util;
+import com.google.protobuf.ByteString;
+import com.sun.org.apache.regexp.internal.RE;
+import gs.Gs;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -40,5 +45,34 @@ public class WareHouseManager {
                 });
             });
         }
+    }
+    //设置仓库出租信息
+    public Boolean settingWareHouseRentInfo(UUID playerId, Gs.setWareHouseRent setting){
+        UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
+        int capacity = setting.getRentCapacity();
+        int minHours = setting.getMinHourToRent();
+        int maxHours = setting.getMaxHourToRent();
+        int money = setting.getRent();
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof  WareHouse))
+            return false;
+        WareHouse wareHouse = (WareHouse) building;
+        wareHouse.store.setOtherUseSize(0);//清空仓库的其他使用容量
+        if(wareHouse.canUseBy(playerId)&&capacity>=0
+                &&minHours>=wareHouse.metaWarehouse.minHourToRent
+                &&minHours<=maxHours
+                &&maxHours<=wareHouse.metaWarehouse.maxHourToRent
+                &&wareHouse.store.availableSize()>=capacity&&money>=0){
+            wareHouse.store.setOtherUseSize(capacity);
+            wareHouse.setRentCapacity(capacity);
+            wareHouse.setMinHourToRent(minHours);
+            wareHouse.setMaxHourToRent(maxHours);
+            wareHouse.setRent(money);
+            GameDb.saveOrUpdate(wareHouse);
+            //同步缓存
+            wareHouseMap.put(wareHouse.id(), wareHouse);
+            return true;
+        }else
+            return false;
     }
 }
