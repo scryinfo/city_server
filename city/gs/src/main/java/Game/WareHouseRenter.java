@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -323,5 +324,9 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     @Override
     public boolean delItem(Item item) {
         return this.store.delItem(item);
+    }
+
+    public boolean isOverTime() {//是否超期了
+        return System.currentTimeMillis() > beginTs + TimeUnit.HOURS.toMillis(hourToRent);
     }
 }
