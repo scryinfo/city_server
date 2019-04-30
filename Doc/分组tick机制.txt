@@ -19,7 +19,7 @@
 			* 第一个参数就是tick的时间间隔，可以使用 City.senond2Ns 把秒转为纳秒
 			* TickManager的tick是按tickInterval来分租更新的
 	3、 这种注册状态会持久化到数据库，即便服务器重新开启，之前注册的tick任然会有效
-	4、 如果要注销某个类、实例的自定义tick，调用
+	4、 如果要注销某个类/实例的自定义tick，调用
 		TickManager.instance().unRegisterTick(City.senond2Ns(5),buildingIns);
 		* 注意： 注销要传入注册时的间隔时间，比如注册时是5秒，注销时也必须是5秒
 * 		
