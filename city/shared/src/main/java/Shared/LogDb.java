@@ -53,6 +53,9 @@ public class LogDb {
 	private static final String FLOW_AND_LIFT = "flowAndLift";
 	//集散中心租用仓库的收入记录
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
+	
+	private static final String PLAYER_INCOME = "playerIncome";
+	private static final String PLAYER_PAY = "playerPay";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -80,6 +83,8 @@ public class LogDb {
 	private static MongoCollection<Document> npcTypeNum;
 	//player rent warehouse
 	private static MongoCollection<Document> rentWarehouseIncome;
+	private static MongoCollection<Document> playerIncome;
+	private static MongoCollection<Document> playerPay;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -125,6 +130,10 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		//租用仓库
 		rentWarehouseIncome = database.getCollection(RENT_WAREHOUSE_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		playerIncome = database.getCollection(PLAYER_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		playerPay = database.getCollection(PLAYER_PAY)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -273,6 +282,25 @@ public class LogDb {
 						Aggregates.project(projectObject)
 						)
 				).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	
+	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$p",  Accumulators.sum(KEY_TOTAL, "$a")),
+                        Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
 
@@ -514,6 +542,18 @@ public class LogDb {
 				.append("c", rentCapacity);
 		rentWarehouseIncome.insertOne(document);
 	}
+	public static void playerIncome(UUID playerId,long cost){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("p", playerId)
+				.append("a", cost);
+		playerIncome.insertOne(document);
+	}
+	public static void playerPay(UUID playerId,long cost){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("p", playerId)
+				.append("a", cost);
+		playerPay.insertOne(document);
+	}
 
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
@@ -587,6 +627,14 @@ public class LogDb {
 
 	public static MongoCollection<Document> getRentWarehouseIncome() {
 		return rentWarehouseIncome;
+	}
+	
+	public static MongoCollection<Document> getPlayerIncome() {
+		return playerIncome;
+	}
+	
+	public static MongoCollection<Document> getPlayerPay() {
+		return playerPay;
 	}
 
 	public static class Positon

@@ -5,6 +5,7 @@ import Game.City;
 import Game.GameDb;
 import Game.Player;
 import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +102,8 @@ public class ContractManager
             Player seller = GameDb.getPlayer(building1.ownerId());
             player.decMoney(contract.getCost());
             seller.addMoney(contract.getCost());
+    		LogDb.playerPay(player.id(), contract.getCost());
+    	    LogDb.playerIncome(seller.id(), contract.getCost());
             updates.add(player);
             updates.add(seller);
         }

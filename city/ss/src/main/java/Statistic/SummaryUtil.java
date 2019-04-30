@@ -42,6 +42,8 @@ public class SummaryUtil
     private static final String DAY_PLAYER_BUY_IN_SHELF = "dayPlayerBuyInShelf";
     private static final String DAY_PLAYER_RENT_GROUND = "dayPlayerRentGround";
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
+    private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
+    private static final String DAY_PLAYER_PAY = "dayPlayerPay";
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
@@ -60,6 +62,8 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerBuyInShelf;
     private static MongoCollection<Document> dayPlayerRentGround;
     private static MongoCollection<Document> dayBuildingIncome;
+    private static MongoCollection<Document> dayPlayerIncome;
+    private static MongoCollection<Document> dayPlayerPay;
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
@@ -96,6 +100,10 @@ public class SummaryUtil
 
         dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
@@ -228,6 +236,33 @@ public class SummaryUtil
     	});
     	return map;
     }
+    public static Map<Long, Long> queryPlayerIncomePayCurve(MongoCollection<Document> collection,UUID id)
+    {
+    	Calendar calendar = Calendar.getInstance();
+    	calendar.setTime(new Date());
+    	calendar.set(Calendar.HOUR_OF_DAY, 0);
+    	calendar.set(Calendar.MINUTE, 0);
+    	calendar.set(Calendar.SECOND, 0);
+    	Date endDate = calendar.getTime();
+    	long endTime=endDate.getTime();
+    	
+    	calendar.add(Calendar.DATE, -7);
+    	Date startDate = calendar.getTime();
+    	long startTime=startDate.getTime();
+    	Map<Long, Long> map = new LinkedHashMap<>();
+    	collection.find(and(
+    			eq("id",id),
+    			gte("time", startTime),
+    			lt("time", endTime)
+    			))
+    	.projection(fields(include("time", "total"), excludeId()))
+    	.sort(Sorts.descending("time"))
+    	.forEach((Block<? super Document>) document ->
+    	{   
+    		map.put(document.getLong("time"), document.getLong("total"));
+    	});
+    	return map;
+    }
     public static List<Document> queryCityBroadcast(MongoCollection<Document> collection)
     {
     	List<Document> documentList = new ArrayList<>();
@@ -314,6 +349,16 @@ public class SummaryUtil
 			collection.insertMany(documentList);
 		}
 	}
+    public static void insertPlayerIncomeOrPay(List<Document> documentList,
+    		long time,MongoCollection<Document> collection)
+    {
+    	//document already owned : id,total
+    	documentList.forEach(document ->
+    	document.append(TIME, time));
+    	if (!documentList.isEmpty()) {
+    		collection.insertMany(documentList);
+    	}
+    }
     
     public static Ss.EconomyInfos getPlayerEconomy(UUID playerId)
     {
@@ -474,6 +519,16 @@ public class SummaryUtil
     public static MongoCollection<Document> getDayPlayerRentGround()
     {
     	return dayPlayerRentGround;
+    }
+    
+    public static MongoCollection<Document> getDayPlayerIncome()
+    {
+    	return dayPlayerIncome;
+    }
+    
+    public static MongoCollection<Document> getDayPlayerPay()
+    {
+    	return dayPlayerPay;
     }
 
     public static void insertBuildingDayIncome(List<Document> documentList,long time)
