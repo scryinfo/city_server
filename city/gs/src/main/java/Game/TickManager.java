@@ -39,26 +39,43 @@ public class TickManager {
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<Long, TickGroup> _groupList; //key是表示tick间隔的时长
 
-    public TickGroup registerTick(long tickInterval, Building obj){
+    public TickGroup registerTick(long tickInterval, Building obj, boolean needSave){
         TickGroup gp = _groupList.get(tickInterval);
         if(gp == null){
             gp = new TickGroup(this, tickInterval);
             _groupList.put(tickInterval,gp);
         }
-        if(gp.add(obj)){
+        if(gp.add(obj) && needSave){
             obj.setTickGroup(gp);
             GameDb.saveOrUpdate(this);
         }
         return gp;
     }
-    public void unRegisterTick(long tickInterval, Building obj){
+    //从特定的tick组中移除某个实例的tick
+    public void unRegisterTick(long tickInterval, Building obj, boolean needSave){
         TickGroup gp =  _groupList.get(tickInterval);
-        gp.del(obj);
+        boolean changed = gp.del(obj);
         if(gp.isEmpty()){
             _groupList.remove(tickInterval);
         }
-        GameDb.saveOrUpdate(this);
+        if(needSave && changed){
+            GameDb.saveOrUpdate(this);
+        }
     }
+    //从所有tick组中移除某个实例的tick
+    public void unRegisterTick(Building obj , boolean needSave ){
+        boolean changed = false;
+        for(Iterator<Map.Entry<Long,TickGroup>> it = _groupList.entrySet().iterator(); it.hasNext();){
+            Map.Entry<Long,TickGroup> item = it.next();
+            if(item.getValue().del(obj)){
+                changed = true;
+            }
+        }
+        if(changed && needSave){
+            GameDb.saveOrUpdate(this);
+        }
+    }
+
     public void tick(long deltaTime){
         for (Iterator<Map.Entry<Long, TickGroup>> it = _groupList.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Long,TickGroup> item = it.next();

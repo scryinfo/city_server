@@ -47,7 +47,8 @@ public class PublicFacility extends Building{
     }
     @Override
     public void postAddToWorld(){
-        TickManager.instance().registerTick(City.senond2Ns(25),this);
+        TickManager.instance().unRegisterTick(this, false);
+        TickManager.instance().registerTick(City.senond2Ns(25),this, true);
     };
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
