@@ -52,7 +52,7 @@ public class TickManager {
         return gp;
     }
     //从特定的tick组中移除某个实例的tick
-    public void unRegisterTick(long tickInterval, Building obj, boolean needSave){
+    public boolean unRegisterTick(long tickInterval, Building obj, boolean needSave){
         TickGroup gp =  _groupList.get(tickInterval);
         boolean changed = gp.del(obj);
         if(gp.isEmpty()){
@@ -60,10 +60,12 @@ public class TickManager {
         }
         if(needSave && changed){
             GameDb.saveOrUpdate(this);
+            return true;
         }
+        return false;
     }
     //从所有tick组中移除某个实例的tick
-    public void unRegisterTick(Building obj , boolean needSave ){
+    public boolean unRegisterTick(Building obj , boolean needSave ){
         boolean changed = false;
         for(Iterator<Map.Entry<Long,TickGroup>> it = _groupList.entrySet().iterator(); it.hasNext();){
             Map.Entry<Long,TickGroup> item = it.next();
@@ -73,7 +75,9 @@ public class TickManager {
         }
         if(changed && needSave){
             GameDb.saveOrUpdate(this);
+            return true;
         }
+        return false;
     }
 
     public void tick(long deltaTime){
