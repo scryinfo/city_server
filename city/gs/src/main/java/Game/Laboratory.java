@@ -319,7 +319,7 @@ public class Laboratory extends Building {
     private int goodProb;
     @Transient
     private int evaProb;
-    private boolean exclusiveForOwner;
+    private boolean exclusiveForOwner = true;
 
     private long totalEvaIncome;
     private int totalEvaTimes;
