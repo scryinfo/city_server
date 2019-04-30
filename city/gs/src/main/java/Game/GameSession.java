@@ -2940,8 +2940,9 @@ public class GameSession {
 			b.charge=b.distance*(MetaData.getSysPara().transferChargeRatio);*/
 			b.appendDetailProto(builder);
 		});
+
 		//根据玩家id获取租的仓库
-		List<WareHouseRenter> renter = GameDb.getWareHouseRenterByPlayerId(player.id());
+		List<WareHouseRenter> renter = WareHouseManager.instance().getWareHouseByRenterId(player.id());
 		renter.forEach(w->{
 			//计算距离(向上取整)
 			/*w.getWareHouse().distance = (int)Math.ceil(Building.distance(srcBuilding, w.getWareHouse()));

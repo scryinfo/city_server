@@ -156,4 +156,16 @@ public class WareHouseManager {
         } else
             return null;
     }
+
+    //根据玩家id获取租的仓库
+    public List<WareHouseRenter> getWareHouseByRenterId(UUID renterId){
+        List<WareHouseRenter> renters = new ArrayList<>();
+        wareHouseMap.values().forEach(w->{
+            w.getRenters().forEach(r->{
+                if(r.getRenterId().equals(renterId))
+                    renters.add(r);
+            });
+        });
+        return renters;
+    }
 }
