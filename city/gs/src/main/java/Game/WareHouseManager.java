@@ -76,6 +76,10 @@ public class WareHouseManager {
             wareHouse.setMinHourToRent(minHours);
             wareHouse.setMaxHourToRent(maxHours);
             wareHouse.setRent(money);
+            Building buildingChange = City.instance().getBuilding(bid);
+            WareHouse house = (WareHouse) buildingChange;
+            System.out.println("小时:"+house.getMaxHourToRent()+house.getMinHourToRent()+"容量"+house.getRentCapacity()+"=======================");
+            City.instance().getBuilding(bid);
             GameDb.saveOrUpdate(wareHouse);
             //同步缓存
             wareHouseMap.put(wareHouse.id(), wareHouse);

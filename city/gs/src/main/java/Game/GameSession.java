@@ -2961,7 +2961,6 @@ public class GameSession {
 	//关闭出租
 	public void closeWareHouseRent(short cmd, Message message){
 		Gs.SetWareHouseRent info = (Gs.SetWareHouseRent) message;
-		System.out.println("简要执行关闭出租信息===========================");
 		if(WareHouseManager.instance().closeWareHouseRentInfo(player.id(),info)){
 			this.write(Package.create(cmd, info));
 		}else
