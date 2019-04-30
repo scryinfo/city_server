@@ -45,6 +45,7 @@ public class WareHouseManager {
             });
         }
     }
+
     //设置仓库出租信息
     public Boolean settingWareHouseRentInfo(UUID playerId, Gs.SetWareHouseRent setting){
         UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
