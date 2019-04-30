@@ -3003,6 +3003,15 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 	}
 
+	//关闭出租
+	public void closeWareHouseRent(short cmd, Message message){
+		Gs.SetWareHouseRent info = (Gs.SetWareHouseRent) message;
+		if(WareHouseManager.instance().closeWareHouseRentInfo(player.id(),info)){
+			this.write(Package.create(cmd, info));
+		}else
+			this.write(Package.fail(cmd));
+	}
+
 	//4.删除指定个数的商品
 	public void delItems(short cmd, Message message) throws Exception {
 		Gs.ItemsInfo c = (Gs.ItemsInfo) message;
