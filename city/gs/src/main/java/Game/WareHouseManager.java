@@ -16,7 +16,7 @@ public class WareHouseManager {
     public static WareHouseManager instance() {
         return instance;
     }
-    public static Map<UUID, WareHouse> wareHouseMap = new HashMap<>();
+    public static Map<UUID, WareHouse> wareHouseMap = new HashMap<>();//任何增删改之后，都需要同步到此数据集中
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
     static {
@@ -164,6 +164,17 @@ public class WareHouseManager {
             w.getRenters().forEach(r->{
                 if(r.getRenterId().equals(renterId))
                     renters.add(r);
+            });
+        });
+        return renters;
+    }
+
+    //获取所有租户
+    public List<WareHouseRenter> getAllRenter(){
+        List<WareHouseRenter> renters = new ArrayList<>();
+        wareHouseMap.values().forEach(w->{
+            w.getRenters().forEach(r->{
+                renters.add(r);
             });
         });
         return renters;

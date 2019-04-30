@@ -2934,9 +2934,7 @@ public class GameSession {
 		Building srcBuilding = City.instance().getBuilding(Util.toUuid(bid.toByteArray()));
 		Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();
 		City.instance().forEachBuilding(player.id(), (Building b)->{
-			//计算距离(向上取整)
 			/*b.distance = (int)Math.ceil(Building.distance(srcBuilding, b));
-			//计算运费（距离x运费比例）
 			b.charge=b.distance*(MetaData.getSysPara().transferChargeRatio);*/
 			b.appendDetailProto(builder);
 		});
@@ -2944,9 +2942,7 @@ public class GameSession {
 		//根据玩家id获取租的仓库
 		List<WareHouseRenter> renter = WareHouseManager.instance().getWareHouseByRenterId(player.id());
 		renter.forEach(w->{
-			//计算距离(向上取整)
 			/*w.getWareHouse().distance = (int)Math.ceil(Building.distance(srcBuilding, w.getWareHouse()));
-			//计算运费（距离x运费比例）
 			w.getWareHouse().charge=w.getWareHouse().distance*(MetaData.getSysPara().transferChargeRatio);*/
 			w.appendDetailProto(builder);
 		});
@@ -2965,6 +2961,7 @@ public class GameSession {
 	//关闭出租
 	public void closeWareHouseRent(short cmd, Message message){
 		Gs.SetWareHouseRent info = (Gs.SetWareHouseRent) message;
+		System.out.println("简要执行关闭出租信息===========================");
 		if(WareHouseManager.instance().closeWareHouseRentInfo(player.id(),info)){
 			this.write(Package.create(cmd, info));
 		}else
@@ -3042,7 +3039,7 @@ public class GameSession {
 			}
 		}
 		//从租户表中获取已上架的物品
-		List<WareHouseRenter> renter = GameDb.getAllRenter();
+		List<WareHouseRenter> renter = WareHouseManager.instance().getAllRenter();
 		for (WareHouseRenter wt : renter) {
 			if(wt.getRenterId()==player.id()){//跳过当前玩家的上架物品
 				continue;
@@ -3061,7 +3058,6 @@ public class GameSession {
 		Gs.BuyInShelfGood inShelf = (Gs.BuyInShelfGood) message;
 		if(inShelf.getGood().getPrice()<0)
 			return;
-		//1.参数详情
 		//1.1卖家建筑id
 		UUID bid = Util.toUuid(inShelf.getGood().getBuildingId().toByteArray());
 		//1.2买家仓库建筑id
