@@ -34,7 +34,7 @@ public class TickManager {
     }
 
     private static TickManager tickManager;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="tickManager",fetch = FetchType.LAZY)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<Long, TickGroup> _groupList; //key是表示tick间隔的时长
 
@@ -49,7 +49,7 @@ public class TickManager {
         GameDb.saveOrUpdate(this);
         return gp;
     }
-    public void unRegisterTick(int tickInterval, Building obj){
+    public void unRegisterTick(long tickInterval, Building obj){
         TickGroup gp =  _groupList.get(tickInterval);
         gp.del(obj);
         if(gp.isEmpty()){

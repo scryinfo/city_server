@@ -253,6 +253,7 @@ public class City {
         // do this at last
         updateTimeSection(diffNano);
         specialTick(diffNano);
+        TickManager.instance().tick(diffNano);
         //PromotionMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
@@ -316,7 +317,7 @@ public class City {
         }else{
             _elapsedtime = 0;
         }
-        TickManager.instance().tick(diffNano);
+        //TickManager.instance().tick(diffNano);
     }
 
     public long leftMsToNextTimeSection() {
