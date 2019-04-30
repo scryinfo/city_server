@@ -7,6 +7,7 @@ import gs.Gs;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Entity(name = "WareHouse")
 public class WareHouse extends Building implements IStorage, IShelf {
@@ -28,6 +29,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
     private int rentCapacity=0;//出租的容量
     private int rentUsedCapacity=0;//已出租的容量
     private int rentIncome=0;//仓库收入
+    private boolean enableRent=false;//是否出租
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
 
     @OneToMany(mappedBy = "wareHouse",cascade ={CascadeType.ALL},fetch = FetchType.EAGER)//让租户维护关系
@@ -133,7 +135,14 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) { //上架
-        return false;
+        if(!this.store.has(mi.key, mi.n))
+            return false;
+        if(this.shelf.add(mi, price,autoReplenish)) {
+            this.store.lock(mi.key, mi.n);
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override
@@ -305,7 +314,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
     public boolean delItem(Item item) {
         return this.store.delItem(item);
     }
-
     //到期删除租户
     public Set<WareHouseRenter> rentersOverdueAndRemove(){
         Set<WareHouseRenter> set = new HashSet<>();
@@ -321,5 +329,20 @@ public class WareHouse extends Building implements IStorage, IShelf {
         }
         return set;
     }
+    public boolean isRent(){
+        return this.enableRent;
+    }
 
+    public void openRent(){
+        this.enableRent = true;
+    }
+
+    public void closeRent(){
+        this.enableRent = false;
+        this.store.setOtherUseSize(this.rentUsedCapacity);//设置其他使用容量为当前已经租出去的容量
+    }
+
+    public void updateOtherSize(){
+        this.store.setOtherUseSize(this.rentUsedCapacity);
+    }
 }

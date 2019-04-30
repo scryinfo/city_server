@@ -2984,7 +2984,7 @@ public class GameSession {
 			b.appendDetailProto(builder);
 		});
 		//根据玩家id获取租的仓库
-		List<WareHouseRenter> renter = GameDb.getWareHouseRenterByPlayerId(player.id());
+		List<WareHouseRenter> renter = WareHouseManager.instance().getWareHouseByRenterId(player.id());
 		renter.forEach(w->{
 			//计算距离(向上取整)
 			/*w.getWareHouse().distance = (int)Math.ceil(Building.distance(srcBuilding, w.getWareHouse()));
@@ -2996,35 +2996,11 @@ public class GameSession {
 	}
 	//3.设置仓库出租信息
 	public void setWareHouseRent(short cmd, Message message){
-		Gs.setWareHouseRent info = (Gs.setWareHouseRent) message;
-		//建筑id
-		UUID bid = Util.toUuid(info.getBuildingId().toByteArray());
-		Building b = City.instance().getBuilding(bid);
-		if(b == null || b.type() != MetaBuilding.WAREHOUSE)
-			return;
-		WareHouse wh= (WareHouse) b;
-		if (!wh.canUseBy(player.id())||!info.hasRentCapacity()||info.getRentCapacity()==0)
-			return;
-		wh.store.setOtherUseSize(0);
-		//判断是不是有这么多容量可以出租
-		if(wh.store.availableSize()<info.getRentCapacity()) {
+		Gs.SetWareHouseRent info = (Gs.SetWareHouseRent) message;
+		if(WareHouseManager.instance().settingWareHouseRentInfo(player.id(),info)){
+			this.write(Package.create(cmd, info));
+		}else
 			this.write(Package.fail(cmd));
-			return;
-		}
-		//修改剩余容量，仓库剩余容量要减少,只需要增加仓库的使用大小
-		wh.store.setOtherUseSize(info.getRentCapacity());
-		wh.setRentCapacity(info.getRentCapacity());
-		if(!info.hasRent())
-			return;
-		wh.setRent(info.getRent());
-		if(!info.hasMinHourToRent()||info.getMinHourToRent()<wh.metaWarehouse.minHourToRent)
-			return;
-		wh.setMinHourToRent(info.getMinHourToRent());
-		if(info.getMaxHourToRent()>wh.metaWarehouse.maxHourToRent||info.getMaxHourToRent()<info.getMinHourToRent())
-			return;
-		wh.setMaxHourToRent(info.getMaxHourToRent());
-		GameDb.saveOrUpdate(wh);
-		this.write(Package.create(cmd,info));
 	}
 
 	//4.删除指定个数的商品
@@ -3047,63 +3023,11 @@ public class GameSession {
 	//5.租用集散中心仓库
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
-		//建筑id
-		UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
-		//租户id
-		UUID renterId = Util.toUuid(rentInfo.getRenterId().toByteArray());
-		//租用时间
-		int hourToRent = rentInfo.getHourToRent();
-		//仓库容量
-		int rentCapacity = rentInfo.getRentCapacity();
-		//租金
-		int rent = rentInfo.getRent();
-		Long startTime = rentInfo.getStartTime();
-		//1.判断建筑是不是集散中心，不是则return
-		Building building = City.instance().getBuilding(bid);
-		if(!(building instanceof WareHouse)||building==null){
+		Gs.rentWareHouse rentWareHouse = WareHouseManager.instance().rentWareHouse(player, rentInfo);
+		if(rentWareHouse!=null)
+			this.write(Package.create(cmd,rentWareHouse));
+		else
 			this.write(Package.fail(cmd));
-			return;
-		}
-		//2.判断仓库容量是否充足
-		WareHouse wareHouse= (WareHouse) building;
-		if(wareHouse.getRentCapacity()-wareHouse.getRentUsedCapacity()<rentCapacity){
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//3.判断玩家是否有足够的钱
-		if(player.money()<rent){
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//4.租户是否是当前玩家
-		if(player.id()!=renterId){
-			this.write(Package.fail(cmd));
-			return;
-		}
-		//4.修改集散中心信息
-		wareHouse.setRentUsedCapacity(wareHouse.getRentUsedCapacity()+rentCapacity);
-		//4.1玩家开销
-		player.decMoney(rent);
-		MoneyPool.instance().add(rent);
-		//4.2建筑主人获利
-		UUID owner = building.ownerId();
-		//4.3增加建筑主人的收入
-		Player player = GameDb.getPlayer(owner);
-		player.addMoney(rent);
-		LogDb.playerPay(player.id(), rent);
-	    LogDb.playerIncome(player.id(), rent);
-		GameDb.saveOrUpdate(player);
-		//5.创建租户对象
-		WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
-		//6.记录仓库出租日志
-		LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
-		wareHouse.addRenter(wareHouseRenter);
-		wareHouse.updateTodayRentIncome(rent);//修改今日货架收入
-		wareHouseRenter.setWareHouse(wareHouse);
-		GameDb.saveOrUpdate(wareHouse);
-		WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
-		Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
-		this.write(Package.create(cmd,builder.build()));
 	}
 
 	//6.获取所有上架的商品
@@ -3150,7 +3074,7 @@ public class GameSession {
 			}
 		}
 		//从租户表中获取已上架的物品
-		List<WareHouseRenter> renter = GameDb.getAllRenter();
+		List<WareHouseRenter> renter = WareHouseManager.instance().getAllRenter();
 		for (WareHouseRenter wt : renter) {
 			if(wt.getRenterId()==player.id()){//跳过当前玩家的上架物品
 				continue;
