@@ -253,7 +253,8 @@ public class GroundManager {
 
         Player owner = GameDb.getPlayer(ownerId);
         owner.addMoney(cost);
-        
+        LogDb.playerPay(renter.id(), cost);
+        LogDb.playerIncome(owner.id(), cost);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
@@ -349,6 +350,8 @@ public class GroundManager {
         Player seller = GameDb.getPlayer(sellerId);
         seller.addMoney(cost);
         buyer.decMoney(cost);
+        LogDb.playerPay(buyer.id(), cost);
+	    LogDb.playerIncome(seller.id(), cost);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)

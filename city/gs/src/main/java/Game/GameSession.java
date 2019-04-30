@@ -171,6 +171,7 @@ public class GameSession {
 				if(n <= 0)
 					return;
 				player.addMoney(n);
+				LogDb.playerIncome(player.id(), n);
 				GameDb.saveOrUpdate(player);
 				break;
 			}
@@ -363,6 +364,7 @@ public class GameSession {
 			return;
 		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
 		p.addMoney(999999999);
+		LogDb.playerIncome(p.id(), 999999999);
 		if(!GameDb.createPlayer(p)) {
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
 		}
@@ -573,10 +575,7 @@ public class GameSession {
 					bb.setGoodProb(s.getGoodProb());
 					bb.setPrice(s.getPricePreTime());
 					bb.setAvailableTimes(s.getSellTimes());
-					if(s.getQueuedTimes() > 0)
-						bb.setQueuedTimes((int) (System.currentTimeMillis()+s.getQueuedTimes()*3600*1000));
-					else
-						bb.setQueuedTimes(0);
+					bb.setQueuedTimes(s.getQueuedTimes());
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
 					bb.setMetaId(building.metaId());
@@ -799,6 +798,8 @@ public class GameSession {
 				.setCount(itemBuy.n)
 				.build());
 		player.decMoney(cost);
+		LogDb.playerPay(player.id(), cost);
+		LogDb.playerIncome(seller.id(), cost);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
@@ -810,7 +811,7 @@ public class GameSession {
 			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
 		}
 		player.decMoney(freight);
-
+		LogDb.playerPay(player.id(), freight);
 
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
@@ -1480,6 +1481,8 @@ public class GameSession {
 		//结账
 		buyer.decMoney(fee);
 		seller.addMoney(fee);
+        LogDb.playerPay(buyer.id(), fee);
+        LogDb.playerIncome(seller.id(), fee);
 
 		//更新买家玩家信息中的广告缓存
 		buyer.addPayedPromotion(newOrder.promotionId);
@@ -1673,6 +1676,8 @@ public class GameSession {
 		Player owner = GameDb.getPlayer(building.ownerId());
 		owner.addMoney(slot.rentPreDay);
 		player.decMoney(slot.rentPreDay);
+	    LogDb.playerPay(player.id(), slot.rentPreDay);
+	    LogDb.playerIncome(owner.id(), slot.rentPreDay);
 		player.lockMoney(slot.id, slot.deposit);
 		pf.buySlot(slotId, c.getDay(), player.id());
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -1727,6 +1732,7 @@ public class GameSession {
 		}
 
 		player.decMoney(charge);
+		LogDb.playerPay(player.id(), charge);
 		MoneyPool.instance().add(charge);
 		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
@@ -1872,7 +1878,7 @@ public class GameSession {
 			cost = c.getTimes() * lab.getPricePreTime();
 			if(!player.decMoney(cost))
 				return;
-
+	        LogDb.playerPay(player.id(), cost);
 			lab.updateTodayIncome(cost);
 			if(c.hasGoodCategory())
 				lab.updateTotalGoodIncome(cost, c.getTimes());
@@ -1968,6 +1974,8 @@ public class GameSession {
 			return;
 		Player seller = GameDb.getPlayer(sell.ownerId);
 		seller.addMoney(sell.price);
+		LogDb.playerPay(player.id(), sell.price);
+	    LogDb.playerIncome(seller.id(), sell.price);
 		player.addItem(sell.metaId, sell.lv);
 		TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
 		GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
@@ -2036,6 +2044,8 @@ public class GameSession {
 				return;
 			talent.addMoney(cost);
 			player.decMoney(cost);
+		    LogDb.playerPay(player.id(), cost);
+		    LogDb.playerIncome(talent.id(), cost);
 			updates = Arrays.asList(talent, player);
 		}
 		else
@@ -2987,10 +2997,34 @@ public class GameSession {
 	//3.设置仓库出租信息
 	public void setWareHouseRent(short cmd, Message message){
 		Gs.setWareHouseRent info = (Gs.setWareHouseRent) message;
-		if(WareHouseManager.instance().settingWareHouseRentInfo(player.id(),info)){
-			this.write(Package.create(cmd, info));
-		}else
+		//建筑id
+		UUID bid = Util.toUuid(info.getBuildingId().toByteArray());
+		Building b = City.instance().getBuilding(bid);
+		if(b == null || b.type() != MetaBuilding.WAREHOUSE)
+			return;
+		WareHouse wh= (WareHouse) b;
+		if (!wh.canUseBy(player.id())||!info.hasRentCapacity()||info.getRentCapacity()==0)
+			return;
+		wh.store.setOtherUseSize(0);
+		//判断是不是有这么多容量可以出租
+		if(wh.store.availableSize()<info.getRentCapacity()) {
 			this.write(Package.fail(cmd));
+			return;
+		}
+		//修改剩余容量，仓库剩余容量要减少,只需要增加仓库的使用大小
+		wh.store.setOtherUseSize(info.getRentCapacity());
+		wh.setRentCapacity(info.getRentCapacity());
+		if(!info.hasRent())
+			return;
+		wh.setRent(info.getRent());
+		if(!info.hasMinHourToRent()||info.getMinHourToRent()<wh.metaWarehouse.minHourToRent)
+			return;
+		wh.setMinHourToRent(info.getMinHourToRent());
+		if(info.getMaxHourToRent()>wh.metaWarehouse.maxHourToRent||info.getMaxHourToRent()<info.getMinHourToRent())
+			return;
+		wh.setMaxHourToRent(info.getMaxHourToRent());
+		GameDb.saveOrUpdate(wh);
+		this.write(Package.create(cmd,info));
 	}
 
 	//4.删除指定个数的商品
@@ -3013,11 +3047,63 @@ public class GameSession {
 	//5.租用集散中心仓库
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
-		Gs.rentWareHouse rentWareHouse = WareHouseManager.instance().rentWareHouse(player, rentInfo);
-		if(rentWareHouse!=null)
-			this.write(Package.create(cmd,rentWareHouse));
-		else
+		//建筑id
+		UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
+		//租户id
+		UUID renterId = Util.toUuid(rentInfo.getRenterId().toByteArray());
+		//租用时间
+		int hourToRent = rentInfo.getHourToRent();
+		//仓库容量
+		int rentCapacity = rentInfo.getRentCapacity();
+		//租金
+		int rent = rentInfo.getRent();
+		Long startTime = rentInfo.getStartTime();
+		//1.判断建筑是不是集散中心，不是则return
+		Building building = City.instance().getBuilding(bid);
+		if(!(building instanceof WareHouse)||building==null){
 			this.write(Package.fail(cmd));
+			return;
+		}
+		//2.判断仓库容量是否充足
+		WareHouse wareHouse= (WareHouse) building;
+		if(wareHouse.getRentCapacity()-wareHouse.getRentUsedCapacity()<rentCapacity){
+			this.write(Package.fail(cmd));
+			return;
+		}
+		//3.判断玩家是否有足够的钱
+		if(player.money()<rent){
+			this.write(Package.fail(cmd));
+			return;
+		}
+		//4.租户是否是当前玩家
+		if(player.id()!=renterId){
+			this.write(Package.fail(cmd));
+			return;
+		}
+		//4.修改集散中心信息
+		wareHouse.setRentUsedCapacity(wareHouse.getRentUsedCapacity()+rentCapacity);
+		//4.1玩家开销
+		player.decMoney(rent);
+		MoneyPool.instance().add(rent);
+		//4.2建筑主人获利
+		UUID owner = building.ownerId();
+		//4.3增加建筑主人的收入
+		Player player = GameDb.getPlayer(owner);
+		player.addMoney(rent);
+		LogDb.playerPay(player.id(), rent);
+	    LogDb.playerIncome(player.id(), rent);
+		GameDb.saveOrUpdate(player);
+		//5.创建租户对象
+		WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
+		//6.记录仓库出租日志
+		LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
+		wareHouse.addRenter(wareHouseRenter);
+		wareHouse.updateTodayRentIncome(rent);//修改今日货架收入
+		wareHouseRenter.setWareHouse(wareHouse);
+		GameDb.saveOrUpdate(wareHouse);
+		WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
+		Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
+		this.write(Package.create(cmd,builder.build()));
 	}
 
 	//6.获取所有上架的商品
@@ -3151,6 +3237,8 @@ public class GameSession {
 				.build());
 		//8.3玩家扣钱
 		player.decMoney(cost);
+		LogDb.playerPay(player.id(), cost);
+		LogDb.playerIncome(seller.id(), cost);
 		//8.4 发送消息通知
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
@@ -3164,6 +3252,7 @@ public class GameSession {
 		}
 		//8.5玩家扣除运费
 		player.decMoney(freight);
+		LogDb.playerPay(player.id(), freight);
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);//获取商品类型
 		//8.6记录交易日志
@@ -3433,6 +3522,7 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
+		LogDb.playerPay(player.id(), charge);
 		MoneyPool.instance().add(charge);
 		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);

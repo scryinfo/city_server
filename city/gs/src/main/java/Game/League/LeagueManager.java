@@ -18,6 +18,7 @@ import Game.Player;
 import Game.Eva.Eva;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 import Shared.Util;
 import gs.Gs;
 
@@ -254,6 +255,8 @@ public class LeagueManager
         Player seller = GameDb.getPlayer(leagueInfo.getUid().getPlayerId());
         player.decMoney(leagueInfo.getPrice());
         seller.addMoney(leagueInfo.getPrice());
+        LogDb.playerPay(player.id(), leagueInfo.getPrice());
+        LogDb.playerIncome(seller.id(), leagueInfo.getPrice());
         LeagueInfo.Member member = new LeagueInfo.Member(building.id(), joinLeague.getHours());
         leagueInfo.addMember(member);
         GameDb.Update(Arrays.asList(player, seller, leagueInfo));

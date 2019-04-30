@@ -133,14 +133,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) { //上架
-        if(!this.store.has(mi.key, mi.n))
-            return false;
-        if(this.shelf.add(mi, price,autoReplenish)) {
-            this.store.lock(mi.key, mi.n);
-            return true;
-        }
-        else
-            return false;
+        return false;
     }
 
     @Override
