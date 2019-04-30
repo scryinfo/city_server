@@ -36,6 +36,7 @@ public class TickManager {
     }
     public void unRegisterTick(Building obj){
         _tickerList.remove(obj);
+        GameDb.saveOrUpdate(this);
     }
     public void tick(long delta){
         _tickerList.forEach(ticker -> ticker.tick(delta));
