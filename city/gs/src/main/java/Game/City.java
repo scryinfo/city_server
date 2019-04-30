@@ -253,6 +253,7 @@ public class City {
         // do this at last
         updateTimeSection(diffNano);
         specialTick(diffNano);
+        TickManager.instance().tick(diffNano);
         //PromotionMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
@@ -310,13 +311,13 @@ public class City {
     public static final int second = 20;        //tick间隔时间，秒为单位
     public static final long _upDeltaNs = TimeUnit.MILLISECONDS.toNanos(1000*second); //间隔时间换算成纳秒
     private void specialTick(long diffNano){
-        if(_elapsedtime < _upDeltaNs){
+        /*if(_elapsedtime < _upDeltaNs){
             _elapsedtime += diffNano;
             return;
         }else{
             _elapsedtime = 0;
         }
-        TickManager.instance().tick(diffNano);
+        TickManager.instance().tick(diffNano);*/
     }
 
     public long leftMsToNextTimeSection() {
