@@ -30,15 +30,16 @@ public class WareHouseManager {
     //定时检查任务
     public void update(Long diffNano){
         if (timer.update(diffNano)){
-            Set<WareHouse> updateSet = new HashSet<>();
             wareHouseMap.values().forEach(wareHouse->{
                 Set<WareHouseRenter> renters = wareHouse.rentersOverdueAndRemove();//要删除的过期租户信息
-                if(renters!=null){//表命当前仓库是需要修改的，添加到修改列表
-                    updateSet.add(wareHouse);
-                }
                 renters.forEach(renter -> {
                     renter.setWareHouse(null);
                     wareHouse.getRenters().remove(renter);
+                    //设置已使用容量减少
+                    wareHouse.setRentUsedCapacity(wareHouse.getRentUsedCapacity()-renter.getRentCapacity());
+                    if(!wareHouse.isRent()){//如果未出租了，需要修改其他容量为租仓库的已使用容量
+                        wareHouse.updateOtherSize();
+                    }
                     GameDb.delete(renter);
                     System.out.println("已删除租户"+wareHouse);
                     System.out.println("集散中心是"+wareHouse.id()+"名称"+wareHouse.getName());
@@ -48,29 +49,65 @@ public class WareHouseManager {
         }
     }
     //设置仓库出租信息
-    public Boolean settingWareHouseRentInfo(UUID playerId, Gs.setWareHouseRent setting){
+    public Boolean settingWareHouseRentInfo(UUID playerId, Gs.SetWareHouseRent setting){
         UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
         int capacity = setting.getRentCapacity();
         int minHours = setting.getMinHourToRent();
         int maxHours = setting.getMaxHourToRent();
         int money = setting.getRent();
+        boolean isRent = setting.getEnableRent();
         Building building = City.instance().getBuilding(bid);
         if(!(building instanceof  WareHouse))
             return false;
         WareHouse wareHouse = (WareHouse) building;
         wareHouse.store.setOtherUseSize(0);//清空仓库的其他使用容量
         //获取已经租出去的容量(你设置的值必须比已经租出去的容量大，否则设置失败)
-        if(wareHouse.canUseBy(playerId)&&capacity>=0
+        if(wareHouse.canUseBy(playerId)
+                &&capacity>=0
+                &&isRent==true
                 &&minHours>=wareHouse.metaWarehouse.minHourToRent
                 &&minHours<=maxHours
                 &&maxHours<=wareHouse.metaWarehouse.maxHourToRent
                 &&wareHouse.store.availableSize()>=capacity&&money>=0
                 &&capacity>=wareHouse.getRentUsedCapacity()){
+            wareHouse.openRent();//开启出租
             wareHouse.store.setOtherUseSize(capacity);
             wareHouse.setRentCapacity(capacity);
             wareHouse.setMinHourToRent(minHours);
             wareHouse.setMaxHourToRent(maxHours);
             wareHouse.setRent(money);
+            GameDb.saveOrUpdate(wareHouse);
+            //同步缓存
+            wareHouseMap.put(wareHouse.id(), wareHouse);
+            return true;
+        }else
+            return false;
+    }
+    //关闭出租(重置容量)
+    public boolean closeWareHouseRentInfo(UUID playerId,Gs.SetWareHouseRent setting){
+        UUID bid = Util.toUuid(setting.getBuildingId().toByteArray());
+        int capacity = setting.getRentCapacity();
+        int minHours = setting.getMinHourToRent();
+        int maxHours = setting.getMaxHourToRent();
+        int money = setting.getRent();
+        boolean isRent = setting.getEnableRent();
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof  WareHouse))
+            return false;
+        WareHouse wareHouse = (WareHouse) building;
+        if(wareHouse.canUseBy(playerId)
+                &&isRent==false
+                &&capacity==0
+                &&minHours==0
+                &&maxHours==0
+                &&money==0){
+            //修改出租容量
+            wareHouse.closeRent();//开启出租
+            wareHouse.updateOtherSize();
+            wareHouse.setRentCapacity(0);
+            wareHouse.setMinHourToRent(0);
+            wareHouse.setMaxHourToRent(0);
+            wareHouse.setRent(0);
             GameDb.saveOrUpdate(wareHouse);
             //同步缓存
             wareHouseMap.put(wareHouse.id(), wareHouse);
@@ -90,8 +127,8 @@ public class WareHouseManager {
         if(!(building instanceof WareHouse)||building==null)
             return null;
         WareHouse wareHouse= (WareHouse) building;
-        //租金等于多少1小时1个容量
-        if(wareHouse.getRentCapacity()-wareHouse.getRentUsedCapacity()>=rentCapacity
+        if(wareHouse.isRent()
+                &&wareHouse.getRentCapacity()-wareHouse.getRentUsedCapacity()>=rentCapacity
                 &&player.money()>=rent
                 &&player.id()!=renterId
                 &&hourToRent>=wareHouse.getMinHourToRent()

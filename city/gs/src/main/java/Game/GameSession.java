@@ -2953,11 +2953,21 @@ public class GameSession {
 	}
 	//3.设置仓库出租信息
 	public void setWareHouseRent(short cmd, Message message){
-		Gs.setWareHouseRent info = (Gs.setWareHouseRent) message;
+		Gs.SetWareHouseRent info = (Gs.SetWareHouseRent) message;
 		if(WareHouseManager.instance().settingWareHouseRentInfo(player.id(),info)){
 			this.write(Package.create(cmd, info));
 		}else
 		this.write(Package.fail(cmd));
+	}
+
+
+	//关闭出租
+	public void closeWareHouseRent(short cmd, Message message){
+		Gs.SetWareHouseRent info = (Gs.SetWareHouseRent) message;
+		if(WareHouseManager.instance().closeWareHouseRentInfo(player.id(),info)){
+			this.write(Package.create(cmd, info));
+		}else
+			this.write(Package.fail(cmd));
 	}
 
 	//4.删除指定个数的商品
@@ -3421,8 +3431,6 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd,t));
 	}
-
-
 
 	//未在公会中根据id查询公会信息
 	public void getOneSocietyInfo(short cmd, Message message)
