@@ -7,7 +7,6 @@ import gs.Gs;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.function.Consumer;
 
 @Entity(name = "WareHouse")
 public class WareHouse extends Building implements IStorage, IShelf {
