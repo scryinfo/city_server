@@ -33,7 +33,6 @@ public class PublicFacility extends Building{
         if(deltaTime == 0)
             return;
         updatePromoAbility();
-        TickManager.instance().registerTick(City.senond2Ns(25),this);
     }
     @Override
     protected void finalize(){
