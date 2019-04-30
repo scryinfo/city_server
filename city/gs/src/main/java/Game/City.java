@@ -254,7 +254,7 @@ public class City {
         updateTimeSection(diffNano);
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
-        //PromotionMgr.instance().update(diffNano);
+        PromotionMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
