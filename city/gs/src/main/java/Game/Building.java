@@ -58,8 +58,17 @@ public abstract class Building implements Ticker{
         return Coordinate.distance(a.coordinate(), b.coordinate());
     }
 
+    public TickGroup getTickGroup() {
+        return tickGroup;
+    }
+
+    public void setTickGroup(TickGroup tickGroup) {
+        this.tickGroup = tickGroup;
+    }
+
     @ManyToOne
-    private TickManager tickManager;
+    private TickGroup tickGroup;
+
     public void tick(long deltaTime){};
     public abstract int quality();
     boolean canUseBy(UUID userId) {

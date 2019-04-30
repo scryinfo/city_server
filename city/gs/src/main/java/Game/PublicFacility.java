@@ -26,19 +26,7 @@ import Shared.GlobalConfig;
 @Entity(name = "PublicFacility")
 @DiscriminatorValue("1")
 public class PublicFacility extends Building{
-    PublicFacility(){
-    }
-
-    public TickManager getTickMgr() {
-        return tickMgr;
-    }
-
-    public void setTickMgr(TickManager tickMgr) {
-        this.tickMgr = tickMgr;
-    }
-
-    @ManyToOne
-    private TickManager tickMgr;
+    PublicFacility(){}
 
     @Override
     public  void tick(long deltaTime){
@@ -59,8 +47,7 @@ public class PublicFacility extends Building{
     }
     @Override
     public void postAddToWorld(){
-        TickManager.instance().registerTick(this);
-        setTickMgr(TickManager.instance());
+        setTickGroup(TickManager.instance().registerTick(City.senond2Ns(20),this));
     };
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 

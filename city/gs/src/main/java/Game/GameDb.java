@@ -863,6 +863,15 @@ public class GameDb {
 		return mgr;
 	}
 
+	static public TickGroup getTickGroup(TickGroup gp){
+		Session session = sessionMgr.openSession();
+		Transaction transaction = session.beginTransaction();
+		gp = session.get(TickGroup.class, gp.getId());
+		transaction.commit();
+		session.close();
+		return gp;
+	}
+
 	public static PromotionMgr getPromotionMgr() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
