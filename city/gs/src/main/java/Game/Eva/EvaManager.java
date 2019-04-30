@@ -54,12 +54,8 @@ public class EvaManager
     public void updateEva(Eva eva) {
     	Set<Eva> s=evaMap.get(eva.getPid());
     	s.remove(getEva(eva.getPid(),eva.getAt(),eva.getBt()));
-    	s.forEach(e->{
-    		if(e.getId().equals(eva.getId())){
-    			s.add(eva);
-    			evaMap.put(eva.getPid(), s);
-    		}
-    	});
+    	s.add(eva);
+		evaMap.put(eva.getPid(), s);
      	GameDb.saveOrUpdate(eva);
     }
     
