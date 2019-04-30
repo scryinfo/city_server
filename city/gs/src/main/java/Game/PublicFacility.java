@@ -22,24 +22,11 @@ import Game.Meta.MetaExperiences;
 import Game.Meta.MetaData;
 import Game.Contract.ContractManager;
 import Shared.GlobalConfig;
-import Shared.LogDb;
 
 @Entity(name = "PublicFacility")
 @DiscriminatorValue("1")
 public class PublicFacility extends Building{
-    PublicFacility(){
-    }
-
-    public TickManager getTickMgr() {
-        return tickMgr;
-    }
-
-    public void setTickMgr(TickManager tickMgr) {
-        this.tickMgr = tickMgr;
-    }
-
-    @ManyToOne
-    private TickManager tickMgr;
+    PublicFacility(){}
 
     @Override
     public  void tick(long deltaTime){
@@ -60,8 +47,8 @@ public class PublicFacility extends Building{
     }
     @Override
     public void postAddToWorld(){
-        TickManager.instance().registerTick(this);
-        setTickMgr(TickManager.instance());
+        TickManager.instance().unRegisterTick(this, false);
+        TickManager.instance().registerTick(City.senond2Ns(25),this, true);
     };
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
@@ -614,13 +601,10 @@ public class PublicFacility extends Building{
                         long deposit = renter.spentLockMoney(v.slot.id);
                         owner.addMoney(deposit);
                         ids.add(v.slot.id);
-                        LogDb.playerIncome(owner.id(), deposit);
                     }
                     else {
                         owner.addMoney(v.slot.rentPreDay);
                         v.payTs = now;
-                        LogDb.playerPay(renter.id(), v.slot.rentPreDay);
-                        LogDb.playerIncome(owner.id(), v.slot.rentPreDay);
                     }
                     GameDb.saveOrUpdate(Arrays.asList(renter, owner, this)); // seems we should disable select-before-update
                 }
