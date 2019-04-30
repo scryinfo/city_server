@@ -858,11 +858,19 @@ public class GameDb {
 		Transaction transaction = session.beginTransaction();
 		mgr = session.get(TickManager.class, TickManager.ID);
 		transaction.commit();
-		mgr._tickerList.forEach(ticker -> ticker.tick(0));
+		mgr.postLoad();
+		mgr.tick(0);
 		session.close();
 		return mgr;
 	}
-
+	static public TickGroup getTickGroup(TickGroup gp){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		gp = session.get(TickGroup.class, gp.getId());
+		transaction.commit();
+		session.close();
+		return gp;
+	}
 	public static PromotionMgr getPromotionMgr() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
