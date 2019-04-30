@@ -85,6 +85,7 @@ public class Shopping implements IAction {
             npc.decMoney(chosen.price);
             Player owner = GameDb.getPlayer(sellShop.ownerId());
             owner.addMoney(chosen.price);
+            LogDb.playerIncome(owner.id(), chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
 
             ((IStorage)sellShop).consumeLock(chosen.getItemKey(), 1);

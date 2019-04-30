@@ -248,5 +248,22 @@ public class StatisticSession {
 		this.write(Package.create(cmd,list.build()));
 
 	}
+	
+    public void queryPlayerIncomePayCurve(short cmd, Message message)
+    {
+    	UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
+    	Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
+    	Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+    	
+    	Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
+    	builder.setId(Util.toByteString(id));
+    	playerIncomeMap.forEach((k,v)->{
+    		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
+    		b.setTime(k);
+    		b.setIncome(v);
+    		b.setPay((playerPayMap!=null&&playerPayMap.size()>0&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
+    	});
+    	this.write(Package.create(cmd,builder.build()));
+    }
 
 }
