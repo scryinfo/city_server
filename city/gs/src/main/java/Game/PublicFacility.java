@@ -33,6 +33,7 @@ public class PublicFacility extends Building{
         if(deltaTime == 0)
             return;
         updatePromoAbility();
+        TickManager.instance().registerTick(City.senond2Ns(25),this);
     }
     @Override
     protected void finalize(){
@@ -47,7 +48,7 @@ public class PublicFacility extends Building{
     }
     @Override
     public void postAddToWorld(){
-        TickManager.instance().registerTick(City.senond2Ns(5),this);
+        TickManager.instance().registerTick(City.senond2Ns(25),this);
     };
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
