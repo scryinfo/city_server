@@ -262,9 +262,6 @@ public class MetaData {
     	return experiences;
     }
 
-    public static HashMap<Integer, MetaGroundAuction> getGroundAuction() {
-        return groundAuction;
-    }
 
     public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
