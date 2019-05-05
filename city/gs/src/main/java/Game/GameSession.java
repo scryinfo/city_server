@@ -3499,6 +3499,7 @@ public class GameSession {
 	//查询城市主页
 	public void queryCityIndex(short cmd){
 		Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
+		Map<Integer, Integer> npcMap = NpcManager.instance().countNpcByType();
 		//1.城市信息(名称)
 		MetaCity city = MetaData.getCity();
 		builder.setCityName(city.name);
@@ -3514,8 +3515,10 @@ public class GameSession {
 			else
 				woman++;
 		}
+
 		//2.2.统计所有npc的数量
-		long npcNum = NpcManager.instance().getNpcCount();
+		long npcNum = NpcManager.instance().getNpcCount();//所有npc数量
+		long socialNum = npcMap.get(10) + npcMap.get(11);//失业人员
 		humanInfo.setBoy(man);
 		humanInfo.setGirl(woman);
 		humanInfo.setCitizens(npcNum);
@@ -3525,18 +3528,17 @@ public class GameSession {
 		Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
 		//3.1.所有的土地数量
 		int groundSum = 0;
-		//3.2.土地拍卖的所有数量
 		for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
 			MetaGroundAuction value = mg.getValue();
 			groundSum+=value.area.size();
 		}
-		//3.3已经拍出去的数量
+		//3.2已经拍出去的数量
 		int auctionNum = GameDb.countGroundInfo();
 		groundInfo.setTotalNum(groundSum).setAuctionNum(auctionNum);
 		citySummary.setGroundInfo(groundInfo);
 		//4.设置城市运费
 		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
-		//5.设置平均工资(需要计算)
+		//5.设置平均工资(需要计算)以及其他信息
 		long avgSalary=0;
 		long sumSalary=0;
 		List<Building> buildings = new ArrayList<>();
@@ -3547,8 +3549,11 @@ public class GameSession {
 		for (Building b : buildings) {
 			sumSalary += b.singleSalary();
 		}
-		avgSalary = sumSalary / buildings.size();
-		citySummary.setAvgSalary(avgSalary);
+		avgSalary = sumSalary/buildings.size();
+		citySummary.setAvgSalary(avgSalary);//平均工资
+		citySummary.setUnEmployedNum(socialNum);//失业人员
+		citySummary.setEmployeeNum(npcNum - socialNum);//在职人员
+		citySummary.setUnEmployedPercent((int)Math.ceil((double)socialNum/npcNum*100));//失业率(数量/总数*100)
 		//6.设置城市摘要
 		builder.setSummary(citySummary);
 		//7.设置工资涨幅（需要计算，还不确定,间隔是7天统计一下）
@@ -3561,13 +3566,11 @@ public class GameSession {
 		//8.市民保障福利（平均工资）,计算公式：社会保障的比例计算  （社保福利是平均工资的3%+全程交易量的%2）/奖金池
 		//8.1.计算福利待遇
 		Double socialSalary = avgSalary*0.03+amount*0.02;//社保人员的工资
-		//8.2统计福利人员人数(10类型和11类型)
-		Map<Integer, Integer> npcMap = NpcManager.instance().countNpcByType();
-		int socialNum = npcMap.get(10) + npcMap.get(11);
 		long socialWelfare = Math.round((socialSalary *socialNum)/ MoneyPool.instance().money());//比例
 		builder.setSocialWelfare((int) socialWelfare);
+		//9.设置城市资金（奖金池）
 		builder.setMoneyPool(MoneyPool.instance().money());
-		//9.全程玩家交易信息
+		//10.全程玩家交易信息
 		builder.setExchangeNum(amount);
 		this.write(Package.create(cmd,builder.build()));
 	}
