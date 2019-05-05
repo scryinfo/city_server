@@ -140,6 +140,8 @@ public class WareHouseManager {
             MoneyPool.instance().add(rent);
             WareHouseRenter wareHouseRenter = new WareHouseRenter(renterId, wareHouse, rentCapacity, startTime, hourToRent, rent);
             LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid,renterId,startTime,startTime+hourToRent*3600*1000,hourToRent,rent,rentCapacity);
+            LogDb.playerPay(player.id(),rent);
+            LogDb.playerIncome(owner,rent);
             wareHouse.addRenter(wareHouseRenter);
             wareHouse.updateTodayRentIncome(rent);//修改今日出租收入
             wareHouseRenter.setWareHouse(wareHouse);

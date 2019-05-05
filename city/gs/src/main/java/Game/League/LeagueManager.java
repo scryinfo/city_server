@@ -34,7 +34,7 @@ public class LeagueManager
     }
 
     //任何对leagueInfoMap作出的改变，必要信息一定要同步到buildingLeagueInfo中
-    private Map<LeagueInfo.UID, LeagueInfo> leagueInfoMap = new HashMap<>();
+    private Map<LeagueInfo.UID, LeagueInfo> leagueInfoMap = new HashMap<>();//存的是加盟玩家建筑所加盟的所有信息，k是加盟建筑的id，key是该建筑加盟的所有的加盟信息uid
     //key = buildingId
     private Map<UUID, Set<LeagueInfo.UID>> buildingLeagueInfo = new HashMap<>();
     private Map<UUID, Set<BrandLeague>> brandLeagueMap = new HashMap<UUID, Set<BrandLeague>>();
@@ -237,7 +237,7 @@ public class LeagueManager
         if (leagueInfo.getPrice() != joinLeague.getPrice() ||
                 leagueInfo.getMinHours() > joinLeague.getHours() ||
                 leagueInfo.getMaxHours()< joinLeague.getHours()  ||
-                leagueInfo.getMembersId().contains(building.id()))
+                leagueInfo.getMembersId().contains(building.id()))//不可重复加盟
         {
             return false;
         }
