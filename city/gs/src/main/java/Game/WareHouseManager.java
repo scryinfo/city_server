@@ -116,10 +116,10 @@ public class WareHouseManager {
     public Gs.rentWareHouse rentWareHouse(Player player,Gs.rentWareHouse rentInfo){
         UUID bid = Util.toUuid(rentInfo.getBid().toByteArray());
         UUID renterId = Util.toUuid(rentInfo.getRenterId().toByteArray());
-        int hourToRent = rentInfo.getHourToRent();
-        int rentCapacity = rentInfo.getRentCapacity();
-        int rent = rentInfo.getRent();
-        Long startTime = rentInfo.getStartTime();
+        int hourToRent = rentInfo.getHourToRent();//租的时间
+        int rentCapacity = rentInfo.getRentCapacity();//容量
+        int rent = rentInfo.getRent();//价格
+        Long startTime = System.currentTimeMillis();//起租时间
         Building building = City.instance().getBuilding(bid);
         if(!(building instanceof WareHouse)||building==null)
             return null;
@@ -150,7 +150,7 @@ public class WareHouseManager {
             GameDb.saveOrUpdate(updateList);
             //更新缓存数据
             wareHouseMap.put(wareHouse.id(),wareHouse);
-            Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId());
+            Gs.rentWareHouse.Builder builder = rentInfo.toBuilder().setOrderNumber(wareHouseRenter.getOrderId()).setStartTime(startTime);
             return builder.build();
         } else
             return null;
