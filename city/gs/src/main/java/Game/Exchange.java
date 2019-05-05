@@ -1,19 +1,43 @@
 package Game;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
+
 import Game.Meta.MetaData;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
+import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Cascade;
-
-import javax.persistence.*;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Entity(name = "exchange")
 public class Exchange {
@@ -269,6 +293,7 @@ public class Exchange {
         long cost = n*s.price;
         seller.addMoney(cost);
         buyer.spentLockMoney(b.id);
+        LogDb.playerIncome(seller.id(), cost);
         b.dealedPrice += cost;
         s.dealedPrice += cost;
 

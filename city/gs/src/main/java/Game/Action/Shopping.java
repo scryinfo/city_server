@@ -70,6 +70,9 @@ public class Shopping implements IAction {
             for (Shelf.SellInfo sell : sells) {
                 double goodSpendV = ((1 + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId) / 100.d) + (1 + sell.qty / 100.d) + shopScore)/3.d * spend;
                 int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
+                if(w < 0){
+                    w = 0;
+                }
                 wi.add(new WeightInfo(b.id(), sell.producerId, sell.qty, w, sell.price, (MetaGood) sell.meta, buildingBrand, b.quality()));
             }
         });
@@ -85,6 +88,7 @@ public class Shopping implements IAction {
             npc.decMoney(chosen.price);
             Player owner = GameDb.getPlayer(sellShop.ownerId());
             owner.addMoney(chosen.price);
+            LogDb.playerIncome(owner.id(), chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
 
             ((IStorage)sellShop).consumeLock(chosen.getItemKey(), 1);

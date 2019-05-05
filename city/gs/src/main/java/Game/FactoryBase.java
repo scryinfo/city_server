@@ -265,7 +265,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         Shelf.Content i = this.shelf.getContent(id);
         if(i == null)
             return false;
-        this.shelf.add(new Item(id,i.n),i.price,autoRepOn);
+        this.shelf.add(new Item(id,0),i.price,autoRepOn);
         return  true;
     }
 

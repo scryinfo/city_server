@@ -267,7 +267,7 @@ public class Player {
         this.bagCapacity = MetaData.getSysPara().playerBagCapcaity;
         this.bag = new Storage(bagCapacity);
         this.createTs = System.currentTimeMillis();
-        this.eva=0;
+        this.eva=10000;
     }
     @PostLoad
     void _init() {
@@ -279,6 +279,7 @@ public class Player {
         if(this.decMoney(100)) {
             this.bagCapacity += MetaData.getSysPara().bagCapacityDelta;
             LogDb.extendBag(id, cost, bagCapacity);
+        	LogDb.playerPay(id(), 100);
             return true;
         }
         return false;

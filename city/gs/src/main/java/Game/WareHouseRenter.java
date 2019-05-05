@@ -267,7 +267,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     @Override
     public boolean unLock(ItemKey m, int n) {
-            return store.unLock(m, n);
+        return store.unLock(m, n);
     }
 
     @Override
@@ -325,7 +325,6 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     public boolean delItem(Item item) {
         return this.store.delItem(item);
     }
-
     public boolean isOverTime() {//是否超期了
         return System.currentTimeMillis() > beginTs + TimeUnit.HOURS.toMillis(hourToRent);
     }

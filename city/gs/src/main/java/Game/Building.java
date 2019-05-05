@@ -58,8 +58,16 @@ public abstract class Building implements Ticker{
         return Coordinate.distance(a.coordinate(), b.coordinate());
     }
 
+    public TickGroup getTickGroup() {
+        return tickGroup;
+    }
+
+    public void setTickGroup(TickGroup tickGroup) {
+        this.tickGroup = tickGroup;
+    }
+
     @ManyToOne
-    private TickManager tickManager;
+    private TickGroup tickGroup;
 
     public void tick(long deltaTime){};
     public abstract int quality();
@@ -545,16 +553,16 @@ public abstract class Building implements Ticker{
         	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
     	   	//单个建筑
         	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
-           	double brand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
-        	double quality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+           	double brand=BrandManager.instance().getValFromMap(brandMap, type());
+        	double quality=BrandManager.instance().getValFromMap(qtyMap, type());
         	brandMap.clear();
         	qtyMap.clear();
         	//所有建筑
           	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
         	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
         	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-        	double totalBrand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(type()):0);
-        	double totalQuality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(type()):0);
+        	double totalBrand=BrandManager.instance().getValFromMap(brandMap, type());
+        	double totalQuality=BrandManager.instance().getValFromMap(qtyMap, type());
 
         	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
         	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
@@ -703,6 +711,7 @@ public abstract class Building implements Ticker{
     }
     private boolean payOff(Player p) {
         if(p.decMoney(this.allSalary())) {
+          	LogDb.playerPay(p.id(), this.allSalary());
             calcuHappy();
             allStaff.forEach(npc -> npc.addMoney(this.singleSalary()));
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());

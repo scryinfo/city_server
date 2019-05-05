@@ -26,19 +26,7 @@ import Shared.GlobalConfig;
 @Entity(name = "PublicFacility")
 @DiscriminatorValue("1")
 public class PublicFacility extends Building{
-    PublicFacility(){
-    }
-
-    public TickManager getTickMgr() {
-        return tickMgr;
-    }
-
-    public void setTickMgr(TickManager tickMgr) {
-        this.tickMgr = tickMgr;
-    }
-
-    @ManyToOne
-    private TickManager tickMgr;
+    PublicFacility(){}
 
     @Override
     public  void tick(long deltaTime){
@@ -55,9 +43,13 @@ public class PublicFacility extends Building{
         super(meta, pos, ownerId);
         this.meta = meta;
         this.qty = meta.qty;
-        TickManager.instance().registerTick(this);
-        setTickMgr(TickManager.instance());
+        this.curflowPromoAbTotall = -1;
     }
+    @Override
+    public void postAddToWorld(){
+        TickManager.instance().unRegisterTick(this, false);
+        TickManager.instance().registerTick(City.senond2Ns(25),this, true);
+    };
     private static final Logger logger = Logger.getLogger(PackageEncoder.class);
 
     public int getCurPromPricePerHour() {
@@ -200,7 +192,7 @@ public class PublicFacility extends Building{
 
     //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
     private float curPromoAbility = 0;
-
+    private int curflowPromoAbTotall = -1;
     /*@ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "PubFacility_promo", joinColumns = @JoinColumn(name = "selled_id"))
     @OrderColumn*/
@@ -531,6 +523,7 @@ public class PublicFacility extends Building{
         builder.setCurPromPricePerHour(this.getCurPromPricePerHour());
         builder.setPromRemainTime(this.getPromRemainTime());
         builder.setTakeOnNewOrder(this.isTakeOnNewOrder());
+        builder.setCurflowPromoAbTotall(updateflowPromoTotall ());
         return builder.build();
     }
     protected Gs.Advertisement genAdPart() {
@@ -539,6 +532,12 @@ public class PublicFacility extends Building{
         this.rent.values().forEach(v->builder.addSoldSlot(v.toProto()));
         this.ad.values().forEach(v->builder.addAd(v.toProto()));
         return builder.build();
+    }
+    private int updateflowPromoTotall (){
+        List<UUID> promoIDs = new ArrayList<>();
+        Player player =  GameDb.getPlayer(ownerId());
+        curflowPromoAbTotall = (int)ContractManager.getInstance().getPlayerADLift(player.id());
+        return curflowPromoAbTotall;
     }
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
@@ -572,7 +571,7 @@ public class PublicFacility extends Building{
                 return;
             }
             FlowRecord newRecord = new FlowRecord(pid,ts, value);
-            //GameDb.saveOrUpdateAndClear( newRecord );
+            GameDb.saveOrUpdateAndClear( newRecord );
             GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear FlowRecord");
         }else{
             //eva

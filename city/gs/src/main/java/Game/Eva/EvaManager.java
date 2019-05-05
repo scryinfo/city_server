@@ -53,13 +53,9 @@ public class EvaManager
     
     public void updateEva(Eva eva) {
     	Set<Eva> s=evaMap.get(eva.getPid());
-    	s.forEach(e->{
-    		if(e.getId().equals(eva.getId())){
-    			s.remove(e);
-    			s.add(eva);
-    			evaMap.put(eva.getPid(), s);
-    		}
-    	});
+    	s.remove(getEva(eva.getPid(),eva.getAt(),eva.getBt()));
+    	s.add(eva);
+		evaMap.put(eva.getPid(), s);
      	GameDb.saveOrUpdate(eva);
     }
     
@@ -69,5 +65,8 @@ public class EvaManager
                     k -> new HashSet<>()).add(e);
     	});
 		GameDb.saveOrUpdate(evaList);
+    }
+    public double computePercent(Eva eva){
+    	return ((eva!=null&&eva.getLv()>0)?(eva.getLv()-1)/100d:0);
     }
 }

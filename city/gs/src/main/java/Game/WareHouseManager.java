@@ -1,11 +1,8 @@
 package Game;
 
-import Game.Meta.MetaWarehouse;
 import Game.Timers.PeriodicTimer;
 import Shared.LogDb;
 import Shared.Util;
-import com.google.protobuf.ByteString;
-import com.sun.org.apache.regexp.internal.RE;
 import gs.Gs;
 
 import java.util.*;
@@ -76,10 +73,6 @@ public class WareHouseManager {
             wareHouse.setMinHourToRent(minHours);
             wareHouse.setMaxHourToRent(maxHours);
             wareHouse.setRent(money);
-            Building buildingChange = City.instance().getBuilding(bid);
-            WareHouse house = (WareHouse) buildingChange;
-            System.out.println("小时:"+house.getMaxHourToRent()+house.getMinHourToRent()+"容量"+house.getRentCapacity()+"=======================");
-            City.instance().getBuilding(bid);
             GameDb.saveOrUpdate(wareHouse);
             //同步缓存
             wareHouseMap.put(wareHouse.id(), wareHouse);

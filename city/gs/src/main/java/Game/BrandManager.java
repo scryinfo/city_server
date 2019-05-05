@@ -282,16 +282,14 @@ public class BrandManager {
     	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
-     	if(brandEva!=null){
-     		if(brandEva.getLv()>0){
-     			brandMap.put(b.type(), (brandMap.get(b.type())!=null?brandMap.get(b.type()):0)+new Double(buildingBrand*(1+brandEva.getLv()/100d)));
-     		}
-    	}
-     	if(qualityEva!=null){
-     		if(qualityEva.getLv()>0){
-     			qtyMap.put(b.type(), (qtyMap.get(b.type())!=null?qtyMap.get(b.type()):0)+new Double(b.quality()*(1+qualityEva.getLv()/100d)));
-     		}
-     	}
+    	
+		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
+		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
+		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
+		
+		qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
+		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
+		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
     
     public void getAllBuildingBrandOrQuality(){
@@ -308,5 +306,8 @@ public class BrandManager {
     
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
     	return totalBrandQualityMap;
+    }
+    public double getValFromMap(Map<Integer,Double> map,int type){
+    	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
     }
 }
