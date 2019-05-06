@@ -148,7 +148,6 @@ public class PromotionMgr {
                 //更新广告商广告列表
                 PromoOrder pm = PromotionMgr.instance().getPromotion(promotion.promotionId);
                 fcySeller.delSelledPromotion(promotion.promotionId);
-                GameDb.delete(pm);
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
                 //paras: 第一个是广告id，第二个是广告商建筑id
@@ -163,7 +162,7 @@ public class PromotionMgr {
         }
         if(idToRemove.size() > 0){
             for (int i = 0; i < idToRemove.size(); i++) {
-                promotions.remove(idToRemove.get(i));
+                GameDb.delete(promotions.remove(idToRemove.get(i)));
             }
             GameDb.saveOrUpdate(this);
         }
