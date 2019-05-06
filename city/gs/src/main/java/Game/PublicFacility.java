@@ -221,8 +221,8 @@ public class PublicFacility extends Building{
         }
     }
 
-    public List<PromoOdTs> delSelledPromotion(UUID promoId){
-        List<PromoOdTs> ret = PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion);
+    public List<PromoOdTs> delSelledPromotion(UUID promoId ,boolean delOrder){
+        List<PromoOdTs> ret = PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion, delOrder);
         //删除缓存的推广ID
         selledPromotion.remove(promoId);
         //更新推广公司广告列表中所有推广的起点

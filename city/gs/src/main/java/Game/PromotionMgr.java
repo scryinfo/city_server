@@ -43,7 +43,7 @@ public class PromotionMgr {
         }
     }
 
-    public List<PromoOdTs> AdRemovePromoOrder(UUID id, List<UUID> promotionIds){
+    public List<PromoOdTs> AdRemovePromoOrder(UUID id, List<UUID> promotionIds, boolean delOrder){
         long nextTs = 0;
         int findPos = -1 ;
         List<PromoOdTs> changed = new ArrayList<>();
@@ -71,7 +71,9 @@ public class PromotionMgr {
             nextTs = promo.promStartTs + promo.promDuration;
         }
         //更新完之后，移除掉要删除的推广。
-        promotions.remove(id);
+        if(delOrder){
+            promotions.remove(id);
+        }
         return changed;
     }
     public PromoOrder getPromotion(UUID id){
@@ -146,8 +148,7 @@ public class PromotionMgr {
                 buyer.delpayedPromotion(promotion.promotionId);
                 GameDb.saveOrUpdate(buyer);
                 //更新广告商广告列表
-                PromoOrder pm = PromotionMgr.instance().getPromotion(promotion.promotionId);
-                fcySeller.delSelledPromotion(promotion.promotionId);
+                fcySeller.delSelledPromotion(promotion.promotionId, false);
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
                 //paras: 第一个是广告id，第二个是广告商建筑id
