@@ -41,18 +41,18 @@ public class PerHourJob implements org.quartz.Job {
 
 
         //buy ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
+        documentList = LogDb.dayPlayerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
+        documentList = LogDb.dayPlayerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy goods in Shelf
-        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
+        documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy material in Shelf
-        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
+        documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //player income
@@ -61,6 +61,11 @@ public class PerHourJob implements org.quartz.Job {
         //player pay
         documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerPay());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerPay());
+
+        //brandAndQuality
+        documentList = LogDb.queryApartmentBrandAndQuality(startTime, endTime, LogDb.getNpcRentApartment());
+        SummaryUtil.insertBrandAndQuality(SummaryUtil.CountType.BYHOUR,documentList,endTime, SummaryUtil.gethourBrandAmount());
+
 
         //统计耗时
         StatisticSession.setIsReady(true);

@@ -3498,6 +3498,33 @@ public class GameSession {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
 	}
+	//建筑推荐价格
+	public void queryBuildingRecommendPrice(short cmd, Message message) {
+		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
+		Gs.RecommendPrice.Builder builder = Gs.RecommendPrice.newBuilder();
+		Building building = City.instance().getBuilding(buildingId);
+		int type = MetaBuilding.type(building.metaId());
+		//1.住宅均品质 均品牌 均定价
+		List<Double> avg = LogDb.queryAvg(type);
+		//2.npc工资 住宅消费预期
+		double moneyRatio = MetaData.getBuildingSpendMoneyRatio(type);
+		double salary = building.salaryRatio;
+		//3.全城住宅 或 零售店总知名度 总品牌
+		Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+		Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+		Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+		brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+		qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+		double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
+		double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
+		builder.addAllAvg(avg)
+				.addAllNpc(Arrays.asList(moneyRatio, salary))
+				.addAllSum(Arrays.asList(totalBrand, totalQuality));
+		this.write(Package.create(cmd,builder.build()));
+
+	}
 
 	//查询城市主页
 	public void queryCityIndex(short cmd){

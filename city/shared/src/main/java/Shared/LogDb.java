@@ -5,10 +5,8 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lt;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.text.DecimalFormat;
+import java.util.*;
 
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
@@ -51,9 +49,11 @@ public class LogDb {
 	private static final String NPC_TYPE_NUM = "npcTypeNum";
 
 	private static final String FLOW_AND_LIFT = "flowAndLift";
+	public static final String HOUR_BRAND_AMOUNT = "hourBrandAmount";
+
 	//集散中心租用仓库的收入记录
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
-	
+
 	private static final String PLAYER_INCOME = "playerIncome";
 	private static final String PLAYER_PAY = "playerPay";
 	//---------------------------------------------------
@@ -85,6 +85,8 @@ public class LogDb {
 	private static MongoCollection<Document> rentWarehouseIncome;
 	private static MongoCollection<Document> playerIncome;
 	private static MongoCollection<Document> playerPay;
+	//统计推荐价格
+	private static MongoCollection<Document> hourBrandAmount;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -127,6 +129,8 @@ public class LogDb {
 		npcTypeNum = database.getCollection(NPC_TYPE_NUM)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		flowAndLift = database.getCollection(FLOW_AND_LIFT)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		hourBrandAmount = database.getCollection(HOUR_BRAND_AMOUNT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		//租用仓库
 		rentWarehouseIncome = database.getCollection(RENT_WAREHOUSE_INCOME)
@@ -284,7 +288,7 @@ public class LogDb {
 				).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -490,17 +494,20 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId)
+			UUID ownerId, UUID bid, int type, int mId,double brand,double quality)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
-		document.append("r", npcId)
-				.append("d", sellId)
-				.append("p", price)
-				.append("a", n * price)
-				.append("o", ownerId)
-				.append("b", bid)
-				.append("tp", type)
-				.append("mid", mId);
+        document.append("r", npcId)
+                .append("d", sellId)
+                .append("p", price)
+                .append("n", n)
+                .append("a", n * price)
+                .append("o", ownerId)
+                .append("b", bid)
+                .append("tp", type)
+                .append("mid", mId)
+                .append("brand", brand)
+                .append("quality", quality);
 		npcRentApartment.insertOne(document);
 	}
 
@@ -628,11 +635,9 @@ public class LogDb {
 	public static MongoCollection<Document> getRentWarehouseIncome() {
 		return rentWarehouseIncome;
 	}
-	
 	public static MongoCollection<Document> getPlayerIncome() {
 		return playerIncome;
 	}
-	
 	public static MongoCollection<Document> getPlayerPay() {
 		return playerPay;
 	}
@@ -661,7 +666,7 @@ public class LogDb {
 	}
 
 	//--ly
-	public static List<Document> dayPlyaerExchange1(long startTime, long endTime, MongoCollection<Document> collection,int id)
+	public static List<Document> dayPlayerExchange1(long startTime, long endTime, MongoCollection<Document> collection,int id)
 	{
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
@@ -681,7 +686,7 @@ public class LogDb {
 	}
 
 
-	public static List<Document> dayPlyaerExchange2(long startTime, long endTime, MongoCollection<Document> collection,boolean isGoods)
+	public static List<Document> dayPlayerExchange2(long startTime, long endTime, MongoCollection<Document> collection,boolean isGoods)
 	{
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
@@ -703,6 +708,58 @@ public class LogDb {
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
+	}
+
+	//查询一小时住宅成交的知名度品牌定价总和
+    public static List<Document> queryApartmentBrandAndQuality(long startTime, long endTime, MongoCollection<Document> collection) {
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append("total", "$" + "total")
+                .append("sum","$sum")
+                .append("brand","$brand")
+                .append("quality","$quality")
+                .append("size","$size")
+                .append("_id",0);
+        collection.aggregate(
+                Arrays.asList(
+                        Aggregates.match(and(
+                                gte("t", startTime),
+                                lt("t", endTime)
+                        )),
+                        Aggregates.group("$tp", Accumulators.sum("total", "$a"),
+                                Accumulators.sum("sum", "$n"),
+                                Accumulators.sum("brand", "$brand"),
+                                Accumulators.sum("quality", "$quality"),
+                                Accumulators.sum("size", 1l)
+                        )
+                        , Aggregates.project(projectObject)
+                )
+        ).forEach((Block<? super Document>) documentList::add);
+
+        return documentList;
+
+    }
+
+	public static List<Double> queryAvg(long id) {
+		List<Double> list = new ArrayList<>();
+		hourBrandAmount.find(and(
+//				eq("countType", countType.getValue()),
+				eq("id", id)
+		))
+//                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+				.sort(Sorts.descending("time"))
+				.limit(1)
+				.forEach((Block<? super Document>) document ->
+				{
+					double price = (double)document.getLong("total") / document.getLong("sum");
+					double quality = document.getDouble("quality") / document.getLong("size");
+					double brand = document.getDouble("brand") / document.getLong("size");
+					list.add(quality);
+					list.add(brand);
+					list.add(price);
+				});
+		return list;
 	}
 
 

@@ -47,6 +47,7 @@ public class SummaryUtil
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
+    public static final String HOUR_BRAND_AMOUNT = "hourBrandAmount";
 
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
@@ -67,6 +68,7 @@ public class SummaryUtil
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
+    private static MongoCollection<Document> hourBrandAmount;
 
     public static void init()
     {
@@ -105,6 +107,8 @@ public class SummaryUtil
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        hourBrandAmount = database.getCollection(HOUR_BRAND_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -572,7 +576,7 @@ public class SummaryUtil
             return value;
         }
     }
-      enum CountType
+      public enum CountType
     {
     	BYDAY(1),BYHOUR(2),BYMINU(3),BYSECONDS(4);
     	private int value;
@@ -606,7 +610,10 @@ public class SummaryUtil
     {
         return playerExchangeAmount;
     }
-
+    public static MongoCollection<Document> gethourBrandAmount()
+    {
+        return hourBrandAmount;
+    }
     public static void insertPlayerExchangeData(CountType countType,ExchangeType exchangeType,List<Document> documentList,
                                          long time,MongoCollection<Document> collection)
     {
@@ -697,5 +704,18 @@ public class SummaryUtil
                 });
         return map;
     }
+
+    public static void insertBrandAndQuality(CountType countType, List<Document> documentList, long time, MongoCollection<Document> collection) {
+        //document already owned : id,total
+        documentList.forEach(document ->
+                document.append(TIME, time)
+                        .append(COUNTTYPE,countType.getValue()));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
+
+
+
 
 }

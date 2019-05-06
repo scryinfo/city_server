@@ -51,18 +51,18 @@ public class SecondJob implements org.quartz.Job {
 
 
         //buy ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
+        documentList = LogDb.dayPlayerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
+        documentList = LogDb.dayPlayerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy goods in Shelf
-        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
+        documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy material in Shelf
-        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
+        documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
 
