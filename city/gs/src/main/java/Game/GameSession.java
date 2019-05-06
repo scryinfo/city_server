@@ -2736,6 +2736,35 @@ public class GameSession {
 		}
 	}
 
+	public void queryBuildingTech(short cmd, Message message)
+	{
+		Gs.ByteNum param = (Gs.ByteNum) message;
+		UUID bid = Util.toUuid(param.getId().toByteArray());
+		int techId = param.getNum();
+		Building building = City.instance().getBuilding(bid);
+		if (building != null)
+		{
+			Gs.BuildingTech.Builder builder = Gs.BuildingTech.newBuilder()
+					.setBid(param.getId())
+					.setTechId(techId)
+					.setPId(Util.toByteString(building.ownerId()))
+					.setBname(building.getName())
+					.setMId(building.metaId());
+
+			if (building.ownerId().equals(player.id()))
+			{
+				Gs.BuildingTech.Infos.Builder builder1 = builder.addInfosBuilder().setPId(Util.toByteString(player.id()));
+				EvaManager.getInstance().getEva(player.id(), techId).forEach(eva ->
+				{
+					builder1.addTechInfo(eva.toTechInfo());
+
+				});
+			}
+			builder.addAllInfos(LeagueManager.getInstance().getBuildingLeagueTech(bid, techId));
+			this.write(Package.create(cmd,builder.build()));
+		}
+	}
+
 	//===========================================================
 
 	//llb========================================================

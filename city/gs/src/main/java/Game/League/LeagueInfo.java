@@ -184,6 +184,16 @@ public class LeagueInfo
         @Column(nullable = false)
         private int signHours;
 
+        public long getStartTs()
+        {
+            return startTs;
+        }
+
+        public int getSignHours()
+        {
+            return signHours;
+        }
+
         public UUID getBuildingId()
         {
             return buildingId;

@@ -84,7 +84,7 @@ public class StatisticServer {
                                 ch.pipeline().addLast(new ExceptionHandler());
                             }
                         }).option(ChannelOption.SO_REUSEADDR, true);
-                fs.add(b.bind(20001));
+                fs.add(b.bind(serverInfo.getSsPort()));
             System.out.println("listening on port for client " + 20001 + " for client");
 
             for(ChannelFuture f : fs)
