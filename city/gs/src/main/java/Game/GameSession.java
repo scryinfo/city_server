@@ -3432,6 +3432,7 @@ public class GameSession {
 			if(p.getRenterId().equals(player.id()))
 				builder.addRenters(p.toProto());
 			});
+        builder.setBuildingId(c.getId());
 		this.write(Package.create(cmd,builder.build()));
 	}
 
