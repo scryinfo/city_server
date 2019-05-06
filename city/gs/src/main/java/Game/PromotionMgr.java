@@ -138,7 +138,6 @@ public class PromotionMgr {
                 float addition = fcySeller.excutePromotion(promotion);
                 //累加提升值，以便计算平均值
                 promotion.promotedTotal += addition;
-
                 promotion.promProgress = (int)(((float)elapsedtime/(float)promotion.promDuration)*100);
                 BrandManager.instance().update(promotion.buyerId, objType, (int)addition);
             }else {
