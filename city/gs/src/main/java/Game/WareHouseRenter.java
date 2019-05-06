@@ -57,7 +57,6 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
             Long beginTs,
             Integer hourToRent,
             Integer rent) {
-        this.orderId = OrderCodeFactory.getOrderId(this.wareHouse.metaId());//自动生成订单号
         this.renterId = renterId;
         this.wareHouse = wareHouse;
         this.rentCapacity = rentCapacity;
