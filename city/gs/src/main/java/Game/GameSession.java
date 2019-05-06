@@ -1686,10 +1686,17 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
 		this.write(Package.create(cmd, c));
 	}
-	public void getAllBuildingDetail(short cmd) {
+	public void getAllBuildingDetail(short cmd) {//新增了集散中心租户信息
 		Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();
 		City.instance().forEachBuilding(player.id(), (Building b)->{
-			b.appendDetailProto(builder);
+			if(b instanceof  WareHouse&&((WareHouse)b).getRenters().size()>0){
+				WareHouse w = (WareHouse) b;
+				w.getRenters().forEach(r->{
+					r.appendDetailProto(builder);
+				});
+			}else {
+				b.appendDetailProto(builder);
+			}
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
@@ -1704,6 +1711,11 @@ public class GameSession {
 			return;
 		if(storage.delItem(it))
 		{
+			//同步数据
+			if(storage instanceof  WareHouse){
+				WareHouse wareHouse= (WareHouse) storage;
+				WareHouseManager.updateWareHouseMap(wareHouse);
+			}
 			GameDb.saveOrUpdate(storage);
 			this.write(Package.create(cmd, c));
 		}
@@ -3026,6 +3038,15 @@ public class GameSession {
 			return;
 		if(storage.delItem(item)){
 			GameDb.saveOrUpdate(storage);//修改数据库
+			//同步缓存数据
+			if(storage instanceof  WareHouseRenter){
+				WareHouseRenter renter = (WareHouseRenter) storage;
+				WareHouseManager.updateWareHouseMap(renter);
+			}
+ 			else if(storage instanceof  WareHouse){
+				WareHouse wareHouse= (WareHouse) storage;
+				WareHouseManager.updateWareHouseMap(wareHouse);
+			}
 			this.write(Package.create(cmd,c));
 		}else
 			this.write(Package.fail(cmd));
@@ -3034,8 +3055,17 @@ public class GameSession {
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
 		Gs.rentWareHouse rentWareHouse = WareHouseManager.instance().rentWareHouse(player, rentInfo);
-		if(rentWareHouse!=null)
-			this.write(Package.create(cmd,rentWareHouse));
+		if(rentWareHouse!=null) {
+			Gs.detailWareHouseRenter.Builder builder = Gs.detailWareHouseRenter.newBuilder();
+			//返回租的所有仓库
+			UUID bid = Util.toUuid(rentWareHouse.getBid().toByteArray());
+			List<WareHouseRenter> renters = WareHouseManager.instance().getWareHouseByRenterIdFromWareHouse(bid, player.id());
+			renters.forEach(r->{
+				builder.addRenters(r.toProto());
+			});
+			builder.setBuildingId(rentInfo.getBid());
+			this.write(Package.create(cmd, builder.build()));
+		}
 		else
 			this.write(Package.fail(cmd));
 	}
@@ -3215,7 +3245,17 @@ public class GameSession {
 			sellBuilding.updateTodayIncome(cost);
 		}
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, inShelf.getGood().getPrice());
-		GameDb.saveOrUpdate(Arrays.asList(player,seller,sellStorage));
+		GameDb.saveOrUpdate(Arrays.asList(player,seller,sellStorage,buyStore));
+		//更新同步数据
+		if(sellStorage instanceof WareHouseRenter){
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) sellStorage);
+		}else if(sellStorage instanceof  WareHouse){
+			WareHouseManager.updateWareHouseMap((WareHouse) sellStorage);
+		}
+		if(buyStore instanceof WareHouseRenter)
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) buyStore);
+		else if(buyStore instanceof  WareHouse)
+			WareHouseManager.updateWareHouseMap((WareHouse) buyStore);
 		this.write(Package.create(cmd,inShelf));
 	}
 	//8.上架
@@ -3233,6 +3273,8 @@ public class GameSession {
 			IShelf s = renter;
 			if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
 				GameDb.saveOrUpdate(s);
+				//同步缓存数据
+				WareHouseManager.updateWareHouseMap(renter);
 				this.write(Package.create(cmd, c));
 				return;
 			}
@@ -3249,7 +3291,7 @@ public class GameSession {
 		//2.2 如果是原料厂，但是货物是商品，不允许上架
 		if(building instanceof  MaterialFactory &&item.key.meta instanceof MetaGood)
 			return;
-		//2.3 如果是加工厂或者零售店，但是，上架的是原料
+		//2.3 如果是加工厂上架的是原料
 		if(building instanceof ProduceDepartment &&item.key.meta instanceof MetaMaterial){
 			return;
 		}
@@ -3260,6 +3302,10 @@ public class GameSession {
 		IShelf s = (IShelf)building;
 		if(s.addshelf(item,c.getPrice(),c.getAutoRepOn())){
 			GameDb.saveOrUpdate(s);
+			//同步缓存数据
+			if(building instanceof WareHouse){
+				WareHouseManager.updateWareHouseMap((WareHouse) building);
+			}
 			this.write(Package.create(cmd,c));
 		}else{
 			this.write(Package.fail(cmd));
@@ -3279,6 +3325,9 @@ public class GameSession {
 		IShelf s = wareRenter;
 		if (s.setPrice(item.key, r.getPrice())) {
 			GameDb.saveOrUpdate(s);
+			//同步缓存数据
+			WareHouse wareHouse = wareRenter.getWareHouse();
+			WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
 			this.write(Package.create(cmd,r));
 		}else
 			this.write(Package.fail(cmd));
@@ -3298,6 +3347,8 @@ public class GameSession {
 
 			IShelf shelf = renter;
 			if(shelf.delshelf(item.key,item.n,true)){
+				//同步Warehouse数据
+				WareHouseManager.updateWareHouseMap(renter);
 				GameDb.saveOrUpdate(shelf);
 				this.write(Package.create(cmd,s));
 			}else
@@ -3319,6 +3370,9 @@ public class GameSession {
 			}
 			IShelf sf = (IShelf) building;
 			if (sf.delshelf(item.key, item.n, true)) {
+				//同步数据
+				if(building instanceof WareHouse)
+					WareHouseManager.updateWareHouseMap((WareHouse) building);
 				GameDb.saveOrUpdate(sf);
 				this.write(Package.create(cmd, s));
 			} else
@@ -3343,6 +3397,8 @@ public class GameSession {
 			if(content != null && content.autoReplenish){
 				IShelf.updateAutoReplenish(shelf,itemKey);
 			}
+			//同步数据
+			WareHouseManager.updateWareHouseMap(renter);
 			GameDb.saveOrUpdate(shelf);
 			this.write(Package.create(cmd, c));
 		}
@@ -3362,20 +3418,20 @@ public class GameSession {
 		this.write(Package.create(cmd, info));
 	}
 
-	//13.detailWareHouse 租户详情，根据集散中心获取租户详情
+	//13.detailWareHouse 租户详情，根据集散中心获取当前的租户详情
 	public void detailWareHouseRenter(short cmd,Message message){
 		Gs.Id c = (Gs.Id) message;
 		UUID bid = Util.toUuid(c.getId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building==null||!(building instanceof WareHouse)){
+		List<WareHouseRenter> renters = WareHouseManager.instance().getWareHouseByRenterIdFromWareHouse(bid, player.id());
+		if(renters.size()<=0){
 			this.write(Package.fail(cmd));
 			return;
 		}
-		WareHouse wareHouse = (WareHouse) building;
-		if(wareHouse.getRenters().size()<=0||wareHouse.getRenters()==null)
-			return;
 		Gs.detailWareHouseRenter.Builder builder = Gs.detailWareHouseRenter.newBuilder();
-		wareHouse.getRenters().forEach(p->builder.addRenters(p.toProto()));
+		renters.forEach(p->{
+			if(p.getRenterId().equals(player.id()))
+				builder.addRenters(p.toProto());
+			});
 		this.write(Package.create(cmd,builder.build()));
 	}
 
@@ -3398,7 +3454,7 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	//15.获取集散中心数据详情摘要,客户端传递一个中心坐标
+	//15.获取集散中心数据详情,客户端传递一个中心坐标
 	public void queryWareHouseDetail(short cmd,Message message){
 		Gs.QueryWareHouseDetail c = (Gs.QueryWareHouseDetail) message;
 		GridIndex center = new GridIndex(c.getCenterIdx().getX(),c.getCenterIdx().getY());
@@ -3474,6 +3530,16 @@ public class GameSession {
 				IShelf.updateAutoReplenish(dstShelf,item.key);
 			}
 		}
+		//同步数据
+		if(srcShelf instanceof WareHouseRenter)
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) srcShelf);
+		else if(srcShelf instanceof WareHouse)
+			WareHouseManager.updateWareHouseMap((WareHouse) srcShelf);
+
+		if(dstShelf instanceof WareHouseRenter)
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) dstShelf);
+		else if(dstShelf instanceof WareHouse)
+			WareHouseManager.updateWareHouseMap((WareHouse) dstShelf);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd,t));
 	}
@@ -3515,7 +3581,6 @@ public class GameSession {
 			else
 				woman++;
 		}
-
 		//2.2.统计所有npc的数量
 		long npcNum = NpcManager.instance().getNpcCount();//所有npc数量
 		long socialNum = npcMap.get(10) + npcMap.get(11);//失业人员
