@@ -5,6 +5,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lt;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +57,12 @@ public class LogDb {
 	
 	private static final String PLAYER_INCOME = "playerIncome";
 	private static final String PLAYER_PAY = "playerPay";
+	//购买租户上架的商品记录
+	private static final String BUY_RENTER_INSHELF = "buyRenterInShelf";
+	//租户仓库收入记录
+	private static final String RENTER_SHELF_INCOME = "renterShelfIncome";
+	//运输记录（租用仓库之间的运输记录）
+	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -85,6 +92,10 @@ public class LogDb {
 	private static MongoCollection<Document> rentWarehouseIncome;
 	private static MongoCollection<Document> playerIncome;
 	private static MongoCollection<Document> playerPay;
+	//WareHouserenter
+	private static MongoCollection<Document> buyRenterInShelf;//购买了租户仓库的商品
+	private static MongoCollection<Document> renterShelfIncome;//租户仓库的收入
+	private static MongoCollection<Document> payRenterTransfer;//租用仓库间的运输记录
 
 	public static final String KEY_TOTAL = "total";
 
@@ -134,6 +145,15 @@ public class LogDb {
 		playerIncome = database.getCollection(PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerPay = database.getCollection(PLAYER_PAY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//购买租户上架商品
+		buyRenterInShelf = database.getCollection(BUY_RENTER_INSHELF)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//租户仓库的收入
+		renterShelfIncome=database.getCollection(RENTER_SHELF_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//租用仓库间的运输记录
+		payRenterTransfer = database.getCollection(PAY_RENTER_TRANSFER)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -529,16 +549,15 @@ public class LogDb {
 		npcTypeNum.insertOne(document);
 	}
 
-	//租用仓库记录：租用开始时间、结束时间、租用时长、租金、租用者、集散中心建筑id、订单编号、租用大小等数据
-	public static void rentWarehouseIncome(Long orderId,UUID bid,UUID renterId,Long startTime,Long endTime,int hourToRent,int rent,int rentCapacity){
+	//租用仓库记录：租用时间、结束时间、租金、租用者id、订单编号、租用容量等数据
+	public static void rentWarehouseIncome(Long orderId,UUID bid,Serializable renterId,Long endTime,int hourToRent,int rent,int rentCapacity){
 		Document document = new Document("t", System.currentTimeMillis());
-		document.append("o", orderId)
+		document.append("or", orderId)
 				.append("b", bid)
 				.append("r", renterId)
-				.append("s", startTime)
 				.append("e", endTime)
 				.append("h", hourToRent)
-				.append("rent", rent)
+				.append("money", rent)
 				.append("c", rentCapacity);
 		rentWarehouseIncome.insertOne(document);
 	}
@@ -554,7 +573,42 @@ public class LogDb {
 				.append("a", cost);
 		playerPay.insertOne(document);
 	}
+	//购买租户上架商品记录
+	public static void buyRenterInShelf(UUID buyId, UUID sellId, long n, long price,
+										UUID producerId, Long orderId, int type, int typeId){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", buyId)
+				.append("d", sellId)
+				.append("or", orderId)//订单编号
+				.append("p", price)
+				.append("a", n * price)
+				.append("i", producerId)
+				.append("tp", type)
+				.append("tpi", typeId);
+		buyRenterInShelf.insertOne(document);
+	}
+	//记录租户仓库收入
+	public static void renterShelfIncome(Long orderId,UUID payId,long cost,int type,int typeId){ //租用仓库的货架收入
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("or", orderId)
+				.append("p", payId)
+				.append("a", cost)
+				.append("tp", type)
+				.append("tpi", typeId);
+		renterShelfIncome.insertOne(document);
+	}
 
+	//租用仓库之间的运输
+	public static void payRenterTransfer(UUID roleId, long charge, Serializable srcId, Serializable dstId, UUID producerId, int n){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("s", srcId)
+				.append("d", dstId)
+				.append("a", charge)
+				.append("i", producerId)
+				.append("c", n);
+		payTransfer.insertOne(document);
+	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
