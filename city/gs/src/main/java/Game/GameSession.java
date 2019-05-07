@@ -749,7 +749,31 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.setPrice(item.key, c.getPrice())) {
+		Shelf.Content i = s.getContent(item.key);
+		if(!s.setPrice(item.key, c.getPrice())){
+			this.write(Package.fail(cmd));
+			return;
+		}
+
+		int changeNum = item.n - i.getCount();
+		if( changeNum > 0){//上架
+			Item itemAdd = new Item(item.key,changeNum);
+			if(!s.addshelf(itemAdd, c.getPrice(),c.getAutoRepOn())){
+				this.write(Package.fail(cmd));
+				return;
+			}
+		}else{
+			if(!s.delshelf(item.key, -changeNum, true)){
+				this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
+				return;
+			}
+		}
+
+		if(s.setAutoReplenish(item.key,c.getAutoRepOn())) {
+			//处理自动补货
+			if(i != null && i.autoReplenish){
+				IShelf.updateAutoReplenish(s,item.key);
+			}
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}

@@ -80,6 +80,13 @@ public class TickManager {
         return false;
     }
 
+    public static void unRegisterTickById(String id){
+        Building building = City.instance().getBuilding(UUID.fromString(id));
+        if(building != null){
+            instance().unRegisterTick(building,true);
+        }
+    }
+
     public void tick(long deltaTime){
         for (Iterator<Map.Entry<Long, TickGroup>> it = _groupList.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Long,TickGroup> item = it.next();
