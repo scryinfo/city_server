@@ -3333,7 +3333,7 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 	}
 
-	//10.下架（包含集散中心和租用仓库）
+	//10.下架（包含其他建筑和租用仓库）
 	public void soldOutShelf(short cmd, Message message) throws Exception {
 		Gs.SoldOutShelf s = (Gs.SoldOutShelf) message;
 		Item item = new Item(s.getItem());
@@ -3355,19 +3355,10 @@ public class GameSession {
 				this.write(Package.fail(cmd));
 		}else {
 			//普通建筑下架
-			if (building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
+			if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 				return;
-			//2.2 如果是原料厂，货物是商品，
-			if (building instanceof MaterialFactory && item.key.meta instanceof MetaGood)
+			if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 				return;
-			//2.3 如果是加工厂或者零售店，原料
-			if (building instanceof ProduceDepartment && item.key.meta instanceof MetaMaterial) {
-				return;
-			}
-			//2.4 如果是零售店，商品
-			if (building instanceof RetailShop && item.key.meta instanceof MetaMaterial) {
-				return;
-			}
 			IShelf sf = (IShelf) building;
 			if (sf.delshelf(item.key, item.n, true)) {
 				//同步数据
