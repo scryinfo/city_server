@@ -1,11 +1,6 @@
 package Game.Eva;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import Game.GameDb;
@@ -68,5 +63,18 @@ public class EvaManager
     }
     public double computePercent(Eva eva){
     	return ((eva!=null&&eva.getLv()>0)?(eva.getLv()-1)/100d:0);
+    }
+
+
+    public List<Eva> getEva(UUID playerId,int at)
+    {
+        Set<Eva> set=getEvaList(playerId);
+        List<Eva> list = new ArrayList<>();
+        for (Eva eva : set) {
+            if(at==eva.getAt()){
+                list.add(eva);
+            }
+        }
+        return list;
     }
 }

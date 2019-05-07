@@ -1277,7 +1277,7 @@ public class GameSession {
 		//更新广告商玩家信息中广告列表
 		Building sellerBuilding = City.instance().getBuilding(promoOrder.sellerBuildingId);
 		PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
-		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId);
+		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId,true);
 		Gs.AdRemovePromoOrder.Builder newMsg = gs_AdRemovePromoOrder.toBuilder();
 		tslist.forEach(ts->newMsg.addPromoTsChanged(ts.toProto()));
 		GameDb.saveOrUpdate(fcySeller);
@@ -1443,7 +1443,7 @@ public class GameSession {
 
 		//临时处理不匹配的情况,正常情况下不会出现这种情况
 		if(lastOrder == null && !lastPromotion.equals(null)){
-			fcySeller.delSelledPromotion(lastPromotion);
+			fcySeller.delSelledPromotion(lastPromotion,true);
 			if(GlobalConfig.DEBUGLOG) {
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): lastOrder == null && lastPromotion != null");
 			}
@@ -2748,6 +2748,35 @@ public class GameSession {
 		else
 		{
 			this.write(Package.fail(cmd));
+		}
+	}
+
+	public void queryBuildingTech(short cmd, Message message)
+	{
+		Gs.ByteNum param = (Gs.ByteNum) message;
+		UUID bid = Util.toUuid(param.getId().toByteArray());
+		int techId = param.getNum();
+		Building building = City.instance().getBuilding(bid);
+		if (building != null)
+		{
+			Gs.BuildingTech.Builder builder = Gs.BuildingTech.newBuilder()
+					.setBid(param.getId())
+					.setTechId(techId)
+					.setPId(Util.toByteString(building.ownerId()))
+					.setBname(building.getName())
+					.setMId(building.metaId());
+
+			if (building.ownerId().equals(player.id()))
+			{
+				Gs.BuildingTech.Infos.Builder builder1 = builder.addInfosBuilder().setPId(Util.toByteString(player.id()));
+				EvaManager.getInstance().getEva(player.id(), techId).forEach(eva ->
+				{
+					builder1.addTechInfo(eva.toTechInfo());
+
+				});
+			}
+			builder.addAllInfos(LeagueManager.getInstance().getBuildingLeagueTech(bid, techId));
+			this.write(Package.create(cmd,builder.build()));
 		}
 	}
 

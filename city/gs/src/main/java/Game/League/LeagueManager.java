@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import Game.Building;
 import Game.City;
+import Game.Eva.EvaManager;
 import Game.GameDb;
 import Game.Player;
 import Game.Eva.Eva;
@@ -176,6 +177,7 @@ public class LeagueManager
         return getAllTechInfo(leagueInfo.getUid().getPlayerId(), leagueInfo.getUid().getTechId());
     }
 
+
     public List<LeagueInfo> getOpenedLeagueInfoByTechId(int techId)
     {
         List<LeagueInfo> leagueInfos = new ArrayList<>();
@@ -270,6 +272,33 @@ public class LeagueManager
          return buildingLeagueInfo.get(buildingId) == null ?
                  new HashSet<LeagueInfo.UID>() : buildingLeagueInfo.get(buildingId);
     }
+
+    public List<Gs.BuildingTech.Infos> getBuildingLeagueTech(UUID buildingId, int techId)
+    {
+
+        List<Gs.BuildingTech.Infos> builders = new ArrayList<>();
+        if (buildingLeagueInfo.get(buildingId) != null) {
+            buildingLeagueInfo.get(buildingId).forEach(uid ->
+            {
+                if (uid.getTechId() == techId)
+                {
+                    LeagueInfo info = leagueInfoMap.get(uid);
+                    Gs.BuildingTech.Infos.Builder builder = Gs.BuildingTech.Infos.newBuilder();
+                    builder.setPId(Util.toByteString(uid.getPlayerId()));
+                    EvaManager.getInstance().getEva(uid.getPlayerId(), uid.getTechId()).forEach(eva -> builder.addTechInfo(eva.toTechInfo()));
+                    info.memberForEach(member -> {
+                        if (member.getBuildingId().equals(buildingId))
+                        {
+                            builder.setStartTs(member.getStartTs()).setHours(member.getSignHours());
+                        }
+                    });
+                    builders.add(builder.build());
+                }
+            });
+        }
+        return builders;
+    }
+
     
     public Set<BrandLeague> getBrandLeagueList(UUID buildingId)
     {

@@ -127,4 +127,18 @@ public class Eva {
 		}
 		return false;
 	}
+
+	public Gs.LeagueInfo.TechInfo toTechInfo()
+	{
+		Gs.LeagueInfo.TechInfo.Builder builder = Gs.LeagueInfo.TechInfo.newBuilder();
+		if (bt == Gs.Eva.Btype.Brand_VALUE)
+		{
+			builder.setType(Gs.Eva.Btype.valueOf(bt)).setValue(b);
+		}
+		else
+		{
+			builder.setType(Gs.Eva.Btype.valueOf(bt)).setValue(lv);
+		}
+		return builder.build();
+	}
 }
