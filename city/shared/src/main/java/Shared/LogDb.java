@@ -550,7 +550,7 @@ public class LogDb {
 	}
 
 	//租用仓库记录：租用时间、结束时间、租金、租用者id、订单编号、租用容量等数据
-	public static void rentWarehouseIncome(Long orderId,UUID bid,Serializable renterId,Long endTime,int hourToRent,int rent,int rentCapacity){
+	public static void rentWarehouseIncome(Long orderId,UUID bid,UUID renterId,Long endTime,int hourToRent,int rent,int rentCapacity){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("or", orderId)
 				.append("b", bid)
