@@ -64,7 +64,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         this.hourToRent = hourToRent;
         this.rent = rent;
         this.store = new Storage(rentCapacity);
-        this.shelf = new Shelf();
+        this.shelf = new Shelf(rentCapacity);
     }
 
     public WareHouseRenter() { }
