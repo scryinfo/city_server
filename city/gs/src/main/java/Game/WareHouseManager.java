@@ -148,7 +148,7 @@ public class WareHouseManager {
             wareHouse.updateTodayRentIncome(rent);//修改今日出租收入
             wareHouseRenter.setWareHouse(wareHouse);
             wareHouseRenter.setOrderId(OrderCodeFactory.getOrderId(wareHouse.metaId()));//自动生成订单号
-            LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(), bid, renterId, startTime, startTime + hourToRent * 3600 * 1000, hourToRent, rent, rentCapacity);
+            LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid, renterId,startTime + hourToRent * 3600000, hourToRent, rent, rentCapacity);
             LogDb.playerPay(player.id(), rent);
             LogDb.playerIncome(owner, rent);
             List updateList = new ArrayList();

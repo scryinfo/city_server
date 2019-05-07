@@ -188,8 +188,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.closeWareHouseRent_VALUE, Wrapper.newWithMessageAsync(Gs.SetWareHouseRent.PARSER, GameSession.class,"closeWareHouseRent"));
 			//租用仓库
 			table.put((short) GsCode.OpCode.rentWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.rentWareHouse.PARSER, GameSession.class,"rentWareHouse"));
-			//查询玩家的（建筑）仓库信息（包含租用的仓库信息）
-			table.put((short) GsCode.OpCode.getPlayerBuildingDetail_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getPlayerBuildingDetail"));
+			//查询玩家的（建筑）仓库信息（包含所有仓库信息）
+			table.put((short) GsCode.OpCode.getPlayerBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerBuildingDetail"));
 			//购买商品
 			table.put((short) GsCode.OpCode.buyShelfGood_VALUE, Wrapper.newWithMessageAsync(Gs.BuyInShelfGood.PARSER,GameSession.class,"buyInShelfGood"));
 			//上架
