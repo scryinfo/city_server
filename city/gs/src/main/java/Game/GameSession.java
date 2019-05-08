@@ -62,6 +62,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
+import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -3419,7 +3420,7 @@ public class GameSession {
 		if (t.hasSrcOrderId())
 			src = WareHouseUtil.getWareRenter(srcId, t.getSrcOrderId());
 		if(t.hasDstOrderId())
-			dst=WareHouseUtil.getWareRenter(dstId, t.getSrcOrderId());
+			dst=WareHouseUtil.getWareRenter(dstId, t.getDstOrderId());
 		if(src == null || dst == null)
 			return;
 		//运费=距离*运费比例*数量
@@ -3436,10 +3437,20 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
+		MoneyPool.instance().add(charge);
 		//日志记录
 		LogDb.playerPay(player.id(), charge);
-		MoneyPool.instance().add(charge);
-		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		if(!t.hasSrcOrderId()&&!t.hasDstOrderId()) {
+			LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		}else{
+			Serializable srcId1=srcId;
+			Serializable dstId1=dstId;
+			if(t.hasSrcOrderId())
+				srcId1 = t.getSrcOrderId();
+			if(t.hasDstOrderId())
+				dstId1 = t.getDstOrderId();
+			LogDb.payRenterTransfer(player.id(), charge, srcId1, dstId1, item.key.producerId, item.n);
+		}
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		IShelf srcShelf = (IShelf)src;
@@ -3509,7 +3520,7 @@ public class GameSession {
 		}
 		//2.2.统计所有npc的数量
 		long npcNum = NpcManager.instance().getNpcCount();//所有npc数量
-		long socialNum = npcMap.get(10) + npcMap.get(11);//失业人员
+		long socialNum = npcMap.get(10) + npcMap.get(11);//失业人员（社会福利人员）
 		humanInfo.setBoy(man);
 		humanInfo.setGirl(woman);
 		humanInfo.setCitizens(npcNum);
@@ -3517,7 +3528,7 @@ public class GameSession {
 		//3.设置城市摘要信息
 		Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
 		Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
-		//3.1.所有的土地数量
+		//3.1.所有的拍卖的土地数量
 		int groundSum = 0;
 		for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
 			MetaGroundAuction value = mg.getValue();
@@ -3529,11 +3540,10 @@ public class GameSession {
 		citySummary.setGroundInfo(groundInfo);
 		//4.设置城市运费
 		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
-		//5.设置平均工资(需要计算)以及其他信息
+		//5.设置平均工资(需要计算)以及其他信息(平九年工资，所有建筑实发的工资之和➗全城员工人数)
 		long avgSalary=0;
 		long sumSalary=0;
 		List<Building> buildings = new ArrayList<>();
-		//获取到所有的城市用于获取实发工资
 		City.instance().forEachBuilding(b->{
 			buildings.add(b);
 		});
