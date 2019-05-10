@@ -11,15 +11,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
@@ -81,6 +73,22 @@ public class BrandManager {
         }
     }
     @Entity
+    public static final class BrandName {
+        @Id
+        @GeneratedValue
+        UUID id;
+
+        public String getBrandName() {
+            return brandName;
+        }
+
+        public void setBrandName(String brandName) {
+            this.brandName = brandName;
+        }
+
+        private String brandName = "";
+    }
+    @Entity
     public static final class BrandInfo {
 
         public BrandInfo(BrandKey key) {
@@ -92,6 +100,17 @@ public class BrandManager {
         @EmbeddedId
         BrandKey key;
         int v;
+
+        public BrandName getBrandName() {
+            return brandName;
+        }
+
+        public void setBrandName(BrandName brandName) {
+
+            this.brandName = brandName;
+        }
+
+        private BrandName brandName;
     }
     public void update(long diffNano) {
         if(dbSaveTimer.update(diffNano))

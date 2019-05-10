@@ -22,6 +22,7 @@ public interface IShelf {
         IStorage storage = (IStorage) shelf;
         if(i != null){
             shelf.delshelf(k, i.n, true);
+            storage.consumeLock(k, i.n);
         }
         Item itemInStore = new Item(k,storage.availableQuantity(k.meta));
         shelf.addshelf(itemInStore,i.price, i.autoReplenish);
