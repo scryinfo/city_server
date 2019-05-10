@@ -28,6 +28,7 @@ import Game.Util.PlayerExchangeAmountUtil;
 import Game.Util.WareHouseUtil;
 import Shared.*;
 import Shared.Package;
+import com.mongodb.client.FindIterable;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
@@ -62,6 +63,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
+import org.bson.Document;
 import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Method;
@@ -3563,7 +3565,7 @@ public class GameSession {
 		//计算增幅（本次7天内统计-前7天内统计）/上次统计
 		long incryRate = (salarys2 - salarys1) / salarys1 ;
 		builder.setSalaryIncre((int) incryRate);
-		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);//全程交易量
+		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);//全城交易量
 		//8.市民保障福利（平均工资）,计算公式：社会保障的比例计算  （社保福利是平均工资的3%+全程交易量的%2）/奖金池
 		//8.1.计算福利待遇
 		Double socialSalary = avgSalary*0.03+amount*0.02;//社保人员的工资
@@ -3677,6 +3679,7 @@ public class GameSession {
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(totalQuality).build());
     	this.write(Package.create(cmd, builder.build()));
     }
+
     //查询推广公司信息	
     public void queryPromotionCompanyInfo(short cmd,Message message){
     	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;

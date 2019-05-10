@@ -25,7 +25,7 @@ public class PerHourJob implements org.quartz.Job {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
         long time = System.currentTimeMillis();
-        long endTime = time - time%(1000 * 60  * 60);
+        long endTime = time - time%(1000 * 60  * 60); //结束时间为当前时间-1小时
         long startTime = endTime - 1000 * 60 * 60;
 
 

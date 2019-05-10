@@ -691,6 +691,18 @@ public class LogDb {
 		return playerPay;
 	}
 
+	public static MongoCollection<Document> getBuyRenterInShelf() {
+		return buyRenterInShelf;
+	}
+
+	public static MongoCollection<Document> getRenterShelfIncome() {
+		return renterShelfIncome;
+	}
+
+	public static MongoCollection<Document> getPayRenterTransfer() {
+		return payRenterTransfer;
+	}
+
 	public static class Positon
 	{
 		int x;
