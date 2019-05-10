@@ -57,7 +57,6 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
             Long beginTs,
             Integer hourToRent,
             Integer rent) {
-        this.orderId = OrderCodeFactory.getOrderId(this.wareHouse.metaId());//自动生成订单号
         this.renterId = renterId;
         this.wareHouse = wareHouse;
         this.rentCapacity = rentCapacity;
@@ -65,7 +64,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         this.hourToRent = hourToRent;
         this.rent = rent;
         this.store = new Storage(rentCapacity);
-        this.shelf = new Shelf();
+        this.shelf = new Shelf(rentCapacity);
     }
 
     public WareHouseRenter() { }
@@ -319,10 +318,6 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
         builder.addHouseRenter(this.toProto());
-    }
-
-    public static void test(){
-        System.out.println("开始执行++++++++++WareHourseRenter"+System.currentTimeMillis());
     }
 
     @Override

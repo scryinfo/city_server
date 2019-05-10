@@ -5,6 +5,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lt;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +46,7 @@ public class LogDb {
 
 	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
-	
+
 	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
 	private static final String CITY_BROADCAST = "cityBroadcast";
 	private static final String NPC_TYPE_NUM = "npcTypeNum";
@@ -53,9 +54,15 @@ public class LogDb {
 	private static final String FLOW_AND_LIFT = "flowAndLift";
 	//集散中心租用仓库的收入记录
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
-	
+
 	private static final String PLAYER_INCOME = "playerIncome";
 	private static final String PLAYER_PAY = "playerPay";
+	//购买租户上架的商品记录
+	private static final String BUY_RENTER_INSHELF = "buyRenterInShelf";
+	//租户仓库收入记录
+	private static final String RENTER_SHELF_INCOME = "renterShelfIncome";
+	//运输记录（租用仓库之间的运输记录）
+	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -76,7 +83,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
-	
+
 	//npc rent apartment
 	private static MongoCollection<Document> npcRentApartment;
 	private static MongoCollection<Document> cityBroadcast;
@@ -85,6 +92,10 @@ public class LogDb {
 	private static MongoCollection<Document> rentWarehouseIncome;
 	private static MongoCollection<Document> playerIncome;
 	private static MongoCollection<Document> playerPay;
+	//WareHouserenter
+	private static MongoCollection<Document> buyRenterInShelf;//购买了租户仓库的商品
+	private static MongoCollection<Document> renterShelfIncome;//租户仓库的收入
+	private static MongoCollection<Document> payRenterTransfer;//租用仓库间的运输记录
 
 	public static final String KEY_TOTAL = "total";
 
@@ -101,7 +112,7 @@ public class LogDb {
 		buyInShelf = database.getCollection(BUY_INSHELF)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		npcBuyInShelf = database.getCollection(NPC_BUY_INSHELF)
-						.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
 		payTransfer = database.getCollection(PAY_TRANSFER)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -119,7 +130,7 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buildingIncome = database.getCollection(BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		
+
 		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityBroadcast = database.getCollection(CITY_BROADCAST)
@@ -134,6 +145,15 @@ public class LogDb {
 		playerIncome = database.getCollection(PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerPay = database.getCollection(PLAYER_PAY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//购买租户上架商品
+		buyRenterInShelf = database.getCollection(BUY_RENTER_INSHELF)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//租户仓库的收入
+		renterShelfIncome=database.getCollection(RENTER_SHELF_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		//租用仓库间的运输记录
+		payRenterTransfer = database.getCollection(PAY_RENTER_TRANSFER)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -177,10 +197,10 @@ public class LogDb {
 	public static List<Document> daySummaryRoomRent(long yestodayStartTime, long todayStartTime)
 	{
 		List<Document> documentList = new ArrayList<>();
-        Document projectObject = new Document()
-                .append("id", "$_id")
-                .append(KEY_TOTAL, "$" + KEY_TOTAL)
-                .append("_id",0);
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
 		incomeVisit.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
@@ -188,7 +208,7 @@ public class LogDb {
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
 						Aggregates.group("$r", Accumulators.sum(KEY_TOTAL, "$a")),
-                        Aggregates.project(projectObject)
+						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -203,51 +223,51 @@ public class LogDb {
 		if (isIncomne) {
 			groupStr = "$d";
 		}
-        Document groupObject = new Document("_id",
-                new Document("r", groupStr)
-                        .append("tpi", "$tpi"));
-        Document projectObject = new Document()
-                .append("id", "$_id._id.r")
-                .append("tpi", "$_id._id.tpi")
-                .append("total","$total")
-                .append("_id",0);
+		Document groupObject = new Document("_id",
+				new Document("r", groupStr)
+						.append("tpi", "$tpi"));
+		Document projectObject = new Document()
+				.append("id", "$_id._id.r")
+				.append("tpi", "$_id._id.tpi")
+				.append("total","$total")
+				.append("_id",0);
 		int tp = TP_TYPE_GOODS;
 		if (!isGoods) {
 			tp = TP_TYPE_MATERIAL;
 		}
 		//npc buy
-        collection.aggregate(
-                Arrays.asList(
-                        Aggregates.match(and(
-                                eq("tp", tp),
-                                gte("t", yestodayStartTime),
-                                lt("t", todayStartTime))),
-                        Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a")),
-                        Aggregates.project(projectObject)
-                )
-        ).forEach((Block<? super Document>) documentList::add);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", tp),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayNpcGoodsNum(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
-        Document projectObject = new Document()
-                .append("id", "$_id")
-                .append(KEY_TOTAL, "$" + KEY_TOTAL)
-                .append("_id",0);
-        collection.aggregate(
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
 						Aggregates.group("$tpi",  Accumulators.sum(KEY_TOTAL, 1l)),
-                        Aggregates.project(projectObject)
+						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayYesterdayExchangeAmount(long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -261,11 +281,11 @@ public class LogDb {
 								lt("t", endTime))),
 						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
 						Aggregates.project(projectObject)
-						)
-				).forEach((Block<? super Document>) documentList::add);
+				)
+		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayTodayNpcExchangeAmount(long startTime,long endTime,MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -280,25 +300,25 @@ public class LogDb {
 								lt("t", endTime))),
 						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, "$a")),
 						Aggregates.project(projectObject)
-						)
-				).forEach((Block<? super Document>) documentList::add);
+				)
+		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
-        Document projectObject = new Document()
-                .append("id", "$_id")
-                .append(KEY_TOTAL, "$" + KEY_TOTAL)
-                .append("_id",0);
-        collection.aggregate(
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
 						Aggregates.group("$p",  Accumulators.sum(KEY_TOTAL, "$a")),
-                        Aggregates.project(projectObject)
+						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -353,9 +373,9 @@ public class LogDb {
 	public static List<Document> queryBuildingFlowAndLift(long startTime,UUID buildingId)
 	{
 		List<Document> list = new ArrayList<>();
-		 flowAndLift.find(and(eq("b",buildingId),gte("t", startTime)))
+		flowAndLift.find(and(eq("b",buildingId),gte("t", startTime)))
 				.sort(Sorts.ascending("t"))
-				 .forEach((Block<? super Document>) list::add);
+				.forEach((Block<? super Document>) list::add);
 		return list;
 	}
 
@@ -386,7 +406,7 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+									  UUID producerId, UUID bid, int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -488,9 +508,9 @@ public class LogDb {
 				.append("tp",buildType);
 		incomeVisit.insertOne(document);
 	}
-	
+
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId)
+										 UUID ownerId, UUID bid, int type, int mId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -509,8 +529,8 @@ public class LogDb {
 		//重大交易不删以前的提示，其他都要删除以前的提示
 		if(type!=1){
 			cityBroadcast.deleteMany(and(
-	    			eq("tp",type)
-	    			));
+					eq("tp",type)
+			));
 		}
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("s", sellerId)
@@ -520,7 +540,7 @@ public class LogDb {
 				.append("tp", type);
 		cityBroadcast.insertOne(document);
 	}
-	
+
 	public static void  npcTypeNum(long time, int type, long n)
 	{
 		Document document = new Document("t", time);
@@ -529,16 +549,15 @@ public class LogDb {
 		npcTypeNum.insertOne(document);
 	}
 
-	//租用仓库记录：租用开始时间、结束时间、租用时长、租金、租用者、集散中心建筑id、订单编号、租用大小等数据
-	public static void rentWarehouseIncome(Long orderId,UUID bid,UUID renterId,Long startTime,Long endTime,int hourToRent,int rent,int rentCapacity){
+	//租用仓库记录：租用时间、结束时间、租金、租用者id、订单编号、租用容量等数据
+	public static void rentWarehouseIncome(Long orderId,UUID bid,UUID renterId,Long endTime,int hourToRent,int rent,int rentCapacity){
 		Document document = new Document("t", System.currentTimeMillis());
-		document.append("o", orderId)
+		document.append("or", orderId)
 				.append("b", bid)
 				.append("r", renterId)
-				.append("s", startTime)
 				.append("e", endTime)
 				.append("h", hourToRent)
-				.append("rent", rent)
+				.append("money", rent)
 				.append("c", rentCapacity);
 		rentWarehouseIncome.insertOne(document);
 	}
@@ -554,7 +573,42 @@ public class LogDb {
 				.append("a", cost);
 		playerPay.insertOne(document);
 	}
+	//购买租户上架商品记录
+	public static void buyRenterInShelf(UUID buyId, UUID sellId, long n, long price,
+										UUID producerId, Long orderId, int type, int typeId){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", buyId)
+				.append("d", sellId)
+				.append("or", orderId)//订单编号
+				.append("p", price)
+				.append("a", n * price)
+				.append("i", producerId)
+				.append("tp", type)
+				.append("tpi", typeId);
+		buyRenterInShelf.insertOne(document);
+	}
+	//记录租户仓库收入
+	public static void renterShelfIncome(Long orderId,UUID payId,long cost,int type,int typeId){ //租用仓库的货架收入
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("or", orderId)
+				.append("p", payId)
+				.append("a", cost)
+				.append("tp", type)
+				.append("tpi", typeId);
+		renterShelfIncome.insertOne(document);
+	}
 
+	//租用仓库之间的运输
+	public static void payRenterTransfer(UUID roleId, long charge, Serializable srcId, Serializable dstId, UUID producerId, int n){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("s", srcId)
+				.append("d", dstId)
+				.append("a", charge)
+				.append("i", producerId)
+				.append("c", n);
+		payTransfer.insertOne(document);
+	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
@@ -609,17 +663,17 @@ public class LogDb {
 	{
 		return playerInfo;
 	}
-	
+
 	public static MongoCollection<Document> getNpcRentApartment()
 	{
 		return npcRentApartment;
 	}
-	
+
 	public static MongoCollection<Document> getCityBroadcast()
 	{
 		return cityBroadcast;
 	}
-	
+
 	public static MongoCollection<Document> getNpcTypeNum()
 	{
 		return npcTypeNum;
@@ -628,13 +682,25 @@ public class LogDb {
 	public static MongoCollection<Document> getRentWarehouseIncome() {
 		return rentWarehouseIncome;
 	}
-	
+
 	public static MongoCollection<Document> getPlayerIncome() {
 		return playerIncome;
 	}
-	
+
 	public static MongoCollection<Document> getPlayerPay() {
 		return playerPay;
+	}
+
+	public static MongoCollection<Document> getBuyRenterInShelf() {
+		return buyRenterInShelf;
+	}
+
+	public static MongoCollection<Document> getRenterShelfIncome() {
+		return renterShelfIncome;
+	}
+
+	public static MongoCollection<Document> getPayRenterTransfer() {
+		return payRenterTransfer;
 	}
 
 	public static class Positon
