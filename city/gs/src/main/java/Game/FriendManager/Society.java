@@ -77,7 +77,8 @@ public class Society
     {
         this.id = UUID.randomUUID();
         this.createId = createId;
-        this.lastModify = this.createTs = System.currentTimeMillis();
+        this.createTs = System.currentTimeMillis();
+        this.lastModify = 0;
         this.name = name;
         this.declaration = declaration;
         addMember(createId, new SocietyMember(Gs.SocietyMember.Identity.CHAIRMAN_VALUE));

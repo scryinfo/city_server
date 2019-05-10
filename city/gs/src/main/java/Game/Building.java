@@ -518,6 +518,7 @@ public abstract class Building implements Ticker{
         return Gs.TechBuildingPos.newBuilder()
                 .setBid(Util.toByteString(id))
                 .setMId(metaBuilding.id)
+                .setPId(Util.toByteString(this.ownerId))
                 .setPos(Gs.MiniIndex.newBuilder()
                         .setX(this.coordinate.x)
                         .setY(this.coordinate.y))
