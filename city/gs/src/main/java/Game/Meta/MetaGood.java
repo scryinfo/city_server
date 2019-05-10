@@ -14,7 +14,7 @@ public final class MetaGood extends MetaItem
             mapping.put(base+i, Type.values()[i]);
         }
     }
-    public static final int LUX_SIZE = 4;
+    public static final int LUX_SIZE = 3;
     public static Type goodType(int id) {
         return mapping.get(category(id));
     }
