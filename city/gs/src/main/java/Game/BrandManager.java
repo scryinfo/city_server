@@ -118,7 +118,6 @@ public class BrandManager {
         if(brandQualityTimer.update(diffNano)){
         	getAllBuildingBrandOrQuality();
         }
-            
     }
     @Transient
     private PeriodicTimer dbSaveTimer = new PeriodicTimer(2*60*1000);

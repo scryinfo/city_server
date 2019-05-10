@@ -12,6 +12,7 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import Game.BrandManager;
 
 @Embeddable
 public class ItemKey implements Serializable {
@@ -64,6 +65,8 @@ public class ItemKey implements Serializable {
     // SQL's composite key can not have NULL column, so give those 2 field a default value
     public UUID producerId = NULL_PRODUCER_ID;
     public int qty = 0;
+    //品牌id
+    BrandManager.BrandKey brandId;
 
     public static final UUID NULL_PRODUCER_ID = UUID.nameUUIDFromBytes(new byte[16]);
     public Gs.ItemKey toProto() {
