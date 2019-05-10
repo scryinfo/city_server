@@ -217,6 +217,9 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         if(this.shelf.del(id, n)) {
             if(unLock)
                 this.store.unLock(id, n);
+            else{//如果是消费，那么需要消费lock的数量
+                this.store.consumeLock(id, n);
+            }
             return true;
         }
         return false;
@@ -241,7 +244,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         Shelf.Content i = this.shelf.getContent(id);
         if(i == null)
             return false;
-        this.shelf.add(new Item(id,i.n),i.price,autoRepOn);
+        this.shelf.add(new Item(id,0),i.price,autoRepOn);
         return  true;
     }
 
