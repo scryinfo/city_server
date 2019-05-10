@@ -846,7 +846,6 @@ public class GameSession {
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 		sellBuilding.updateTodayIncome(cost);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
@@ -3263,7 +3262,6 @@ public class GameSession {
 		if(sellRenter!=null){
 			sellStorage = sellRenter;
 		}
-		sellStorage.consumeLock(itemBuy.key, itemBuy.n);
 		//更每每日的收入
 		if(sellRenter!=null){
 			sellRenter.updateTodayIncome(cost);//更新今日收入
