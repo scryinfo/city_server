@@ -217,7 +217,7 @@ public class Storage implements IStorage {
     Set<UUID> order = new HashSet<>();
 
     public int usedSize() {
-        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + locked.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum()-otherUseSize;
+        return inHand.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + locked.entrySet().stream().mapToInt(e->e.getKey().meta.size*e.getValue()).sum() + reserved.entrySet().stream().mapToInt(e->e.getKey().size*e.getValue()).sum()+otherUseSize;
     }
     public int availableSize() {
         return capacity - usedSize();
@@ -241,6 +241,5 @@ public class Storage implements IStorage {
     public void setOtherUseSize(int otherUseSize) {
         this.otherUseSize = otherUseSize;
     }
-
 
 }
