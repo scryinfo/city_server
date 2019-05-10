@@ -1496,7 +1496,9 @@ public class GameSession {
 		GameDb.saveOrUpdate(buyer);
 		//更新广告商广告列表
 		fcySeller.addSelledPromotion(newOrder.promotionId);
-		GameDb.saveOrUpdate(fcySeller);
+		sellerBuilding.updateTodayIncome(fee);
+		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);
+		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
 
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
