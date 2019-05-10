@@ -109,7 +109,7 @@ public class BrandManager {
 
             this.brandName = brandName;
         }
-
+        @OneToOne(cascade=CascadeType.ALL)
         private BrandName brandName;
     }
     public void update(long diffNano) {
