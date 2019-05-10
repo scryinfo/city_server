@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import Statistic.StatisticSession;
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.quartz.JobExecutionException;
 
@@ -255,6 +257,39 @@ public class Test
             System.err.println("end--------------");
             TimeUnit.SECONDS.sleep(5);
         }
+    }
+    @org.junit.Test
+   public void testDayIncome(){
+        LogDb.init("mongodb://192.168.0.51:27017","cityYetianyi");
+        SummaryUtil.init();
+        MongoCollection<Document> dayPlayerIncome = SummaryUtil.getDayPlayerPay();
+        Map<Long, Document> map = new LinkedHashMap<>();
+        dayPlayerIncome
+                .find()
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) document ->
+        {
+            map.put(document.getLong("time"), document);
+        });
+        for (Map.Entry<Long, Document> entry : map.entrySet()) {
+            System.out.println(entry.getKey()+"金额"+entry.getValue());
+        }
+        //查询统计信息
+        Map<Long, Long> map1 = SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(), UUID.fromString("bc7e5815-4dcb-4e5c-b4b2-ca5870ae57ac"));
+        System.out.println(map1);
+    }
+
+    //统计收入支出信息
+    @org.junit.Test
+    public void testDayIncomAndPay(){
+        LogDb.init("mongodb://192.168.0.51:27017","cityYetianyi");
+        SummaryUtil.init();
+        UUID id = UUID.fromString("9ba65634-4e0b-4f43-aa1a-8b8b573b822c");
+        Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
+        Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+        //统计整理数据
+        Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
+        Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
     }
 
 }

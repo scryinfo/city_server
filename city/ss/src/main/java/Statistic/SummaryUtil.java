@@ -243,12 +243,14 @@ public class SummaryUtil
     	calendar.set(Calendar.HOUR_OF_DAY, 0);
     	calendar.set(Calendar.MINUTE, 0);
     	calendar.set(Calendar.SECOND, 0);
-    	Date endDate = calendar.getTime();
-    	long endTime=endDate.getTime();
-    	
-    	calendar.add(Calendar.DATE, -7);
+    	calendar.add(Calendar.DATE, -30);//把7天的统计改为30天统计
+        //开始时间
     	Date startDate = calendar.getTime();
     	long startTime=startDate.getTime();
+    	calendar.setTime(new Date());
+    	//结束时间（到现在时间点的统计）
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
     	Map<Long, Long> map = new LinkedHashMap<>();
     	collection.find(and(
     			eq("id",id),

@@ -1,9 +1,8 @@
 package Statistic;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import Statistic.TimeUtil.TimeUtil;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
@@ -254,16 +253,42 @@ public class StatisticSession {
     	UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
     	Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
     	Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
-    	
-    	Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
+    	//统计整理数据
+		Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
+		Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
+
+		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
     	builder.setId(Util.toByteString(id));
-    	playerIncomeMap.forEach((k,v)->{
+		monthTotalIncome.forEach((k,v)->{
     		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
     		b.setTime(k);
     		b.setIncome(v);
-    		b.setPay((playerPayMap!=null&&playerPayMap.size()>0&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
+    		b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?playerPayMap.get(k):0);
     	});
     	this.write(Package.create(cmd,builder.build()));
     }
 
+    //以前面29天作为全部统计单位，当前天数不统计
+    public static Map<Long,Long>  monthTotal(Map<Long, Long> sourceMap){
+		Map<Long, Long> total = new TreeMap<>();
+    	//1.处理29天以前的数据，以天数统计求和
+		sourceMap.forEach((time,money)->{
+			//处理29天以前的数据
+			if(time<=TimeUtil.todayStartTime()-1&&time>=TimeUtil.monthStartTime()){
+				//获取当天开始时间
+				Long st = TimeUtil.getTimeDayStartTime(time);
+				if(total.containsKey(st)) {
+					total.put(st, total.get(st) + money);
+				}
+				else {
+					total.put(st, money);
+				}
+			}
+			//处理今天内的数据(直接发送明细，不统计)
+			else if(time>=TimeUtil.todayStartTime()){
+				total.put(time, money);
+			}
+		});
+		return total;
+	}
 }
