@@ -242,5 +242,4 @@ public class Storage implements IStorage {
         this.otherUseSize = otherUseSize;
     }
 
-
 }
