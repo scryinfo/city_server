@@ -1,38 +1,5 @@
 package Game;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import Game.Contract.BuildingContract;
-import Game.Contract.Contract;
-import Game.Contract.ContractManager;
-import Game.Contract.IBuildingContract;
-import Game.Meta.*;
-import Game.Util.CitySalaryUtil;
-import Game.Util.PlayerExchangeAmountUtil;
-import Game.Util.WareHouseUtil;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -40,30 +7,37 @@ import Game.Contract.IBuildingContract;
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
-import Game.FriendManager.FriendManager;
-import Game.FriendManager.FriendRequest;
-import Game.FriendManager.ManagerCommunication;
-import Game.FriendManager.OfflineMessage;
-import Game.FriendManager.Society;
-import Game.FriendManager.SocietyManager;
+import Game.FriendManager.*;
 import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
-import Shared.GlobalConfig;
-import Shared.LogDb;
+import Game.Meta.*;
+import Game.Util.CitySalaryUtil;
+import Game.Util.PlayerExchangeAmountUtil;
+import Game.Util.WareHouseUtil;
+import Shared.*;
 import Shared.Package;
-import Shared.RoleBriefInfo;
-import Shared.Util;
-import Shared.Validator;
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
-import gs.Gs.MaterialInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
+import org.apache.log4j.Logger;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -449,7 +423,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf && !building.outOfBusiness()) {
+				if(building instanceof IShelf && !building.outOfBusiness()&&building instanceof FactoryBase) {
 					//如果是集散中心并且有租户，就还要从租户中获取上架信息
 					/*if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
 						WareHouse wareHouse = (WareHouse) building;
@@ -522,7 +496,7 @@ public class GameSession {
 			Gs.MarketDetail.GridInfo.Builder gb = builder.addInfoBuilder();
 			gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
 			grid.forAllBuilding(building->{
-				if(building instanceof IShelf && !building.outOfBusiness()) {
+				if(building instanceof IShelf && !building.outOfBusiness()&&building instanceof FactoryBase) {
 					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
 						((WareHouse)building).getRenters().forEach(r->{
 							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
@@ -749,31 +723,7 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		Shelf.Content i = s.getContent(item.key);
-		if(!s.setPrice(item.key, c.getPrice())){
-			this.write(Package.fail(cmd));
-			return;
-		}
-
-		int changeNum = item.n - i.getCount();
-		if( changeNum > 0){//上架
-			Item itemAdd = new Item(item.key,changeNum);
-			if(!s.addshelf(itemAdd, c.getPrice(),c.getAutoRepOn())){
-				this.write(Package.fail(cmd));
-				return;
-			}
-		}else{
-			if(!s.delshelf(item.key, -changeNum, true)){
-				this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
-				return;
-			}
-		}
-
-		if(s.setAutoReplenish(item.key,c.getAutoRepOn())) {
-			//处理自动补货
-			if(i != null && i.autoReplenish){
-				IShelf.updateAutoReplenish(s,item.key);
-			}
+		if(s.setPrice(item.key, c.getPrice())) {
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -846,6 +796,7 @@ public class GameSession {
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
+		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 		sellBuilding.updateTodayIncome(cost);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
@@ -3038,25 +2989,15 @@ public class GameSession {
 	}
 
 	//2.获取玩家的建筑信息（建筑信息）
-	public void getPlayerBuildingDetail(short cmd,Message message){
-		Gs.Id bid = (Gs.Id) message;//当前建筑的id
-		Building srcBuilding = City.instance().getBuilding(Util.toUuid(bid.toByteArray()));
+	public void getPlayerBuildingDetail(short cmd){
 		Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();
 		City.instance().forEachBuilding(player.id(), (Building b)->{
-			//计算距离(向上取整)
-			/*b.distance = (int)Math.ceil(Building.distance(srcBuilding, b));
-			//计算运费（距离x运费比例）
-			b.charge=b.distance*(MetaData.getSysPara().transferChargeRatio);*/
 			b.appendDetailProto(builder);
 		});
 		//根据玩家id获取租的仓库
-		List<WareHouseRenter> renter = WareHouseManager.instance().getWareHouseByRenterId(player.id());
-		renter.forEach(w->{
-			//计算距离(向上取整)
-			/*w.getWareHouse().distance = (int)Math.ceil(Building.distance(srcBuilding, w.getWareHouse()));
-			//计算运费（距离x运费比例）
-			w.getWareHouse().charge=w.getWareHouse().distance*(MetaData.getSysPara().transferChargeRatio);*/
-			w.appendDetailProto(builder);
+		List<WareHouseRenter> renters = WareHouseManager.instance().getWareHouseByRenterId(player.id());
+		renters.forEach(r->{
+			r.appendDetailProto(builder);
 		});
 		this.write(Package.create(cmd, builder.build()));
 	}
@@ -3091,6 +3032,15 @@ public class GameSession {
 			return;
 		if(storage.delItem(item)){
 			GameDb.saveOrUpdate(storage);//修改数据库
+			//同步缓存数据
+			if(storage instanceof  WareHouseRenter){
+				WareHouseRenter renter = (WareHouseRenter) storage;
+				WareHouseManager.updateWareHouseMap(renter);
+			}
+			else if(storage instanceof  WareHouse){
+				WareHouse wareHouse= (WareHouse) storage;
+				WareHouseManager.updateWareHouseMap(wareHouse);
+			}
 			this.write(Package.create(cmd,c));
 		}else
 			this.write(Package.fail(cmd));
@@ -3099,107 +3049,53 @@ public class GameSession {
 	public void rentWareHouse(short cmd, Message message){
 		Gs.rentWareHouse rentInfo = (Gs.rentWareHouse) message;
 		Gs.rentWareHouse rentWareHouse = WareHouseManager.instance().rentWareHouse(player, rentInfo);
-		if(rentWareHouse!=null)
-			this.write(Package.create(cmd,rentWareHouse));
+		if(rentWareHouse!=null) {
+			Gs.detailWareHouseRenter.Builder builder = Gs.detailWareHouseRenter.newBuilder();
+			//返回租的所有仓库
+			UUID bid = Util.toUuid(rentWareHouse.getBid().toByteArray());
+			List<WareHouseRenter> renters = WareHouseManager.instance().getWareHouseByRenterIdFromWareHouse(bid, player.id());
+			renters.forEach(r->{
+				builder.addRenters(r.toProto());
+			});
+			builder.setBuildingId(rentInfo.getBid());
+			this.write(Package.create(cmd, builder.build()));
+		}
 		else
 			this.write(Package.fail(cmd));
 	}
 
-	//6.获取所有上架的商品
-	public void getAllShelf(short cmd){
-		Gs.getAllShelf.Builder shelfInfo = Gs.getAllShelf.newBuilder();
-		List<Gs.GoodInfo> shelfItemList = new ArrayList<>();//保存所有的商品信息
-		List<Building> building=new ArrayList<>();
-		City.instance().forEachBuilding(b->{
-			if(b instanceof IShelf){
-				building.add(b);
-			}
-		});
-		for (Building bd : building) {
-			int i = bd.metaId();//判断建筑的类型
-			if(bd.ownerId() == player.id()||!(bd instanceof IShelf)){//不查询玩家的建筑和没有货架的建筑
-				continue;
-			}
-			//判断类型
-			switch (MetaBuilding.type(bd.metaId())){
-				case MetaBuilding.MATERIAL://原料厂
-					MaterialFactory mf = (MaterialFactory) bd;
-					Gs.MaterialFactory m = mf.detailProto();
-					List<Gs.Shelf.Content> goodList = m.getShelf().getGoodList();
-					WareHouseUtil.addGoodInfo(goodList,shelfItemList,m.getInfo().getId(),null);
-					break;
-				case MetaBuilding.PRODUCE://加工厂
-					ProduceDepartment pd = (ProduceDepartment) bd;
-					Gs.ProduceDepartment p = pd.detailProto();
-					List<Gs.Shelf.Content> goodList1 = p.getShelf().getGoodList();
-					WareHouseUtil.addGoodInfo(goodList1,shelfItemList,p.getInfo().getId(),null);
-					break;
-				case MetaBuilding.RETAIL://零售店
-					RetailShop rs = (RetailShop) bd;
-					Gs.RetailShop r= (Gs.RetailShop) rs.detailProto();
-					List<Gs.Shelf.Content> goodList2 = r.getShelf().getGoodList();
-					WareHouseUtil.addGoodInfo(goodList2,shelfItemList,r.getInfo().getId(),null);
-					break;
-				case MetaBuilding.WAREHOUSE://集散中心
-					WareHouse wh = (WareHouse) bd;
-					Gs.WareHouse w=  wh.detailProto();
-					List<Gs.Shelf.Content> goodList3 = w.getShelf().getGoodList();
-					WareHouseUtil.addGoodInfo(goodList3,shelfItemList,w.getInfo().getId(),null);
-					break;
-			}
-		}
-		//从租户表中获取已上架的物品
-		List<WareHouseRenter> renter = WareHouseManager.instance().getAllRenter();
-		for (WareHouseRenter wt : renter) {
-			if(wt.getRenterId()==player.id()){//跳过当前玩家的上架物品
-				continue;
-			}
-			Gs.WareHouseRenter wareHouseRenter = wt.toProto();
-			Gs.Shelf shelf = wareHouseRenter.getShelf();
-			ByteString bid = Util.toByteString(wt.getWareHouse().id());
-			WareHouseUtil.addGoodInfo(shelf.getGoodList(), shelfItemList,bid,wt.getOrderId());
-		}
-		shelfInfo.addAllShelfItem(shelfItemList);//完成商品信息的封装
-		this.write(Package.create(cmd,shelfInfo.build()));
-	}
 
-	//7.购买上架商品
+	//7.购买上架商品（包括购买在租户仓库的物品）
 	public void buyInShelfGood(short cmd, Message message) throws Exception {
 		Gs.BuyInShelfGood inShelf = (Gs.BuyInShelfGood) message;
 		if(inShelf.getGood().getPrice()<0)
 			return;
-		//1.参数详情
-		//1.1卖家建筑id
 		UUID bid = Util.toUuid(inShelf.getGood().getBuildingId().toByteArray());
-		//1.2买家仓库建筑id
 		UUID wid = Util.toUuid(inShelf.getWareHouseId().toByteArray());
-		//2.判断商品所属id建筑是不是租的仓库
+		//2.判断商品所属id建筑是不是租的仓库（根据orderid判断）
 		WareHouseRenter sellRenter=null;
 		WareHouseRenter buyRenter=null;
-		Building sellBuilding = City.instance().getBuilding(bid);
-		IStorage buyStore = IStorage.get(wid, player);
+		Building sellBuilding = City.instance().getBuilding(bid);//销售方
+		IShelf sellShelf = (IShelf) sellBuilding;
+		IStorage buyStore = IStorage.get(wid, player);//买方
 		UUID sellOwnerId=sellBuilding.ownerId();
-		if(inShelf.getGood().hasOrderid()){//判断商品所属建筑
+		//3.卖方是否是租的仓库
+		if(inShelf.getGood().hasOrderid()){
 			//表明是租的仓库
 			sellRenter = WareHouseUtil.getWareRenter(bid, inShelf.getGood().getOrderid());
 			if(sellRenter==null)
 				return;
+			sellShelf = sellRenter;
 			sellOwnerId = sellRenter.getRenterId();
 		}
-		//3.判断要运送的仓库是不是也是租的
+		//买方是否也是租的仓库
 		if(inShelf.hasOrderid()){
-			//是租的
 			buyRenter= WareHouseUtil.getWareRenter(wid, inShelf.getOrderid());
 			if(buyRenter==null){
 				return;
 			}
-		}
-		IShelf sellShelf = (IShelf) sellBuilding;
-		if(sellRenter!=null)
-			sellShelf = sellRenter;
-		if(buyRenter!=null)
 			buyStore = buyRenter;
-		//商品信息
+		}
 		Item itemBuy = new Item(inShelf.getGood().getItem());
 		Shelf.Content i = sellShelf.getContent(itemBuy.key);
 		//4.如果和上架的价格不对应或者上架数量小于要购买的数量，失败
@@ -3208,8 +3104,7 @@ public class GameSession {
 			return;
 		}
 		//5.计算价格（运费+商品所需价值）
-		//5.1.购买商品要花费钱
-		long cost = itemBuy.n*inShelf.getGood().getPrice();//计算总价值
+		long cost = itemBuy.n*inShelf.getGood().getPrice();//计算商品总价值
 		//商品的运费
 		int freight = (int) (MetaData.getSysPara().transferChargeRatio * Math.ceil(IStorage.distance(buyStore, (IStorage) sellBuilding)))*itemBuy.n;
 		//6.如果玩家钱少于要支付的，交易失败
@@ -3223,6 +3118,7 @@ public class GameSession {
 		//8.1获取到商品主人的信息
 		Player seller = GameDb.getPlayer(sellOwnerId);
 		seller.addMoney(cost);//交易
+		player.decMoney(cost+freight);//扣除商品+运费
 		//8.2向出售方发送收入通知提示
 		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
@@ -3234,11 +3130,7 @@ public class GameSession {
 				.setItemId(itemBuy.key.meta.id)
 				.setCount(itemBuy.n)
 				.build());
-		//8.3玩家扣钱
-		player.decMoney(cost);
-		LogDb.playerPay(player.id(), cost);
-		LogDb.playerIncome(seller.id(), cost);
-		//8.4 发送消息通知
+		//8.3 发送消息通知
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
@@ -3249,30 +3141,40 @@ public class GameSession {
 					.build()));
 			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
 		}
-		//8.5玩家扣除运费
-		player.decMoney(freight);
-		LogDb.playerPay(player.id(), freight);
+		//9.日志记录
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);//获取商品类型
-		//8.6记录交易日志
-		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+		LogDb.playerIncome(seller.id(), cost);
+		LogDb.playerPay(player.id(), cost);
+		LogDb.playerPay(player.id(), freight);
+		//9.1记录运输日志(区分建筑还是租户仓库)
+		if(sellRenter==null&&buyRenter==null) {
+			LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+		}else{
+			Serializable srcId=bid;
+			Serializable dstId=wid;
+			if(sellRenter!=null)
+				srcId = inShelf.getGood().hasOrderid();
+			if(buyRenter!=null)
+				dstId = inShelf.getOrderid();
+			LogDb.payRenterTransfer(player.id(),freight,srcId,dstId,itemBuy.key.producerId, itemBuy.n);
+		}
+		//9.2记录货架收入与建筑收入信息(区分建筑还是租户仓库)
 		if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
 			LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
 					itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 			LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
 		}
-		else{//否则是在租户货架上购买的（统计日志）
-			/*LogDb.buyRenterInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-					itemBuy.key.producerId,sellRenter.getOrderId(), type, itemId);*/
+		else{//租户货架上购买的（统计日志）
+			LogDb.buyRenterInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
+					itemBuy.key.producerId,sellRenter.getOrderId(), type, itemId);
 			//租户货架收入记录
-			//LogDb.renterShelfIncome(inShelf.getGood().getOrderid(),player.id(), cost, type, itemId);
+			LogDb.renterShelfIncome(inShelf.getGood().getOrderid(),player.id(), cost, type, itemId);
 		}
 		//8.7.销售方减少上架数量
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-		IStorage sellStorage = (IStorage) sellBuilding;
-		if(sellRenter!=null){
-			sellStorage = sellRenter;
-		}
+		IStorage sellStorage = (IStorage) sellShelf;
+		sellStorage.consumeLock(itemBuy.key, itemBuy.n);
 		//更每每日的收入
 		if(sellRenter!=null){
 			sellRenter.updateTodayIncome(cost);//更新今日收入
@@ -3280,7 +3182,18 @@ public class GameSession {
 			sellBuilding.updateTodayIncome(cost);
 		}
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, inShelf.getGood().getPrice());
-		GameDb.saveOrUpdate(Arrays.asList(player,seller,sellStorage));
+		GameDb.saveOrUpdate(Arrays.asList(player,seller,sellStorage,buyStore));
+		//同步缓存数据
+		if(sellStorage instanceof WareHouseRenter){
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) sellStorage);
+		}else if(sellStorage instanceof  WareHouse){
+			WareHouseManager.updateWareHouseMap((WareHouse) sellStorage);
+		}
+		if(buyStore instanceof WareHouseRenter)
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) buyStore);
+		else if(buyStore instanceof  WareHouse)
+			WareHouseManager.updateWareHouseMap((WareHouse) buyStore);
+
 		this.write(Package.create(cmd,inShelf));
 	}
 	//8.上架
@@ -3288,43 +3201,28 @@ public class GameSession {
 		Gs.PutAway c = (Gs.PutAway) message;
 		Item item = new Item(c.getItem());
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-		//1.：情况1：处理在租用仓库中上架的物品
+		Building building = City.instance().getBuilding(bid);
+		IShelf s = null;
+		//如果有订单号，表示在租用的仓库中上架
 		if(c.hasOrderId()){
 			//从租的仓库中上架
 			WareHouseRenter renter = WareHouseUtil.getWareRenter(bid, c.getOrderId());
-			if(renter==null){
+			s=renter;
+		}else {
+			if (building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 				return;
-			}
-			IShelf s = renter;
-			if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
-				GameDb.saveOrUpdate(s);
-				this.write(Package.create(cmd, c));
+			if (building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 				return;
-			}
-			else {
-				this.write(Package.fail(cmd));
-				return;
-			}
+			s = (IShelf) building;
 		}
-		//2.情况2，处理其他建筑上架信息
-		Building building = City.instance().getBuilding(bid);
-		//2.1 如果建筑无效
-		if(building==null ||!(building instanceof IShelf) || !building.canUseBy(player.id())|| building.outOfBusiness())
-			return;
-		//2.2 如果是原料厂，但是货物是商品，不允许上架
-		if(building instanceof  MaterialFactory &&item.key.meta instanceof MetaGood)
-			return;
-		//2.3 如果是加工厂或者零售店，但是，上架的是原料
-		if(building instanceof ProduceDepartment &&item.key.meta instanceof MetaMaterial){
-			return;
-		}
-		//2.4 如果是零售店，只能上架商品
-		if(building instanceof RetailShop &&item.key.meta instanceof MetaMaterial){
-			return;
-		}
-		IShelf s = (IShelf)building;
+
 		if(s.addshelf(item,c.getPrice(),c.getAutoRepOn())){
 			GameDb.saveOrUpdate(s);
+			//同步缓存数据
+			if(s instanceof WareHouse)
+				WareHouseManager.updateWareHouseMap((WareHouse)s);
+			else if(s instanceof WareHouseRenter)
+				WareHouseManager.updateWareHouseMap((WareHouseRenter)s);
 			this.write(Package.create(cmd,c));
 		}else{
 			this.write(Package.fail(cmd));
@@ -3344,51 +3242,44 @@ public class GameSession {
 		IShelf s = wareRenter;
 		if (s.setPrice(item.key, r.getPrice())) {
 			GameDb.saveOrUpdate(s);
+			//同步缓存数据
+			WareHouse wareHouse = wareRenter.getWareHouse();
+			WareHouseManager.wareHouseMap.put(wareHouse.id(),wareHouse);
 			this.write(Package.create(cmd,r));
 		}else
 			this.write(Package.fail(cmd));
 	}
 
-	//10.下架（包含集散中心和租用仓库）
+	//10.下架（包含其他建筑和租用仓库）
 	public void soldOutShelf(short cmd, Message message) throws Exception {
 		Gs.SoldOutShelf s = (Gs.SoldOutShelf) message;
 		Item item = new Item(s.getItem());
 		Building building = City.instance().getBuilding(Util.toUuid(s.getBuildingId().toByteArray()));
+		IShelf sf = null;
 		//情况1，是租用的仓库下架
 		if(s.hasOrderId()){
 			//从租的仓库中下架
 			WareHouseRenter renter = WareHouseUtil.getWareRenter(Util.toUuid(s.getBuildingId().toByteArray()),s.getOrderId());
 			if(renter==null)
 				return;
-
-			IShelf shelf = renter;
-			if(shelf.delshelf(item.key,item.n,true)){
-				GameDb.saveOrUpdate(shelf);
-				this.write(Package.create(cmd,s));
-			}else
-				this.write(Package.fail(cmd));
-		}else {
-			//普通建筑下架
-			if (building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
+			sf = renter;
+		}else {//普通建筑下架
+			if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
 				return;
-			//2.2 如果是原料厂，货物是商品，
-			if (building instanceof MaterialFactory && item.key.meta instanceof MetaGood)
+			if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 				return;
-			//2.3 如果是加工厂或者零售店，原料
-			if (building instanceof ProduceDepartment && item.key.meta instanceof MetaMaterial) {
-				return;
-			}
-			//2.4 如果是零售店，商品
-			if (building instanceof RetailShop && item.key.meta instanceof MetaMaterial) {
-				return;
-			}
-			IShelf sf = (IShelf) building;
-			if (sf.delshelf(item.key, item.n, true)) {
-				GameDb.saveOrUpdate(sf);
-				this.write(Package.create(cmd, s));
-			} else
-				this.write(Package.fail(cmd));
+			sf = (IShelf) building;
 		}
+		if (sf.delshelf(item.key, item.n, true)) {
+			//同步缓存数据
+			if(sf instanceof WareHouse)
+				WareHouseManager.updateWareHouseMap((WareHouse)sf);
+			else if(sf instanceof  WareHouseRenter)
+				WareHouseManager.updateWareHouseMap((WareHouseRenter)sf);
+			GameDb.saveOrUpdate(sf);
+			this.write(Package.create(cmd, s));
+		} else
+			this.write(Package.fail(cmd));
 	}
 
 	//11.设置租户仓库自动补货
@@ -3408,6 +3299,8 @@ public class GameSession {
 			if(content != null && content.autoReplenish){
 				IShelf.updateAutoReplenish(shelf,itemKey);
 			}
+			//同步数据
+			WareHouseManager.updateWareHouseMap(renter);
 			GameDb.saveOrUpdate(shelf);
 			this.write(Package.create(cmd, c));
 		}
@@ -3427,20 +3320,21 @@ public class GameSession {
 		this.write(Package.create(cmd, info));
 	}
 
-	//13.detailWareHouse 租户详情，根据集散中心获取租户详情
+	//13.detailWareHouse 租户详情，根据集散中心获取当前的租户详情
 	public void detailWareHouseRenter(short cmd,Message message){
 		Gs.Id c = (Gs.Id) message;
 		UUID bid = Util.toUuid(c.getId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building==null||!(building instanceof WareHouse)){
+		List<WareHouseRenter> renters = WareHouseManager.instance().getWareHouseByRenterIdFromWareHouse(bid, player.id());
+		if(renters.size()<=0){
 			this.write(Package.fail(cmd));
 			return;
 		}
-		WareHouse wareHouse = (WareHouse) building;
-		if(wareHouse.getRenters().size()<=0||wareHouse.getRenters()==null)
-			return;
 		Gs.detailWareHouseRenter.Builder builder = Gs.detailWareHouseRenter.newBuilder();
-		wareHouse.getRenters().forEach(p->builder.addRenters(p.toProto()));
+		renters.forEach(p->{
+			if(p.getRenterId().equals(player.id()))
+				builder.addRenters(p.toProto());
+		});
+		builder.setBuildingId(c.getId());
 		this.write(Package.create(cmd,builder.build()));
 	}
 
@@ -3463,7 +3357,7 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	//15.获取集散中心数据详情摘要,客户端传递一个中心坐标
+	//15.获取集散中心数据详情,客户端传递一个中心坐标
 	public void queryWareHouseDetail(short cmd,Message message){
 		Gs.QueryWareHouseDetail c = (Gs.QueryWareHouseDetail) message;
 		GridIndex center = new GridIndex(c.getCenterIdx().getX(),c.getCenterIdx().getY());
@@ -3503,7 +3397,7 @@ public class GameSession {
 		if (t.hasSrcOrderId())
 			src = WareHouseUtil.getWareRenter(srcId, t.getSrcOrderId());
 		if(t.hasDstOrderId())
-			dst=WareHouseUtil.getWareRenter(dstId, t.getSrcOrderId());
+			dst=WareHouseUtil.getWareRenter(dstId, t.getDstOrderId());
 		if(src == null || dst == null)
 			return;
 		//运费=距离*运费比例*数量
@@ -3520,9 +3414,20 @@ public class GameSession {
 			return;
 		}
 		player.decMoney(charge);
-		LogDb.playerPay(player.id(), charge);
 		MoneyPool.instance().add(charge);
-		LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		//日志记录
+		LogDb.playerPay(player.id(), charge);
+		if(!t.hasSrcOrderId()&&!t.hasDstOrderId()) {
+			LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+		}else{
+			Serializable srcId1=srcId;
+			Serializable dstId1=dstId;
+			if(t.hasSrcOrderId())
+				srcId1 = t.getSrcOrderId();
+			if(t.hasDstOrderId())
+				dstId1 = t.getDstOrderId();
+			LogDb.payRenterTransfer(player.id(), charge, srcId1, dstId1, item.key.producerId, item.n);
+		}
 		Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
 		dst.consumeReserve(item.key, item.n, (int) avg.avg);
 		IShelf srcShelf = (IShelf)src;
@@ -3539,10 +3444,19 @@ public class GameSession {
 				IShelf.updateAutoReplenish(dstShelf,item.key);
 			}
 		}
+		//同步数据
+		if(srcShelf instanceof WareHouseRenter)
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) srcShelf);
+		else if(srcShelf instanceof WareHouse)
+			WareHouseManager.updateWareHouseMap((WareHouse) srcShelf);
+
+		if(dstShelf instanceof WareHouseRenter)
+			WareHouseManager.updateWareHouseMap((WareHouseRenter) dstShelf);
+		else if(dstShelf instanceof WareHouse)
+			WareHouseManager.updateWareHouseMap((WareHouse) dstShelf);
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd,t));
 	}
-
 
 
 	//未在公会中根据id查询公会信息
