@@ -34,7 +34,7 @@ public class Storage implements IStorage {
         });
         return builder.build();
     }
-    public boolean offset(MetaItem item, int n) {
+    public boolean offset(MetaItem item, int n, UUID pid, int typeId) {
         if(n == 0)
             return true;
         else if(n > 0) {
@@ -42,7 +42,7 @@ public class Storage implements IStorage {
                 return false;
             if(!(item instanceof MetaMaterial))
                 throw new IllegalArgumentException();
-            ItemKey k = new ItemKey(item);
+            ItemKey k = new ItemKey(item,pid,typeId);
             this.inHand.put(k, this.inHand.getOrDefault(k, 0)+n);
         }
         else if(n < 0) {

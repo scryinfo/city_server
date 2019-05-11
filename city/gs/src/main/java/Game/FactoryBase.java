@@ -120,7 +120,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public int freeWorkerNum() {
         return this.meta.workerNum - lines.stream().map(l -> l.workerNum).reduce(0, Integer::sum);
     }
-    protected abstract boolean consumeMaterial(LineBase line);
+    protected abstract boolean consumeMaterial(LineBase line, UUID pid);
 
     protected void _update(long diffNano) {
         List<UUID> completedLines = new ArrayList<>();
@@ -141,7 +141,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             }
             else {
                 if (l.materialConsumed == false)
-                l.materialConsumed = this.consumeMaterial(l);
+                l.materialConsumed = this.consumeMaterial(l,ownerId());
                     if (!l.materialConsumed)
                         return;
                     int add = l.update(diffNano);
@@ -310,7 +310,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public boolean offset(ItemKey item, int n) { return this.store.offset(item, n); }
 
     @Override
-    public boolean offset(MetaItem item, int n) { return this.store.offset(item, n); }
+    public boolean offset(MetaItem item, int n, UUID pid, int typeId) { return this.store.offset(item, n,pid,typeId); }
 
     public boolean delLine(UUID lineId) {
         return this.__delLine(lineId) != null ;

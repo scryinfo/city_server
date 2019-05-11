@@ -96,7 +96,7 @@ public class MaterialFactory extends FactoryBase {
     }
 
     @Override
-    protected boolean consumeMaterial(LineBase line) {
+    protected boolean consumeMaterial(LineBase line, UUID pid) {
         return true;
     }
 

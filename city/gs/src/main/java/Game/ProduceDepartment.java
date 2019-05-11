@@ -88,19 +88,19 @@ public class ProduceDepartment extends FactoryBase {
     }
 
     @Override
-    protected boolean consumeMaterial(LineBase line) {
+    protected boolean consumeMaterial(LineBase line,UUID pid) {
         Line l = (Line)line;
         for(GoodFormula.Info i : l.formula.material) {
             if(i.item == null)
                 continue;
-            if(!this.store.has(new ItemKey(i.item), i.n)) {
+            if(!this.store.has(new ItemKey(i.item,pid,i.item.id), i.n)) {
                 return false;
             }
         }
         for(GoodFormula.Info i : l.formula.material) {
             if (i.item == null)
                 continue;
-            this.store.offset(new ItemKey(i.item), -i.n);
+            this.store.offset(new ItemKey(i.item,pid,i.item.id), -i.n);
         }
         return true;
     }

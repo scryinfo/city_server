@@ -105,6 +105,9 @@ public class BrandManager {
             this.key = key;
             brandName = new BrandName(newBrandName);
         }
+        public BrandInfo(BrandKey key) {
+            this.key = key;
+        }
 
         protected BrandInfo() {}
 
