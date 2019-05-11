@@ -90,6 +90,10 @@ public class BrandManager {
             this.brandName = brandName;
         }
 
+        //@OneToOne(mappedBy="brandName",cascade=CascadeType.ALL)
+        @OneToOne(mappedBy="brandName",cascade=CascadeType.ALL)
+        private BrandInfo brandinfo;
+
         private String brandName = "";
     }
     @Entity
@@ -97,8 +101,8 @@ public class BrandManager {
         @EmbeddedId
         BrandKey key;
         int v;
-        @OneToOne(cascade=CascadeType.ALL)
-        private BrandName brandName;
+        @OneToOne(cascade={CascadeType.ALL})
+        public BrandName brandName;
 
 
         public BrandInfo(BrandKey key, String newBrandName) {
