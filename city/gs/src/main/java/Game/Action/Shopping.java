@@ -50,8 +50,13 @@ public class Shopping implements IAction {
         int[] weight = new int[goodMetaIds.size()];
         int i = 0;
         for (Integer goodMetaId : goodMetaIds) {
-            weight[i++] = (int) (BrandManager.instance().spendMoneyRatioGood(goodMetaId) * (1.d + (double)brandV.get(goodMetaId) / (double)sumBrandV));
+            double ratio = 0;
+            if (sumBrandV != 0) {
+                ratio = (double) brandV.get(goodMetaId) / (double) sumBrandV;
+            }
+            weight[i++] = (int) (BrandManager.instance().spendMoneyRatioGood(goodMetaId) * (1.d + ratio));
         }
+        logger.info("good weight : " + Arrays.toString(weight));
         int idx = ProbBase.randomIdx(weight);
         int chosenGoodMetaId = (int) goodMetaIds.toArray()[idx];
         logger.info("chosen: " + chosenGoodMetaId);
@@ -90,9 +95,6 @@ public class Shopping implements IAction {
             owner.addMoney(chosen.price);
             LogDb.playerIncome(owner.id(), chosen.price);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
-
-            ((IStorage)sellShop).consumeLock(chosen.getItemKey(), 1);
-
             sellShop.updateTodayIncome(chosen.price);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 

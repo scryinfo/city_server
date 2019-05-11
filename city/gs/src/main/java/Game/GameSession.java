@@ -1,6 +1,5 @@
 package Game;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -3472,8 +3471,6 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd,t));
 	}
-
-
 
 
 	//未在公会中根据id查询公会信息
