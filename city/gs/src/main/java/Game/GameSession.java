@@ -3223,15 +3223,8 @@ public class GameSession {
 		}
 		//8.7.销售方减少上架数量
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-<<<<<<< HEAD
 		IStorage sellStorage = (IStorage) sellShelf;
 		sellStorage.consumeLock(itemBuy.key, itemBuy.n);
-=======
-		IStorage sellStorage = (IStorage) sellBuilding;
-		if(sellRenter!=null){
-			sellStorage = sellRenter;
-		}
->>>>>>> 561b535e37c843e69fbb017151cad0709e09fe97
 		//更每每日的收入
 		if(sellRenter!=null){
 			sellRenter.updateTodayIncome(cost);//更新今日收入
