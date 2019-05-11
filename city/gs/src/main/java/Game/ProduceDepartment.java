@@ -40,8 +40,8 @@ public class ProduceDepartment extends FactoryBase {
         @Convert(converter = GoodFormula.Converter.class)
         GoodFormula formula;
         @Override
-        public ItemKey newItemKey(UUID producerId, int qty,UUID pid, int mid) {
-            return new ItemKey(item, producerId, qty, pid, mid);
+        public ItemKey newItemKey(UUID producerId, int qty,UUID pid) {
+            return new ItemKey(item, producerId, qty, pid);
         }
     }
 
@@ -93,14 +93,14 @@ public class ProduceDepartment extends FactoryBase {
         for(GoodFormula.Info i : l.formula.material) {
             if(i.item == null)
                 continue;
-            if(!this.store.has(new ItemKey(i.item,pid,i.item.id), i.n)) {
+            if(!this.store.has(new ItemKey(i.item,pid), i.n)) {
                 return false;
             }
         }
         for(GoodFormula.Info i : l.formula.material) {
             if (i.item == null)
                 continue;
-            this.store.offset(new ItemKey(i.item,pid,i.item.id), -i.n);
+            this.store.offset(new ItemKey(i.item,pid), -i.n);
         }
         return true;
     }

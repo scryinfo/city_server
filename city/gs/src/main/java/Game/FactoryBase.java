@@ -133,7 +133,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             }
             if(l.isSuspend()) {
                 assert l.left() > 0;
-                ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId(),l.item.id);
+                ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId());
                 if(this.store.offset(key, l.left())) {
                     l.resume();
                     broadcastLineInfo(l,key);
@@ -147,7 +147,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     int add = l.update(diffNano);
                     if (add > 0) {
                         l.materialConsumed = false;
-                        ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId(),l.item.id);
+                        ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId());
                         if (this.store.offset(key, add)) {
                             IShelf s = (IShelf)this;
                             Shelf.Content i = s.getContent(key);

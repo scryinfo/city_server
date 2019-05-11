@@ -16,13 +16,10 @@ import Game.BrandManager;
 
 @Embeddable
 public class ItemKey implements Serializable {
-    public ItemKey(MetaItem meta, UUID producerId, int qty, UUID playerId,int mid) {
+    public ItemKey(MetaItem meta, UUID producerId, int qty, UUID playerId) {
         this.meta = meta;
         this.producerId = producerId;
         this.qty = qty;
-        //this.brandId = new BrandManager.BrandKey(playerId,mid);
-        this.playerId = playerId;
-        this.mid = mid;
     }
     public ItemKey(Gs.ItemKey item) throws Exception {
         MetaItem mi = MetaData.getItem(item.getId());
@@ -44,11 +41,8 @@ public class ItemKey implements Serializable {
     }
     protected ItemKey() {}
 
-    public ItemKey(MetaItem mi, UUID playerId,int mid) {
+    public ItemKey(MetaItem mi, UUID playerId) {
         this.meta = mi;
-        //this.brandId = new BrandManager.BrandKey(playerId,mid);
-        this.playerId = playerId;
-        this.mid = mid;
     }
 
     @Override
@@ -71,10 +65,6 @@ public class ItemKey implements Serializable {
     // SQL's composite key can not have NULL column, so give those 2 field a default value
     public UUID producerId = NULL_PRODUCER_ID;
     public int qty = 0;
-    //品牌id
-    //BrandManager.BrandKey brandId;
-    public UUID playerId;
-    public int mid;
 
     public static final UUID NULL_PRODUCER_ID = UUID.nameUUIDFromBytes(new byte[16]);
     public Gs.ItemKey toProto() {

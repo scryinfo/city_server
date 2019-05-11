@@ -42,7 +42,7 @@ public class Storage implements IStorage {
                 return false;
             if(!(item instanceof MetaMaterial))
                 throw new IllegalArgumentException();
-            ItemKey k = new ItemKey(item,pid,typeId);
+            ItemKey k = new ItemKey(item,pid);
             this.inHand.put(k, this.inHand.getOrDefault(k, 0)+n);
         }
         else if(n < 0) {

@@ -35,8 +35,8 @@ public class MaterialFactory extends FactoryBase {
         protected Line(){}
 
         @Override
-        public ItemKey newItemKey(UUID producerId, int qty,UUID pid, int mid) {
-            return new ItemKey(item, pid, mid);
+        public ItemKey newItemKey(UUID producerId, int qty,UUID pid) {
+            return new ItemKey(item, pid);
         }
 
         public Line(MetaMaterial item, int targetNum, int workerNum, int itemLevel) {

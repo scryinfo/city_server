@@ -138,7 +138,7 @@ public class Shopping implements IAction {
         int buildingQty;
         MetaGood meta;
         public ItemKey getItemKey() {
-            return new ItemKey(meta, producerId, qty);
+            return new ItemKey(meta, producerId, qty,producerId);
         }
     }
 }

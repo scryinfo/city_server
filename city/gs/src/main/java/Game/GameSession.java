@@ -160,9 +160,9 @@ public class GameSession {
 				if(player.getBag().reserve(mi, n)) {
 					Item item;
 					if(mi instanceof MetaMaterial)
-						item = new Item(new ItemKey(mi,player.id(),mi.id), n);
+						item = new Item(new ItemKey(mi,player.id()), n);
 					else
-						item = new Item(new ItemKey(mi, player.id(), 0), n);
+						item = new Item(new ItemKey(mi, player.id()), n);
 					player.getBag().consumeReserve(item.key, n, 1);
 				}
 				GameDb.saveOrUpdate(player);
@@ -845,7 +845,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		IStorage s = IStorage.get(bid, player);
-		if (s == null || !s.lock(new ItemKey(mi,player.id(),mi.id), c.getNum()))
+		if (s == null || !s.lock(new ItemKey(mi,player.id()), c.getNum()))
 			return;
 		UUID orderId = Exchange.instance().addSellOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), bid);
 		s.markOrder(orderId);
