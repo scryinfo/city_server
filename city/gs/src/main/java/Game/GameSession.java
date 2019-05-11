@@ -446,7 +446,6 @@ public class GameSession {
 		b.shutdownBusiness();
 		this.write(Package.create(cmd,c));
 	}
-
 	public void queryMarketSummary(short cmd, Message message) {
 		Gs.Num c = (Gs.Num)message;
 		MetaItem mi = MetaData.getItem(c.getNum()); //获取商品类型
