@@ -3011,6 +3011,17 @@ public class GameSession {
 		this.write(Package.create(cmd, msg));
 	}
 
+	//修改品牌名字
+	public void modyfyMyBrandName(short cmd,Message message){
+		Gs.ModyfyMyBrandName msg = (Gs.ModyfyMyBrandName)message;
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		int techId=msg.getTypeId();
+		if(BrandManager.instance().addBrand(pId,techId,msg.getNewBrandName())){
+			this.write(Package.create(cmd, msg));
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
 
 	//1.集散中心详情数据获取
 	public void detailWareHouse(short cmd, Message message) {
