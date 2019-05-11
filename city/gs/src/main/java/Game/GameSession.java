@@ -1,38 +1,5 @@
 package Game;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import Game.Contract.BuildingContract;
-import Game.Contract.Contract;
-import Game.Contract.ContractManager;
-import Game.Contract.IBuildingContract;
-import Game.Meta.*;
-import Game.Util.CitySalaryUtil;
-import Game.Util.PlayerExchangeAmountUtil;
-import Game.Util.WareHouseUtil;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -40,30 +7,37 @@ import Game.Contract.IBuildingContract;
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
-import Game.FriendManager.FriendManager;
-import Game.FriendManager.FriendRequest;
-import Game.FriendManager.ManagerCommunication;
-import Game.FriendManager.OfflineMessage;
-import Game.FriendManager.Society;
-import Game.FriendManager.SocietyManager;
+import Game.FriendManager.*;
 import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
-import Shared.GlobalConfig;
-import Shared.LogDb;
+import Game.Meta.*;
+import Game.Util.CitySalaryUtil;
+import Game.Util.PlayerExchangeAmountUtil;
+import Game.Util.WareHouseUtil;
+import Shared.*;
 import Shared.Package;
-import Shared.RoleBriefInfo;
-import Shared.Util;
-import Shared.Validator;
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
-import gs.Gs.MaterialInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
+import org.apache.log4j.Logger;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
