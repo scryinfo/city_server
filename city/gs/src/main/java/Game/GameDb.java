@@ -172,7 +172,6 @@ public class GameDb {
 		List userList = null;
 		try{
 			//重新开服,需要获取一下上次的记录
-			int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs/1000 - PromotionMgr._upDeltaMs);
 			Query query = session.createQuery("from brandname BrandName where BrandName.brandName is :testName")
 					.setParameter("testName",testName);
 			userList = query.list();
