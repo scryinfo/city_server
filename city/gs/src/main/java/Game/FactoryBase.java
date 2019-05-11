@@ -148,15 +148,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     if (add > 0) {
                         l.materialConsumed = false;
                         ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId(),l.item.id);
-
-                        //绑定品牌
-                        if(BrandManager.instance().getBrand(ownerId(),l.item.id) == null){
-                            Player owner = GameDb.getPlayer(ownerId());
-                            //这里之所以直接用公司名字，是因为公司名字是唯一的,而公司与类型的组合也是唯一的
-                            //目前使用 公司名字+产品类型id 的组合作为服务器的品牌名字，客户端需要解析出 _ 之后的id，找到对应的多语言字符串来表现
-                            BrandManager.instance().addBrand(ownerId(), l.item.id, owner.getCompanyName()+"_"+l.item.id);
-                        }
-
                         if (this.store.offset(key, add)) {
                             IShelf s = (IShelf)this;
                             Shelf.Content i = s.getContent(key);
@@ -164,6 +155,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                             //处理自动补货
                             if(i != null && i.autoReplenish){
                                 IShelf.updateAutoReplenish(s,key);
+                            }
+                            //绑定品牌
+                            if(BrandManager.instance().getBrand(ownerId(),l.item.id) == null){
+                                Player owner = GameDb.getPlayer(ownerId());
+                                //这里之所以直接用公司名字，是因为公司名字是唯一的,而公司与类型的组合也是唯一的
+                                //目前使用 公司名字+产品类型id 的组合作为服务器的品牌名字，客户端需要解析出 _ 之后的id，找到对应的多语言字符串来表现
+                                BrandManager.instance().addBrand(ownerId(), l.item.id, owner.getCompanyName()+"_"+l.item.id);
                             }
                         } else {
                             //(加工厂/原料厂)仓库已满通知

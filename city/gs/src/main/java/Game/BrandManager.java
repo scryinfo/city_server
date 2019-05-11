@@ -78,7 +78,7 @@ public class BrandManager {
         @Id
         @GeneratedValue
         UUID id;
-
+        BrandName(){}
         BrandName(String name){
             brandName = name;
         }
