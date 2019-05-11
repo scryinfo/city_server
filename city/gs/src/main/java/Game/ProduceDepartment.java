@@ -40,8 +40,8 @@ public class ProduceDepartment extends FactoryBase {
         @Convert(converter = GoodFormula.Converter.class)
         GoodFormula formula;
         @Override
-        public ItemKey newItemKey(UUID producerId, int qty) {
-            return new ItemKey(item, producerId, qty);
+        public ItemKey newItemKey(UUID producerId, int qty,UUID pid, int mid) {
+            return new ItemKey(item, producerId, qty, pid, mid);
         }
     }
 

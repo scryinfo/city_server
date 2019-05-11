@@ -167,6 +167,24 @@ public class GameDb {
         }
     }
 
+    public static boolean brandNameIsInUsing(String testName){
+		Session session = sessionFactory.openSession();
+		List userList = null;
+		try{
+			//重新开服,需要获取一下上次的记录
+			int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs/1000 - PromotionMgr._upDeltaMs);
+			Query query = session.createQuery("from brandname BrandName where BrandName.brandName is :testName")
+					.setParameter("testName",testName);
+			userList = query.list();
+		}catch (Exception e){//异常情况下， 认为是名字使用中，避免后续操作
+			return true;
+		}
+		if(userList.size() > 0){
+			return true;
+		}
+		return false;
+	}
+
 	public static  EvaRecord getlastEvaRecord(UUID bid, short tid){
 		Session session = sessionFactory.openSession();
 		List userList = null;

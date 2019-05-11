@@ -16,10 +16,11 @@ import Game.BrandManager;
 
 @Embeddable
 public class ItemKey implements Serializable {
-    public ItemKey(MetaItem meta, UUID producerId, int qty) {
+    public ItemKey(MetaItem meta, UUID producerId, int qty, UUID playerId,int mid) {
         this.meta = meta;
         this.producerId = producerId;
         this.qty = qty;
+        this.brandId = new BrandManager.BrandKey(playerId,mid);
     }
     public ItemKey(Gs.ItemKey item) throws Exception {
         MetaItem mi = MetaData.getItem(item.getId());
@@ -41,8 +42,9 @@ public class ItemKey implements Serializable {
     }
     protected ItemKey() {}
 
-    public ItemKey(MetaItem mi) {
+    public ItemKey(MetaItem mi, UUID playerId,int mid) {
         this.meta = mi;
+        this.brandId = new BrandManager.BrandKey(playerId,mid);
     }
 
     @Override

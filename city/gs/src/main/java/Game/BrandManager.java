@@ -72,12 +72,16 @@ public class BrandManager {
             return Objects.hash(playerId, mid);
         }
     }
-    @Entity
+
+    @Entity(name = "brandname")
     public static final class BrandName {
         @Id
         @GeneratedValue
         UUID id;
 
+        BrandName(String name){
+            brandName = name;
+        }
         public String getBrandName() {
             return brandName;
         }
@@ -90,27 +94,28 @@ public class BrandManager {
     }
     @Entity
     public static final class BrandInfo {
+        @EmbeddedId
+        BrandKey key;
+        int v;
+        @OneToOne(cascade=CascadeType.ALL)
+        private BrandName brandName;
 
-        public BrandInfo(BrandKey key) {
+
+        public BrandInfo(BrandKey key, String newBrandName) {
             this.key = key;
+            brandName = new BrandName(newBrandName);
         }
 
         protected BrandInfo() {}
 
-        @EmbeddedId
-        BrandKey key;
-        int v;
 
         public BrandName getBrandName() {
             return brandName;
         }
-
         public void setBrandName(BrandName brandName) {
 
             this.brandName = brandName;
         }
-        @OneToOne(cascade=CascadeType.ALL)
-        private BrandName brandName;
     }
     public void update(long diffNano) {
         if(dbSaveTimer.update(diffNano))
@@ -286,7 +291,44 @@ public class BrandManager {
     @MapKey(name = "key")
     @JoinColumn(name = "brand_manager_id")
     private Map<BrandKey, BrandInfo> allBrandInfo = new HashMap<>();
-    
+
+    //添加品牌，如果已经有使用该BrandKey的品牌了，返回false
+    //现在的规则是，BrandKey 只增不减，比如1万个玩家200种商品，那么最多就是200万个BrandKey
+    public boolean addBrand(UUID pid, int typeId, String brandName){
+        BrandKey bk = new BrandKey(pid,typeId);
+        BrandInfo bInfo = allBrandInfo.get(bk);
+        if(bInfo == null){
+            bInfo = new BrandInfo(bk, brandName);
+            allBrandInfo.put(bk,bInfo);
+            GameDb.saveOrUpdate(this);
+            return true;
+        }
+        return  false;
+    }
+
+    public BrandInfo getBrand(UUID pid, int typeId){
+        BrandKey bk = new BrandKey(pid,typeId);
+        return allBrandInfo.get(bk);
+    }
+
+    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的
+    public boolean changeBrandName(UUID pid, int typeId, String validNewName){
+        BrandKey bk = new BrandKey(pid,typeId);
+        BrandInfo bInfo = allBrandInfo.get(bk);
+        if(bInfo == null){
+            return false;
+        }
+        //如果新名字是使用中的名字，那么操作失败，返回false
+        if(GameDb.brandNameIsInUsing(validNewName)){
+            return false;
+        }
+        //如果名字可用
+        bInfo.setBrandName(new BrandName(validNewName));
+        allBrandInfo.put(bk,bInfo);
+        GameDb.saveOrUpdate(this);
+        return  true;
+    }
+
     @Transient
     private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
 	
