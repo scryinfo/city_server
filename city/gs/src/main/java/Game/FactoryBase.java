@@ -255,6 +255,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         if(this.shelf.del(id, n)) {
             if(unLock)
                 this.store.unLock(id, n);
+            else{//如果是消费，那么需要消费lock的数量
+                this.store.consumeLock(id, n);
+            }
             return true;
         }
         return false;

@@ -756,7 +756,31 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.setPrice(item.key, c.getPrice())) {
+		Shelf.Content i = s.getContent(item.key);
+		if(!s.setPrice(item.key, c.getPrice())){
+			this.write(Package.fail(cmd));
+			return;
+		}
+
+		int changeNum = item.n - i.getCount();
+		if( changeNum > 0){//上架
+			Item itemAdd = new Item(item.key,changeNum);
+			if(!s.addshelf(itemAdd, c.getPrice(),c.getAutoRepOn())){
+				this.write(Package.fail(cmd));
+				return;
+			}
+		}else{
+			if(!s.delshelf(item.key, -changeNum, true)){
+				this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
+				return;
+			}
+		}
+
+		if(s.setAutoReplenish(item.key,c.getAutoRepOn())) {
+			//处理自动补货
+			if(i != null && i.autoReplenish){
+				IShelf.updateAutoReplenish(s,item.key);
+			}
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -829,7 +853,6 @@ public class GameSession {
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 		sellBuilding.updateTodayIncome(cost);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
@@ -3200,8 +3223,15 @@ public class GameSession {
 		}
 		//8.7.销售方减少上架数量
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
+<<<<<<< HEAD
 		IStorage sellStorage = (IStorage) sellShelf;
 		sellStorage.consumeLock(itemBuy.key, itemBuy.n);
+=======
+		IStorage sellStorage = (IStorage) sellBuilding;
+		if(sellRenter!=null){
+			sellStorage = sellRenter;
+		}
+>>>>>>> 561b535e37c843e69fbb017151cad0709e09fe97
 		//更每每日的收入
 		if(sellRenter!=null){
 			sellRenter.updateTodayIncome(cost);//更新今日收入

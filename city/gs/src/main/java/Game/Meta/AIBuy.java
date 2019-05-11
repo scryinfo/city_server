@@ -15,6 +15,7 @@ public class AIBuy extends ProbBase {
         for(int i = 0; i < d.length; ++i) {
             d[i] *= ratio[i];
         }
+        IAction.logger.info("AIBuy weight" + Arrays.toString(d));
         return MetaGood.Type.values()[super.randomIdx(d)];
     }
 }

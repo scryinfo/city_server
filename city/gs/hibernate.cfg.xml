@@ -66,6 +66,7 @@
 		<mapping class="Game.GroundManager"></mapping>
 		<mapping class="Game.GroundInfo"></mapping>
 		<mapping class="Game.BrandManager"></mapping>
+		<mapping class="Game.BrandManager$BrandName"></mapping>
 		<mapping class="Game.BrandManager$BrandInfo"></mapping>
 		<mapping class="Game.TechTradeCenter"></mapping>
 		<mapping class="Game.TechTradeCenter$Sell"></mapping>
