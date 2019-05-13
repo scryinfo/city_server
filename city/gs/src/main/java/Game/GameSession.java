@@ -2899,7 +2899,11 @@ public class GameSession {
 		Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
-			band.setItemId(itemId).setPId(Util.toByteString(pId)).setBrandName(BrandManager.instance().getBrand(pId,itemId).getBrandName());
+			band.setItemId(itemId).setPId(Util.toByteString(pId));
+			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,itemId);
+			if(binfo.hasBrandName()){
+				band.setBrandName(binfo.getBrandName());
+			}
 			GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
 				//优先查询建筑正在使用的某项加盟技术
 				BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);

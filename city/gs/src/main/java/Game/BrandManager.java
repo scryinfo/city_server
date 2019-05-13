@@ -114,6 +114,9 @@ public class BrandManager {
         */
         Long nameChangedTs;
 
+        public boolean hasBrandName(){
+            return brandName != null;
+        }
         public BrandInfo(BrandKey key, String newBrandName) {
             this.key = key;
             brandName = new BrandName(newBrandName);
