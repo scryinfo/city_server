@@ -353,7 +353,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
         this.enableRent = false;
         this.store.setOtherUseSize(this.rentUsedCapacity);//设置其他使用容量为当前已经租出去的容量
     }
-
     public void updateOtherSize(){
         this.store.setOtherUseSize(this.rentUsedCapacity);
     }
