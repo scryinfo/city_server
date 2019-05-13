@@ -72,12 +72,16 @@ public class BrandManager {
             return Objects.hash(playerId, mid);
         }
     }
-    @Entity
+
+    @Entity(name = "brandname")
     public static final class BrandName {
         @Id
         @GeneratedValue
         UUID id;
-
+        BrandName(){}
+        BrandName(String name){
+            brandName = name;
+        }
         public String getBrandName() {
             return brandName;
         }
@@ -86,39 +90,46 @@ public class BrandManager {
             this.brandName = brandName;
         }
 
+        //@OneToOne(mappedBy="brandName",cascade=CascadeType.ALL)
+        @OneToOne(mappedBy="brandName",cascade=CascadeType.ALL)
+        private BrandInfo brandinfo;
+
         private String brandName = "";
     }
     @Entity
     public static final class BrandInfo {
+        @EmbeddedId
+        BrandKey key;
+        int v;
+        @OneToOne(cascade={CascadeType.ALL})
+        public BrandName brandName;
 
+
+        public BrandInfo(BrandKey key, String newBrandName) {
+            this.key = key;
+            brandName = new BrandName(newBrandName);
+        }
         public BrandInfo(BrandKey key) {
             this.key = key;
         }
 
         protected BrandInfo() {}
 
-        @EmbeddedId
-        BrandKey key;
-        int v;
 
         public BrandName getBrandName() {
             return brandName;
         }
-
         public void setBrandName(BrandName brandName) {
 
             this.brandName = brandName;
         }
-        @OneToOne(cascade=CascadeType.ALL)
-        private BrandName brandName;
     }
     public void update(long diffNano) {
         if(dbSaveTimer.update(diffNano))
-        	GameDb.saveOrUpdate(this);
+            GameDb.saveOrUpdate(this);
         if(brandQualityTimer.update(diffNano)){
-        	getAllBuildingBrandOrQuality();
+            getAllBuildingBrandOrQuality();
         }
-
     }
     @Transient
     private PeriodicTimer dbSaveTimer = new PeriodicTimer(2*60*1000);
@@ -288,45 +299,82 @@ public class BrandManager {
     @JoinColumn(name = "brand_manager_id")
     private Map<BrandKey, BrandInfo> allBrandInfo = new HashMap<>();
 
+    //添加品牌，如果已经有使用该BrandKey的品牌了，返回false
+    //现在的规则是，BrandKey 只增不减，比如1万个玩家200种商品，那么最多就是200万个BrandKey
+    public boolean addBrand(UUID pid, int typeId, String brandName){
+        BrandKey bk = new BrandKey(pid,typeId);
+        BrandInfo bInfo = allBrandInfo.get(bk);
+        if(bInfo == null){
+            bInfo = new BrandInfo(bk, brandName);
+            allBrandInfo.put(bk,bInfo);
+            GameDb.saveOrUpdate(this);
+            return true;
+        }
+        return  false;
+    }
+
+    public BrandInfo getBrand(UUID pid, int typeId){
+        BrandKey bk = new BrandKey(pid,typeId);
+        return allBrandInfo.get(bk);
+    }
+
+    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的
+    public boolean changeBrandName(UUID pid, int typeId, String validNewName){
+        BrandKey bk = new BrandKey(pid,typeId);
+        BrandInfo bInfo = allBrandInfo.get(bk);
+        if(bInfo == null){
+            return false;
+        }
+        //如果新名字是使用中的名字，那么操作失败，返回false
+        if(GameDb.brandNameIsInUsing(validNewName)){
+            return false;
+        }
+        //如果名字可用
+        bInfo.setBrandName(new BrandName(validNewName));
+        allBrandInfo.put(bk,bInfo);
+        GameDb.saveOrUpdate(this);
+        return  true;
+    }
+
     @Transient
     private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
 
     public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
-    	UUID playerId=b.ownerId();
-    	//住宅和零售店的techId是13和14
-    	BrandLeague bl=LeagueManager.getInstance().getBrandLeague(b.id(), b.type());
-    	if(bl!=null){//优先查询加盟玩家技术
-    		playerId=bl.getPlayerId();
-    	}
-    	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
-    	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
-    	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
+        UUID playerId=b.ownerId();
+        //住宅和零售店的techId是13和14
+        BrandLeague bl=LeagueManager.getInstance().getBrandLeague(b.id(), b.type());
+        if(bl!=null){//优先查询加盟玩家技术
+            playerId=bl.getPlayerId();
+        }
+        int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
+        Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
+        Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
 
-		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
-		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
-		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
+        brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
+        brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
+        brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
 
-		qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
-		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
-		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
+        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
+        qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
+        qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 
     public void getAllBuildingBrandOrQuality(){
-    	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
-    	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-    	City.instance().forEachBuilding((Building b)->{
-    		if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
-    			getBuildingBrandOrQuality(b,brandMap,qtyMap);
-    		}
-    	});
-    	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
-    	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
+        Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+        Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+        City.instance().forEachBuilding((Building b)->{
+            if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
+                getBuildingBrandOrQuality(b,brandMap,qtyMap);
+            }
+        });
+        totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
+        totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
     }
 
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
-    	return totalBrandQualityMap;
+        return totalBrandQualityMap;
     }
     public double getValFromMap(Map<Integer,Double> map,int type){
-    	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
+        return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
     }
 }

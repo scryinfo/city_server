@@ -96,7 +96,7 @@ public class GameDb {
 							return res;
 						}
 					});
-//	private static LoadingCache<UUID, Player> tmpPlayerCache = CacheBuilder.newBuilder()
+	//	private static LoadingCache<UUID, Player> tmpPlayerCache = CacheBuilder.newBuilder()
 //			.concurrencyLevel(1)
 //			.expireAfterWrite(Duration.ofMinutes(2))
 //			.maximumSize(2560)
@@ -144,28 +144,45 @@ public class GameDb {
 					});
 
 	//wxj============================================
-    public static void Update(Collection objs) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            int i = 0;
-            for (Object o : objs) {
-                session.update(o);
-                ++i;
-                if (i % BATCH_SIZE == 0) {
-                    session.flush();
-                }
-            }
-            transaction.commit();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            if(transaction != null)
-                transaction.rollback();
-        } finally {
-            session.close();
-        }
-    }
+	public static void Update(Collection objs) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			int i = 0;
+			for (Object o : objs) {
+				session.update(o);
+				++i;
+				if (i % BATCH_SIZE == 0) {
+					session.flush();
+				}
+			}
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+			session.close();
+		}
+	}
+
+	public static boolean brandNameIsInUsing(String testName){
+		Session session = sessionFactory.openSession();
+		List userList = null;
+		try{
+			//重新开服,需要获取一下上次的记录
+			Query query = session.createQuery("from brandname BrandName where BrandName.brandName is :testName")
+					.setParameter("testName",testName);
+			userList = query.list();
+		}catch (Exception e){//异常情况下， 认为是名字使用中，避免后续操作
+			return true;
+		}
+		if(userList.size() > 0){
+			return true;
+		}
+		return false;
+	}
 
 	public static  EvaRecord getlastEvaRecord(UUID bid, short tid){
 		Session session = sessionFactory.openSession();
@@ -192,9 +209,9 @@ public class GameDb {
 		List userList = null;
 		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs - 1);
 		try{
-		Query query = session.createQuery("from flow_records Record where ts>=:tsSt and playerId is :pid and typeId is :tpid")
-				.setParameter("tsSt",tsSart)
-				.setParameter("pid",inPid);
+			Query query = session.createQuery("from flow_records Record where ts>=:tsSt and playerId is :pid and typeId is :tpid")
+					.setParameter("tsSt",tsSart)
+					.setParameter("pid",inPid);
 			userList = query.list();
 		}catch (Exception e){
 			return new FlowRecord(inPid,0,0);
@@ -223,8 +240,8 @@ public class GameDb {
 		return  ret;
 	}
 	public static List getFlow_records(int tsSart,UUID pid, int count){
-    	List ret = null;
-    	try{
+		List ret = null;
+		try{
 			Session session = sessionFactory.openSession();
 			//人流量
 			Query query = session.createQuery( "FROM flow_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND playerId IS :pid" )
@@ -372,7 +389,7 @@ public class GameDb {
 	public static void deleteFriendRequest(UUID from, UUID to)
 	{
 		Transaction transaction = null;
-        StatelessSession session = sessionFactory.openStatelessSession();
+		StatelessSession session = sessionFactory.openStatelessSession();
 		try
 		{
 			transaction = session.beginTransaction();
@@ -389,17 +406,17 @@ public class GameDb {
 			rollBack(transaction);
 		}
 		finally
-        {
-            closeSession(session);
-        }
+		{
+			closeSession(session);
+		}
 	}
 
 	public static void newSessionSaveOrUpdateAndDelete(Collection saveUpdate, Collection deletes) {
 		Transaction transaction = null;
 		Session session1 = sessionFactory.openSession();
 		try
-        {
-		    transaction = session1.beginTransaction();
+		{
+			transaction = session1.beginTransaction();
 			int i = 0;
 			for (Object o : saveUpdate)
 			{
@@ -545,7 +562,7 @@ public class GameDb {
 		List<UUID> resultList= session.createSQLQuery("SELECT fid AS uuid FROM friend WHERE pid=:x UNION SELECT pid AS uuid FROM friend WHERE fid=:x ")
 				.addScalar("uuid",StandardBasicTypes.UUID_CHAR)
 				.setParameter("x",pid)
-		        .getResultList();
+				.getResultList();
 		session.close();
 		return new HashSet<>(resultList);
 	}
@@ -921,29 +938,29 @@ public class GameDb {
 		}
 	}
 	//数据库更新后，清理缓存，适用于数据量很大的应用场景
-    public static void saveOrUpdateAndClear(Collection objs) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            int i = 0;
-            for (Object o : objs) {
-                session.saveOrUpdate(o);
-                ++i;
-                if (i % BATCH_SIZE == 0) {
-                    session.flush();
-                }
-            }
-            session.clear(); //清除缓存，避免内存开销太大
-            transaction.commit();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            if(transaction != null)
-                transaction.rollback();
-        } finally {
-            session.close();
-        }
-    }
+	public static void saveOrUpdateAndClear(Collection objs) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			int i = 0;
+			for (Object o : objs) {
+				session.saveOrUpdate(o);
+				++i;
+				if (i % BATCH_SIZE == 0) {
+					session.flush();
+				}
+			}
+			session.clear(); //清除缓存，避免内存开销太大
+			transaction.commit();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+			session.close();
+		}
+	}
 	public static void saveOrUpdateAndClear(Object o) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
@@ -1084,7 +1101,7 @@ public class GameDb {
 		//session.close();
 		sessionFactory.close();
 	}
-    public static Gs.ExchangeDealLogs getExchangeDealLog(UUID id) {
+	public static Gs.ExchangeDealLogs getExchangeDealLog(UUID id) {
 		Gs.ExchangeDealLogs.Builder builder = Gs.ExchangeDealLogs.newBuilder();
 		StatelessSession session = sessionFactory.openStatelessSession();
 		Transaction transaction = session.beginTransaction();
@@ -1094,7 +1111,7 @@ public class GameDb {
 		transaction.commit();
 		session.close();
 		return builder.build();
-    }
+	}
 
 	public static Gs.ExchangeDealLogs getExchangeDealLog(int page) {
 		Gs.ExchangeDealLogs.Builder builder = Gs.ExchangeDealLogs.newBuilder();
@@ -1125,72 +1142,72 @@ public class GameDb {
 		return res;
 	}
 
-    public static void delMail(UUID mailId) {
-        Transaction transaction = null;
-        StatelessSession session = null;
-        try {
-            session = sessionFactory.openStatelessSession();
-            transaction = session.beginTransaction();
-            session.createSQLQuery("DELETE FROM Mail WHERE Id= :x and read = :y")
-                    .setParameter("x", mailId)
-                    .setParameter("y", true)
-                    .executeUpdate();
-            transaction.commit();
-        } catch (RuntimeException e) {
-            transaction.rollback();
-            logger.fatal("Delete mail failure");
-            e.printStackTrace();
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
+	public static void delMail(UUID mailId) {
+		Transaction transaction = null;
+		StatelessSession session = null;
+		try {
+			session = sessionFactory.openStatelessSession();
+			transaction = session.beginTransaction();
+			session.createSQLQuery("DELETE FROM Mail WHERE Id= :x and read = :y")
+					.setParameter("x", mailId)
+					.setParameter("y", true)
+					.executeUpdate();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			transaction.rollback();
+			logger.fatal("Delete mail failure");
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+	}
 
-    public static void delOverdueMail() {
-        Transaction transaction = null;
-        StatelessSession session = null;
-        try {
-            session = sessionFactory.openStatelessSession();
-            transaction = session.beginTransaction();
+	public static void delOverdueMail() {
+		Transaction transaction = null;
+		StatelessSession session = null;
+		try {
+			session = sessionFactory.openStatelessSession();
+			transaction = session.beginTransaction();
 
-            long now = System.currentTimeMillis();
-            long diffTs = now - TimeUnit.HOURS.toMillis(7 * 24);
-            session.createSQLQuery("DELETE FROM Mail WHERE ts < :x")
-                    .setParameter("x", diffTs)
-                    .executeUpdate();
-            transaction.commit();
-        } catch (RuntimeException e) {
-            transaction.rollback();
-            logger.fatal("Delete overdueMail failure");
-            e.printStackTrace();
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
+			long now = System.currentTimeMillis();
+			long diffTs = now - TimeUnit.HOURS.toMillis(7 * 24);
+			session.createSQLQuery("DELETE FROM Mail WHERE ts < :x")
+					.setParameter("x", diffTs)
+					.executeUpdate();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			transaction.rollback();
+			logger.fatal("Delete overdueMail failure");
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+	}
 
-    public static void mailChangeRead(UUID mailId) {
-        Transaction transaction = null;
-        StatelessSession session = null;
-        try {
-            session = sessionFactory.openStatelessSession();
-            transaction = session.beginTransaction();
-            session.createSQLQuery("update Mail SET read = TRUE WHERE id = :x")
-                    .setParameter("x", mailId)
-                    .executeUpdate();
-            transaction.commit();
-        } catch (RuntimeException e) {
-            transaction.rollback();
-            logger.fatal("mailChangeRead failure");
-            e.printStackTrace();
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
+	public static void mailChangeRead(UUID mailId) {
+		Transaction transaction = null;
+		StatelessSession session = null;
+		try {
+			session = sessionFactory.openStatelessSession();
+			transaction = session.beginTransaction();
+			session.createSQLQuery("update Mail SET read = TRUE WHERE id = :x")
+					.setParameter("x", mailId)
+					.executeUpdate();
+			transaction.commit();
+		} catch (RuntimeException e) {
+			transaction.rollback();
+			logger.fatal("mailChangeRead failure");
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+	}
 
 	//llb=================================
 
@@ -1215,7 +1232,7 @@ public class GameDb {
 		list.forEach(o->res.put(o.mid, o.goodlv));
 		return res;
 	}
-	
+
 	public static List<Eva> getEvaInfoList(UUID pid,Integer itemId)
 	{
 		List<Eva> list = new ArrayList<Eva>();
@@ -1232,7 +1249,7 @@ public class GameDb {
 						.setParameter("at", itemId)
 						.list();
 			}
-			
+
 		}
 		catch (RuntimeException e)
 		{
