@@ -327,7 +327,7 @@ public class BrandManager {
 
     public BrandInfo getBrand(UUID pid, int typeId){
         BrandKey bk = new BrandKey(pid,typeId);
-        return allBrandInfo.get(bk);
+        return allBrandInfo.getOrDefault(bk,new BrandInfo(bk));
     }
 
     //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的
@@ -336,14 +336,9 @@ public class BrandManager {
         if(GameDb.brandNameIsInUsing(validNewName)){
             return false;
         }
-        BrandKey brandkey = new BrandKey(pid,typeId);
-        BrandInfo bInfo = allBrandInfo.get(brandkey);
-        if(bInfo == null){
-            bInfo = new BrandInfo(brandkey,validNewName);
-        }
+        BrandInfo bInfo = getBrand(pid,typeId);
         //如果名字可用
         bInfo.setBrandName(validNewName);
-        allBrandInfo.put(brandkey,bInfo);
         GameDb.saveOrUpdate(bInfo.brandName);
         GameDb.saveOrUpdate(this);
         return  true;
