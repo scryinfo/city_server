@@ -118,7 +118,7 @@ public class BrandManager {
         if(brandQualityTimer.update(diffNano)){
         	getAllBuildingBrandOrQuality();
         }
-            
+
     }
     @Transient
     private PeriodicTimer dbSaveTimer = new PeriodicTimer(2*60*1000);
@@ -287,10 +287,10 @@ public class BrandManager {
     @MapKey(name = "key")
     @JoinColumn(name = "brand_manager_id")
     private Map<BrandKey, BrandInfo> allBrandInfo = new HashMap<>();
-    
+
     @Transient
     private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
-	
+
     public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
     	UUID playerId=b.ownerId();
     	//住宅和零售店的techId是13和14
@@ -301,16 +301,16 @@ public class BrandManager {
     	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
-    	
+
 		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
 		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
 		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
-		
+
 		qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
 		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
-    
+
     public void getAllBuildingBrandOrQuality(){
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
@@ -322,7 +322,7 @@ public class BrandManager {
     	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
     	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
     }
-    
+
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
     	return totalBrandQualityMap;
     }

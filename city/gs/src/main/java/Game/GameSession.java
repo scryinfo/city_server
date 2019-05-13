@@ -3768,5 +3768,4 @@ public class GameSession {
 		this.write(Package.create(cmd, list.build()));
 	}*/
 
-
 }
