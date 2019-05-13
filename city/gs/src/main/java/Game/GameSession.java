@@ -2991,6 +2991,7 @@ public class GameSession {
 
 
 
+
 	//1.集散中心详情数据获取
 	public void detailWareHouse(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
