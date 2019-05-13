@@ -102,7 +102,6 @@ public class BrandManager {
         BrandKey key;
         int v;
         @OneToOne(cascade={CascadeType.ALL})
-        @Column(nullable = true)
         public BrandName brandName = null;
 
         //记录名字修改的时间戳，与当前时间大于7天才可以修改，用于防止抢注的情况
