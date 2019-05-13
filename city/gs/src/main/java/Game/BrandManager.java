@@ -102,8 +102,17 @@ public class BrandManager {
         BrandKey key;
         int v;
         @OneToOne(cascade={CascadeType.ALL})
-        public BrandName brandName;
+        public BrandName brandName = null;
 
+        //记录名字修改的时间戳，与当前时间大于7天才可以修改，用于防止抢注的情况
+        //鉴于每个玩家的BrandKey是有限的所以暂时不用处理这个数据，有必要的时候在实现
+        /*
+        数量没有限制才会导致抢注这种情况。比如100种商品，那么每个玩家顶多100多个BrandKey,
+        那么应该不会发生抢注的情况；况且玩家频繁修改自己的品牌名字，实际上会损害
+        自己的品牌认知度；如果是恶意针对对其它竞争玩家，那么我怎么知道人家要取啥名名字？
+        所以限制抢注的这个需求其实是伪需求。
+        */
+        Long nameChangedTs;
 
         public BrandInfo(BrandKey key, String newBrandName) {
             this.key = key;
@@ -301,11 +310,12 @@ public class BrandManager {
 
     //添加品牌，如果已经有使用该BrandKey的品牌了，返回false
     //现在的规则是，BrandKey 只增不减，比如1万个玩家200种商品，那么最多就是200万个BrandKey
-    public boolean addBrand(UUID pid, int typeId, String brandName){
+    //服务器默认是只产生品牌key，不产生品牌名字的，客户端拿到品牌key自己生成品牌默认品牌名字
+    public boolean addBrand(UUID pid, int typeId){
         BrandKey bk = new BrandKey(pid,typeId);
         BrandInfo bInfo = allBrandInfo.get(bk);
         if(bInfo == null){
-            bInfo = new BrandInfo(bk, brandName);
+            bInfo = new BrandInfo(bk);
             allBrandInfo.put(bk,bInfo);
             GameDb.saveOrUpdate(this);
             return true;
