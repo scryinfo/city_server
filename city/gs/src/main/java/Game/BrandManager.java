@@ -340,41 +340,41 @@ public class BrandManager {
     private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
 
     public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
-        UUID playerId=b.ownerId();
-        //住宅和零售店的techId是13和14
-        BrandLeague bl=LeagueManager.getInstance().getBrandLeague(b.id(), b.type());
-        if(bl!=null){//优先查询加盟玩家技术
-            playerId=bl.getPlayerId();
-        }
-        int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
-        Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
-        Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
+    	UUID playerId=b.ownerId();
+    	//住宅和零售店的techId是13和14
+    	BrandLeague bl=LeagueManager.getInstance().getBrandLeague(b.id(), b.type());
+    	if(bl!=null){//优先查询加盟玩家技术
+    		playerId=bl.getPlayerId();
+    	}
+    	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
+    	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
+    	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
 
-        brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
-        brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
-        brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
+		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
+		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
+		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
 
-        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
-        qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
-        qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
+		qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
+		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
+		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 
     public void getAllBuildingBrandOrQuality(){
-        Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
-        Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-        City.instance().forEachBuilding((Building b)->{
-            if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
-                getBuildingBrandOrQuality(b,brandMap,qtyMap);
-            }
-        });
-        totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
-        totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
+    	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+    	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+    	City.instance().forEachBuilding((Building b)->{
+    		if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
+    			getBuildingBrandOrQuality(b,brandMap,qtyMap);
+    		}
+    	});
+    	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
+    	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
     }
 
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
-        return totalBrandQualityMap;
+    	return totalBrandQualityMap;
     }
     public double getValFromMap(Map<Integer,Double> map,int type){
-        return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
+    	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
     }
 }
