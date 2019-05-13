@@ -2847,7 +2847,6 @@ public class GameSession {
 	public void queryMyEva(short cmd, Message message)
 	{
 		UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
@@ -2906,6 +2905,9 @@ public class GameSession {
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setBrand(buildInfo.getBrand());
 			GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
+				//查询品牌名
+				BrandManager.BrandInfo brandInfo = BrandManager.instance().getBrand(pId, eva.getAt());
+				band.setBrandName(brandInfo.getBrandName().getBrandName());
 				//优先查询建筑正在使用的某项加盟技术
 				BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
 				if(bl!=null){
@@ -2934,7 +2936,6 @@ public class GameSession {
 				ls.add(info.getPlayerId());//某项技术可能加盟多个，但是只能使用其中一个
 			}
 		}
-
 		Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
 		ls.forEach(playerId->{
 			Player player=GameDb.getPlayer(playerId);
@@ -3726,35 +3727,49 @@ public class GameSession {
     	this.write(Package.create(cmd, builder.build()));
     }
 
-	/*public void queryMyEvaVersion1(short cmd, Message message)
+	public void queryMyEvaByBuildingType(short cmd, Message message)
 	{
 		Gs.QueryMyEvaByType msg = (Gs.QueryMyEvaByType) message;
 		UUID pid = Util.toUuid(msg.getPlayerId().toByteArray());//玩家id
 		int type = msg.getType();//建筑类型
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
+		Gs.Evas.MetaInfo.Builder mt = Gs.Evas.MetaInfo.newBuilder();
 		MetaData.getBuildingTech(type).forEach(techId->{
 			EvaManager.getInstance().getEva(pid,techId).forEach(eva->{
 				list.addEva(eva.toProto());
 			});
 		});
-		//设置其他信息
+		//设置其他信息(建筑信息)
 		switch (type){
 			case MetaBuilding.MATERIAL:
 				Collection<MetaMaterialFactory> values1 = MetaData.getMaterialFactory().values();
+				values1.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 			case MetaBuilding.PRODUCE:
 				Collection<MetaProduceDepartment> values2 = MetaData.getProduceDepartment().values();
+				values2.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 			case MetaBuilding.RETAIL:
 				Collection<MetaRetailShop> values3 = MetaData.getRetailShop().values();
+				values3.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 			case MetaBuilding.APARTMENT:
 				Collection<MetaApartment> values4 = MetaData.getApartment().values();
+				values4.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 			case MetaBuilding.LAB:
 				Collection<MetaLaboratory> values5 = MetaData.getLaboratory().values();
+				values5.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 			case MetaBuilding.PUBLIC:
 				Collection<MetaPublicFacility> values6 = MetaData.getPublicFacility().values();
+				values6.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 			case MetaBuilding.WAREHOUSE:
-				MetaData.getWarehouse().values()
+				Collection<MetaWarehouse> values7 = MetaData.getWarehouse().values();
+				values7.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
+				break;
 		}
 		this.write(Package.create(cmd, list.build()));
-	}*/
-
+	}
 }
