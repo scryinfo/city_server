@@ -102,6 +102,7 @@ public class BrandManager {
         BrandKey key;
         int v;
         @OneToOne(cascade={CascadeType.ALL})
+        @Column(nullable = true)
         public BrandName brandName = null;
 
         //记录名字修改的时间戳，与当前时间大于7天才可以修改，用于防止抢注的情况
@@ -330,18 +331,19 @@ public class BrandManager {
 
     //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的
     public boolean changeBrandName(UUID pid, int typeId, String validNewName){
-        BrandKey bk = new BrandKey(pid,typeId);
-        BrandInfo bInfo = allBrandInfo.get(bk);
-        if(bInfo == null){
-            return false;
-        }
         //如果新名字是使用中的名字，那么操作失败，返回false
         if(GameDb.brandNameIsInUsing(validNewName)){
             return false;
         }
+        BrandKey brandkey = new BrandKey(pid,typeId);
+        BrandInfo bInfo = allBrandInfo.get(brandkey);
+        if(bInfo == null){
+            bInfo = new BrandInfo(brandkey,validNewName);
+        }
         //如果名字可用
         bInfo.setBrandName(new BrandName(validNewName));
-        allBrandInfo.put(bk,bInfo);
+        allBrandInfo.put(brandkey,bInfo);
+        GameDb.saveOrUpdate(bInfo.brandName);
         GameDb.saveOrUpdate(this);
         return  true;
     }
