@@ -256,8 +256,8 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public boolean offset(MetaItem item, int n) {
-        return this.store.offset(item,n);
+    public boolean offset(MetaItem item, int n, UUID pid, int typeId) {
+        return this.store.offset(item,n,pid,typeId);
     }
 
 

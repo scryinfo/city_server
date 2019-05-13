@@ -126,9 +126,9 @@ public class BrandManager {
     }
     public void update(long diffNano) {
         if(dbSaveTimer.update(diffNano))
-            GameDb.saveOrUpdate(this);
+        	GameDb.saveOrUpdate(this);
         if(brandQualityTimer.update(diffNano)){
-            getAllBuildingBrandOrQuality();
+        	getAllBuildingBrandOrQuality();
         }
     }
     @Transient

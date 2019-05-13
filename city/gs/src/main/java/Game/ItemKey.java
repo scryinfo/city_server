@@ -12,10 +12,11 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import Game.BrandManager;
 
 @Embeddable
 public class ItemKey implements Serializable {
-    public ItemKey(MetaItem meta, UUID producerId, int qty) {
+    public ItemKey(MetaItem meta, UUID producerId, int qty, UUID playerId) {
         this.meta = meta;
         this.producerId = producerId;
         this.qty = qty;
@@ -40,7 +41,7 @@ public class ItemKey implements Serializable {
     }
     protected ItemKey() {}
 
-    public ItemKey(MetaItem mi) {
+    public ItemKey(MetaItem mi, UUID playerId) {
         this.meta = mi;
     }
 

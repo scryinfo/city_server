@@ -45,6 +45,6 @@ public interface IStorage {
     boolean has(ItemKey m, int n);
 
     boolean offset(ItemKey item, int n);
-    boolean offset(MetaItem item, int n);
+    boolean offset(MetaItem item, int n, UUID pid, int typeId);
     boolean delItem(Item item);
 }

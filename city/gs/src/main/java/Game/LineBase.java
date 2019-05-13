@@ -42,7 +42,7 @@ public abstract class LineBase {
 
     protected LineBase() {
     }
-    public abstract ItemKey newItemKey(UUID producerId, int qty);
+    public abstract ItemKey newItemKey(UUID producerId, int qty,UUID pid);
     public boolean isPause() {
         return isComplete() || workerNum == 0;
     }

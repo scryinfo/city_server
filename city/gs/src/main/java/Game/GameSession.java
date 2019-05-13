@@ -160,9 +160,9 @@ public class GameSession {
 				if(player.getBag().reserve(mi, n)) {
 					Item item;
 					if(mi instanceof MetaMaterial)
-						item = new Item(new ItemKey(mi), n);
+						item = new Item(new ItemKey(mi,player.id()), n);
 					else
-						item = new Item(new ItemKey(mi, player.id(), 0), n);
+						item = new Item(new ItemKey(mi, player.id()), n);
 					player.getBag().consumeReserve(item.key, n, 1);
 				}
 				GameDb.saveOrUpdate(player);
@@ -413,6 +413,7 @@ public class GameSession {
 		b.shutdownBusiness();
 		this.write(Package.create(cmd,c));
 	}
+
 	public void queryMarketSummary(short cmd, Message message) {
 		Gs.Num c = (Gs.Num)message;
 		MetaItem mi = MetaData.getItem(c.getNum()); //获取商品类型
@@ -422,7 +423,7 @@ public class GameSession {
 		City.instance().forAllGrid((grid)->{
 			AtomicInteger n = new AtomicInteger(0);
 			grid.forAllBuilding(building -> {
-				if(building instanceof IShelf && !building.outOfBusiness()&&building instanceof FactoryBase) {//只查询加工厂和原料厂
+				if(building instanceof IShelf && !building.outOfBusiness()&&building instanceof FactoryBase) {
 					//如果是集散中心并且有租户，就还要从租户中获取上架信息
 					/*if(building instanceof WareHouse &&((WareHouse) building).getRenters().size()>0){
 						WareHouse wareHouse = (WareHouse) building;
@@ -722,31 +723,7 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		Shelf.Content i = s.getContent(item.key);
-		if(!s.setPrice(item.key, c.getPrice())){
-			this.write(Package.fail(cmd));
-			return;
-		}
-
-		int changeNum = item.n - i.getCount();
-		if( changeNum > 0){//上架
-			Item itemAdd = new Item(item.key,changeNum);
-			if(!s.addshelf(itemAdd, c.getPrice(),c.getAutoRepOn())){
-				this.write(Package.fail(cmd));
-				return;
-			}
-		}else{
-			if(!s.delshelf(item.key, -changeNum, true)){
-				this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
-				return;
-			}
-		}
-
-		if(s.setAutoReplenish(item.key,c.getAutoRepOn())) {
-			//处理自动补货
-			if(i != null && i.autoReplenish){
-				IShelf.updateAutoReplenish(s,item.key);
-			}
+		if(s.setPrice(item.key, c.getPrice())) {
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -819,6 +796,7 @@ public class GameSession {
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
+		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 		sellBuilding.updateTodayIncome(cost);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
@@ -867,7 +845,7 @@ public class GameSession {
 			return;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		IStorage s = IStorage.get(bid, player);
-		if (s == null || !s.lock(new ItemKey(mi), c.getNum()))
+		if (s == null || !s.lock(new ItemKey(mi,player.id()), c.getNum()))
 			return;
 		UUID orderId = Exchange.instance().addSellOrder(player.id(), c.getItemId(), c.getPrice(), c.getNum(), bid);
 		s.markOrder(orderId);
@@ -2989,7 +2967,17 @@ public class GameSession {
 		this.write(Package.create(cmd, msg));
 	}
 
-
+	//修改品牌名字
+	public void modyfyMyBrandName(short cmd,Message message){
+		Gs.ModyfyMyBrandName msg = (Gs.ModyfyMyBrandName)message;
+		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		int techId=msg.getTypeId();
+		if(BrandManager.instance().addBrand(pId,techId,msg.getNewBrandName())){
+			this.write(Package.create(cmd, msg));
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
 
 
 	//1.集散中心详情数据获取
@@ -3351,8 +3339,8 @@ public class GameSession {
 		renters.forEach(p->{
 			if(p.getRenterId().equals(player.id()))
 				builder.addRenters(p.toProto());
-			});
-        builder.setBuildingId(c.getId());
+		});
+		builder.setBuildingId(c.getId());
 		this.write(Package.create(cmd,builder.build()));
 	}
 
@@ -3579,106 +3567,105 @@ public class GameSession {
 		building.setName(msg.getName());
 		GameDb.saveOrUpdate(building);
 		this.write(Package.create(cmd, building.toProto()));
-	}
-	//查询原料厂信息
-	public void queryMaterialInfo(short cmd, Message message)
-	{
-		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		Building building = City.instance().getBuilding(buildingId);
+    }
+    //查询原料厂信息
+    public void queryMaterialInfo(short cmd, Message message)
+    {
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
 
-		Gs.MaterialInfo.Builder builder=Gs.MaterialInfo.newBuilder();
-		builder.setSalary(building.salaryRatio);
-		builder.setStaffNum(building.getWorkerNum());
-		MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
-			Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
-			MetaMaterial material=MetaData.getMaterial(itemId);
-			Eva e=EvaManager.getInstance().getEva(playerId, itemId, Gs.Eva.Btype.ProduceSpeed.getNumber());
-			b.setItemId(itemId);
-			b.setIsUsed(material.useDirectly);
-			b.setNumOneSec(material.n);
-			b.setEva(e!=null?e.toProto():null);
-		});
-		this.write(Package.create(cmd, builder.build()));
-	}
-	//查询加工厂信息
-	public void queryProduceDepInfo(short cmd,Message message){
-		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		Building building = City.instance().getBuilding(buildingId);
+    	Gs.MaterialInfo.Builder builder=Gs.MaterialInfo.newBuilder();
+    	builder.setSalary(building.salaryRatio);
+    	builder.setStaffNum(building.getWorkerNum());
+    	MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
+    		Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
+    		MetaMaterial material=MetaData.getMaterial(itemId);
+        	Eva e=EvaManager.getInstance().getEva(playerId, itemId, Gs.Eva.Btype.ProduceSpeed.getNumber());
+        	b.setItemId(itemId);
+        	b.setIsUsed(material.useDirectly);
+        	b.setNumOneSec(material.n);
+        	b.setEva(e!=null?e.toProto():null);
+    	});
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    //查询加工厂信息
+    public void queryProduceDepInfo(short cmd,Message message){
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
 
-		Gs.ProduceDepInfo.Builder builder=Gs.ProduceDepInfo.newBuilder();
-		builder.setSalary(building.salaryRatio);
-		builder.setStaffNum(building.getWorkerNum());
-		double totalBrand=0;
-		double totalQuality=0;
-		Set<Integer> set=MetaData.getBuildingTech(MetaBuilding.PRODUCE);
-		for (Integer itemId : set) {
-			Eva SpeedEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.ProduceSpeed_VALUE);
-			Eva brandEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.Brand_VALUE);
-			Eva qualityEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.Quality_VALUE);
-			Gs.ProduceDepInfo.Goods.Builder b=builder.addGdsBuilder();
-			MetaGood goods=MetaData.getGood(itemId);
-			b.setItemId(itemId);
-			b.setIsUsed(goods.useDirectly);
-			b.setNumOneSec(goods.n);
-			b.setBrand(goods.brand);
-			b.setQuality(goods.quality);
-			b.setAddNumOneSec(EvaManager.getInstance().computePercent(SpeedEva));
-			b.setAddBrand(EvaManager.getInstance().computePercent(brandEva));
-			b.setAddQuality(EvaManager.getInstance().computePercent(qualityEva));
-			totalBrand+=b.getBrand()*(1+b.getAddBrand());
-			totalQuality+=b.getQuality()*(1+b.getAddQuality());
+    	Gs.ProduceDepInfo.Builder builder=Gs.ProduceDepInfo.newBuilder();
+    	builder.setSalary(building.salaryRatio);
+    	builder.setStaffNum(building.getWorkerNum());
+    	double totalBrand=0;
+    	double totalQuality=0;
+    	Set<Integer> set=MetaData.getBuildingTech(MetaBuilding.PRODUCE);
+    	for (Integer itemId : set) {
+    		Eva SpeedEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.ProduceSpeed_VALUE);
+    	   	Eva brandEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.Brand_VALUE);
+        	Eva qualityEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.Quality_VALUE);
+    		Gs.ProduceDepInfo.Goods.Builder b=builder.addGdsBuilder();
+    		MetaGood goods=MetaData.getGood(itemId);
+        	b.setItemId(itemId);
+        	b.setIsUsed(goods.useDirectly);
+        	b.setNumOneSec(goods.n);
+        	b.setBrand(goods.brand);
+        	b.setQuality(goods.quality);
+          	b.setAddNumOneSec(EvaManager.getInstance().computePercent(SpeedEva));
+        	b.setAddBrand(EvaManager.getInstance().computePercent(brandEva));
+        	b.setAddQuality(EvaManager.getInstance().computePercent(qualityEva));
+        	totalBrand+=b.getBrand()*(1+b.getAddBrand());
+        	totalQuality+=b.getQuality()*(1+b.getAddQuality());
 		}
-		builder.setTotalBrand(totalBrand);
-		builder.setTotalQuality(totalQuality);
-		this.write(Package.create(cmd, builder.build()));
-	}
+    	builder.setTotalBrand(totalBrand);
+    	builder.setTotalQuality(totalQuality);
+    	this.write(Package.create(cmd, builder.build()));
+    }
 	//查询零售店或住宅信息
-	public void queryRetailShopOrApartmentInfo(short cmd,Message message){
-		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		Building building = City.instance().getBuilding(buildingId);
+    public void queryRetailShopOrApartmentInfo(short cmd,Message message){
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
 
-		Gs.RetailShopOrApartmentInfo.Builder builder=Gs.RetailShopOrApartmentInfo.newBuilder();
-		builder.setSalary(building.salaryRatio);
-		builder.setStaffNum(building.getWorkerNum());
+    	Gs.RetailShopOrApartmentInfo.Builder builder=Gs.RetailShopOrApartmentInfo.newBuilder();
+    	builder.setSalary(building.salaryRatio);
+    	builder.setStaffNum(building.getWorkerNum());
 
-		Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
-		Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-		//单个建筑的值
-		BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
-		double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
-		double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
-		double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
-		double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
-		brandMap.clear();
-		qtyMap.clear();
-		//所有建筑的值
-		Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
-		brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
-		qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-		double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
-		double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
+	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
+    	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
+	   	//单个建筑的值
+    	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
+       	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
+       	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
+    	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
+    	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
+    	brandMap.clear();
+    	qtyMap.clear();
+    	//所有建筑的值
+      	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+    	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
+    	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
+    	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
+    	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
 
-		builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
-		builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
-		builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(totalBrand).build());
-		builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
-		builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddQuality).setVal(addQuality).build());
-		builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(totalQuality).build());
-		this.write(Package.create(cmd, builder.build()));
-	}
-
-	//查询推广公司信息
-	public void queryPromotionCompanyInfo(short cmd,Message message){
-		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		Building building = City.instance().getBuilding(buildingId);
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(totalBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddQuality).setVal(addQuality).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(totalQuality).build());
+    	this.write(Package.create(cmd, builder.build()));
+    }
+    //查询推广公司信息
+    public void queryPromotionCompanyInfo(short cmd,Message message){
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
 		//检查是否是推广公司
 		Building sellerBuilding = City.instance().getBuilding(buildingId);
 		PublicFacility fcySeller = (PublicFacility) building ;
@@ -3689,9 +3676,9 @@ public class GameSession {
 			}
 			return;
 		}
-		Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
-		builder.setSalary(building.salaryRatio);
-		builder.setStaffNum(building.getWorkerNum());
+    	Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
+    	builder.setSalary(building.salaryRatio);
+    	builder.setStaffNum(building.getWorkerNum());
 		for (int type : msg.getTypeIdsList())
 		{
 			Gs.PromotionCompanyInfo.PromoAbility.Builder b=builder.addAbilitysBuilder();
@@ -3699,45 +3686,45 @@ public class GameSession {
 			b.setTypeId(type).setAbility(value);
 		}
 		this.write(Package.create(cmd, builder.build()));
-	}
+    }
 	//查询仓库信息
-	public void queryWarehouseInfo(short cmd,Message message){
-		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		Building building = City.instance().getBuilding(buildingId);
-		WareHouse wareHouse = (WareHouse) building ;
+    public void queryWarehouseInfo(short cmd,Message message){
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
+    	WareHouse wareHouse = (WareHouse) building ;
 
-		Gs.WarehouseInfo.Builder builder=Gs.WarehouseInfo.newBuilder();
-		builder.setSalary(wareHouse.salaryRatio);
-		builder.setStaffNum(wareHouse.getWorkerNum());
-		int basicCapacity=wareHouse.metaWarehouse.storeCapacity;
-		builder.setBasicCapacity(basicCapacity);
-		Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
-		builder.setCurCapacity((int) (basicCapacity*(1+EvaManager.getInstance().computePercent(eva))));
-		this.write(Package.create(cmd, builder.build()));
-	}
+    	Gs.WarehouseInfo.Builder builder=Gs.WarehouseInfo.newBuilder();
+      	builder.setSalary(wareHouse.salaryRatio);
+    	builder.setStaffNum(wareHouse.getWorkerNum());
+    	int basicCapacity=wareHouse.metaWarehouse.storeCapacity;
+    	builder.setBasicCapacity(basicCapacity);
+    	Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
+    	builder.setCurCapacity((int) (basicCapacity*(1+EvaManager.getInstance().computePercent(eva))));
+    	this.write(Package.create(cmd, builder.build()));
+    }
 	//查询研究所信息
-	public void queryLaboratoryInfo(short cmd,Message message){
-		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		Building building = City.instance().getBuilding(buildingId);
-		Laboratory lab = (Laboratory) building ;
+    public void queryLaboratoryInfo(short cmd,Message message){
+    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+    	Building building = City.instance().getBuilding(buildingId);
+    	Laboratory lab = (Laboratory) building ;
 
-		Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-		builder.setSalary(lab.salaryRatio);
-		builder.setStaffNum(lab.getWorkerNum());
-		builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-		builder.setGoodProb(lab.getGoodProb());
-		for (int type : msg.getTypeIdsList()) {
-			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-			b.setTypeId(type);
-			b.setAbility(EvaManager.getInstance().computePercent(eva));
+    	Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
+      	builder.setSalary(lab.salaryRatio);
+    	builder.setStaffNum(lab.getWorkerNum());
+    	builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
+    	builder.setGoodProb(lab.getGoodProb());
+    	for (int type : msg.getTypeIdsList()) {
+    		Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
+    		Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
+    		b.setTypeId(type);
+    		b.setAbility(EvaManager.getInstance().computePercent(eva));
 		}
-		this.write(Package.create(cmd, builder.build()));
-	}
+    	this.write(Package.create(cmd, builder.build()));
+    }
 
 	/*public void queryMyEvaVersion1(short cmd, Message message)
 	{
