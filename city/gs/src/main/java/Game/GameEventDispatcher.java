@@ -175,6 +175,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryMyBrands_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryMyBrands"));
 			table.put((short) GsCode.OpCode.queryMyBrandDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBrandDetail.PARSER, GameSession.class,"queryMyBrandDetail"));
 			table.put((short) GsCode.OpCode.updateMyBrandDetail_VALUE, Wrapper.newWithMessageAsync(Gs.BrandLeague.PARSER, GameSession.class,"updateMyBrandDetail"));
+			table.put((short) GsCode.OpCode.modyfyMyBrandName_VALUE, Wrapper.newWithMessageAsync(Gs.BrandLeague.PARSER, GameSession.class,"modyfyMyBrandName"));
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));
@@ -188,7 +189,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.closeWareHouseRent_VALUE, Wrapper.newWithMessageAsync(Gs.SetWareHouseRent.PARSER, GameSession.class,"closeWareHouseRent"));
 			//租用仓库
 			table.put((short) GsCode.OpCode.rentWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.rentWareHouse.PARSER, GameSession.class,"rentWareHouse"));
-			//查询玩家的（建筑）仓库信息（包含所有仓库信息）
+			//查询玩家的（建筑）仓库信息（包含租用的仓库信息）
 			table.put((short) GsCode.OpCode.getPlayerBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerBuildingDetail"));
 			//购买商品
 			table.put((short) GsCode.OpCode.buyShelfGood_VALUE, Wrapper.newWithMessageAsync(Gs.BuyInShelfGood.PARSER,GameSession.class,"buyInShelfGood"));
@@ -229,7 +230,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static GameEventDispatcher getInstance(){
 		return instance;
 	}
