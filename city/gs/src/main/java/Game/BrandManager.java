@@ -125,12 +125,14 @@ public class BrandManager {
         protected BrandInfo() {}
 
 
-        public BrandName getBrandName() {
-            return brandName;
+        public String getBrandName() {
+            return brandName.getBrandName();
         }
-        public void setBrandName(BrandName brandName) {
-
-            this.brandName = brandName;
+        public void setBrandName(String newBrandName) {
+            if(brandName == null){
+                brandName = new BrandName(newBrandName);
+            }else
+                brandName.setBrandName(newBrandName);
         }
     }
     public void update(long diffNano) {
@@ -340,7 +342,7 @@ public class BrandManager {
             bInfo = new BrandInfo(brandkey,validNewName);
         }
         //如果名字可用
-        bInfo.setBrandName(new BrandName(validNewName));
+        bInfo.setBrandName(validNewName);
         allBrandInfo.put(brandkey,bInfo);
         GameDb.saveOrUpdate(bInfo.brandName);
         GameDb.saveOrUpdate(this);

@@ -2966,7 +2966,7 @@ public class GameSession {
 	public void modyfyMyBrandName(short cmd,Message message){
 		Gs.ModyfyMyBrandName msg = (Gs.ModyfyMyBrandName)message;
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
-		if(this.player.id() != pId){
+		if(!this.player.id().equals(pId)){
 			GlobalConfig.cityError("[modyfyMyBrandName] Brand-name only can be modified by it's owner!");
 			return;
 		}
