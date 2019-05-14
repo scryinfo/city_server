@@ -1336,5 +1336,22 @@ public class GameDb {
 		session.close();
 		return size;
 	}
+
+	//公司名称是否已存在
+	public static boolean companyNameIsInUsed(String name){
+		Session session = sessionFactory.openSession();
+		List playerList = new ArrayList();
+		try {
+			Query query = session.createQuery("from Player as p where p.companyName = :name")
+					.setParameter("name", name);
+			playerList = query.list();
+		}catch (Exception e){
+			return true;
+		}
+		if(playerList.size()>0) {
+			return true;
+		}
+		return false;
+	}
 }
 

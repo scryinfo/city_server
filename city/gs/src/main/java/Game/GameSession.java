@@ -336,6 +336,11 @@ public class GameSession {
 		Gs.CreateRole c = (Gs.CreateRole)message;
 		if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN)
 			return;
+		//如果公司名存在，return
+		if(GameDb.companyNameIsInUsed(c.getCompanyName())){
+			this.write(Package.fail(cmd, Common.Fail.Reason.notAllow));
+			return;
+		}
 		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
 		p.addMoney(999999999);
 		LogDb.playerIncome(p.id(), 999999999);
@@ -2974,6 +2979,26 @@ public class GameSession {
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
 		int techId=msg.getTypeId();
 		if(BrandManager.instance().addBrand(pId,techId,msg.getNewBrandName())){
+			this.write(Package.create(cmd, msg));
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
+
+	//修改公司名字
+	public void modifyCompanyName(short cmd,Message message){
+		Gs.ModyfyCompanyName msg = (Gs.ModyfyCompanyName) message;
+		String newName = msg.getNewName();
+		UUID pid = Util.toUuid(msg.getPid().toByteArray());
+		//查询玩家信息
+		Player player = GameDb.getPlayer(pid);
+		if(player==null||player.getCompanyName().equals(newName)){
+			return;
+		}
+		//判断名称是否重复（然后判断上次修改的时间是否超过了7天，如果超过了，可以修改）
+		if(!GameDb.companyNameIsInUsed(newName)&&player.canBeModify()){
+			player.setCompanyName(newName);
+			GameDb.saveOrUpdate(player);
 			this.write(Package.create(cmd, msg));
 		}else{
 			this.write(Package.fail(cmd));

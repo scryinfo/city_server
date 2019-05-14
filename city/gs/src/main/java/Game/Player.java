@@ -251,6 +251,9 @@ public class Player {
     @Column
     private int eva;
 
+    @Column
+    private long last_modify_time;//上次修改时间
+
     public void addEvaPoint(int d) {
         this.eva += d;
     }
@@ -515,5 +518,17 @@ public class Player {
     public void setSocietyId(UUID societyId)
     {
         this.societyId = societyId;
+    }
+
+    public boolean canBeModify(){//是否可以修改。判断修改时间是否超过7天
+        Calendar now = Calendar.getInstance();
+        now.setTime(new Date());
+        Calendar last = Calendar.getInstance();
+        last.setTime(new Date(this.last_modify_time));
+        last.add(Calendar.DATE,7);//上次修改时间+7天，如果小于现在时间，则可以修改
+        if(last.getTime().getTime()<=now.getTime().getTime())
+            return true;
+        else
+            return false;
     }
 }
