@@ -201,6 +201,12 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
+    protected void broadcastMaterialConsumed(UUID bid, List<Item> changedMats) {
+        Gs.materialConsumedInform.Builder i = Gs.materialConsumedInform.newBuilder()
+                .setBuildingId(Util.toByteString(bid));
+        changedMats.forEach(item -> i.addItems(item.toProto()));
+        sendToWatchers(Shared.Package.create(GsCode.OpCode.materialConsumedInform_VALUE, i.build()));
+    }
 
     @Transient
     private MetaFactoryBase meta;
