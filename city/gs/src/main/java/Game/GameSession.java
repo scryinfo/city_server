@@ -2872,7 +2872,7 @@ public class GameSession {
 				MetaExperiences obj=map.get(level);
 				exp=obj.exp;
 				if(cexp>=exp){
-					cexp=cexp-exp; //减去升级需要的经验
+					cexp=cexp-exp;
 					level++;
 				}
 			}while(cexp>=exp);
@@ -2885,8 +2885,11 @@ public class GameSession {
 		e.setBt(eva.getBt().getNumber());
 		e.setLv(level);
 		e.setCexp(cexp);
-		//e.setB(eva.getB());
-        e.setB(-1);
+		if(eva.hasB()) {
+			e.setB(eva.getB());
+		}else {
+			e.setB(-1);
+		}
 		EvaManager.getInstance().updateEva(e);
 
 		Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
