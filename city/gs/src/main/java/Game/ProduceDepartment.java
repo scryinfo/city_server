@@ -8,13 +8,18 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
+import java.util.List;
 
 @Entity(name = "ProduceDepartment")
 public class ProduceDepartment extends FactoryBase {
     @Transient
     private MetaProduceDepartment meta;
+
+    @Transient
+    List<Item> consumedCache = new ArrayList();
 
     public ProduceDepartment(MetaProduceDepartment meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
@@ -100,7 +105,16 @@ public class ProduceDepartment extends FactoryBase {
         for(GoodFormula.Info i : l.formula.material) {
             if (i.item == null)
                 continue;
-            this.store.offset(new ItemKey(i.item,pid), -i.n);
+            ItemKey key = new ItemKey(i.item,pid);
+            this.store.offset(key, -i.n);
+            consumedCache.add(new Item(key,i.n));
+        }
+        //如果有材料消耗，需要通知客户端更新
+        if(consumedCache.size() > 0 ){
+            GameDb.saveOrUpdate(this);
+            broadcastMaterialConsumed(this.id(),consumedCache);
+            //通知完之后，清掉缓存
+            consumedCache.clear();
         }
         return true;
     }
