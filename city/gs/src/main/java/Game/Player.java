@@ -526,14 +526,11 @@ public class Player {
     }
 
     public boolean canBeModify(){//是否可以修改。判断修改时间是否超过7天
-        Calendar now = Calendar.getInstance();
-        now.setTime(new Date());
-        Calendar last = Calendar.getInstance();
-        last.setTime(new Date(this.last_modify_time));
-        last.add(Calendar.DATE,7);//上次修改时间+7天，如果小于现在时间，则可以修改
-        if(last.getTime().getTime()<=now.getTime().getTime())
+        Long now = new Date().getTime();
+        long day = 24 * 60 * 60 * 1000;
+        if(this.last_modify_time+7*day<=now){
             return true;
-        else
+        }else
             return false;
     }
 }

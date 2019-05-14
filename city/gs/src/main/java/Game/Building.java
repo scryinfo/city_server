@@ -759,7 +759,7 @@ public abstract class Building implements Ticker{
     public void setLast_modify_time(long last_modify_time) {
         this.last_modify_time = last_modify_time;
     }
-    //能否修改
+    //是否到了规定时间可以修改
     public boolean canBeModify(){
         Long now = new Date().getTime();
         long day = 24 * 60 * 60 * 1000;
