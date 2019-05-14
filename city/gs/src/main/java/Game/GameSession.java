@@ -2852,6 +2852,7 @@ public class GameSession {
 	public void queryMyEva(short cmd, Message message)
 	{
 		UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
 			list.addEva(eva.toProto());
@@ -2941,6 +2942,7 @@ public class GameSession {
 				ls.add(info.getPlayerId());//某项技术可能加盟多个，但是只能使用其中一个
 			}
 		}
+
 		Gs.MyBrandDetail.Builder list = Gs.MyBrandDetail.newBuilder();
 		ls.forEach(playerId->{
 			Player player=GameDb.getPlayer(playerId);
@@ -3006,7 +3008,6 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 		}
 	}
-
 
 	//1.集散中心详情数据获取
 	public void detailWareHouse(short cmd, Message message) {
@@ -3760,7 +3761,7 @@ public class GameSession {
     	this.write(Package.create(cmd, builder.build()));
     }
 
-	public void queryMyEvaByBuildingType(short cmd, Message message)
+	public void queryMyEvaByType(short cmd, Message message)
 	{
 		Gs.QueryMyEvaByType msg = (Gs.QueryMyEvaByType) message;
 		UUID pid = Util.toUuid(msg.getPlayerId().toByteArray());//玩家id
