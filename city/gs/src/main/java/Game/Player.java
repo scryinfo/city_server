@@ -271,6 +271,7 @@ public class Player {
         this.bag = new Storage(bagCapacity);
         this.createTs = System.currentTimeMillis();
         this.eva=10000;
+        this.last_modify_time=System.currentTimeMillis();
     }
     @PostLoad
     void _init() {
@@ -518,6 +519,10 @@ public class Player {
     public void setSocietyId(UUID societyId)
     {
         this.societyId = societyId;
+    }
+
+    public void setLast_modify_time(long last_modify_time) {
+        this.last_modify_time = last_modify_time;
     }
 
     public boolean canBeModify(){//是否可以修改。判断修改时间是否超过7天

@@ -2987,7 +2987,7 @@ public class GameSession {
 
 	//修改公司名字
 	public void modifyCompanyName(short cmd,Message message){
-		Gs.ModyfyCompanyName msg = (Gs.ModyfyCompanyName) message;
+		Gs.ModifyCompanyName msg = (Gs.ModifyCompanyName) message;
 		String newName = msg.getNewName();
 		UUID pid = Util.toUuid(msg.getPid().toByteArray());
 		//查询玩家信息
@@ -2998,8 +2998,10 @@ public class GameSession {
 		//判断名称是否重复（然后判断上次修改的时间是否超过了7天，如果超过了，可以修改）
 		if(!GameDb.companyNameIsInUsed(newName)&&player.canBeModify()){
 			player.setCompanyName(newName);
+			player.setLast_modify_time(new Date().getTime());
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd, msg));
+			Gs.RoleInfo roleInfo = playerToRoleInfo(player);
+			this.write(Package.create(cmd,roleInfo));
 		}else{
 			this.write(Package.fail(cmd));
 		}
@@ -3590,9 +3592,15 @@ public class GameSession {
 		Gs.UpdateBuildingName msg = (Gs.UpdateBuildingName) message;
 		UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		building.setName(msg.getName());
-		GameDb.saveOrUpdate(building);
-		this.write(Package.create(cmd, building.toProto()));
+		//设置建筑的修改时间（7天改一次）
+		if(building.canBeModify()) {
+			building.setName(msg.getName());
+			building.setLast_modify_time(new Date().getTime());
+			GameDb.saveOrUpdate(building);
+			this.write(Package.create(cmd, building.toProto()));
+		}else{
+			this.write(Package.fail(cmd));
+		}
     }
     //查询原料厂信息
     public void queryMaterialInfo(short cmd, Message message)
