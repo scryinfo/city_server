@@ -3,6 +3,7 @@ package Statistic;
 import java.util.*;
 
 import Statistic.TimeUtil.TimeUtil;
+import Statistic.TimeUtil.TotalUtil;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
@@ -255,8 +256,8 @@ public class StatisticSession {
     	Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
     	Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
     	//统计整理数据
-		Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
-		Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
+		Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+		Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
 		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
     	builder.setId(Util.toByteString(id));
 		//1.处理收入信息
@@ -284,49 +285,12 @@ public class StatisticSession {
 		}
 
 		//3.处理今日最新收入和支出信息
-		Long todayIncome = StatisticSession.todayIncomOrPay(playerIncomeMap);
-		Long todayPay = StatisticSession.todayIncomOrPay(playerPayMap);
+		Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
+		Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
 
 		builder.setTodayIncome(todayIncome);
 		builder.setTodaypay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
     	this.write(Package.create(cmd,builder.build()));
     }
-
-    //统计前面29天的数据
-    public static Map<Long,Long>  monthTotal(Map<Long, Long> sourceMap){
-		Map<Long, Long> total = new TreeMap<>();
-		Map<Long, Long> today = new TreeMap<>();
-    	//1.处理29天以前的数据，以天数统计求和
-		sourceMap.forEach((time,money)->{
-			//处理29天以前的数据
-			if(time<=TimeUtil.todayStartTime()-1&&time>=TimeUtil.monthStartTime()){
-				//获取当天开始时间
-				Long st = TimeUtil.getTimeDayStartTime(time);
-				if(total.containsKey(st)) {
-					total.put(st, total.get(st) + money);
-				}
-				else {
-					total.put(st, money);
-				}
-			}
-		});
-		return total;
-	}
-
-	//获取今日玩家收入支出最新数据
-	public static Long  todayIncomOrPay(Map<Long, Long> sourceMap){
-		Long todayIncomeOrPay=0L;
-		Map<Long, Long> today = new TreeMap<>();
-		sourceMap.forEach((time,money)->{
-			if(time>=TimeUtil.todayStartTime()){
-				today.put(time, money);
-			}
-		});
-		Map.Entry<Long, Long> entry = ((TreeMap<Long, Long>) today).lastEntry();
-		if(entry!=null)
-			todayIncomeOrPay = entry.getValue();
-		return todayIncomeOrPay;
-	}
-
 }
