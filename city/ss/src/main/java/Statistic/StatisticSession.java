@@ -271,6 +271,7 @@ public class StatisticSession {
     //以前面29天作为全部统计单位，当前天数不统计
     public static Map<Long,Long>  monthTotal(Map<Long, Long> sourceMap){
 		Map<Long, Long> total = new TreeMap<>();
+		Map<Long, Long> today = new TreeMap<>();
     	//1.处理29天以前的数据，以天数统计求和
 		sourceMap.forEach((time,money)->{
 			//处理29天以前的数据
@@ -284,11 +285,13 @@ public class StatisticSession {
 					total.put(st, money);
 				}
 			}
-			//处理今天内的数据(直接发送明细，不统计)
 			else if(time>=TimeUtil.todayStartTime()){
-				total.put(time, money);
+				today.put(time, money);
 			}
 		});
+		Map.Entry<Long, Long> entry = ((TreeMap<Long, Long>) today).lastEntry();
+		if(entry!=null)
+			total.put(entry.getKey(), entry.getValue());//处理今天内的数据(只需要统计今天内最新的一条数据，也就是最后一条数据)
 		return total;
 	}
 }
