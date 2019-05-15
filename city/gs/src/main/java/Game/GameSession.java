@@ -2901,16 +2901,23 @@ public class GameSession {
 	public void queryMyBrands(short cmd, Message message)
 	{
 		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
-		int type=msg.getType();
-		UUID bId = Util.toUuid(msg.getBId().toByteArray());
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
-
-		Building build=City.instance().getBuilding(bId);
-
-		Gs.BuildingInfo buildInfo = build.toProto();
-
+		//Building build=City.instance().getBuilding(bId);
+		//Gs.BuildingInfo buildInfo = build.toProto();
 		Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
-		MetaData.getBuildingTech(type).forEach(itemId->{
+		//根据id获取查询玩家所有的eva信息
+		EvaManager.getInstance().getEvaList(pId).forEach(eva->{
+			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+			band.setItemId(eva.getAt()).setPId(Util.toByteString(pId));
+			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,eva.getAt());
+			if(binfo.hasBrandName()){
+				band.setBrandName(binfo.getBrandName());
+			}
+			band.addEva(eva.toProto());
+			//BrandLeague bl = LeagueManager.getInstance().
+
+		});
+		/*MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setPId(Util.toByteString(pId));
 			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,itemId);
@@ -2927,7 +2934,7 @@ public class GameSession {
 				band.addEva(eva.toProto());
 			});
 			list.addBrand(band.build());
-		});
+		});*/
 		this.write(Package.create(cmd, list.build()));
 	}
 
@@ -3014,7 +3021,7 @@ public class GameSession {
 		}else{
 			player.setCompanyName(newName);
 			player.setLast_modify_time(new Date().getTime());
-			GameDb.saveOrUpdate(Arrays.asList(player));
+			GameDb.saveOrUpdate(player);
 			Gs.RoleInfo roleInfo = playerToRoleInfo(player);
 			this.write(Package.create(cmd,roleInfo));
 		}

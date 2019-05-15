@@ -265,7 +265,7 @@ public class StatisticSession {
     		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
     		b.setTime(k);
     		b.setIncome(v);
-    		b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?playerPayMap.get(k):0);
+    		b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
 			totalMap.put(k,b.build());
     	});
 
@@ -280,7 +280,7 @@ public class StatisticSession {
 			//添加其他的信息
 			b.setTime(pay.getKey());
 			b.setPay(pay.getValue());
-			b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?playerIncomeMap.get(pay.getKey()):0);
+			b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
 			totalMap.put(pay.getKey(),b.build());
 		}
 

@@ -316,7 +316,7 @@ public class Test
             Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
             b.setTime(k);
             b.setIncome(v);
-            b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?playerPayMap.get(k):0);
+            b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
             totalMap.put(k,b.build());
         });
 
@@ -328,10 +328,10 @@ public class Test
             if(totalMap.containsKey(time)){
                 continue;
             }
-            //添加其他的信息
+            //添加其他的支出信息
             b.setTime(pay.getKey());
             b.setPay(pay.getValue());
-            b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?playerIncomeMap.get(pay.getKey()):0);
+            b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
             totalMap.put(pay.getKey(),b.build());
         }
         builder.addAllPlayerIncome(totalMap.values());
@@ -341,7 +341,7 @@ public class Test
         Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
         //还需要处理最后一天的数据
         builder.setTodayIncome(todayIncome);
-        builder.setTodaypay(todayPay);
+        builder.setTodayPay(todayPay);
 
         System.out.println(builder);
 
