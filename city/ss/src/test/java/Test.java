@@ -1,11 +1,8 @@
-import static Statistic.SummaryUtil.DAY_MILLISECOND;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Projections.excludeId;
 import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
-import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -290,6 +287,63 @@ public class Test
         //统计整理数据
         Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
         Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
+    }
+
+    @org.junit.Test
+    public void testDayIncomAndPay2(){
+        LogDb.init("mongodb://192.168.0.51:27017","cityYetianyi");
+        SummaryUtil.init();
+        UUID id = UUID.fromString("9ba65634-4e0b-4f43-aa1a-8b8b573b822c");
+        Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
+        Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+        //统计整理数据
+        Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
+        Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
+
+        Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
+        builder.setId(Util.toByteString(id));
+        //收入和支出前面29天，可以按照相同的时间存储，但是最后一天不行
+      /*  chooseMap.forEach((k,v)->{
+            Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
+            b.setTime(k);
+            b.setIncome(v);
+            b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?playerPayMap.get(k):0);
+        });*/
+        Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();
+        //1.处理收入信息
+        monthTotalIncome.forEach((k,v)->{
+            Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
+            b.setTime(k);
+            b.setIncome(v);
+            b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?playerPayMap.get(k):0);
+            totalMap.put(k,b.build());
+        });
+
+        //2.处理支出信息
+        for (Map.Entry<Long, Long> pay : monthTotalpay.entrySet()) {
+            Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
+            //如果在收入中已经处理了，则跳过
+            Long time = pay.getKey();
+            if(totalMap.containsKey(time)){
+                continue;
+            }
+            //添加其他的信息
+            b.setTime(pay.getKey());
+            b.setPay(pay.getValue());
+            b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?playerIncomeMap.get(pay.getKey()):0);
+            totalMap.put(pay.getKey(),b.build());
+        }
+        builder.addAllPlayerIncome(totalMap.values());
+        //获取今日收入信息
+        //获取今日支出信息
+        Long todayIncome = StatisticSession.todayIncomOrPay(playerIncomeMap);
+        Long todayPay = StatisticSession.todayIncomOrPay(playerPayMap);
+        //还需要处理最后一天的数据
+        builder.setTodayIncome(todayIncome);
+        builder.setTodaypay(todayPay);
+
+        System.out.println(builder);
+
     }
 
 }

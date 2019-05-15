@@ -161,7 +161,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                                 Player owner = GameDb.getPlayer(ownerId());
                                 //这里之所以直接用公司名字，是因为公司名字是唯一的,而公司与类型的组合也是唯一的
                                 //目前使用 公司名字+产品类型id 的组合作为服务器的品牌名字，客户端需要解析出 _ 之后的id，找到对应的多语言字符串来表现
-                                BrandManager.instance().addBrand(ownerId(), l.item.id, owner.getCompanyName()+"_"+l.item.id);
+                                BrandManager.instance().addBrand(ownerId(), l.item.id);
                             }
                         } else {
                             //(加工厂/原料厂)仓库已满通知
@@ -200,6 +200,12 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 .setNowCountInStore(this.availableQuantity(key.meta))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
+    }
+    protected void broadcastMaterialConsumed(UUID bid, List<Item> changedMats) {
+        Gs.materialConsumedInform.Builder i = Gs.materialConsumedInform.newBuilder()
+                .setBuildingId(Util.toByteString(bid));
+        changedMats.forEach(item -> i.addItems(item.toProto()));
+        sendToWatchers(Shared.Package.create(GsCode.OpCode.materialConsumedInform_VALUE, i.build()));
     }
 
     @Transient

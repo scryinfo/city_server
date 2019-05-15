@@ -2872,7 +2872,7 @@ public class GameSession {
 				MetaExperiences obj=map.get(level);
 				exp=obj.exp;
 				if(cexp>=exp){
-					cexp=cexp-exp;
+					cexp=cexp-exp; //减去升级需要的经验
 					level++;
 				}
 			}while(cexp>=exp);
@@ -2912,11 +2912,12 @@ public class GameSession {
 		Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
-			band.setItemId(itemId).setBrand(buildInfo.getBrand());
+			band.setItemId(itemId).setPId(Util.toByteString(pId));
+			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,itemId);
+			if(binfo.hasBrandName()){
+				band.setBrandName(binfo.getBrandName());
+			}
 			GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-				//查询品牌名
-				BrandManager.BrandInfo brandInfo = BrandManager.instance().getBrand(pId, eva.getAt());
-				band.setBrandName(brandInfo.getBrandName().getBrandName());
 				//优先查询建筑正在使用的某项加盟技术
 				BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
 				if(bl!=null){
@@ -2982,8 +2983,12 @@ public class GameSession {
 	public void modyfyMyBrandName(short cmd,Message message){
 		Gs.ModyfyMyBrandName msg = (Gs.ModyfyMyBrandName)message;
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
+		if(!this.player.id().equals(pId)){
+			GlobalConfig.cityError("[modyfyMyBrandName] Brand-name only can be modified by it's owner!");
+			return;
+		}
 		int techId=msg.getTypeId();
-		if(BrandManager.instance().addBrand(pId,techId,msg.getNewBrandName())){
+		if(BrandManager.instance().changeBrandName(pId,techId,msg.getNewBrandName())){
 			this.write(Package.create(cmd, msg));
 		}else{
 			this.write(Package.fail(cmd));
@@ -3495,6 +3500,7 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(src, dst, player));
 		this.write(Package.create(cmd,t));
 	}
+
 
 	//未在公会中根据id查询公会信息
 	public void getOneSocietyInfo(short cmd, Message message)
