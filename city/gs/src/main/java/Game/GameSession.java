@@ -3000,8 +3000,11 @@ public class GameSession {
 		Gs.ModifyCompanyName msg = (Gs.ModifyCompanyName) message;
 		String newName = msg.getNewName();
 		UUID pid = Util.toUuid(msg.getPid().toByteArray());
+        System.out.println("玩家id"+pid);
+        System.out.println("登陆玩家id"+player.id());
 		//查询玩家信息
-		if(pid!=player.id()||player.getCompanyName().equals(newName)){
+		if(!pid.equals(player.id())||player.getCompanyName().equals(newName)){
+            GlobalConfig.cityError("[modyfyCompanyName] CompanyName only can be modified by it's owner!");
 			return;
 		}
 		//判断名称是否重复（然后判断上次修改的时间是否超过了7天，如果超过了，可以修改）
