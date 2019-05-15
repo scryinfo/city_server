@@ -3001,19 +3001,22 @@ public class GameSession {
 		String newName = msg.getNewName();
 		UUID pid = Util.toUuid(msg.getPid().toByteArray());
 		//查询玩家信息
-		Player player = GameDb.getPlayer(pid);
-		if(player==null||player.getCompanyName().equals(newName)){
+		if(pid!=player.id()||player==null||player.getCompanyName().equals(newName)){
 			return;
 		}
 		//判断名称是否重复（然后判断上次修改的时间是否超过了7天，如果超过了，可以修改）
-		if(!GameDb.companyNameIsInUsed(newName)&&player.canBeModify()){
+		if(GameDb.companyNameIsInUsed(newName)){//已经被使用的名称
+			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
+		}
+		else if(!player.canBeModify()){ //时间未到（返回冻结状态错误码）
+			this.write(Package.fail(cmd,Common.Fail.Reason.accountInFreeze));
+			return;
+		}else{
 			player.setCompanyName(newName);
 			player.setLast_modify_time(new Date().getTime());
-			GameDb.saveOrUpdate(player);
+			GameDb.saveOrUpdate(Arrays.asList(player));
 			Gs.RoleInfo roleInfo = playerToRoleInfo(player);
 			this.write(Package.create(cmd,roleInfo));
-		}else{
-			this.write(Package.fail(cmd));
 		}
 	}
 

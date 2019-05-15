@@ -289,7 +289,7 @@ public class StatisticSession {
 		Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
 
 		builder.setTodayIncome(todayIncome);
-		builder.setTodaypay(todayPay);
+		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
     	this.write(Package.create(cmd,builder.build()));
     }

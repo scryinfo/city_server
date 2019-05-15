@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import Statistic.StatisticSession;
+import Statistic.TimeUtil.TotalUtil;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.quartz.JobExecutionException;
@@ -285,8 +286,8 @@ public class Test
         Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
         Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
         //统计整理数据
-        Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
-        Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
+        Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+        Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
     }
 
     @org.junit.Test
@@ -297,8 +298,8 @@ public class Test
         Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
         Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
         //统计整理数据
-        Map<Long, Long> monthTotalIncome = StatisticSession.monthTotal(playerIncomeMap);
-        Map<Long, Long> monthTotalpay = StatisticSession.monthTotal(playerPayMap);
+        Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+        Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
 
         Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
         builder.setId(Util.toByteString(id));
@@ -336,8 +337,8 @@ public class Test
         builder.addAllPlayerIncome(totalMap.values());
         //获取今日收入信息
         //获取今日支出信息
-        Long todayIncome = StatisticSession.todayIncomOrPay(playerIncomeMap);
-        Long todayPay = StatisticSession.todayIncomOrPay(playerPayMap);
+        Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
+        Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
         //还需要处理最后一天的数据
         builder.setTodayIncome(todayIncome);
         builder.setTodaypay(todayPay);
