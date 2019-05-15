@@ -3001,7 +3001,7 @@ public class GameSession {
 		String newName = msg.getNewName();
 		UUID pid = Util.toUuid(msg.getPid().toByteArray());
 		//查询玩家信息
-		if(pid!=player.id()||player==null||player.getCompanyName().equals(newName)){
+		if(pid!=player.id()||player.getCompanyName().equals(newName)){
 			return;
 		}
 		//判断名称是否重复（然后判断上次修改的时间是否超过了7天，如果超过了，可以修改）
