@@ -2898,7 +2898,7 @@ public class GameSession {
 
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
-	public void queryMyBrands(short cmd, Message message)
+	/*public void queryMyBrands(short cmd, Message message)
 	{
 		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
 		UUID pId = Util.toUuid(msg.getPId().toByteArray());
@@ -2917,7 +2917,7 @@ public class GameSession {
 			//BrandLeague bl = LeagueManager.getInstance().
 
 		});
-		/*MetaData.getBuildingTech(type).forEach(itemId->{
+		*//*MetaData.getBuildingTech(type).forEach(itemId->{
 			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
 			band.setItemId(itemId).setPId(Util.toByteString(pId));
 			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,itemId);
@@ -2934,9 +2934,49 @@ public class GameSession {
 				band.addEva(eva.toProto());
 			});
 			list.addBrand(band.build());
-		});*/
+		});*//*
 		this.write(Package.create(cmd, list.build()));
+	}*/
+
+	public void queryMyBrands(short cmd, Message message){
+		Gs.Id msg = (Gs.Id)message;
+		UUID pId = Util.toUuid(msg.getId().toByteArray());
+		Gs.MyAllBrands.Builder list = Gs.MyAllBrands.newBuilder();
+		//需要根据原料厂、加工厂、零售店、住宅、推广公司、研究所等查询
+		List<Gs.MyAllBrands.Brand> materialBrand = getBrandByType(MetaBuilding.MATERIAL, pId);//原料
+		List<Gs.MyAllBrands.Brand> goodBrand = getBrandByType(MetaBuilding.PRODUCE, pId);//加工厂
+		List<Gs.MyAllBrands.Brand> retailShopBrand = getBrandByType(MetaBuilding.RETAIL, pId);//零售店
+		List<Gs.MyAllBrands.Brand> apartmentBrand = getBrandByType(MetaBuilding.APARTMENT, pId);//住宅
+		List<Gs.MyAllBrands.Brand> promotionBrand = getBrandByType(MetaBuilding.PUBLIC, pId);//推广
+		List<Gs.MyAllBrands.Brand> labBrand = getBrandByType(MetaBuilding.LAB, pId);//研究所
+		list.addAllMaterialBrand(materialBrand)
+				.addAllGoodBrand(goodBrand)
+				.addAllRetailShopBrand(retailShopBrand)
+				.addAllApartmentBrand(apartmentBrand)
+				.addAllPromotionBrand(apartmentBrand)
+				.addAllLabBrand(labBrand);
 	}
+
+
+	//抽取
+	public List<Gs.MyAllBrands.Brand> getBrandByType(int type,UUID pid){
+		List<Gs.MyAllBrands.Brand> brands = new ArrayList<>();
+		MetaData.getBuildingTech(type).forEach(itemId->{
+			Gs.MyAllBrands.Brand.Builder band = Gs.MyAllBrands.Brand.newBuilder();
+			band.setItemId(itemId).setPId(Util.toByteString(pid));
+			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pid,itemId);
+			if(binfo.hasBrandName()){
+				band.setBrandName(binfo.getBrandName());
+			}
+			GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
+				band.addEva(eva.toProto());
+			});
+			brands.add(band.build());
+		});
+		return brands;
+	}
+
+
 
 	public void queryMyBrandDetail(short cmd,Message message){
 		Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
