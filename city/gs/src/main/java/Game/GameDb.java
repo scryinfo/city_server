@@ -1084,6 +1084,15 @@ public class GameDb {
 		session.close();
 		return res;
 	}
+	public static List<Npc> getAllNpcByStatus(int status){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		List<Npc> list = session.createQuery("From NPC where status =:x", Npc.class)
+				.setParameter("x", status).list();
+		transaction.commit();
+		session.close();
+		return list;
+	}
 	public static Npc getNpc(UUID id) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();

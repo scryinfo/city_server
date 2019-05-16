@@ -13,23 +13,32 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.persistence.*;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.SelectBeforeUpdate;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.EvictingQueue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.mchange.v2.lang.StringUtils;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Util.NpcUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
@@ -361,6 +370,12 @@ public abstract class Building implements Ticker{
     public int singleSalary() {
         return (int) (salaryRatio / 100.d * metaBuilding.salary);
     }
+    public int allInsurance() {
+    	return singleInsurance() * metaBuilding.workerNum;
+    }
+    public int singleInsurance() {
+    	return MetaData.getCity().insurance;
+    }
     public int singleSalary(Talent talent) {
         return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
     }
@@ -486,6 +501,11 @@ public abstract class Building implements Ticker{
         allStaff.clear();
         return npcs;
     }
+    
+    public final void addUnEmployeeNpc() {
+    	NpcManager.instance().addUnEmployeeNpc(allStaff);
+    	allStaff.clear();
+    }
 
     public List<Npc> hireNpc() {
         List<Npc> npcs = new ArrayList<>();
@@ -498,6 +518,56 @@ public abstract class Building implements Ticker{
             }
         });
         return npcs;
+    }
+    
+    public List<Npc> createNpc() {
+    	Map<UUID, Npc> unEmployeeNpc=NpcManager.instance().getUnEmployeeNpc();
+    	int unEmployeeNpcNum=unEmployeeNpc.size();
+    	List<Npc> npcList = new ArrayList<Npc>(unEmployeeNpc.values());
+    	List<Npc> npcs = new ArrayList<>();
+    	
+    	int requireWorkNum=0;
+    	for (Map.Entry<Integer, Integer> n : this.metaBuilding.npc.entrySet()) {
+    		requireWorkNum+=n.getValue();
+    	}
+    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口 
+    		NpcManager.instance().addWorkNpc(npcList,this);
+    		npcs.addAll(npcList);
+    		int num=(requireWorkNum-unEmployeeNpcNum)/4; //每种类型还差npc数量
+    	  	this.metaBuilding.npc.forEach((k,v)->{
+        		for(Npc npc : NpcManager.instance().create(k, num, this, 0))
+        		{
+        			npcs.add(npc);
+        		}
+        	});
+    	}else if(requireWorkNum==unEmployeeNpcNum){//需求工人数量 = 失业人口  失业人口全部转化为工人
+    		NpcManager.instance().addWorkNpc(npcList,this);
+    		npcs.addAll(npcList);
+    	}else{//需求工人数量 < 失业人口  在失业人口中随机抽取需求工人数量的人口转化为工人
+    		int num=requireWorkNum/4;
+    		Map<Integer, List<Npc>> map=NpcManager.instance().getUnEmployeeNpcByType();
+    		List<Npc> totalNpc = new ArrayList<Npc>();
+      	  	this.metaBuilding.npc.forEach((k,v)->{
+      	  		List<Npc> list=map.get(k);
+      	  		//每一种类型的npc随机抽取num个
+      	  		List<Npc> sub=new ArrayList<Npc>();
+      	  		int[] idxArray=NpcUtil.getDifferentIndex(0,list.size()-1,num);
+      	  		for (int i = 0; i < idxArray.length; i++) {
+					int j = idxArray[i];
+					Npc npc=list.get(j);
+					sub.add(npc);
+				}
+      	  		NpcManager.instance().addWorkNpc(sub,this);
+      	  		totalNpc.addAll(sub);
+        	});
+      	  	npcs.addAll(totalNpc);
+    	}
+    	
+    	npcs.forEach(npc->{
+    		takeAsWorker(npc);
+			npc.goWork();
+    	});
+    	return npcs;
     }
 
     public CoordPair effectRange() {
@@ -714,7 +784,12 @@ public abstract class Building implements Ticker{
         if(p.decMoney(this.allSalary())) {
           	LogDb.playerPay(p.id(), this.allSalary());
             calcuHappy();
-            allStaff.forEach(npc -> npc.addMoney(this.singleSalary()));
+            allStaff.forEach(npc ->{
+            	npc.addMoney(this.singleSalary());
+            	//缴纳社保
+            	npc.decMoney(this.singleInsurance());
+            	MoneyPool.instance().add(this.singleInsurance());
+            });
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
             GameDb.saveOrUpdate(updates);

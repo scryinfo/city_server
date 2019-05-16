@@ -40,7 +40,7 @@ public class MetaBuilding {
         if(d.containsKey("workerNum")) {
             this.workerNum = d.getInteger("workerNum");
             this.effectRange = d.getInteger("effectRange");
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 4; i++) {
                 int type = d.getInteger("npcType" + i);
                 int n = d.getInteger("npcNum" + i);
                 if (n > 0)

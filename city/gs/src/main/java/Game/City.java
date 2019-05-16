@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import javax.persistence.Transient;
 
 import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
@@ -51,6 +55,8 @@ public class City {
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
     private boolean taskIsRunning = false;
     private PeriodicTimer metaAuctionLoadTimer = new PeriodicTimer();
+    private PeriodicTimer insuranceTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24),(int)TimeUnit.SECONDS.toMillis((endTime-nowTime)/1000));
+
     public int[] timeSection() {
         return meta.timeSection;
     }
@@ -255,6 +261,8 @@ public class City {
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
         PromotionMgr.instance().update(diffNano);
+        //发放失业金
+        updateInsurance(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
@@ -284,7 +292,19 @@ public class City {
         }
         timeSectionAccumlateNano += diffNano;
     }
-
+    
+    private void updateInsurance(long diffNano) {
+    	if (this.insuranceTimer.update(diffNano)) {
+    		Map<UUID, Npc> map=NpcManager.instance().getUnEmployeeNpc();
+    		map.forEach((k,v)->{
+    			if(v.getUnEmployeddTs()>=TimeUnit.HOURS.toMillis(24)){ //失业超过24小时
+    				v.addMoney(MetaData.getCity().insurance);  //失业人员领取社保
+    			}
+    		});
+    		GameDb.saveOrUpdate(map.values());
+    	}
+    }
+    
     private void dayTickAction() {
         MetaData.updateDayId();
     }
@@ -433,7 +453,8 @@ public class City {
     }
 
     public void delBuilding(Building building) {
-        List npcs = building.destroy();
+   //   List npcs = building.destroy();
+        building.addUnEmployeeNpc();//添加失业人员
         this.allBuilding.remove(building.id());
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
@@ -447,7 +468,8 @@ public class City {
             }
         }
         building.broadcastDelete();
-        GameDb.delete(npcs.add(building));
+   //   GameDb.delete(npcs.add(building));
+        GameDb.delete(building);
     }
     public void send(GridIndexPair range, Package pack) {
         for(int x = range.l.x; x <= range.r.x; ++x) {
@@ -460,7 +482,8 @@ public class City {
         if(!this.canBuild(b))
             return false;
         GameDb.saveOrUpdate(b); // let hibernate generate the id value
-        List updates = b.hireNpc();
+ //     List updates = b.hireNpc();
+        List updates = b.createNpc();
         take(b);
         //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
         if(allBuilding!=null&&allBuilding.size()>=100){
@@ -532,5 +555,18 @@ public class City {
         }
         ArrayList<GridIndex> l = new ArrayList<>();
         ArrayList<GridIndex> r = new ArrayList<>();
+    }
+    static long endTime=0;
+    static long nowTime=0;
+    static{
+    	   Calendar calendar = Calendar.getInstance();
+           calendar.setTime(new Date());
+           calendar.add(Calendar.DATE, +1);
+           calendar.set(Calendar.HOUR_OF_DAY, 0);
+           calendar.set(Calendar.MINUTE, 0);
+           calendar.set(Calendar.SECOND, 0);
+           Date endDate = calendar.getTime();
+           endTime=endDate.getTime(); //今天晚上0点
+           nowTime = System.currentTimeMillis();
     }
 }

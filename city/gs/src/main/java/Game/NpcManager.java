@@ -1,6 +1,16 @@
 package Game;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import Game.Meta.MetaCity;
@@ -19,7 +29,7 @@ public class NpcManager {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         Date startDate = calendar.getTime();
-        endTime=startDate.getTime()+1000 * 60  * 55;
+        endTime=startDate.getTime()+1000 * 60  * 55; 
         nowTime = System.currentTimeMillis();
     }
     private static NpcManager instance = new NpcManager();
@@ -93,6 +103,25 @@ public class NpcManager {
         GameDb.delete(npc);
         //waitToUpdate.forEach(s->s.removeAll(ids)); // can save this by check npc is null in saveOrUpdate
     }
+    public void addUnEmployeeNpc(Collection<Npc> npc) {
+    	npc.forEach(n->{
+    		allNpc.remove(n.id()); //移除失业npc
+    		n.setStatus(1);  //状态改成失业
+    		n.setTs(System.currentTimeMillis());
+    		unEmployeeNpc.put(n.id(),n); //添加失业npc
+    	});
+    	GameDb.saveOrUpdate(npc);
+    }
+    public void addWorkNpc(Collection<Npc> npc,Building born) {
+    	npc.forEach(n->{
+    		unEmployeeNpc.remove(n.id()); //移除失业npc
+    		n.setStatus(0);  //状态改成工作
+    		n.setTs(System.currentTimeMillis());
+    		n.setBorn(born);  //改为新建筑
+    		allNpc.put(n.id(),n); //添加工作npc
+    	});
+    	GameDb.saveOrUpdate(npc);
+    }
     public List<Npc> create(int type, int n, Building building, int salary) {
         List<Npc> npcs = new ArrayList<>();
         for(int i = 0; i < n; ++i) {
@@ -102,16 +131,6 @@ public class NpcManager {
         GameDb.saveOrUpdate(npcs); // generate the id
         for (Npc npc : npcs) {
             addImpl(npc);
-            // This is WRONG place to put this code here!!! comment out
-            //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
-//            if(allNpc!=null&&allNpc.size()>=500){
-//            	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-//            			.setType(2)
-//            			.setNum(allNpc.size())
-//                        .setTs(System.currentTimeMillis())
-//                        .build()));
-//                LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
-//            }
         }
         return npcs;
     }
@@ -132,16 +151,6 @@ public class NpcManager {
     }
     private void addImpl(Npc npc) {
         allNpc.put(npc.id(), npc);
-        // This is WRONG place to put this code here!!! comment out
-        //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
-//        if(allNpc!=null&&allNpc.size()>=500){
-//        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-//        			.setType(2)
-//        			.setNum(allNpc.size())
-//                    .setTs(System.currentTimeMillis())
-//                    .build()));
-//            LogDb.cityBroadcast(null,null,0l,allNpc.size(),2);
-//        }
         int idx = Math.abs(npc.id().hashCode())% updateTimesAtCurrentTimeSection;
         if(reCalcuWaitToUpdate) {
             int nextIdx = Math.abs(npc.id().hashCode())%updateTimesAtNextTimeSection;
@@ -152,7 +161,8 @@ public class NpcManager {
         else // don't have chance to act in this round
             ;
     }
-    private Map<UUID, Npc> allNpc = new HashMap<>();
+    private Map<UUID, Npc> allNpc = new HashMap<>();  //工作npc
+    private Map<UUID, Npc> unEmployeeNpc = new HashMap<>();
     private List<Set<UUID>> waitToUpdate = new ArrayList<>();
     private List<Set<UUID>> waitToUpdateNext = new ArrayList<>();
     private int updateTimesAtCurrentTimeSection;
@@ -176,7 +186,14 @@ public class NpcManager {
         }
         //waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));  won't works, n copies are refer to same object
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
-        GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
+      //GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
+       
+        //工作npc
+        GameDb.getAllNpcByStatus(0).forEach(npc->this.addImpl(npc));
+        //失业npc
+        GameDb.getAllNpcByStatus(1).forEach(npc->{
+    		unEmployeeNpc.put(npc.id(),npc); 
+    	});
     }
 
     public void hourTickAction(int nowHour) {
@@ -213,5 +230,17 @@ public class NpcManager {
     public long getNpcCount()
     {
         return allNpc.size();
+    }
+    
+    public Map<UUID, Npc> getUnEmployeeNpc(){
+    	return unEmployeeNpc;
+    }
+    
+    public Map<Integer, List<Npc>> getUnEmployeeNpcByType(){
+    	Map<Integer, List<Npc>> map=new HashMap<Integer, List<Npc>>();
+    	getUnEmployeeNpc().forEach((k,v)->{
+    		map.computeIfAbsent(v.type(),n -> new ArrayList<Npc>()).add(v);
+    	});
+    	return map;
     }
 }
