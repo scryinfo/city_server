@@ -3696,7 +3696,7 @@ public class GameSession {
     	this.write(Package.create(cmd, builder.build()));
     }
     //查询推广公司信息
-    public void queryPromotionCompanyInfo(short cmd,Message message){
+/*    public void queryPromotionCompanyInfo(short cmd,Message message){
     	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
     	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
     	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
@@ -3721,7 +3721,38 @@ public class GameSession {
 			b.setTypeId(type).setAbility(value);
 		}
 		this.write(Package.create(cmd, builder.build()));
-    }
+    }*/
+	//推广公司信息(修改版)
+	public void queryPromotionCompanyInfo(short cmd,Message message){
+		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		//检查是否是推广公司
+		Building sellerBuilding = City.instance().getBuilding(buildingId);
+		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
+			if(GlobalConfig.DEBUGLOG){
+				GlobalConfig.cityError("GameSession.queryPromotionCompanyInfo: building type of seller is not PublicFacility!");
+			}
+			return;
+		}
+		PublicFacility fcySeller = (PublicFacility) building ;
+		Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
+		builder.setSalary(building.salaryRatio);
+		builder.setStaffNum(building.getWorkerNum());
+		builder.setBaseAbility(fcySeller.getBaseAbility());
+		Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.PUBLIC);
+		buildingTech.forEach(type->{
+			Gs.PromotionCompanyInfo.PromoAbility.Builder b=builder.addAbilitysBuilder();
+			Integer value = (int)fcySeller.getAllPromoTypeAbility(type);//推广能力加成需要由eva来获取
+			Eva promotionEva = EvaManager.getInstance().getEva(playerId, type, Gs.Eva.Btype.PromotionAbility_VALUE);
+			b.setAddAbility(EvaManager.getInstance().computePercent(promotionEva))//基础推广能力加成
+					.setTypeId(type)
+					.setAbility(value);//推广能力值（单项推广能力，也就是的总能力）
+		});
+		this.write(Package.create(cmd, builder.build()));
+	}
+
 	//查询仓库信息
     public void queryWarehouseInfo(short cmd,Message message){
     	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
