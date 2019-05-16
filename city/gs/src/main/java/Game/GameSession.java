@@ -2919,6 +2919,7 @@ public class GameSession {
 		this.write(Package.create(cmd, list.build()));
 	}
 
+
 	//抽取
 	public void queryMyBrandDetail(short cmd,Message message){
 		Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
