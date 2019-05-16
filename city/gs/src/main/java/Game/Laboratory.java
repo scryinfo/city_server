@@ -156,6 +156,7 @@ public class Laboratory extends Building {
     public static final class RollResult {
         List<Integer> itemIds;
         int evaPoint;
+        List<Integer> labResult = new ArrayList(5);//Eva点数研究的成果包含5个信息（1表成功，0表示失败）
     }
     private Line findInProcess(UUID lineId) {
         for (Line line : this.inProcess) {
@@ -173,11 +174,20 @@ public class Laboratory extends Building {
         if(l != null && l.availableRoll > 0) {
             res = new RollResult();
             l.useRoll();
-            if(l.eva()) {
-                if(Prob.success(this.evaProb, RADIX)) {
-                    res.evaPoint++;
-                    player.addEvaPoint(1);
+            if(l.eva()) {//是否是eva发明提升
+                //1次开启5个成果，所以循环5次
+                for (int i = 0; i <5 ; i++) {//新增=================================================
+                    if(Prob.success(this.evaProb, RADIX)) {//成功概率（第一个参数表示成功概率,后一个为基数）
+                        res.evaPoint++;
+                        player.addEvaPoint(10);
+                        //每次都需要把结果保存起来
+                        res.labResult.add(1);
+                    }else{//失败
+                        player.addEvaPoint(1);
+                        res.labResult.add(0);
+                    }
                 }
+                //通知系统（待补）
             }
             else {
                 if(Prob.success(this.goodProb, RADIX)) {
@@ -194,6 +204,7 @@ public class Laboratory extends Building {
                             }
                         }
                     }
+                    //通知系统（待补）
                 }
             }
         }
