@@ -2898,45 +2898,6 @@ public class GameSession {
 
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
-	/*public void queryMyBrands(short cmd, Message message)
-	{
-		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
-		UUID pId = Util.toUuid(msg.getPId().toByteArray());
-		//Building build=City.instance().getBuilding(bId);
-		//Gs.BuildingInfo buildInfo = build.toProto();
-		Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
-		//根据id获取查询玩家所有的eva信息
-		EvaManager.getInstance().getEvaList(pId).forEach(eva->{
-			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
-			band.setItemId(eva.getAt()).setPId(Util.toByteString(pId));
-			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,eva.getAt());
-			if(binfo.hasBrandName()){
-				band.setBrandName(binfo.getBrandName());
-			}
-			band.addEva(eva.toProto());
-			//BrandLeague bl = LeagueManager.getInstance().
-
-		});
-		*//*MetaData.getBuildingTech(type).forEach(itemId->{
-			Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
-			band.setItemId(itemId).setPId(Util.toByteString(pId));
-			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pId,itemId);
-			if(binfo.hasBrandName()){
-				band.setBrandName(binfo.getBrandName());
-			}
-			GameDb.getEvaInfoList(pId,itemId).forEach(eva->{
-				//优先查询建筑正在使用的某项加盟技术
-				BrandLeague bl=LeagueManager.getInstance().getBrandLeague(bId,itemId);
-				if(bl!=null){
-					Eva e=EvaManager.getInstance().getEva(bl.getPlayerId(), eva.getAt(), eva.getBt());
-					band.addEva(e.toProto());
-				}
-				band.addEva(eva.toProto());
-			});
-			list.addBrand(band.build());
-		});*//*
-		this.write(Package.create(cmd, list.build()));
-	}*/
 
 	public void queryMyBrands(short cmd, Message message){
 		Gs.Id msg = (Gs.Id)message;
@@ -2947,16 +2908,16 @@ public class GameSession {
 		List<Gs.MyAllBrands.Brand> goodBrand = getBrandByType(MetaBuilding.PRODUCE, pId);//加工厂
 		List<Gs.MyAllBrands.Brand> retailShopBrand = getBrandByType(MetaBuilding.RETAIL, pId);//零售店
 		List<Gs.MyAllBrands.Brand> apartmentBrand = getBrandByType(MetaBuilding.APARTMENT, pId);//住宅
-		List<Gs.MyAllBrands.Brand> promotionBrand = getBrandByType(MetaBuilding.PUBLIC, pId);//推广
 		List<Gs.MyAllBrands.Brand> labBrand = getBrandByType(MetaBuilding.LAB, pId);//研究所
+		List<Gs.MyAllBrands.Brand> promotionBrand = getBrandByType(MetaBuilding.PUBLIC, pId);//推广
 		list.addAllMaterialBrand(materialBrand)
 				.addAllGoodBrand(goodBrand)
 				.addAllRetailShopBrand(retailShopBrand)
 				.addAllApartmentBrand(apartmentBrand)
-				.addAllPromotionBrand(apartmentBrand)
+				.addAllPromotionBrand(promotionBrand)
 				.addAllLabBrand(labBrand);
+		this.write(Package.create(cmd, list.build()));
 	}
-
 
 	//抽取
 	public List<Gs.MyAllBrands.Brand> getBrandByType(int type,UUID pid){
