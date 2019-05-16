@@ -391,10 +391,10 @@ public class BrandManager {
     }
 
     //根据建筑类型获取品牌信息
-    public List<Gs.MyAllBrands.Brand> getBrandByType(int type,UUID pid){
-        List<Gs.MyAllBrands.Brand> brands = new ArrayList<>();
+    public List<Gs.MyBrands.Brand> getBrandByType(int type,UUID pid){
+        List<Gs.MyBrands.Brand> brands = new ArrayList<>();
         MetaData.getBuildingTech(type).forEach(itemId->{
-            Gs.MyAllBrands.Brand.Builder band = Gs.MyAllBrands.Brand.newBuilder();
+            Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
             band.setItemId(itemId).setPId(Util.toByteString(pid));
             BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pid,itemId);
             if(binfo.hasBrandName()){

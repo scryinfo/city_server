@@ -336,8 +336,8 @@ public class Test
         }
         builder.addAllPlayerIncome(totalMap.values());
         //获取今日收入信息
-        //获取今日支出信息
         Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
+        //获取今日支出信息
         Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
         //还需要处理最后一天的数据
         builder.setTodayIncome(todayIncome);

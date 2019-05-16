@@ -2900,16 +2900,16 @@ public class GameSession {
 	}
 
 	public void queryMyBrands(short cmd, Message message){
-		Gs.Id msg = (Gs.Id)message;
-		UUID pId = Util.toUuid(msg.getId().toByteArray());
-		Gs.MyAllBrands.Builder list = Gs.MyAllBrands.newBuilder();
+		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
+		UUID pid = Util.toUuid(msg.getPId().toByteArray());
+		Gs.MyBrands.Builder list = Gs.MyBrands.newBuilder();
 		//需要根据原料厂、加工厂、零售店、住宅、推广公司、研究所等查询
-		List<Gs.MyAllBrands.Brand> materialBrand = BrandManager.instance().getBrandByType(MetaBuilding.MATERIAL, pId);//原料
-		List<Gs.MyAllBrands.Brand> goodBrand = BrandManager.instance().getBrandByType(MetaBuilding.PRODUCE, pId);//加工厂
-		List<Gs.MyAllBrands.Brand> retailShopBrand = BrandManager.instance().getBrandByType(MetaBuilding.RETAIL, pId);//零售店
-		List<Gs.MyAllBrands.Brand> apartmentBrand = BrandManager.instance().getBrandByType(MetaBuilding.APARTMENT, pId);//住宅
-		List<Gs.MyAllBrands.Brand> labBrand = BrandManager.instance().getBrandByType(MetaBuilding.LAB, pId);//研究所
-		List<Gs.MyAllBrands.Brand> promotionBrand = BrandManager.instance().getBrandByType(MetaBuilding.PUBLIC, pId);//推广
+		List<Gs.MyBrands.Brand> materialBrand = BrandManager.instance().getBrandByType(MetaBuilding.MATERIAL, pid);//原料
+		List<Gs.MyBrands.Brand> goodBrand = BrandManager.instance().getBrandByType(MetaBuilding.PRODUCE, pid);//加工厂
+		List<Gs.MyBrands.Brand> retailShopBrand = BrandManager.instance().getBrandByType(MetaBuilding.RETAIL, pid);//零售店
+		List<Gs.MyBrands.Brand> apartmentBrand = BrandManager.instance().getBrandByType(MetaBuilding.APARTMENT, pid);//住宅
+		List<Gs.MyBrands.Brand> labBrand = BrandManager.instance().getBrandByType(MetaBuilding.LAB, pid);//研究所
+		List<Gs.MyBrands.Brand> promotionBrand = BrandManager.instance().getBrandByType(MetaBuilding.PUBLIC, pid);//推广
 		list.addAllMaterialBrand(materialBrand)
 				.addAllGoodBrand(goodBrand)
 				.addAllRetailShopBrand(retailShopBrand)
@@ -2920,9 +2920,6 @@ public class GameSession {
 	}
 
 	//抽取
-
-
-
 	public void queryMyBrandDetail(short cmd,Message message){
 		Gs.QueryMyBrandDetail msg = (Gs.QueryMyBrandDetail)message;
 		UUID bId = Util.toUuid(msg.getBId().toByteArray());
