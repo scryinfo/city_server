@@ -251,8 +251,8 @@ public class Player {
     @Column
     private int eva;
 
-    @Column
-    private long last_modify_time=0;//上次修改时间
+    @Column(nullable = false)
+    private long last_modify_time=0l;//上次修改时间
 
     public void addEvaPoint(int d) {
         this.eva += d;
