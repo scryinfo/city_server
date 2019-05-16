@@ -1,22 +1,5 @@
 package Game;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.persistence.*;
-
-import Shared.Util;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Cascade;
-
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.League.BrandLeague;
@@ -26,7 +9,15 @@ import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
+import Shared.Util;
 import gs.Gs;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 public class BrandManager {
