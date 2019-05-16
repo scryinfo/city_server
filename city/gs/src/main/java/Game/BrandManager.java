@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.persistence.*;
 
+import Shared.Util;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
@@ -387,5 +388,23 @@ public class BrandManager {
     }
     public double getValFromMap(Map<Integer,Double> map,int type){
     	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
+    }
+
+    //根据建筑类型获取品牌信息
+    public List<Gs.MyAllBrands.Brand> getBrandByType(int type,UUID pid){
+        List<Gs.MyAllBrands.Brand> brands = new ArrayList<>();
+        MetaData.getBuildingTech(type).forEach(itemId->{
+            Gs.MyAllBrands.Brand.Builder band = Gs.MyAllBrands.Brand.newBuilder();
+            band.setItemId(itemId).setPId(Util.toByteString(pid));
+            BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pid,itemId);
+            if(binfo.hasBrandName()){
+                band.setBrandName(binfo.getBrandName());
+            }
+            GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
+                band.addEva(eva.toProto());
+            });
+            brands.add(band.build());
+        });
+        return brands;
     }
 }

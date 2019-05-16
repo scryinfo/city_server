@@ -18,7 +18,7 @@
 			jdbc:postgresql://192.168.0.51/107
 		</property>
 		<property name="hibernate.connection.username">
-			postgres
+
 		</property>
 		<property name="hibernate.connection.password">
 			123456

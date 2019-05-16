@@ -2904,12 +2904,12 @@ public class GameSession {
 		UUID pId = Util.toUuid(msg.getId().toByteArray());
 		Gs.MyAllBrands.Builder list = Gs.MyAllBrands.newBuilder();
 		//需要根据原料厂、加工厂、零售店、住宅、推广公司、研究所等查询
-		List<Gs.MyAllBrands.Brand> materialBrand = getBrandByType(MetaBuilding.MATERIAL, pId);//原料
-		List<Gs.MyAllBrands.Brand> goodBrand = getBrandByType(MetaBuilding.PRODUCE, pId);//加工厂
-		List<Gs.MyAllBrands.Brand> retailShopBrand = getBrandByType(MetaBuilding.RETAIL, pId);//零售店
-		List<Gs.MyAllBrands.Brand> apartmentBrand = getBrandByType(MetaBuilding.APARTMENT, pId);//住宅
-		List<Gs.MyAllBrands.Brand> labBrand = getBrandByType(MetaBuilding.LAB, pId);//研究所
-		List<Gs.MyAllBrands.Brand> promotionBrand = getBrandByType(MetaBuilding.PUBLIC, pId);//推广
+		List<Gs.MyAllBrands.Brand> materialBrand = BrandManager.instance().getBrandByType(MetaBuilding.MATERIAL, pId);//原料
+		List<Gs.MyAllBrands.Brand> goodBrand = BrandManager.instance().getBrandByType(MetaBuilding.PRODUCE, pId);//加工厂
+		List<Gs.MyAllBrands.Brand> retailShopBrand = BrandManager.instance().getBrandByType(MetaBuilding.RETAIL, pId);//零售店
+		List<Gs.MyAllBrands.Brand> apartmentBrand = BrandManager.instance().getBrandByType(MetaBuilding.APARTMENT, pId);//住宅
+		List<Gs.MyAllBrands.Brand> labBrand = BrandManager.instance().getBrandByType(MetaBuilding.LAB, pId);//研究所
+		List<Gs.MyAllBrands.Brand> promotionBrand = BrandManager.instance().getBrandByType(MetaBuilding.PUBLIC, pId);//推广
 		list.addAllMaterialBrand(materialBrand)
 				.addAllGoodBrand(goodBrand)
 				.addAllRetailShopBrand(retailShopBrand)
@@ -2920,22 +2920,6 @@ public class GameSession {
 	}
 
 	//抽取
-	public List<Gs.MyAllBrands.Brand> getBrandByType(int type,UUID pid){
-		List<Gs.MyAllBrands.Brand> brands = new ArrayList<>();
-		MetaData.getBuildingTech(type).forEach(itemId->{
-			Gs.MyAllBrands.Brand.Builder band = Gs.MyAllBrands.Brand.newBuilder();
-			band.setItemId(itemId).setPId(Util.toByteString(pid));
-			BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pid,itemId);
-			if(binfo.hasBrandName()){
-				band.setBrandName(binfo.getBrandName());
-			}
-			GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
-				band.addEva(eva.toProto());
-			});
-			brands.add(band.build());
-		});
-		return brands;
-	}
 
 
 
