@@ -28,7 +28,7 @@ public class BrandManager {
     public static final int ID = 0;
     private static final Logger logger = Logger.getLogger(BrandManager.class);
     protected BrandManager() {}
-    public static void init() {
+    public static void init(){
         GameDb.initBrandManager();
         instance = GameDb.getBrandManager();
         instance.refineCache();
