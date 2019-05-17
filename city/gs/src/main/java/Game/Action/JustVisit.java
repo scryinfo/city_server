@@ -3,6 +3,7 @@ package Game.Action;
 
 import Game.*;
 import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
 import Game.Meta.ProbBase;
 import Shared.LogDb;
 import Shared.Util;
@@ -33,8 +34,10 @@ public class JustVisit implements IAction {
         Iterator<Building> iterator = buildings.iterator();
         while(iterator.hasNext()) {
             Building building = iterator.next();
-            double c = ((1.d + BrandManager.instance().buildingBrandScore(buildingType)/ 100.d) + (1.d + City.instance().buildingQtyScore(building.type(), building.quality()) / 100.d) + (1.d + 0)) /3*cost;
-            int r = (int) ((1.d-(building.cost() / c))*100000);
+//          double c = ((1.d + BrandManager.instance().buildingBrandScore(buildingType)/ 100.d) + (1.d + City.instance().buildingQtyScore(building.type(), building.quality()) / 100.d) + (1.d + 0)) /3*cost;
+//          int r = (int) ((1.d-(building.cost() / c))*100000);
+            double c = ((BrandManager.instance().buildingBrandScore(buildingType) + City.instance().buildingQtyScore(building.type(), building.quality())) /400.d * 7 + 1) * cost ;
+            int r = (int) ((1.d-(building.cost() / c))*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
             buildingWeights[i++] = r<0?0:r;
         }
         int idx = ProbBase.randomIdx(buildingWeights);

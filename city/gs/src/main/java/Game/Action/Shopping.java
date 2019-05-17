@@ -69,14 +69,12 @@ public class Shopping implements IAction {
         List<WeightInfo> wi = new ArrayList<>();
         buildings.forEach(b->{
             int buildingBrand = BrandManager.instance().getBuilding(b.ownerId(), b.type());
-          //double shopScore = (1 + buildingBrand / 100.d) + (1 + b.quality() / 100.d) + (1 + 100 - Building.distance(b, npc.buildingLocated())/4.d);
+            double shopScore = (1 + buildingBrand / 100.d) + (1 + b.quality() / 100.d) + (1 + 100 - Building.distance(b, npc.buildingLocated())/4.d);
             int spend = (int) (npc.salary()*BrandManager.instance().spendMoneyRatioGood(chosenGoodMetaId));
             List<Shelf.SellInfo> sells = ((RetailShop)b).getSellInfo(chosenGoodMetaId);
             for (Shelf.SellInfo sell : sells) {
-              //double goodSpendV = ((1 + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId) / 100.d) + (1 + sell.qty / 100.d) + shopScore)/3.d * spend;
-            	double goodSpendV = ((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1) * spend;
-              //int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
-                int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                double goodSpendV = ((1 + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId) / 100.d) + (1 + sell.qty / 100.d) + shopScore)/3.d * spend;
+                int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
                 if(w < 0){
                     w = 0;
                 }
@@ -88,10 +86,6 @@ public class Shopping implements IAction {
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         if(chosen.price > npc.money()) {
-        	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
-        	int money=(int) (chosen.price-npc.money());
-        	City.instance().addIndustryMoney(npc.building().type(),money);
-        	
             npc.hangOut(sellShop);
             return null;
         }

@@ -18,7 +18,8 @@ public class MetaCity {
         if(timeSection.length == 0 || timeSection[0] != 0 || timeSection[timeSection.length-1] > 23)
             throw new Exception("city time section config is incorrect!");
         this.minHour = minTimeSectionHour();
-        this.insurance = d.getInteger("insurance");
+        this.taxRatio = d.getInteger("taxRatio");
+        this.insuranceRatio = d.getInteger("insuranceRatio");
 	}
 	public int x;
 	public int y;
@@ -28,7 +29,8 @@ public class MetaCity {
 	public int timeZone;
 	public int[] timeSection;
     public int minHour;
-    public int insurance;
+    public int taxRatio;
+    public int insuranceRatio;
     public int indexOfHour(int nowHour) {
         int idx = Arrays.binarySearch(this.timeSection, nowHour);
         if(idx < 0)

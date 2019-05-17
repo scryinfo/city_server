@@ -90,5 +90,6 @@
 		<mapping class="Game.Record"></mapping>		
 		<mapping class="Game.FlowRecord"></mapping>		
 		<mapping class="Game.EvaRecord"></mapping>			
+		<mapping class="Game.IndustryIncrease"></mapping>			
 	</session-factory>
 </hibernate-configuration> 

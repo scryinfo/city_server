@@ -15,21 +15,15 @@ import java.util.concurrent.TimeUnit;
 
 import Game.Meta.MetaCity;
 import Game.Timers.PeriodicTimer;
+import Game.Util.DateUtil;
 import Shared.LogDb;
 import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
 
 public class NpcManager {
-    static long endTime=0;
     static long nowTime=0;
     static{
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        endTime=startDate.getTime()+1000 * 60  * 55; 
         nowTime = System.currentTimeMillis();
     }
     private static NpcManager instance = new NpcManager();
@@ -198,7 +192,7 @@ public class NpcManager {
 
     public void hourTickAction(int nowHour) {
     }
-    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((endTime-nowTime)/1000));
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
             Calendar calendar = Calendar.getInstance();
@@ -214,7 +208,7 @@ public class NpcManager {
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
-  	  //计算各类npc的大小
+  	  //计算各类npc的数量
 	  allNpc.forEach((k,v)->{
 		  int type=v.type();
 		  if(!countMap.containsKey(type)){ 
@@ -223,13 +217,37 @@ public class NpcManager {
 			  countMap.put(type,countMap.get(type)+1); 
 		  }
 	  });
-	  
 	  return countMap;
    }
+    public Map<Integer, Long> countNpcByBuildingType(){
+    	Map<Integer, Long> countMap= new HashMap<Integer, Long>();
+    	//计算各种建筑npc的数量，包括工作npc和失业npc
+    	allNpc.forEach((k,v)->{
+    		int type=v.building().type();
+    		if(!countMap.containsKey(type)){ 
+    			countMap.put(type, 1l);
+    		}else{ 
+    			countMap.put(type,countMap.get(type)+1); 
+    		}
+    	});
+    	unEmployeeNpc.forEach((k,v)->{
+    		int type=v.building().type();
+    		if(!countMap.containsKey(type)){ 
+    			countMap.put(type, 1l);
+    		}else{ 
+    			countMap.put(type,countMap.get(type)+1); 
+    		}
+    	});
+    	return countMap;
+    }
 
     public long getNpcCount()
     {
         return allNpc.size();
+    }
+    
+    public long getUnEmployeeNpcCount(){
+    	return unEmployeeNpc.size();
     }
     
     public Map<UUID, Npc> getUnEmployeeNpc(){

@@ -301,6 +301,14 @@ public class GameDb {
 		session.close();
 		return list;
 	}
+	
+	public static List<IndustryIncrease> getAllIndustryIncrease()
+	{
+		Session session = sessionFactory.openSession();
+		List<IndustryIncrease> list = session.createQuery("from IndustryIncrease",IndustryIncrease.class).list();
+		session.close();
+		return list;
+	}
 
 	public static boolean saveOrUpdSociety(Society society)
 	{

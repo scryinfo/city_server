@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "NPC")
 @SelectBeforeUpdate(false)
 @Table(name = "NPC")
 public class Npc {
@@ -179,7 +179,8 @@ public class Npc {
         id += City.instance().currentHour()*1000000;
         id += City.instance().weather()*10000;
         id += MetaData.getDayId()*10;
-        id += this.born.onStrike()?1:0;
+   //   id += this.born.onStrike()?1:0;
+        id += status;
         return id;
     }
     // where the npc is are not important, location phaseChange can not persist to db

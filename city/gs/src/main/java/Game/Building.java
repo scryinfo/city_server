@@ -368,13 +368,13 @@ public abstract class Building implements Ticker{
         return singleSalary() * metaBuilding.workerNum;
     }
     public int singleSalary() {
-        return (int) (salaryRatio / 100.d * metaBuilding.salary);
+        return (int) (salaryRatio / 100.d * City.instance().getAvgIndustrySalary());
     }
-    public int allInsurance() {
-    	return singleInsurance() * metaBuilding.workerNum;
+    public int allTax() {
+    	return singleTax() * metaBuilding.workerNum;
     }
-    public int singleInsurance() {
-    	return MetaData.getCity().insurance;
+    public int singleTax() {
+    	return (int)(MetaData.getCity().taxRatio / 100.d * singleSalary());
     }
     public int singleSalary(Talent talent) {
         return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
@@ -787,8 +787,8 @@ public abstract class Building implements Ticker{
             allStaff.forEach(npc ->{
             	npc.addMoney(this.singleSalary());
             	//缴纳社保
-            	npc.decMoney(this.singleInsurance());
-            	MoneyPool.instance().add(this.singleInsurance());
+            	npc.decMoney(this.singleTax());
+            	MoneyPool.instance().add(this.singleTax());
             });
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
