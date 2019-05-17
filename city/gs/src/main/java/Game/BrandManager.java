@@ -104,7 +104,7 @@ public class BrandManager {
         自己的品牌认知度；如果是恶意针对对其它竞争玩家，那么我怎么知道人家要取啥名名字？
         所以限制抢注的这个需求其实是伪需求。
         */
-        Long nameChangedTs;
+        Long nameChangedTs=0L;
 
         public boolean hasBrandName(){
             return brandName != null;
@@ -112,9 +112,11 @@ public class BrandManager {
         public BrandInfo(BrandKey key, String newBrandName) {
             this.key = key;
             brandName = new BrandName(newBrandName);
+            this.nameChangedTs = 0L;
         }
         public BrandInfo(BrandKey key) {
             this.key = key;
+            this.nameChangedTs = 0L;
         }
 
         protected BrandInfo() {}
@@ -124,10 +126,19 @@ public class BrandManager {
             return brandName.getBrandName();
         }
         public void setBrandName(String newBrandName) {
+            this.nameChangedTs = new Date().getTime();
             if(brandName == null){
                 brandName = new BrandName(newBrandName);
             }else
                 brandName.setBrandName(newBrandName);
+        }
+        public boolean canBeModify(){//距离上次修改时是否大于7天，true能修改、false不能修改
+            Long now = new Date().getTime();
+            long day = 24 * 60 * 60 * 1000;
+            if(this.nameChangedTs+7*day<=now){
+                return true;
+            }else
+                return false;
         }
     }
     public void update(long diffNano) {
@@ -325,18 +336,23 @@ public class BrandManager {
         return allBrandInfo.getOrDefault(bk,new BrandInfo(bk));
     }
 
-    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的
-    public boolean changeBrandName(UUID pid, int typeId, String validNewName){
-        //如果新名字是使用中的名字，那么操作失败，返回false
+    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的(-1品牌名称重复、1修改成功、其他（表示时间不通过）)
+    public Long changeBrandName(UUID pid, int typeId, String validNewName){
+        //如果新名字是使用中的名字，那么操作失败，返回-1
         if(GameDb.brandNameIsInUsing(validNewName)){
-            return false;
+            return -1l;
         }
         BrandInfo bInfo = getBrand(pid,typeId);
-        //如果名字可用
-        bInfo.setBrandName(validNewName);
-        GameDb.saveOrUpdate(bInfo.brandName);
-        GameDb.saveOrUpdate(this);
-        return  true;
+        if(!bInfo.canBeModify()) {
+            return bInfo.nameChangedTs;
+        }else {
+            //如果名字可用
+            bInfo.setBrandName(validNewName);
+            //级联保存
+            this.allBrandInfo.put(bInfo.key, bInfo);
+            GameDb.saveOrUpdate(this);
+            return 1l;
+        }
     }
 
     @Transient
