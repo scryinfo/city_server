@@ -10,6 +10,7 @@ import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -167,6 +168,7 @@ public class Laboratory extends Building {
         return null;
     }
     public RollResult roll(UUID lineId, Player player) {
+        calcuProb();
         RollResult res = null;
         Line l = this.findInProcess(lineId);
         if(l == null)
@@ -176,7 +178,7 @@ public class Laboratory extends Building {
             l.useRoll();
             if(l.eva()) {//是否是eva发明提升
                 //1次开启5个成果，所以循环5次
-                for (int i = 0; i <5 ; i++) {//新增=================================================
+                for (int i = 0; i <5 ; i++) {//新增===========================================
                     if(Prob.success(this.evaProb, RADIX)) {//成功概率（第一个参数表示成功概率,后一个为基数）
                         res.evaPoint++;
                         player.addEvaPoint(10);
@@ -187,7 +189,6 @@ public class Laboratory extends Building {
                         res.labResult.add(0);
                     }
                 }
-                //通知系统（待补）
             }
             else {
                 if(Prob.success(this.goodProb, RADIX)) {
@@ -195,6 +196,7 @@ public class Laboratory extends Building {
                     Integer newId = MetaData.randomGood(l.goodCategory, player.itemIds());
                     if(newId != null) {
                         player.addItem(newId, 0);
+                        player.addEvaPoint(1);
                         res.itemIds.add(newId);
                         GoodFormula f = MetaData.getFormula(newId);
                         for (GoodFormula.Info info : f.material) {
@@ -204,7 +206,8 @@ public class Laboratory extends Building {
                             }
                         }
                     }
-                    //通知系统（待补）
+                }else{ //失败
+                    player.addEvaPoint(1);
                 }
             }
         }
