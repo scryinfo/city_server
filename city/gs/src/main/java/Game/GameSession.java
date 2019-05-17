@@ -1920,6 +1920,7 @@ public class GameSession {
 			builder.setLineId(c.getLineId());
 			if(r.evaPoint > 0) {
 				builder.setEvaPoint(r.evaPoint);
+                builder.addAllLabResult(r.labResult);//开启的结果集（新增）
 			}
 			else {
 				if(r.itemIds != null)
@@ -2976,10 +2977,15 @@ public class GameSession {
 			return;
 		}
 		int techId=msg.getTypeId();
-		if(BrandManager.instance().changeBrandName(pId,techId,msg.getNewBrandName())){
+		Long result = BrandManager.instance().changeBrandName(pId, techId, msg.getNewBrandName());
+		//-1 名称重复、1修改成功。其他，返回的是上次修改时间（只有可能是不能修改的时间）
+		if(result==-1){
+			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
+		}else if(result==1){
 			this.write(Package.create(cmd, msg));
-		}else{
-			this.write(Package.fail(cmd));
+		}else{//时间过短，修改失败，返回上次修改时间。
+			Gs.ModyfyMyBrandName.Builder builder = msg.toBuilder().setLastChangeTime(result);
+			this.write(Package.create(cmd, builder.build()));
 		}
 	}
 
@@ -2989,12 +2995,11 @@ public class GameSession {
 		String newName = msg.getNewName();
 		UUID pid = Util.toUuid(msg.getPid().toByteArray());
 		//查询玩家信息
-		if(!pid.equals(player.id())||player.getCompanyName().equals(newName)){
+		if(!player.id().equals(pid)){
             GlobalConfig.cityError("[modyfyCompanyName] CompanyName only can be modified by it's owner!");
-			return;
 		}
 		//判断名称是否重复
-		if(GameDb.companyNameIsInUsed(newName)){//已经被使用的名称
+		else if(GameDb.companyNameIsInUsed(newName)||player.getCompanyName().equals(newName)){//已经被使用的名称(或者和以前名称相同)
 			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
 		}
 		else if(!player.canBeModify()){ //时间未到（返回冻结状态错误码）
@@ -3792,7 +3797,7 @@ public class GameSession {
     	this.write(Package.create(cmd, builder.build()));
     }
 
-	public void queryMyEvaByType(short cmd, Message message)
+	/*public void queryMyEvaByType(short cmd, Message message)
 	{
 		Gs.QueryMyEvaByType msg = (Gs.QueryMyEvaByType) message;
 		UUID pid = Util.toUuid(msg.getPlayerId().toByteArray());//玩家id
@@ -3836,6 +3841,6 @@ public class GameSession {
 				break;
 		}
 		this.write(Package.create(cmd, list.build()));
-	}
+	}*/
 
 }
