@@ -527,9 +527,8 @@ public class Player {
 
     public boolean canBeModify(){//是否可以修改。判断修改时间是否超过7天
         Long now = new Date().getTime();
-        //long day = 24 * 60 * 60 * 1000;
-        //设置1分钟改一次
-        if(this.last_modify_time+60*1000<=now){
+        long day = 24 * 60 * 60 * 1000;
+        if(this.last_modify_time+day*7<=now){
             return true;
         }else
             return false;

@@ -1911,8 +1911,8 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
 			return;
-		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory lab = (Laboratory)building;
+		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
 		Laboratory.RollResult r = lab.roll(lineId, player);
 		if(r != null) {
 			Gs.LabRollACK.Builder builder = Gs.LabRollACK.newBuilder();
@@ -1920,7 +1920,7 @@ public class GameSession {
 			builder.setLineId(c.getLineId());
 			if(r.evaPoint > 0) {
 				builder.setEvaPoint(r.evaPoint);
-                builder.addAllLabResult(r.labResult);//开启的结果集（新增）
+                builder.addAllLabResult(r.labResult);//开启的5个结果集（新增）
 			}
 			else {
 				if(r.itemIds != null)
@@ -1932,6 +1932,7 @@ public class GameSession {
 		else
 			this.write(Package.fail(cmd));
 	}
+
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
 		MetaItem mi = MetaData.getItem(c.getItemId());
