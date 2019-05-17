@@ -8,12 +8,10 @@ import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
-import Game.League.BrandLeague;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
-import Game.Util.CitySalaryUtil;
-import Game.Util.PlayerExchangeAmountUtil;
+import Game.Util.CityUtil;
 import Game.Util.WareHouseUtil;
 import Shared.*;
 import Shared.Package;
@@ -2979,7 +2977,7 @@ public class GameSession {
 		}
 		int techId=msg.getTypeId();
 		Long result = BrandManager.instance().changeBrandName(pId, techId, msg.getNewBrandName());
-		//-1 名称重复、1修改成功。其他，返回的是上次修改时间（只有可能是不能修改的时间）
+		//-1 名称重复、1修改成功。其他，返回上次修改时间（只有可能是不能修改的时间）
 		if(result==-1){
 			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
 		}else if(result==1){
@@ -3526,71 +3524,46 @@ public class GameSession {
 		builder.setCityName(city.name);
 		//2.人口信息
 		Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
-		//2.1统计男女人数
-		List<Player> players = GameDb.getAllPlayer();
-		int man=0;
-		int woman=0;
-		for (Player p : players) {
-			if(p.isMale())
-				man++;
-			else
-				woman++;
-		}
-		//2.2.统计所有npc的数量
+		Map<String, Integer> genderSex = CityUtil.genderSex(GameDb.getAllPlayer());
 		long npcNum = NpcManager.instance().getNpcCount();//所有npc数量
 		long socialNum = npcMap.get(10) + npcMap.get(11);//失业人员（社会福利人员）
-		humanInfo.setBoy(man);
-		humanInfo.setGirl(woman);
+		humanInfo.setBoy(genderSex.get("boy"));
+		humanInfo.setGirl(genderSex.get("girl"));
 		humanInfo.setCitizens(npcNum);
 		builder.setSexNum(humanInfo);
 		//3.设置城市摘要信息
 		Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
-		Gs.QueryCityIndex.CitySummary.GroundInfo.Builder groundInfo = Gs.QueryCityIndex.CitySummary.GroundInfo.newBuilder();
-		//3.1.所有的拍卖的土地数量
+		//3.1.土地拍卖信息
 		int groundSum = 0;
 		for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
 			MetaGroundAuction value = mg.getValue();
 			groundSum+=value.area.size();
 		}
-		//3.2已经拍出去的数量
 		int auctionNum = GameDb.countGroundInfo();
-		groundInfo.setTotalNum(groundSum).setAuctionNum(auctionNum);
-		citySummary.setGroundInfo(groundInfo);
+		citySummary.setTotalNum(groundSum).setAuctionNum(auctionNum);
 		//4.设置城市运费
 		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
-		//5.设置平均工资(需要计算)以及其他信息(平九年工资，所有建筑实发的工资之和➗全城员工人数)
-		long avgSalary=0;
-		long sumSalary=0;
-		List<Building> buildings = new ArrayList<>();
-		City.instance().forEachBuilding(b->{
-			buildings.add(b);
-		});
-		for (Building b : buildings) {
-			sumSalary += b.singleSalary();
-		}
-		avgSalary = sumSalary/buildings.size();
+		//5.设置平均工资(需要计算)以及其他信息(工资，所有建筑实发的工资之和➗全城员工人数)
+		Long avgSalary = CityUtil.cityAvgSalary();
 		citySummary.setAvgSalary(avgSalary);//平均工资
 		citySummary.setUnEmployedNum(socialNum);//失业人员
 		citySummary.setEmployeeNum(npcNum - socialNum);//在职人员
 		citySummary.setUnEmployedPercent((int)Math.ceil((double)socialNum/npcNum*100));//失业率(数量/总数*100)
-		//6.设置城市摘要
 		builder.setSummary(citySummary);
 		//7.设置工资涨幅（需要计算，还不确定,间隔是7天统计一下）
-		Long salarys1 = CitySalaryUtil.getSumSalaryByDays(14, 7);//前7天工资
-		Long salarys2 = CitySalaryUtil.getSumSalaryByDays(7, 0);//最近7天工资
+		Long salarys1 = CityUtil.getSumSalaryByDays(14, 7);//前7天工资
+		Long salarys2 = CityUtil.getSumSalaryByDays(7, 0);//最近7天工资
 		//计算增幅（本次7天内统计-前7天内统计）/上次统计
 		long incryRate = (salarys2 - salarys1) / salarys1 ;
 		builder.setSalaryIncre((int) incryRate);
-		Long amount = PlayerExchangeAmountUtil.getExchangeAmount(4);//全城交易量
 		//8.市民保障福利（平均工资）,计算公式：社会保障的比例计算  （社保福利是平均工资的3%+全程交易量的%2）/奖金池
 		//8.1.计算福利待遇
-		Double socialSalary = avgSalary*0.03+amount*0.02;//社保人员的工资
+		Double socialSalary = avgSalary*0.02;//社保人员的工资
 		long socialWelfare = Math.round((socialSalary *socialNum)/ MoneyPool.instance().money());//比例
 		builder.setSocialWelfare((int) socialWelfare);
 		//9.设置城市资金（奖金池）
 		builder.setMoneyPool(MoneyPool.instance().money());
 		//10.全程玩家交易信息
-		builder.setExchangeNum(amount);
 		this.write(Package.create(cmd,builder.build()));
 	}
 	//修改建筑名称
