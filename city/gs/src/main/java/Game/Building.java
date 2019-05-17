@@ -282,8 +282,8 @@ public abstract class Building implements Ticker{
     @Transient
     private long todayVisitorTs = 0;
 
-    @Column
-    private long last_modify_time=0;//最后修改时间
+    @Column(nullable = false)
+    private long last_modify_time=0L;//最后修改时间
 
     public void increaseTodayVisit()
     {
@@ -474,6 +474,7 @@ public abstract class Building implements Ticker{
         this.coordinate = pos;
         this.metaBuilding = meta;
         this.constructCompleteTs = System.currentTimeMillis();
+        this.last_modify_time = 0L;
     }
     public final List<Npc> destroy() {
         List<Npc> npcs = new ArrayList<>(allStaff);
