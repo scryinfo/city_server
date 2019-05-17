@@ -54,7 +54,7 @@ public class Shopping implements IAction {
             if (sumBrandV != 0) {
                 ratio = (double) brandV.get(goodMetaId) / (double) sumBrandV;
             }
-            weight[i++] = (int) (BrandManager.instance().spendMoneyRatioGood(goodMetaId) * (1.d + ratio));
+            weight[i++] = (int) (BrandManager.instance().spendMoneyRatioGood(goodMetaId) * (1.d + ratio) * 100000);
         }
         logger.info("good weight : " + Arrays.toString(weight));
         int idx = ProbBase.randomIdx(weight);
