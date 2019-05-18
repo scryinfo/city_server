@@ -268,7 +268,6 @@ public class StatisticSession {
     		b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
 			totalMap.put(k,b.build());
     	});
-
 		//2.处理支出信息
 		for (Map.Entry<Long, Long> pay : monthTotalpay.entrySet()) {
 			//如果在收入中已经处理了，则跳过
@@ -283,11 +282,9 @@ public class StatisticSession {
 			b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
 			totalMap.put(pay.getKey(),b.build());
 		}
-
 		//3.处理今日最新收入和支出信息
 		Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
 		Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
-
 		builder.setTodayIncome(todayIncome);
 		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
