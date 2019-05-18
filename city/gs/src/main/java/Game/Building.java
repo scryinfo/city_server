@@ -15,6 +15,7 @@ import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
@@ -277,7 +278,8 @@ public abstract class Building implements Ticker{
     private long todayVisitorTs = 0;
 
     @Column(nullable = false)
-    private long last_modify_time=0L;//最后修改时间
+    @ColumnDefault("0")
+    private long last_modify_time;//最后修改时间
 
     public void increaseTodayVisit()
     {
