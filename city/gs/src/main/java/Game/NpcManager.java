@@ -181,12 +181,12 @@ public class NpcManager {
         //waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));  won't works, n copies are refer to same object
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
       //GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
-       
+
         //工作npc
         GameDb.getAllNpcByStatus(0).forEach(npc->this.addImpl(npc));
         //失业npc
         GameDb.getAllNpcByStatus(1).forEach(npc->{
-    		unEmployeeNpc.put(npc.id(),npc); 
+    		unEmployeeNpc.put(npc.id(),npc);
     	});
     }
 
@@ -224,18 +224,18 @@ public class NpcManager {
     	//计算各种建筑npc的数量，包括工作npc和失业npc
     	allNpc.forEach((k,v)->{
     		int type=v.building().type();
-    		if(!countMap.containsKey(type)){ 
+    		if(!countMap.containsKey(type)){
     			countMap.put(type, 1l);
-    		}else{ 
-    			countMap.put(type,countMap.get(type)+1); 
+    		}else{
+    			countMap.put(type,countMap.get(type)+1);
     		}
     	});
     	unEmployeeNpc.forEach((k,v)->{
     		int type=v.building().type();
-    		if(!countMap.containsKey(type)){ 
+    		if(!countMap.containsKey(type)){
     			countMap.put(type, 1l);
-    		}else{ 
-    			countMap.put(type,countMap.get(type)+1); 
+    		}else{
+    			countMap.put(type,countMap.get(type)+1);
     		}
     	});
     	return countMap;
@@ -245,20 +245,24 @@ public class NpcManager {
     {
         return allNpc.size();
     }
-    
+
     public long getUnEmployeeNpcCount(){
     	return unEmployeeNpc.size();
     }
-    
+
     public Map<UUID, Npc> getUnEmployeeNpc(){
     	return unEmployeeNpc;
     }
-    
+
     public Map<Integer, List<Npc>> getUnEmployeeNpcByType(){
     	Map<Integer, List<Npc>> map=new HashMap<Integer, List<Npc>>();
     	getUnEmployeeNpc().forEach((k,v)->{
     		map.computeIfAbsent(v.type(),n -> new ArrayList<Npc>()).add(v);
     	});
     	return map;
+    }
+
+    public Map<UUID, Npc> getAllNpc() {
+        return allNpc;
     }
 }

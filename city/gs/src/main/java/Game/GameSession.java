@@ -2977,7 +2977,7 @@ public class GameSession {
 		}
 		int techId=msg.getTypeId();
 		Long result = BrandManager.instance().changeBrandName(pId, techId, msg.getNewBrandName());
-		//-1 名称重复、1修改成功。其他(因为时间问题而不可修改情况，返回上次修改时间)
+		//-1 名称重复、1修改成功。其他，返回上次修改时间（只有可能是不能修改的时间）
 		if(result==-1){
 			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
 		}else if(result==1){
@@ -3526,7 +3526,8 @@ public class GameSession {
 		Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
 		Map<String, Integer> genderSex = CityUtil.genderSex(GameDb.getAllPlayer());
 		long npcNum = NpcManager.instance().getNpcCount();//所有npc数量
-		long socialNum = npcMap.get(10) + npcMap.get(11);//失业人员（社会福利人员）
+		long socialNum =0;//失业人员（社会福利人员）
+		socialNum = npcMap.getOrDefault(10, 0)+npcMap.getOrDefault(11,0);
 		humanInfo.setBoy(genderSex.get("boy"));
 		humanInfo.setGirl(genderSex.get("girl"));
 		humanInfo.setCitizens(npcNum);
@@ -3543,12 +3544,18 @@ public class GameSession {
 		citySummary.setTotalNum(groundSum).setAuctionNum(auctionNum);
 		//4.设置城市运费
 		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
-		//5.设置平均工资(需要计算)以及其他信息(工资，所有建筑实发的工资之和➗全城员工人数)
+		//5.设置平均工资(需要计算)以及其他信息(工资，所有建筑实发的工资之和/全城员工人数)
 		Long avgSalary = CityUtil.cityAvgSalary();
 		citySummary.setAvgSalary(avgSalary);//平均工资
 		citySummary.setUnEmployedNum(socialNum);//失业人员
 		citySummary.setEmployeeNum(npcNum - socialNum);//在职人员
 		citySummary.setUnEmployedPercent((int)Math.ceil((double)socialNum/npcNum*100));//失业率(数量/总数*100)
+		//平均资产（区分福利npc）
+		Gs.QueryCityIndex.CitySummary.AvgProperty.Builder avgProperty = Gs.QueryCityIndex.CitySummary.AvgProperty.newBuilder();
+		Map<Integer, Long> moneyMap = CityUtil.cityAvgProperty();//城市平均资产
+		avgProperty.setSocialMoney(moneyMap.get(1));
+		avgProperty.setEmployeeMoney(moneyMap.get(0));
+		citySummary.setAvgProperty(avgProperty);
 		builder.setSummary(citySummary);
 		//7.设置工资涨幅（需要计算，还不确定,间隔是7天统计一下）
 		Long salarys1 = CityUtil.getSumSalaryByDays(14, 7);//前7天工资
@@ -3563,7 +3570,7 @@ public class GameSession {
 		builder.setSocialWelfare((int) socialWelfare);
 		//9.设置城市资金（奖金池）
 		builder.setMoneyPool(MoneyPool.instance().money());
-		//10.全程玩家交易信息
+
 		this.write(Package.create(cmd,builder.build()));
 	}
 
@@ -3684,8 +3691,7 @@ public class GameSession {
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(totalQuality).build());
     	this.write(Package.create(cmd, builder.build()));
     }
-
-	//推广公司信息
+	//推广公司信息(修改版)
 	public void queryPromotionCompanyInfo(short cmd,Message message){
 		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());

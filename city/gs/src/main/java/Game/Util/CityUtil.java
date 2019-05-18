@@ -1,29 +1,23 @@
 package Game.Util;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
-
-import java.util.*;
-
-import Game.Building;
-import Game.City;
-import Game.Player;
-import org.bson.Document;
-
+import Game.*;
+import Shared.LogDb;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import org.bson.Document;
 
-import Shared.LogDb;
+import java.util.*;
 
-/*
-*统计多少天到多少天之间的的工资之和
-* */
+import static com.mongodb.client.model.Filters.*;
+
+
 public class CityUtil {
 
-
+    /*
+     *统计多少天到多少天之间的的工资之和
+     * */
     public static Long getSumSalaryByDays(int startday,int enday){
         MongoCollection<Document> paySalary = LogDb.getPaySalary();
         //1.首先计算出时间区间
@@ -87,6 +81,41 @@ public class CityUtil {
         for (Building b : buildings) {
             sumSalary += b.singleSalary();
         }
-        return sumSalary / buildings.size();
+        if(avgSalary==0){
+            return 0L;
+        }else {
+            return sumSalary / buildings.size();
+        }
+    }
+
+    //平均资产
+    public static Map<Integer, Long> cityAvgProperty(){//1表示福利npc、0表示员工的平均资产
+        long socialSumMoney=0;//福利npc总资产
+        long employeeSumMoney=0;//员工总资产
+        int socialSize=0;
+        int employeeSize=0;
+        Map<Integer, Long> avgProperty = new HashMap<>();
+        List<Npc> buildings = new ArrayList<>();
+        for (Npc npc : NpcManager.instance().getAllNpc().values()) {
+            if(npc.type()==11||npc.type()==10){
+                socialSumMoney += npc.money();
+                socialSize++;
+            }else{
+                employeeSumMoney+=npc.money();
+                employeeSize++;
+            }
+        }
+        if(socialSize==0){
+            avgProperty.put(1, 0L);
+        }else{
+            avgProperty.put(1, socialSumMoney / socialSize);
+        }
+        if(employeeSize==0) {
+            avgProperty.put(0, 0L);
+        }
+        else {
+            avgProperty.put(0, employeeSumMoney / employeeSize);
+        }
+        return avgProperty;
     }
 }

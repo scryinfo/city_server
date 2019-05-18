@@ -9,6 +9,7 @@ import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
@@ -252,7 +253,8 @@ public class Player {
     private int eva;
 
     @Column(nullable = false)
-    private long last_modify_time=0l;//上次修改时间
+    @ColumnDefault("0")
+    private long last_modify_time;//上次修改时间
 
     public void addEvaPoint(int d) {
         this.eva += d;

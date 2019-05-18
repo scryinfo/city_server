@@ -1,30 +1,5 @@
 package Game;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.persistence.AttributeConverter;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.SelectBeforeUpdate;
-
-import com.google.common.collect.EvictingQueue;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
-
 import DB.Db;
 import Game.Contract.IBuildingContract;
 import Game.Listener.ConvertListener;
@@ -34,9 +9,19 @@ import Game.Util.NpcUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
+import com.google.common.collect.EvictingQueue;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
+import org.hibernate.annotations.SelectBeforeUpdate;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Entity
 @SelectBeforeUpdate(false)
@@ -497,7 +482,7 @@ public abstract class Building implements Ticker{
         allStaff.clear();
         return npcs;
     }
-    
+
     public final void addUnEmployeeNpc() {
     	NpcManager.instance().addUnEmployeeNpc(allStaff);
     	allStaff.clear();
@@ -515,18 +500,18 @@ public abstract class Building implements Ticker{
         });
         return npcs;
     }
-    
+
     public List<Npc> createNpc() {
     	Map<UUID, Npc> unEmployeeNpc=NpcManager.instance().getUnEmployeeNpc();
     	int unEmployeeNpcNum=unEmployeeNpc.size();
     	List<Npc> npcList = new ArrayList<Npc>(unEmployeeNpc.values());
     	List<Npc> npcs = new ArrayList<>();
-    	
+
     	int requireWorkNum=0;
     	for (Map.Entry<Integer, Integer> n : this.metaBuilding.npc.entrySet()) {
     		requireWorkNum+=n.getValue();
     	}
-    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口 
+    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口
     		NpcManager.instance().addWorkNpc(npcList,this);
     		npcs.addAll(npcList);
     		int num=(requireWorkNum-unEmployeeNpcNum)/4; //每种类型还差npc数量
@@ -558,7 +543,7 @@ public abstract class Building implements Ticker{
         	});
       	  	npcs.addAll(totalNpc);
     	}
-    	
+
     	npcs.forEach(npc->{
     		takeAsWorker(npc);
 			npc.goWork();
