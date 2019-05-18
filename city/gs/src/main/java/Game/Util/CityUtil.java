@@ -1,20 +1,16 @@
 package Game.Util;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
-
-import java.util.*;
-
 import Game.*;
-import org.bson.Document;
-
+import Shared.LogDb;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import org.bson.Document;
 
-import Shared.LogDb;
+import java.util.*;
+
+import static com.mongodb.client.model.Filters.*;
 
 
 public class CityUtil {

@@ -261,4 +261,8 @@ public class NpcManager {
     	});
     	return map;
     }
+
+    public Map<UUID, Npc> getAllNpc() {
+        return allNpc;
+    }
 }
