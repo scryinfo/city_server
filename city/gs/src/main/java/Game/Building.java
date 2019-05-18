@@ -1,15 +1,7 @@
 package Game;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -299,6 +291,9 @@ public abstract class Building implements Ticker{
     @Transient
     private long todayVisitorTs = 0;
 
+    @Column(nullable = false)
+    private long last_modify_time=0L;//最后修改时间
+
     public void increaseTodayVisit()
     {
         if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
@@ -494,6 +489,7 @@ public abstract class Building implements Ticker{
         this.coordinate = pos;
         this.metaBuilding = meta;
         this.constructCompleteTs = System.currentTimeMillis();
+        this.last_modify_time = 0L;
     }
     public final List<Npc> destroy() {
         List<Npc> npcs = new ArrayList<>(allStaff);
@@ -830,5 +826,22 @@ public abstract class Building implements Ticker{
 
     public void setTodayIncome(long todayIncome) {
         this.todayIncome = todayIncome;
+    }
+
+    public long getLast_modify_time() {
+        return last_modify_time;
+    }
+
+    public void setLast_modify_time(long last_modify_time) {
+        this.last_modify_time = last_modify_time;
+    }
+    //是否到了规定时间可以修改
+    public boolean canBeModify(){
+        Long now = new Date().getTime();
+        long day = 24 * 60 * 60 * 1000;
+        if(this.last_modify_time+7*day<=now){
+            return true;
+        }else
+            return false;
     }
 }

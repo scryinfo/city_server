@@ -25,7 +25,7 @@ public class PerHourJob implements org.quartz.Job {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
         long time = System.currentTimeMillis();
-        long endTime = time - time%(1000 * 60  * 60);
+        long endTime = time - time%(1000 * 60  * 60); //结束时间为当前时间-1小时
         long startTime = endTime - 1000 * 60 * 60;
 
 
@@ -55,13 +55,13 @@ public class PerHourJob implements org.quartz.Job {
         documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
-        //player income
-        documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());
+        //player income 由每小时统计变为每分钟统计
+    /*    documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerIncome());
         //player pay
         documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerPay());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerPay());
-
+    */
         //统计耗时
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();

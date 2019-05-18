@@ -2,29 +2,37 @@ package Game.Util;
 
 import Shared.LogDb;
 import com.mongodb.Block;
-import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 
 import java.util.*;
 
 import static Shared.LogDb.KEY_TOTAL;
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.*;
 
 public class PlayerExchangeAmountUtil {
-    private static MongoCollection<Document> playerExchangeAmount;
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
+    private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
+    private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String COUNTTYPE = "countType";
+    private static MongoCollection<Document> playerExchangeAmount;
+    private static MongoCollection<Document> dayPlayerIncome;
+    private static MongoCollection<Document> dayPlayerPay;
     //初始化
     static {
         MongoDatabase database = LogDb.getDatabase();
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -49,5 +57,27 @@ public class PlayerExchangeAmountUtil {
             a=entry.getValue();
         }
         return a;
+    }
+
+    public static MongoCollection<Document> getDayPlayerIncome() {
+        return dayPlayerIncome;
+    }
+
+    public static MongoCollection<Document> getDayPlayerPay() {
+        return dayPlayerPay;
+    }
+
+    //查询玩家每日收入或支出
+    public static List<Integer> queryDayPlayerIncomeOrPay(MongoCollection<Document> collection,UUID id)
+    {
+        List<Integer> dayTotal = new ArrayList<>();
+        collection.find(and(
+                eq("id",id)
+        )).projection(fields(include("time", "total"), excludeId()))
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) document ->{
+                    dayTotal.add(Math.toIntExact(document.getLong("total")));
+                });
+        return dayTotal;
     }
 }

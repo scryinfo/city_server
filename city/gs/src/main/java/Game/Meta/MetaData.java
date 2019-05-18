@@ -493,4 +493,32 @@ public class MetaData {
 
         initBuildingTech();
 	}
+
+    public static TreeMap<Integer, MetaApartment> getApartment() {
+        return apartment;
+    }
+
+    public static TreeMap<Integer, MetaProduceDepartment> getProduceDepartment() {
+        return produceDepartment;
+    }
+
+    public static TreeMap<Integer, MetaRetailShop> getRetailShop() {
+        return retailShop;
+    }
+
+    public static TreeMap<Integer, MetaLaboratory> getLaboratory() {
+        return laboratory;
+    }
+
+    public static TreeMap<Integer, MetaPublicFacility> getPublicFacility() {
+        return publicFacility;
+    }
+
+    public static TreeMap<Integer, MetaMaterialFactory> getMaterialFactory() {
+        return materialFactory;
+    }
+
+    public static TreeMap<Integer, MetaWarehouse> getWarehouse() {
+        return warehouse;
+    }
 }

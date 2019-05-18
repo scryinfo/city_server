@@ -4,13 +4,11 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import Game.Building;
+import Game.City;
+import Game.Player;
 import org.bson.Document;
 
 import com.mongodb.Block;
@@ -23,7 +21,7 @@ import Shared.LogDb;
 /*
 *统计多少天到多少天之间的的工资之和
 * */
-public class CitySalaryUtil {
+public class CityUtil {
 
 
     public static Long getSumSalaryByDays(int startday,int enday){
@@ -62,5 +60,33 @@ public class CitySalaryUtil {
         }
         System.out.println("前"+startday+"天，到"+enday+"的人均总工资是"+salarys);
         return salarys;
+    }
+
+    //获取玩家的性别信息
+    public static Map<String,Integer> genderSex(List<Player> players){
+        Map<String, Integer> sex = new HashMap<>();
+        int man=0;
+        int woman=0;
+        for (Player p : players) {
+            if(p.isMale())
+                man++;
+            else
+                woman++;
+        }
+        sex.put("girl", woman);
+        sex.put("boy", man);
+        return sex;
+    }
+
+    //获取城市的平均工资
+    public static Long cityAvgSalary(){
+        long avgSalary=0;
+        long sumSalary=0;
+        List<Building> buildings = new ArrayList<>();
+        City.instance().forEachBuilding(b->buildings.add(b));
+        for (Building b : buildings) {
+            sumSalary += b.singleSalary();
+        }
+        return sumSalary / buildings.size();
     }
 }

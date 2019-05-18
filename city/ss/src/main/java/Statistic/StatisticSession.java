@@ -1,9 +1,9 @@
 package Statistic;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import Statistic.TimeUtil.TimeUtil;
+import Statistic.TimeUtil.TotalUtil;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
@@ -252,18 +252,42 @@ public class StatisticSession {
     public void queryPlayerIncomePayCurve(short cmd, Message message)
     {
     	UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
+		Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();//用于统计收入和支出的合并数据
     	Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
     	Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
-    	
-    	Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
+    	//统计整理数据
+		Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+		Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
+		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
     	builder.setId(Util.toByteString(id));
-    	playerIncomeMap.forEach((k,v)->{
+		//1.处理收入信息
+    	monthTotalIncome.forEach((k,v)->{
     		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
     		b.setTime(k);
     		b.setIncome(v);
-    		b.setPay((playerPayMap!=null&&playerPayMap.size()>0&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
+    		b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
+			totalMap.put(k,b.build());
     	});
+		//2.处理支出信息
+		for (Map.Entry<Long, Long> pay : monthTotalpay.entrySet()) {
+			//如果在收入中已经处理了，则跳过
+			Long time = pay.getKey();
+			if(totalMap.containsKey(time)){
+				continue;
+			}
+			Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
+			//添加其他的信息
+			b.setTime(pay.getKey());
+			b.setPay(pay.getValue());
+			b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
+			totalMap.put(pay.getKey(),b.build());
+		}
+		//3.处理今日最新收入和支出信息
+		Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
+		Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
+		builder.setTodayIncome(todayIncome);
+		builder.setTodayPay(todayPay);
+		builder.addAllPlayerIncome(totalMap.values());
     	this.write(Package.create(cmd,builder.build()));
     }
-
 }

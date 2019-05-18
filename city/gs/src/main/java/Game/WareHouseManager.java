@@ -188,12 +188,12 @@ public class WareHouseManager {
     public List<WareHouseRenter> getWareHouseByRenterIdFromWareHouse(UUID bid,UUID renterId) {
         List<WareHouseRenter> renters = new ArrayList<>();
         wareHouseMap.values().forEach(w -> {
-            if(w.id().equals(bid)){
-                w.getRenters().forEach(r -> {
-                    if (r.getRenterId().equals(renterId))
-                        renters.add(r);
-                });
-            }
+           if(w.id().equals(bid)){
+               w.getRenters().forEach(r -> {
+                   if (r.getRenterId().equals(renterId))
+                       renters.add(r);
+               });
+           }
         });
         return renters;
     }
