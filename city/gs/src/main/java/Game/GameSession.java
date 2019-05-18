@@ -2977,7 +2977,7 @@ public class GameSession {
 		}
 		int techId=msg.getTypeId();
 		Long result = BrandManager.instance().changeBrandName(pId, techId, msg.getNewBrandName());
-		//-1 名称重复、1修改成功。其他，返回上次修改时间（只有可能是不能修改的时间）
+		//-1 名称重复、1修改成功。其他(因为时间问题而不可修改情况，返回上次修改时间)
 		if(result==-1){
 			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
 		}else if(result==1){
@@ -3566,6 +3566,7 @@ public class GameSession {
 		//10.全程玩家交易信息
 		this.write(Package.create(cmd,builder.build()));
 	}
+
 	//修改建筑名称
 	public void updateBuildingName(short cmd, Message message)
 	{
@@ -3683,34 +3684,8 @@ public class GameSession {
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(totalQuality).build());
     	this.write(Package.create(cmd, builder.build()));
     }
-    //查询推广公司信息
-/*    public void queryPromotionCompanyInfo(short cmd,Message message){
-    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-    	Building building = City.instance().getBuilding(buildingId);
-		//检查是否是推广公司
-		Building sellerBuilding = City.instance().getBuilding(buildingId);
-		PublicFacility fcySeller = (PublicFacility) building ;
 
-		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
-			if(GlobalConfig.DEBUGLOG){
-				GlobalConfig.cityError("GameSession.queryPromotionCompanyInfo: building type of seller is not PublicFacility!");
-			}
-			return;
-		}
-    	Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
-    	builder.setSalary(building.salaryRatio);
-    	builder.setStaffNum(building.getWorkerNum());
-		for (int type : msg.getTypeIdsList())
-		{
-			Gs.PromotionCompanyInfo.PromoAbility.Builder b=builder.addAbilitysBuilder();
-			Integer value = (int)fcySeller.getAllPromoTypeAbility(type);
-			b.setTypeId(type).setAbility(value);
-		}
-		this.write(Package.create(cmd, builder.build()));
-    }*/
-	//推广公司信息(修改版)
+	//推广公司信息
 	public void queryPromotionCompanyInfo(short cmd,Message message){
 		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
@@ -3805,51 +3780,4 @@ public class GameSession {
 			return null;
 		}
 	}
-
-	/*public void queryMyEvaByType(short cmd, Message message)
-	{
-		Gs.QueryMyEvaByType msg = (Gs.QueryMyEvaByType) message;
-		UUID pid = Util.toUuid(msg.getPlayerId().toByteArray());//玩家id
-		int type = msg.getType();//建筑类型
-		Gs.Evas.Builder list = Gs.Evas.newBuilder();
-		Gs.Evas.MetaInfo.Builder mt = Gs.Evas.MetaInfo.newBuilder();
-		MetaData.getBuildingTech(type).forEach(techId->{
-			EvaManager.getInstance().getEva(pid,techId).forEach(eva->{
-				list.addEva(eva.toProto());
-			});
-		});
-		//设置其他信息(建筑信息)
-		switch (type){
-			case MetaBuilding.MATERIAL:
-				Collection<MetaMaterialFactory> values1 = MetaData.getMaterialFactory().values();
-				values1.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-			case MetaBuilding.PRODUCE:
-				Collection<MetaProduceDepartment> values2 = MetaData.getProduceDepartment().values();
-				values2.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-			case MetaBuilding.RETAIL:
-				Collection<MetaRetailShop> values3 = MetaData.getRetailShop().values();
-				values3.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-			case MetaBuilding.APARTMENT:
-				Collection<MetaApartment> values4 = MetaData.getApartment().values();
-				values4.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-			case MetaBuilding.LAB:
-				Collection<MetaLaboratory> values5 = MetaData.getLaboratory().values();
-				values5.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-			case MetaBuilding.PUBLIC:
-				Collection<MetaPublicFacility> values6 = MetaData.getPublicFacility().values();
-				values6.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-			case MetaBuilding.WAREHOUSE:
-				Collection<MetaWarehouse> values7 = MetaData.getWarehouse().values();
-				values7.forEach(m->list.addMetaInfo((mt.setMid(m.id).setStaffNum(m.workerNum))));
-				break;
-		}
-		this.write(Package.create(cmd, list.build()));
-	}*/
-
 }

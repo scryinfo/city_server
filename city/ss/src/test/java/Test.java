@@ -10,8 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import Statistic.StatisticSession;
-import Statistic.TimeUtil.TotalUtil;
+import Statistic.Util.TotalUtil;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.quartz.JobExecutionException;

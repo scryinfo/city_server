@@ -1,4 +1,4 @@
-package Statistic.TimeUtil;
+package Statistic.Util;
 
 import java.util.Calendar;
 import java.util.Date;

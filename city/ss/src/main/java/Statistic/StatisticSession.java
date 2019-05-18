@@ -2,8 +2,7 @@ package Statistic;
 
 import java.util.*;
 
-import Statistic.TimeUtil.TimeUtil;
-import Statistic.TimeUtil.TotalUtil;
+import Statistic.Util.TotalUtil;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
@@ -17,7 +16,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import ss.Ss;
 
-import static Statistic.SummaryUtil.DAY_MILLISECOND;
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
 // this class contain only getXXX method, that means the only purpose this class or this server
