@@ -606,4 +606,8 @@ public class City {
     static{
            nowTime = System.currentTimeMillis();
     }
+
+    public Map<Integer, IndustryIncrease> getIndustryMoneyMap() {
+        return industryMoneyMap;
+    }
 }
