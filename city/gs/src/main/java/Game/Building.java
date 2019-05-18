@@ -279,7 +279,7 @@ public abstract class Building implements Ticker{
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private long last_modify_time;//最后修改时间
+    private long last_modify_time;
 
     public void increaseTodayVisit()
     {
