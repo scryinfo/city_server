@@ -16,19 +16,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
+import Game.Util.DateUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
@@ -47,10 +46,14 @@ public class City {
     private static City instance;
     private TreeMap<Integer, Integer> topGoodQty;
     private Map<Integer, Integer> topBuildingQty = new HashMap<>();
+    private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
     private boolean taskIsRunning = false;
     private PeriodicTimer metaAuctionLoadTimer = new PeriodicTimer();
+    private PeriodicTimer insuranceTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));
+    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24*7),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
+
     public int[] timeSection() {
         return meta.timeSection;
     }
@@ -183,8 +186,11 @@ public class City {
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
 
         this.lastHour = this.localTime().getHour();
+        
+        //行业涨薪指数
+        loadIndustryIncrease();
     }
-    private void loadSysBuildings() {
+	private void loadSysBuildings() {
         for(MetaData.InitialBuildingInfo i : MetaData.getAllInitialBuilding())
         {
             if(MetaBuilding.type(i.id) != MetaBuilding.TRIVIAL)
@@ -202,7 +208,19 @@ public class City {
             this.take(b);
         }
     }
-
+    private void loadIndustryIncrease() {
+    	GameDb.getAllIndustryIncrease().forEach(industry->{
+    		industryMoneyMap.put(industry.getBuildingType(),industry);
+    	});
+	}
+    public void addIndustryMoney(int type,int money){
+    	IndustryIncrease ii=industryMoneyMap.get(type);
+    	long industryMoney=ii.getIndustryMoney();
+    	industryMoney+=money;
+    	ii.setIndustryMoney(industryMoney);
+    	industryMoneyMap.put(type,ii);
+    	GameDb.saveOrUpdate(new IndustryIncrease(type,industryMoney));
+    }
     private void consumeQueue() {
         if (!queue.isEmpty()) {
             if(!taskIsRunning) {
@@ -255,6 +273,10 @@ public class City {
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
         PromotionMgr.instance().update(diffNano);
+        //发放失业金
+        updateInsurance(diffNano);
+        //计算下周行业工资
+        updateIndustryMoney(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
@@ -284,7 +306,51 @@ public class City {
         }
         timeSectionAccumlateNano += diffNano;
     }
-
+    
+    private void updateInsurance(long diffNano) {
+    	if (this.insuranceTimer.update(diffNano)) {
+    		Map<UUID, Npc> map=NpcManager.instance().getUnEmployeeNpc();
+    		map.forEach((k,v)->{
+    			if(v.getUnEmployeddTs()>=TimeUnit.HOURS.toMillis(24)){ //失业超过24小时
+    				v.addMoney((int) (City.instance().getAvgIndustrySalary()*MetaData.getCity().insuranceRatio));  //失业人员领取社保
+    			}
+    		});
+    		GameDb.saveOrUpdate(map.values());
+    	}
+    }
+    
+    private void updateIndustryMoney(long diffNano) {
+    	if (this.industryMoneyTimer.update(diffNano)) {
+    		//跌幅 =   (1 - 社保发放比例 - 税收比例) * 失业率
+    		double unEmpRatio=NpcManager.instance().getUnEmployeeNpcCount()/(double)(NpcManager.instance().getUnEmployeeNpcCount()+NpcManager.instance().getNpcCount());
+    		double decrMoney=(1-MetaData.getCity().taxRatio / 100.d-MetaData.getCity().insuranceRatio / 100.d)*unEmpRatio;
+    		// 行业涨薪指数 / 行业人数<0.001  不清0
+    		industryMoneyMap.forEach((k,v)->{
+    			 Map<Integer, Long> industryNpcNumMap=NpcManager.instance().countNpcByBuildingType();
+    			 double r=v.getIndustryMoney()/(double)industryNpcNumMap.get(k);
+    			 if(r>=0.001){
+    				 v.setIndustryMoney(0l);
+    				 industryMoneyMap.put(k, v);
+    				 GameDb.saveOrUpdate(new IndustryIncrease(k,0l));
+    			 }
+    			 //下周行业工资 = 行业工资 * （1-跌幅） + 行业涨薪指数 / 行业人数
+         		 double nextIndustrySalary=v.getIndustrySalary()*(1-decrMoney)+ r;
+         		 IndustryIncrease ii=new IndustryIncrease(k,0l,nextIndustrySalary);
+         		 industryMoneyMap.put(k, ii);
+         		 GameDb.saveOrUpdate(ii);  //更新行业工资
+    		});
+    		
+    	}
+    }
+    
+    public double getAvgIndustrySalary(){
+    	double a=0;
+    	for(Map.Entry<Integer, IndustryIncrease> map:industryMoneyMap.entrySet()){
+    		a+=map.getValue().getIndustrySalary();
+    	}
+    	return a/6.d;
+    }
+    
     private void dayTickAction() {
         MetaData.updateDayId();
     }
@@ -433,7 +499,8 @@ public class City {
     }
 
     public void delBuilding(Building building) {
-        List npcs = building.destroy();
+   //   List npcs = building.destroy();
+        building.addUnEmployeeNpc();//添加失业人员
         this.allBuilding.remove(building.id());
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
@@ -447,7 +514,8 @@ public class City {
             }
         }
         building.broadcastDelete();
-        GameDb.delete(npcs.add(building));
+   //   GameDb.delete(npcs.add(building));
+        GameDb.delete(building);
     }
     public void send(GridIndexPair range, Package pack) {
         for(int x = range.l.x; x <= range.r.x; ++x) {
@@ -460,7 +528,8 @@ public class City {
         if(!this.canBuild(b))
             return false;
         GameDb.saveOrUpdate(b); // let hibernate generate the id value
-        List updates = b.hireNpc();
+ //     List updates = b.hireNpc();
+        List updates = b.createNpc();
         take(b);
         //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
         if(allBuilding!=null&&allBuilding.size()>=100){
@@ -532,5 +601,9 @@ public class City {
         }
         ArrayList<GridIndex> l = new ArrayList<>();
         ArrayList<GridIndex> r = new ArrayList<>();
+    }
+    static long nowTime=0;
+    static{
+           nowTime = System.currentTimeMillis();
     }
 }

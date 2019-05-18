@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "NPC")
 @SelectBeforeUpdate(false)
 @Table(name = "NPC")
 public class Npc {
@@ -64,8 +64,34 @@ public class Npc {
     private long money;
 
     private int type;
+    
+    @Column(name = "status", nullable = false)
+    private int status = 0; //失业状态,初始时为工作状态
+    
+    @Column(name = "ts", nullable = false)
+    private long ts = 0;  //失业时间
+ 
+    public int getStatus() {
+		return status;
+	}
 
-    public long money() {
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public long getTs() {
+		return ts;
+	}
+
+	public void setTs(long ts) {
+		this.ts = ts;
+	}
+
+	public long getUnEmployeddTs() {
+		return System.currentTimeMillis()-getTs();
+	}
+	
+	public long money() {
         return money;
     }
     protected Npc() {}
@@ -153,7 +179,8 @@ public class Npc {
         id += City.instance().currentHour()*1000000;
         id += City.instance().weather()*10000;
         id += MetaData.getDayId()*10;
-        id += this.born.onStrike()?1:0;
+   //   id += this.born.onStrike()?1:0;
+        id += status;
         return id;
     }
     // where the npc is are not important, location phaseChange can not persist to db
@@ -193,7 +220,10 @@ public class Npc {
         this.money -= money;
         return true;
     }
-    public Building building() {
+    public void setBorn(Building born) {
+		this.born = born;
+	}
+	public Building building() {
         return this.born;
     }
     public Building buildingLocated() {

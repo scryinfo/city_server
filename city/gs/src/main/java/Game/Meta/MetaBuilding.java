@@ -1,15 +1,17 @@
 package Game.Meta;
 
-import Game.CoordPair;
-import Game.Coordinate;
-import org.bson.Document;
-
-import javax.persistence.AttributeConverter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
+
+import javax.persistence.AttributeConverter;
+
+import org.bson.Document;
+
+import Game.CoordPair;
+import Game.Coordinate;
 
 public class MetaBuilding {
     public static final int TRIVIAL = 10;
@@ -40,7 +42,7 @@ public class MetaBuilding {
         if(d.containsKey("workerNum")) {
             this.workerNum = d.getInteger("workerNum");
             this.effectRange = d.getInteger("effectRange");
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 4; i++) {
                 int type = d.getInteger("npcType" + i);
                 int n = d.getInteger("npcNum" + i);
                 if (n > 0)
@@ -75,7 +77,7 @@ public class MetaBuilding {
     public static boolean legalType(int type) {
         return type >= TRIVIAL && type <= TALENT;
     }
-
+    
     public static final class Converter implements AttributeConverter<MetaBuilding, Integer> {
         @Override
         public Integer convertToDatabaseColumn(MetaBuilding attribute) {
