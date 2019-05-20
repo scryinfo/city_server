@@ -145,9 +145,15 @@ public class Shopping implements IAction {
             
             //再次购物
             double categorySpend=MetaData.getAIBuyRepeatedlyRatio(MetaItem.baseId(chosen.meta.id), lux)/100.d;
-            double mutilSpend=npc.building().singleSalary()*categorySpend;
+            //工资区分失业与否
+            int salary=npc.building().singleSalary();
+            //失业则是失业金
+            if(npc.getStatus()==1){
+            	salary=(int) (City.instance().getAvgIndustrySalary()*MetaData.getCity().insuranceRatio);
+            }
+            double mutilSpend=salary*categorySpend;
             mutilSpend-=chosen.price;
-            double repeatBuyRetio=mutilSpend/npc.building().singleSalary()*categorySpend;
+            double repeatBuyRetio=mutilSpend/salary*categorySpend;
             Random random = new Random();
             int num = random.nextInt(101);
             if(num/100.d<repeatBuyRetio){
@@ -254,9 +260,15 @@ public class Shopping implements IAction {
               
               //再次购物
               double categorySpend=MetaData.getAIBuyRepeatedlyRatio(MetaItem.baseId(chosen.meta.id), lux)/100.d;
-            //double mutilSpend=npc.building().singleSalary()*categorySpend;
+              //工资区分失业与否
+              int salary=npc.building().singleSalary();
+              //失业则是失业金
+              if(npc.getStatus()==1){
+              	salary=(int) (City.instance().getAvgIndustrySalary()*MetaData.getCity().insuranceRatio);
+              }
+            //double mutilSpend=salary*categorySpend;
               mutilSpend-=chosen.price;//不断减，直到超出范围则不再次购物
-              double repeatBuyRetio=mutilSpend/npc.building().singleSalary()*categorySpend;
+              double repeatBuyRetio=mutilSpend/salary*categorySpend;
               Random random = new Random();
               int num = random.nextInt(101);
               if(num/100.d<repeatBuyRetio){
