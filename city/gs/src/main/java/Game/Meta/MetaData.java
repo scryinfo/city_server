@@ -37,6 +37,7 @@ public class MetaData {
     private static final String aiBuildingColName = "AIBuilding";
     private static final String aiBuyColName = "AIBuy";
     private static final String aiLuxColName = "AILux";
+    private static final String aiBuyRepeatedlyColName = "AIBuyRepeatedly";
     private static final String dayColName = "Holiday";
     private static final String buildingSpendColName = "BuildingSpendRatio";
     private static final String goodSpendColName = "GoodSpendRatio";
@@ -65,6 +66,7 @@ public class MetaData {
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
     private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
+    private static final TreeMap<String, AIBuyRepeatedly> aiBuyRepeatedly = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
@@ -256,6 +258,16 @@ public class MetaData {
     public static AILux getAILux(long id) {
         return aiLux.get(id);
     }
+    public static int getAIBuyRepeatedlyRatio(int category,int lux){
+    	for(Map.Entry<String, AIBuyRepeatedly> map:aiBuyRepeatedly.entrySet()){
+    		if((map.getValue().category==category)&&(map.getValue().lux==lux)){
+    			return map.getValue().radio;
+    		}
+    	}
+		return 0;
+    }
+    
+    
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }
@@ -322,6 +334,12 @@ public class MetaData {
             AILux m = new AILux(doc);
             aiLux.put(m.id, m);
         });
+    }
+    private static void initAIBuyRepeatedly() {
+    	mongoClient.getDatabase(dbName).getCollection(aiBuyRepeatedlyColName).find().forEach((Block<Document>) doc -> {
+    		AIBuyRepeatedly m = new AIBuyRepeatedly(doc);
+    		aiBuyRepeatedly.put(m.id, m);
+    	});
     }
 //	public static void initNpc() {
 //		mongoClient.getDatabase(dbName).getCollection(npcColName).find().forEach((Block<Document>) doc -> {
@@ -482,6 +500,7 @@ public class MetaData {
         initAIBuilding();
         initAIBuy();
         initAILux();
+        initAIBuyRepeatedly();
         initDayId();
         initSpendRatio();
 

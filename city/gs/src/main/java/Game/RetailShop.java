@@ -206,6 +206,11 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     public Collection<Integer> getMetaIdsInShelf(MetaGood.Type type, int lux) {
         return shelf.getMetaIds(type, lux);
     }
+    
+    public Collection<Integer> getMetaIdsInShelf(int category, int lux) {
+    	return shelf.getMetaIdsBy(category, lux);
+    }
+    
     public boolean shelfHas(int metaId) {
         return shelf.has(metaId);
     }
