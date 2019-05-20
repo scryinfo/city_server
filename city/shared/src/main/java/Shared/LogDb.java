@@ -63,6 +63,7 @@ public class LogDb {
 	private static final String RENTER_SHELF_INCOME = "renterShelfIncome";
 	//运输记录（租用仓库之间的运输记录）
 	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
+	private static final String MINERS_COST_RATIO = "minersCostRatio";//矿工费用
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -93,9 +94,10 @@ public class LogDb {
 	private static MongoCollection<Document> playerIncome;
 	private static MongoCollection<Document> playerPay;
 	//WareHouserenter
-	private static MongoCollection<Document> buyRenterInShelf;//购买了租户仓库的商品
+	private static MongoCollection<Document> buyRenterInShelf;	//购买了租户仓库的商品
 	private static MongoCollection<Document> renterShelfIncome;//租户仓库的收入
 	private static MongoCollection<Document> payRenterTransfer;//租用仓库间的运输记录
+	private static MongoCollection<Document> minersCostRatio;	//矿工比例
 
 	public static final String KEY_TOTAL = "total";
 
@@ -154,6 +156,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		//租用仓库间的运输记录
 		payRenterTransfer = database.getCollection(PAY_RENTER_TRANSFER)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		minersCostRatio=database.getCollection(MINERS_COST_RATIO)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 	}
 
@@ -609,6 +613,13 @@ public class LogDb {
 				.append("c", n);
 		payTransfer.insertOne(document);
 	}
+
+	public static void minersCostRatio(UUID pid,double money,double  ratio){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("pid", pid)
+				.append("a", money)
+				.append("", ratio);
+	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
@@ -701,6 +712,10 @@ public class LogDb {
 
 	public static MongoCollection<Document> getPayRenterTransfer() {
 		return payRenterTransfer;
+	}
+
+	public static MongoCollection<Document> getMinersCostRatio() {
+		return minersCostRatio;
 	}
 
 	public static class Positon

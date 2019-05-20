@@ -19,6 +19,7 @@ import javax.persistence.MapKeyClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import Game.Meta.MetaData;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
@@ -241,7 +242,9 @@ public class GroundManager {
             }
         }
         int cost = rentPara.requiredPay() * coordinates.size();
-        if(!renter.decMoney(cost))
+        //TODO:矿工费用
+        long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+        if(!renter.decMoney(cost+minerCost))
             return false;
         List<LogDb.Positon> plist1 = new ArrayList<>();
         List<Gs.MiniIndex> miniIndexList = new ArrayList<>();
@@ -252,18 +255,18 @@ public class GroundManager {
         }
 
         Player owner = GameDb.getPlayer(ownerId);
-        owner.addMoney(cost);
-        LogDb.playerPay(renter.id(), cost);
-        LogDb.playerIncome(owner.id(), cost);
-		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+        owner.addMoney(cost-minerCost);
+        LogDb.playerPay(renter.id(), cost+minerCost);
+        LogDb.playerIncome(owner.id(), cost-minerCost);
+		if(cost+minerCost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(owner.id()))
                     .setBuyerId(Util.toByteString(renter.id()))
-                    .setCost(cost)
+                    .setCost(cost+minerCost)
                     .setTs(System.currentTimeMillis())
                     .build()));
-            LogDb.cityBroadcast(owner.id(),renter.id(),cost,0,1);
+            LogDb.cityBroadcast(owner.id(),renter.id(),cost+minerCost,0,1);
 		}
 
         LogDb.rentGround(renter.id(), ownerId, cost, plist1);
@@ -294,7 +297,7 @@ public class GroundManager {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(renter.id()))
                 .setFaceId(renter.getFaceId())
-                .setCost(cost)
+                .setCost(cost-minerCost)
                 .setType(Gs.IncomeNotify.Type.RENT_GROUND)
                 .addAllCoord(miniIndexList)
                 .build());
@@ -345,22 +348,27 @@ public class GroundManager {
             gis.add(i);
         }
         int cost = gis.size() * price;
-        if(buyer.money() < cost)
+        //TODO:矿工费用
+        long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+        if(buyer.money() < cost+minerCost)
             return false;
         Player seller = GameDb.getPlayer(sellerId);
-        seller.addMoney(cost);
-        buyer.decMoney(cost);
-        LogDb.playerPay(buyer.id(), cost);
-	    LogDb.playerIncome(seller.id(), cost);
-		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+        seller.addMoney(cost-minerCost);
+        buyer.decMoney(cost+minerCost);
+        LogDb.playerPay(buyer.id(), cost+minerCost);
+	    LogDb.playerIncome(seller.id(), cost-minerCost);
+	    //矿工费用记录
+        LogDb.minersCostRatio(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+        LogDb.minersCostRatio(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		if(cost+minerCost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(seller.id()))
                     .setBuyerId(Util.toByteString(buyer.id()))
-                    .setCost(cost)
+                    .setCost(cost+minerCost)
                     .setTs(System.currentTimeMillis())
                     .build()));
-			LogDb.cityBroadcast(seller.id(),buyer.id(),cost,0,1);
+			LogDb.cityBroadcast(seller.id(),buyer.id(),cost+minerCost,0,1);
 		}
         List<LogDb.Positon> plist1 = new ArrayList<>();
         List<Gs.MiniIndex> miniIndexList = new ArrayList<>();
@@ -369,7 +377,7 @@ public class GroundManager {
             plist1.add(new LogDb.Positon(c.x, c.y));
             miniIndexList.add(c.toProto());
         }
-        LogDb.buyGround(buyer.id(),sellerId,price,plist1);
+        LogDb.buyGround(buyer.id(),sellerId,price,plist1);//cost不包含矿工费用，并非真实收入
         for(GroundInfo i : gis) {
             swapOwner(buyer.id(), seller.id(), i);
         }
@@ -380,7 +388,7 @@ public class GroundManager {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(buyer.id()))
                 .setFaceId(buyer.getFaceId())
-                .setCost(cost)
+                .setCost(cost-minerCost)
                 .setType(Gs.IncomeNotify.Type.BUY_GROUND)
                 .addAllCoord(miniIndexList)
                 .build());
