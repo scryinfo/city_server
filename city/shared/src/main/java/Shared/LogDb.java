@@ -63,7 +63,8 @@ public class LogDb {
 	private static final String RENTER_SHELF_INCOME = "renterShelfIncome";
 	//运输记录（租用仓库之间的运输记录）
 	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
-	private static final String MINERS_COST_RATIO = "minersCostRatio";//矿工费用
+	private static final String MINERS_COST= "minersCost";//矿工费用
+	private static final String NPC_MINERS_COST = "npcMinersCost";//npc支付矿工费用
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -97,7 +98,9 @@ public class LogDb {
 	private static MongoCollection<Document> buyRenterInShelf;	//购买了租户仓库的商品
 	private static MongoCollection<Document> renterShelfIncome;//租户仓库的收入
 	private static MongoCollection<Document> payRenterTransfer;//租用仓库间的运输记录
-	private static MongoCollection<Document> minersCostRatio;	//矿工比例
+	//npc and player pay Miner cost
+	private static MongoCollection<Document> minersCost;	//矿工费用
+	private static MongoCollection<Document> npcMinersCost;//矿工费用
 
 	public static final String KEY_TOTAL = "total";
 
@@ -157,8 +160,11 @@ public class LogDb {
 		//租用仓库间的运输记录
 		payRenterTransfer = database.getCollection(PAY_RENTER_TRANSFER)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		minersCostRatio=database.getCollection(MINERS_COST_RATIO)
+		minersCost=database.getCollection(MINERS_COST)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		npcMinersCost=database.getCollection(NPC_MINERS_COST)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+
 	}
 
 	public static MongoDatabase getDatabase()
@@ -614,11 +620,20 @@ public class LogDb {
 		payTransfer.insertOne(document);
 	}
 
-	public static void minersCostRatio(UUID pid,double money,double  ratio){
+	public static void minersCost(UUID pid,double money,double  ratio){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("pid", pid)
 				.append("a", money)
-				.append("", ratio);
+				.append("ratio", ratio);//矿工费用收取比例
+		minersCost.insertOne(document);
+	}
+
+	public static void npcMinersCost(UUID npcId,double money,double  ratio){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("pid", npcId)//npcId
+				.append("a", money)  //矿工费用
+				.append("ratio", ratio);//矿工费用收取比例
+		npcMinersCost.insertOne(document);
 	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
@@ -714,8 +729,12 @@ public class LogDb {
 		return payRenterTransfer;
 	}
 
-	public static MongoCollection<Document> getMinersCostRatio() {
-		return minersCostRatio;
+	public static MongoCollection<Document> getMinersCost() {
+		return minersCost;
+	}
+
+	public static MongoCollection<Document> getNpcMinersCost() {
+		return npcMinersCost;
 	}
 
 	public static class Positon
