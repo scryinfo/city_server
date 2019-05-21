@@ -1481,7 +1481,7 @@ public class GameSession {
 		//更新广告商广告列表
 		fcySeller.addSelledPromotion(newOrder.promotionId);
 		sellerBuilding.updateTodayIncome(fee);
-		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee-minerCost, 0, 0);
+		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);//不含矿工费
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
 
 		//发送客户端通知
