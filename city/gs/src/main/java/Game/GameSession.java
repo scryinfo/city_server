@@ -1357,7 +1357,7 @@ public class GameSession {
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
 		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
-		//TODO:矿工费用结算
+		//TODO:矿工费用(向下取整)
 		long minerCost = (long) Math.floor(fee * MetaData.getSysPara().minersCostRatio);
 		if(buyer.money() < fee+minerCost){
 			if(GlobalConfig.DEBUGLOG){
@@ -1377,7 +1377,7 @@ public class GameSession {
 					* 广告推广力计算为整点全局更新，即便是 1点59打的广告，2点整也会执行一次广告计算。
 					* 每次更新增加的品牌值增量为：
 						* 当前广告公司推广能力 * 更新时长/1小时
-						* 更新时长 ：
+						* 更新时长 ：5
 							* 如果该广告第一次执行整点更新，那么“更新时长”为该该广告开始时间起计算到这个整点的时长
 							* 非第一次整点更新，更新时长 为1个小时
 				* promotionId 可以使用索引作为ID吗（需要全局唯一吗）？
