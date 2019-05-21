@@ -394,9 +394,9 @@ public abstract class Building implements Ticker{
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
         this.broadcastChange();
 
-        //停工通知
+     /*   //停工通知
         UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
-        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
+        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);*/
     }
 
     public void setName(String name) {
@@ -583,10 +583,10 @@ public abstract class Building implements Ticker{
         addFlowCount();
 //        flowCount += 1;
         enterImpl(npc);
-        //住宅入住通知
+      /*  //住宅入住通知
         int[] num = {flowCount};
         UUID[] apartmentOwerIdAndBid = {this.ownerId,id()};
-        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);
+        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);*/
     }
 
     public void addFlowCount()

@@ -105,8 +105,10 @@ public class Shopping implements IAction {
                     .setBid(sellShop.metaId())
                     .setItemId(chosen.meta.id)
                     .build());
-            LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
-                    chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
+            int brand = BrandManager.instance().getGood(sellShop.ownerId(), chosen.meta.id);//查询商品的品质  知名度
+            int buildingBrand = BrandManager.instance().getBuilding(sellShop.ownerId(), sellShop.type());//查询零售店的知名度
+            LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
+                    chosen.qty,brand,sellShop.ownerId(), chosen.buildingBrand,buildingBrand,chosen.buildingQty);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
                     chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
             LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price, MetaItem.type(chosen.meta.id), chosen.meta.id);

@@ -51,15 +51,12 @@ public class JustVisit implements IAction {
             npc.decMoney(chosen.cost());
             LogDb.playerIncome(owner.id(), chosen.cost());
             LogDb.playerIncome(owner.id(), chosen.cost());
-            //单个建筑
-            Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
-            Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-            BrandManager.instance().getBuildingBrandOrQuality(chosen, brandMap, qtyMap);
-            double brand=((brandMap!=null&&brandMap.size()>0)?brandMap.get(chosen.type()):0);
-            double quality=((qtyMap!=null&&qtyMap.size()>0)?qtyMap.get(chosen.type()):0);
+            // 获取住宅品牌和知名度
+            double brand =BrandManager.instance().getBuilding(chosen.ownerId(), chosen.type());
+            double quality = chosen.quality();
             LogDb.incomeVisit(owner.id(),chosen.type(),chosen.cost(),chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
-            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen   .ownerId(),
+            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
                     chosen.id(),chosen.type(),chosen.metaId(),brand,quality);
             chosen.updateTodayIncome(chosen.cost());
 

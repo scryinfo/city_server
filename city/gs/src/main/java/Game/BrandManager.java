@@ -1,14 +1,7 @@
 package Game;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Embeddable;
@@ -21,6 +14,9 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import Shared.Package;
+import Shared.Util;
+import com.google.protobuf.Message;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 

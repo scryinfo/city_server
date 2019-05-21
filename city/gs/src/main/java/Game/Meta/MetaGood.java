@@ -41,6 +41,7 @@ public final class MetaGood extends MetaItem
     public int lux;
     public int brand;
     public int quality;
+    public int type;
     public static boolean legalCategory(int category) {
         return mapping.keySet().contains(category);
     }
