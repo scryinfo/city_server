@@ -1869,7 +1869,7 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		long cost = 0;
 		Player seller = GameDb.getPlayer(lab.ownerId());
-		if(!building.canUseBy(this.player.id())) {
+		if(!building.canUseBy(this.player.id())&&!lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if(!c.hasTimes())
 				return;
 			if(c.getTimes() > lab.getSellTimes())
@@ -1894,7 +1894,7 @@ public class GameSession {
 		}
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), this.player.id(), cost);
 		if(null != line) {
-			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
+			GameDb.saveOrUpdate(Arrays.asList(lab,player,seller)); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
 	}
