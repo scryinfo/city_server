@@ -799,13 +799,12 @@ public class GameSession {
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
 		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
 		//矿工费用日志记录
-		LogDb.minersCostRatio(player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-		LogDb.minersCostRatio(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		LogDb.minersCost(player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
@@ -1472,8 +1471,8 @@ public class GameSession {
         LogDb.playerPay(buyer.id(), fee+minerCost);
         LogDb.playerIncome(seller.id(), fee-minerCost);
         //矿工费用记录
-		LogDb.minersCostRatio(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-		LogDb.minersCostRatio(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 
 		//更新买家玩家信息中的广告缓存
 		buyer.addPayedPromotion(newOrder.promotionId);
@@ -1883,8 +1882,8 @@ public class GameSession {
 	        LogDb.playerPay(this.player.id(),cost+minerCost);
 	        LogDb.playerIncome(seller.id(),cost-minerCost);
 	        //矿工费用记录
-	        LogDb.minersCostRatio(this.player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-			LogDb.minersCostRatio(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+	        LogDb.minersCost(this.player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+			LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 			lab.updateTodayIncome(cost-minerCost);
 			if(c.hasGoodCategory())
 				lab.updateTotalGoodIncome(cost-minerCost, c.getTimes());

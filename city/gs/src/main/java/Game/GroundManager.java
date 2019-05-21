@@ -258,6 +258,9 @@ public class GroundManager {
         owner.addMoney(cost-minerCost);
         LogDb.playerPay(renter.id(), cost+minerCost);
         LogDb.playerIncome(owner.id(), cost-minerCost);
+        //矿工费用日志记录
+        LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+        LogDb.minersCost(renter.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
@@ -358,8 +361,8 @@ public class GroundManager {
         LogDb.playerPay(buyer.id(), cost+minerCost);
 	    LogDb.playerIncome(seller.id(), cost-minerCost);
 	    //矿工费用记录
-        LogDb.minersCostRatio(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-        LogDb.minersCostRatio(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+        LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+        LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)

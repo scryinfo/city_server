@@ -65,8 +65,9 @@ public class JustVisit implements IAction {
                         .setType(Gs.IncomeNotify.Type.RENT_ROOM)
                         .setBid(chosen.metaId())
                         .build());
-                //矿工费记录(未记录npc的矿工费用)
-                LogDb.minersCostRatio(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+                //矿工费记录
+                LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+                LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             }
             owner.addMoney(income);
             npc.decMoney((int) pay);
