@@ -1,17 +1,28 @@
 package Game.Meta;
 
-import Game.Building;
-import Game.Prob;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
+import org.bson.Document;
+
 import com.google.common.collect.ImmutableSet;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
-import org.apache.log4j.Logger;
-import org.bson.Document;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import Game.Building;
+import Game.Prob;
 
 public class MetaData {
     public static final int ID_RADIX = 100000;
@@ -37,7 +48,6 @@ public class MetaData {
     private static final String aiBuildingColName = "AIBuilding";
     private static final String aiBuyColName = "AIBuy";
     private static final String aiLuxColName = "AILux";
-    private static final String aiBuyRepeatedlyColName = "AIBuyRepeatedly";
     private static final String dayColName = "Holiday";
     private static final String buildingSpendColName = "BuildingSpendRatio";
     private static final String goodSpendColName = "GoodSpendRatio";
@@ -66,7 +76,6 @@ public class MetaData {
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
     private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
-    private static final TreeMap<String, AIBuyRepeatedly> aiBuyRepeatedly = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
@@ -258,16 +267,6 @@ public class MetaData {
     public static AILux getAILux(long id) {
         return aiLux.get(id);
     }
-    public static int getAIBuyRepeatedlyRatio(int category,int lux){
-    	for(Map.Entry<String, AIBuyRepeatedly> map:aiBuyRepeatedly.entrySet()){
-    		if((map.getValue().category==category)&&(map.getValue().lux==lux)){
-    			return map.getValue().radio;
-    		}
-    	}
-		return 0;
-    }
-    
-    
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }
@@ -334,12 +333,6 @@ public class MetaData {
             AILux m = new AILux(doc);
             aiLux.put(m.id, m);
         });
-    }
-    private static void initAIBuyRepeatedly() {
-    	mongoClient.getDatabase(dbName).getCollection(aiBuyRepeatedlyColName).find().forEach((Block<Document>) doc -> {
-    		AIBuyRepeatedly m = new AIBuyRepeatedly(doc);
-    		aiBuyRepeatedly.put(m.id, m);
-    	});
     }
 //	public static void initNpc() {
 //		mongoClient.getDatabase(dbName).getCollection(npcColName).find().forEach((Block<Document>) doc -> {
@@ -500,7 +493,6 @@ public class MetaData {
         initAIBuilding();
         initAIBuy();
         initAILux();
-        initAIBuyRepeatedly();
         initDayId();
         initSpendRatio();
 

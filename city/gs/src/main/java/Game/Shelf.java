@@ -1,14 +1,26 @@
 package Game;
 
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import gs.Gs;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
-import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import Game.Meta.MetaGood;
+import Game.Meta.MetaItem;
+import gs.Gs;
 
 @Entity
 @SelectBeforeUpdate(false)
@@ -78,16 +90,6 @@ public class Shelf {
         // .mapToInt(e->e.getKey().meta.id).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         // this is most stupid api design what I have ever seen
     }
-    public Collection<Integer> getMetaIdsBy(int category, int lux) {
-    	return this.slots.entrySet().stream().filter(e-> {
-    		if(e.getKey().meta instanceof MetaGood) {
-    			MetaGood mg = (MetaGood)e.getKey().meta;
-    			return mg.lux == lux && MetaItem.baseId(mg.id) == category;
-    		}
-    		return false;
-    	}).map(e->e.getKey().meta.id).collect(Collectors.toList());
-    }
-
     @Embeddable
     public static final class Content {
         public Content(int n, int price,boolean autoReplenish) {
