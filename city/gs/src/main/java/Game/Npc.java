@@ -68,8 +68,11 @@ public class Npc {
     @Column(name = "status", nullable = false)
     private int status = 0; //失业状态,初始时为工作状态
     
-    @Column(name = "ts", nullable = false)
-    private long ts = 0;  //失业时间
+    @Column(name = "unEmpts", nullable = false)
+    private long unEmpts = 0;  //失业时间
+    
+    @Column(name = "buyApartmentTs", nullable = false)
+    private long buyApartmentTs = 0; //购买住宅时间
  
     public int getStatus() {
 		return status;
@@ -79,18 +82,26 @@ public class Npc {
 		this.status = status;
 	}
 
-	public long getTs() {
-		return ts;
+	public long getUnEmpts() {
+		return unEmpts;
 	}
 
-	public void setTs(long ts) {
-		this.ts = ts;
+	public void setUnEmpts(long unEmpts) {
+		this.unEmpts = unEmpts;
 	}
 
 	public long getUnEmployeddTs() {
-		return System.currentTimeMillis()-getTs();
+		return System.currentTimeMillis()-getUnEmpts();
 	}
 	
+	public long getBuyApartmentTs() {
+		return buyApartmentTs;
+	}
+
+	public void setBuyApartmentTs(long buyApartmentTs) {
+		this.buyApartmentTs = buyApartmentTs;
+	}
+
 	public long money() {
         return money;
     }
@@ -211,7 +222,10 @@ public class Npc {
     public void setApartment(Apartment apartment) {
         this.apartment = apartment;
     }
-    public void addMoney(int money) {
+    public Apartment getApartment() {
+		return apartment;
+	}
+	public void addMoney(int money) {
         this.money += money;
     }
     public boolean decMoney(int money) {

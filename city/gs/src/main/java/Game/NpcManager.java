@@ -101,7 +101,7 @@ public class NpcManager {
     	npc.forEach(n->{
     		allNpc.remove(n.id()); //移除失业npc
     		n.setStatus(1);  //状态改成失业
-    		n.setTs(System.currentTimeMillis());
+    		n.setUnEmpts(System.currentTimeMillis());
     		unEmployeeNpc.put(n.id(),n); //添加失业npc
     	});
     	GameDb.saveOrUpdate(npc);
@@ -110,7 +110,7 @@ public class NpcManager {
     	npc.forEach(n->{
     		unEmployeeNpc.remove(n.id()); //移除失业npc
     		n.setStatus(0);  //状态改成工作
-    		n.setTs(System.currentTimeMillis());
+    		n.setUnEmpts(System.currentTimeMillis());
     		n.setBorn(born);  //改为新建筑
     		allNpc.put(n.id(),n); //添加工作npc
     	});

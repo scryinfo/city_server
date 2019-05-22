@@ -96,7 +96,12 @@ public class Shopping implements IAction {
               //double goodSpendV = ((1 + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId) / 100.d) + (1 + sell.qty / 100.d) + shopScore)/3.d * spend;
             	double goodSpendV = ((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1) * spend;
               //int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
-                int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                int w =0;// goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                if(1 - sell.price / goodSpendV > 0){
+                	w=goodSpendV==0?0: (int) ((sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                }else{
+                	w=1;
+                }
                 if(w < 0){
                     w = 0;
                 }
