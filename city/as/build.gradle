@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
 }
 
 
