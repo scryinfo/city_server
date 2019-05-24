@@ -324,4 +324,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public boolean delItem(Item item) {
         return this.store.delItem(item);
     }
+
+    public Shelf getShelf() {
+        return shelf;
+    }
 }

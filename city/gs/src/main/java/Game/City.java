@@ -2,14 +2,7 @@ package Game;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -609,5 +602,9 @@ public class City {
 
     public Map<Integer, IndustryIncrease> getIndustryMoneyMap() {
         return industryMoneyMap;
+    }
+    public List<Building> getAllBuilding(){
+        ArrayList list = new ArrayList(allBuilding.values());
+        return list;
     }
 }

@@ -63,6 +63,14 @@ public class BrandManager {
         public int hashCode() {
             return Objects.hash(playerId, mid);
         }
+
+        public UUID getPlayerId() {
+            return playerId;
+        }
+
+        public int getMid() {
+            return mid;
+        }
     }
 
     @Entity(name = "brandname")
@@ -139,6 +147,14 @@ public class BrandManager {
                 return true;
             }else
                 return false;
+        }
+
+        public BrandKey getKey() {
+            return key;
+        }
+
+        public int getV() {
+            return v;
         }
     }
     public void update(long diffNano) {
@@ -413,5 +429,14 @@ public class BrandManager {
             brands.add(band.build());
         });
         return brands;
+    }
+
+    public List<BrandInfo> getAllBrandInfoByItem(int item){
+        ArrayList<BrandInfo> infos = new ArrayList<>();
+        allBrandInfo.values().forEach(b->{
+            if(b.key.mid==item)
+                infos.add(b);
+        });
+        return infos;
     }
 }

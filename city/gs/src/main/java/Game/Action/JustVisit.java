@@ -78,19 +78,39 @@ public class JustVisit implements IAction {
             LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
                     chosen.id(),chosen.type(),chosen.metaId());
             chosen.updateTodayIncome(chosen.cost());
-          
+
             npc.setBuyApartmentTs(System.currentTimeMillis());
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
 
             if (chosen.type() == MetaBuilding.APARTMENT) {
+            long income = chosen.cost();//今日收入
+            long pay = chosen.cost();
+            if (chosen.type() == MetaBuilding.APARTMENT) {//需要多扣除矿工费用
+
+                //TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
+                long minerCost = (long) Math.floor(chosen.cost() * MetaData.getSysPara().minersCostRatio);
+                income -= minerCost;
+                pay += minerCost;
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                         .setBuyerId(Util.toByteString(npc.id()))
-                        .setCost(chosen.cost())
+                        .setCost(pay)
                         .setType(Gs.IncomeNotify.Type.RENT_ROOM)
                         .setBid(chosen.metaId())
                         .build());
+                //矿工费记录
+                LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+                LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             }
+            owner.addMoney(income);
+            npc.decMoney((int) pay);
+            LogDb.playerIncome(owner.id(), income);
+            LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
+            LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
+            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
+                    chosen.id(),chosen.type(),chosen.metaId()); //不包含矿工费用
+            chosen.updateTodayIncome(income);
+            GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
             npc.goFor(chosen);
             return new HashSet<>(Arrays.asList(owner, npc, chosen));
         }

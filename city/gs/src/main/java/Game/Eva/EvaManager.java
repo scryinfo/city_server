@@ -1,16 +1,14 @@
 package Game.Eva;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import Game.GameDb;
+import Game.Meta.MetaData;
+import Game.Meta.MetaExperiences;
 import Game.Timers.PeriodicTimer;
+import Shared.Util;
+import gs.Gs;
 
 public class EvaManager
 {
@@ -83,4 +81,47 @@ public class EvaManager
         }
         return list;
     }
+
+    public Set<Eva> getAllEvas(){
+        ArrayList<Set<Eva>> list = new ArrayList<>(this.evaMap.values());
+        Set<Eva> evas = new HashSet<>();
+        for (Set<Eva> e : list) {
+            evas.addAll(e);
+        }
+        return evas;
+    }
+
+    public  Eva updateMyEva(Gs.Eva eva){
+        int level=eva.getLv();
+        long cexp=eva.getCexp();
+        Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
+
+        if(level>=1){//计算等级
+            long exp=0l;
+            do{
+                MetaExperiences obj=map.get(level);
+                exp=obj.exp;
+                if(cexp>=exp){
+                    cexp=cexp-exp; //减去升级需要的经验
+                    level++;
+                }
+            }while(cexp>=exp);
+        }
+        Eva e=new Eva();//修改后的Eva
+        e.setId(Util.toUuid(eva.getId().toByteArray()));
+        e.setPid(Util.toUuid(eva.getPid().toByteArray()));
+        e.setAt(eva.getAt());
+        e.setBt(eva.getBt().getNumber());
+        e.setLv(level);
+        e.setCexp(cexp);
+        if(eva.hasB()) {
+            e.setB(eva.getB());
+        }else {
+            e.setB(-1);
+        }
+        updateEva(e);
+        return e;
+    }
+
+    //判断是否是推广能力的提升
 }

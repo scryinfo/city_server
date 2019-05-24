@@ -121,21 +121,22 @@ public class CityUtil {
     }
 
     //工资涨幅
-    public static double increaseRatio(){//工资涨幅比例（一周统计一次）我现在要计算总共的涨幅，平均
+    public static double increaseRatio(){//工资涨幅比例（一周统计一次）我现在要计算总共的涨幅。
         double increaseRatio=0d;
-        for (Map.Entry<Integer, IndustryIncrease> entry : City.instance().getIndustryMoneyMap().entrySet()) {
+        Map<Integer, IndustryIncrease> map = City.instance().getIndustryMoneyMap();
+        for (Map.Entry<Integer, IndustryIncrease> entry : map.entrySet()) {
             Map<Integer, Long> industryNpcNumMap=NpcManager.instance().countNpcByBuildingType();
             double r=entry.getValue().getIndustryMoney()/(double)industryNpcNumMap.get(entry.getKey());//涨幅
             increaseRatio+= r;
         }
-        return increaseRatio/City.instance().getIndustryMoneyMap().size();
+        return increaseRatio/ map.size();
     }
+
     //社保福利(城市产业平均工资*社保比例)
     public static int socialMoney(){
         int v = (int) (City.instance().getAvgIndustrySalary() * MetaData.getCity().insuranceRatio);
         return v;
     }
-
     //获取城市税收
     public static long getTax(){
         long allTax = 0;

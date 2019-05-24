@@ -12,6 +12,8 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.CityUtil;
+import Game.Util.EvaUtil;
+import Game.Util.GlobalUtil;
 import Game.Util.WareHouseUtil;
 import Shared.*;
 import Shared.Package;
@@ -20,6 +22,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import com.sun.xml.internal.bind.v2.TODO;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -318,9 +321,10 @@ public class GameSession {
 
 		player.setCity(City.instance()); // toProto will use Player.city
 		logger.debug("account: " + this.accountName + " login");
-
-		this.write(Package.create(cmd, player.toProto()));
-
+		//添加矿工费用（系统参数）
+		Gs.Role.Builder role = player.toProto().toBuilder();
+		role.setMinersCostRatio(MetaData.getSysPara().minersCostRatio);
+		this.write(Package.create(cmd,role.build()));
 		City.instance().add(player); // will send UnitCreate
 		player.online();
 		if (player.getSocietyId() != null)
@@ -756,27 +760,31 @@ public class GameSession {
 		}
 		long cost = itemBuy.n*c.getPrice();
 		int freight = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(buyStore, (IStorage) sellBuilding));
-		if(player.money() < cost + freight)
-			return;
 
+		//TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
+		long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+		long income =cost - minerCost;//收入（扣除矿工费后）
+		long pay=cost+minerCost;
+		if(player.money() < cost + freight+minerCost)
+			return;
 		// begin do modify
 		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n))
 			return;
 		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
-		seller.addMoney(cost);
+		seller.addMoney(income);
 		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
-				.setCost(cost)
+				.setCost(pay)
 				.setType(Gs.IncomeNotify.Type.INSHELF)
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
 				.setCount(itemBuy.n)
 				.build());
-		player.decMoney(cost);
-		LogDb.playerPay(player.id(), cost);
-		LogDb.playerIncome(seller.id(), cost);
+		player.decMoney(pay);
+		LogDb.playerPay(player.id(),pay);
+		LogDb.playerIncome(seller.id(),income);
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
@@ -793,14 +801,16 @@ public class GameSession {
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
 		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(),type,itemId);
-		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);
+		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
+		//矿工费用日志记录
+		LogDb.minersCost(player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
-		sellBuilding.updateTodayIncome(cost);
+		sellBuilding.updateTodayIncome(income);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
 
@@ -1349,7 +1359,9 @@ public class GameSession {
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
 		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
-		if(buyer.money() < fee){
+		//TODO:矿工费用(向下取整)
+		long minerCost = (long) Math.floor(fee * MetaData.getSysPara().minersCostRatio);
+		if(buyer.money() < fee+minerCost){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
 			}
@@ -1367,7 +1379,7 @@ public class GameSession {
 					* 广告推广力计算为整点全局更新，即便是 1点59打的广告，2点整也会执行一次广告计算。
 					* 每次更新增加的品牌值增量为：
 						* 当前广告公司推广能力 * 更新时长/1小时
-						* 更新时长 ：
+						* 更新时长 ：5
 							* 如果该广告第一次执行整点更新，那么“更新时长”为该该广告开始时间起计算到这个整点的时长
 							* 非第一次整点更新，更新时长 为1个小时
 				* promotionId 可以使用索引作为ID吗（需要全局唯一吗）？
@@ -1456,10 +1468,13 @@ public class GameSession {
 		PromotionMgr.instance().AdAddNewPromoOrder(newOrder);
 		GameDb.saveOrUpdate(PromotionMgr.instance());
 		//结账
-		buyer.decMoney(fee);
-		seller.addMoney(fee);
-        LogDb.playerPay(buyer.id(), fee);
-        LogDb.playerIncome(seller.id(), fee);
+		buyer.decMoney(fee+minerCost);
+		seller.addMoney(fee-minerCost);
+        LogDb.playerPay(buyer.id(), fee+minerCost);
+        LogDb.playerIncome(seller.id(), fee-minerCost);
+        //矿工费用记录
+		LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 
 		//更新买家玩家信息中的广告缓存
 		buyer.addPayedPromotion(newOrder.promotionId);
@@ -1467,7 +1482,7 @@ public class GameSession {
 		//更新广告商广告列表
 		fcySeller.addSelledPromotion(newOrder.promotionId);
 		sellerBuilding.updateTodayIncome(fee);
-		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);
+		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);//不含矿工费
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
 
 		//发送客户端通知
@@ -1854,25 +1869,33 @@ public class GameSession {
 		}
 		Laboratory lab = (Laboratory)building;
 		long cost = 0;
-		if(!building.canUseBy(player.id())) {
+		Player seller = GameDb.getPlayer(lab.ownerId());
+		if(!building.canUseBy(this.player.id())&&!lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if(!c.hasTimes())
 				return;
 			if(c.getTimes() > lab.getSellTimes())
 				return;
 			cost = c.getTimes() * lab.getPricePreTime();
-			if(!player.decMoney(cost))
+			//TODO:矿工费用
+			long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+			if(player.decMoney(cost+minerCost))
 				return;
-	        LogDb.playerPay(player.id(), cost);
-			lab.updateTodayIncome(cost);
+			seller.addMoney(cost-minerCost);
+	        LogDb.playerPay(this.player.id(),cost+minerCost);
+	        LogDb.playerIncome(seller.id(),cost-minerCost);
+	        //矿工费用记录
+	        LogDb.minersCost(this.player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+			LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+			lab.updateTodayIncome(cost-minerCost);
 			if(c.hasGoodCategory())
-				lab.updateTotalGoodIncome(cost, c.getTimes());
+				lab.updateTotalGoodIncome(cost-minerCost, c.getTimes());
 			else
-				lab.updateTotalEvaIncome(cost, c.getTimes());
-			LogDb.buildingIncome(lab.id(), player.id(), cost, 0, 0);
+				lab.updateTotalEvaIncome(cost-minerCost, c.getTimes());
+			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
 		}
-		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), player.id(), cost);
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory()?c.getGoodCategory():0, c.getTimes(), this.player.id(), cost);
 		if(null != line) {
-			GameDb.saveOrUpdate(lab); // let hibernate generate the fucking line.id first
+			GameDb.saveOrUpdate(Arrays.asList(lab,player,seller)); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
 	}
@@ -1923,6 +1946,9 @@ public class GameSession {
 			else {
 				if(r.itemIds != null)
 					builder.addAllItemId(r.itemIds);
+				else{
+					builder.addAllLabResult(r.labResult);
+				}
 			}
 			GameDb.saveOrUpdate(Arrays.asList(lab, player));
 			this.write(Package.create(cmd, builder.build()));
@@ -2898,6 +2924,44 @@ public class GameSession {
 
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
+//TODO:Eva改版==============================================================================
+	/*public void updateMyEvas(short cmd, Message message)
+	{
+		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
+		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
+		for (Gs.Eva eva : evas.getEvaList()) {
+			Gs.EvaResultInfo.Builder result = Gs.EvaResultInfo.newBuilder();
+			//修改eva信息
+			Eva newEva = EvaManager.getInstance().updateMyEva(eva);
+			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
+			player.decEva(eva.getDecEva());
+			GameDb.saveOrUpdate(player);
+			Gs.EvaResultInfo.EvasInfo.Builder evaInfo = Gs.EvaResultInfo.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
+			//参数1
+			result.setEvasInfo(evaInfo);
+
+			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）
+				//筛选玩家所有该建筑
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
+				List<Gs.EvaResultInfo.Promote> promotes = EvaUtil.getProducePromoteInfo(buildings, eva, newEva);
+				result.addAllPromotes(promotes);
+			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.APARTMENT);
+				//balabala===
+			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//3.零售店品质提升，计算预期值提升的比例，同上差不多
+				//balabala===(还是要计算预期值，然后计算提升比例)
+			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PUBLIC);
+				List<Gs.EvaResultInfo.Promote> promotes = EvaUtil.getPubPromoteInfo(buildings, eva, newEva);
+				result.addAllPromotes(promotes);
+			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.LAB);
+				List<Gs.EvaResultInfo.Promote> promotes = EvaUtil.getLabPromoteInfo(buildings, eva, newEva);
+				result.addAllPromotes(promotes);
+			}
+		}
+
+	}*/
 
 	public void queryMyBrands(short cmd, Message message){
 		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
@@ -3545,7 +3609,7 @@ public class GameSession {
 		//4.设置城市运费
 		citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
 		//5.设置平均工资
-		citySummary.setAvgSalary(City.instance().getAvgIndustrySalary());//平均工资
+		citySummary.setAvgSalary((long) City.instance().getAvgIndustrySalary());//平均工资
 		citySummary.setUnEmployedNum(socialNum);//失业人员
 		citySummary.setEmployeeNum(npcNum - socialNum);//在职人员
 		citySummary.setUnEmployedPercent((int)Math.ceil((double)socialNum/npcNum*100));//失业率(数量/总数*100)
