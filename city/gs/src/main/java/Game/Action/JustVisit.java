@@ -23,17 +23,17 @@ public class JustVisit implements IAction {
         logger.info("npc " + npc.id().toString() + " type " + npc.type() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
         //NPC成功购买住宅后,住宅状态保存24小时,在此期间不允许再次购买住宅
         if(System.currentTimeMillis()-npc.getBuyApartmentTs()<TimeUnit.HOURS.toMillis(24)){
-          	Building b=City.instance().getBuilding(npc.getApartment().id());
-        	if(b==null||b.getState()== Gs.BuildingState.SHUTDOWN_VALUE){
-        		if(npc.getStatus()==0){
-        			npc.goWork();
-        		}
-        	}
-        	return new HashSet<>(Arrays.asList(npc));
+            Building b=City.instance().getBuilding(npc.getApartment().id());
+            if(b==null||b.getState()== Gs.BuildingState.SHUTDOWN_VALUE){
+                if(npc.getStatus()==0){
+                    npc.goWork();
+                }
+            }
+            return new HashSet<>(Arrays.asList(npc));
         }else{
-    		if(npc.getStatus()==0){
-    			npc.goWork();
-    		}
+            if(npc.getStatus()==0){
+                npc.goWork();
+            }
         }
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
@@ -54,9 +54,9 @@ public class JustVisit implements IAction {
             double c = ((BrandManager.instance().buildingBrandScore(buildingType) + City.instance().buildingQtyScore(building.type(), building.quality())) /400.d * 7 + 1) * cost ;
             int r = 0;// (int) ((1.d-(building.cost() / c))*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
             if(1.d-(building.cost() / c)>0){
-               r = (int) ((building.cost() / c)*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                r = (int) ((building.cost() / c)*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
             }else{
-               r = 1;
+                r = 1;
             }
             buildingWeights[i++] = r<0?0:r;
         }
@@ -70,19 +70,6 @@ public class JustVisit implements IAction {
         }
         else {
             Player owner = GameDb.getPlayer(chosen.ownerId());
-            owner.addMoney(chosen.cost());
-            npc.decMoney(chosen.cost());
-            LogDb.playerIncome(owner.id(), chosen.cost());
-            LogDb.incomeVisit(owner.id(),chosen.type(),chosen.cost(),chosen.id(),npc.id());
-            LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);
-            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
-                    chosen.id(),chosen.type(),chosen.metaId());
-            chosen.updateTodayIncome(chosen.cost());
-
-            npc.setBuyApartmentTs(System.currentTimeMillis());
-            GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
-
-            if (chosen.type() == MetaBuilding.APARTMENT) {
             long income = chosen.cost();//今日收入
             long pay = chosen.cost();
             if (chosen.type() == MetaBuilding.APARTMENT) {//需要多扣除矿工费用
@@ -94,7 +81,7 @@ public class JustVisit implements IAction {
                 GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                         .setBuyerId(Util.toByteString(npc.id()))
-                        .setCost(pay)
+                        .setCost(chosen.cost())
                         .setType(Gs.IncomeNotify.Type.RENT_ROOM)
                         .setBid(chosen.metaId())
                         .build());

@@ -1878,7 +1878,7 @@ public class GameSession {
 			cost = c.getTimes() * lab.getPricePreTime();
 			//TODO:矿工费用
 			long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
-			if(player.decMoney(cost+minerCost))
+			if(!player.decMoney(cost+minerCost))
 				return;
 			seller.addMoney(cost-minerCost);
 	        LogDb.playerPay(this.player.id(),cost+minerCost);
@@ -2924,44 +2924,6 @@ public class GameSession {
 
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
-//TODO:Eva改版==============================================================================
-	/*public void updateMyEvas(short cmd, Message message)
-	{
-		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
-		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
-		for (Gs.Eva eva : evas.getEvaList()) {
-			Gs.EvaResultInfo.Builder result = Gs.EvaResultInfo.newBuilder();
-			//修改eva信息
-			Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
-			player.decEva(eva.getDecEva());
-			GameDb.saveOrUpdate(player);
-			Gs.EvaResultInfo.EvasInfo.Builder evaInfo = Gs.EvaResultInfo.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
-			//参数1
-			result.setEvasInfo(evaInfo);
-
-			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）
-				//筛选玩家所有该建筑
-				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
-				List<Gs.EvaResultInfo.Promote> promotes = EvaUtil.getProducePromoteInfo(buildings, eva, newEva);
-				result.addAllPromotes(promotes);
-			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数
-				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.APARTMENT);
-				//balabala===
-			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//3.零售店品质提升，计算预期值提升的比例，同上差不多
-				//balabala===(还是要计算预期值，然后计算提升比例)
-			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力
-				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PUBLIC);
-				List<Gs.EvaResultInfo.Promote> promotes = EvaUtil.getPubPromoteInfo(buildings, eva, newEva);
-				result.addAllPromotes(promotes);
-			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升
-				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.LAB);
-				List<Gs.EvaResultInfo.Promote> promotes = EvaUtil.getLabPromoteInfo(buildings, eva, newEva);
-				result.addAllPromotes(promotes);
-			}
-		}
-
-	}*/
 
 	public void queryMyBrands(short cmd, Message message){
 		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;

@@ -24,7 +24,7 @@
 		<property name="hibernate.connection.password">
 			123456
 		</property>
-		<property name="hbm2ddl.auto">update</property>
+		<property name="hbm2ddl.auto">create</property>
 		<property name="hibernate.show_sql">true</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
 		<property name="hibernate.cache.use_second_level_cache">false</property> <!--doc say the default value is true but default cache is NoCachingRegionFactory-->
