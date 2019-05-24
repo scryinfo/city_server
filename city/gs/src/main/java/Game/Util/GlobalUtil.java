@@ -135,6 +135,7 @@ public class GlobalUtil {
 
     }*/
 
+
    //6.获取推荐定价
     public static int getRecommendPrice(int at,int bt,int base,double localEvaAdd,int localBrand,int buildingType){
         //公式：推荐定价 = 全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
