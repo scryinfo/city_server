@@ -14,15 +14,15 @@ import java.util.UUID;
 public class ProtoUtil {
 
     /*获取竞争力信息封装,参数1：玩家对应的类型建筑,参数2：修改前的玩家竞争力，参数2：后改后的玩家竞争力，参数3 建筑类型，参数4 商品id（可选,只要是封装加工厂的，必须要填此参数）*/
-    public static List<Gs.EvaResultInfo.Promote> getPromoteList(List<Building> buildings, Map<UUID, Double> old,Map<UUID, Double> news,int type,Integer at){
-        List<Gs.EvaResultInfo.Promote> promotes = new ArrayList<>();
+    public static List<Gs.Promote> getPromoteList(List<Building> buildings, Map<UUID, Double> old,Map<UUID, Double> news,int type,Integer at){
+        List<Gs.Promote> promotes = new ArrayList<>();
         for (Building building : buildings) {
             UUID bid = building.id();
             Double old_competitive = old.get(bid);
             Double new_competitive = news.get(bid);
             if(old_competitive==null||new_competitive==null)
                 continue;
-            Gs.EvaResultInfo.Promote.Builder promote = Gs.EvaResultInfo.Promote.newBuilder();
+            Gs.Promote.Builder promote = Gs.Promote.newBuilder();
             int price=0;
             String name=building.getName();
             switch (type){
@@ -48,15 +48,15 @@ public class ProtoUtil {
         return promotes;
     }
     /*期望值数据封装*/
-    public static List<Gs.EvaResultInfo.ApartmentData> getApartmentResultList(List<Building> buildings, Map<UUID,List<Integer>> old,Map<UUID,List<Integer>> news,int type){
-        List<Gs.EvaResultInfo.ApartmentData> apartmentList = new ArrayList<>();
+    public static List<Gs.ApartmentData> getApartmentResultList(List<Building> buildings, Map<UUID,List<Integer>> old,Map<UUID,List<Integer>> news,int type){
+        List<Gs.ApartmentData> apartmentList = new ArrayList<>();
         for (Building building : buildings) {
             UUID bid = building.id();
             List<Integer> oldExpect = old.get(bid);
             List<Integer> newExpect = news.get(bid);
             if(oldExpect==null||newExpect==null)
                 continue;
-            Gs.EvaResultInfo.ApartmentData.Builder ra = Gs.EvaResultInfo.ApartmentData.newBuilder();
+            Gs.ApartmentData.Builder ra = Gs.ApartmentData.newBuilder();
             String name=building.getName();
             Apartment apartment = (Apartment) building;
             int price = apartment.cost();//售价
@@ -64,8 +64,8 @@ public class ProtoUtil {
             int buildingRich=0;//Todo ：繁荣度
             //建筑获取开放数量
             int opentNum = City.instance().getOpentNumByType(type);
-            Gs.EvaResultInfo.ApartmentData.ExpectSpend.Builder oldExpectSpend = Gs.EvaResultInfo.ApartmentData.ExpectSpend.newBuilder();
-            Gs.EvaResultInfo.ApartmentData.ExpectSpend.Builder newExpectSpend = Gs.EvaResultInfo.ApartmentData.ExpectSpend.newBuilder();
+            Gs.ApartmentData.ExpectSpend.Builder oldExpectSpend = Gs.ApartmentData.ExpectSpend.newBuilder();
+            Gs.ApartmentData.ExpectSpend.Builder newExpectSpend = Gs.ApartmentData.ExpectSpend.newBuilder();
             oldExpectSpend.setExpectSpend(oldExpect.get(0)).setCityExpectSpend(oldExpect.get(1));
             newExpectSpend.setExpectSpend(newExpect.get(0)).setCityExpectSpend(newExpect.get(1));
             //统计npc各个类型数量npc

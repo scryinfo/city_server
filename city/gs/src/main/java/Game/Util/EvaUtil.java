@@ -51,7 +51,7 @@ public class EvaUtil {
         int at = eva.getAt();
         int bt = eva.getBt();
         for (Building b : buildings) {
-            Gs.EvaResultInfo.Promote.Builder promote = Gs.EvaResultInfo.Promote.newBuilder();
+            Gs.Promote.Builder promote = Gs.Promote.newBuilder();
             ProduceDepartment pro = (ProduceDepartment) b;
             //1.1判断是否该有该上架的商品
             if (!pro.getShelf().has(at)||b.outOfBusiness())
@@ -120,7 +120,7 @@ public class EvaUtil {
 
 
     //4.抽取住宅和零售店的预期值
-    public  static List<Gs.EvaResultInfo.Promote> getApartmentOrRetailShopPromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva){
+    public  static List<Gs.Promote> getApartmentOrRetailShopPromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva){
         int at = msEva.getAt();
         int bt = msEva.getBt().getNumber();
         for (Building b : buildings) {
@@ -129,7 +129,7 @@ public class EvaUtil {
         return null;
     }
 
-    //TODO:获取npc的预期值
+    //TODO:获取住宅npc的预期值
     //参数1：eva a类型 ，2：eva b类型，3：当前品牌值，4：基础品质值（也就是建筑中的品质qty）
     // 5:eva加成，6：npc的预期花费比例，7：玩家定价，8：npc每小时需
     public static  Map<UUID,List<Integer>> getApartmentExpectSpend(List<Building> buildings,Eva eva,double npcSpendRatio) {
