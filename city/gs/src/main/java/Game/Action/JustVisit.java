@@ -91,11 +91,14 @@ public class JustVisit implements IAction {
             }
             owner.addMoney(income);
             npc.decMoney((int) pay);
+            // 获取住宅品牌和知名度
+            double brand =BrandManager.instance().getBuilding(chosen.ownerId(), chosen.type());
+            double quality = chosen.quality();
             LogDb.playerIncome(owner.id(), income);
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
-            LogDb.npcRentApartment(npc.id(),owner.id(),1,chosen.cost(),chosen.ownerId(),
-                    chosen.id(),chosen.type(),chosen.metaId()); //不包含矿工费用
+            LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
+                    chosen.id(), chosen.type(), chosen.metaId(), brand, quality); //不包含矿工费用
             chosen.updateTodayIncome(income);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
             npc.goFor(chosen);

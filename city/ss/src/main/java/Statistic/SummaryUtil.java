@@ -24,6 +24,7 @@ public class SummaryUtil
 {
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     public static final long HOUR_MILLISECOND = 1000 * 3600;
+    public static final long SECOND_MILLISECOND = 1000 * 10;
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String TIME = "time";
@@ -47,7 +48,12 @@ public class SummaryUtil
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
-
+    public static final String HOUR_MATERIAL = "hourMaterial";
+    public static final String HOUR_GOODS = "hourGoods";
+    public static final String HOUR_RETAILSHOP = "hourRetailshop";
+    public static final String HOUR_BRAND_AMOUNT = "hourBrandAmount";
+    private static final int TP_TYPE_NPC = 8;
+    private static final int TP_TYPE_PLAYER = 9;
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -67,6 +73,10 @@ public class SummaryUtil
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
+    private static MongoCollection<Document> hourMaterial;
+    private static MongoCollection<Document> hourGoods;
+    private static MongoCollection<Document> hourRetailShop;
+    private static MongoCollection<Document> hourBrandAmount;
 
     public static void init()
     {
@@ -105,6 +115,14 @@ public class SummaryUtil
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        hourMaterial = database.getCollection(HOUR_MATERIAL)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        hourGoods = database.getCollection(HOUR_GOODS)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        hourRetailShop = database.getCollection(HOUR_RETAILSHOP)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        hourBrandAmount = database.getCollection(HOUR_BRAND_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -457,6 +475,15 @@ public class SummaryUtil
     {
         return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% DAY_MILLISECOND;
     }
+    public static long hourStartTime(long nowTime)
+    {
+        return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% HOUR_MILLISECOND;
+    }
+    public static long secondStartTime(long nowTime)
+    {
+        return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% SECOND_MILLISECOND;
+    }
+
 
     public static MongoCollection<Document> getDaySellGround()
     {
@@ -574,7 +601,7 @@ public class SummaryUtil
             return value;
         }
     }
-      enum CountType
+        public enum CountType
     {
     	BYDAY(1),BYHOUR(2),BYMINU(3),BYSECONDS(4);
     	private int value;
@@ -589,10 +616,25 @@ public class SummaryUtil
     	}
     }
 
-    enum ExchangeType {
-        MATERIAL(1),GOODS(2),GROUND(3),PUBLICITY(4), LABORATORY(5), storage(6);
+
+     public enum ExchangeType {
+        MATERIAL(1),GOODS(2),GROUND(3),PUBLICITY(4), LABORATORY(5), STORAGE(6);
         private int value;
         ExchangeType(int i)
+        {
+            this.value = i;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
+    }
+
+    public enum Categorytype {
+        APARTMENT(1),MATERIAL(2),RETAILSHOP(3),PROMOTION(4), PRODUCEDEP(5), STORAGE(6);
+        private int value;
+        Categorytype(int i)
         {
             this.value = i;
         }
@@ -608,7 +650,21 @@ public class SummaryUtil
     {
         return playerExchangeAmount;
     }
-
+    public static MongoCollection<Document> getHourMaterial()
+    {
+        return hourMaterial;
+    } public static MongoCollection<Document> getHourGoods()
+    {
+        return hourGoods;
+    }
+    public static MongoCollection<Document> gethourBrandAmount()
+    {
+        return hourBrandAmount;
+    }
+    public static MongoCollection<Document> getHourRetailShop()
+    {
+        return hourRetailShop;
+    }
     public static void insertPlayerExchangeData(CountType countType,ExchangeType exchangeType,List<Document> documentList,
                                          long time,MongoCollection<Document> collection)
     {
@@ -623,26 +679,32 @@ public class SummaryUtil
     }
 
 
-//    public static List<Document> dayTodayPlayerExchangeAmount(MongoCollection<Document> collection,SummaryUtil.CountType countType)
-//    {
-//        List<Document> documentList = new ArrayList<>();
-//        Document projectObject = new Document()
-//                .append("id", "$_id")
-//                .append(KEY_TOTAL, "$" + KEY_TOTAL)
-//                .append("_id",0);
-//        collection.aggregate(
-//                Arrays.asList(
-//                        Aggregates.match(and(
-//                                eq(COUNTTYPE, countType.getValue()),
-//                                gte(TIME, startTime),
-//                                lt(TIME, endTime))),
-//                        Aggregates.match(eq(COUNTTYPE, countType.getValue())),
-//                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total")),
-//                        Aggregates.project(projectObject)
-//                )
-//        ).forEach((Block<? super Document>) documentList::add);
-//        return documentList;
-//    }
+    public static void insertHourMaterial(List<Document> documentList, long endTime, MongoCollection<Document> collection)
+    {
+        documentList.forEach(document -> {
+            document.append(TIME, endTime);
+        });
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+
+    }
+
+    public static void insertHourGoods(List<Document> documentList, long endTime, MongoCollection<Document> collection, boolean isNpcBuy) {
+        int type = TP_TYPE_NPC;
+        if (!isNpcBuy) {
+            type = TP_TYPE_PLAYER;
+        }
+
+        int finalType = type;
+        documentList.forEach(document -> {
+            document.append("tp", finalType);
+            document.append(TIME, endTime);
+        });
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
 
 
     //玩家交易汇总表中查询开服截止当前时间玩家交易量。
@@ -669,7 +731,7 @@ public class SummaryUtil
         return a;
     }
 
-    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
+    public static Map<Long,Long> queryPlayerExchangeCurve(MongoCollection<Document> collection, long id, int exchangeType, CountType countType,boolean isMoney) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -684,20 +746,35 @@ public class SummaryUtil
         long startTime=startDate.getTime();
         Map<Long, Long> map = new LinkedHashMap<>();
 
+       String value = KEY_TOTAL;
+        if (!isMoney) {
+            value = "size";
+        }
+        String finalValue = value;
         collection.find(and(
                 eq(COUNTTYPE, countType.getValue()),
-                eq(TYPE, exchangeType.getNumber()),
+                eq(TYPE, exchangeType),
                 eq(ID, id),
                 gte(TIME, startTime),
                 lt(TIME, endTime)
         ))
-                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+
+                .projection(fields(include(TIME, finalValue), excludeId()))
                 .sort(Sorts.descending(TIME))
                 .forEach((Block<? super Document>) document ->
                 {
-                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                    map.put(document.getLong(TIME), document.getLong(finalValue));
                 });
         return map;
+    }
+
+    public static void insertBrandAndQuality(Categorytype categoryType, List<Document> documentList, long time, MongoCollection<Document> collection) {
+        //document already owned : id,total
+        documentList.forEach(document ->
+                document.append(TIME, time).append("ct", categoryType.getValue()));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
     }
 
 }
