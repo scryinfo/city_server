@@ -119,7 +119,6 @@ public class EvaManager
         }else {
             e.setB(-1);
         }
-        updateEva(e);
         return e;
     }
 

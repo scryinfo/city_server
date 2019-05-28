@@ -13,7 +13,7 @@ import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.CityUtil;
 import Game.Util.EvaUtil;
-import Game.Util.GlobalUtil;
+import Game.Util.ProtoUtil;
 import Game.Util.WareHouseUtil;
 import Shared.*;
 import Shared.Package;
@@ -22,7 +22,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.sun.xml.internal.bind.v2.TODO;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -2924,6 +2923,68 @@ public class GameSession {
 
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
+
+	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)==============================================================================
+	public void updateMyEvas(short cmd, Message message)
+	{
+		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
+		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
+		for (Gs.Eva eva : evas.getEvaList()) {
+			Gs.EvaResultInfo.Builder result = Gs.EvaResultInfo.newBuilder();
+			//修改后eva信息
+			Eva newEva = EvaManager.getInstance().updateMyEva(eva);
+			//修改前的eva
+			Eva oldEva = new Eva();
+			oldEva.setLv(eva.getLv());
+			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
+			player.decEva(eva.getDecEva());
+			GameDb.saveOrUpdate(player);
+			//基础信息
+			Gs.EvaResultInfo.EvasInfo.Builder evaInfo = Gs.EvaResultInfo.EvasInfo.newBuilder()
+					.setBEva(eva)
+					.setEEva(newEva.toProto())
+					.setLv(newEva.getLv())
+					.setCexp(newEva.getCexp())
+					.setPlayerId(eva.getPid());
+			if(eva.hasB())
+				evaInfo.setB(eva.getB());
+			result.setEvasInfo(evaInfo);
+			//升级对比信息
+			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）
+				//筛选玩家所有该建筑
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
+				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
+				EvaManager.getInstance().updateEva(newEva);
+				Map<UUID, Double> newCompetitiveMap = EvaUtil.getProductCompetitiveMap(buildings, newEva);//2.修改前后的竞争力
+				List<Gs.EvaResultInfo.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.PRODUCE,eva.getAt());
+				result.addAllPromotes(promotes);
+			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PUBLIC);
+				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getPublicCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
+				EvaManager.getInstance().updateEva(newEva);
+				Map<UUID, Double> newCompetitiveMap = EvaUtil.getPublicCompetitiveMap(buildings,newEva);//2.修改后的竞争力
+				List<Gs.EvaResultInfo.Promote> promotes = ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.PUBLIC,null);
+				result.addAllPromotes(promotes);
+			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升
+				//同理，先获取未加点前的研究所竞争力，再获取加点后的
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.LAB);
+				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getLabCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
+				EvaManager.getInstance().updateEva(newEva);
+				Map<UUID, Double> newCompetitiveMap = EvaUtil.getLabCompetitiveMap(buildings, newEva);//2.修改后的竞争力
+				ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.LAB,null);
+				List<Gs.EvaResultInfo.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.LAB,null);
+				result.addAllPromotes(promotes);
+			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数
+				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.APARTMENT);
+				//balabala===
+			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//3.零售店品质提升，计算预期值提升的比例，同上差不多
+				//balabala===(还是要计算预期值，然后计算提升比例)
+			}
+			results.addResultInfo(result);
+		}
+	}
+
+
 
 	public void queryMyBrands(short cmd, Message message){
 		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;

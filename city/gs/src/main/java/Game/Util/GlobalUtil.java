@@ -8,14 +8,65 @@ import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import gs.Gs;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GlobalUtil {
 
-    //1.获取商品的全城销售均价(获取所有花架上该商品的销售价格取平均值)
+    /*1.获取全城最大和最小的加成信息（找出全城Eva提升最大的那一个，然后进行计算）*/
+    public static Map<String, Eva>  getEvaMaxAndMinValue(int at,int bt){
+        Set<Eva> evas = EvaManager.getInstance().getAllEvas();
+        Eva maxEva = null;
+        Eva minEva=null;
+        Map<String, Eva> minOrMaxEva = new HashMap<>();
+        int init=0;
+        for (Eva eva : evas) {
+            if(eva.getAt()==at&&eva.getBt()==bt){
+                if(maxEva==null&&minEva==null) {
+                    maxEva = eva;
+                    minEva = eva;
+                }else {
+                    if(eva.getLv()>maxEva.getLv()) {
+                        maxEva = eva;
+                    }
+                    if(eva.getLv()<maxEva.getLv()) {
+                        minEva = eva;
+                    }
+                }
+            }
+        }
+        minOrMaxEva.put("max", maxEva);
+        minOrMaxEva.put("min", minEva);
+        return minOrMaxEva;
+    }
+
+    //2.获取指定选项知名度的最大最小信息
+    public static Map<String, BrandManager.BrandInfo> getMaxOrMinBrandInfo(int item){
+        //1.获取到所有的品牌信息，找出其中v最大的数据
+        BrandManager.BrandInfo maxBrand= null;
+        BrandManager.BrandInfo minBrand= null;
+        HashMap<String, BrandManager.BrandInfo> map=new HashMap<>();
+        List<BrandManager.BrandInfo> brandInfos = BrandManager.instance().getAllBrandInfoByItem(item);
+        for (BrandManager.BrandInfo brandInfo : brandInfos) {
+            if(maxBrand==null&&minBrand==null){
+                maxBrand = brandInfo;
+                minBrand = brandInfo;
+            }else{
+                if(brandInfo.getV()>maxBrand.getV()){
+                    maxBrand = brandInfo;
+                }
+                if(brandInfo.getV()<minBrand.getV()){
+                    minBrand = brandInfo;
+                }
+            }
+        }if(maxBrand!=null&&minBrand!=null) {
+            map.put("max", maxBrand);
+            map.put("min", minBrand);
+            return map;
+        }else
+            return null;
+    }
+
+    //3.获取商品的全城销售均价(获取所有货架上该商品的销售价格取平均值)
     public static int getCityItemAvgPrice(int goodItem, int type) {
         int sumPrice = 0;
         int count = 0;
@@ -34,7 +85,7 @@ public class GlobalUtil {
         return sumPrice / count;
     }
 
-    //2.查询全城建筑中设置的平均价格
+    //4.查询全城建筑中设置的平均价格
     public static int getCityAvgPriceByType(int type) {
         int sumPrice = 0;
         int count = 0;
@@ -42,19 +93,24 @@ public class GlobalUtil {
         for (Building building : buildings) {
             if (building.type() == type && !building.outOfBusiness()) {
                switch (type){
+                   case MetaBuilding.RETAIL:
+                       RetailShop retailShop = (RetailShop) building;
+                       sumPrice += retailShop.getCurPromPricePerHour();
+                       count++;
+                       break;
                    case MetaBuilding.APARTMENT:
                        Apartment apartment = (Apartment) building;
                        sumPrice += apartment.cost();
                        count++;
                        break;
-                   case MetaBuilding.PUBLIC:
-                       PublicFacility facility = (PublicFacility) building;
-                       sumPrice += facility.getCurPromPricePerHour();
-                       count++;
-                       break;
                    case MetaBuilding.LAB:
                        Laboratory lab = (Laboratory) building;
                        sumPrice += lab.getPricePreTime();
+                       count++;
+                       break;
+                   case MetaBuilding.PUBLIC:
+                       PublicFacility facility = (PublicFacility) building;
+                       sumPrice += facility.getCurPromPricePerHour();
                        count++;
                        break;
                }
@@ -66,7 +122,7 @@ public class GlobalUtil {
             return 1;
     }
 
-    //3.查询根据类型研究成功几率，依然是建筑的成功平均值+eva的平均提升值
+    //5.查询根据类型研究成功几率，依然是建筑的成功平均值+eva的平均提升值
     public static int getCityAvgSuccessOdds(int at,int bt){
         int sumBaseOdds = 0;
         int count=0;
@@ -85,18 +141,14 @@ public class GlobalUtil {
         }
         //计算发明或研究的的平均Eva加成信息
         int avgEvaAdd = cityAvgEva(at, bt);
-        if(count==0)
-            return 1;
-        else{
-            return (sumBaseOdds / count) * (1 + avgEvaAdd);
-        }
+        return count == 0 ? 1 * (1 + avgEvaAdd) : (sumBaseOdds / count) * (1 + avgEvaAdd);
     }
 
-   //4.全城商品均知名度 || 全城住宅均知名度
-   public static int cityAvgBrand(int item){
+   //6.全城商品均知名度 || 全城住宅均知名度
+    public static int cityAvgBrand(int item){
        int sum=0;
        int count = 0;
-      //首先获取所有的品牌信息
+      //获取所有的品牌信息
        List<BrandManager.BrandInfo> allBrand = BrandManager.instance().getAllBrandInfoByItem(item);
        for (BrandManager.BrandInfo brandInfo : allBrand) {
            if(brandInfo.getKey().getMid()==item){
@@ -104,15 +156,16 @@ public class GlobalUtil {
                count++;
            }
        }
-       if(sum==0){
-           return 1;
-       }else {
-           return sum / count;
+       //如果是商品，还需要加上基础品牌值
+       if(MetaGood.isItem(item)){
+           int baseBrand = MetaData.getGood(item).brand;
+           sum += baseBrand;
        }
+       return  count==0?1: sum / count;
    }
 
-   //5.获取全城Eva属性商品品质均加成信息
-   public static int cityAvgEva(int at,int bt){
+   //7.获取全城Eva属性商品品质均加成信息
+    public static int cityAvgEva(int at,int bt){
         //获取eva值，求平均，然后加上商品的基础值即可
        Set<Eva> allEvas = EvaManager.getInstance().getAllEvas();
        double evaSum=0;
@@ -123,20 +176,43 @@ public class GlobalUtil {
                count++;
            }
        }
-       if(count==0)
-           return 1;
-       else {
-           return (int) (evaSum / count);
-       }
+       return count==0?0: (int) (evaSum / count);
    }
 
-   //获取全城推广该类型的推广能力平均值
-   /* public static int cityAvgPromotionValue(int type){
+   //8.获取全城推广该类型的推广能力平均值
+    public static int cityAvgPromotionAbilityValue(int type){
+        int sum=0;
+        int count = 0;
+        List<Building> buildings = City.instance().getAllBuilding();
+        for (Building b: buildings) {
+            if(b instanceof PublicFacility&&!b.outOfBusiness()){
+                PublicFacility facility = (PublicFacility) b;
+                sum+=facility.getAllPromoTypeAbility(type);
+                count++;
+            }
+        }
+        return count==0?1:sum / count;
+    }
 
-    }*/
+    //9.全城住宅零售店均品质(*)
+    public static int getCityApartmentOrRetailShopQuality(int at,int bt){
+        //1.计算均加成
+        int avgAdd = cityAvgEva(at, bt);
+        int quality=0;
+        int count = 0;
+        //2.获得基本品质
+        List<Building> buildings = City.instance().getAllBuilding();
+        for (Building building : buildings) {
+            if(building.type()==at){
+                quality+= building.quality();
+                count++;
+            }
+        }
+        return (quality/count) * (1 + avgAdd);
+    }
 
-   //6.获取推荐定价
-    public static int getRecommendPrice(int at,int bt,int base,double localEvaAdd,int localBrand,int buildingType){
+   //10.获取加工厂推荐定价
+    public static int getProduceRecommendPrice(int at,int bt,int base,double localEvaAdd,int localBrand,int buildingType){
         //公式：推荐定价 = 全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
 
         //1.全城商品销售均价
@@ -144,25 +220,26 @@ public class GlobalUtil {
         //2.玩家知名度权重
         double brandWeight = EvaUtil.getBrandWeight(localBrand, at);
         //3.玩家品质权重
-        double qualityWeight = EvaUtil.getItemWeight(localEvaAdd, at, bt, base);
+        int localQuality = (int) (base * (1 + localEvaAdd));
+        double qualityWeight = EvaUtil.getItemWeight(localQuality, at, bt, base);
         //4.全城知名度权重
         int cityAvgBrand = cityAvgBrand(at);
         double cityBrandWeight = EvaUtil.getBrandWeight(cityAvgBrand, at);
         //5.全城品质权重
-        int cityAvgQuality = cityAvgEva(at, bt);
+        int cityAvgQuality =(int)(base * (1+ cityAvgEva(at, bt)));
         double cityQualityWeight = EvaUtil.getItemWeight(cityAvgQuality, at, bt, base);
         return (int) (cityItemAvgPrice * (brandWeight + qualityWeight) / (cityBrandWeight + cityQualityWeight));
     }
 
-    //7.研究所的推荐定价
+    //11.研究所的推荐定价
     public static int getLabRecommendPrice(int at,int bt,int playerSuccessOdds){
-        int cityAvgPrice = getCityAvgPriceByType(MetaBuilding.LAB);
+        int cityAvgPrice = getCityAvgPriceByType(MetaBuilding.LAB);//全城发明均定价
         //1.全城xx概率单位定价
-        int cityAvgSuccessOdds = getCityAvgSuccessOdds(at, bt);
-        int successPrice = cityAvgPrice * cityAvgSuccessOdds;
+        int cityAvgSuccessOdds = getCityAvgSuccessOdds(at, bt);//全城发明成功几率
+        /*单位定价 = 发明均定价 / 均发明成功几率*/
+        int successPrice = cityAvgPrice /cityAvgSuccessOdds;
         //推荐定价
         int recommendPrice = successPrice * playerSuccessOdds;
         return recommendPrice;
     }
-    
 }

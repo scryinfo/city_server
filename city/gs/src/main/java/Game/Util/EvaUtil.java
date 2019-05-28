@@ -5,211 +5,161 @@ import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
 import gs.Gs;
 
 import java.util.*;
 
 public class EvaUtil {
-
-
-    /*1.获取全城最大和最小的加成信息（找出全城Eva提升最大的那一个，然后进行计算）*/
-    public static Map<String, Eva>  getEvaMaxValue(int at,int bt){
-        Set<Eva> evas = EvaManager.getInstance().getAllEvas();
-        Eva maxEva = null;
-        Eva minEva=null;
-        Map<String, Eva> minOrMaxEva = new HashMap<>();
-        int init=0;
-        for (Eva eva : evas) {
-            if(eva.getAt()==at&&eva.getBt()==bt){
-                if(maxEva==null&&minEva==null) {
-                    maxEva = eva;
-                    minEva = eva;
-                }else {
-                    if(eva.getLv()>maxEva.getLv()) {
-                        maxEva = eva;
-                    }
-                    if(eva.getLv()<maxEva.getLv()) {
-                        minEva = eva;
-                    }
-                }
-            }
-        }
-        minOrMaxEva.put("max", maxEva);
-        minOrMaxEva.put("min", minEva);
-        return minOrMaxEva;
-    }
-
-    //2.获取指定选项知名度的最大最小信息
-    public static Map<String, BrandManager.BrandInfo> getMaxOrMinBrandInfo(int item){
-        //1.获取到所有的品牌信息，找出其中v最大的数据
-        BrandManager.BrandInfo maxBrand= null;
-        BrandManager.BrandInfo minBrand= null;
-        HashMap<String, BrandManager.BrandInfo> map=new HashMap<>();
-        List<BrandManager.BrandInfo> brandInfos = BrandManager.instance().getAllBrandInfoByItem(item);
-        for (BrandManager.BrandInfo brandInfo : brandInfos) {
-            if(maxBrand==null&&minBrand==null){
-                maxBrand = brandInfo;
-                minBrand = brandInfo;
-            }else{
-                if(brandInfo.getV()>maxBrand.getV()){
-                    maxBrand = brandInfo;
-                }
-                if(brandInfo.getV()<minBrand.getV()){
-                    minBrand = brandInfo;
-                }
-            }
-        }if(maxBrand!=null&&minBrand!=null) {
-            map.put("max", maxBrand);
-            map.put("min", minBrand);
-            return map;
-        }else
-            return null;
-    }
-
-
-    //3.计算品质权重(品质权重等等计算)(arg1:当前eva的加成值，arg2:a类型，arg3：b类型,arg4：基础值)
-    public static double getItemWeight(double addEva,int at,int bt,int base){
+    //品质权重(品质权重等等计算)(arg1:当前值，arg2:a类型，arg3：b类型,arg4：品质基础值)
+    public static double getItemWeight(int localQuality,int at,int bt,int base){
        // 权重 = 当前值 / 全城最大 > 当前值 /全城最低 ?  当前值 / 全城最大 : 当前值 /全城最低
-        Map<String, Eva> map = getEvaMaxValue(at,bt);
+        Map<String, Eva> map = GlobalUtil.getEvaMaxAndMinValue(at,bt);
         if(map==null)
             return 1;
         Eva maxEva = map.get("max");//全城最大Eva
         Eva minEva = map.get("min");//全城最小Eva
-        double local = base * (1 + addEva);//当前值
         double maxValue=base * (1 + EvaManager.getInstance().computePercent(maxEva));//全城最大
         double minValue=base * (1 + EvaManager.getInstance().computePercent(minEva));//全城最小
-        double weight = (local / maxValue)> (local / minValue) ? local / maxValue : local / minValue;
+        double weight = (localQuality / maxValue)> (localQuality / minValue) ? localQuality / maxValue : localQuality / minValue;
         return weight;
     }
 
-
-    /*4.计算知名度权重(全城知名度也在这儿计算)*/
+    //知名度权重
     public static double getBrandWeight(int localBrand,int item){
-        //1.获取到全城该属性的最大最小的知名度(如果都为null，那么获取默认的)
-        Map<String, BrandManager.BrandInfo> map = getMaxOrMinBrandInfo(item);
+        // 权重 = 当前值 / 全城最大 > 当前值 /全城最低 ?  当前值 / 全城最大 : 当前值 /全城最低
+        //1.获取到全城该属性的最大最小的知名度(如果都为null，那么获取默认1)
+        Map<String, BrandManager.BrandInfo> map = GlobalUtil.getMaxOrMinBrandInfo(item);
         int minBrand=1;
         int maxBrand=1;
         if(map!=null){
             minBrand = map.get("min").getV();
             maxBrand = map.get("max").getV();
         }
-        //2.权重
+        if(MetaGood.isItem(item)){
+            int goodBrand = MetaData.getGood(item).brand;
+            minBrand += goodBrand;
+            maxBrand += goodBrand;
+        }
         double weight = (localBrand / maxBrand)> (localBrand / minBrand) ? localBrand / maxBrand : localBrand / minBrand;
         return weight;
     }
 
-    //=======================================================================
-
-    //1.抽取获取加工厂的竞争力
-    public static List<Gs.EvaResultInfo.Promote> getProducePromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva) {
-        List<Gs.EvaResultInfo.Promote> promotes = new ArrayList<>();
-        int at = newEva.getAt();
-        int bt = newEva.getBt();
+    //获取加工厂建筑的竞争力
+    public static Map<UUID,Double> getProductCompetitiveMap(List<Building> buildings, Eva eva){
+        Map<UUID, Double> map = new HashMap<>();
+        int at = eva.getAt();
+        int bt = eva.getBt();
         for (Building b : buildings) {
             Gs.EvaResultInfo.Promote.Builder promote = Gs.EvaResultInfo.Promote.newBuilder();
             ProduceDepartment pro = (ProduceDepartment) b;
             //1.1判断是否该有该上架的商品
-            if (!pro.getShelf().has(at))
+            if (!pro.getShelf().has(at)||b.outOfBusiness())
                 continue;
             int price = pro.getShelf().getSellInfo(at).get(0).price;//售价
-            int base = MetaData.getGood(at).quality;//商品的品质基础值
+            MetaGood good = MetaData.getGood(at);
+            int base = good.quality;//商品的品质基础值
             //获取品牌信息
-            int brandValue = BrandManager.instance().getBrand(b.ownerId(), at).getV();
-            //1.提升前的eva加成信息
-            Eva oldEva = new Eva();
-            oldEva.setLv(msEva.getLv());
-            double oldAdd = EvaManager.getInstance().computePercent(oldEva);
-            int old_recommendPrice = GlobalUtil.getRecommendPrice(at, bt, base, oldAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
-            int old_competitive = (int) Math.ceil(old_recommendPrice / price * 100);//老的竞争力
-            //2.提升后的eva加成信息
-            double newAdd = EvaManager.getInstance().computePercent(newEva);
-            int new_recommendPrice = GlobalUtil.getRecommendPrice(at, bt, base, newAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
-            int new_competitive = (int) Math.ceil(new_recommendPrice / price * 100);//新的竞争力
-            promote.setName(pro.getName())
-                    .setPrice(price)
-                    .setBCompetitiveness(old_competitive)
-                    .setECompetitiveness(new_competitive);
-            promotes.add(promote.build());
+            int brandValue = BrandManager.instance().getBrand(b.ownerId(),at).getV()+good.brand;
+            double evaAdd = EvaManager.getInstance().computePercent(eva);
+            int recommendPrice = GlobalUtil.getProduceRecommendPrice(at,bt,base,evaAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
+            int competitive = (int) Math.ceil(recommendPrice / price * 100);//竞争力
+            map.put(b.id(), (double) competitive);
         }
-        return promotes;
+        return map;
     }
 
-    //2.抽取的推广公司的竞争力
-    public  static List<Gs.EvaResultInfo.Promote> getPubPromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva) {
-        List<Gs.EvaResultInfo.Promote> promotes = new ArrayList<>();
-        //1.全城推广单位定价
+    //获取推广公司的竞争力
+    public static Map<UUID,Double> getPublicCompetitiveMap(List<Building> buildings, Eva eva){
+        Map<UUID, Double> map = new HashMap<>();
+        //1.全城推广均定价
         int cityAvgprice = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
-        int cityAvgAbility = GlobalUtil.cityAvgEva(newEva.getAt(), newEva.getBt());
+        //2.全城的平均推广值
+        int cityAvgAbility = GlobalUtil.cityAvgPromotionAbilityValue(eva.getAt());
+        //3.全城该类型推广均单位定价
         int cityAbilityPrice = cityAvgprice/cityAvgAbility;
-
         for (Building b : buildings) {
             if(b.outOfBusiness())
                 continue;
-            Gs.EvaResultInfo.Promote.Builder promote = Gs.EvaResultInfo.Promote.newBuilder();
             PublicFacility pub = (PublicFacility) b;
-            int price = pub.getCurPromPricePerHour();
-            //1.(提升前)
-            Eva oldEva = new Eva();
-            oldEva.setLv(msEva.getLv());
-            double oldAdd = EvaManager.getInstance().computePercent(oldEva);
-            double old_promoAbility = pub.getCurPromoAbility()*(1+oldAdd);
-            double old_recommendPrice = cityAbilityPrice * old_promoAbility;
-            int old_competitive = (int) Math.ceil(old_recommendPrice / price * 100);
-
-            //2.提升后
-            double newAdd = EvaManager.getInstance().computePercent(newEva);
-            double new_promoAbility = pub.getCurPromoAbility()*(1+newAdd);
-            double new_recommendPrice = cityAbilityPrice * new_promoAbility;
-            int new_competitive = (int) Math.ceil(new_recommendPrice / price * 100);
-            promote.setName(pub.getName())
-                    .setPrice(price)
-                    .setBCompetitiveness(old_competitive)
-                    .setECompetitiveness(new_competitive);
-            promotes.add(promote.build());
+            int price = pub.getCurPromPricePerHour();//定价
+            double evaAdd = EvaManager.getInstance().computePercent(eva);//eva加成
+            /*单项推广能力 = 基础推广力 * （1 + %单项eva能力提升） *（1+%流量提升）*/
+            double promoAbility = pub.getBaseAbility()*(1+evaAdd)*(1 +pub.getFlowPromoCur());
+            double recommendPrice = cityAbilityPrice * promoAbility;
+            int competitive = (int) Math.ceil(recommendPrice / price * 100);
+            map.put(b.id(), (double) competitive);
         }
-        return promotes;
+        return map;
     }
 
-    //3.抽取的研究所公司的竞争力
-    public  static List<Gs.EvaResultInfo.Promote> getLabPromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva) {
-        List<Gs.EvaResultInfo.Promote> promotes = new ArrayList<>();
+    //获取研究所公司建筑的竞争力
+    public static Map<UUID,Double> getLabCompetitiveMap(List<Building> buildings, Eva eva) {
+        Map<UUID, Double> map = new HashMap<>();
+        int at = eva.getAt();
+        int bt = eva.getBt();
         for (Building building : buildings) {
-            if(building.outOfBusiness())
+            if (building.outOfBusiness())
                 continue;
-            Laboratory lab= (Laboratory) building;
-            int playerSuccessOdds = 0;
-            Gs.EvaResultInfo.Promote.Builder promote = Gs.EvaResultInfo.Promote.newBuilder();
+            Laboratory lab = (Laboratory) building;
+            int playerSuccessOdds = 0;//当前的发明概率
             int price = lab.getPricePreTime();
-            //1.提升前
-            //提升前的建筑成功几率
-            Eva oldEva = new Eva();
-            oldEva.setLv(msEva.getLv());
-            double oldAdd = EvaManager.getInstance().computePercent(oldEva);
-            if(msEva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)) {//升级的是发明成功几率
-                playerSuccessOdds = (int) (lab.getGoodProb() * (1 + oldAdd));
-            }else{//研究Eva的成功几率
-                playerSuccessOdds = (int) (lab.getEvaProb() * (1 + oldAdd));
+            double evaAdd = EvaManager.getInstance().computePercent(eva);//加成
+            if (eva.getBt() == (Gs.Eva.Btype.InventionUpgrade.getNumber())) {//获取发明成功几率
+                playerSuccessOdds = (int) (lab.getGoodProb() * (1 + evaAdd));
+            } else {
+                playerSuccessOdds = (int) (lab.getEvaProb() * (1 + evaAdd));//获取研究Eva的成功几率
             }
-
-            int old_labRecommendPrice = GlobalUtil.getLabRecommendPrice(newEva.getAt(), newEva.getBt(),playerSuccessOdds); //推荐价格
-            int old_competitive = (int) Math.ceil(old_labRecommendPrice / price * 100);//竞争力
-
-            //2.提升后
-            double newAdd = EvaManager.getInstance().computePercent(newEva);
-            if(msEva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)) {//发明成功几率
-                playerSuccessOdds = (int) (lab.getGoodProb() * (1 + newAdd));
-            }else{
-                playerSuccessOdds = (int) (lab.getEvaProb() * (1 + newAdd));
-            }
-            int new_labRecommendPrice = GlobalUtil.getLabRecommendPrice(newEva.getAt(), newEva.getBt(), playerSuccessOdds);//推荐价格
-            int new_competitive = (int) Math.ceil(new_labRecommendPrice / price * 100);//竞争力
-            promote.setName(lab.getName())
-                    .setPrice(price)
-                    .setBCompetitiveness(old_competitive)
-                    .setECompetitiveness(new_competitive);
-            promotes.add(promote.build());
+            //推荐定价
+            int labRecommendPrice = GlobalUtil.getLabRecommendPrice(eva.getAt(), eva.getBt(),playerSuccessOdds); //推荐价格
+            int competitive = (int) Math.ceil(labRecommendPrice / price * 100);//竞争力
+            map.put(building.id(), (double) competitive);
         }
-        return promotes;
+        return map;
     }
 
+
+    //4.抽取住宅和零售店的预期值
+    public  static List<Gs.EvaResultInfo.Promote> getApartmentOrRetailShopPromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva){
+        int at = msEva.getAt();
+        int bt = msEva.getBt().getNumber();
+        for (Building b : buildings) {
+
+        }
+        return null;
+    }
+
+    //TODO:获取npc的预期值
+    //参数1：eva a类型 ，2：eva b类型，3：当前品牌值，4：基础品质值（也就是建筑中的品质qty）
+    // 5:eva加成，6：npc的预期花费比例，7：玩家定价，8：npc每小时需
+    public static  Map<UUID,List<Integer>> ExpectSpend(List<Building> buildings,Eva eva,double evaAdd,double npcSpendRatio,int localPrice) {
+        Map<UUID,List<Integer>> expectSpends = new HashMap<>();
+        int at = eva.getAt();
+        int bt = eva.getBt();
+        for (Building building : buildings) {
+            if (building.outOfBusiness())
+                continue;
+            Apartment apartment = (Apartment) building;
+          /*
+            String name = apartment.getName();//建筑名
+            int price = apartment.cost();//定价
+            int cityAvgPrice = GlobalUtil.getCityAvgPriceByType(at);//全城定价*/
+            int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
+            int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt);//全城品质
+            int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
+            int localQuality = (int) (apartment.quality() * (EvaManager.getInstance().computePercent(eva)));//玩家品质
+            double totalWeight = getItemWeight(localQuality, at, bt, apartment.quality()) + getBrandWeight(localBrand, at);
+            //玩家预期花费（住宅预期花费 = (总权重 * 200 / 3 + 1) * NPC预期花费比例 * NPC平均工资）
+            int expectSpend = (int) ((totalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary());
+            //全城的预期花费
+            double cityTotalWeight = getItemWeight(cityAvgQuality, at, bt, apartment.quality()) + getBrandWeight(avgAvgBrand, at);
+            int cityExpectSpend = (int) ((cityTotalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary());
+            //全城的，需要存储当前的预期花费还有全城的预期花费
+            List<Integer> data=new ArrayList<>();
+            data.add(expectSpend);
+            data.add(cityExpectSpend);
+            expectSpends.put(building.id(), data);
+        }
+        return expectSpends;
+    }
 }
