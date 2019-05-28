@@ -158,10 +158,10 @@ public class GlobalUtil {
     public static int getLabRecommendPrice(int at,int bt,int playerSuccessOdds){
         int cityAvgPrice = getCityAvgPriceByType(MetaBuilding.LAB);
         //1.全城xx概率单位定价
-        int cityAvgSuccessOdds = getCityAvgSuccessOdds(at, bt);
-        int successPrice = cityAvgPrice * cityAvgSuccessOdds;
+        int cityAvgSuccessOdds = getCityAvgSuccessOdds(at, bt);//成功几率
+        int cityUnitPrice = cityAvgPrice / cityAvgSuccessOdds;//发明概率单位定价
         //推荐定价
-        int recommendPrice = successPrice * playerSuccessOdds;
+        int recommendPrice = cityUnitPrice * playerSuccessOdds;
         return recommendPrice;
     }
     
