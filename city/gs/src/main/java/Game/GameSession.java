@@ -11,10 +11,7 @@ import Game.FriendManager.*;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
-import Game.Util.CityUtil;
-import Game.Util.EvaUtil;
-import Game.Util.ProtoUtil;
-import Game.Util.WareHouseUtil;
+import Game.Util.*;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -2936,18 +2933,13 @@ public class GameSession {
 			//修改前的eva
 			Eva oldEva = new Eva();
 			oldEva.setLv(eva.getLv());
+			oldEva.setAt(eva.getAt());
+			oldEva.setBt(eva.getBt().getNumber());
 			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
 			//基础信息
-			Gs.EvaResultInfo.EvasInfo.Builder evaInfo = Gs.EvaResultInfo.EvasInfo.newBuilder()
-					.setBEva(eva)
-					.setEEva(newEva.toProto())
-					.setLv(newEva.getLv())
-					.setCexp(newEva.getCexp())
-					.setPlayerId(eva.getPid());
-			if(eva.hasB())
-				evaInfo.setB(eva.getB());
+			Gs.EvaResultInfo.EvasInfo.Builder evaInfo = Gs.EvaResultInfo.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
 			//升级对比信息
 			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）
@@ -2976,9 +2968,27 @@ public class GameSession {
 				result.addAllPromotes(promotes);
 			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.APARTMENT);
-				//balabala===
+				//npc花费比例
+				double spendMoneyRatio = MetaData.getBuildingSpendMoneyRatio(eva.getAt());
+				Map<UUID, List<Integer>> oldExpectSpend = EvaUtil.getApartmentExpectSpend(buildings, oldEva, spendMoneyRatio);//1.获取修改前的预期花费
+				EvaManager.getInstance().updateEva(newEva);
+				Map<UUID, List<Integer>> newExpectSpend = EvaUtil.getApartmentExpectSpend(buildings, newEva, spendMoneyRatio);//2.修改后的预期花费
+				//封装数据
+				List<Gs.EvaResultInfo.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
+				result.addAllApartmentData(apartmentData);
 			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//3.零售店品质提升，计算预期值提升的比例，同上差不多
-				//balabala===(还是要计算预期值，然后计算提升比例)
+				EvaManager.getInstance().updateEva(newEva);
+				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
+				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
+				int lv = newEva.getLv();
+				if(maxLv==lv){
+					result.setRetailSpendRatio(0);
+				}else {
+					result.setRetailSpendRatio(lv/maxLv);
+				}
+			}
+			else {
+				EvaManager.getInstance().updateEva(newEva);
 			}
 			results.addResultInfo(result);
 		}
@@ -3869,4 +3879,5 @@ public class GameSession {
 			return null;
 		}
 	}
+
 }

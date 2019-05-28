@@ -132,7 +132,7 @@ public class EvaUtil {
     //TODO:获取npc的预期值
     //参数1：eva a类型 ，2：eva b类型，3：当前品牌值，4：基础品质值（也就是建筑中的品质qty）
     // 5:eva加成，6：npc的预期花费比例，7：玩家定价，8：npc每小时需
-    public static  Map<UUID,List<Integer>> ExpectSpend(List<Building> buildings,Eva eva,double evaAdd,double npcSpendRatio,int localPrice) {
+    public static  Map<UUID,List<Integer>> getApartmentExpectSpend(List<Building> buildings,Eva eva,double npcSpendRatio) {
         Map<UUID,List<Integer>> expectSpends = new HashMap<>();
         int at = eva.getAt();
         int bt = eva.getBt();
@@ -140,10 +140,6 @@ public class EvaUtil {
             if (building.outOfBusiness())
                 continue;
             Apartment apartment = (Apartment) building;
-          /*
-            String name = apartment.getName();//建筑名
-            int price = apartment.cost();//定价
-            int cityAvgPrice = GlobalUtil.getCityAvgPriceByType(at);//全城定价*/
             int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
             int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt);//全城品质
             int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
@@ -154,7 +150,6 @@ public class EvaUtil {
             //全城的预期花费
             double cityTotalWeight = getItemWeight(cityAvgQuality, at, bt, apartment.quality()) + getBrandWeight(avgAvgBrand, at);
             int cityExpectSpend = (int) ((cityTotalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary());
-            //全城的，需要存储当前的预期花费还有全城的预期花费
             List<Integer> data=new ArrayList<>();
             data.add(expectSpend);
             data.add(cityExpectSpend);

@@ -48,45 +48,36 @@ public class ProtoUtil {
         return promotes;
     }
     /*期望值数据封装*/
-    public static List<Gs.EvaResultInfo.RetailOrApartmentData> getRetailOrApartmentDataList(List<Building> buildings, Map<UUID,List<Integer>> old,Map<UUID,List<Integer>> news,int type){
-        List<Gs.EvaResultInfo.RetailOrApartmentData> retailOrApartmentData = new ArrayList<>();
+    public static List<Gs.EvaResultInfo.ApartmentData> getApartmentResultList(List<Building> buildings, Map<UUID,List<Integer>> old,Map<UUID,List<Integer>> news,int type){
+        List<Gs.EvaResultInfo.ApartmentData> apartmentList = new ArrayList<>();
         for (Building building : buildings) {
             UUID bid = building.id();
             List<Integer> oldExpect = old.get(bid);
             List<Integer> newExpect = news.get(bid);
             if(oldExpect==null||newExpect==null)
                 continue;
-            Gs.EvaResultInfo.RetailOrApartmentData.Builder ra = Gs.EvaResultInfo.RetailOrApartmentData.newBuilder();
-            int price=0;
+            Gs.EvaResultInfo.ApartmentData.Builder ra = Gs.EvaResultInfo.ApartmentData.newBuilder();
             String name=building.getName();
-            switch (type){
-                case MetaBuilding.APARTMENT:
-                    Apartment apartment = (Apartment) building;
-                    price = apartment.cost();//售价
-                    break;
-                case MetaBuilding.RETAIL:
-                    RetailShop retailShop = (RetailShop) building;
-                    price=retailShop.getCurPromPricePerHour();
-                    break;
-            }
+            Apartment apartment = (Apartment) building;
+            int price = apartment.cost();//售价
             int cityAvgPrice = GlobalUtil.getCityAvgPriceByType(type);//全城定价
             int buildingRich=0;//Todo ：繁荣度
             //建筑获取开放数量
             int opentNum = City.instance().getOpentNumByType(type);
-            Gs.EvaResultInfo.RetailOrApartmentData.ExpectSpend.Builder oldExpectSpend = Gs.EvaResultInfo.RetailOrApartmentData.ExpectSpend.newBuilder();
-            Gs.EvaResultInfo.RetailOrApartmentData.ExpectSpend.Builder newExpectSpend = Gs.EvaResultInfo.RetailOrApartmentData.ExpectSpend.newBuilder();
+            Gs.EvaResultInfo.ApartmentData.ExpectSpend.Builder oldExpectSpend = Gs.EvaResultInfo.ApartmentData.ExpectSpend.newBuilder();
+            Gs.EvaResultInfo.ApartmentData.ExpectSpend.Builder newExpectSpend = Gs.EvaResultInfo.ApartmentData.ExpectSpend.newBuilder();
             oldExpectSpend.setExpectSpend(oldExpect.get(0)).setCityExpectSpend(oldExpect.get(1));
             newExpectSpend.setExpectSpend(newExpect.get(0)).setCityExpectSpend(newExpect.get(1));
-            ra.setName(name)
-                    .setPrice(price)
-                    .setCityPrice(cityAvgPrice)
-                    .setBuildingRich(buildingRich)
-                    .setOpenNum(opentNum)
-                    .setOldExpectSpend(oldExpectSpend)
-                    .setNewExpectSpend(oldExpectSpend);
-            retailOrApartmentData.add(ra.build());
+            //统计npc各个类型数量npc
+            Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
+            NpcManager.instance().countNpcByBuildingType().forEach((k,v)->{
+               list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
+            });
+            ra.setName(name).setPrice(price).setCityPrice(cityAvgPrice).setBuildingRich(buildingRich).setOpenNum(opentNum)
+                            .setOldExpectSpend(oldExpectSpend).setNewExpectSpend(oldExpectSpend).setCountTypeNum(list);
+            apartmentList.add(ra.build());
         }
-        return retailOrApartmentData;
+        return apartmentList;
     }
 }
 
