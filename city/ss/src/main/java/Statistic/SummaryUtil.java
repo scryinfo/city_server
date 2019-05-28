@@ -669,7 +669,7 @@ public class SummaryUtil
         return a;
     }
 
-    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
+/*    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -698,6 +698,6 @@ public class SummaryUtil
                     map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
                 });
         return map;
-    }
+    }*/
 
 }

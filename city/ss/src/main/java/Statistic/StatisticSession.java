@@ -229,7 +229,7 @@ public class StatisticSession {
     }
 
     // 查询一周曲线图
-	public void queryPlayerGoodsCurve(short cmd, Message message) {
+	/*public void queryPlayerGoodsCurve(short cmd, Message message) {
 		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
 		long id = curve.getId();
 
@@ -245,7 +245,7 @@ public class StatisticSession {
 		});
 		this.write(Package.create(cmd,list.build()));
 
-	}
+	}*/
 	
     public void queryPlayerIncomePayCurve(short cmd, Message message)
     {
