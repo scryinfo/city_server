@@ -2,30 +2,40 @@ package Account;
 
 import Shared.DatabaseInfo;
 import Shared.RoleBriefInfo;
+import as.As;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class AccountDb {
 	private static MongoClientURI connectionUrl;
 	private static MongoClient mongoClient;
-	private static MongoDatabase database;
 	private static MongoCollection<Document> accCol;
+	private static MongoCollection<Document> invitationCardCollection;
+	private static CopyOnWriteArraySet<String> accountInfo = new CopyOnWriteArraySet<>();
+	private static final Logger LOGGER = Logger.getLogger(AccountDb.class);
+
 	//private static Map<String, MongoClient> gameDbClients = new TreeMap<>();
 	private static Map<String, Connection> gameDbConns = new HashMap<>();
 	public static void init(String url) {
 		connectionUrl = new MongoClientURI(url);
 		mongoClient = new MongoClient(connectionUrl);
-		database = mongoClient.getDatabase("city");
-		accCol = database.getCollection("acc");
-
+		accCol = mongoClient.getDatabase("city").getCollection("acc");
+		accCol.find().forEach((Block<? super Document>) document ->
+		{
+			accountInfo.add(document.getString("_id"));
+		});
 		buildIndex();
+		invitationCardCollection = mongoClient.getDatabase("meta").getCollection("InvitationCard");
 	}
 	private static void buildIndex() {
 		//accCol.createIndex(Indexes.ascending("account"));
@@ -36,16 +46,61 @@ public class AccountDb {
 	public static void shutDown() {
 	}
 
-	public static AccountInfo create(String name) {
-		AccountInfo res = new AccountInfo(name);
-		try {
-			accCol.insertOne(res.toDocument());
-			return res;
-		} catch (Exception e) {
-			e.printStackTrace();
+	public static As.CodeStatus invitationCardUseful(String card)
+	{
+		String pattern = String.format("^%s$", card);
+		Document document = invitationCardCollection.find(Filters.regex("_id",pattern,"i")).first();
+		if (document == null)
+		{
+			return As.CodeStatus.ERROR;
 		}
-		return null;
+		else if (document.getBoolean("used",false))
+		{
+			return As.CodeStatus.USED;
+		}
+		else return As.CodeStatus.USEFUL;
 	}
+
+	public static boolean accountExist(String account)
+	{
+		return accountInfo.contains(account);
+	}
+
+	public static void modifyPwd(String account,String md5Pwd)
+	{
+		accCol.updateOne(Filters.eq("_id", account), Updates.set("pwd", md5Pwd));
+	}
+
+	public static synchronized As.CreateResult.Status createAccount(String account, String md5Pwd, String invataitonCode)
+	{
+		Document document = invitationCardCollection.find(Filters.eq("_id", invataitonCode)).first();
+		if (document == null || document.getBoolean("used"))
+		{
+			return As.CreateResult.Status.FAIL_INVCODE_USED;
+		}
+		try
+		{
+			accCol.insertOne(new AccountInfo(account, md5Pwd).toDocument());
+			accountInfo.add(account);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			LOGGER.fatal("create account failed! : " + e.toString());
+			return As.CreateResult.Status.FAIL;
+		}
+		try
+		{
+			invitationCardCollection.updateOne(Filters.eq("_id", invataitonCode), Updates.set("used", true));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			LOGGER.fatal("update invitationCode status failed! : " + e.toString());
+		}
+		return As.CreateResult.Status.SUCCESS;
+	}
+
 
 	public static AccountInfo get(String name) {
 		Document doc = accCol.find(Filters.eq("_id", name)).first();

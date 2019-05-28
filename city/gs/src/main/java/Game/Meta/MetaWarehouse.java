@@ -14,6 +14,7 @@ public class MetaWarehouse extends MetaBuilding {
     public int shelfCapacity;//货架容量
     public int maxHourToRent;//最大出租时间
     public int minHourToRent;//最小出租时间
+    public int output1P1Hour;//工人每小时产出量
 
 
     public MetaWarehouse(Document d) {
@@ -22,5 +23,6 @@ public class MetaWarehouse extends MetaBuilding {
         this.shelfCapacity = d.getInteger("shelfCapacity");
         this.maxHourToRent = d.getInteger("maxHourToRent");
         this.minHourToRent = d.getInteger("minHourToRent");
+        this.output1P1Hour = d.getInteger("output1P1Hour");
     }
 }

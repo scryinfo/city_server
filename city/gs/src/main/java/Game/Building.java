@@ -1,38 +1,5 @@
 package Game;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.persistence.AttributeConverter;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.SelectBeforeUpdate;
-
-import com.google.common.collect.EvictingQueue;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
-
 import DB.Db;
 import Game.Contract.IBuildingContract;
 import Game.Listener.ConvertListener;
@@ -42,9 +9,20 @@ import Game.Util.NpcUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
+import com.google.common.collect.EvictingQueue;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
 import io.netty.channel.ChannelId;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SelectBeforeUpdate;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Entity
 @SelectBeforeUpdate(false)
@@ -299,6 +277,10 @@ public abstract class Building implements Ticker{
     @Transient
     private long todayVisitorTs = 0;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private long last_modify_time;
+
     public void increaseTodayVisit()
     {
         if (System.currentTimeMillis() - todayVisitorTs >= DAY_MILLISECOND)
@@ -368,13 +350,13 @@ public abstract class Building implements Ticker{
         return singleSalary() * metaBuilding.workerNum;
     }
     public int singleSalary() {
-        return (int) (salaryRatio / 100.d * metaBuilding.salary);
+        return (int) (salaryRatio / 100.d * City.instance().getAvgIndustrySalary());
     }
-    public int allInsurance() {
-    	return singleInsurance() * metaBuilding.workerNum;
+    public int allTax() {
+    	return singleTax() * metaBuilding.workerNum;
     }
-    public int singleInsurance() {
-    	return MetaData.getCity().insurance;
+    public int singleTax() {
+    	return (int)(MetaData.getCity().taxRatio / 100.d * singleSalary());
     }
     public int singleSalary(Talent talent) {
         return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
@@ -409,9 +391,9 @@ public abstract class Building implements Ticker{
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
         this.broadcastChange();
 
-        //停工通知
+     /*   //停工通知
         UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
-        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
+        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);*/
     }
 
     public void setName(String name) {
@@ -494,6 +476,7 @@ public abstract class Building implements Ticker{
         this.coordinate = pos;
         this.metaBuilding = meta;
         this.constructCompleteTs = System.currentTimeMillis();
+        this.last_modify_time = 0L;
     }
     public final List<Npc> destroy() {
         List<Npc> npcs = new ArrayList<>(allStaff);
@@ -501,7 +484,7 @@ public abstract class Building implements Ticker{
         allStaff.clear();
         return npcs;
     }
-    
+
     public final void addUnEmployeeNpc() {
     	NpcManager.instance().addUnEmployeeNpc(allStaff);
     	allStaff.clear();
@@ -519,18 +502,18 @@ public abstract class Building implements Ticker{
         });
         return npcs;
     }
-    
+
     public List<Npc> createNpc() {
     	Map<UUID, Npc> unEmployeeNpc=NpcManager.instance().getUnEmployeeNpc();
     	int unEmployeeNpcNum=unEmployeeNpc.size();
     	List<Npc> npcList = new ArrayList<Npc>(unEmployeeNpc.values());
     	List<Npc> npcs = new ArrayList<>();
-    	
+
     	int requireWorkNum=0;
     	for (Map.Entry<Integer, Integer> n : this.metaBuilding.npc.entrySet()) {
     		requireWorkNum+=n.getValue();
     	}
-    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口 
+    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口
     		NpcManager.instance().addWorkNpc(npcList,this);
     		npcs.addAll(npcList);
     		int num=(requireWorkNum-unEmployeeNpcNum)/4; //每种类型还差npc数量
@@ -562,7 +545,7 @@ public abstract class Building implements Ticker{
         	});
       	  	npcs.addAll(totalNpc);
     	}
-    	
+
     	npcs.forEach(npc->{
     		takeAsWorker(npc);
 			npc.goWork();
@@ -654,10 +637,10 @@ public abstract class Building implements Ticker{
         addFlowCount();
 //        flowCount += 1;
         enterImpl(npc);
-        //住宅入住通知
+      /*  //住宅入住通知
         int[] num = {flowCount};
         UUID[] apartmentOwerIdAndBid = {this.ownerId,id()};
-        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);
+        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);*/
     }
 
     public void addFlowCount()
@@ -787,8 +770,8 @@ public abstract class Building implements Ticker{
             allStaff.forEach(npc ->{
             	npc.addMoney(this.singleSalary());
             	//缴纳社保
-            	npc.decMoney(this.singleInsurance());
-            	MoneyPool.instance().add(this.singleInsurance());
+            	npc.decMoney(this.singleTax());
+            	MoneyPool.instance().add(this.singleTax());
             });
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
@@ -830,5 +813,27 @@ public abstract class Building implements Ticker{
 
     public void setTodayIncome(long todayIncome) {
         this.todayIncome = todayIncome;
+    }
+
+    public long getLast_modify_time() {
+        return last_modify_time;
+    }
+
+    public void setLast_modify_time(long last_modify_time) {
+        this.last_modify_time = last_modify_time;
+    }
+    
+    public int getState() {
+		return state;
+	}
+
+	//是否到了规定时间可以修改
+    public boolean canBeModify(){
+        Long now = new Date().getTime();
+        long day = 24 * 60 * 60 * 1000;
+        if(this.last_modify_time+7*day<=now){
+            return true;
+        }else
+            return false;
     }
 }

@@ -46,6 +46,7 @@ allprojects {
         compile 'io.grpc:grpc-protobuf:1.21.0'
         compile 'io.grpc:grpc-stub:1.21.0'
         //
+        compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"

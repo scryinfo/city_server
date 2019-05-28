@@ -37,7 +37,7 @@ public class PromoOrder {
     UUID sellerId;		//广告商的 playerid
     UUID sellerBuildingId;//广告商的建筑id，同一个玩家可能有多个推广公司建筑
     UUID buyerId;		//广告主的 playerid
-    int buildingType;	//建筑类型
+    int buildingType;	//建筑类型xxxx
     int productionType;	//产品id， 表字段定义.txt 道具类ID一共7位
     long promStartTs;	//推广开始时间
     long promDuration;	//推广时长

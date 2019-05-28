@@ -1,11 +1,11 @@
-import static Statistic.SummaryUtil.DAY_MILLISECOND;
+package lewis;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Projections.excludeId;
 import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
-import java.text.MessageFormat;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -13,17 +13,29 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import Shared.Util;
+import Statistic.StatisticSession;
+import Statistic.Util.TotalUtil;
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.quartz.JobExecutionException;
 
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import org.bson.Document;
+import org.quartz.JobExecutionException;
 
 import Shared.LogDb;
-import Shared.Util;
 import Statistic.DayJob;
 import Statistic.SummaryUtil;
 import ss.Ss;
+
+import static Shared.LogDb.KEY_TOTAL;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lt;
 
 public class Test
 {
@@ -97,10 +109,10 @@ public class Test
         SummaryUtil.init();
         SummaryUtil.init();
         List<Ss.NodeIncome> list = SummaryUtil.getBuildDayIncomeById(player1);
-        list.forEach(i ->{
-            System.out.println(formatter.format(LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(i.getTime()), ZoneId.systemDefault())) + " : " + i.getIncome());
-        });
+//        list.forEach(i ->{
+//            System.out.println(formatter.format(LocalDateTime.ofInstant(
+//                    Instant.ofEpochMilli(i.getTime()), ZoneId.systemDefault())) + " : " + i.getIncome());
+//        });
     }
 
     @org.junit.Test
@@ -156,7 +168,7 @@ public class Test
     {
         LogDb.init("mongodb://192.168.0.51:27017", "city148");
         SummaryUtil.init();
-        Ss.EconomyInfos economyInfo = SummaryUtil.getPlayerEconomy(UUID.fromString(p1));
+//        Ss.EconomyInfos economyInfo = SummaryUtil.getPlayerEconomy(UUID.fromString(p1));
         //debug
         System.out.println("-------------");
     }
@@ -255,6 +267,148 @@ public class Test
             System.err.println("end--------------");
             TimeUnit.SECONDS.sleep(5);
         }
+    }
+    @org.junit.Test
+   public void testDayIncome(){
+        LogDb.init("mongodb://192.168.0.51:27017","cityYetianyi");
+        SummaryUtil.init();
+        MongoCollection<Document> dayPlayerIncome = SummaryUtil.getDayPlayerPay();
+        Map<Long, Document> map = new LinkedHashMap<>();
+        dayPlayerIncome
+                .find()
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) document ->
+        {
+            map.put(document.getLong("time"), document);
+        });
+        for (Map.Entry<Long, Document> entry : map.entrySet()) {
+            System.out.println(entry.getKey()+"金额"+entry.getValue());
+        }
+        //查询统计信息
+        Map<Long, Long> map1 = SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(), UUID.fromString("bc7e5815-4dcb-4e5c-b4b2-ca5870ae57ac"));
+        System.out.println(map1);
+    }
+
+    //统计收入支出信息
+    @org.junit.Test
+    public void testDayIncomAndPay(){
+        LogDb.init("mongodb://192.168.0.51:27017","cityYetianyi");
+        SummaryUtil.init();
+        UUID id = UUID.fromString("9ba65634-4e0b-4f43-aa1a-8b8b573b822c");
+        Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
+        Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+        //统计整理数据
+        Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+        Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
+    }
+
+    @org.junit.Test
+    public void testDayIncomAndPay2(){
+        LogDb.init("mongodb://192.168.0.51:27017","cityYetianyi");
+        SummaryUtil.init();
+        UUID id = UUID.fromString("9ba65634-4e0b-4f43-aa1a-8b8b573b822c");
+        Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
+        Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+        //统计整理数据
+        Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+        Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
+
+        Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
+        builder.setId(Util.toByteString(id));
+        //收入和支出前面29天，可以按照相同的时间存储，但是最后一天不行
+      /*  chooseMap.forEach((k,v)->{
+            Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
+            b.setTime(k);
+            b.setIncome(v);
+            b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?playerPayMap.get(k):0);
+        });*/
+        Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();
+        //1.处理收入信息
+        monthTotalIncome.forEach((k,v)->{
+            Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
+            b.setTime(k);
+            b.setIncome(v);
+            b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
+            totalMap.put(k,b.build());
+        });
+
+        //2.处理支出信息
+        for (Map.Entry<Long, Long> pay : monthTotalpay.entrySet()) {
+            Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
+            //如果在收入中已经处理了，则跳过
+            Long time = pay.getKey();
+            if(totalMap.containsKey(time)){
+                continue;
+            }
+            //添加其他的支出信息
+            b.setTime(pay.getKey());
+            b.setPay(pay.getValue());
+            b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
+            totalMap.put(pay.getKey(),b.build());
+        }
+        builder.addAllPlayerIncome(totalMap.values());
+        //获取今日收入信息
+        Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
+        //获取今日支出信息
+        Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
+        //还需要处理最后一天的数据
+        builder.setTodayIncome(todayIncome);
+        builder.setTodayPay(todayPay);
+
+        System.out.println(builder);
+
+    }
+
+    @org.junit.Test
+    public void testTime() {
+        LogDb.init("mongodb://192.168.0.51:27017", "cityLiuyi");
+        SummaryUtil.init();
+    /*    UUID uuid = new UUID(9527l, 3342l);
+        UUID sellId = new UUID(9527l, 3342l);
+        UUID ownerId = new UUID(9527l, 3342l);
+        UUID bid = new UUID(9527l, 3342l);
+        LogDb.npcRentApartment(uuid,sellId,999l,10,ownerId,bid,5,7,2.2,3.3);*/
+
+
+
+        MongoCollection<Document> npcRentApartment = LogDb.getNpcRentApartment();
+        MongoCollection<Document> collection = SummaryUtil.getPlayerExchangeAmount();
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append("total", "$" + "total")
+                .append("sum","$sum")
+                .append("brand","$brand")
+                .append("quality","$quality")
+                .append("size","$size")
+                .append("_id",0);
+        npcRentApartment.aggregate(
+                Arrays.asList(
+                        Aggregates.group("$tp",  Accumulators.sum("total", "$a"),
+                                Accumulators.sum("sum","$n"),
+                                Accumulators.sum("brand","$brand"),
+                                Accumulators.sum("quality","$quality"),
+                                Accumulators.sum("size",1l)
+                                )
+                        ,Aggregates.project(projectObject)
+                )
+        ).forEach((Block<? super Document>) documentList::add);
+        System.out.println(documentList);
+
+
+//        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+//        long time = System.currentTimeMillis();
+//        long endTime = time - time%(1000 * 60  * 60);
+//        long startTime = endTime - 1000 * 60 * 60;
+//        List<Document> documents = LogDb.queryApartmentBrandAndQuality(startTime, endTime, collection);
+////        SummaryUtil.insertBrandAndQuality(SummaryUtil.CountType.BYHOUR, documents, endTime, SummaryUtil.getPlayerExchangeAmount());
+//        System.out.println(documents);
+//        System.out.println(dateFormat.format(1556262000000l));
+//        System.out.println(dateFormat.format(endTime));
+
+
+//        Map<String, Double> map = SummaryUtil.queryAvg(collection, 5, SummaryUtil.CountType.BYHOUR);
+//        System.out.println(map);
     }
 
 }

@@ -1,18 +1,22 @@
 package Game;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.*;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
+import Shared.Package;
+import Shared.Util;
+import com.google.protobuf.Message;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
@@ -25,7 +29,15 @@ import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
+import Shared.Util;
 import gs.Gs;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 public class BrandManager {
@@ -36,7 +48,7 @@ public class BrandManager {
     public static final int ID = 0;
     private static final Logger logger = Logger.getLogger(BrandManager.class);
     protected BrandManager() {}
-    public static void init() {
+    public static void init(){
         GameDb.initBrandManager();
         instance = GameDb.getBrandManager();
         instance.refineCache();
@@ -70,6 +82,14 @@ public class BrandManager {
         @Override
         public int hashCode() {
             return Objects.hash(playerId, mid);
+        }
+
+        public UUID getPlayerId() {
+            return playerId;
+        }
+
+        public int getMid() {
+            return mid;
         }
     }
 
@@ -112,7 +132,7 @@ public class BrandManager {
         自己的品牌认知度；如果是恶意针对对其它竞争玩家，那么我怎么知道人家要取啥名名字？
         所以限制抢注的这个需求其实是伪需求。
         */
-        Long nameChangedTs;
+        Long nameChangedTs=0L;
 
         public boolean hasBrandName(){
             return brandName != null;
@@ -120,9 +140,11 @@ public class BrandManager {
         public BrandInfo(BrandKey key, String newBrandName) {
             this.key = key;
             brandName = new BrandName(newBrandName);
+            this.nameChangedTs = 0L;
         }
         public BrandInfo(BrandKey key) {
             this.key = key;
+            this.nameChangedTs = 0L;
         }
 
         protected BrandInfo() {}
@@ -132,10 +154,27 @@ public class BrandManager {
             return brandName.getBrandName();
         }
         public void setBrandName(String newBrandName) {
+            this.nameChangedTs = new Date().getTime();
             if(brandName == null){
                 brandName = new BrandName(newBrandName);
             }else
                 brandName.setBrandName(newBrandName);
+        }
+        public boolean canBeModify(){//距离上次修改时是否大于7天，true能修改、false不能修改
+            Long now = new Date().getTime();
+            long day = 24 * 60 * 60 * 1000;
+            if(this.nameChangedTs+7*day<=now){
+                return true;
+            }else
+                return false;
+        }
+
+        public BrandKey getKey() {
+            return key;
+        }
+
+        public int getV() {
+            return v;
         }
     }
     public void update(long diffNano) {
@@ -333,23 +372,28 @@ public class BrandManager {
         return allBrandInfo.getOrDefault(bk,new BrandInfo(bk));
     }
 
-    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的
-    public boolean changeBrandName(UUID pid, int typeId, String validNewName){
-        //如果新名字是使用中的名字，那么操作失败，返回false
+    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的(-1品牌名称重复、1修改成功、其他（表示时间不通过）)
+    public Long changeBrandName(UUID pid, int typeId, String validNewName){
+        //如果新名字是使用中的名字，那么操作失败，返回-1
         if(GameDb.brandNameIsInUsing(validNewName)){
-            return false;
+            return -1l;
         }
         BrandInfo bInfo = getBrand(pid,typeId);
-        //如果名字可用
-        bInfo.setBrandName(validNewName);
-        GameDb.saveOrUpdate(bInfo.brandName);
-        GameDb.saveOrUpdate(this);
-        return  true;
+        if(!bInfo.canBeModify()) {
+            return bInfo.nameChangedTs;
+        }else {
+            //如果名字可用
+            bInfo.setBrandName(validNewName);
+            //级联保存
+            this.allBrandInfo.put(bInfo.key, bInfo);
+            GameDb.saveOrUpdate(this);
+            return 1l;
+        }
     }
 
     @Transient
     private Map<Integer,Map<Integer,Double>> totalBrandQualityMap=new HashMap<Integer,Map<Integer,Double>>();
-	
+
     public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
     	UUID playerId=b.ownerId();
     	//住宅和零售店的techId是13和14
@@ -360,16 +404,16 @@ public class BrandManager {
     	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
-    	
+
 		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
 		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
 		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
-		
+
 		qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
 		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
-    
+
     public void getAllBuildingBrandOrQuality(){
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
@@ -381,11 +425,37 @@ public class BrandManager {
     	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
     	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
     }
-    
+
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
     	return totalBrandQualityMap;
     }
     public double getValFromMap(Map<Integer,Double> map,int type){
     	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
     }
+    //根据建筑类型获取品牌信息
+    public List<Gs.MyBrands.Brand> getBrandByType(int type,UUID pid){
+        List<Gs.MyBrands.Brand> brands = new ArrayList<>();
+        MetaData.getBuildingTech(type).forEach(itemId->{
+            Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+            band.setItemId(itemId).setPId(Util.toByteString(pid));
+            BrandManager.BrandInfo binfo = BrandManager.instance().getBrand(pid,itemId);
+            if(binfo.hasBrandName()){
+                band.setBrandName(binfo.getBrandName());
+            }
+            GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
+                band.addEva(eva.toProto());
+            });
+            brands.add(band.build());
+        });
+        return brands;
+    }
+    public List<BrandInfo> getAllBrandInfoByItem(int item){
+        ArrayList<BrandInfo> infos = new ArrayList<>();
+        allBrandInfo.values().forEach(b->{
+            if(b.key.mid==item)
+                infos.add(b);
+        });
+        return infos;
+    }
+
 }

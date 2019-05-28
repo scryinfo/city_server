@@ -2,25 +2,27 @@ package Game.Util;
 
 import Shared.LogDb;
 import com.mongodb.Block;
-import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 
 import java.util.*;
 
 import static Shared.LogDb.KEY_TOTAL;
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.*;
 
 public class PlayerExchangeAmountUtil {
-    private static MongoCollection<Document> playerExchangeAmount;
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
+    private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
+    private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String COUNTTYPE = "countType";
+    private static MongoCollection<Document> playerExchangeAmount;
     //初始化
     static {
         MongoDatabase database = LogDb.getDatabase();

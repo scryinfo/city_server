@@ -15,21 +15,15 @@ import java.util.concurrent.TimeUnit;
 
 import Game.Meta.MetaCity;
 import Game.Timers.PeriodicTimer;
+import Game.Util.DateUtil;
 import Shared.LogDb;
 import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
 
 public class NpcManager {
-    static long endTime=0;
     static long nowTime=0;
     static{
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        endTime=startDate.getTime()+1000 * 60  * 55; 
         nowTime = System.currentTimeMillis();
     }
     private static NpcManager instance = new NpcManager();
@@ -107,7 +101,7 @@ public class NpcManager {
     	npc.forEach(n->{
     		allNpc.remove(n.id()); //移除失业npc
     		n.setStatus(1);  //状态改成失业
-    		n.setTs(System.currentTimeMillis());
+    		n.setUnEmpts(System.currentTimeMillis());
     		unEmployeeNpc.put(n.id(),n); //添加失业npc
     	});
     	GameDb.saveOrUpdate(npc);
@@ -116,7 +110,7 @@ public class NpcManager {
     	npc.forEach(n->{
     		unEmployeeNpc.remove(n.id()); //移除失业npc
     		n.setStatus(0);  //状态改成工作
-    		n.setTs(System.currentTimeMillis());
+    		n.setUnEmpts(System.currentTimeMillis());
     		n.setBorn(born);  //改为新建筑
     		allNpc.put(n.id(),n); //添加工作npc
     	});
@@ -187,18 +181,18 @@ public class NpcManager {
         //waitToUpdate = new ArrayList<>(Collections.nCopies(updateTimesAtCurrentTimeSection, new HashSet<>()));  won't works, n copies are refer to same object
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
       //GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
-       
+
         //工作npc
         GameDb.getAllNpcByStatus(0).forEach(npc->this.addImpl(npc));
         //失业npc
         GameDb.getAllNpcByStatus(1).forEach(npc->{
-    		unEmployeeNpc.put(npc.id(),npc); 
+    		unEmployeeNpc.put(npc.id(),npc);
     	});
     }
 
     public void hourTickAction(int nowHour) {
     }
-    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((endTime-nowTime)/1000));
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
             Calendar calendar = Calendar.getInstance();
@@ -214,7 +208,7 @@ public class NpcManager {
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
-  	  //计算各类npc的大小
+  	  //计算各类npc的数量
 	  allNpc.forEach((k,v)->{
 		  int type=v.type();
 		  if(!countMap.containsKey(type)){ 
@@ -223,24 +217,52 @@ public class NpcManager {
 			  countMap.put(type,countMap.get(type)+1); 
 		  }
 	  });
-	  
 	  return countMap;
    }
+    public Map<Integer, Long> countNpcByBuildingType(){
+    	Map<Integer, Long> countMap= new HashMap<Integer, Long>();
+    	//计算各种建筑npc的数量，包括工作npc和失业npc
+    	allNpc.forEach((k,v)->{
+    		int type=v.building().type();
+    		if(!countMap.containsKey(type)){
+    			countMap.put(type, 1l);
+    		}else{
+    			countMap.put(type,countMap.get(type)+1);
+    		}
+    	});
+    	unEmployeeNpc.forEach((k,v)->{
+    		int type=v.building().type();
+    		if(!countMap.containsKey(type)){
+    			countMap.put(type, 1l);
+    		}else{
+    			countMap.put(type,countMap.get(type)+1);
+    		}
+    	});
+    	return countMap;
+    }
 
     public long getNpcCount()
     {
         return allNpc.size();
     }
-    
+
+    public long getUnEmployeeNpcCount(){
+    	return unEmployeeNpc.size();
+    }
+
     public Map<UUID, Npc> getUnEmployeeNpc(){
     	return unEmployeeNpc;
     }
-    
+
     public Map<Integer, List<Npc>> getUnEmployeeNpcByType(){
     	Map<Integer, List<Npc>> map=new HashMap<Integer, List<Npc>>();
     	getUnEmployeeNpc().forEach((k,v)->{
     		map.computeIfAbsent(v.type(),n -> new ArrayList<Npc>()).add(v);
     	});
     	return map;
+    }
+
+    public Map<UUID, Npc> getAllNpc() {
+        return allNpc;
     }
 }

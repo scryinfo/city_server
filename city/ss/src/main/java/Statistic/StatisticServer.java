@@ -16,7 +16,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
@@ -67,6 +66,9 @@ public class StatisticServer {
         scheduler.scheduleJob(newJob(YesterdayJob.class).build(), newTrigger()
         		.withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
         		.build());//统计昨天包括以前的数据，每天凌晨1点统计
+        scheduler.scheduleJob(newJob(OneSecondJob.class).build(), newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * * * ?"))
+                .build());//玩家收入和支出信息,每分钟计一次
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         List<ChannelFuture> fs = new ArrayList<>();

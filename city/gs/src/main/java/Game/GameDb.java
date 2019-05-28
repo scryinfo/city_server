@@ -301,6 +301,14 @@ public class GameDb {
 		session.close();
 		return list;
 	}
+	
+	public static List<IndustryIncrease> getAllIndustryIncrease()
+	{
+		Session session = sessionFactory.openSession();
+		List<IndustryIncrease> list = session.createQuery("from IndustryIncrease",IndustryIncrease.class).list();
+		session.close();
+		return list;
+	}
 
 	public static boolean saveOrUpdSociety(Society society)
 	{
@@ -1241,7 +1249,7 @@ public class GameDb {
 		list.forEach(o->res.put(o.mid, o.goodlv));
 		return res;
 	}
-	
+
 	public static List<Eva> getEvaInfoList(UUID pid,Integer itemId)
 	{
 		List<Eva> list = new ArrayList<Eva>();
@@ -1258,7 +1266,7 @@ public class GameDb {
 						.setParameter("at", itemId)
 						.list();
 			}
-			
+
 		}
 		catch (RuntimeException e)
 		{
@@ -1281,7 +1289,7 @@ public class GameDb {
 		try {
 			session = sessionFactory.openStatelessSession();
 			transaction = session.beginTransaction();
-			amount = (long) session.createSQLQuery("select count (ID) FROM PLAYER").uniqueResult();
+			amount = (Long) session.createQuery("SELECT COUNT(*) FROM Player").uniqueResult();
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
@@ -1344,6 +1352,23 @@ public class GameDb {
 		transaction.commit();
 		session.close();
 		return size;
+	}
+
+	//公司名称是否已存在
+	public static boolean companyNameIsInUsed(String name){
+		Session session = sessionFactory.openSession();
+		List playerList = new ArrayList();
+		try {
+			Query query = session.createQuery("from Player as p where p.companyName = :name")
+					.setParameter("name", name);
+			playerList = query.list();
+		}catch (Exception e){
+			return true;
+		}
+		if(playerList.size()>0) {
+			return true;
+		}
+		return false;
 	}
 }
 

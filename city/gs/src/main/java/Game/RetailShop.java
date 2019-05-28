@@ -1,20 +1,28 @@
 package Game;
 
-import Game.Contract.BuildingContract;
-import Game.Contract.Contract;
-import Game.Contract.ContractManager;
-import Game.Contract.IBuildingContract;
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import Game.Meta.MetaRetailShop;
-import com.google.protobuf.Message;
-import gs.Gs;
-
-import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
+
+import com.google.protobuf.Message;
+
+import Game.Contract.BuildingContract;
+import Game.Contract.IBuildingContract;
+import Game.Meta.MetaGood;
+import Game.Meta.MetaItem;
+import Game.Meta.MetaRetailShop;
+import gs.Gs;
 
 @Entity
 public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuildingContract
@@ -206,6 +214,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     public Collection<Integer> getMetaIdsInShelf(MetaGood.Type type, int lux) {
         return shelf.getMetaIds(type, lux);
     }
+    
     public boolean shelfHas(int metaId) {
         return shelf.has(metaId);
     }

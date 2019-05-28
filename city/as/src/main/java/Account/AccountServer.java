@@ -15,7 +15,10 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.math.BigInteger;
 import java.nio.ByteOrder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +31,7 @@ public class AccountServer {
 	public static final ChannelGroup allClientChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	public static final ConcurrentHashMap<String, ChannelId> clientAccountToChannelId = new ConcurrentHashMap<>();
 	public static final ConcurrentHashMap<Integer, ChannelId> gsIdToChannelId = new ConcurrentHashMap<>();
+	public static MessageDigest md5;
 	public AccountServer() {
 		ServerCfgDb.init(GlobalConfig.configUri());
 		ServerCfgDb.startUp();
@@ -35,8 +39,32 @@ public class AccountServer {
 		AccountDb.startUp();
 		accInfo =  ServerCfgDb.getAccountserverInfo();
 	}
+	public static String getMd5Str(String in)
+	{
+		MessageDigest md5 = null;
+		try
+		{
+			md5 = MessageDigest.getInstance("MD5");
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			e.printStackTrace();
+		}
+		md5.update(in.getBytes());
+		byte[] bytes = md5.digest();
+		String md5String = new BigInteger(1,bytes).toString(16);
+		int i = 32 - md5String.length();
+		StringBuilder builder = new StringBuilder();
+		for (; i  > 0; i--)
+		{
+			builder.append("0");
+		}
+		return builder.append(md5String).toString();
+	}
 
 	public void run() throws Exception {
+		YunSmsManager.getInstance();
+
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {

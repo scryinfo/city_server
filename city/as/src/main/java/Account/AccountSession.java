@@ -4,6 +4,8 @@ import Shared.*;
 import Shared.Package;
 import as.As;
 import com.google.protobuf.Message;
+import com.yunpian.sdk.model.Result;
+import com.yunpian.sdk.model.SmsSingleSend;
 import common.Common;
 import ga.Ga;
 import gacode.GaCode;
@@ -12,10 +14,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 
+import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class AccountSession {
@@ -23,17 +28,20 @@ public class AccountSession {
     private static final Logger logger = Logger.getLogger(AccountSession.class);
     private boolean valid = false;
     private AccountInfo accInfo;
-    private String accountName;
-    private String validateCode;
-
+    private String accountName = "";
+    private String authCode = "";
+    private boolean canModifyPwd = false;
+    private static ConcurrentHashMap<ChannelId, Long> channelInterval = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Long> numberInterval = new ConcurrentHashMap<>();
     public boolean valid() {
         return valid;
     }
 
     public void logout() {
         AccountServer.clientAccountToChannelId.remove(this.accountName());
+        channelInterval.remove(ctx.channel().id());
         if (GlobalConfig.product()) {
-            Validator.getInstance().unRegist(accountName, validateCode);
+            //Validator.getInstance().unRegist(accountName, validateCode);
         }
     }
 
@@ -48,32 +56,175 @@ public class AccountSession {
     public void write(Package pack) {
         ctx.channel().writeAndFlush(pack);
     }
+
+    public void modifyPwd(short cmd, Message message)
+    {
+        if (!this.canModifyPwd)
+        {
+            logger.fatal(accountName +" : modify pwd illegal");
+            return;
+        }
+        String pwd = ((As.String) message).getCode();
+        if (!validPwd(pwd))
+        {
+            return;
+        }
+        String md5Pwd = AccountServer.getMd5Str(pwd);
+        AccountDb.modifyPwd(accountName, md5Pwd);
+        this.write(Package.create(cmd));
+    }
+
+    private boolean validPwd(String pwd)
+    {
+        return true;
+    }
+
+    public void cancleModefyPwd(short cmd)
+    {
+        this.canModifyPwd = false;
+    }
+
+    public void modifyPwdVerify(short cmd, Message message)
+    {
+        As.VerifyInfo param = (As.VerifyInfo) message;
+        String accountName = param.getPhoneNumber();
+        String authCode = param.getAuthCode();
+        if (!AccountDb.accountExist(accountName))
+        {
+            this.write(Package.create(cmd,
+                    As.VerifyStatus.newBuilder()
+                            .setStatus(As.VerifyStatus.Status.FAIL_ACCOUNT_UNREGISTER)
+                            .build()));
+            return;
+        }
+        if (!this.accountName.equals(accountName) || !this.authCode.equals(authCode))
+        {
+            this.write(Package.create(cmd,
+                    As.VerifyStatus.newBuilder()
+                            .setStatus(As.VerifyStatus.Status.FAIL_AUTHCODE_ERROR)
+                            .build()));
+            return;
+        }
+        this.canModifyPwd = true;
+        this.write(Package.create(cmd,
+                As.VerifyStatus.newBuilder()
+                        .setStatus(As.VerifyStatus.Status.SUCCESS)
+                        .build()));
+    }
+
+    public void createAccount(short cmd, Message message)
+    {
+        As.RegistAccount registAccount = (As.RegistAccount) message;
+        String invitationCode = registAccount.getInvitationCode();
+        String authCode = registAccount.getAuthCode();
+        String account = registAccount.getPhoneNumber();
+        String password = registAccount.getPassword();
+        if (!validPwd(password))
+        {
+            return;
+        }
+        As.CreateResult.Builder builder = As.CreateResult.newBuilder();
+        if (AccountDb.accountExist(account))
+        {
+            builder.setStatus(As.CreateResult.Status.FAIL_ACCOUNT_EXIST);
+        }
+        else if (!this.authCode.equals(authCode) || !this.accountName.equals(account))
+        {
+            builder.setStatus(As.CreateResult.Status.FAIL_AUTHCODE_ERROR);
+        }
+        else
+        {
+            String md5Pwd = AccountServer.getMd5Str(password);
+            As.CreateResult.Status status = AccountDb.createAccount(account, md5Pwd, invitationCode);
+            builder.setStatus(status);
+            if (status == As.CreateResult.Status.SUCCESS)
+            {
+                this.authCode = "";
+            }
+        }
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+
+
+    public void getAuthCode(short cmd, Message message)
+    {
+        String phoneNumber = ((As.String) message).getCode();
+        long interval = 49000;
+        long now = System.currentTimeMillis();
+        long oldSendTime = channelInterval.getOrDefault(ctx.channel().id(), 0L);
+        long oldSendTime1 = numberInterval.getOrDefault(phoneNumber, 0L);
+        if (now - oldSendTime < interval || now - oldSendTime1 < interval)
+        {
+            this.write(Package.fail(cmd,Common.Fail.Reason.highFrequency));
+            return;
+        }
+        String authCode = numberAuthCode();
+        Result<SmsSingleSend> result = YunSmsManager.getInstance().sendAuthCode(phoneNumber, authCode);
+        if (result.getCode() == 0)
+        {
+            channelInterval.put(ctx.channel().id(), now);
+            numberInterval.put(phoneNumber, now);
+            this.authCode = authCode;
+            this.accountName = phoneNumber;
+            this.write(Package.create(cmd));
+        }
+        else
+        {
+            logger.error(result.toString());
+            if (result.getCode() == 2) {
+                this.write(Package.fail(cmd,Common.Fail.Reason.paramError));
+            }
+        }
+    }
+
+    private String numberAuthCode()
+    {
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 4; i++)
+        {
+            stringBuilder.append(random.nextInt(10));
+        }
+        return stringBuilder.toString();
+    }
+
+    public void verificationInvitationCode(short cmd, Message message)
+    {
+        As.CodeStatus status = AccountDb.invitationCardUseful(((As.String) message).getCode());
+        this.write(Package.create(cmd,
+                As.InvitationCodeStatus.newBuilder()
+                        .setStatus(status)
+                        .build()));
+    }
+
     public void login(short cmd, Message message) {
         if (!valid()) {
             As.Login c = (As.Login)message;
             accountName = c.getAccount();
-            validateCode = "";
-
-            boolean product = GlobalConfig.product();
-            if (product) {
-                if (Validator.getInstance().validate(accountName, "") == 0)
-                    return;
-            }
-
+            authCode = "";
+            String pwd = c.getPwd();
             accInfo = AccountDb.get(accountName);
-            if (accInfo == null) {
-                accInfo = AccountDb.create(accountName);
-                if (accInfo == null) {
-                    return;
-                }
+            if (accInfo == null)
+            {
+                this.write(Package.create(cmd,As.LoginStatus.newBuilder()
+                        .setStatus(As.LoginStatus.Status.FAIL_ACCOUNT_UNREGISTER).build()));
+                return;
             }
-
-            if (accInfo.freezeTime.isAfter(Instant.now())) {
+            else if (!accInfo.getMd5Pwd().equals(AccountServer.getMd5Str(pwd)))
+            {
+                this.write(Package.create(cmd,As.LoginStatus.newBuilder()
+                        .setStatus(As.LoginStatus.Status.FAIL_ERROR).build()));
+                return;
+            }
+            if (accInfo.freezeTime.isAfter(Instant.now()))
+            {
                 this.write(Shared.Package.fail(cmd, Common.Fail.Reason.accountInFreeze));
                 return;
             }
 
-            this.write(Shared.Package.create(cmd));
+            this.write(Shared.Package.create(cmd,As.LoginStatus.newBuilder()
+                    .setStatus(As.LoginStatus.Status.SUCCESS).build()));
             valid = true;
             AccountServer.allClientChannels.add(ctx.channel());
             AccountServer.clientAccountToChannelId.put(this.accountName(), ctx.channel().id());

@@ -11,10 +11,12 @@ public class SysPara {
         this.centerStorePos.x = d.getInteger("centerStoreX");
         this.centerStorePos.y = d.getInteger("centerStoreY");
         this.auctionDelay = d.getInteger("groundAuctionSec")*1000;
+        this.minersCostRatio = d.getDouble("minersCostRatio");
     }
     final public int playerBagCapcaity;
     final public int bagCapacityDelta;
     final public int transferChargeRatio;
     final public int auctionDelay;
+    final public double minersCostRatio;//矿工费用
     public Coordinate centerStorePos = new Coordinate();
 }

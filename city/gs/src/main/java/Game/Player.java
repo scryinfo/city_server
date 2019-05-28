@@ -9,6 +9,7 @@ import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
@@ -251,6 +252,10 @@ public class Player {
     @Column
     private int eva;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private long last_modify_time;//上次修改时间
+
     public void addEvaPoint(int d) {
         this.eva += d;
     }
@@ -268,6 +273,7 @@ public class Player {
         this.bag = new Storage(bagCapacity);
         this.createTs = System.currentTimeMillis();
         this.eva=10000;
+        this.last_modify_time=System.currentTimeMillis();
     }
     @PostLoad
     void _init() {
@@ -515,5 +521,18 @@ public class Player {
     public void setSocietyId(UUID societyId)
     {
         this.societyId = societyId;
+    }
+
+    public void setLast_modify_time(long last_modify_time) {
+        this.last_modify_time = last_modify_time;
+    }
+
+    public boolean canBeModify(){//是否可以修改。判断修改时间是否超过7天
+        Long now = new Date().getTime();
+        long day = 24 * 60 * 60 * 1000;
+        if(this.last_modify_time+day*7<=now){
+            return true;
+        }else
+            return false;
     }
 }

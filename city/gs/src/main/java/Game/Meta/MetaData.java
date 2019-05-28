@@ -1,17 +1,28 @@
 package Game.Meta;
 
-import Game.Building;
-import Game.Prob;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
+import org.bson.Document;
+
 import com.google.common.collect.ImmutableSet;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
-import org.apache.log4j.Logger;
-import org.bson.Document;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import Game.Building;
+import Game.Prob;
 
 public class MetaData {
     public static final int ID_RADIX = 100000;
@@ -73,6 +84,7 @@ public class MetaData {
     private static final HashMap<Integer, GoodFormula> goodFormula = new HashMap<>();
     private static final HashMap<Integer, Set<Integer>> buildingTech = new HashMap<>();
     private static final TreeMap<Integer, MetaWarehouse> warehouse = new TreeMap<>();
+    private static final Map<Integer,Integer> salaryMap=new HashMap<Integer,Integer>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
@@ -94,6 +106,9 @@ public class MetaData {
     }
     public static MetaProduceDepartment getProduceDepartment(int id) {
         return produceDepartment.get(id);
+    }
+    public static int getSalaryByBuildingType(int type){
+    	return salaryMap.get(type);
     }
     public static int getDayId() {
         return dayId;
@@ -384,31 +399,38 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(trivialBuildingColName).find().forEach((Block<Document>) doc -> {
             MetaBuilding m = new MetaBuilding(doc);
             trivial.put(m.id, m);
+            salaryMap.put(MetaBuilding.TRIVIAL, m.salary);
         });
 
         mongoClient.getDatabase(dbName).getCollection(apartmentColName).find().forEach((Block<Document>) doc -> {
             MetaApartment m = new MetaApartment(doc);
             apartment.put(m.id, m);
+            salaryMap.put(MetaBuilding.APARTMENT, m.salary);
         });
         mongoClient.getDatabase(dbName).getCollection(materialFactoryColName).find().forEach((Block<Document>) doc -> {
             MetaMaterialFactory m = new MetaMaterialFactory(doc);
             materialFactory.put(m.id, m);
+            salaryMap.put(MetaBuilding.MATERIAL, m.salary);
         });
         mongoClient.getDatabase(dbName).getCollection(produceDepartmentColName).find().forEach((Block<Document>) doc -> {
             MetaProduceDepartment m = new MetaProduceDepartment(doc);
             produceDepartment.put(m.id, m);
+            salaryMap.put(MetaBuilding.PRODUCE, m.salary);
         });
         mongoClient.getDatabase(dbName).getCollection(retailShopColName).find().forEach((Block<Document>) doc -> {
             MetaRetailShop m = new MetaRetailShop(doc);
             retailShop.put(m.id, m);
+            salaryMap.put(MetaBuilding.RETAIL, m.salary);
         });
         mongoClient.getDatabase(dbName).getCollection(publicFacilityColName).find().forEach((Block<Document>) doc -> {
             MetaPublicFacility m = new MetaPublicFacility(doc);
             publicFacility.put(m.id, m);
+            salaryMap.put(MetaBuilding.PUBLIC, m.salary);
         });
         mongoClient.getDatabase(dbName).getCollection(laboratoryColName).find().forEach((Block<Document>) doc -> {
             MetaLaboratory m = new MetaLaboratory(doc);
             laboratory.put(m.id, m);
+            salaryMap.put(MetaBuilding.LAB, m.salary);
         });
         mongoClient.getDatabase(dbName).getCollection(initialBuildingColName).find().forEach((Block<Document>) doc -> {
             InitialBuildingInfo i = new InitialBuildingInfo(doc);
@@ -422,6 +444,7 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(warehouseColName).find().forEach((Block<Document>) doc -> {
             MetaWarehouse m = new MetaWarehouse(doc);
             warehouse.put(m.id, m);
+            salaryMap.put(MetaBuilding.WAREHOUSE, m.salary);
         });
     }
 

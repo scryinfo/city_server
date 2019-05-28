@@ -626,4 +626,14 @@ public class PublicFacility extends Building{
             }
         }
     }
+
+    //基础能力加成
+    public double getBaseAbility(){
+        //基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
+        //1.发放工资比例 *建筑NPC数量
+        int salaryAdd = this.getSalaryRatio()*this.getWorkerNum();
+        //2、 1个工人1小时产出
+        int workerAdd1H = meta.output1P1Hour;
+        return salaryAdd * workerAdd1H;
+    }
 }
