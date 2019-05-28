@@ -47,7 +47,7 @@ public class ProtoUtil {
         }
         return promotes;
     }
-
+    /*期望值数据封装*/
     public static List<Gs.EvaResultInfo.RetailOrApartmentData> getRetailOrApartmentDataList(List<Building> buildings, Map<UUID,List<Integer>> old,Map<UUID,List<Integer>> news,int type){
         List<Gs.EvaResultInfo.RetailOrApartmentData> retailOrApartmentData = new ArrayList<>();
         for (Building building : buildings) {
