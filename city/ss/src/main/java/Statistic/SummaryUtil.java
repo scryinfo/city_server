@@ -48,12 +48,6 @@ public class SummaryUtil
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
-    public static final String HOUR_MATERIAL = "hourMaterial";
-    public static final String HOUR_GOODS = "hourGoods";
-    public static final String HOUR_RETAILSHOP = "hourRetailshop";
-    public static final String HOUR_BRAND_AMOUNT = "hourBrandAmount";
-    private static final int TP_TYPE_NPC = 8;
-    private static final int TP_TYPE_PLAYER = 9;
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -73,10 +67,6 @@ public class SummaryUtil
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
-    private static MongoCollection<Document> hourMaterial;
-    private static MongoCollection<Document> hourGoods;
-    private static MongoCollection<Document> hourRetailShop;
-    private static MongoCollection<Document> hourBrandAmount;
 
     public static void init()
     {
@@ -115,14 +105,6 @@ public class SummaryUtil
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
-                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        hourMaterial = database.getCollection(HOUR_MATERIAL)
-                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        hourGoods = database.getCollection(HOUR_GOODS)
-                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        hourRetailShop = database.getCollection(HOUR_RETAILSHOP)
-                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        hourBrandAmount = database.getCollection(HOUR_BRAND_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -630,40 +612,10 @@ public class SummaryUtil
             return value;
         }
     }
-
-    public enum Categorytype {
-        APARTMENT(1),MATERIAL(2),RETAILSHOP(3),PROMOTION(4), PRODUCEDEP(5), STORAGE(6);
-        private int value;
-        Categorytype(int i)
-        {
-            this.value = i;
-        }
-
-        public int getValue()
-        {
-            return value;
-        }
-    }
-
     //--ly
     public static MongoCollection<Document> getPlayerExchangeAmount()
     {
         return playerExchangeAmount;
-    }
-    public static MongoCollection<Document> getHourMaterial()
-    {
-        return hourMaterial;
-    } public static MongoCollection<Document> getHourGoods()
-    {
-        return hourGoods;
-    }
-    public static MongoCollection<Document> gethourBrandAmount()
-    {
-        return hourBrandAmount;
-    }
-    public static MongoCollection<Document> getHourRetailShop()
-    {
-        return hourRetailShop;
     }
     public static void insertPlayerExchangeData(CountType countType,ExchangeType exchangeType,List<Document> documentList,
                                          long time,MongoCollection<Document> collection)
@@ -677,35 +629,6 @@ public class SummaryUtil
             collection.insertMany(documentList);
         }
     }
-
-
-    public static void insertHourMaterial(List<Document> documentList, long endTime, MongoCollection<Document> collection)
-    {
-        documentList.forEach(document -> {
-            document.append(TIME, endTime);
-        });
-        if (!documentList.isEmpty()) {
-            collection.insertMany(documentList);
-        }
-
-    }
-
-    public static void insertHourGoods(List<Document> documentList, long endTime, MongoCollection<Document> collection, boolean isNpcBuy) {
-        int type = TP_TYPE_NPC;
-        if (!isNpcBuy) {
-            type = TP_TYPE_PLAYER;
-        }
-
-        int finalType = type;
-        documentList.forEach(document -> {
-            document.append("tp", finalType);
-            document.append(TIME, endTime);
-        });
-        if (!documentList.isEmpty()) {
-            collection.insertMany(documentList);
-        }
-    }
-
 
     //玩家交易汇总表中查询开服截止当前时间玩家交易量。
     public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
@@ -766,15 +689,6 @@ public class SummaryUtil
                     map.put(document.getLong(TIME), document.getLong(finalValue));
                 });
         return map;
-    }
-
-    public static void insertBrandAndQuality(Categorytype categoryType, List<Document> documentList, long time, MongoCollection<Document> collection) {
-        //document already owned : id,total
-        documentList.forEach(document ->
-                document.append(TIME, time).append("ct", categoryType.getValue()));
-        if (!documentList.isEmpty()) {
-            collection.insertMany(documentList);
-        }
     }
 
 }

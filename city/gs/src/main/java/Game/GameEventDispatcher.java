@@ -180,16 +180,19 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			table.put((short) GsCode.OpCode.getOneSocietyInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "getOneSocietyInfo"));
 			table.put((short) GsCode.OpCode.getPlayerAmount_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerAmount"));
-			//获取住宅推荐价格
-			table.put((short) GsCode.OpCode.queryApartmentRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryApartmentRecommendPrice"));
-			//获取零售店推荐价格
-			table.put((short) GsCode.OpCode.queryRetailShopRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.RetailShopMsg.PARSER, GameSession.class, "queryRetailShopRecommendPrice"));
 			//获取原料推荐价格
 			table.put((short) GsCode.OpCode.queryMaterialRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.MaterialMsg.PARSER, GameSession.class, "queryMaterialRecommendPrice"));
-			//获取加工厂商品推荐价格
-			table.put((short) GsCode.OpCode.queryProduceDepRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryGoodsInfo.PARSER, GameSession.class, "queryProduceDepRecommendPrice"));
 			//获取推广推荐价格
 			table.put((short) GsCode.OpCode.queryPromotionRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.PromotionMsg.PARSER, GameSession.class, "queryPromotionRecommendPrice"));
+			//获取研究所推荐价格
+			table.put((short) GsCode.OpCode.queryLaboratoryRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.LaboratoryMsg.PARSER, GameSession.class, "queryLaboratoryRecommendPrice"));
+			//获取加工厂商品推荐价格
+			table.put((short) GsCode.OpCode.queryProduceDepRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.ProduceDepMsg.PARSER, GameSession.class, "queryProduceDepRecommendPrice"));
+
+//			//获取住宅推荐价格
+//			table.put((short) GsCode.OpCode.queryApartmentRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryApartmentRecommendPrice"));
+//			//获取零售店推荐价格
+//			table.put((short) GsCode.OpCode.queryRetailShopRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.RetailShopMsg.PARSER, GameSession.class, "queryRetailShopRecommendPrice"));
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));

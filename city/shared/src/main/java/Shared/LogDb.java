@@ -39,8 +39,6 @@ public class LogDb {
 	private static final int TYPE_GOODS = 2;
 	private static final int TYPE_INVENT = 3;
 	private static final int TYPE_EVAPOINT = 4;
-	private static final int TP_TYPE_NPC = 8;
-	private static final int TP_TYPE_PLAYER = 9;
 
 	private static final String PAY_SALARY = "paySalary";
 	private static final String PAY_TRANSFER = "payTransfer";
@@ -56,21 +54,17 @@ public class LogDb {
 
 	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
-	
+	//研究所日志记录
+	private static final String LABORATORY_RECORD = "laboratoryRecord";
+	// 推广公司日志记录
+	private static final String PROMOTION_RECORD = "promotionRecord";
+
 	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
 	private static final String CITY_BROADCAST = "cityBroadcast";
 	private static final String NPC_TYPE_NUM = "npcTypeNum";
 
 	private static final String FLOW_AND_LIFT = "flowAndLift";
-	private static final String PROMOTION_RECORD = "promotionRecord";
-	private static final String LABORATORY_RECORD = "laboratoryRecord";
 	private static final String NPCBUY_INRETAILCOL = "npcBuyInRetailCol";
-
-
-	//ly
-	public static final String HOUR_BRAND_AMOUNT = "hourBrandAmount";
-	public static final String HOUR_MATERIAL = "hourMaterial";
-	public static final String HOUR_GOODS = "hourGoods";
 
 	//集散中心租用仓库的收入记录
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
@@ -105,6 +99,8 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
+	private static MongoCollection<Document> laboratoryRecord;
+	private static MongoCollection<Document> promotionRecord;
 
 	//npc rent apartment
 	private static MongoCollection<Document> npcRentApartment;
@@ -121,17 +117,7 @@ public class LogDb {
 	//npc and player pay Miner cost
 	private static MongoCollection<Document> minersCost;	//矿工费用
 	private static MongoCollection<Document> npcMinersCost;//矿工费用
-	//promotion
-	private static MongoCollection<Document> promotionRecord;
-	//laboratory
-	private static MongoCollection<Document> laboratoryRecord;
-	//住宅
-	private static MongoCollection<Document> hourBrandAmount;
-	//零售店
-	private static MongoCollection<Document> hourRetailShop;
-	//原料
-	private static MongoCollection<Document> hourMaterial;
-	private static MongoCollection<Document> hourGoods;
+
 
 	public static final String KEY_TOTAL = "total";
 
@@ -166,7 +152,7 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buildingIncome = database.getCollection(BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		
+
 		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityBroadcast = database.getCollection(CITY_BROADCAST)
@@ -174,12 +160,6 @@ public class LogDb {
 		npcTypeNum = database.getCollection(NPC_TYPE_NUM)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		flowAndLift = database.getCollection(FLOW_AND_LIFT)
-				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		hourBrandAmount = database.getCollection(HOUR_BRAND_AMOUNT)
-				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		hourMaterial = database.getCollection(HOUR_MATERIAL)
-				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		hourGoods = database.getCollection(HOUR_GOODS)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		promotionRecord = database.getCollection(PROMOTION_RECORD)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -442,7 +422,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId,double brand,double quality)
+								  UUID producerId, UUID bid, int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -452,9 +432,7 @@ public class LogDb {
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
-				.append("tpi", typeId)
-				.append("tb", brand)
-				.append("tq", quality);
+				.append("tpi", typeId);
 		buyInShelf.insertOne(document);
 	}
 
@@ -473,16 +451,14 @@ public class LogDb {
 		npcBuyInShelf.insertOne(document);
 	}
 
-	public static void npcBuyInRetailCol(int itemId, int price, UUID producerId, int itemQty,int itemBrand,UUID buildingOwnerId, int buildingQty,int buildingBrand,float distance) {
+	public static void npcBuyInRetailCol(int itemId, int price, UUID producerId, int itemQty,UUID buildingOwnerId, int buildingQty,float distance) {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.put("imId", itemId);
 		document.put("p", price);
 		document.put("iId", producerId);
 		document.put("iQ", itemQty);
-		document.put("iB", itemBrand);
 		document.put("bId", buildingOwnerId);
 		document.put("bQ", buildingQty);
-		document.put("bB", buildingBrand);
 		document.put("d", distance);
 		npcBuyInRetailCol.insertOne(document);
 	}
@@ -565,19 +541,17 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId,double brand,double quality)
+			UUID ownerId, UUID bid, int type, int mId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
-        document.append("r", npcId)
-                .append("d", sellId)
-                .append("p", price)
-                .append("a", n * price)
-                .append("o", ownerId)
-                .append("b", bid)
-                .append("tp", type)
-                .append("mid", mId)
-                .append("brand", brand)
-                .append("quality", quality);
+		document.append("r", npcId)
+				.append("d", sellId)
+				.append("p", price)
+				.append("a", n * price)
+				.append("o", ownerId)
+				.append("b", bid)
+				.append("tp", type)
+				.append("mid", mId);
 		npcRentApartment.insertOne(document);
 	}
 
@@ -606,7 +580,7 @@ public class LogDb {
 		npcTypeNum.insertOne(document);
 	}
 	//记录推广成交记录
-	public static void promotionRecord(UUID sellerId, UUID buyerId,UUID bid,int price,long cost, int typeId,int categoryType,float ability,boolean isBuilding) {
+	public static void promotionRecord(UUID sellerId, UUID buyerId,UUID bid,int price,long cost, int typeId,int categoryType,boolean isBuilding) {
 		int type = TYPE_BUILDING;
 		if (!isBuilding) {
 			type = TYPE_GOODS;
@@ -619,7 +593,6 @@ public class LogDb {
 		document.append("bid", bid);
 		document.append("tp", type);
 		document.append("ct", categoryType);
-		document.append("ab", ability);
 		document.append("tpi", typeId);
 		promotionRecord.insertOne(document);
 	}
@@ -798,6 +771,14 @@ public class LogDb {
 		return playerPay;
 	}
 
+	public static MongoCollection<Document> getPromotionRecord() {
+		return promotionRecord;
+	}
+	public static MongoCollection<Document> getLaboratoryRecord() {
+		return laboratoryRecord;
+	}
+
+
 	public static MongoCollection<Document> getBuyRenterInShelf() {
 		return buyRenterInShelf;
 	}
@@ -817,14 +798,6 @@ public class LogDb {
 	public static MongoCollection<Document> getNpcMinersCost() {
 		return npcMinersCost;
 	}
-
-	public static MongoCollection<Document> getPromotionRecord() {
-		return promotionRecord;
-	}
-	public static MongoCollection<Document> getLaboratoryRecord() {
-		return laboratoryRecord;
-	}
-
 
 	public static class Positon
 	{
@@ -895,79 +868,14 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	public static List<Document> dayHourMaterial(long startTime, long endTime, MongoCollection<Document> collection)
-	{
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("p", "$p" )
-				.append("size", "$size" )
-				.append("_id",0);
 
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								eq("tp", TP_TYPE_MATERIAL),
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("p", "$p"), Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
-	public static List<Document> hourPromotionRecord(long startTime, long endTime, MongoCollection<Document> collection)
-	{
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$"+KEY_TOTAL)
-				.append("size", "$size" )
-				.append("_id",0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime)
-						)),
-						Aggregates.group("$ct",Accumulators.sum(KEY_TOTAL, "$c"),Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
-
-	public static List<Document> hourLaboratoryRecord(long startTime, long endTime, MongoCollection<Document> collection) {
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$"+KEY_TOTAL)
-				.append("size", "$size" )
-				.append("_id",0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime)
-						)),
-						Aggregates.group("$tp",Accumulators.sum(KEY_TOTAL, "$c"),Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
-
-	//查询一小时住宅成交的知名度品牌定价总和
-    public static List<Document> queryApartmentBrandAndQuality(long startTime, long endTime, MongoCollection<Document> collection) {
+    public static List<Document> hourPromotionRecord(long startTime, long endTime, MongoCollection<Document> collection)
+    {
         List<Document> documentList = new ArrayList<>();
         Document projectObject = new Document()
                 .append("id", "$_id")
-                .append("total", "$" + "total")
-                .append("p","$p")
-                .append("brand","$brand")
-                .append("quality","$quality")
-                .append("size","$size")
+                .append(KEY_TOTAL, "$"+KEY_TOTAL)
+                .append("size", "$size" )
                 .append("_id",0);
         collection.aggregate(
                 Arrays.asList(
@@ -975,240 +883,32 @@ public class LogDb {
                                 gte("t", startTime),
                                 lt("t", endTime)
                         )),
-                        Aggregates.group("$tp", Accumulators.sum("total", "$a"),
-                                Accumulators.sum("p", "$p"),
-                                Accumulators.sum("brand", "$brand"),
-                                Accumulators.sum("quality", "$quality"),
-                                Accumulators.sum("size", 1l)
-                        )
-                        , Aggregates.project(projectObject)
+                        Aggregates.group("$ct",Accumulators.sum(KEY_TOTAL, "$c"),Accumulators.sum("size", 1l)),
+                        Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) documentList::add);
-
         return documentList;
     }
 
-	//查询推广信息
-	public static List<Document> queryPromotionAbility(long startTime, long endTime, MongoCollection<Document> collection) {
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append("ab", "$ab")
-				.append("total", "$total")
-				.append("_id", 0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime)
-						)),
-						Aggregates.group("$tpi", Accumulators.sum("total", "$p"),
-								Accumulators.sum("ab", "$ab"),
-								Accumulators.sum("size", 1l)
+    public static List<Document> hourLaboratoryRecord(long startTime, long endTime, MongoCollection<Document> collection) {
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$"+KEY_TOTAL)
+                .append("size", "$size" )
+                .append("_id",0);
+        collection.aggregate(
+                Arrays.asList(
+                        Aggregates.match(and(
+                                gte("t", startTime),
+                                lt("t", endTime)
+                        )),
+                        Aggregates.group("$tp",Accumulators.sum(KEY_TOTAL, "$c"),Accumulators.sum("size", 1l)),
+                        Aggregates.project(projectObject)
+                )
+        ).forEach((Block<? super Document>) documentList::add);
+        return documentList;
+    }
 
-						)
-						, Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
-
-	//查询一小时玩家交易商品的知名度品牌定价总和
-	public static List<Document> queryGoodsBrandAndQuality(long startTime, long endTime, MongoCollection<Document> collection) {
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append("total", "$" + "total")
-				.append("p","$p")
-				.append("tb","$tb")
-				.append("tq","$tq")
-				.append("size","$size")
-				.append("_id",0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								eq("tp",TP_TYPE_GOODS),
-								gte("t", startTime),
-								lt("t", endTime)
-						)),
-						Aggregates.group("$tpi", Accumulators.sum("total", "$a"),
-								Accumulators.sum("p", "$p"),
-								Accumulators.sum("tb", "$tb"),
-								Accumulators.sum("tq", "$tq"),
-								Accumulators.sum("size", 1l)
-						)
-						, Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-
-		return documentList;
-	}
-
-
-	/*	document.put("imId", itemId);
-		document.put("p", price);
-		document.put("iId", producerId);
-		document.put("iQ", itemQty);
-		document.put("iB", itemBrand);
-		document.put("bId", buildingOwnerId);
-		document.put("bQ", buildingQty);
-		document.put("bB", buildingBrand);
-		document.put("d", distance);*/
-
-
-	//查询一小时npc交易商品的品质知名度，零售店的品质知名度
-	public static List<Document> queryNpcGoodsBrandAndQuality(long startTime, long endTime, MongoCollection<Document> collection) {
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append("total", "$" + "total")
-				.append("iQ","$iQ")
-				.append("iB","$iB")
-				.append("bQ","$bQ")
-				.append("bB","$bB")
-				.append("size","$size")
-				.append("_id",0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime)
-						)),
-						Aggregates.group("$imId", Accumulators.sum("total", "$p"),
-								Accumulators.sum("iQ", "$iQ"),
-								Accumulators.sum("iB", "$iB"),
-								Accumulators.sum("bQ", "$bQ"),
-								Accumulators.sum("bB", "$bB"),
-								Accumulators.sum("size", 1l)
-						)
-						, Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-
-		return documentList;
-	}
-
-	public enum Categorytype {
-		APARTMENT(1),MATERIAL(2),RETAILSHOP(3),PROMOTION(4), PRODUCEDEP(5), STORAGE(6);
-		private int value;
-		Categorytype(int i)
-		{
-			this.value = i;
-		}
-
-		public int getValue()
-		{
-			return value;
-		}
-	}
-	public static List<Double> queryAvg(long id,Categorytype cty) {
-		List<Double> list = new ArrayList<>();
-		hourBrandAmount.find(and(
-				eq("ct", cty.getValue()),
-				eq("id", id)
-		))
-//                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
-				.sort(Sorts.descending("time"))
-				.limit(1)
-				.forEach((Block<? super Document>) document ->
-				{
-					double price = new BigDecimal((float) document.getLong("p") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double quality = document.getDouble("quality") / document.getLong("size");
-					double brand = document.getDouble("brand") / document.getLong("size");
-					list.add(quality);
-					list.add(brand);
-					list.add(price);
-				});
-		return list;
-	}
-	public static double queryMaterialAvg(long mid) {
-		final double[] avg = {0.0};
-		hourMaterial.find(and(
-				eq("id", mid)
-		))
-				.sort(Sorts.descending("time"))
-				.limit(1)
-				.forEach((Block<? super Document>) document ->
-				{
-					avg[0] = new BigDecimal((float) document.getLong("p") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-				});
-		return avg[0];
-	}
-
-	public static List<Double> queryGoodsBrandAndQuality(long id,boolean isNpcBuy) {
-		List<Double> list = new ArrayList<>();
-		int type = TP_TYPE_NPC;
-		if (!isNpcBuy) {
-			type = TP_TYPE_PLAYER;
-		}
-		hourGoods.find(and(
-				eq("id", id),
-				eq("tp", type)
-		))
-				.sort(Sorts.descending("time"))
-				.limit(1)
-				.forEach((Block<? super Document>) document ->
-				{
-					double quality = document.getDouble("tq") / document.getLong("size");
-					double brand = document.getDouble("tb") / document.getLong("size");
-					double price = document.getLong("p") / document.getLong("size");
-					list.add(quality);
-					list.add(brand);
-					list.add(price);
-				});
-		return list;
-	}
-	public static List<Double> queryPromotionAvg(long typeId,Categorytype cty) {
-		List<Double> list = new ArrayList<>();
-		hourBrandAmount.find(and(
-				eq("id", typeId),
-				eq("ct", cty.getValue())
-		))
-				.sort(Sorts.descending("time"))
-				.limit(1)
-				.forEach((Block<? super Document>) document ->
-				{
-					double price = new BigDecimal((float) document.getLong("total") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double ability = document.getDouble("ab") / document.getLong("size");
-					list.add(price);
-					list.add(ability);
-				});
-		return list;
-	}
-	public static List<Double> queryRetailShopGoodsAvg(long itemId) {
-		List<Double> list = new ArrayList<>();
-		hourRetailShop.find(and(
-				eq("id", itemId)
-		))
-				.sort(Sorts.descending("time"))
-				.limit(1)
-				.forEach((Block<? super Document>) document ->
-				{
-					double quality = new BigDecimal((float) document.getLong("iQ") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double brand = new BigDecimal((float) document.getLong("iB") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double price = new BigDecimal((float) document.getLong("total") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					list.add(quality);
-					list.add(brand);
-					list.add(price);
-				});
-		return list;
-	}
-
-	public static List<Double> queryRetailShopAvg(long itemId) {
-		List<Double> list = new ArrayList<>();
-		hourRetailShop.find(and(
-				eq("id", itemId)
-		))
-				.sort(Sorts.descending("time"))
-				.limit(1)
-				.forEach((Block<? super Document>) document ->
-				{
-					double quality = new BigDecimal((float) document.getLong("bQ") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double brand = new BigDecimal((float) document.getLong("bB") / document.getLong("size")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-					list.add(quality);
-					list.add(brand);
-				});
-		return list;
-	}
 
 }

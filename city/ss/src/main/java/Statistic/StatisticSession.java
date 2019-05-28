@@ -238,7 +238,7 @@ public class StatisticSession {
 		Ss.PlayerGoodsCurve.Builder builder = Ss.PlayerGoodsCurve.newBuilder();
 		builder.setId(id);
 		builder.setExchangeType(exchangeType);
-		builder.setExchangeType(exchangeType);
+		builder.setType(curve.getType());
 		moneyMap.forEach((k,v)->{
 			Ss.PlayerGoodsCurve.PlayerGoodsCurveMap.Builder b = builder.addPlayerGoodsCurveMapBuilder();
 			b.setTime(k);

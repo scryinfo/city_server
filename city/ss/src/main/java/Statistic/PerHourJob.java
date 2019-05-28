@@ -58,23 +58,6 @@ public class PerHourJob implements org.quartz.Job {
         documentList = LogDb.hourLaboratoryRecord(endTime, startTime, LogDb.getLaboratoryRecord());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.LABORATORY, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
-        // --recommend price
-        // only material record
-        documentList = LogDb.dayHourMaterial(endTime, startTime, LogDb.getBuyInShelf());
-        SummaryUtil.insertHourMaterial(documentList, startTime, SummaryUtil.getHourMaterial());
-        // apartment brandAndQuality
-        documentList = LogDb.queryApartmentBrandAndQuality(endTime, startTime, LogDb.getNpcRentApartment());
-        SummaryUtil.insertBrandAndQuality(SummaryUtil.Categorytype.APARTMENT,documentList, startTime, SummaryUtil.gethourBrandAmount());
-        // publicFacility
-        documentList = LogDb.queryPromotionAbility(endTime, startTime, LogDb.getPromotionRecord());
-        SummaryUtil.insertBrandAndQuality(SummaryUtil.Categorytype.PROMOTION,documentList, startTime, SummaryUtil.gethourBrandAmount());
-
-        // ProduceDepartment goods brand quality record
-        documentList= LogDb.queryGoodsBrandAndQuality(endTime, startTime, LogDb.getBuyInShelf());
-        SummaryUtil.insertHourGoods(documentList, startTime, SummaryUtil.getHourGoods(),false);
-        // RetailShop goods brand qulity record
-        documentList = LogDb.queryNpcGoodsBrandAndQuality(endTime, startTime, LogDb.getNpcBuyInRetailCol());
-        SummaryUtil.insertHourMaterial(documentList, startTime, SummaryUtil.getHourRetailShop());
 
         //player income 由每小时统计变为每分钟统计
     /*    documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());
