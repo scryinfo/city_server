@@ -229,22 +229,23 @@ public class StatisticSession {
     }
 
     // 查询一周曲线图
-	public void queryPlayerGoodsCurve(short cmd, Message message) {
+	public void queryPlayerExchangeCurve(short cmd, Message message) {
 		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
 		long id = curve.getId();
-
-		Ss.PlayerGoodsCurve.ExchangeType exchangeType = curve.getExchangeType();
-		Map<Long, Long> map=SummaryUtil.queryPlayerGoodsCurve(SummaryUtil.getPlayerExchangeAmount(),id,exchangeType,CountType.BYHOUR);
-		Ss.PlayerGoodsCurveMap.Builder bmap = Ss.PlayerGoodsCurveMap.newBuilder();
-		Ss.PlayerGoodsCurve.Builder list = Ss.PlayerGoodsCurve.newBuilder();
-		list.setExchangeType(exchangeType);
-		map.forEach((k,v)->{
-			bmap.setKey(k);
-			bmap.setValue(v);
-			list.addPlayerGoodsCurveMap(bmap.build());
+		int exchangeType = curve.getExchangeType();
+		Map<Long, Long> moneyMap = SummaryUtil.queryPlayerExchangeCurve(SummaryUtil.getPlayerExchangeAmount(), id, exchangeType, curve.getType() ? CountType.BYHOUR : CountType.BYDAY, true);
+		Map<Long, Long> numMap = SummaryUtil.queryPlayerExchangeCurve(SummaryUtil.getPlayerExchangeAmount(), id, exchangeType, curve.getType() ? CountType.BYHOUR : CountType.BYDAY, false);
+		Ss.PlayerGoodsCurve.Builder builder = Ss.PlayerGoodsCurve.newBuilder();
+		builder.setId(id);
+		builder.setExchangeType(exchangeType);
+		builder.setType(curve.getType());
+		moneyMap.forEach((k,v)->{
+			Ss.PlayerGoodsCurve.PlayerGoodsCurveMap.Builder b = builder.addPlayerGoodsCurveMapBuilder();
+			b.setTime(k);
+			b.setMoney(v);
+			b.setSize((numMap != null && numMap.size() > 0 && numMap.get(k) != null) ? numMap.get(k) : 0);
 		});
-		this.write(Package.create(cmd,list.build()));
-
+		this.write(Package.create(cmd,builder.build()));
 	}
 	
     public void queryPlayerIncomePayCurve(short cmd, Message message)

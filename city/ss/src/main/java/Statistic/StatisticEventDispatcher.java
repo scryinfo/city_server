@@ -26,7 +26,7 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryBuildingLift_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryBuildingLift"));
 
             table.put((short) SsCode.OpCode.queryPlayerExchangeAmount_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryPlayerExchangeAmount"));  //查询截止当前时间玩家交易量
-            table.put((short) SsCode.OpCode.queryPlayerGoodsCurve_VALUE, Wrapper.newWithMessage(Ss.PlayerGoodsCurve.PARSER,StatisticSession.class, "queryPlayerGoodsCurve"));// 查询玩家购买曲线图
+            table.put((short) SsCode.OpCode.queryPlayerGoodsCurve_VALUE, Wrapper.newWithMessage(Ss.PlayerGoodsCurve.PARSER,StatisticSession.class, "queryPlayerExchangeCurve"));// 查询玩家交易曲线图
             table.put((short) SsCode.OpCode.queryPlayerIncomePayCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryPlayerIncomePayCurve")); //查询玩家收入支出曲线图
 
         } catch (Exception e) {
