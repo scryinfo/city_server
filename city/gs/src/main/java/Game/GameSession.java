@@ -2922,8 +2922,7 @@ public class GameSession {
 	}
 
 	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)==============================================================================
-	public void updateMyEvas(short cmd, Message message)
-	{
+	public void updateMyEvas(short cmd, Message message) {
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
 		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
 		for (Gs.Eva eva : evas.getEvaList()) {
@@ -2993,8 +2992,6 @@ public class GameSession {
 			results.addResultInfo(result);
 		}
 	}
-
-
 
 	public void queryMyBrands(short cmd, Message message){
 		Gs.QueryMyBrands msg = (Gs.QueryMyBrands)message;
