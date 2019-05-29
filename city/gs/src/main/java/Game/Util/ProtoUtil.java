@@ -2,7 +2,6 @@ package Game.Util;
 
 import Game.*;
 import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
 import gs.Gs;
 
 import java.util.ArrayList;
@@ -26,15 +25,15 @@ public class ProtoUtil {
             int price=0;
             String name=building.getName();
             switch (type){
-                case MetaBuilding.PRODUCE:
+                case MetaBuilding.PRODUCE:  //加工厂
                     ProduceDepartment pro = (ProduceDepartment) building;
                     price = pro.getShelf().getSellInfo(at).get(0).price;//售价
                     break;
-                case  MetaBuilding.PUBLIC:
+                case  MetaBuilding.PUBLIC: //推广公司
                     PublicFacility pub = (PublicFacility) building;
                     price = pub.getCurPromPricePerHour();
                     break;
-                case  MetaBuilding.LAB:
+                case  MetaBuilding.LAB:    //研究所
                     Laboratory lab = (Laboratory) building;
                     price = lab.getPricePreTime();
                     break;

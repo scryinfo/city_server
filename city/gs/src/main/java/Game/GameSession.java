@@ -2937,11 +2937,11 @@ public class GameSession {
 			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
-			//基础信息
+			//基础信息(加点前、加点后)
 			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
 			//升级对比信息
-			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）
+			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）（*）
 				//筛选玩家所有该建筑
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
 				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
@@ -2949,14 +2949,14 @@ public class GameSession {
 				Map<UUID, Double> newCompetitiveMap = EvaUtil.getProductCompetitiveMap(buildings, newEva);//2.修改前后的竞争力
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.PRODUCE,eva.getAt());
 				result.addAllPromotes(promotes);
-			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力
+			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力（*）
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PUBLIC);
 				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getPublicCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
 				EvaManager.getInstance().updateEva(newEva);
 				Map<UUID, Double> newCompetitiveMap = EvaUtil.getPublicCompetitiveMap(buildings,newEva);//2.修改后的竞争力
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.PUBLIC,null);
 				result.addAllPromotes(promotes);
-			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升
+			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升（*）
 				//同理，先获取未加点前的研究所竞争力，再获取加点后的
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.LAB);
 				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getLabCompetitiveMap(buildings, oldEva);//1.修改前的竞争力

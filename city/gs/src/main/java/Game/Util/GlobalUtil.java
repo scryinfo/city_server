@@ -66,23 +66,24 @@ public class GlobalUtil {
             return null;
     }
 
-    //3.获取商品的全城销售均价(获取所有货架上该商品的销售价格取平均值)
+    //3.获取商品的全城销售均价(获取所有货架上该商品的销售价格取平均值)(*)
     public static int getCityItemAvgPrice(int goodItem, int type) {
         int sumPrice = 0;
         int count = 0;
         List<Building> buildings = City.instance().getAllBuilding();
         for (Building building : buildings) {
             //判断类型
-            if (!(building instanceof IShelf) || building.type() != type)
+            if (building.type()!= type||building.outOfBusiness()||!(building instanceof  IShelf))
                 continue;
             IShelf shelf = (IShelf) building;
             Map<Item, Integer> saleDetail = shelf.getSaleDetail(goodItem);
             if (saleDetail != null) {
                 Integer price = new ArrayList<>(saleDetail.values()).get(0);
+                sumPrice += price;
                 count++;
             }
         }
-        return sumPrice / count;
+        return count == 0 ? 0 : sumPrice / count;
     }
 
     //4.查询全城建筑中设置的平均价格
@@ -141,7 +142,7 @@ public class GlobalUtil {
         }
         //计算发明或研究的的平均Eva加成信息
         int avgEvaAdd = cityAvgEva(at, bt);
-        return count == 0 ? 1 * (1 + avgEvaAdd) : (sumBaseOdds / count) * (1 + avgEvaAdd);
+        return count == 0 ? 1: (sumBaseOdds / count) * (1 + avgEvaAdd);
     }
 
    //6.全城商品均知名度 || 全城住宅均知名度
@@ -151,15 +152,13 @@ public class GlobalUtil {
       //获取所有的品牌信息
        List<BrandManager.BrandInfo> allBrand = BrandManager.instance().getAllBrandInfoByItem(item);
        for (BrandManager.BrandInfo brandInfo : allBrand) {
-           if(brandInfo.getKey().getMid()==item){
                sum += brandInfo.getV();
                count++;
+           //如果是商品，还需要加上基础品牌值
+           if(MetaGood.isItem(item)){
+               int baseBrand = MetaData.getGood(item).brand;
+               sum += baseBrand;
            }
-       }
-       //如果是商品，还需要加上基础品牌值
-       if(MetaGood.isItem(item)){
-           int baseBrand = MetaData.getGood(item).brand;
-           sum += baseBrand;
        }
        return  count==0?1: sum / count;
    }
@@ -233,13 +232,14 @@ public class GlobalUtil {
 
     //11.研究所的推荐定价
     public static int getLabRecommendPrice(int at,int bt,int playerSuccessOdds){
+        //1.均定价
         int cityAvgPrice = getCityAvgPriceByType(MetaBuilding.LAB);//全城发明均定价
-        //1.全城xx概率单位定价
+        //2..均成功几率
         int cityAvgSuccessOdds = getCityAvgSuccessOdds(at, bt);//全城发明成功几率
         /*单位定价 = 发明均定价 / 均发明成功几率*/
-        int successPrice = cityAvgPrice /cityAvgSuccessOdds;
-        //推荐定价
-        int recommendPrice = successPrice * playerSuccessOdds;
+        int unitPrice = cityAvgPrice /cityAvgSuccessOdds;
+        //推荐定价=单位定价 * 玩家发明概率
+        int recommendPrice = unitPrice * playerSuccessOdds;
         return recommendPrice;
     }
 }

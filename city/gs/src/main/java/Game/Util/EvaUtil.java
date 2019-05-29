@@ -56,15 +56,15 @@ public class EvaUtil {
             //1.1判断是否该有该上架的商品
             if (!pro.getShelf().has(at)||b.outOfBusiness())
                 continue;
-            int price = pro.getShelf().getSellInfo(at).get(0).price;//售价
+            int price = pro.getShelf().getSellInfo(at).get(0).price;//玩家定价
             MetaGood good = MetaData.getGood(at);
             int base = good.quality;//商品的品质基础值
             //获取品牌信息
             int brandValue = BrandManager.instance().getBrand(b.ownerId(),at).getV()+good.brand;
             double evaAdd = EvaManager.getInstance().computePercent(eva);
             int recommendPrice = GlobalUtil.getProduceRecommendPrice(at,bt,base,evaAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
-            int competitive = (int) Math.ceil(recommendPrice / price * 100);//竞争力
-            map.put(b.id(), (double) competitive);
+            double competitive= Math.ceil(recommendPrice / price * 100);//竞争力
+            map.put(b.id(),competitive);
         }
         return map;
     }
@@ -87,8 +87,8 @@ public class EvaUtil {
             /*单项推广能力 = 基础推广力 * （1 + %单项eva能力提升） *（1+%流量提升）*/
             double promoAbility = pub.getBaseAbility()*(1+evaAdd)*(1 +pub.getFlowPromoCur());
             double recommendPrice = cityAbilityPrice * promoAbility;
-            int competitive = (int) Math.ceil(recommendPrice / price * 100);
-            map.put(b.id(), (double) competitive);
+            double competitive = Math.ceil(recommendPrice / price * 100);
+            map.put(b.id(),competitive);
         }
         return map;
     }
@@ -112,21 +112,10 @@ public class EvaUtil {
             }
             //推荐定价
             int labRecommendPrice = GlobalUtil.getLabRecommendPrice(eva.getAt(), eva.getBt(),playerSuccessOdds); //推荐价格
-            int competitive = (int) Math.ceil(labRecommendPrice / price * 100);//竞争力
-            map.put(building.id(), (double) competitive);
+            double competitive =Math.ceil(labRecommendPrice / price * 100);//竞争力
+            map.put(building.id(),competitive);
         }
         return map;
-    }
-
-
-    //4.抽取住宅和零售店的预期值
-    public  static List<Gs.Promote> getApartmentOrRetailShopPromoteInfo(List<Building> buildings,Gs.Eva msEva, Eva newEva){
-        int at = msEva.getAt();
-        int bt = msEva.getBt().getNumber();
-        for (Building b : buildings) {
-
-        }
-        return null;
     }
 
     //TODO:获取住宅npc的预期值
