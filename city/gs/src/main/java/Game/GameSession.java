@@ -2932,7 +2932,7 @@ public class GameSession {
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
 
-	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)==============================================================================
+	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)=====================================================
 	public void updateMyEvas(short cmd, Message message) {
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
 		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值

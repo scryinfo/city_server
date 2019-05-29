@@ -120,7 +120,7 @@ public class GlobalUtil {
         if(count!=0)
             return sumPrice / count;
         else
-            return 1;
+            return 0;
     }
 
     //5.查询根据类型研究成功几率，依然是建筑的成功平均值+eva的平均提升值
