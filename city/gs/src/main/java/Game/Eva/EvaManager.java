@@ -119,9 +119,6 @@ public class EvaManager
         }else {
             e.setB(-1);
         }
-        updateEva(e);
         return e;
     }
-
-    //判断是否是推广能力的提升
 }
