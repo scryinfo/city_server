@@ -217,16 +217,16 @@ public class GlobalUtil {
         //1.全城商品销售均价
         int cityItemAvgPrice = getCityItemAvgPrice(at,buildingType);
         //2.玩家知名度权重
-        double brandWeight = EvaUtil.getBrandWeight(localBrand, at);
+        double brandWeight = CompeteAndExpectUtil.getBrandWeight(localBrand, at);
         //3.玩家品质权重
         int localQuality = (int) (base * (1 + localEvaAdd));
-        double qualityWeight = EvaUtil.getItemWeight(localQuality, at, bt, base);
+        double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, base);
         //4.全城知名度权重
         int cityAvgBrand = cityAvgBrand(at);
-        double cityBrandWeight = EvaUtil.getBrandWeight(cityAvgBrand, at);
+        double cityBrandWeight = CompeteAndExpectUtil.getBrandWeight(cityAvgBrand, at);
         //5.全城品质权重
         int cityAvgQuality =(int)(base * (1+ cityAvgEva(at, bt)));
-        double cityQualityWeight = EvaUtil.getItemWeight(cityAvgQuality, at, bt, base);
+        double cityQualityWeight = CompeteAndExpectUtil.getItemWeight(cityAvgQuality, at, bt, base);
         return (int) (cityItemAvgPrice * (brandWeight + qualityWeight) / (cityBrandWeight + cityQualityWeight));
     }
 

@@ -9,9 +9,10 @@ import Game.Meta.MetaGood;
 import gs.Gs;
 
 import java.util.*;
+/*此工具类提供了：获取建筑的竞争力和期望值的封装*/
+public class CompeteAndExpectUtil {
 
-public class EvaUtil {
-    //品质权重(品质权重等等计算)(arg1:当前值，arg2:a类型，arg3：b类型,arg4：品质基础值)
+    //1.品质权重(品质权重等等计算)(arg1:当前值，arg2:a类型，arg3：b类型,arg4：品质基础值)
     public static double getItemWeight(int localQuality,int at,int bt,int base){
        // 权重 = 当前值 / 全城最大 > 当前值 /全城最低 ?  当前值 / 全城最大 : 当前值 /全城最低
         Map<String, Eva> map = GlobalUtil.getEvaMaxAndMinValue(at,bt);
@@ -25,7 +26,7 @@ public class EvaUtil {
         return weight;
     }
 
-    //知名度权重
+    //2.知名度权重
     public static double getBrandWeight(int localBrand,int item){
         // 权重 = 当前值 / 全城最大 > 当前值 /全城最低 ?  当前值 / 全城最大 : 当前值 /全城最低
         //1.获取到全城该属性的最大最小的知名度(如果都为null，那么获取默认1)
@@ -45,7 +46,7 @@ public class EvaUtil {
         return weight;
     }
 
-    //获取加工厂建筑的竞争力
+    //3.获取加工厂建筑的竞争力
     public static Map<UUID,Double> getProductCompetitiveMap(List<Building> buildings, Eva eva){
         Map<UUID, Double> map = new HashMap<>();
         int at = eva.getAt();
@@ -69,7 +70,7 @@ public class EvaUtil {
         return map;
     }
 
-    //获取推广公司的竞争力
+    //4.获取推广公司的竞争力
     public static Map<UUID,Double> getPublicCompetitiveMap(List<Building> buildings, Eva eva){
         Map<UUID, Double> map = new HashMap<>();
         //1.全城推广均定价
@@ -93,7 +94,7 @@ public class EvaUtil {
         return map;
     }
 
-    //获取研究所公司建筑的竞争力
+    //5.获取研究所公司建筑的竞争力
     public static Map<UUID,Double> getLabCompetitiveMap(List<Building> buildings, Eva eva) {
         Map<UUID, Double> map = new HashMap<>();
         int at = eva.getAt();
@@ -118,19 +119,18 @@ public class EvaUtil {
         return map;
     }
 
-    //TODO:获取住宅npc的预期值
-    //参数1：eva a类型 ，2：eva b类型，3：当前品牌值，4：基础品质值（也就是建筑中的品质qty）
-    // 5:eva加成，6：npc的预期花费比例，7：玩家定价，8：npc每小时需
+    //6.TODO:获取住宅npc的预期花费
+    //参数：arg1:所有住宅建筑 arg2:当前eva信息  arg3:npc的花费比例
     public static  Map<UUID,List<Integer>> getApartmentExpectSpend(List<Building> buildings,Eva eva,double npcSpendRatio) {
         Map<UUID,List<Integer>> expectSpends = new HashMap<>();
         int at = eva.getAt();
         int bt = eva.getBt();
+        int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
+        int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt);//全城品质
         for (Building building : buildings) {
             if (building.outOfBusiness())
                 continue;
             Apartment apartment = (Apartment) building;
-            int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
-            int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt);//全城品质
             int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
             int localQuality = (int) (apartment.quality() * (EvaManager.getInstance().computePercent(eva)));//玩家品质
             double totalWeight = getItemWeight(localQuality, at, bt, apartment.quality()) + getBrandWeight(localBrand, at);

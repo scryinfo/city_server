@@ -60,20 +60,28 @@ public class ProtoUtil {
             Apartment apartment = (Apartment) building;
             int price = apartment.cost();//售价
             int cityAvgPrice = GlobalUtil.getCityAvgPriceByType(type);//全城定价
-            int buildingRich=0;//Todo ：繁荣度
+            int buildingRich=0;//Todo ：繁荣度（待补）
             //建筑获取开放数量
             int opentNum = City.instance().getOpentNumByType(type);
+
+            /*加点前后的预期花费*/
             Gs.ApartmentData.ExpectSpend.Builder oldExpectSpend = Gs.ApartmentData.ExpectSpend.newBuilder();
             Gs.ApartmentData.ExpectSpend.Builder newExpectSpend = Gs.ApartmentData.ExpectSpend.newBuilder();
             oldExpectSpend.setExpectSpend(oldExpect.get(0)).setCityExpectSpend(oldExpect.get(1));
             newExpectSpend.setExpectSpend(newExpect.get(0)).setCityExpectSpend(newExpect.get(1));
+
             //统计npc各个类型数量npc
             Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
             NpcManager.instance().countNpcByBuildingType().forEach((k,v)->{
                list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
             });
-            ra.setName(name).setPrice(price).setCityPrice(cityAvgPrice).setBuildingRich(buildingRich).setOpenNum(opentNum)
-                            .setOldExpectSpend(oldExpectSpend).setNewExpectSpend(oldExpectSpend).setCountTypeNum(list);
+            ra.setName(name).setPrice(price)
+                    .setCityPrice(cityAvgPrice)
+                    .setBuildingRich(buildingRich)
+                    .setOpenNum(opentNum)
+                    .setOldExpectSpend(oldExpectSpend)
+                    .setNewExpectSpend(oldExpectSpend)
+                    .setCountTypeNum(list);
             apartmentList.add(ra.build());
         }
         return apartmentList;

@@ -2944,34 +2944,34 @@ public class GameSession {
 			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）（*）
 				//筛选玩家所有该建筑
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
-				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
+				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
 				EvaManager.getInstance().updateEva(newEva);
-				Map<UUID, Double> newCompetitiveMap = EvaUtil.getProductCompetitiveMap(buildings, newEva);//2.修改前后的竞争力
+				Map<UUID, Double> newCompetitiveMap = CompeteAndExpectUtil.getProductCompetitiveMap(buildings, newEva);//2.修改前后的竞争力
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.PRODUCE,eva.getAt());
 				result.addAllPromotes(promotes);
 			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力（*）
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PUBLIC);
-				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getPublicCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
+				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getPublicCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
 				EvaManager.getInstance().updateEva(newEva);
-				Map<UUID, Double> newCompetitiveMap = EvaUtil.getPublicCompetitiveMap(buildings,newEva);//2.修改后的竞争力
+				Map<UUID, Double> newCompetitiveMap = CompeteAndExpectUtil.getPublicCompetitiveMap(buildings,newEva);//2.修改后的竞争力
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.PUBLIC,null);
 				result.addAllPromotes(promotes);
 			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升（*）
 				//同理，先获取未加点前的研究所竞争力，再获取加点后的
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.LAB);
-				Map<UUID, Double> oldCompetitiveMap = EvaUtil.getLabCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
+				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getLabCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
 				EvaManager.getInstance().updateEva(newEva);
-				Map<UUID, Double> newCompetitiveMap = EvaUtil.getLabCompetitiveMap(buildings, newEva);//2.修改后的竞争力
+				Map<UUID, Double> newCompetitiveMap = CompeteAndExpectUtil.getLabCompetitiveMap(buildings, newEva);//2.修改后的竞争力
 				ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.LAB,null);
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.LAB,null);
 				result.addAllPromotes(promotes);
-			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数
+			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数（*，目前只差一个繁荣度）
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.APARTMENT);
 				//npc花费比例
 				double spendMoneyRatio = MetaData.getBuildingSpendMoneyRatio(eva.getAt());
-				Map<UUID, List<Integer>> oldExpectSpend = EvaUtil.getApartmentExpectSpend(buildings, oldEva, spendMoneyRatio);//1.获取修改前的预期花费
+				Map<UUID, List<Integer>> oldExpectSpend = CompeteAndExpectUtil.getApartmentExpectSpend(buildings, oldEva, spendMoneyRatio);//1.获取修改前的预期花费
 				EvaManager.getInstance().updateEva(newEva);
-				Map<UUID, List<Integer>> newExpectSpend = EvaUtil.getApartmentExpectSpend(buildings, newEva, spendMoneyRatio);//2.修改后的预期花费
+				Map<UUID, List<Integer>> newExpectSpend = CompeteAndExpectUtil.getApartmentExpectSpend(buildings, newEva, spendMoneyRatio);//2.修改后的预期花费
 				//封装数据
 				List<Gs.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
 				result.addAllApartmentData(apartmentData);
