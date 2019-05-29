@@ -7,6 +7,9 @@ import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
+
+
+
 public class GameEventDispatcher extends DispatcherBase {
 	private static final Logger logger = Logger.getLogger(GameEventDispatcher.class);
 	private static GameEventDispatcher instance = new GameEventDispatcher();
@@ -240,6 +243,9 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryWarehouseInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryWarehouseInfo"));
 			//查询研究所信息
 			table.put((short) GsCode.OpCode.queryLaboratoryInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryLaboratoryInfo"));
+
+			//充提
+			table.put((short) GsCode.OpCode.cc_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.CcOuterClass.CreateUserReq.PARSER, GameSession.class,"cc_CreateUserReq"));
 			if(GlobalConfig.debug()){
 
 			}

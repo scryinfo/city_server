@@ -5,7 +5,7 @@
  */
 
 
-syntax = "proto2";
+syntax = "proto3";
 
 package cityapi;
 option go_package = "github.com/scryinfo/citychain-s/ccapi/grpc/go_out/cityapi";
@@ -20,16 +20,16 @@ service CityS {
 //    rpc DischargeResult(NormalEventReq) returns(NormalEventRes);
 }
 message RechargeResultRes {
-    required ccapi.ResHeader ResHeader  = 1;
+    ccapi.ResHeader ResHeader  = 1;
 }
 
 message RechargeResultReq {
-    required ccapi.ReqHeader ReqHeader = 1;
-    required ccapi.ErrCode ErrCode = 2;
-    required string ErrMsg =3;
-    required string CityPurchaseId = 4;
-    required string CccTokenAmount =5; //带小数点 精度4 、ddd->ccc 1：1
-    required string LastBlockId=6;
+    ccapi.ReqHeader ReqHeader = 1;
+    ccapi.ErrCode ErrCode = 2;
+    string ErrMsg =3;
+    string CityPurchaseId = 4;
+    string CccTokenAmount =5; //带小数点 精度4 、ddd->ccc 1：1
+    string LastBlockId=6;
 }
 
 

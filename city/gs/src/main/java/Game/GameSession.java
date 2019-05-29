@@ -12,7 +12,6 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.CityUtil;
-import Game.Util.EvaUtil;
 import Game.Util.GlobalUtil;
 import Game.Util.WareHouseUtil;
 import Shared.*;
@@ -22,7 +21,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.sun.xml.internal.bind.v2.TODO;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -39,9 +37,11 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import sun.rmi.runtime.Log;
 
-import static javafx.scene.input.KeyCode.T;
+//import com.sun.xml.internal.bind.v2.TODO;
+//import sun.rmi.runtime.Log;
+
+//import static javafx.scene.input.KeyCode.T;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -3942,28 +3942,54 @@ public class GameSession {
     }
 	//查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
-    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-    	Building building = City.instance().getBuilding(buildingId);
-    	Laboratory lab = (Laboratory) building ;
+		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		Laboratory lab = (Laboratory) building ;
 
-    	Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-      	builder.setSalary(lab.salaryRatio);
-    	builder.setStaffNum(lab.getWorkerNum());
-    	builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-    	builder.setGoodProb(lab.getGoodProb());
+		Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
+		builder.setSalary(lab.salaryRatio);
+		builder.setStaffNum(lab.getWorkerNum());
+		builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
+		builder.setGoodProb(lab.getGoodProb());
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
 		builder.setBuildingInfo(buildingInfo);
-    	for (int type : msg.getTypeIdsList()) {
-    		Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-    		Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-    		b.setTypeId(type);
-    		b.setAbility(EvaManager.getInstance().computePercent(eva));
+		for (int type : msg.getTypeIdsList()) {
+			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
+			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
+			b.setTypeId(type);
+			b.setAbility(EvaManager.getInstance().computePercent(eva));
 		}
-    	this.write(Package.create(cmd, builder.build()));
-    }
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void cc_CreateUserReq(short cmd,Message message){
+		//Gs.Cc_createUser msg = (Gs.Cc_createUser) message;
+		ccapi.CcOuterClass.CreateUserReq msg = (ccapi.CcOuterClass.CreateUserReq) message;
+		//UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		//ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		int t = 0 ;
+		/*Building building = City.instance().getBuilding(buildingId);
+		Laboratory lab = (Laboratory) building ;
+
+		Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
+		builder.setSalary(lab.salaryRatio);
+		builder.setStaffNum(lab.getWorkerNum());
+		builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
+		builder.setGoodProb(lab.getGoodProb());
+		//建筑基本信息
+		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
+		builder.setBuildingInfo(buildingInfo);
+		for (int type : msg.getTypeIdsList()) {
+			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
+			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
+			b.setTypeId(type);
+			b.setAbility(EvaManager.getInstance().computePercent(eva));
+		}
+		this.write(Package.create(cmd, builder.build()));*/
+	}
 
     //获取建筑的通用信息（抽取，yty）
     public Gs.BuildingGeneral.Builder buildingToBuildingGeneral(Building building){

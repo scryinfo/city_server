@@ -1,17 +1,37 @@
 plugins {
-    id 'java'
+    // Provide convenience executables for trying out the examples.
+    id 'application'
+    // ASSUMES GRADLE 2.12 OR HIGHER. Use plugin version 0.7.5 with earlier gradle versions
+    id 'com.google.protobuf' version '0.8.8'
+    // Generate IntelliJ IDEA's .idea & .iml project files
+    id 'idea'
 }
 
-group 'info.scry.city'
-//version '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
+//repositories {
+//    mavenCentral()
+//}
 
 repositories {
-    mavenCentral()
+    maven { // The google mirror is less flaky than mavenCentral()
+        url "https://maven-central.storage-download.googleapis.com/repos/central/data/" }
+    mavenLocal()
 }
+group 'info.scry.city'
+def grpcVersion = '1.21.0' // CURRENT_GRPC_VERSION
+def protobufVersion = '3.7.1'
+def protocVersion = protobufVersion
+sourceCompatibility = 1.8
+
 dependencies {
-    //compile 'com.google.protobuf:protobuf-java:3.6.1'
+    compile 'io.grpc:grpc-netty-shaded:1.21.0'
+    compile 'io.grpc:grpc-protobuf:1.21.0'
+    compile 'io.grpc:grpc-stub:1.21.0'
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    compileOnly "javax.annotation:javax.annotation-api:1.2"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+    runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    testImplementation "io.grpc:grpc-testing:${grpcVersion}"
 }
 sourceSets {
     main.java.srcDirs += 'src/jpaModelgen/generated'
@@ -31,3 +51,49 @@ task myCopyTask(type: Copy) {
 }
 //myCopyTask.dependsOn jar
 assemble.dependsOn myCopyTask
+
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+    }
+}
+
+// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+startScripts.enabled = false
+
+task helloWorldServer(type: CreateStartScripts) {
+    mainClassName = 'io.grpc.examples.helloworld.HelloWorldServer'
+    applicationName = 'hello-world-server'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task helloWorldClient(type: CreateStartScripts) {
+    mainClassName = 'io.grpc.examples.helloworld.HelloWorldClient'
+    applicationName = 'hello-world-client'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+applicationDistribution.into('bin') {
+    //from(routeGuideServer)
+    //from(routeGuideClient)
+    from(helloWorldServer)
+    from(helloWorldClient)
+    //from(compressingHelloWorldClient)
+    fileMode = 0755
+}

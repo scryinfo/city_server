@@ -13,7 +13,7 @@ import "global_def.proto";
 
 // The greeting service definition.
 // CityUserName 是用户创建后返回的 ccc account name
-service CcS {
+service Cc {
 
     //创建玩家用户
     rpc CreateUser (CreateUserReq) returns (ccapi.ResHeader) {}
@@ -41,12 +41,11 @@ message CreateUserReq {
     required string PayPassword = 5;
     //返回的钱包地址
     optional string EthAddr = 6;
-
 }
 
 //生成订单号
 message GenerateOrderReq {
-    required ccapi.ReqHeader ReqHeader = 1;
+    required ReqHeader ReqHeader = 1;
     optional string PurchaseId = 2; //生成的订单号
 }
 //提币
