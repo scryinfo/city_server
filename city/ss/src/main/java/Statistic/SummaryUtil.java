@@ -689,6 +689,6 @@ public class SummaryUtil
                     map.put(document.getLong(TIME), document.getLong(finalValue));
                 });
         return map;
-    }*/
+    }
 
 }
