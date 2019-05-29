@@ -111,18 +111,24 @@ public class StatisticSession {
         this.write(Package.create(cmd, builder.build()));
     }
     
-    public void queryGoodsNpcNum(short cmd, Message message)
+    public void queryNpcNum(short cmd, Message message)
     {
-    	Ss.GoodNpcNumInfo m = (Ss.GoodNpcNumInfo)message;
+    	Ss.QueryNpcNum m = (Ss.QueryNpcNum)message;
     	long time=m.getTime();
-    	Ss.GoodsNpcNum.Builder list = Ss.GoodsNpcNum.newBuilder();
-    	Ss.GoodNpcNumInfo.Builder info = Ss.GoodNpcNumInfo.newBuilder();
-    	List<Document> ls=SummaryUtil.getGoodsNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
+    	int type=m.getType().getNumber();
+    	Ss.NpcNums.Builder list = Ss.NpcNums.newBuilder();
+    	Ss.NpcNums.NpcNumInfo.Builder info = Ss.NpcNums.NpcNumInfo.newBuilder();
+    	List<Document> ls=null;
+    	if(Ss.QueryNpcNum.Type.GOODS.equals(type)){
+        	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
+    	}else if(Ss.QueryNpcNum.Type.APARTMENT.equals(type)){
+        	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayApartmentNpcNum(),CountType.BYSECONDS,time);
+    	}
     	for (Document document : ls) {
     		info.setId(document.getInteger("id"));
     		info.setTotal(document.getLong("total"));
     		info.setTime(document.getLong("time"));
-    		list.addGoodNpcNumInfo(info.build());
+    		list.addNumInfo(info.build());
 		}
     	this.write(Package.create(cmd, list.build()));
     }
