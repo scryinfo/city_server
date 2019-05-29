@@ -1,5 +1,25 @@
 package Game;
 
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import Shared.Package;
+import Shared.Util;
+import com.google.protobuf.Message;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
+
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.League.BrandLeague;
@@ -412,7 +432,6 @@ public class BrandManager {
     public double getValFromMap(Map<Integer,Double> map,int type){
     	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
     }
-
     //根据建筑类型获取品牌信息
     public List<Gs.MyBrands.Brand> getBrandByType(int type,UUID pid){
         List<Gs.MyBrands.Brand> brands = new ArrayList<>();
@@ -430,7 +449,6 @@ public class BrandManager {
         });
         return brands;
     }
-
     public List<BrandInfo> getAllBrandInfoByItem(int item){
         ArrayList<BrandInfo> infos = new ArrayList<>();
         allBrandInfo.values().forEach(b->{
@@ -439,4 +457,5 @@ public class BrandManager {
         });
         return infos;
     }
+
 }

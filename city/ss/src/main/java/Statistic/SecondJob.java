@@ -2,6 +2,7 @@ package Statistic;
 
 import static Statistic.PerHourJob.BUYGROUND_ID;
 import static Statistic.PerHourJob.RENTGROUND_ID;
+import static Statistic.SummaryUtil.SECOND_MILLISECOND;
 
 import java.text.MessageFormat;
 import java.time.Instant;
@@ -23,22 +24,11 @@ public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException
-    {
+    public void execute(JobExecutionContext context) throws JobExecutionException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
-        
-
-        long time1 = System.currentTimeMillis();
-        long endTime = time1 - time1%(1000 * 10);
-
+        long startTime = SummaryUtil.secondStartTime(System.currentTimeMillis());
+        long endTime = startTime - SECOND_MILLISECOND;
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
@@ -51,27 +41,33 @@ public class SecondJob implements org.quartz.Job {
 
 
         //buy ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getBuyGround(),BUYGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange1(endTime,startTime,LogDb.getBuyGround(), BUYGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
-        documentList = LogDb.dayPlyaerExchange1(startTime, endTime, LogDb.getRentGround(),RENTGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange1(endTime, startTime, LogDb.getRentGround(), RENTGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy goods in Shelf
-        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange2(endTime, startTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GOODS, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy material in Shelf
-        documentList = LogDb.dayPlyaerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange2(endTime, startTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.MATERIAL, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
+        // PublicFacility Promotion buildingOrGoods
+        documentList = LogDb.hourPromotionRecord(endTime, startTime, LogDb.getPromotionRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.PUBLICITY, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
+        // Laboratory  research EvapointOrinvent
+        documentList = LogDb.hourLaboratoryRecord(endTime, startTime, LogDb.getLaboratoryRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.LABORATORY, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
         //统计耗时
         StatisticSession.setIsReady(true);
-        long nowTime1 = System.currentTimeMillis();
-        timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));
+        long nowcurrTime = System.currentTimeMillis();
+        timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowcurrTime), ZoneId.systemDefault()));
         LOGGER.debug(MessageFormat.format("SecondJob end execute, time = {0}, consume = {1} ms",
-                timeStr, nowTime1 - nowTime));
+                timeStr, nowcurrTime - nowTime));
     }
 }

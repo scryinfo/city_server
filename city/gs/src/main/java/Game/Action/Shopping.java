@@ -138,8 +138,8 @@ public class Shopping implements IAction {
                     .setBid(sellShop.metaId())
                     .setItemId(chosen.meta.id)
                     .build());
-            LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
-                    chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
+            LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
+                    chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
                     chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
             LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price, MetaItem.type(chosen.meta.id), chosen.meta.id);
@@ -197,8 +197,8 @@ public class Shopping implements IAction {
                       .setBid(sellShop.metaId())
                       .setItemId(chosen.meta.id)
                       .build());
-              LogDb.npcBuy(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
-                      chosen.qty, sellShop.ownerId(), chosen.buildingBrand, chosen.buildingQty);
+              LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
+                      chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
                       chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price, MetaItem.type(chosen.meta.id), chosen.meta.id);

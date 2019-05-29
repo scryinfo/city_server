@@ -9,12 +9,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
 import Game.Contract.ContractManager;
+import Game.Eva.EvaManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -179,7 +181,7 @@ public class City {
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
 
         this.lastHour = this.localTime().getHour();
-        
+
         //行业涨薪指数
         loadIndustryIncrease();
     }
@@ -299,7 +301,7 @@ public class City {
         }
         timeSectionAccumlateNano += diffNano;
     }
-    
+
     private void updateInsurance(long diffNano) {
     	if (this.insuranceTimer.update(diffNano)) {
     		Map<UUID, Npc> map=NpcManager.instance().getUnEmployeeNpc();
@@ -311,7 +313,7 @@ public class City {
     		GameDb.saveOrUpdate(map.values());
     	}
     }
-    
+
     private void updateIndustryMoney(long diffNano) {
     	if (this.industryMoneyTimer.update(diffNano)) {
     		//跌幅 =   (1 - 社保发放比例 - 税收比例) * 失业率
@@ -332,10 +334,10 @@ public class City {
          		 industryMoneyMap.put(k, ii);
          		 GameDb.saveOrUpdate(ii);  //更新行业工资
     		});
-    		
+
     	}
     }
-    
+
     public double getAvgIndustrySalary(){
     	double a=0;
     	for(Map.Entry<Integer, IndustryIncrease> map:industryMoneyMap.entrySet()){
@@ -343,7 +345,7 @@ public class City {
     	}
     	return a/6.d;
     }
-    
+
     private void dayTickAction() {
         MetaData.updateDayId();
     }
@@ -607,7 +609,10 @@ public class City {
         ArrayList list = new ArrayList(allBuilding.values());
         return list;
     }
-    //获取该建筑类型已开放的数量
+
+    public double getIndustrySalary(int type) {
+        return industryMoneyMap.get(type) != null ? industryMoneyMap.get(type).getIndustrySalary() : 0.0;
+    }    //获取该建筑类型已开放的数量
     public int getOpentNumByType(int type){
         int count=0;
         for (Building building : getAllBuilding()) {

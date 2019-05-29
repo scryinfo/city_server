@@ -1289,7 +1289,7 @@ public class GameDb {
 		try {
 			session = sessionFactory.openStatelessSession();
 			transaction = session.beginTransaction();
-			amount = (long) session.createSQLQuery("select count (ID) FROM PLAYER").uniqueResult();
+			amount = (Long) session.createQuery("SELECT COUNT(*) FROM Player").uniqueResult();
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
