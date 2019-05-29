@@ -612,7 +612,9 @@ public class City {
 
     public double getIndustrySalary(int type) {
         return industryMoneyMap.get(type) != null ? industryMoneyMap.get(type).getIndustrySalary() : 0.0;
-    }    //获取该建筑类型已开放的数量
+    }
+
+    //获取该建筑类型已开放的数量
     public int getOpentNumByType(int type){
         int count=0;
         for (Building building : getAllBuilding()) {
