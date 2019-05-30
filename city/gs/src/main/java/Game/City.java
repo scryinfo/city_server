@@ -52,7 +52,7 @@ public class City {
     public int[] timeSection() {
         return meta.timeSection;
     }
-    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);
+    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);//1分钟转为200纳秒颗粒数
     public MetaCity getMeta() {
         return meta;
     }
@@ -612,5 +612,16 @@ public class City {
 
     public double getIndustrySalary(int type) {
         return industryMoneyMap.get(type) != null ? industryMoneyMap.get(type).getIndustrySalary() : 0.0;
+    }
+
+    //获取该建筑类型已开放的数量
+    public int getOpentNumByType(int type){
+        int count=0;
+        for (Building building : getAllBuilding()) {
+            if(building.type()==type&&!building.outOfBusiness()){
+                count++;
+            }
+        }
+        return count;
     }
 }
