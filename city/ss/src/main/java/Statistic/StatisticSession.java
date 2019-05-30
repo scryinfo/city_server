@@ -131,8 +131,8 @@ public class StatisticSession {
         		info.setTime(document.getLong("time"));
         		list.addNumInfo(info.build());
     		}
-    	 	list.setType(type);
     	}
+    	list.setType(type);
     	this.write(Package.create(cmd, list.build()));
     }
     
