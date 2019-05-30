@@ -245,7 +245,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryLaboratoryInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryLaboratoryInfo"));
 
 			//充提
-			table.put((short) GsCode.OpCode.cc_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.CcOuterClass.CreateUserReq.PARSER, GameSession.class,"cc_CreateUserReq"));
+			table.put((short) GsCode.OpCode.cc_createUser_VALUE, Wrapper.newWithMessageAsync(Gs.Cc_createUser.PARSER, GameSession.class,"cc_CreateUserReq"));
 			if(GlobalConfig.debug()){
 
 			}

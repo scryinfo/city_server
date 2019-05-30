@@ -3967,8 +3967,8 @@ public class GameSession {
 
 	public void cc_CreateUserReq(short cmd,Message message){
 		//Gs.Cc_createUser msg = (Gs.Cc_createUser) message;
-		ccapi.CcOuterClass.CreateUserReq msg = (ccapi.CcOuterClass.CreateUserReq) message;
-		//UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Gs.Cc_createUser msg = (Gs.Cc_createUser) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		//ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
 		int t = 0 ;
 		/*Building building = City.instance().getBuilding(buildingId);
