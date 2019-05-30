@@ -124,12 +124,15 @@ public class StatisticSession {
     	}else if(Ss.QueryNpcNum.Type.APARTMENT.equals(type)){
         	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayApartmentNpcNum(),CountType.BYSECONDS,time);
     	}
-    	for (Document document : ls) {
-    		info.setId(document.getInteger("id"));
-    		info.setTotal(document.getLong("total"));
-    		info.setTime(document.getLong("time"));
-    		list.addNumInfo(info.build());
-		}
+    	if(ls!=null&&ls.size()>0){
+    	 	for (Document document : ls) {
+        		info.setId(document.getInteger("id"));
+        		info.setTotal(document.getLong("total"));
+        		info.setTime(document.getLong("time"));
+        		list.addNumInfo(info.build());
+    		}
+    	 	list.setType(type);
+    	}
     	this.write(Package.create(cmd, list.build()));
     }
     
