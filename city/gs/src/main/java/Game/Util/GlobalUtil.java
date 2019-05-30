@@ -160,7 +160,7 @@ public class GlobalUtil {
                sum += baseBrand;
            }
        }
-       return  count==0?1: sum / count;
+       return  count==0?0: sum / count;
    }
 
    //7.获取全城Eva属性商品品质均加成信息
@@ -207,7 +207,7 @@ public class GlobalUtil {
                 count++;
             }
         }
-        return (quality/count) * (1 + avgAdd);
+        return  count==0?0:(quality/count) * (1 + avgAdd);
     }
 
    //10.获取加工厂推荐定价
@@ -219,7 +219,7 @@ public class GlobalUtil {
         //2.玩家知名度权重
         double brandWeight = CompeteAndExpectUtil.getBrandWeight(localBrand, at);
         //3.玩家品质权重
-        int localQuality = (int) (base * (1 + localEvaAdd));
+        double localQuality = (base * (1 + localEvaAdd));
         double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, base);
         //4.全城知名度权重
         int cityAvgBrand = cityAvgBrand(at);

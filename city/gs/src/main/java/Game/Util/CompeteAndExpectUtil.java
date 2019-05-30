@@ -13,7 +13,7 @@ import java.util.*;
 public class CompeteAndExpectUtil {
 
     //1.品质权重(品质权重等等计算)(arg1:当前值，arg2:a类型，arg3：b类型,arg4：品质基础值)
-    public static double getItemWeight(int localQuality,int at,int bt,int base){
+    public static double getItemWeight(double localQuality,int at,int bt,int base){
        // 权重 = 当前值 / 全城最大 > 当前值 /全城最低 ?  当前值 / 全城最大 : 当前值 /全城最低
         Map<String, Eva> map = GlobalUtil.getEvaMaxAndMinValue(at,bt);
         if(map==null)
@@ -31,8 +31,8 @@ public class CompeteAndExpectUtil {
         // 权重 = 当前值 / 全城最大 > 当前值 /全城最低 ?  当前值 / 全城最大 : 当前值 /全城最低
         //1.获取到全城该属性的最大最小的知名度(如果都为null，那么获取默认1)
         Map<String, BrandManager.BrandInfo> map = GlobalUtil.getMaxOrMinBrandInfo(item);
-        int minBrand=1;
-        int maxBrand=1;
+        int minBrand=0;
+        int maxBrand=0;
         if(map!=null){
             minBrand = map.get("min").getV();
             maxBrand = map.get("max").getV();
@@ -41,6 +41,10 @@ public class CompeteAndExpectUtil {
             int goodBrand = MetaData.getGood(item).brand;
             minBrand += goodBrand;
             maxBrand += goodBrand;
+        }
+        if(minBrand==0&&maxBrand==0){//设置默认值
+            minBrand=1;
+            maxBrand = 1;
         }
         double weight = (localBrand / maxBrand)> (localBrand / minBrand) ? localBrand / maxBrand : localBrand / minBrand;
         return weight;
@@ -132,13 +136,13 @@ public class CompeteAndExpectUtil {
                 continue;
             Apartment apartment = (Apartment) building;
             int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
-            int localQuality = (int) (apartment.quality() * (EvaManager.getInstance().computePercent(eva)));//玩家品质
+            int localQuality = (int) (apartment.quality() * (1+EvaManager.getInstance().computePercent(eva)));//玩家品质
             double totalWeight = getItemWeight(localQuality, at, bt, apartment.quality()) + getBrandWeight(localBrand, at);
             //玩家预期花费（住宅预期花费 = (总权重 * 200 / 3 + 1) * NPC预期花费比例 * NPC平均工资）
-            int expectSpend = (int) ((totalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary());
+            int expectSpend = (int) Math.ceil(((totalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary()));
             //全城的预期花费
             double cityTotalWeight = getItemWeight(cityAvgQuality, at, bt, apartment.quality()) + getBrandWeight(avgAvgBrand, at);
-            int cityExpectSpend = (int) ((cityTotalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary());
+            int cityExpectSpend =(int) Math.ceil(((cityTotalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary()));
             List<Integer> data=new ArrayList<>();
             data.add(expectSpend);
             data.add(cityExpectSpend);
