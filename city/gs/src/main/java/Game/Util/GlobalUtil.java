@@ -77,8 +77,8 @@ public class GlobalUtil {
                 continue;
             IShelf shelf = (IShelf) building;
             Map<Item, Integer> saleDetail = shelf.getSaleDetail(goodItem);
-            if (saleDetail != null) {
-                Integer price = new ArrayList<>(saleDetail.values()).get(0);
+            if (saleDetail!=null&&saleDetail.size()>0) {
+                Integer price = saleDetail.values().stream().findFirst().orElse(0);
                 sumPrice += price;
                 count++;
             }

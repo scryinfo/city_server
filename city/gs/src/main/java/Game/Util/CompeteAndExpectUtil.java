@@ -146,4 +146,20 @@ public class CompeteAndExpectUtil {
         }
         return expectSpends;
     }
+    /*获取原料厂的竞争力,和eva无关*/
+    public static Map<UUID,Double> getMaterialCompetitiveMap(List<Building> buildings,int item){
+        Map<UUID, Double> map = new HashMap<>();
+        //获取全城的原料定价
+        int avgPrice = GlobalUtil.getCityItemAvgPrice(item, MetaBuilding.MATERIAL);
+        for (Building building : buildings) {
+            MaterialFactory materialFactory = (MaterialFactory) building;
+            if(materialFactory.outOfBusiness() || !materialFactory.getShelf().has(item))
+                continue;
+            int price = materialFactory.getShelf().getSellInfo(item).get(0).price;
+            //竞争力 = 推荐定价 / 定价 * 100 (向上取整)
+            double competitive = Math.ceil(avgPrice / price) * 100;
+            map.put(building.id(), competitive);
+        }
+        return map;
+    }
 }
