@@ -43,8 +43,7 @@ public class CompeteAndExpectUtil {
             maxBrand += goodBrand;
         }
         if(minBrand==0&&maxBrand==0){//设置默认值
-            minBrand=1;
-            maxBrand = 1;
+            return 0;
         }
         double weight = (localBrand / maxBrand)> (localBrand / minBrand) ? localBrand / maxBrand : localBrand / minBrand;
         return weight;
