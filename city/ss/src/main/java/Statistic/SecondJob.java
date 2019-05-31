@@ -38,6 +38,9 @@ public class SecondJob implements org.quartz.Job {
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
+        //apartment交易
+        documentList = LogDb.dayTodayNpcExchangeAmount(startTime, endTime, LogDb.getNpcRentApartment());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
 
 
         //buy ground

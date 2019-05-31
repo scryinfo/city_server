@@ -10,11 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
+import java.util.stream.Collectors;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
-import com.mongodb.client.model.Sorts;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.googlecode.protobuf.format.JsonFormat;
+import com.mongodb.client.model.*;
+import gs.Gs;
 import org.bson.Document;
 
 import com.mongodb.Block;
@@ -23,9 +28,6 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -49,7 +51,7 @@ public class LogDb {
 	private static final String BUY_GROUND = "buyGround";
 
 	private static final String EXTEND_BAG = "extendBag";
-
+	private static final String FLIGHT_BET = "flightBet";
 	private static final String INCOME_VISIT = "incomeVisit";
 
 	private static final String PLAYER_INFO = "playerInfo";
@@ -79,6 +81,9 @@ public class LogDb {
 	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
 	private static final String MINERS_COST= "minersCost";//矿工费用
 	private static final String NPC_MINERS_COST = "npcMinersCost";//npc支付矿工费用
+
+	//收入通知
+	private static final String INCOME_NOTIFY = "incomeNotify";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -99,6 +104,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
+	private static MongoCollection<Document> flightBet;
 	private static MongoCollection<Document> laboratoryRecord;
 	private static MongoCollection<Document> promotionRecord;
 
@@ -118,8 +124,11 @@ public class LogDb {
 	private static MongoCollection<Document> minersCost;	//矿工费用
 	private static MongoCollection<Document> npcMinersCost;//矿工费用
 
-
 	public static final String KEY_TOTAL = "total";
+
+	private static MongoCollection<Document> incomeNotify;
+	//保持时间 7 天，单位秒
+	public static final long incomeNotify_expire = 7 * 24 * 3600;
 
 	public static void init(String url, String dbName)
 	{
@@ -145,7 +154,8 @@ public class LogDb {
 		extendBag = database.getCollection(EXTEND_BAG)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
-
+		flightBet = database.getCollection(FLIGHT_BET)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		incomeVisit = database.getCollection(INCOME_VISIT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerInfo = database.getCollection(PLAYER_INFO)
@@ -186,6 +196,30 @@ public class LogDb {
 		npcMinersCost=database.getCollection(NPC_MINERS_COST)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
+		incomeNotify = database.getCollection(INCOME_NOTIFY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		AtomicBoolean hasIndex = new AtomicBoolean(false);
+		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
+		{
+			System.out.println(document.toJson());
+			if (document.get("key",Document.class).get("time") != null)
+			{
+				hasIndex.set(true);
+			}
+		});
+
+		if (!hasIndex.get())
+		{
+			System.out.println("collection incomeNotify no index,create");
+			incomeNotify.createIndex(new Document("time", 1),
+					new IndexOptions().background(true).expireAfter(incomeNotify_expire, TimeUnit.SECONDS));
+			incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
+			{
+				System.out.println(document.toJson());
+			});
+		}
+		else{ System.out.println("collection incomeNotify index exists");}
+
 	}
 
 	public static MongoDatabase getDatabase()
@@ -194,6 +228,15 @@ public class LogDb {
 	}
 
 	public static void startUp(){}
+
+	private static JsonFormat jsonFormat = new JsonFormat();
+	public static void insertIncomeNotify(UUID receiver, Gs.IncomeNotify notify)
+	{
+		Document document = new Document("time", new Date())
+				.append("receiver", receiver)
+				.append("notifyJson", jsonFormat.printToString(notify));
+		incomeNotify.insertOne(document);
+	}
 
 	/**
 	 * @param yestodayStartTime
@@ -358,6 +401,49 @@ public class LogDb {
 	public static void insertPlayerInfo(UUID uuid,boolean isMale)
 	{
 		playerInfo.insertOne(new Document("r", uuid).append("male",isMale));
+	}
+
+	public static void flightBet(UUID playerId, int delay, int amount, boolean win, Gs.FlightData d)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("i", playerId)
+				.append("d", delay)
+				.append("a", amount)
+				.append("w", win)
+				.append("d", d.toByteArray());
+		flightBet.insertOne(document);
+	}
+	public static class FlightBetRecord {
+		public FlightBetRecord(UUID playerId, int delay, int amount, boolean win, Gs.FlightData data) {
+			this.playerId = playerId;
+			this.delay = delay;
+			this.amount = amount;
+			this.win = win;
+			this.data = data;
+		}
+
+		public UUID playerId;
+		public int delay;
+		public int amount;
+		public boolean win;
+		public Gs.FlightData data;
+	}
+	public static List<FlightBetRecord> getFlightBetRecord(UUID playerId)
+	{
+		List<Document> list = new ArrayList<>();
+		flightBet.find(eq("i", playerId)).forEach((Block<? super Document>) list::add);
+		return list.stream().map(o-> {
+			try {
+				return new FlightBetRecord(
+						o.get("i", UUID.class),
+						o.getInteger("d"),
+						o.getInteger("a"),
+						o.getBoolean("w"),
+						Gs.FlightData.parseFrom(o.get("d", org.bson.types.Binary.class).getData()));
+			} catch (InvalidProtocolBufferException e) {
+				return null;
+			}
+		}).filter(o -> o != null).collect(Collectors.toList());
 	}
 
 	public static void buildingIncome(UUID bId,UUID payId,long cost,int type,int typeId)
