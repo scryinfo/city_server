@@ -77,8 +77,8 @@ public class GlobalUtil {
                 continue;
             IShelf shelf = (IShelf) building;
             Map<Item, Integer> saleDetail = shelf.getSaleDetail(goodItem);
-            if (saleDetail != null) {
-                Integer price = new ArrayList<>(saleDetail.values()).get(0);
+            if (saleDetail!=null&&saleDetail.size()>0) {
+                Integer price = saleDetail.values().stream().findFirst().orElse(0);
                 sumPrice += price;
                 count++;
             }
@@ -120,7 +120,7 @@ public class GlobalUtil {
         if(count!=0)
             return sumPrice / count;
         else
-            return 1;
+            return 0;
     }
 
     //5.查询根据类型研究成功几率，依然是建筑的成功平均值+eva的平均提升值
@@ -160,7 +160,7 @@ public class GlobalUtil {
                sum += baseBrand;
            }
        }
-       return  count==0?1: sum / count;
+       return  count==0?0: sum / count;
    }
 
    //7.获取全城Eva属性商品品质均加成信息
@@ -207,7 +207,7 @@ public class GlobalUtil {
                 count++;
             }
         }
-        return (quality/count) * (1 + avgAdd);
+        return  count==0?0:(quality/count) * (1 + avgAdd);
     }
 
    //10.获取加工厂推荐定价
@@ -219,7 +219,7 @@ public class GlobalUtil {
         //2.玩家知名度权重
         double brandWeight = CompeteAndExpectUtil.getBrandWeight(localBrand, at);
         //3.玩家品质权重
-        int localQuality = (int) (base * (1 + localEvaAdd));
+        double localQuality = (base * (1 + localEvaAdd));
         double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, base);
         //4.全城知名度权重
         int cityAvgBrand = cityAvgBrand(at);
