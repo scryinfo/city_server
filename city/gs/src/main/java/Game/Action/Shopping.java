@@ -132,7 +132,8 @@ public class Shopping implements IAction {
             sellShop.updateTodayIncome(chosen.price-minerCost);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 
-            GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+
+            Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))
                     .setCost(chosen.price-minerCost)
@@ -140,7 +141,8 @@ public class Shopping implements IAction {
                     .setType(Gs.IncomeNotify.Type.INSHELF)
                     .setBid(sellShop.metaId())
                     .setItemId(chosen.meta.id)
-                    .build());
+                    .build();
+            GameServer.sendIncomeNotity(owner.id(),notify);
             LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
@@ -196,8 +198,7 @@ public class Shopping implements IAction {
               ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
               sellShop.updateTodayIncome(chosen.price-minerCost);
               GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
-
-              GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+              Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                       .setBuyerId(Util.toByteString(npc.id()))
                       .setCost(chosen.price-minerCost)
@@ -205,7 +206,8 @@ public class Shopping implements IAction {
                       .setType(Gs.IncomeNotify.Type.INSHELF)
                       .setBid(sellShop.metaId())
                       .setItemId(chosen.meta.id)
-                      .build());
+                      .build();
+              GameServer.sendIncomeNotity(owner.id(),notify);
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费

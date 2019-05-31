@@ -78,13 +78,14 @@ public class JustVisit implements IAction {
                 long minerCost = (long) Math.floor(chosen.cost() * MetaData.getSysPara().minersCostRatio);
                 income -= minerCost;
                 pay += minerCost;
-                GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+                Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                         .setBuyerId(Util.toByteString(npc.id()))
                         .setCost(chosen.cost())
                         .setType(Gs.IncomeNotify.Type.RENT_ROOM)
                         .setBid(chosen.metaId())
-                        .build());
+                        .build();
+                GameServer.sendIncomeNotity(owner.id(), notify);
                 //矿工费记录
                 LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
                 LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);

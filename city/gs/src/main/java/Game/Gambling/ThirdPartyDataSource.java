@@ -62,7 +62,7 @@ public class ThirdPartyDataSource {
         try {
             URI uri = getFightBaseUriBuilder().build();
             JSONObject o = doGetFight(uri);
-            totalPages = o.getJSONObject("paginator").getInt("total_pages");
+            totalPages = o==null?totalPages:o.getJSONObject("paginator").getInt("total_pages");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -71,6 +71,8 @@ public class ThirdPartyDataSource {
         try {
             URI uri = getFightBaseUriBuilder().setParameter("_page", String.valueOf(totalPages)).build();
             JSONObject o = doGetFight(uri);
+            if(o == null)
+                return;
             List<JSONObject> jsonList  = extractResult(o);
             for (JSONObject json : jsonList) {
                 try {
@@ -136,6 +138,8 @@ public class ThirdPartyDataSource {
     private String updateDepartureTime(int id) throws URISyntaxException, ParseException {
         URI uri = getFightBaseUriBuilder().setParameter("id", String.valueOf(id)).build();
         JSONObject o = doGetFight(uri);
+        if(o == null)
+            return null;
         Flight fd = new Flight(extractResult(o).get(0));
         if(!fd.departured())
             return null;

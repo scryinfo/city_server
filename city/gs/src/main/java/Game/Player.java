@@ -315,8 +315,8 @@ public class Player {
                 .setFaceId(this.faceId)
                 .setLockedMoney(this.lockedMoney())
                 .setPosition(this.position.toProto())
-                .setOfflineTs(this.offlineTs)
-                .setScore(this.score);
+                .setScore(this.score())
+                .setOfflineTs(this.offlineTs);
         city.forEachBuilding(id, (Building b)->{
             b.appendDetailProto(builder.getBuysBuilder());
         });
