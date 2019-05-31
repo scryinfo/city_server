@@ -12,6 +12,7 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.*;
+import Game.blockchain.chainClient;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -4035,11 +4036,16 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
-	public void cc_CreateUserReq(short cmd,Message message){
-		//Gs.Cc_createUser msg = (Gs.Cc_createUser) message;
-		Gs.Cc_createUser msg = (Gs.Cc_createUser) message;
+	public void ct_createUser(short cmd,Message message){
+		ccapi.Dddbind.ct_createUser msg = (ccapi.Dddbind.ct_createUser) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		//ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		try {
+			chainClient.testfun(req);
+		}  catch (Exception e) {
+			return ;
+		}
+		this.write(Package.create(cmd, msg));
 		int t = 0 ;
 		/*Building building = City.instance().getBuilding(buildingId);
 		Laboratory lab = (Laboratory) building ;

@@ -5,7 +5,6 @@ import Game.Eva.EvaManager;
 import Game.FriendManager.FriendManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaData;
-import Game.blockchain.chainClient;
 import Shared.*;
 import Shared.Package;
 import com.google.common.collect.MapMaker;
@@ -183,7 +182,6 @@ public class GameServer {
     }
     public static void main(String[] args) throws Exception {
         // By default, logging is enabled via the popular SLF4J API. The use of SLF4J is optional; the driver will use SLF4J if the driver detects the presence of SLF4J in the classpath. Otherwise, the driver will fall back to JUL (java.util.logging)
-        chainClient.testfun();
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.SIMPLE);
         java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);
         GlobalConfig.init(args[0]);
