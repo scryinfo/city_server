@@ -91,5 +91,9 @@
 		<mapping class="Game.FlowRecord"></mapping>		
 		<mapping class="Game.EvaRecord"></mapping>			
 		<mapping class="Game.IndustryIncrease"></mapping>
+		<mapping class="Game.Gambling.FlightManager"></mapping>
+		<mapping class="Game.Gambling.Flight"></mapping>
+		<mapping class="Game.Gambling.FlightManager$BetInfos"></mapping>
+		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>
 	</session-factory>
 </hibernate-configuration> 

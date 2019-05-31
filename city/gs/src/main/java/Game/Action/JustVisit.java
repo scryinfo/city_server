@@ -91,6 +91,7 @@ public class JustVisit implements IAction {
             }
             owner.addMoney(income);
             npc.decMoney((int) pay);
+            npc.setBuyApartmentTs(System.currentTimeMillis());
             LogDb.playerIncome(owner.id(), income);
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);

@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
 
+import Game.Gambling.FlightManager;
+import Game.Gambling.ThirdPartyDataSource;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.MapMaker;
@@ -54,6 +56,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class GameServer {
     private static final Logger logger = Logger.getLogger(GameServer.class);
+    private static final ScheduledExecutorService thirdPartyDataSourcePullExecutor = Executors.newScheduledThreadPool(1);
     private static final EventExecutorGroup businessLogicExecutor = new DefaultEventExecutorGroup(4);
     public static final ChannelGroup allClientChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     public static final ConcurrentMap<UUID, GameSession> allGameSessions = new MapMaker().concurrencyLevel(1).weakValues().makeMap();
@@ -140,8 +143,15 @@ public class GameServer {
         TickManager.init();
         City.instance().run();
         BrandManager.init();
-
-
+        FlightManager.init();
+        thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
+            try {
+                ThirdPartyDataSource.instance().update();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 30, 10, TimeUnit.SECONDS);
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

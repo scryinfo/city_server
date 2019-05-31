@@ -10,11 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.client.model.Sorts;
+import gs.Gs;
 import org.bson.Document;
 
 import com.mongodb.Block;
@@ -49,7 +52,7 @@ public class LogDb {
 	private static final String BUY_GROUND = "buyGround";
 
 	private static final String EXTEND_BAG = "extendBag";
-
+	private static final String FLIGHT_BET = "flightBet";
 	private static final String INCOME_VISIT = "incomeVisit";
 
 	private static final String PLAYER_INFO = "playerInfo";
@@ -99,6 +102,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
+	private static MongoCollection<Document> flightBet;
 	private static MongoCollection<Document> laboratoryRecord;
 	private static MongoCollection<Document> promotionRecord;
 
@@ -145,7 +149,8 @@ public class LogDb {
 		extendBag = database.getCollection(EXTEND_BAG)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
-
+		flightBet = database.getCollection(FLIGHT_BET)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		incomeVisit = database.getCollection(INCOME_VISIT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerInfo = database.getCollection(PLAYER_INFO)
@@ -358,6 +363,49 @@ public class LogDb {
 	public static void insertPlayerInfo(UUID uuid,boolean isMale)
 	{
 		playerInfo.insertOne(new Document("r", uuid).append("male",isMale));
+	}
+
+	public static void flightBet(UUID playerId, int delay, int amount, boolean win, Gs.FlightData d)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("i", playerId)
+				.append("d", delay)
+				.append("a", amount)
+				.append("w", win)
+				.append("d", d.toByteArray());
+		flightBet.insertOne(document);
+	}
+	public static class FlightBetRecord {
+		public FlightBetRecord(UUID playerId, int delay, int amount, boolean win, Gs.FlightData data) {
+			this.playerId = playerId;
+			this.delay = delay;
+			this.amount = amount;
+			this.win = win;
+			this.data = data;
+		}
+
+		public UUID playerId;
+		public int delay;
+		public int amount;
+		public boolean win;
+		public Gs.FlightData data;
+	}
+	public static List<FlightBetRecord> getFlightBetRecord(UUID playerId)
+	{
+		List<Document> list = new ArrayList<>();
+		flightBet.find(eq("i", playerId)).forEach((Block<? super Document>) list::add);
+		return list.stream().map(o-> {
+			try {
+				return new FlightBetRecord(
+						o.get("i", UUID.class),
+						o.getInteger("d"),
+						o.getInteger("a"),
+						o.getBoolean("w"),
+						Gs.FlightData.parseFrom(o.get("d", org.bson.types.Binary.class).getData()));
+			} catch (InvalidProtocolBufferException e) {
+				return null;
+			}
+		}).filter(o -> o != null).collect(Collectors.toList());
 	}
 
 	public static void buildingIncome(UUID bId,UUID payId,long cost,int type,int typeId)
