@@ -3002,6 +3002,7 @@ public class GameSession {
 			}
 			results.addResultInfo(result);
 		}
+		this.write(Package.create(cmd, results.build()));
 	}
 
 	public void queryMyBrands(short cmd, Message message){
