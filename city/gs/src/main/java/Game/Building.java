@@ -781,9 +781,9 @@ public abstract class Building implements Ticker{
         }
         else
             happy = HAPPY_MIN;
-            //员工满意度通知
-            UUID[] ownerIdAndBuildingId = {p.id(),this.id()};
-            MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),p.id(),null,ownerIdAndBuildingId,null);
+//            //员工满意度通知
+//            UUID[] ownerIdAndBuildingId = {p.id(),this.id()};
+//            MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),p.id(),null,ownerIdAndBuildingId,null);
         return false;
     }
     private void calcuHappy() {

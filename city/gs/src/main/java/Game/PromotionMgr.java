@@ -133,9 +133,10 @@ public class PromotionMgr {
             int objType = promotion.buildingType > 0 ? promotion.buildingType: promotion.productionType;
             long endTime = promotion.promStartTs + promotion.promDuration;
             long elapsedtime = promotion.promDuration - (endTime - curtime);
+            float addition = 0;
             if(endTime >= System.currentTimeMillis()){
                 //计算每个推广的结果
-                float addition = fcySeller.excutePromotion(promotion);
+                addition = fcySeller.excutePromotion(promotion);
                 //累加提升值，以便计算平均值
                 promotion.promotedTotal += addition;
                 promotion.promProgress = (int)(((float)elapsedtime/(float)promotion.promDuration)*100);
@@ -150,8 +151,9 @@ public class PromotionMgr {
                 fcySeller.delSelledPromotion(promotion.promotionId, false);
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
-                //paras: 第一个是广告id，第二个是广告商建筑id
-                MailBox.instance().sendMail(Mail.MailType.AD_PROMOTION_EXPIRE.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, null);
+                //推广完成通知
+                //paras: 第一个是广告id，第二个是广告商建筑id，第三个提升点数
+                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, new int[(int) addition]);
                 //发送给广告商
                 GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
                         Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,

@@ -318,9 +318,9 @@ public class Exchange {
                 .setSellOrderId(Util.toByteString(s.id))
                 .build()));
         //交易所商品售出通知
-        int[] orderNum = {num};  //售出数量
-        UUID[] orderID = {s.id}; //挂单ID
-        MailBox.instance().sendMail(Mail.MailType.EXCHANGE_GOODS_SOLD.getMailType(),seller.id(),null,orderID,orderNum);
+//        int[] orderNum = {num};  //售出数量
+//        UUID[] orderID = {s.id}; //挂单ID
+//        MailBox.instance().sendMail(Mail.MailType.EXCHANGE_GOODS_SOLD.getMailType(),seller.id(),null,orderID,orderNum);
 
         res.notifyBuyer = ()->buyer.send(Package.create(GsCode.OpCode.exchangeDealInform_VALUE, Gs.ExchangeDeal.newBuilder()
                 .setItemId(mi.id)

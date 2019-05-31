@@ -28,6 +28,11 @@ public class MailBox {
         Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr);
         sendMailImpl(playerId, mail);
     }
+    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,long[] tparas) {
+        Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr,tparas);
+        sendMailImpl(playerId, mail);
+    }
+
 
     private void sendMailImpl(UUID playerId, Mail mail) {
         GameDb.saveOrUpdate(mail);
