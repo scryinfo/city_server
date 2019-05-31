@@ -1306,7 +1306,7 @@ public class GameDb {
 		try {
 			session = sessionFactory.openStatelessSession();
 			transaction = session.beginTransaction();
-			amount = (long) session.createSQLQuery("select count (ID) FROM PLAYER").uniqueResult();
+			amount = (Long) session.createQuery("SELECT COUNT(*) FROM Player").uniqueResult();
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
@@ -1381,6 +1381,8 @@ public class GameDb {
 			playerList = query.list();
 		}catch (Exception e){
 			return true;
+		}finally {
+			session.close();
 		}
 		if(playerList.size()>0) {
 			return true;

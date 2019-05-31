@@ -24,6 +24,7 @@ public class SummaryUtil
 {
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     public static final long HOUR_MILLISECOND = 1000 * 3600;
+    public static final long SECOND_MILLISECOND = 1000 * 10;
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String TIME = "time";
@@ -36,6 +37,7 @@ public class SummaryUtil
     private static final String DAY_GOODS = "dayGoods";
     private static final String DAY_RENTROOM = "dayRentRoom";
     private static final String DAY_GOODS_NPC_NUM = "dayGoodsNpcNum";
+    private static final String DAY_APARTMENT_NPC_NUM = "dayApartmentNpcNum";
     private static final String DAY_NPC_BUY_IN_SHELF = "dayNpcBuyInShelf";
     private static final String DAY_NPC_RENT_APARTMENT = "dayNpcRentApartment";
     private static final String DAY_PLAYER_BUY_GROUND = "dayPlayerBuyGround";
@@ -47,7 +49,6 @@ public class SummaryUtil
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
-
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -56,6 +57,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayGoods;
     private static MongoCollection<Document> dayRentRoom;
     private static MongoCollection<Document> dayGoodsNpcNum;
+    private static MongoCollection<Document> dayApartmentNpcNum;
     private static MongoCollection<Document> dayNpcBuyInShelf;
     private static MongoCollection<Document> dayNpcRentApartment;
     private static MongoCollection<Document> dayPlayerBuyGround;
@@ -86,6 +88,8 @@ public class SummaryUtil
         dayRentRoom = database.getCollection(DAY_RENTROOM)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayGoodsNpcNum = database.getCollection(DAY_GOODS_NPC_NUM)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayApartmentNpcNum = database.getCollection(DAY_APARTMENT_NPC_NUM)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayNpcBuyInShelf = database.getCollection(DAY_NPC_BUY_IN_SHELF)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -136,7 +140,7 @@ public class SummaryUtil
 
 
     
-    public static List<Document> getGoodsNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
+    public static List<Document> getNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
     {
     	List<Document> documentList = new ArrayList<>();
         collection.find(and(
@@ -457,6 +461,15 @@ public class SummaryUtil
     {
         return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% DAY_MILLISECOND;
     }
+    public static long hourStartTime(long nowTime)
+    {
+        return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% HOUR_MILLISECOND;
+    }
+    public static long secondStartTime(long nowTime)
+    {
+        return nowTime - (nowTime + TimeZone.getDefault().getRawOffset())% SECOND_MILLISECOND;
+    }
+
 
     public static MongoCollection<Document> getDaySellGround()
     {
@@ -496,6 +509,11 @@ public class SummaryUtil
     public static MongoCollection<Document> getDayGoodsNpcNum()
     {
     	return dayGoodsNpcNum;
+    }
+    
+    public static MongoCollection<Document> getDayApartmentNpcNum()
+    {
+    	return dayApartmentNpcNum;
     }
     
     public static MongoCollection<Document> getDayNpcBuyInShelf()
@@ -574,7 +592,7 @@ public class SummaryUtil
             return value;
         }
     }
-      enum CountType
+        public enum CountType
     {
     	BYDAY(1),BYHOUR(2),BYMINU(3),BYSECONDS(4);
     	private int value;
@@ -589,8 +607,9 @@ public class SummaryUtil
     	}
     }
 
-    enum ExchangeType {
-        MATERIAL(1),GOODS(2),GROUND(3),PUBLICITY(4), LABORATORY(5), storage(6);
+
+     public enum ExchangeType {
+        MATERIAL(1),GOODS(2),GROUND(3),PUBLICITY(4), LABORATORY(5), STORAGE(6);
         private int value;
         ExchangeType(int i)
         {
@@ -602,13 +621,11 @@ public class SummaryUtil
             return value;
         }
     }
-
     //--ly
     public static MongoCollection<Document> getPlayerExchangeAmount()
     {
         return playerExchangeAmount;
     }
-
     public static void insertPlayerExchangeData(CountType countType,ExchangeType exchangeType,List<Document> documentList,
                                          long time,MongoCollection<Document> collection)
     {
@@ -621,29 +638,6 @@ public class SummaryUtil
             collection.insertMany(documentList);
         }
     }
-
-
-//    public static List<Document> dayTodayPlayerExchangeAmount(MongoCollection<Document> collection,SummaryUtil.CountType countType)
-//    {
-//        List<Document> documentList = new ArrayList<>();
-//        Document projectObject = new Document()
-//                .append("id", "$_id")
-//                .append(KEY_TOTAL, "$" + KEY_TOTAL)
-//                .append("_id",0);
-//        collection.aggregate(
-//                Arrays.asList(
-//                        Aggregates.match(and(
-//                                eq(COUNTTYPE, countType.getValue()),
-//                                gte(TIME, startTime),
-//                                lt(TIME, endTime))),
-//                        Aggregates.match(eq(COUNTTYPE, countType.getValue())),
-//                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total")),
-//                        Aggregates.project(projectObject)
-//                )
-//        ).forEach((Block<? super Document>) documentList::add);
-//        return documentList;
-//    }
-
 
     //玩家交易汇总表中查询开服截止当前时间玩家交易量。
     public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
@@ -669,7 +663,7 @@ public class SummaryUtil
         return a;
     }
 
-    public static Map<Long,Long> queryPlayerGoodsCurve(MongoCollection<Document> collection, long id, Ss.PlayerGoodsCurve.ExchangeType exchangeType, CountType countType) {
+    public static Map<Long,Long> queryPlayerExchangeCurve(MongoCollection<Document> collection, long id, int exchangeType, CountType countType,boolean isMoney) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -684,18 +678,24 @@ public class SummaryUtil
         long startTime=startDate.getTime();
         Map<Long, Long> map = new LinkedHashMap<>();
 
+       String value = KEY_TOTAL;
+        if (!isMoney) {
+            value = "size";
+        }
+        String finalValue = value;
         collection.find(and(
                 eq(COUNTTYPE, countType.getValue()),
-                eq(TYPE, exchangeType.getNumber()),
+                eq(TYPE, exchangeType),
                 eq(ID, id),
                 gte(TIME, startTime),
                 lt(TIME, endTime)
         ))
-                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+
+                .projection(fields(include(TIME, finalValue), excludeId()))
                 .sort(Sorts.descending(TIME))
                 .forEach((Block<? super Document>) document ->
                 {
-                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                    map.put(document.getLong(TIME), document.getLong(finalValue));
                 });
         return map;
     }

@@ -13,6 +13,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static Statistic.PerHourJob.BUYGROUND_ID;
+import static Statistic.PerHourJob.RENTGROUND_ID;
 import static Statistic.SummaryUtil.DAY_MILLISECOND;
 
 public class DayJob implements org.quartz.Job {
@@ -80,6 +82,27 @@ public class DayJob implements org.quartz.Job {
         //material Shelf pay
         documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false,false);
         SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayMaterial());
+
+        // --player exchange info
+        //buy ground
+        documentList = LogDb.dayPlayerExchange1(yestodayStartTime, todayStartTime, LogDb.getBuyGround(), BUYGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.GROUND, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
+        //rent ground
+        documentList = LogDb.dayPlayerExchange1(yestodayStartTime, todayStartTime, LogDb.getRentGround(), RENTGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.GROUND, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
+        //buy goods in Shelf
+        documentList = LogDb.dayPlayerExchange2(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.GOODS, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
+        //buy material in Shelf
+        documentList = LogDb.dayPlayerExchange2(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.MATERIAL, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
+        // PublicFacility Promotion buildingOrGoods
+        documentList = LogDb.hourPromotionRecord(yestodayStartTime, todayStartTime, LogDb.getPromotionRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.PUBLICITY, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
+        // Laboratory  research EvapointOrinvent
+        documentList = LogDb.hourLaboratoryRecord(yestodayStartTime, todayStartTime, LogDb.getLaboratoryRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.LABORATORY, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
+
 
         //accept all client request
         StatisticSession.setIsReady(true);

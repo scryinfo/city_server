@@ -111,19 +111,28 @@ public class StatisticSession {
         this.write(Package.create(cmd, builder.build()));
     }
     
-    public void queryGoodsNpcNum(short cmd, Message message)
+    public void queryNpcNum(short cmd, Message message)
     {
-    	Ss.GoodNpcNumInfo m = (Ss.GoodNpcNumInfo)message;
+    	Ss.QueryNpcNum m = (Ss.QueryNpcNum)message;
     	long time=m.getTime();
-    	Ss.GoodsNpcNum.Builder list = Ss.GoodsNpcNum.newBuilder();
-    	Ss.GoodNpcNumInfo.Builder info = Ss.GoodNpcNumInfo.newBuilder();
-    	List<Document> ls=SummaryUtil.getGoodsNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
-    	for (Document document : ls) {
-    		info.setId(document.getInteger("id"));
-    		info.setTotal(document.getLong("total"));
-    		info.setTime(document.getLong("time"));
-    		list.addGoodNpcNumInfo(info.build());
-		}
+    	int type=m.getType().getNumber();
+    	Ss.NpcNums.Builder list = Ss.NpcNums.newBuilder();
+    	Ss.NpcNums.NpcNumInfo.Builder info = Ss.NpcNums.NpcNumInfo.newBuilder();
+    	List<Document> ls=null;
+    	if(Ss.QueryNpcNum.Type.GOODS.equals(type)){
+        	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
+    	}else if(Ss.QueryNpcNum.Type.APARTMENT.equals(type)){
+        	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayApartmentNpcNum(),CountType.BYSECONDS,time);
+    	}
+    	if(ls!=null&&ls.size()>0){
+    	 	for (Document document : ls) {
+        		info.setId(document.getInteger("id"));
+        		info.setTotal(document.getLong("total"));
+        		info.setTime(document.getLong("time"));
+        		list.addNumInfo(info.build());
+    		}
+    	}
+    	list.setType(type);
     	this.write(Package.create(cmd, list.build()));
     }
     
@@ -229,22 +238,23 @@ public class StatisticSession {
     }
 
     // 查询一周曲线图
-	public void queryPlayerGoodsCurve(short cmd, Message message) {
+	public void queryPlayerExchangeCurve(short cmd, Message message) {
 		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
 		long id = curve.getId();
-
-		Ss.PlayerGoodsCurve.ExchangeType exchangeType = curve.getExchangeType();
-		Map<Long, Long> map=SummaryUtil.queryPlayerGoodsCurve(SummaryUtil.getPlayerExchangeAmount(),id,exchangeType,CountType.BYHOUR);
-		Ss.PlayerGoodsCurveMap.Builder bmap = Ss.PlayerGoodsCurveMap.newBuilder();
-		Ss.PlayerGoodsCurve.Builder list = Ss.PlayerGoodsCurve.newBuilder();
-		list.setExchangeType(exchangeType);
-		map.forEach((k,v)->{
-			bmap.setKey(k);
-			bmap.setValue(v);
-			list.addPlayerGoodsCurveMap(bmap.build());
+		int exchangeType = curve.getExchangeType();
+		Map<Long, Long> moneyMap = SummaryUtil.queryPlayerExchangeCurve(SummaryUtil.getPlayerExchangeAmount(), id, exchangeType, curve.getType() ? CountType.BYHOUR : CountType.BYDAY, true);
+		Map<Long, Long> numMap = SummaryUtil.queryPlayerExchangeCurve(SummaryUtil.getPlayerExchangeAmount(), id, exchangeType, curve.getType() ? CountType.BYHOUR : CountType.BYDAY, false);
+		Ss.PlayerGoodsCurve.Builder builder = Ss.PlayerGoodsCurve.newBuilder();
+		builder.setId(id);
+		builder.setExchangeType(exchangeType);
+		builder.setType(curve.getType());
+		moneyMap.forEach((k,v)->{
+			Ss.PlayerGoodsCurve.PlayerGoodsCurveMap.Builder b = builder.addPlayerGoodsCurveMapBuilder();
+			b.setTime(k);
+			b.setMoney(v);
+			b.setSize((numMap != null && numMap.size() > 0 && numMap.get(k) != null) ? numMap.get(k) : 0);
 		});
-		this.write(Package.create(cmd,list.build()));
-
+		this.write(Package.create(cmd,builder.build()));
 	}
 	
     public void queryPlayerIncomePayCurve(short cmd, Message message)
