@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.googlecode.protobuf.format.JsonFormat;
 import com.mongodb.client.model.*;
@@ -236,6 +237,27 @@ public class LogDb {
 				.append("receiver", receiver)
 				.append("notifyJson", jsonFormat.printToString(notify));
 		incomeNotify.insertOne(document);
+	}
+
+	public static List<Gs.IncomeNotify> getIncomeNotify(UUID receiver, int limit)
+	{
+		List<Gs.IncomeNotify> notifyList = new ArrayList<>();
+		incomeNotify.find(Filters.eq("receiver",receiver))
+				.sort(Sorts.descending("time"))
+				.limit(limit).forEach((Block<? super Document>) document ->
+		{
+			Gs.IncomeNotify.Builder builder = Gs.IncomeNotify.newBuilder();
+			try
+			{
+				jsonFormat.merge(document.getString("notifyJson"), ExtensionRegistry.getEmptyRegistry(), builder);
+				notifyList.add(builder.build());
+			}
+			catch (JsonFormat.ParseException e)
+			{
+				e.printStackTrace();
+			}
+		});
+		return notifyList;
 	}
 
 	/**

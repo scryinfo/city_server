@@ -23,7 +23,8 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryCityBroadcast_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryCityBroadcast"));
             table.put((short) SsCode.OpCode.queryNpcTypeNum_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryNpcTypeNum"));
             table.put((short) SsCode.OpCode.queryBuildingFlow_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryBuildingFlow"));
-            table.put((short) SsCode.OpCode.queryBuildingLift_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryBuildingLift"));
+            table.put((short) SsCode.OpCode.queryBuildingLift_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class, "queryBuildingLift"));
+            table.put((short) SsCode.OpCode.queryIncomeNotify_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class,"queryIncomeNotify"));
 
             table.put((short) SsCode.OpCode.queryPlayerExchangeAmount_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryPlayerExchangeAmount"));  //查询截止当前时间玩家交易量
             table.put((short) SsCode.OpCode.queryPlayerGoodsCurve_VALUE, Wrapper.newWithMessage(Ss.PlayerGoodsCurve.PARSER,StatisticSession.class, "queryPlayerExchangeCurve"));// 查询玩家交易曲线图

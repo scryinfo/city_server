@@ -3,6 +3,7 @@ package Statistic;
 import java.util.*;
 
 import Statistic.Util.TotalUtil;
+import gs.Gs;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
@@ -298,4 +299,14 @@ public class StatisticSession {
 		builder.addAllPlayerIncome(totalMap.values());
     	this.write(Package.create(cmd,builder.build()));
     }
+
+	public void queryIncomeNotify(short cmd, Message message)
+	{
+		UUID playerId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		this.write(Package.create(cmd,
+				Ss.IncomeNotifys.newBuilder()
+						.setId(Util.toByteString(playerId))
+						.addAllNotifys(LogDb.getIncomeNotify(playerId, 30))
+						.build()));
+	}
 }
