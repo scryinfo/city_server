@@ -110,6 +110,9 @@ public class MetaData {
     public static int getSalaryByBuildingType(int type){
     	return salaryMap.get(type);
     }
+    public static Map<Integer,Integer> getSalaryMap(){
+    	return salaryMap;
+    }
     public static int getDayId() {
         return dayId;
     }
