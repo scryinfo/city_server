@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import Game.Gambling.FlightManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -838,6 +839,14 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+	public static void initThirdPartyDataSource() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(FlightManager.class, FlightManager.ID) == null)
+			statelessSession.insert(new FlightManager());
+		transaction.commit();
+		statelessSession.close();
+	}
 	public static MoneyPool getMoneyPool() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -850,6 +859,14 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		BrandManager res = session.get(BrandManager.class, BrandManager.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
+	public static FlightManager getThirdPartyDataSource() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		FlightManager res = session.get(FlightManager.class, FlightManager.ID);
 		transaction.commit();
 		session.close();
 		return res;

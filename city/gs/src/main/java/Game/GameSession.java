@@ -8,12 +8,11 @@ import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.CityUtil;
-import Game.Util.EvaUtil;
-import Game.Util.GlobalUtil;
 import Game.Util.WareHouseUtil;
 import Shared.*;
 import Shared.Package;
@@ -22,7 +21,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.sun.xml.internal.bind.v2.TODO;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -1957,6 +1955,29 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 	}
 
+	public void betFlight(short cmd, Message message) {
+		Gs.BetFlight c = (Gs.BetFlight)message;
+		if(c.getScore() > player.score())
+			return;
+
+		if(FlightManager.instance().betFlight(player.id(), c.getId(), c.getDelay(), c.getScore())) {
+			player.offsetScore(-c.getScore());
+			GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
+			this.write(Package.create(cmd, c));
+		}
+	}
+
+	public void getFlightBetHistory(short cmd, Message message) {
+		Gs.FlightBetHistory.Builder builder = Gs.FlightBetHistory.newBuilder();
+		for(LogDb.FlightBetRecord r : LogDb.getFlightBetRecord(player.id())) {
+			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setData(r.data);
+		}
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void getAllFlight(short cmd, Message message) {
+		this.write(Package.create(cmd, FlightManager.instance().toProto(player.id())));
+	}
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
 		MetaItem mi = MetaData.getItem(c.getItemId());

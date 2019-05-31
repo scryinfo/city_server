@@ -224,6 +224,17 @@ public class Player {
     @Column
     private boolean male;
 
+    public boolean offsetScore(int d) {
+        if(this.score + d < 0)
+            return false;
+        this.score += d;
+        this.send(Package.create(GsCode.OpCode.scoreChangeInform_VALUE, Gs.Num.newBuilder().setNum(this.score).build()));
+        return true;
+    }
+    public int score() {
+        return this.score;
+    }
+    private int score;
     @Column
     private String faceId = "";
     // for player, it position is GridIndex, Coordinate is too fine-grained
