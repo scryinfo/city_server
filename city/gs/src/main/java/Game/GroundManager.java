@@ -296,14 +296,15 @@ public class GroundManager {
         	playerGround.put(renter.id(),s);
         }
 
-        GameServer.sendIncomeNotity(ownerId,Gs.IncomeNotify.newBuilder()
+        Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(renter.id()))
                 .setFaceId(renter.getFaceId())
-                .setCost(cost-minerCost)
+                .setCost(cost - minerCost)
                 .setType(Gs.IncomeNotify.Type.RENT_GROUND)
                 .addAllCoord(miniIndexList)
-                .build());
+                .build();
+        GameServer.sendIncomeNotity(ownerId,notify);
         //土地出租通知
         List<Integer> list = new ArrayList<>();
         for (Coordinate c : coordinates) {
@@ -387,14 +388,15 @@ public class GroundManager {
         GameDb.saveOrUpdate(Arrays.asList(buyer,seller,this));
         this.broadcast(gis);
 
-        GameServer.sendIncomeNotity(sellerId,Gs.IncomeNotify.newBuilder()
+        Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(buyer.id()))
                 .setFaceId(buyer.getFaceId())
-                .setCost(cost-minerCost)
+                .setCost(cost - minerCost)
                 .setType(Gs.IncomeNotify.Type.BUY_GROUND)
                 .addAllCoord(miniIndexList)
-                .build());
+                .build();
+        GameServer.sendIncomeNotity(sellerId, notify);
         //土地出售通知
         List<Integer> list = new ArrayList<>();
         for (Coordinate c : coordinates) {
