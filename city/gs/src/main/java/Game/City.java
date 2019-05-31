@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import Game.Gambling.FlightManager;
 import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
 
@@ -260,6 +261,7 @@ public class City {
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
+        FlightManager.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
         LeagueManager.getInstance().update(diffNano);
         WareHouseManager.instance().update(diffNano);

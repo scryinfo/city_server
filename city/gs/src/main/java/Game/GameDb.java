@@ -839,7 +839,7 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
-	public static void initThirdPartyDataSource() {
+	public static void initFlightManager() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
 		if(statelessSession.get(FlightManager.class, FlightManager.ID) == null)
@@ -863,7 +863,7 @@ public class GameDb {
 		session.close();
 		return res;
 	}
-	public static FlightManager getThirdPartyDataSource() {
+	public static FlightManager getFlightManager() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		FlightManager res = session.get(FlightManager.class, FlightManager.ID);

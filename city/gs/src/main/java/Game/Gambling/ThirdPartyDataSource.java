@@ -10,6 +10,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.xml.bind.DatatypeConverter;
@@ -21,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class ThirdPartyDataSource {
-    private static ThirdPartyDataSource instance;
+    private static ThirdPartyDataSource instance = new ThirdPartyDataSource();
     public static ThirdPartyDataSource instance() {
         return instance;
     }
@@ -111,9 +113,18 @@ public class ThirdPartyDataSource {
             }
         }
     }
+    private <T> List<T> toList(JSONArray jsonArray) {
+        List<T> list = new ArrayList<>();
+        if (jsonArray != null) {
+            int len = jsonArray.length();
+            for (int i = 0; i < len; i++) {
+                list.add((T) jsonArray.opt(i));
+            }
+        }
+        return list;
+    }
     private List<JSONObject> extractResult(JSONObject o) {
-        List<Object> jsonList  = o.getJSONArray("results").toList();
-        return jsonList.stream().map(e->(JSONObject)e).collect(Collectors.toList());
+        return toList(o.getJSONArray("results"));
     }
     private URIBuilder getFightBaseUriBuilder() {
         return new URIBuilder()
@@ -136,7 +147,7 @@ public class ThirdPartyDataSource {
         httpget.addHeader("api-id", "gY2F4kA7J8Fpt3XDLKVl");
         MessageDigest md = null;
         try {
-            MessageDigest.getInstance("MD5");
+            md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
 
         }

@@ -143,8 +143,15 @@ public class GameServer {
         TickManager.init();
         City.instance().run();
         BrandManager.init();
-        thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->ThirdPartyDataSource.instance().update(), 20, 10, TimeUnit.SECONDS);
-
+        FlightManager.init();
+        thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
+            try {
+                ThirdPartyDataSource.instance().update();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 30, 10, TimeUnit.SECONDS);
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
