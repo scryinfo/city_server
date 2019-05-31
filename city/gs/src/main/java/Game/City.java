@@ -48,7 +48,7 @@ public class City {
     private boolean taskIsRunning = false;
     private PeriodicTimer metaAuctionLoadTimer = new PeriodicTimer();
     private PeriodicTimer insuranceTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));
-    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24*7),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
+    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
 
     public int[] timeSection() {
         return meta.timeSection;
@@ -205,9 +205,17 @@ public class City {
         }
     }
     private void loadIndustryIncrease() {
-    	GameDb.getAllIndustryIncrease().forEach(industry->{
-    		industryMoneyMap.put(industry.getBuildingType(),industry);
-    	});
+    	List<IndustryIncrease> list=GameDb.getAllIndustryIncrease();
+    	if(list!=null&&list.size()>0){
+    		list.forEach(industry->{
+        		industryMoneyMap.put(industry.getBuildingType(),industry);
+        	});
+    	}else{//初始化工资
+    		MetaData.getSalaryMap().forEach((k,v)->{
+    			GameDb.saveOrUpdate(new IndustryIncrease(k,0));
+    			industryMoneyMap.put(k,new IndustryIncrease(k,0));
+    		});
+    	}
 	}
     public void addIndustryMoney(int type,int money){
     	IndustryIncrease ii=industryMoneyMap.get(type);
