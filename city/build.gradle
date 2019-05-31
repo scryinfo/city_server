@@ -34,6 +34,8 @@ allprojects {
         compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
         compile 'com.vladmihalcea:hibernate-types-52:2.3.0'
         compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
+        compile group: 'org.json', name: 'json', version: '20180813'
+        compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"

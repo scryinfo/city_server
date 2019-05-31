@@ -112,37 +112,45 @@ public class Shopping implements IAction {
         Building sellShop = City.instance().getBuilding(chosen.bId);
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
-        if(chosen.price > npc.money()) {
+        //TODO:计算旷工费
+        long minerCost = (long) Math.floor(chosen.price* MetaData.getSysPara().minersCostRatio);
+        if(chosen.price+minerCost > npc.money()) {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
-        	int money=(int) (chosen.price-npc.money());
+        	int money=(int) ((chosen.price+minerCost)-npc.money());
         	City.instance().addIndustryMoney(npc.building().type(),money);
         	
             npc.hangOut(sellShop);
             return null;
         }
         else {
-            npc.decMoney(chosen.price);
+            //收益方和购买方都要计算旷工费
+            npc.decMoney((int) (chosen.price+minerCost));
             Player owner = GameDb.getPlayer(sellShop.ownerId());
-            owner.addMoney(chosen.price);
-            LogDb.playerIncome(owner.id(), chosen.price);
+            owner.addMoney(chosen.price-minerCost);
+            LogDb.playerIncome(owner.id(),chosen.price-minerCost);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
-            sellShop.updateTodayIncome(chosen.price);
+            sellShop.updateTodayIncome(chosen.price-minerCost);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 
-            GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+
+            Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))
-                    .setCost(chosen.price)
+                    .setCost(chosen.price-minerCost)
                     .setCount(1)
                     .setType(Gs.IncomeNotify.Type.INSHELF)
                     .setBid(sellShop.metaId())
                     .setItemId(chosen.meta.id)
-                    .build());
-            LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
+                    .build();
+            GameServer.sendIncomeNotity(owner.id(),notify);
+            LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
-            LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
+            LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
                     chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
-            LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price, MetaItem.type(chosen.meta.id), chosen.meta.id);
+            LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
+            //矿工费用记录
+            LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+            LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             //db操作 从外部挪进来
             Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
             GameDb.saveOrUpdate(u);
@@ -171,37 +179,43 @@ public class Shopping implements IAction {
           Building sellShop = City.instance().getBuilding(chosen.bId);
           sellShop.addFlowCount();
           logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
-          if(chosen.price > npc.money()) {
-          	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
-          	int money=(int) (chosen.price-npc.money());
+        //TODO:计算旷工费
+        long minerCost = (long) Math.floor(chosen.price* MetaData.getSysPara().minersCostRatio);
+
+        if(chosen.price+minerCost> npc.money()) {
+          	//购买时所持金不足,行业涨薪指数 += 定价（已包含旷工费） - 所持金
+          	int money=(int) ((chosen.price+minerCost)-npc.money());
           	City.instance().addIndustryMoney(npc.building().type(),money);
-          	
-              npc.hangOut(sellShop);
-              return null;
+
+          	npc.hangOut(sellShop);
+          	return null;
           }
           else {
-              npc.decMoney(chosen.price);
+              npc.decMoney((int) (chosen.price+minerCost));
               Player owner = GameDb.getPlayer(sellShop.ownerId());
-              owner.addMoney(chosen.price);
-              LogDb.playerIncome(owner.id(), chosen.price);
+              owner.addMoney(chosen.price-minerCost);
+              LogDb.playerIncome(owner.id(), chosen.price-minerCost);
               ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
-              sellShop.updateTodayIncome(chosen.price);
+              sellShop.updateTodayIncome(chosen.price-minerCost);
               GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
-
-              GameServer.sendIncomeNotity(owner.id(),Gs.IncomeNotify.newBuilder()
+              Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                       .setBuyerId(Util.toByteString(npc.id()))
-                      .setCost(chosen.price)
+                      .setCost(chosen.price-minerCost)
                       .setCount(1)
                       .setType(Gs.IncomeNotify.Type.INSHELF)
                       .setBid(sellShop.metaId())
                       .setItemId(chosen.meta.id)
-                      .build());
-              LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,
+                      .build();
+              GameServer.sendIncomeNotity(owner.id(),notify);
+              LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
-              LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,
+              LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
                       chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
-              LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price, MetaItem.type(chosen.meta.id), chosen.meta.id);
+              LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
+              //矿工费用记录
+              LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+              LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               //db操作 从外部挪进来
               Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
               GameDb.saveOrUpdate(u);

@@ -60,7 +60,7 @@ public class ProtoUtil {
             Apartment apartment = (Apartment) building;
             int price = apartment.cost();//售价
             int cityAvgPrice = GlobalUtil.getCityAvgPriceByType(type);//全城定价
-            int buildingRich=0;//Todo ：繁荣度（待补）
+            int buildingRich=1;//Todo ：繁荣度（待补，先设置默认值为1）
             //建筑获取开放数量
             int opentNum = City.instance().getOpentNumByType(type);
 

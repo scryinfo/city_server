@@ -8,6 +8,7 @@ import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -36,11 +37,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-//import com.sun.xml.internal.bind.v2.TODO;
-//import sun.rmi.runtime.Log;
-
-//import static javafx.scene.input.KeyCode.T;
 
 public class GameSession {
 	private ChannelHandlerContext ctx;
@@ -774,7 +770,7 @@ public class GameSession {
 			return;
 		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
 		seller.addMoney(income);
-		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
+		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
@@ -783,7 +779,8 @@ public class GameSession {
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
 				.setCount(itemBuy.n)
-				.build());
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),notify);
 		player.decMoney(pay);
 		LogDb.playerPay(player.id(),pay);
 		LogDb.playerIncome(seller.id(),income);
@@ -1495,6 +1492,18 @@ public class GameSession {
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
+
+		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+				.setBuyerId(Util.toByteString(buyerPlayerId))
+				.setFaceId(buyer.getFaceId())
+				.setCost(fee - minerCost)
+				.setType(Gs.IncomeNotify.Type.PROMO)
+				.setBid(sellerBuilding.metaId())
+				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+				.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 
 	public void AdGetPromoAbilityHistory(short cmd, Message message) {
@@ -1876,6 +1885,7 @@ public class GameSession {
 		}
 		Laboratory lab = (Laboratory) building;
 		long cost = 0;
+		long income = 0;
 		Player seller = GameDb.getPlayer(lab.ownerId());
 		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if (!c.hasTimes())
@@ -1887,7 +1897,7 @@ public class GameSession {
 			long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
 			if (!player.decMoney(cost + minerCost))
 				return;
-			seller.addMoney(cost - minerCost);
+			seller.addMoney(income = cost - minerCost);
 			LogDb.playerPay(this.player.id(), cost + minerCost);
 			LogDb.playerIncome(seller.id(), cost - minerCost);
 			//矿工费用记录
@@ -1908,6 +1918,18 @@ public class GameSession {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
+
+		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+				.setBuyerId(Util.toByteString(player.id()))
+				.setFaceId(player.getFaceId())
+				.setCost(income)
+				.setType(Gs.IncomeNotify.Type.LAB)
+				.setBid(building.metaId())
+				.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+				.setDuration(c.getTimes())
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -1967,6 +1989,29 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 	}
 
+	public void betFlight(short cmd, Message message) {
+		Gs.BetFlight c = (Gs.BetFlight)message;
+		if(c.getScore() > player.score())
+			return;
+
+		if(FlightManager.instance().betFlight(player.id(), c.getId(), c.getDelay(), c.getScore())) {
+			player.offsetScore(-c.getScore());
+			GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
+			this.write(Package.create(cmd, c));
+		}
+	}
+
+	public void getFlightBetHistory(short cmd, Message message) {
+		Gs.FlightBetHistory.Builder builder = Gs.FlightBetHistory.newBuilder();
+		for(LogDb.FlightBetRecord r : LogDb.getFlightBetRecord(player.id())) {
+			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setData(r.data);
+		}
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void getAllFlight(short cmd, Message message) {
+		this.write(Package.create(cmd, FlightManager.instance().toProto(player.id())));
+	}
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
 		MetaItem mi = MetaData.getItem(c.getItemId());
@@ -2935,8 +2980,9 @@ public class GameSession {
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
 
-	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)==============================================================================
-	public void updateMyEvas(short cmd, Message message) {
+	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)=====================================================
+	public void updateMyEvas(short cmd, Message message)
+	{
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
 		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
 		for (Gs.Eva eva : evas.getEvaList()) {
@@ -2952,7 +2998,7 @@ public class GameSession {
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
 			//基础信息(加点前、加点后)
-			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
+			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
 			//升级对比信息
 			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）（*）
@@ -2963,14 +3009,14 @@ public class GameSession {
 				Map<UUID, Double> newCompetitiveMap = CompeteAndExpectUtil.getProductCompetitiveMap(buildings, newEva);//2.修改前后的竞争力
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.PRODUCE,eva.getAt());
 				result.addAllPromotes(promotes);
-			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//4.推广公司推广能力（*）
+			}else if(eva.getBt().equals(Gs.Eva.Btype.PromotionAbility)){//2.推广公司推广能力（*）
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PUBLIC);
 				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getPublicCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
 				EvaManager.getInstance().updateEva(newEva);
 				Map<UUID, Double> newCompetitiveMap = CompeteAndExpectUtil.getPublicCompetitiveMap(buildings,newEva);//2.修改后的竞争力
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.PUBLIC,null);
 				result.addAllPromotes(promotes);
-			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//5.研究所的研究成功率提升（*）
+			}else if(eva.getBt().equals(Gs.Eva.Btype.InventionUpgrade)||eva.getBt().equals(Gs.Eva.Btype.EvaUpgrade)){//3.研究所的研究成功率提升（*）
 				//同理，先获取未加点前的研究所竞争力，再获取加点后的
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.LAB);
 				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getLabCompetitiveMap(buildings, oldEva);//1.修改前的竞争力
@@ -2979,7 +3025,7 @@ public class GameSession {
 				ProtoUtil.getPromoteList(buildings,oldCompetitiveMap,newCompetitiveMap,MetaBuilding.LAB,null);
 				List<Gs.Promote> promotes = ProtoUtil.getPromoteList(buildings, oldCompetitiveMap, newCompetitiveMap,MetaBuilding.LAB,null);
 				result.addAllPromotes(promotes);
-			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//2.住宅的品质提升，计算预期入住人数（*，目前只差一个繁荣度）
+			}else if(eva.getAt()==MetaBuilding.APARTMENT&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//4.住宅的品质提升，计算预期入住人数（*，目前只差一个繁荣度）
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.APARTMENT);
 				//npc花费比例
 				double spendMoneyRatio = MetaData.getBuildingSpendMoneyRatio(eva.getAt());
@@ -2989,7 +3035,7 @@ public class GameSession {
 				//封装数据
 				List<Gs.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
 				result.addAllApartmentData(apartmentData);
-			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//3.零售店品质提升，计算预期值提升的比例，同上差不多
+			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升，计算预期值提升的比例，同上差不多
 				EvaManager.getInstance().updateEva(newEva);
 				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
@@ -3005,6 +3051,7 @@ public class GameSession {
 			}
 			results.addResultInfo(result);
 		}
+		this.write(Package.create(cmd, results.build()));
 	}
 
 	public void queryMyBrands(short cmd, Message message){
@@ -3266,7 +3313,7 @@ public class GameSession {
 		seller.addMoney(cost);//交易
 		player.decMoney(cost+freight);//扣除商品+运费
 		//8.2向出售方发送收入通知提示
-		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
+		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
@@ -3275,7 +3322,8 @@ public class GameSession {
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
 				.setCount(itemBuy.n)
-				.build());
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),notify);
 		//8.3 发送消息通知
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()

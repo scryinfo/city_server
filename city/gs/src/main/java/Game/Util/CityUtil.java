@@ -75,17 +75,21 @@ public class CityUtil {
 
     //获取城市的平均工资
     public static Long cityAvgSalary(){
-        long avgSalary=0;
+        long count=0;
         long sumSalary=0;
+
         List<Building> buildings = new ArrayList<>();
         City.instance().forEachBuilding(b->buildings.add(b));
         for (Building b : buildings) {
-            sumSalary += b.singleSalary();
+            if(!b.outOfBusiness()) {
+                sumSalary += b.getSalaryRatio();
+                count++;
+            }
         }
-        if(avgSalary==0){
+        if(count==0){
             return 0L;
         }else {
-            return sumSalary / buildings.size();
+            return sumSalary / count;
         }
     }
 
