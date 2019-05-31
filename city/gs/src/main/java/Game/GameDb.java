@@ -1364,6 +1364,8 @@ public class GameDb {
 			playerList = query.list();
 		}catch (Exception e){
 			return true;
+		}finally {
+			session.close();
 		}
 		if(playerList.size()>0) {
 			return true;
