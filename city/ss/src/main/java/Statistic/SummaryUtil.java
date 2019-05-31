@@ -37,6 +37,7 @@ public class SummaryUtil
     private static final String DAY_GOODS = "dayGoods";
     private static final String DAY_RENTROOM = "dayRentRoom";
     private static final String DAY_GOODS_NPC_NUM = "dayGoodsNpcNum";
+    private static final String DAY_APARTMENT_NPC_NUM = "dayApartmentNpcNum";
     private static final String DAY_NPC_BUY_IN_SHELF = "dayNpcBuyInShelf";
     private static final String DAY_NPC_RENT_APARTMENT = "dayNpcRentApartment";
     private static final String DAY_PLAYER_BUY_GROUND = "dayPlayerBuyGround";
@@ -56,6 +57,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayGoods;
     private static MongoCollection<Document> dayRentRoom;
     private static MongoCollection<Document> dayGoodsNpcNum;
+    private static MongoCollection<Document> dayApartmentNpcNum;
     private static MongoCollection<Document> dayNpcBuyInShelf;
     private static MongoCollection<Document> dayNpcRentApartment;
     private static MongoCollection<Document> dayPlayerBuyGround;
@@ -86,6 +88,8 @@ public class SummaryUtil
         dayRentRoom = database.getCollection(DAY_RENTROOM)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayGoodsNpcNum = database.getCollection(DAY_GOODS_NPC_NUM)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayApartmentNpcNum = database.getCollection(DAY_APARTMENT_NPC_NUM)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayNpcBuyInShelf = database.getCollection(DAY_NPC_BUY_IN_SHELF)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -136,7 +140,7 @@ public class SummaryUtil
 
 
     
-    public static List<Document> getGoodsNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
+    public static List<Document> getNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
     {
     	List<Document> documentList = new ArrayList<>();
         collection.find(and(
@@ -505,6 +509,11 @@ public class SummaryUtil
     public static MongoCollection<Document> getDayGoodsNpcNum()
     {
     	return dayGoodsNpcNum;
+    }
+    
+    public static MongoCollection<Document> getDayApartmentNpcNum()
+    {
+    	return dayApartmentNpcNum;
     }
     
     public static MongoCollection<Document> getDayNpcBuyInShelf()

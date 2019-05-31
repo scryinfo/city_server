@@ -175,7 +175,7 @@ public class Laboratory extends Building {
              l = this.completed.get(lineId);
         if(l != null && l.availableRoll > 0) {
             res = new RollResult();
-            l.useRoll();
+            l.useRoll(l.eva());
             if(l.eva()) {//是否是eva发明提升
                 //1次开启5个成果，所以循环5次
                 for (int i = 0; i <5 ; i++) {//新增===========================================
@@ -298,9 +298,14 @@ public class Laboratory extends Building {
             return beginProcessTs > 0;
         }
 
-        public void useRoll() {
-            this.availableRoll--;
-            this.usedRoll++;
+        public void useRoll(boolean isEva) {//如果是eva点数宝箱开启，一次减5个可用点数，商品发明是一次减少1个
+           if(isEva){
+               this.availableRoll-=5;
+               this.usedRoll+=5;
+           }else {
+               this.availableRoll--;
+               this.usedRoll++;
+           }
         }
     }
 

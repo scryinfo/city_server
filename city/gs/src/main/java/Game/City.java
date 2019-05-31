@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import Game.Gambling.FlightManager;
 import Shared.GlobalConfig;
 import org.apache.log4j.Logger;
 
@@ -47,12 +48,12 @@ public class City {
     private boolean taskIsRunning = false;
     private PeriodicTimer metaAuctionLoadTimer = new PeriodicTimer();
     private PeriodicTimer insuranceTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));
-    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24*7),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
+    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
 
     public int[] timeSection() {
         return meta.timeSection;
     }
-    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);
+    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);//1分钟转为200纳秒颗粒数
     public MetaCity getMeta() {
         return meta;
     }
@@ -204,9 +205,17 @@ public class City {
         }
     }
     private void loadIndustryIncrease() {
-    	GameDb.getAllIndustryIncrease().forEach(industry->{
-    		industryMoneyMap.put(industry.getBuildingType(),industry);
-    	});
+    	List<IndustryIncrease> list=GameDb.getAllIndustryIncrease();
+    	if(list!=null&&list.size()>0){
+    		list.forEach(industry->{
+        		industryMoneyMap.put(industry.getBuildingType(),industry);
+        	});
+    	}else{//初始化工资
+    		MetaData.getSalaryMap().forEach((k,v)->{
+    			GameDb.saveOrUpdate(new IndustryIncrease(k,0));
+    			industryMoneyMap.put(k,new IndustryIncrease(k,0));
+    		});
+    	}
 	}
     public void addIndustryMoney(int type,int money){
     	IndustryIncrease ii=industryMoneyMap.get(type);
@@ -260,6 +269,7 @@ public class City {
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
+        FlightManager.instance().update(diffNano);
         NpcManager.instance().countNpcNum(diffNano);
         LeagueManager.getInstance().update(diffNano);
         WareHouseManager.instance().update(diffNano);
@@ -612,5 +622,16 @@ public class City {
 
     public double getIndustrySalary(int type) {
         return industryMoneyMap.get(type) != null ? industryMoneyMap.get(type).getIndustrySalary() : 0.0;
+    }
+
+    //获取该建筑类型已开放的数量
+    public int getOpentNumByType(int type){
+        int count=0;
+        for (Building building : getAllBuilding()) {
+            if(building.type()==type&&!building.outOfBusiness()){
+                count++;
+            }
+        }
+        return count;
     }
 }
