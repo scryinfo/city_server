@@ -770,7 +770,7 @@ public class GameSession {
 			return;
 		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
 		seller.addMoney(income);
-		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
+		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
@@ -779,7 +779,8 @@ public class GameSession {
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
 				.setCount(itemBuy.n)
-				.build());
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),notify);
 		player.decMoney(pay);
 		LogDb.playerPay(player.id(),pay);
 		LogDb.playerIncome(seller.id(),income);
@@ -1491,6 +1492,18 @@ public class GameSession {
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
+
+		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+				.setBuyerId(Util.toByteString(buyerPlayerId))
+				.setFaceId(buyer.getFaceId())
+				.setCost(fee - minerCost)
+				.setType(Gs.IncomeNotify.Type.PROMO)
+				.setBid(sellerBuilding.metaId())
+				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+				.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 
 	public void AdGetPromoAbilityHistory(short cmd, Message message) {
@@ -1872,6 +1885,7 @@ public class GameSession {
 		}
 		Laboratory lab = (Laboratory) building;
 		long cost = 0;
+		long income = 0;
 		Player seller = GameDb.getPlayer(lab.ownerId());
 		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if (!c.hasTimes())
@@ -1883,7 +1897,7 @@ public class GameSession {
 			long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
 			if (!player.decMoney(cost + minerCost))
 				return;
-			seller.addMoney(cost - minerCost);
+			seller.addMoney(income = cost - minerCost);
 			LogDb.playerPay(this.player.id(), cost + minerCost);
 			LogDb.playerIncome(seller.id(), cost - minerCost);
 			//矿工费用记录
@@ -1904,6 +1918,18 @@ public class GameSession {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
+
+		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+				.setBuyerId(Util.toByteString(player.id()))
+				.setFaceId(player.getFaceId())
+				.setCost(income)
+				.setType(Gs.IncomeNotify.Type.LAB)
+				.setBid(building.metaId())
+				.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+				.setDuration(c.getTimes())
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -2972,7 +2998,7 @@ public class GameSession {
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
 			//基础信息(加点前、加点后)
-			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
+			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
 			//升级对比信息
 			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）（*）
@@ -3287,7 +3313,7 @@ public class GameSession {
 		seller.addMoney(cost);//交易
 		player.decMoney(cost+freight);//扣除商品+运费
 		//8.2向出售方发送收入通知提示
-		GameServer.sendIncomeNotity(seller.id(),Gs.IncomeNotify.newBuilder()
+		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
@@ -3296,7 +3322,8 @@ public class GameSession {
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
 				.setCount(itemBuy.n)
-				.build());
+				.build();
+		GameServer.sendIncomeNotity(seller.id(),notify);
 		//8.3 发送消息通知
 		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()

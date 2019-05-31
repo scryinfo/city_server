@@ -97,6 +97,7 @@ public class GameServer {
     }
     public static void sendIncomeNotity(UUID roleId, Gs.IncomeNotify notify)
     {
+        LogDb.insertIncomeNotify(roleId,notify);
         GameSession session = allGameSessions.get(roleId);
         if(session != null) {
             session.write(Package.create(GsCode.OpCode.incomeNotify_VALUE,notify));

@@ -11,12 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.mongodb.client.model.Sorts;
+import com.googlecode.protobuf.format.JsonFormat;
+import com.mongodb.client.model.*;
 import gs.Gs;
 import org.bson.Document;
 
@@ -26,9 +28,6 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -82,6 +81,9 @@ public class LogDb {
 	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
 	private static final String MINERS_COST= "minersCost";//矿工费用
 	private static final String NPC_MINERS_COST = "npcMinersCost";//npc支付矿工费用
+
+	//收入通知
+	private static final String INCOME_NOTIFY = "incomeNotify";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -122,8 +124,11 @@ public class LogDb {
 	private static MongoCollection<Document> minersCost;	//矿工费用
 	private static MongoCollection<Document> npcMinersCost;//矿工费用
 
-
 	public static final String KEY_TOTAL = "total";
+
+	private static MongoCollection<Document> incomeNotify;
+	//保持时间 7 天，单位秒
+	public static final long incomeNotify_expire = 7 * 24 * 3600;
 
 	public static void init(String url, String dbName)
 	{
@@ -191,6 +196,30 @@ public class LogDb {
 		npcMinersCost=database.getCollection(NPC_MINERS_COST)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
+		incomeNotify = database.getCollection(INCOME_NOTIFY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		AtomicBoolean hasIndex = new AtomicBoolean(false);
+		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
+		{
+			System.out.println(document.toJson());
+			if (document.get("key",Document.class).get("time") != null)
+			{
+				hasIndex.set(true);
+			}
+		});
+
+		if (!hasIndex.get())
+		{
+			System.out.println("collection incomeNotify no index,create");
+			incomeNotify.createIndex(new Document("time", 1),
+					new IndexOptions().background(true).expireAfter(incomeNotify_expire, TimeUnit.SECONDS));
+			incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
+			{
+				System.out.println(document.toJson());
+			});
+		}
+		else{ System.out.println("collection incomeNotify index exists");}
+
 	}
 
 	public static MongoDatabase getDatabase()
@@ -199,6 +228,15 @@ public class LogDb {
 	}
 
 	public static void startUp(){}
+
+	private static JsonFormat jsonFormat = new JsonFormat();
+	public static void insertIncomeNotify(UUID receiver, Gs.IncomeNotify notify)
+	{
+		Document document = new Document("time", new Date())
+				.append("receiver", receiver)
+				.append("notifyJson", jsonFormat.printToString(notify));
+		incomeNotify.insertOne(document);
+	}
 
 	/**
 	 * @param yestodayStartTime
