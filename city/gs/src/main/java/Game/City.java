@@ -212,6 +212,7 @@ public class City {
     	}else{//初始化工资
     		MetaData.getSalaryMap().forEach((k,v)->{
     			GameDb.saveOrUpdate(new IndustryIncrease(k,0));
+    			industryMoneyMap.put(k,new IndustryIncrease(k,0));
     		});
     	}
 	}

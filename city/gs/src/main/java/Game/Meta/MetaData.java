@@ -402,7 +402,6 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(trivialBuildingColName).find().forEach((Block<Document>) doc -> {
             MetaBuilding m = new MetaBuilding(doc);
             trivial.put(m.id, m);
-            salaryMap.put(MetaBuilding.TRIVIAL, m.salary);
         });
 
         mongoClient.getDatabase(dbName).getCollection(apartmentColName).find().forEach((Block<Document>) doc -> {
@@ -447,7 +446,6 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(warehouseColName).find().forEach((Block<Document>) doc -> {
             MetaWarehouse m = new MetaWarehouse(doc);
             warehouse.put(m.id, m);
-            salaryMap.put(MetaBuilding.WAREHOUSE, m.salary);
         });
     }
 
