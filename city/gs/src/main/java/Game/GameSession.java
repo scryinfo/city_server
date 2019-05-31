@@ -3035,7 +3035,7 @@ public class GameSession {
 				//封装数据
 				List<Gs.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
 				result.addAllApartmentData(apartmentData);
-			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升，计算预期值提升的比例，同上差不多
+			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升率=提升的等级/全城该项eva最高等级
 				EvaManager.getInstance().updateEva(newEva);
 				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
