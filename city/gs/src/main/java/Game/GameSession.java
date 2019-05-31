@@ -2972,7 +2972,7 @@ public class GameSession {
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
 			//基础信息(加点前、加点后)
-			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setBEva(eva).setEEva(newEva.toProto());
+			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
 			//升级对比信息
 			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）（*）
