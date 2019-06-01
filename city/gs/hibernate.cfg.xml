@@ -26,6 +26,8 @@
 		<property name="hbm2ddl.auto">update</property>
 		<property name="hibernate.show_sql">true</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
+		<property name="hibernate.order_updates">true</property>
+		<property name="hibernate.order_inserts">true</property>
 		<property name="hibernate.cache.use_second_level_cache">false</property> <!--doc say the default value is true but default cache is NoCachingRegionFactory-->
 		<property name="hibernate.connection.isolation">2</property>
 		<mapping class="Game.Player$Info"></mapping>
