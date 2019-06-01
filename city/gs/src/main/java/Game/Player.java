@@ -14,6 +14,7 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 @SelectBeforeUpdate(false)
@@ -108,7 +109,13 @@ public class Player {
         GameDb.invalidatePlayerInfoCache(id);
         this.des = str;
     }
-
+    private long nameSetTs = 0;
+    public void updateNameSetTs() {
+        nameSetTs = System.currentTimeMillis();
+    }
+    public boolean canSetName() {
+        return nameSetTs == 0 || nameSetTs <= System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+    }
 //    public void addTalent(Talent t) {
 //        talentIds.add(t.id());
 //        TalentManager.instance().add(t);

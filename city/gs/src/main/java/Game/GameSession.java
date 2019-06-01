@@ -1993,14 +1993,21 @@ public class GameSession {
 		Gs.Str c = (Gs.Str)message;
 		if(c.getStr().isEmpty() || c.getStr().length() > MAX_PLAYER_NAME_LEN)
 			return;
+		if(!player.canSetName()) {
+			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameSetInCd));
+			return;
+		}
 		String oldName = player.getName();
 		player.setName(c.getStr());
 		if(!GameDb.setPlayerName(player)) {
 			player.setName(oldName);
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
 		}
-		else
+		else {
+			player.updateNameSetTs();
+			GameDb.saveOrUpdate(player);
 			this.write(Package.create(cmd));
+		}
 	}
 	public void betFlight(short cmd, Message message) {
 		Gs.BetFlight c = (Gs.BetFlight)message;
