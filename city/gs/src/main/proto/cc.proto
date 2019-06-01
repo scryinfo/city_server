@@ -1,0 +1,124 @@
+//protoc -I ./ --go_out=plugins=grpc:./ ./test.proto
+/*
+ * cd citychain
+ * protoc -I=. -I=ccapi/grpc/proto  --go_out=plugins=grpc:./ ccapi/grpc/proto/cc.proto
+ */
+
+syntax = "proto2";
+
+package ccapi;
+option go_package = "github.com/scryinfo/citychain-s/ccapi/grpc/go_out/ccapi";
+
+import "global_def.proto";
+
+// The greeting service definition.
+// CityUserName 是用户创建后返回的 ccc account name
+service CcS {
+
+    //创建玩家用户
+    rpc CreateUser (CreateUserReq) returns (ccapi.ResHeader) {}
+
+    //玩家充值
+    //充值 返回 city.proto -> RechargeResult
+    rpc RechargeRequest(RechargeRequestReq) returns(RechargeRequestRes) {}
+
+    //提币
+    //提币 调用返回 city.proto -> RechargeResult
+    rpc DisCharge(DisChargeReq) returns (DisChargeRes);
+}
+
+// Create player user
+message CreateUserReq {
+    required ccapi.ReqHeader ReqHeader = 1;
+    //玩家用户id, 唯一标识
+    required string CityUserId = 2;
+    //玩家用户id, 唯一标识
+    required string CityUserName = 3;
+    //玩家公钥，
+    //公钥格式为压缩Hex字符，如： 02bef33ad5916f31e8ee55a88870582d7871832f8d598ade6fbb7ce00db3b5b28d
+    required string PubKey = 4;
+    //支付密码
+    required string PayPassword = 5;
+    //返回的钱包地址
+    optional string EthAddr = 6;
+
+}
+
+//生成订单号
+message GenerateOrderReq {
+    required ccapi.ReqHeader ReqHeader = 1;
+    optional string PurchaseId = 2; //生成的订单号
+}
+//提币
+message DisChargeReq{
+    required ccapi.ReqHeader ReqHeader = 1;
+     //提币订单与之前调用GetDisChargeAddr里的订单相同
+    required string PurchaseId = 2;
+     //玩家ccc公钥
+    required string PubKey = 3;
+     //玩家Eth 到账地址
+    required string EthAddr =4;
+     //提币ddd金额
+     // 单位 wei
+     // acmount = “1000000000000000000” == 1 ddd
+    required string Amount = 5;
+     //时间戳 单位秒
+    required int64 Ts = 6;
+     //交易信息以及签名
+     //PurchaseId.toBytes(utf-8) + UserEthAddr.toBtytes(utf-8)+ Amount.toBtytes(utf-8) +ts(大端, toBytes), tohash256
+    required bytes Signature = 7;
+}
+
+message DisChargeRes{
+    required ccapi.ResHeader ResHeader  = 1;
+    required string PurchaseId = 2;
+    //提币ddd金额
+    // 单位 wei
+    // acmount = “1000000000000000000” == 1 ddd
+    required string Amount = 3;
+}
+
+//充值
+// hash256
+// PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256
+message RechargeRequestReq {
+    required ccapi.ReqHeader ReqHeader = 1;
+    //充值订单id
+    required string PurchaseId = 2; //服务器生成
+    //玩家公钥
+    required string PubKey = 3;
+    //提币ddd金额
+    // 单位 wei
+    // acmount = “1000000000000000000” == 1 ddd
+    required string Amount = 4;
+    //过期时间戳单位秒
+    // ts+（过期时间）= ExpireTime
+    required int64 ExpireTime = 5;
+    //时间戳 单位秒
+    required int64 Ts = 6;
+    //PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256
+    required bytes Signature = 7;
+}
+// hash256
+// PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
+// app 使用自己配置的pubkey 验证签名
+message RechargeRequestRes {
+    required ccapi.ResHeader ResHeader  = 1;
+    //充值订单id
+    required string PurchaseId = 2;
+    //eth充值接收地址
+    required string EthAddr = 3;
+    //过期时间戳单位秒
+    //ts+（过期时间）= ExpireTime
+    required int64 ExpireTime = 4;
+    //时间戳 单位秒
+    required int64 Ts = 5;
+    //PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
+    required bytes Signature = 6;
+}
+
+
+
+
+
+

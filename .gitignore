@@ -21,3 +21,4 @@
 /city/shared/src/main/java/common
 /city/log
 /city/gs/src/jpaModelgen/*
+/city/gs/src/main/proto
