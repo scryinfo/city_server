@@ -331,10 +331,10 @@ public class GameSession {
 		}
 		sendSocialInfo();
 	}
-
+	private static final int MAX_PLAYER_NAME_LEN = 20;
 	public void createRole(short cmd, Message message) {
 		Gs.CreateRole c = (Gs.CreateRole)message;
-		if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN)
+		if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN || c.getName().isEmpty() || c.getName().length() > MAX_PLAYER_NAME_LEN)
 			return;
 		//如果公司名存在，return
 		if(GameDb.companyNameIsInUsed(c.getCompanyName())){
@@ -1989,6 +1989,19 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 	}
 
+	public void setPlayerName(short cmd, Message message) {
+		Gs.Str c = (Gs.Str)message;
+		if(c.getStr().isEmpty() || c.getStr().length() > MAX_PLAYER_NAME_LEN)
+			return;
+		String oldName = player.getName();
+		player.setName(c.getStr());
+		if(!GameDb.setPlayerName(player)) {
+			player.setName(oldName);
+			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
+		}
+		else
+			this.write(Package.create(cmd));
+	}
 	public void betFlight(short cmd, Message message) {
 		Gs.BetFlight c = (Gs.BetFlight)message;
 		if(c.getScore() > player.score())
