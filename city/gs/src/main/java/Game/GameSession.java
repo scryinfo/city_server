@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -1306,7 +1307,7 @@ public class GameSession {
 			}
 			return;
 		}
-		fcySeller.setCurPromPricePerHour(adjustPromo.getPricePerHour());
+		fcySeller.setCurPromPricePerHour((int)adjustPromo.getPricePerHour());
 		fcySeller.setPromRemainTime(adjustPromo.getRemainTime());
 		fcySeller.setTakeOnNewOrder(adjustPromo.getTakeOnNewOrder());
 		GameDb.saveOrUpdate(fcySeller);
@@ -4108,44 +4109,39 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
 		try {
-			chainClient.testfun(req);
+			chainClient.instance().CreateUser(req);
 		}  catch (Exception e) {
 			return ;
 		}
 		this.write(Package.create(cmd, msg));
 		int t = 0 ;
-		/*Building building = City.instance().getBuilding(buildingId);
-		Laboratory lab = (Laboratory) building ;
-
-		Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-		builder.setSalary(lab.salaryRatio);
-		builder.setStaffNum(lab.getWorkerNum());
-		builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-		builder.setGoodProb(lab.getGoodProb());
-		//建筑基本信息
-		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-		builder.setBuildingInfo(buildingInfo);
-		for (int type : msg.getTypeIdsList()) {
-			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-			b.setTypeId(type);
-			b.setAbility(EvaManager.getInstance().computePercent(eva));
-		}
-		this.write(Package.create(cmd, builder.build()));*/
 	}
 
+	public void ct_GenerateOrderReq(short cmd,Message message){
+		ccapi.Dddbind.ct_GenerateOrderReq msg = (ccapi.Dddbind.ct_GenerateOrderReq) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString()).build()));
+		int t = 0 ;
+	}
 	public void ct_RechargeRequestReq(short cmd,Message message){
 		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
 		String privateKeyStr = "1368816272920190601123456";
 		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
+		if(pubStr.equals(req.getPubKey())){
+			int a = 0 ;
+		}
 		try {
-			//chainClient.testfun(req);
+			String data = "Hello motal";
+			BigInteger[] signature =  Bouncycastle_Secp256k1.sig(data.getBytes(),privateKeyStr.getBytes());
+			signature[0].toByteArray();
+			//req.toBuilder().setSignature(Util.toByteString() );
+			chainClient.instance().RechargeRequestReq(req);
 		}  catch (Exception e) {
 			return ;
 		}
-		this.write(Package.create(cmd, msg));
+		//this.write(Package.create(cmd, msg));
 		int t = 0 ;
 	}
 

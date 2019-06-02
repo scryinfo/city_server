@@ -1,5 +1,4 @@
 package Game.security;
-
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -19,8 +18,6 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-
-
 /***********************************************************************************************
  * 												*
  *		Ellipische Kurven-Operationen Secp256k1 mit Bouncycastle			*
@@ -55,13 +52,22 @@ public class Bouncycastle_Secp256k1 {
         return sig;
     }
 
+    public static BigInteger[] sig(byte[] hash, byte[] priv) {
+        X9ECParameters p = SECNamedCurves.getByName("secp256k1");
+        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(new BigInteger(1, priv), params);
+        ECDSASigner dsa = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
+        BigInteger[] sig = dsa.generateSignature(hash);
+        return sig;
+    }
+
     public static String GetPublicKeyFromPrivateKey(String privateKey){
         X9ECParameters p = SECNamedCurves.getByName("secp256k1");
         ECDomainParameters domain = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
         BigInteger d = new BigInteger(privateKey);
         ECPoint q = domain.getG().multiply(d);
         ECPublicKeyParameters publicKey = new ECPublicKeyParameters(q, domain);
-        return publicKey.toString();
+        return Base58.encode(publicKey.getQ().getEncoded());
     }
 
     /*private static String GetPublicKeyFromPrivateKey(String privateKey)
