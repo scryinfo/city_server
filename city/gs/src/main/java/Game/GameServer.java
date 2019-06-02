@@ -1,22 +1,10 @@
 package Game;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.*;
-
-import Game.Gambling.FlightManager;
-import Game.Gambling.ThirdPartyDataSource;
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.MapMaker;
-
 import Game.Contract.ContractManager;
 import Game.Eva.EvaManager;
 import Game.FriendManager.FriendManager;
+import Game.Gambling.FlightManager;
+import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueManager;
 import Game.Meta.MetaData;
 import Shared.*;
@@ -50,6 +38,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GameServer {
     private static final Logger logger = Logger.getLogger(GameServer.class);

@@ -248,6 +248,7 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			//充提
 			table.put((short) GsCode.OpCode.ct_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_createUser.PARSER, GameSession.class,"ct_createUser"));
+			table.put((short) GsCode.OpCode.ct_rechargeRequest_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_RechargeRequestReq.PARSER, GameSession.class,"ct_RechargeRequestReq"));
 			if(GlobalConfig.debug()){
 
 			}

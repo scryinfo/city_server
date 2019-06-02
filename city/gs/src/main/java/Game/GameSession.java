@@ -14,6 +14,7 @@ import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.*;
 import Game.blockchain.chainClient;
+import Game.security.Bouncycastle_Secp256k1;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -33,12 +34,30 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class GameSession {
+
+	public static byte[] signData(String algorithm, byte[] data, PrivateKey key) throws Exception {
+		Signature signer = Signature.getInstance(algorithm);
+		signer.initSign(key);
+		signer.update(data);
+		return (signer.sign());
+	}
+
+	public static boolean verifySign(String algorithm, byte[] data, PublicKey key, byte[] sig) throws Exception {
+		Signature signer = Signature.getInstance(algorithm);
+		signer.initVerify(key);
+		signer.update(data);
+		return (signer.verify(sig));
+	}
+
 	private ChannelHandlerContext ctx;
 	private static final Logger logger = Logger.getLogger(GameSession.class);
 	private final static int UPDATE_MS = 200;
@@ -4113,6 +4132,21 @@ public class GameSession {
 			b.setAbility(EvaManager.getInstance().computePercent(eva));
 		}
 		this.write(Package.create(cmd, builder.build()));*/
+	}
+
+	public void ct_RechargeRequestReq(short cmd,Message message){
+		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		ccapi.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
+		String privateKeyStr = "1368816272920190601123456";
+		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
+		try {
+			//chainClient.testfun(req);
+		}  catch (Exception e) {
+			return ;
+		}
+		this.write(Package.create(cmd, msg));
+		int t = 0 ;
 	}
 
     //获取建筑的通用信息（抽取，yty）

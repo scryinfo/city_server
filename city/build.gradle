@@ -21,6 +21,10 @@ allprojects {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.powermock', name: 'powermock-module-junit4', version:'1.6.4'
         compile group: 'io.netty', name: 'netty-all', version: '4.1.31.Final'
+        //compile fileTree(dir:'libs',includes:['*jar'])
+        //compile files('libs/app_api-sources.jar')
+        //compile 'github.com/scryinfo/citychain-s/app_api/app_api-sources'
+        //compile 'lib/app_api-sources.jar'
         //compile 'com.google.protobuf:protobuf-java:3.6.1'
         compile 'com.google.protobuf:protobuf-java:2.5.0'
 
@@ -36,6 +40,7 @@ allprojects {
         compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
         compile group: 'org.json', name: 'json', version: '20180813'
         compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
+        compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
