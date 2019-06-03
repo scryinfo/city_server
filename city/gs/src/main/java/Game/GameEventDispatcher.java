@@ -117,6 +117,11 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.allocTalent_VALUE, Wrapper.newWithMessageAsync(Gs.AllocTalent.PARSER, GameSession.class,"allocTalent"));
 			table.put((short) GsCode.OpCode.unallocTalent_VALUE, Wrapper.newWithMessageAsync(Gs.AllocTalent.PARSER, GameSession.class,"unallocTalent"));
 
+			table.put((short) GsCode.OpCode.setPlayerName_VALUE, Wrapper.newWithMessageAsync(Gs.Str.PARSER, GameSession.class,"setPlayerName"));
+			table.put((short) GsCode.OpCode.getAllFlight_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllFlight"));
+			table.put((short) GsCode.OpCode.betFlight_VALUE, Wrapper.newWithMessageAsync(Gs.BetFlight.PARSER, GameSession.class,"betFlight"));
+			table.put((short) GsCode.OpCode.getFlightBetHistory_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getFlightBetHistory"));
+
 			//wxj=================================================
 			table.put((short) GsCode.OpCode.searchPlayer_VALUE, Wrapper.newWithMessageAsync(Gs.Str.PARSER, GameSession.class, "searchPlayerByName"));
 			table.put((short) GsCode.OpCode.addFriend_VALUE, Wrapper.newWithMessageAsync(Gs.ByteStr.PARSER, GameSession.class, "addFriend"));
