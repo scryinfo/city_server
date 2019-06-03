@@ -775,7 +775,7 @@ public class GameSession {
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
-				.setCost(pay)
+				.setCost(cost)
 				.setType(Gs.IncomeNotify.Type.INSHELF)
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
@@ -805,7 +805,7 @@ public class GameSession {
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
-		//矿工费用日志记录
+		//矿工费用日志记录(需调整)
 		LogDb.minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
@@ -3059,7 +3059,7 @@ public class GameSession {
 				result.addAllApartmentData(apartmentData);
 			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升率=提升的等级/全城该项eva最高等级
 				EvaManager.getInstance().updateEva(newEva);
-				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
+				//提升比例:提升的等级/全城该项eva最高等级  如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
 				int lv = newEva.getLv();
 				result.setRetailSpendRatio(maxLv == lv ? 0 : lv / maxLv);
