@@ -794,7 +794,7 @@ public class GameSession {
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
-				.setCost(pay)
+				.setCost(income)
 				.setType(Gs.IncomeNotify.Type.INSHELF)
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
