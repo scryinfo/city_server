@@ -32,6 +32,8 @@ dependencies {
     implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
     runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('libs/app_api_1.0.jar')
 }
 sourceSets {
     main.java.srcDirs += 'src/jpaModelgen/generated'

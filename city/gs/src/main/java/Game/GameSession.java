@@ -34,7 +34,6 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -4128,16 +4127,15 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
 		String privateKeyStr = "1368816272920190601123456";
+		String key = "123456";
 		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
 		if(pubStr.equals(req.getPubKey())){
 			int a = 0 ;
 		}
 		try {
 			String data = "Hello motal";
-			BigInteger[] signature =  Bouncycastle_Secp256k1.sig(data.getBytes(),privateKeyStr.getBytes());
-			signature[0].toByteArray();
-			//req.toBuilder().setSignature(Util.toByteString() );
-			chainClient.instance().RechargeRequestReq(req);
+			String signature =  Bouncycastle_Secp256k1.sig_s(data.getBytes(),privateKeyStr.getBytes(),key.getBytes());
+			chainClient.instance().RechargeRequestReq(req.toBuilder().setSignature(ByteString.copyFrom(signature.getBytes())).build());
 		}  catch (Exception e) {
 			return ;
 		}

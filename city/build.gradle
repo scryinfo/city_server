@@ -21,10 +21,10 @@ allprojects {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.powermock', name: 'powermock-module-junit4', version:'1.6.4'
         compile group: 'io.netty', name: 'netty-all', version: '4.1.31.Final'
-        //compile fileTree(dir:'libs',includes:['*jar'])
+        //compile fileTree(dir:'libs',includes:['*aar'])
         //compile files('libs/app_api-sources.jar')
         //compile 'github.com/scryinfo/citychain-s/app_api/app_api-sources'
-        //compile 'lib/app_api-sources.jar'
+        //compile 'libs/app_api-sources.jar'
         //compile 'com.google.protobuf:protobuf-java:3.6.1'
         compile 'com.google.protobuf:protobuf-java:2.5.0'
 

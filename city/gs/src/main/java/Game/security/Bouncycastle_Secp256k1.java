@@ -52,13 +52,9 @@ public class Bouncycastle_Secp256k1 {
         return sig;
     }
 
-    public static BigInteger[] sig(byte[] hash, byte[] priv) {
-        X9ECParameters p = SECNamedCurves.getByName("secp256k1");
-        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
-        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(new BigInteger(1, priv), params);
-        ECDSASigner dsa = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
-        BigInteger[] sig = dsa.generateSignature(hash);
-        return sig;
+    public static String sig_s(byte[] hash, byte[] priv, byte[] k) {
+        BigInteger[] sig = sig(hash,priv,k);
+        return sig[0].toString()+"1"+sig[1].toString();
     }
 
     public static String GetPublicKeyFromPrivateKey(String privateKey){
