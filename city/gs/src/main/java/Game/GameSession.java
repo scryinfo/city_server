@@ -760,7 +760,8 @@ public class GameSession {
 		int freight = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(buyStore, (IStorage) sellBuilding));
 
 		//TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
-		long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+		long minerCost = (long) Math.floor(cost * minersRatio);
 		long income =cost - minerCost;//收入（扣除矿工费后）
 		long pay=cost+minerCost;
 		if(player.money() < cost + freight+minerCost)
@@ -805,9 +806,8 @@ public class GameSession {
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
 		//矿工费用日志记录
-		LogDb.minersCost(player.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-
+		LogDb.minersCost(player.id(),minerCost,minersRatio);
+		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
 		sellBuilding.updateTodayIncome(income);
@@ -1360,7 +1360,8 @@ public class GameSession {
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
 		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
 		//TODO:矿工费用(向下取整)
-		long minerCost = (long) Math.floor(fee * MetaData.getSysPara().minersCostRatio);
+		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+		long minerCost = (long) Math.floor(fee * minersRatio);
 		if(buyer.money() < fee+minerCost){
 			if(GlobalConfig.DEBUGLOG){
 				GlobalConfig.cityError("GameSession.AdAddNewPromoOrder(): PromDuration required by client greater than sellerBuilding's remained.");
@@ -1894,7 +1895,8 @@ public class GameSession {
 				return;
 			cost = c.getTimes() * lab.getPricePreTime();
 			//TODO:矿工费用
-			long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+			double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+			long minerCost = (long) Math.floor(cost * minersRatio);
 			if (!player.decMoney(cost + minerCost))
 				return;
 			seller.addMoney(income = cost - minerCost);
@@ -3055,16 +3057,12 @@ public class GameSession {
 				//封装数据
 				List<Gs.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
 				result.addAllApartmentData(apartmentData);
-			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升，计算预期值提升的比例，同上差不多
+			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升率=提升的等级/全城该项eva最高等级
 				EvaManager.getInstance().updateEva(newEva);
 				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
 				int lv = newEva.getLv();
-				if(maxLv==lv){
-					result.setRetailSpendRatio(0);
-				}else {
-					result.setRetailSpendRatio(lv/maxLv);
-				}
+				result.setRetailSpendRatio(maxLv == lv ? 0 : lv / maxLv);
 			}
 			else {
 				EvaManager.getInstance().updateEva(newEva);
