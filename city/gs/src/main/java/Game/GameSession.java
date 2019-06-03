@@ -2043,7 +2043,7 @@ public class GameSession {
 		}
 	}
 
-	public void getFlightBetHistory(short cmd, Message message) {
+	public void getFlightBetHistory(short cmd) {
 		Gs.FlightBetHistory.Builder builder = Gs.FlightBetHistory.newBuilder();
 		for(LogDb.FlightBetRecord r : LogDb.getFlightBetRecord(player.id())) {
 			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setData(r.data);
@@ -2051,7 +2051,7 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
-	public void getAllFlight(short cmd, Message message) {
+	public void getAllFlight(short cmd) {
 		this.write(Package.create(cmd, FlightManager.instance().toProto(player.id())));
 	}
 	public void techTradeAdd(short cmd, Message message) {
