@@ -759,7 +759,7 @@ public class GameSession {
 		long cost = itemBuy.n*c.getPrice();
 		int freight = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(buyStore, (IStorage) sellBuilding));
 
-		//TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
+		 //TODO:矿工费用（商品基本费用*矿工费用比例）(向下取整),
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(cost * minersRatio);
 		long income =cost - minerCost;//收入（扣除矿工费后）
@@ -1359,7 +1359,7 @@ public class GameSession {
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
 		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
-		//TODO:矿工费用(向下取整)
+		//TODO:矿工费用
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(fee * minersRatio);
 		if(buyer.money() < fee+minerCost){
