@@ -1287,7 +1287,7 @@ public class GameSession {
 			}
 			return;
 		}
-		fcySeller.setCurPromPricePerHour(adjustPromo.getPricePerHour());
+		fcySeller.setCurPromPricePerHour((int) adjustPromo.getPricePerHour());
 		fcySeller.setPromRemainTime(adjustPromo.getRemainTime());
 		fcySeller.setTakeOnNewOrder(adjustPromo.getTakeOnNewOrder());
 		GameDb.saveOrUpdate(fcySeller);
