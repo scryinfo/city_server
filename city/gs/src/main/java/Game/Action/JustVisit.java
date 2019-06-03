@@ -75,7 +75,8 @@ public class JustVisit implements IAction {
             if (chosen.type() == MetaBuilding.APARTMENT) {//需要多扣除矿工费用
 
                 //TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
-                long minerCost = (long) Math.floor(chosen.cost() * MetaData.getSysPara().minersCostRatio);
+                double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+                long minerCost = (long) Math.floor(chosen.cost() * minersRatio);
                 income -= minerCost;
                 pay += minerCost;
                 Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()

@@ -113,7 +113,8 @@ public class Shopping implements IAction {
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
-        long minerCost = (long) Math.floor(chosen.price* MetaData.getSysPara().minersCostRatio);
+        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        long minerCost = (long) Math.floor(chosen.price* minersRatio);
         if(chosen.price+minerCost > npc.money()) {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
         	int money=(int) ((chosen.price+minerCost)-npc.money());
@@ -180,7 +181,8 @@ public class Shopping implements IAction {
           sellShop.addFlowCount();
           logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
-        long minerCost = (long) Math.floor(chosen.price* MetaData.getSysPara().minersCostRatio);
+        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        long minerCost = (long) Math.floor(chosen.price* minersRatio);
 
         if(chosen.price+minerCost> npc.money()) {
           	//购买时所持金不足,行业涨薪指数 += 定价（已包含旷工费） - 所持金
