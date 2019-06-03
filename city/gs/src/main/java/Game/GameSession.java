@@ -3040,11 +3040,7 @@ public class GameSession {
 				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
 				int lv = newEva.getLv();
-				if(maxLv==lv){
-					result.setRetailSpendRatio(0);
-				}else {
-					result.setRetailSpendRatio(lv/maxLv);
-				}
+				result.setRetailSpendRatio(maxLv == lv ? 0 : lv / maxLv);
 			}
 			else {
 				EvaManager.getInstance().updateEva(newEva);
