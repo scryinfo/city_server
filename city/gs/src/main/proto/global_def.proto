@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package ccapi;
+option go_package = "github.com/scryinfo/citychain-s/ccapi/grpc/go_out/ccapi";
+
+enum ErrCode {
+    ERR_SUCCESS               =0;       //0 成功
+    ERR_FAILED                =1;       //1 失败
+    ERR_ADDR_ALREADY_EXIST    =2;       //2 地址已经存在
+    ERR_CONN_TO_DA_NOT_READY  =3;       //3 连接没有准备好
+    ERR_INVALID_PUBKEY        =4;       //4 非法公钥
+    ERR_INSUFF_FUNDS          =5;        //5 资金不足
+    ERR_INVALID_AMT           =6;       //6 非法帐号
+    ERR_INVALID_FEE           =7;        //7 非法fee
+    ERR_INVALID_SIGNATURE     =8;        //8 非法签名
+    ERR_INVALID_ADDR          =9;        //9 非法地址
+    ERR_INVALID_FROM_ADDR     =10;       //10 非法的转出地址
+    ERR_INVALID_TO_ADDR       =11;       //11 非法的转入地址
+    ERR_NONEXIST_ADDR         =12;       //12 地址不存在
+    ERR_OUT_MAX_AMOUNT        =13;       //13 超出最大金额
+    ERR_BALANCE_ZERO          =14;       //14 帐户余额不正常
+    ERR_IS_EXIST              =15;       //15 已经存在记录
+    ERR_RECHARGE_EEE_QT_DDD   =16;       //16 提币时 ddd不能大于 eee
+    ERR_PLAY_LIQUIDATE_VERIFY =17;       //17 结算时 校验结算结果失败
+    ERR_DDDADDR_IS_NOT_RULES  =18;       //18 DDD地址不符合规则
+}
+
+
+message ResHeader {
+    // 现在版本默认为 1
+    int32 Version = 1;
+    ErrCode ErrCode = 2;
+    string ErrMsg =3;
+    string ReqId = 4;
+}
+
+message ReqHeader {
+    // 现在版本默认为 1
+    int32 Version = 1;
+    // city 端所有的请求加入唯一的请求id
+    string ReqId = 4;
+}
+
+enum  EventCode {
+    EVENT_Type =0;//
+    EVENT_CREATEUSER =1;//创建用户 da_model.UserEvent
+    EVENT_RECHARGE =2;//充值 //da_model.RechargePurchase
+    EVENT_CREATENPC =3;//创建NPC  da_model.UserEvent
+    EVENT_PlayorTRANSFER=4;//交易 //da_model.PlayTransferEvt
+    EVENT_PUSHCONTRACT=5;//部署劳务合同 da_model.PushContractEvt
+    EVENT_EMPLOYNPC=6;//EmployNpc da_model.EmployNpcEvt
+    EVENT_ACTIVETRANSF=7;//主动交易 da_model.ActiveTransf
+    EVENT_DISMISS=8;//解雇npc da_model.DisMissEvt
+    EVENT_DISCHARGE=9;//提币 da_model.DisChargeEvt
+}

@@ -1019,7 +1019,24 @@ public class GameDb {
 			session.close();
 		}
 	}
-
+	public static boolean setPlayerName(Player p) {
+    	boolean success = false;
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		try {
+			transaction = session.beginTransaction();
+			session.update(p);
+			transaction.commit();
+			success = true;
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			if(transaction != null)
+				transaction.rollback();
+		} finally {
+			session.close();
+		}
+		return success;
+	}
 	public static void delete(Object o) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = null;
