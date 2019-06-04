@@ -28,7 +28,7 @@ public class MailBox {
         Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr);
         sendMailImpl(playerId, mail);
     }
-    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,long[] tparas) {
+    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,String tparas) {
         Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr,tparas);
         sendMailImpl(playerId, mail);
     }

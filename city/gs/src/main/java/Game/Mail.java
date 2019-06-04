@@ -2,7 +2,6 @@ package Game;
 
 import DB.Db;
 import Shared.Util;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
@@ -20,10 +19,6 @@ import java.util.UUID;
         @TypeDef(
                 name = "int-array",
                 typeClass = IntArrayType.class
-        ),
-        @TypeDef(
-                name = "long-array",
-                typeClass = StringArrayType.class
         )
 })
 @Entity
@@ -112,7 +107,7 @@ public class Mail {
         ts = System.currentTimeMillis();
         read = false;        //默认值为false,未读
     }
-    public Mail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,long[] tparas) {
+    public Mail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,String tparas) {
         id = UUID.randomUUID();
         this.playerId = playerId;
         this.type = type;
@@ -147,12 +142,7 @@ public class Mail {
     )
     private int[] intParasArr;
 
-    @Type(type = "long-array")
-    @Column(
-            name = "tparas",
-            columnDefinition = "BIGINT[]"
-    )
-    private long[] tparas;
+    private String tparas;
 //    @ElementCollection(fetch = FetchType.EAGER)
 //    @CollectionTable(name = "mail_uuidPara", joinColumns = { @JoinColumn(name = "Mail_id")})
 //    private Set<UUID> uuidParas = new HashSet<>();
@@ -216,10 +206,9 @@ public class Mail {
                 builder.addUuidParas(Util.toByteString(uuidPara));
             }
         }
-        if (null != tparas && tparas.length != 0) {
-            for (long a : tparas) {
-                builder.addTparas(a);
-            }
+        if (null != tparas) {
+            String[] split = tparas.split(",");
+            builder.addAllTparas(Arrays.asList(split));
         }
         return builder.build();
     }

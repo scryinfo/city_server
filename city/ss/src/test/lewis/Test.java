@@ -1,4 +1,5 @@
 package lewis;
+import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.fields;
@@ -363,52 +364,17 @@ public class Test
     public void testTime() {
         LogDb.init("mongodb://192.168.0.51:27017", "cityLiuyi");
         SummaryUtil.init();
-    /*    UUID uuid = new UUID(9527l, 3342l);
-        UUID sellId = new UUID(9527l, 3342l);
-        UUID ownerId = new UUID(9527l, 3342l);
-        UUID bid = new UUID(9527l, 3342l);
-        LogDb.npcRentApartment(uuid,sellId,999l,10,ownerId,bid,5,7,2.2,3.3);*/
 
+/*
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
 
-        MongoCollection<Document> npcRentApartment = LogDb.getNpcRentApartment();
-        MongoCollection<Document> collection = SummaryUtil.getPlayerExchangeAmount();
-        List<Document> documentList = new ArrayList<>();
-        Document projectObject = new Document()
-                .append("id", "$_id")
-                .append("total", "$" + "total")
-                .append("sum","$sum")
-                .append("brand","$brand")
-                .append("quality","$quality")
-                .append("size","$size")
-                .append("_id",0);
-        npcRentApartment.aggregate(
-                Arrays.asList(
-                        Aggregates.group("$tp",  Accumulators.sum("total", "$a"),
-                                Accumulators.sum("sum","$n"),
-                                Accumulators.sum("brand","$brand"),
-                                Accumulators.sum("quality","$quality"),
-                                Accumulators.sum("size",1l)
-                                )
-                        ,Aggregates.project(projectObject)
-                )
-        ).forEach((Block<? super Document>) documentList::add);
-        System.out.println(documentList);
-
-
-//        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-//        long time = System.currentTimeMillis();
-//        long endTime = time - time%(1000 * 60  * 60);
-//        long startTime = endTime - 1000 * 60 * 60;
-//        List<Document> documents = LogDb.queryApartmentBrandAndQuality(startTime, endTime, collection);
-////        SummaryUtil.insertBrandAndQuality(SummaryUtil.CountType.BYHOUR, documents, endTime, SummaryUtil.getPlayerExchangeAmount());
-//        System.out.println(documents);
-//        System.out.println(dateFormat.format(1556262000000l));
-//        System.out.println(dateFormat.format(endTime));
-
-
-//        Map<String, Double> map = SummaryUtil.queryAvg(collection, 5, SummaryUtil.CountType.BYHOUR);
-//        System.out.println(map);
+        long startTime = SummaryUtil.hourStartTime(System.currentTimeMillis());
+        long endTime = startTime - HOUR_MILLISECOND*60;
+        System.out.println(dateFormat.format(endTime));
+        System.out.println(endTime);
+        */
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(1559372741643l));
     }
 
 }
