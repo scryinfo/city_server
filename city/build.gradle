@@ -2,13 +2,14 @@ allprojects {
     apply plugin: 'java'
 }
 def grpcVersion = '1.21.0' // CURRENT_GRPC_VERSION
-def protobufVersion = '3.7.1'
+def protobufVersion = '3.1.0'
 def protocVersion = protobufVersion
 allprojects {
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         compile group: 'io.netty', name: 'netty-all', version: '4.1.31.Final'
-        compile 'com.google.protobuf:protobuf-java:2.5.0'
+        //compile 'com.google.protobuf:protobuf-java-util:2.5.0'
+        compile 'com.google.protobuf:protobuf-java:3.1.0'
         compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0'
         //compile group: 'com.rabbitmq', name: 'amqp-client', version: '5.3.0'
         compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.8.0'
