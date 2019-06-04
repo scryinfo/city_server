@@ -105,6 +105,6 @@ public class Apartment extends Building implements IBuildingContract
 
     private int getTotalQty(){
         Eva eva = EvaManager.getInstance().getEva(this.ownerId(),type(), Gs.Eva.Btype.Quality_VALUE);
-        return (int) (this.qty * (1 + EvaManager.getInstance().computePercent(eva)));
+        return (int)Math.ceil((this.qty * (1 + EvaManager.getInstance().computePercent(eva))));
     }
 }
