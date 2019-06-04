@@ -1498,7 +1498,7 @@ public class GameSession {
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(buyerPlayerId))
 				.setFaceId(buyer.getFaceId())
-				.setCost(fee - minerCost)
+				.setCost(fee)
 				.setType(Gs.IncomeNotify.Type.PROMO)
 				.setBid(sellerBuilding.metaId())
 				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
@@ -1886,7 +1886,6 @@ public class GameSession {
 		}
 		Laboratory lab = (Laboratory) building;
 		long cost = 0;
-		long income = 0;
 		Player seller = GameDb.getPlayer(lab.ownerId());
 		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if (!c.hasTimes())
@@ -1899,7 +1898,7 @@ public class GameSession {
 			long minerCost = (long) Math.floor(cost * minersRatio);
 			if (!player.decMoney(cost + minerCost))
 				return;
-			seller.addMoney(income = cost - minerCost);
+			seller.addMoney(cost - minerCost);
 			LogDb.playerPay(this.player.id(), cost + minerCost);
 			LogDb.playerIncome(seller.id(), cost - minerCost);
 			//矿工费用记录
@@ -1925,7 +1924,7 @@ public class GameSession {
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
-				.setCost(income)
+				.setCost(cost)
 				.setType(Gs.IncomeNotify.Type.LAB)
 				.setBid(building.metaId())
 				.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
