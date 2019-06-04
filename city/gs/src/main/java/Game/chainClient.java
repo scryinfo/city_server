@@ -84,18 +84,18 @@ public class chainClient {
      * Greet server. If provided, the first element of {@code args} is the name to use in the
      * greeting.
      */
-    public static void main(String[] args) throws Exception {
+    /*public static void main(String[] args) throws Exception {
         //chainClient client = new chainClient("localhost", 50051);
         chainClient client = new chainClient("192.168.0.191", 50051);
         try {
-            /* Access a service running on the local machine on port 50051 */
+            *//* Access a service running on the local machine on port 50051 *//*
             String user = "world";
             if (args.length > 0) {
-                user = args[0]; /* Use the arg as the name to greet if provided */
+                user = args[0]; *//* Use the arg as the name to greet if provided *//*
             }
             client.greet(user);
         } finally {
             client.shutdown();
         }
-    }
+    }*/
 }
