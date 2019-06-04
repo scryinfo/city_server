@@ -1,30 +1,13 @@
-repositories {
-    mavenCentral()
-}
-
-/*repositories {
-    maven { // The google mirror is less flaky than mavenCentral()
-        url "https://maven-central.storage-download.googleapis.com/repos/central/data/" }
-    mavenLocal()
-}*/
-
 allprojects {
     apply plugin: 'java'
 }
-
 def grpcVersion = '1.21.0' // CURRENT_GRPC_VERSION
 def protobufVersion = '3.7.1'
 def protocVersion = protobufVersion
-
 allprojects {
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
-        testCompile group: 'org.powermock', name: 'powermock-module-junit4', version:'1.6.4'
         compile group: 'io.netty', name: 'netty-all', version: '4.1.31.Final'
-        //compile fileTree(dir:'libs',includes:['*aar'])
-        //compile files('libs/app_api-sources.jar')
-        //compile 'github.com/scryinfo/citychain-s/app_api/app_api-sources'
-        //compile 'libs/app_api-sources.jar'
         //compile 'com.google.protobuf:protobuf-java:3.6.1'
         compile 'com.google.protobuf:protobuf-java:2.5.0'
 
@@ -37,11 +20,10 @@ allprojects {
         compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.6.Final'
         compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
         compile 'com.vladmihalcea:hibernate-types-52:2.3.0'
+        //
         compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
         compile group: 'org.json', name: 'json', version: '20180813'
         compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
-        compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
-        //compile 'commons-codec:commons-codec:1.12'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
@@ -51,7 +33,12 @@ allprojects {
 
 group 'info.scry'
 //version '1.0-SNAPSHOT'
+
 sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
 
 project(':as') {
     dependencies {
@@ -83,4 +70,3 @@ task myCopyTask(type: Copy) {
     into "../../server_bin"
 }
 assemble.dependsOn myCopyTask
-
