@@ -2018,7 +2018,7 @@ public class GameSession {
 		else {
 			player.updateNameSetTs();
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd, c));
 		}
 	}
 	public void betFlight(short cmd, Message message) {
@@ -3999,7 +3999,7 @@ public class GameSession {
     	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
     	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
     	Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.APARTMENT || building.type() != MetaBuilding.RETAIL) {
+		if (building == null) {
 			return;
 		}
     	Gs.RetailShopOrApartmentInfo.Builder builder=Gs.RetailShopOrApartmentInfo.newBuilder();
