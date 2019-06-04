@@ -3987,7 +3987,7 @@ public class GameSession {
     	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
     	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
     	Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.APARTMENT || building.type() != MetaBuilding.RETAIL) {
+		if (building == null) {
 			return;
 		}
     	Gs.RetailShopOrApartmentInfo.Builder builder=Gs.RetailShopOrApartmentInfo.newBuilder();
