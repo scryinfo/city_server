@@ -1493,18 +1493,20 @@ public class GameSession {
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
-
-		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(buyerPlayerId))
-				.setFaceId(buyer.getFaceId())
-				.setCost(fee)
-				.setType(Gs.IncomeNotify.Type.PROMO)
-				.setBid(sellerBuilding.metaId())
-				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
-				.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
-				.build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+		if (!buyerPlayerId.equals(seller.id()))
+		{
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(buyerPlayerId))
+					.setFaceId(buyer.getFaceId())
+					.setCost(fee - minerCost)
+					.setType(Gs.IncomeNotify.Type.PROMO)
+					.setBid(sellerBuilding.metaId())
+					.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+					.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+		}
 	}
 
 	public void AdGetPromoAbilityHistory(short cmd, Message message) {
@@ -1913,24 +1915,23 @@ public class GameSession {
 				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, 0, false);
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(player.id()))
+					.setFaceId(player.getFaceId())
+					.setCost(cost - minerCost)
+					.setType(Gs.IncomeNotify.Type.LAB)
+					.setBid(building.metaId())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.setDuration(c.getTimes())
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 		}
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-
-		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(player.id()))
-				.setFaceId(player.getFaceId())
-				.setCost(cost)
-				.setType(Gs.IncomeNotify.Type.LAB)
-				.setBid(building.metaId())
-				.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-				.setDuration(c.getTimes())
-				.build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
