@@ -2008,7 +2008,7 @@ public class GameSession {
 		else {
 			player.updateNameSetTs();
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd, c));
 		}
 	}
 	public void betFlight(short cmd, Message message) {
