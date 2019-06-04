@@ -2997,7 +2997,7 @@ public class GameSession {
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
 
-	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)=====================================================
+	//TODO:Eva改版(保存eva修改信息的位置在查询修改前的数据之后保存)=====================================================
 	public void updateMyEvas(short cmd, Message message)
 	{
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
@@ -3011,6 +3011,7 @@ public class GameSession {
 			oldEva.setLv(eva.getLv());
 			oldEva.setAt(eva.getAt());
 			oldEva.setBt(eva.getBt().getNumber());
+			oldEva.setB(eva.getB());
 			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
@@ -3927,7 +3928,7 @@ public class GameSession {
 		builder.setStaffNum(building.getWorkerNum());
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-		builder.setBuildingInfo(buildingInfo);builder.setBuildingInfo(buildingInfo);
+		builder.setBuildingInfo(buildingInfo);
     	MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
     		Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
     		MetaMaterial material=MetaData.getMaterial(itemId);
