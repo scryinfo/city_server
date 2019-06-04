@@ -442,13 +442,9 @@ public class BrandManager {
             if(binfo.hasBrandName()){
                 band.setBrandName(binfo.getBrandName());
             }
-            EvaManager.getInstance().getEva(pid,itemId).forEach(eva -> {
+            GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
                 band.addEva(eva.toProto());
             });
-            //优化
-           /* GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
-                band.addEva(eva.toProto());
-            });*/
             brands.add(band.build());
         });
         return brands;
