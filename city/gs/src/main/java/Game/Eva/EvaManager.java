@@ -114,11 +114,7 @@ public class EvaManager
         e.setBt(eva.getBt().getNumber());
         e.setLv(level);
         e.setCexp(cexp);
-        if(eva.hasB()) {
-            e.setB(eva.getB());
-        }else {
             e.setB(-1);
-        }
         return e;
     }
 }
