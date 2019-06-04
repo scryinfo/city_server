@@ -114,7 +114,7 @@ public class EvaManager
         e.setBt(eva.getBt().getNumber());
         e.setLv(level);
         e.setCexp(cexp);
-            e.setB(-1);
+        e.setB(-1);
         return e;
     }
 }

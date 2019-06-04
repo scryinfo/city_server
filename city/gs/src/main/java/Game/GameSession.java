@@ -2987,7 +2987,7 @@ public class GameSession {
 		e.setBt(eva.getBt().getNumber());
 		e.setLv(level);
 		e.setCexp(cexp);
-			e.setB(-1);
+		e.setB(-1);
 		EvaManager.getInstance().updateEva(e);
 
 		Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
