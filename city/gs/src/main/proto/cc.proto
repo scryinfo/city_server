@@ -6,7 +6,7 @@
 
 syntax = "proto2";
 
-package ccapi;
+package ccapi.cc;
 option go_package = "github.com/scryinfo/citychain-s/ccapi/grpc/go_out/ccapi";
 
 import "global_def.proto";
@@ -16,7 +16,7 @@ import "global_def.proto";
 service Cc {
 
     //创建玩家用户
-    rpc CreateUser (CreateUserReq) returns (ccapi.ResHeader) {}
+    rpc CreateUser (CreateUserReq) returns (ccapi.global_def.ResHeader) {}
 
     //玩家充值
     //充值 返回 city.proto -> RechargeResult
@@ -29,7 +29,7 @@ service Cc {
 
 // Create player user
 message CreateUserReq {
-    required ccapi.ReqHeader ReqHeader = 1;
+    required ccapi.global_def.ReqHeader ReqHeader = 1;
     //玩家用户id, 唯一标识
     required string CityUserId = 2;
     //玩家用户id, 唯一标识
@@ -47,7 +47,7 @@ message CreateUserReq {
 // hash256
 // PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256
 message RechargeRequestReq {
-    required ccapi.ReqHeader ReqHeader = 1;
+    required ccapi.global_def.ReqHeader ReqHeader = 1;
     //充值订单id
     required string PurchaseId = 2; //服务器生成
     //玩家公钥
@@ -68,7 +68,7 @@ message RechargeRequestReq {
 // PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
 // app 使用自己配置的pubkey 验证签名
 message RechargeRequestRes {
-    required ccapi.ResHeader ResHeader  = 1;
+    required ccapi.global_def.ResHeader ResHeader  = 1;
     //充值订单id
     required string PurchaseId = 2;
     //eth充值接收地址
@@ -84,7 +84,7 @@ message RechargeRequestRes {
 
 //提币
 message DisChargeReq{
-    required ccapi.ReqHeader ReqHeader = 1;
+    required ccapi.global_def.ReqHeader ReqHeader = 1;
      //提币订单与之前调用GetDisChargeAddr里的订单相同
     required string PurchaseId = 2;
      //玩家ccc公钥
@@ -103,7 +103,7 @@ message DisChargeReq{
 }
 
 message DisChargeRes{
-    required ccapi.ResHeader ResHeader  = 1;
+    required ccapi.global_def.ResHeader ResHeader  = 1;
     required string PurchaseId = 2;
     //提币ddd金额
     // 单位 wei

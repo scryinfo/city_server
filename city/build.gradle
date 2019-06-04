@@ -24,6 +24,8 @@ allprojects {
         compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
         compile group: 'org.json', name: 'json', version: '20180813'
         compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
+
+        compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"

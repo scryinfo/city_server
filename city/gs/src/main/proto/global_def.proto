@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package ccapi;
+package ccapi.global_def;
 option go_package = "github.com/scryinfo/citychain-s/ccapi/grpc/go_out/ccapi";
 
 enum ErrCode {

@@ -1,4 +1,12 @@
-apply plugin: 'application'
+//apply plugin: 'application'
+plugins {
+    // Provide convenience executables for trying out the examples.
+    id 'application'
+    // ASSUMES GRADLE 2.12 OR HIGHER. Use plugin version 0.7.5 with earlier gradle versions
+    id 'com.google.protobuf' version '0.8.8'
+    // Generate IntelliJ IDEA's .idea & .iml project files
+    id 'idea'
+}
 
 mainClassName = 'Game.GameServer'
 
@@ -8,7 +16,9 @@ group 'info.scry.city'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+    maven { // The google mirror is less flaky than mavenCentral()
+        url "https://maven-central.storage-download.googleapis.com/repos/central/data/" }
+    mavenLocal()
 }
 
 def grpcVersion = '1.21.0' // CURRENT_GRPC_VERSION
@@ -22,15 +32,9 @@ dependencies {
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     compileOnly "javax.annotation:javax.annotation-api:1.2"
-    //implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
     compile 'com.google.protobuf:protobuf-java:2.5.0'
     runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
-
-    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
-}
-sourceSets {
-    main.java.srcDirs += 'src/jpaModelgen/generated'
 }
 
 jar {
@@ -48,3 +52,83 @@ task myCopyTask(type: Copy) {
 }
 //myCopyTask.dependsOn jar
 assemble.dependsOn myCopyTask
+
+
+startScripts.enabled = false
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protobufVersion}" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+    }
+}
+
+task deleteLast(type: Delete) {
+    delete 'src\\main\\java\\genProto'
+}
+
+task myCopyGenTask(type: Copy) {
+    dependsOn jar
+    delete 'src\\\\main\\\\java\\\\genProto'
+    from "build\\generated\\source\\proto\\main\\*"
+    into "src\\main\\java\\genProto"
+    include '**/*.java'
+}
+
+task deleteTemp(type: Delete) {
+    delete 'build\\generated\\source\\proto\\main'
+}
+// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/genProto'
+        }
+    }
+}
+assemble.dependsOn deleteLast
+assemble.dependsOn myCopyGenTask
+assemble.dependsOn deleteTemp
+
+/*task global_def(type: CreateStartScripts) {
+    mainClassName = 'ccapi.global_def'
+    applicationName = 'global_def'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task dddbind(type: CreateStartScripts) {
+    mainClassName = 'ccapi.dddbind'
+    applicationName = 'dddbind'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task cc(type: CreateStartScripts) {
+    mainClassName = 'ccapi.cc'
+    applicationName = 'cc'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task city(type: CreateStartScripts) {
+    mainClassName = 'ccapi.city'
+    applicationName = 'city'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+
+applicationDistribution.into('bin') {
+    //from(routeGuideServer)
+    //from(routeGuideClient)
+    from(global_def)
+    from(dddbind)
+    from(cc)
+    from(city)
+    //from(compressingHelloWorldClient)
+    fileMode = 0755
+}*/

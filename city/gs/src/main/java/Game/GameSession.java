@@ -13,7 +13,6 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.*;
-import Game.blockchain.chainClient;
 import Game.security.Bouncycastle_Secp256k1;
 import Shared.*;
 import Shared.Package;
@@ -4123,9 +4122,9 @@ public class GameSession {
 	}
 
 	public void ct_createUser(short cmd,Message message){
-		ccapi.Dddbind.ct_createUser msg = (ccapi.Dddbind.ct_createUser) message;
+		ccapi.dddbind.Dddbind.ct_createUser msg = (ccapi.dddbind.Dddbind.ct_createUser) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		ccapi.cc.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
 		try {
 			chainClient.instance().CreateUser(req);
 		}  catch (Exception e) {
@@ -4136,15 +4135,15 @@ public class GameSession {
 	}
 
 	public void ct_GenerateOrderReq(short cmd,Message message){
-		ccapi.Dddbind.ct_GenerateOrderReq msg = (ccapi.Dddbind.ct_GenerateOrderReq) message;
+		ccapi.dddbind.Dddbind.ct_GenerateOrderReq msg = (ccapi.dddbind.Dddbind.ct_GenerateOrderReq) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString()).build()));
 		int t = 0 ;
 	}
 	public void ct_RechargeRequestReq(short cmd,Message message){
-		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq) message;
+		ccapi.dddbind.Dddbind.ct_RechargeRequestReq msg = (ccapi.dddbind.Dddbind.ct_RechargeRequestReq ) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		ccapi.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
+		ccapi.cc.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
 		String privateKeyStr = "1368816272920190601123456";
 		String key = "123456";
 		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
