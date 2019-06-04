@@ -82,15 +82,11 @@ public class CityUtil {
         City.instance().forEachBuilding(b->buildings.add(b));
         for (Building b : buildings) {
             if(!b.outOfBusiness()) {
-                sumSalary += b.getSalaryRatio();
+                sumSalary += b.singleSalary();
                 count++;
             }
         }
-        if(count==0){
-            return 0L;
-        }else {
-            return sumSalary / count;
-        }
+        return count == 0 ? 0L : sumSalary / count;
     }
 
     //平均资产
