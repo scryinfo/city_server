@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package ccapi.global_def;
 option go_package = "github.com/scryinfo/citychain-s/ccapi/grpc/go_out/ccapi";
@@ -28,17 +28,17 @@ enum ErrCode {
 
 message ResHeader {
     // 现在版本默认为 1
-    int32 Version = 1;
-    ErrCode ErrCode = 2;
-    string ErrMsg =3;
-    string ReqId = 4;
+    required int32 Version = 1;
+    required ErrCode ErrCode = 2;
+    required string ErrMsg =3;
+    required string ReqId = 4;
 }
 
 message ReqHeader {
     // 现在版本默认为 1
-    int32 Version = 1;
+    required int32 Version = 1;
     // city 端所有的请求加入唯一的请求id
-    string ReqId = 4;
+    required string ReqId = 4;
 }
 
 enum  EventCode {
