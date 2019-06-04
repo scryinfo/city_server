@@ -3171,7 +3171,7 @@ public class GameSession {
             GlobalConfig.cityError("[modyfyCompanyName] CompanyName only can be modified by it's owner!");
 		}
 		//判断名称是否重复
-		else if(GameDb.companyNameIsInUsed(newName)||player.getCompanyName().equals(newName)){//已经被使用的名称(或者和以前名称相同)
+		else if(player.getCompanyName().equals(newName)||GameDb.companyNameIsInUsed(newName)){//已经被使用的名称(或者和以前名称相同)
 			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
 		}
 		else if(!player.canBeModify()){ //时间未到（返回冻结状态错误码）
