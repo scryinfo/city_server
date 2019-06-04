@@ -13,7 +13,7 @@ import "global_def.proto";
 
 // The greeting service definition.
 // CityUserName 是用户创建后返回的 ccc account name
-service CcS {
+service Cc {
 
     //创建玩家用户
     rpc CreateUser (CreateUserReq) returns (ccapi.ResHeader) {}
@@ -41,14 +41,47 @@ message CreateUserReq {
     required string PayPassword = 5;
     //返回的钱包地址
     optional string EthAddr = 6;
-
 }
 
-//生成订单号
-message GenerateOrderReq {
+//充值
+// hash256
+// PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256
+message RechargeRequestReq {
     required ccapi.ReqHeader ReqHeader = 1;
-    optional string PurchaseId = 2; //生成的订单号
+    //充值订单id
+    required string PurchaseId = 2; //服务器生成
+    //玩家公钥
+    required string PubKey = 3;
+    //提币ddd金额
+    // 单位 wei
+    // acmount = “1000000000000000000” == 1 ddd
+    required string Amount = 4;
+    //过期时间戳单位秒
+    // ts+（过期时间）= ExpireTime
+    required int64 ExpireTime = 5;
+    //时间戳 单位秒
+    required int64 Ts = 6;
+    //PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256 ,由city服务器生成
+    optional bytes Signature = 7;
 }
+// hash256
+// PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
+// app 使用自己配置的pubkey 验证签名
+message RechargeRequestRes {
+    required ccapi.ResHeader ResHeader  = 1;
+    //充值订单id
+    required string PurchaseId = 2;
+    //eth充值接收地址
+    required string EthAddr = 3;
+    //过期时间戳单位秒
+    //ts+（过期时间）= ExpireTime
+    required int64 ExpireTime = 4;
+    //时间戳 单位秒
+    required int64 Ts = 5;
+    //PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
+    required bytes Signature = 6;
+}
+
 //提币
 message DisChargeReq{
     required ccapi.ReqHeader ReqHeader = 1;
@@ -78,44 +111,7 @@ message DisChargeRes{
     required string Amount = 3;
 }
 
-//充值
-// hash256
-// PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256
-message RechargeRequestReq {
-    required ccapi.ReqHeader ReqHeader = 1;
-    //充值订单id
-    required string PurchaseId = 2; //服务器生成
-    //玩家公钥
-    required string PubKey = 3;
-    //提币ddd金额
-    // 单位 wei
-    // acmount = “1000000000000000000” == 1 ddd
-    required string Amount = 4;
-    //过期时间戳单位秒
-    // ts+（过期时间）= ExpireTime
-    required int64 ExpireTime = 5;
-    //时间戳 单位秒
-    required int64 Ts = 6;
-    //PurchaseId.toBytes(utf-8) + ts(大端, toBytes), tohash256
-    required bytes Signature = 7;
-}
-// hash256
-// PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
-// app 使用自己配置的pubkey 验证签名
-message RechargeRequestRes {
-    required ccapi.ResHeader ResHeader  = 1;
-    //充值订单id
-    required string PurchaseId = 2;
-    //eth充值接收地址
-    required string EthAddr = 3;
-    //过期时间戳单位秒
-    //ts+（过期时间）= ExpireTime
-    required int64 ExpireTime = 4;
-    //时间戳 单位秒
-    required int64 Ts = 5;
-    //PurchaseId.toBytes(utf-8) + EthAddr.toBytes(utf-8) + ts(大端, toBytes), tohash256
-    required bytes Signature = 6;
-}
+
 
 
 
