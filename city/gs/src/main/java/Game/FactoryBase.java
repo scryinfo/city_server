@@ -11,8 +11,10 @@ import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.*;
-import  java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.UUID;
 
 @Entity
 public abstract class FactoryBase extends Building implements IStorage, IShelf {
