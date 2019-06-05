@@ -4127,8 +4127,6 @@ public class GameSession {
 		}
 		this.write(Package.create(cmd, builder.build()));
 	}
-    	this.write(Package.create(cmd, builder.build()));
-    }
     /*查询品牌信息*/
 	public void queryBrand(short cmd,Message message){
 		Gs.queryBrand brand = (Gs.queryBrand) message;
