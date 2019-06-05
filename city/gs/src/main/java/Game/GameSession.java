@@ -4143,7 +4143,7 @@ public class GameSession {
 		});
 	}
 
-/*	public void ct_createUser(short cmd,Message message){
+	public void ct_createUser(short cmd,Message message){
 		ccapi.dddbind.Dddbind.ct_createUser msg = (ccapi.dddbind.Dddbind.ct_createUser) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.cc.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
@@ -4181,7 +4181,7 @@ public class GameSession {
 		}
 		//this.write(Package.create(cmd, msg));
 		int t = 0 ;
-	}*/
+	}
 
     //获取建筑的通用信息（抽取，yty）
     public Gs.BuildingGeneral.Builder buildingToBuildingGeneral(Building building){
