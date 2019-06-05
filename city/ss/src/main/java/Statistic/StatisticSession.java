@@ -120,9 +120,9 @@ public class StatisticSession {
     	Ss.NpcNums.Builder list = Ss.NpcNums.newBuilder();
     	Ss.NpcNums.NpcNumInfo.Builder info = Ss.NpcNums.NpcNumInfo.newBuilder();
     	List<Document> ls=null;
-    	if(Ss.QueryNpcNum.Type.GOODS.equals(type)){
+    	if(Ss.QueryNpcNum.Type.GOODS.getNumber()==type){
         	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
-    	}else if(Ss.QueryNpcNum.Type.APARTMENT.equals(type)){
+    	}else if(Ss.QueryNpcNum.Type.APARTMENT.getNumber()==type){
         	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayApartmentNpcNum(),CountType.BYSECONDS,time);
     	}
     	if(ls!=null&&ls.size()>0){
