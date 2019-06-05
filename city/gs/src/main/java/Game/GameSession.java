@@ -777,7 +777,7 @@ public class GameSession {
 		long cost = itemBuy.n*c.getPrice();
 		int freight = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(buyStore, (IStorage) sellBuilding));
 
-		//TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
+		 //TODO:矿工费用（商品基本费用*矿工费用比例）(向下取整),
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(cost * minersRatio);
 		long income =cost - minerCost;//收入（扣除矿工费后）
@@ -793,7 +793,7 @@ public class GameSession {
 				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 				.setBuyerId(Util.toByteString(player.id()))
 				.setFaceId(player.getFaceId())
-				.setCost(income)
+				.setCost(cost)
 				.setType(Gs.IncomeNotify.Type.INSHELF)
 				.setBid(sellBuilding.metaBuilding.id)
 				.setItemId(itemBuy.key.meta.id)
@@ -823,7 +823,7 @@ public class GameSession {
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
-		//矿工费用日志记录
+		//矿工费用日志记录(需调整)
 		LogDb.minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
@@ -1512,18 +1512,20 @@ public class GameSession {
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
-
-		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(buyerPlayerId))
-				.setFaceId(buyer.getFaceId())
-				.setCost(fee - minerCost)
-				.setType(Gs.IncomeNotify.Type.PROMO)
-				.setBid(sellerBuilding.metaId())
-				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
-				.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
-				.build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+		if (!buyerPlayerId.equals(seller.id()))
+		{
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(buyerPlayerId))
+					.setFaceId(buyer.getFaceId())
+					.setCost(fee - minerCost)
+					.setType(Gs.IncomeNotify.Type.PROMO)
+					.setBid(sellerBuilding.metaId())
+					.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+					.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+		}
 	}
 
 	public void AdGetPromoAbilityHistory(short cmd, Message message) {
@@ -1905,7 +1907,6 @@ public class GameSession {
 		}
 		Laboratory lab = (Laboratory) building;
 		long cost = 0;
-		long income = 0;
 		Player seller = GameDb.getPlayer(lab.ownerId());
 		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if (!c.hasTimes())
@@ -1918,7 +1919,7 @@ public class GameSession {
 			long minerCost = (long) Math.floor(cost * minersRatio);
 			if (!player.decMoney(cost + minerCost))
 				return;
-			seller.addMoney(income = cost - minerCost);
+			seller.addMoney(cost - minerCost);
 			LogDb.playerPay(this.player.id(), cost + minerCost);
 			LogDb.playerIncome(seller.id(), cost - minerCost);
 			//矿工费用记录
@@ -1933,24 +1934,23 @@ public class GameSession {
 				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, 0, false);
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(player.id()))
+					.setFaceId(player.getFaceId())
+					.setCost(cost - minerCost)
+					.setType(Gs.IncomeNotify.Type.LAB)
+					.setBid(building.metaId())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.setDuration(c.getTimes())
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 		}
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-
-		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(player.id()))
-				.setFaceId(player.getFaceId())
-				.setCost(income)
-				.setType(Gs.IncomeNotify.Type.LAB)
-				.setBid(building.metaId())
-				.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-				.setDuration(c.getTimes())
-				.build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -2027,7 +2027,7 @@ public class GameSession {
 		else {
 			player.updateNameSetTs();
 			GameDb.saveOrUpdate(player);
-			this.write(Package.create(cmd));
+			this.write(Package.create(cmd, c));
 		}
 	}
 	public void betFlight(short cmd, Message message) {
@@ -3007,11 +3007,7 @@ public class GameSession {
 		e.setBt(eva.getBt().getNumber());
 		e.setLv(level);
 		e.setCexp(cexp);
-		if(eva.hasB()) {
-			e.setB(eva.getB());
-		}else {
-			e.setB(-1);
-		}
+		e.setB(-1);
 		EvaManager.getInstance().updateEva(e);
 
 		Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
@@ -3021,7 +3017,7 @@ public class GameSession {
 		this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
 	}
 
-	//TODO:Eva改版(保存eva修改信息的位置是在查询完修改前的数据之后保存)=====================================================
+	//TODO:Eva改版(保存eva修改信息的位置在查询修改前的数据之后保存)=====================================================
 	public void updateMyEvas(short cmd, Message message)
 	{
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
@@ -3035,6 +3031,7 @@ public class GameSession {
 			oldEva.setLv(eva.getLv());
 			oldEva.setAt(eva.getAt());
 			oldEva.setBt(eva.getBt().getNumber());
+			oldEva.setB(eva.getB());
 			Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
 			player.decEva(eva.getDecEva());
 			GameDb.saveOrUpdate(player);
@@ -3078,7 +3075,7 @@ public class GameSession {
 				result.addAllApartmentData(apartmentData);
 			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升率=提升的等级/全城该项eva最高等级
 				EvaManager.getInstance().updateEva(newEva);
-				//提升比例:提升的等级/全城该项eva最高等级 ,如果平级，提升为0
+				//提升比例:提升的等级/全城该项eva最高等级  如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
 				int lv = newEva.getLv();
 				result.setRetailSpendRatio(maxLv == lv ? 0 : lv / maxLv);
@@ -3190,7 +3187,7 @@ public class GameSession {
             GlobalConfig.cityError("[modyfyCompanyName] CompanyName only can be modified by it's owner!");
 		}
 		//判断名称是否重复
-		else if(GameDb.companyNameIsInUsed(newName)||player.getCompanyName().equals(newName)){//已经被使用的名称(或者和以前名称相同)
+		else if(player.getCompanyName().equals(newName)||GameDb.companyNameIsInUsed(newName)){//已经被使用的名称(或者和以前名称相同)
 			this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
 		}
 		else if(!player.canBeModify()){ //时间未到（返回冻结状态错误码）
@@ -3951,7 +3948,7 @@ public class GameSession {
 		builder.setStaffNum(building.getWorkerNum());
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-		builder.setBuildingInfo(buildingInfo);builder.setBuildingInfo(buildingInfo);
+		builder.setBuildingInfo(buildingInfo);
     	MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
     		Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
     		MetaMaterial material=MetaData.getMaterial(itemId);
@@ -4006,7 +4003,7 @@ public class GameSession {
     	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
     	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
     	Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.APARTMENT || building.type() != MetaBuilding.RETAIL) {
+		if (building == null) {
 			return;
 		}
     	Gs.RetailShopOrApartmentInfo.Builder builder=Gs.RetailShopOrApartmentInfo.newBuilder();
