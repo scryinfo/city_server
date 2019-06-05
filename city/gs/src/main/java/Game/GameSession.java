@@ -4097,6 +4097,21 @@ public class GameSession {
 		}
     	this.write(Package.create(cmd, builder.build()));
     }
+    /*查询品牌信息*/
+	public void queryBrand(short cmd,Message message){
+		Gs.queryBrand brand = (Gs.queryBrand) message;
+		UUID pid = Util.toUuid(brand.getPId().toByteArray());
+		int typeId = brand.getTypeId();
+		BrandManager.BrandInfo info = BrandManager.instance().getBrand(pid, typeId);
+		Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+		band.setItemId(typeId).setPId(brand.getPId());
+		if(info.hasBrandName()){
+			band.setBrandName(info.getBrandName());
+		}
+		EvaManager.getInstance().getEva(pid,typeId).forEach(eva -> {
+			band.addEva(eva.toProto());
+		});
+	}
 
     //获取建筑的通用信息（抽取，yty）
     public Gs.BuildingGeneral.Builder buildingToBuildingGeneral(Building building){
