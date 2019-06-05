@@ -82,15 +82,11 @@ public class CityUtil {
         City.instance().forEachBuilding(b->buildings.add(b));
         for (Building b : buildings) {
             if(!b.outOfBusiness()) {
-                sumSalary += b.getSalaryRatio();
+                sumSalary += b.singleSalary();
                 count++;
             }
         }
-        if(count==0){
-            return 0L;
-        }else {
-            return sumSalary / count;
-        }
+        return count == 0 ? 0L : sumSalary / count;
     }
 
     //平均资产
@@ -110,17 +106,8 @@ public class CityUtil {
                 employeeSize++;
             }
         }
-        if(socialSize==0){
-            avgProperty.put(1, 0L);
-        }else{
-            avgProperty.put(1, socialSumMoney / socialSize);
-        }
-        if(employeeSize==0) {
-            avgProperty.put(0, 0L);
-        }
-        else {
-            avgProperty.put(0, employeeSumMoney / employeeSize);
-        }
+        avgProperty.put(1,socialSize==0?0L:socialSumMoney / socialSize);
+        avgProperty.put(0, employeeSize == 0 ? 0L : employeeSumMoney / employeeSize);
         return avgProperty;
     }
 

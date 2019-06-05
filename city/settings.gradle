@@ -3,4 +3,5 @@ include 'as'
 include 'gs'
 include 'Shared'
 include 'ss'
+include 'testProject'
 

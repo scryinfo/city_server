@@ -113,7 +113,8 @@ public class Shopping implements IAction {
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
-        long minerCost = (long) Math.floor(chosen.price* MetaData.getSysPara().minersCostRatio);
+        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        long minerCost = (long) Math.floor(chosen.price* minersRatio);
         if(chosen.price+minerCost > npc.money()) {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
         	int money=(int) ((chosen.price+minerCost)-npc.money());
@@ -136,7 +137,7 @@ public class Shopping implements IAction {
             Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))
-                    .setCost(chosen.price-minerCost)
+                    .setCost(chosen.price)
                     .setCount(1)
                     .setType(Gs.IncomeNotify.Type.INSHELF)
                     .setBid(sellShop.metaId())
@@ -180,7 +181,8 @@ public class Shopping implements IAction {
           sellShop.addFlowCount();
           logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
-        long minerCost = (long) Math.floor(chosen.price* MetaData.getSysPara().minersCostRatio);
+        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        long minerCost = (long) Math.floor(chosen.price* minersRatio);
 
         if(chosen.price+minerCost> npc.money()) {
           	//购买时所持金不足,行业涨薪指数 += 定价（已包含旷工费） - 所持金
@@ -201,7 +203,7 @@ public class Shopping implements IAction {
               Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                       .setBuyerId(Util.toByteString(npc.id()))
-                      .setCost(chosen.price-minerCost)
+                      .setCost(chosen.price)
                       .setCount(1)
                       .setType(Gs.IncomeNotify.Type.INSHELF)
                       .setBid(sellShop.metaId())

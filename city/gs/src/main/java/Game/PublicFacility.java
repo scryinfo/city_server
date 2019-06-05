@@ -59,6 +59,9 @@ public class PublicFacility extends Building{
     public int getCurPromPricePerMs() {
         return curPromPricePerHour/3600000;
     }
+    public int getCurPromPricePerS() {
+        return curPromPricePerHour/3600;
+    }
 
     public void setCurPromPricePerHour(int curPromPricePerHour) {
         this.curPromPricePerHour = curPromPricePerHour;

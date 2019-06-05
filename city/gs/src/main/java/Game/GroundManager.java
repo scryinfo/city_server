@@ -243,7 +243,8 @@ public class GroundManager {
         }
         int cost = rentPara.requiredPay() * coordinates.size();
         //TODO:矿工费用
-        long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        long minerCost = (long) Math.floor(cost * minersRatio);
         if(!renter.decMoney(cost+minerCost))
             return false;
         List<LogDb.Positon> plist1 = new ArrayList<>();
@@ -300,7 +301,7 @@ public class GroundManager {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(renter.id()))
                 .setFaceId(renter.getFaceId())
-                .setCost(cost - minerCost)
+                .setCost(cost)
                 .setType(Gs.IncomeNotify.Type.RENT_GROUND)
                 .addAllCoord(miniIndexList)
                 .build();
@@ -353,7 +354,8 @@ public class GroundManager {
         }
         int cost = gis.size() * price;
         //TODO:矿工费用
-        long minerCost = (long) Math.floor(cost * MetaData.getSysPara().minersCostRatio);
+        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        long minerCost = (long) Math.floor(cost *minersRatio);
         if(buyer.money() < cost+minerCost)
             return false;
         Player seller = GameDb.getPlayer(sellerId);
@@ -392,7 +394,7 @@ public class GroundManager {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(buyer.id()))
                 .setFaceId(buyer.getFaceId())
-                .setCost(cost - minerCost)
+                .setCost(cost)
                 .setType(Gs.IncomeNotify.Type.BUY_GROUND)
                 .addAllCoord(miniIndexList)
                 .build();

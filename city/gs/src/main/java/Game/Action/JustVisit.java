@@ -22,17 +22,19 @@ public class JustVisit implements IAction {
     public Set<Object> act(Npc npc) {
         logger.info("npc " + npc.id().toString() + " type " + npc.type() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
         //NPC成功购买住宅后,住宅状态保存24小时,在此期间不允许再次购买住宅
-        if(System.currentTimeMillis()-npc.getBuyApartmentTs()<TimeUnit.HOURS.toMillis(24)){
-            Building b=City.instance().getBuilding(npc.getApartment().id());
-            if(b==null||b.getState()== Gs.BuildingState.SHUTDOWN_VALUE){
+        if(npc.hasApartment()){
+            if(System.currentTimeMillis()-npc.getBuyApartmentTs()<TimeUnit.HOURS.toMillis(24)){
+                Building b=City.instance().getBuilding(npc.getApartment().id());
+                if(b==null||b.getState()== Gs.BuildingState.SHUTDOWN_VALUE){
+                    if(npc.getStatus()==0){
+                        npc.goWork();
+                    }
+                }
+                return new HashSet<>(Arrays.asList(npc));
+            }else{
                 if(npc.getStatus()==0){
                     npc.goWork();
                 }
-            }
-            return new HashSet<>(Arrays.asList(npc));
-        }else{
-            if(npc.getStatus()==0){
-                npc.goWork();
             }
         }
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
@@ -75,7 +77,8 @@ public class JustVisit implements IAction {
             if (chosen.type() == MetaBuilding.APARTMENT) {//需要多扣除矿工费用
 
                 //TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
-                long minerCost = (long) Math.floor(chosen.cost() * MetaData.getSysPara().minersCostRatio);
+                double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+                long minerCost = (long) Math.floor(chosen.cost() * minersRatio);
                 income -= minerCost;
                 pay += minerCost;
                 Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
