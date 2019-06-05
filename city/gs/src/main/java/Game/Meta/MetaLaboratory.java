@@ -8,8 +8,13 @@ public class MetaLaboratory extends MetaBuilding {
         super(d);
         this.evaProb = d.getInteger("evaProb");
         this.goodProb = d.getInteger("goodProb");
+        this.evaTransitionTime = d.getInteger("evaTransitionTime");
+        this.inventTransitionTime = d.getInteger("inventTransitionTime");
     }
 
     public int evaProb;
     public int goodProb;
+    public int evaTransitionTime;   //eva研究过渡时间
+    public int inventTransitionTime;//发明的过渡时间
+
 }

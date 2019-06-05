@@ -28,6 +28,7 @@ import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
+import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 
 public class City {
@@ -633,5 +634,15 @@ public class City {
             }
         }
         return count;
+    }
+    
+    public int getBuildingNumByType(int type){
+		Map<Integer,List<Building>> map=new HashMap<Integer,List<Building>>();
+		getAllBuilding().forEach(b->{
+			map.computeIfAbsent(b.type(),
+					k -> new ArrayList<Building>()).add(b);
+		});
+		List<Building> list=map.get(type);
+		return list!=null?list.size():0;
     }
 }

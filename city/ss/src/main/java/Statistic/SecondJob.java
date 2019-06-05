@@ -27,8 +27,17 @@ public class SecondJob implements org.quartz.Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
-        long startTime = SummaryUtil.secondStartTime(System.currentTimeMillis());
-        long endTime = startTime - SECOND_MILLISECOND;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+        
+
+        long time1 = System.currentTimeMillis();
+        long endTime = time1 - time1%(1000 * 10);
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
