@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 public class Laboratory extends Building {
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     private static final int RADIX = 100000;
-    private static int EVA_TRANSITION_TIME;//eva提升的过度时间
-    private static int INVENT_TRANSITION_TIME;//发明过渡时间
+    private static int eva_transition_time;//eva提升的过度时间
+    private static int invent_transition_time;//发明过渡时间
     @Transient
     private MetaLaboratory meta;
 
@@ -46,8 +46,8 @@ public class Laboratory extends Building {
     @PostLoad
     private void _1() {
         this.meta = (MetaLaboratory) super.metaBuilding;
-        EVA_TRANSITION_TIME = meta.evaTransitionTime;
-        INVENT_TRANSITION_TIME = meta.inventTransitionTime;
+        eva_transition_time = meta.evaTransitionTime;
+        invent_transition_time = meta.inventTransitionTime;
         if(!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
             if (line.isRunning())
@@ -108,6 +108,17 @@ public class Laboratory extends Building {
         if(exclusiveForOwner && !proposerId.equals(this.ownerId()))
             return null;
         Line line = new Line(goodCategory, times, proposerId, cost);
+        //设置开始时间
+        //获取到最后一个的开始时间
+        Line lastLine = getLastLine();
+        if(lastLine==null){
+            lastLine = new Line();
+            lastLine.beginProcessTs=System.currentTimeMillis();;
+            lastLine.times=0;
+        }
+        //设置开始时间
+        long beginTime=lastLine.beginProcessTs+ TimeUnit.HOURS.toMillis(lastLine.times);
+        line.beginProcessTs = beginTime;
         inProcess.add(line);
         //this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
@@ -231,7 +242,13 @@ public class Laboratory extends Building {
         this.sellTimes = maxTimes;
         this.pricePreTime = pricePreTime;
     }
-
+    //获取最后一条的研究信息
+    public Line getLastLine(){
+        if(inProcess.size()==0){
+            return null;
+        }else
+        return  inProcess.get(inProcess.size() - 1);
+    }
     @Entity
     public static final class Line {
         public Line(int goodCategory, int times, UUID proposerId, long cost) {
@@ -292,8 +309,8 @@ public class Laboratory extends Building {
             currentRoundPassNano += diffNano;//当前通过的纳秒
             /*if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1))*/
             //TODO:研究的过渡时间是从配置表读取的，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            long transition = TimeUnit.SECONDS.toNanos(EVA_TRANSITION_TIME);
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(EVA_TRANSITION_TIME)) { //从配置表读取
+            long transition = TimeUnit.SECONDS.toNanos(eva_transition_time);
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
