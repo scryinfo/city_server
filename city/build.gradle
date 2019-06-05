@@ -22,7 +22,8 @@ allprojects {
         compile group: 'org.json', name: 'json', version: '20180813'
         compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
         //compile group: 'org.ethereum', name: 'ethereumj-core', version: '1.8.27'
-        compile "org.ethereum:ethereumj-core:1.8.2"
+        //compile "org.ethereum:ethereumj-core:1.8.1"
+        //compile "org.ethereum:ethereumj-core:1.8.+"
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
@@ -37,6 +38,8 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven { url "https://dl.bintray.com/ethereum/maven/" }
 }
 
 project(':as') {
