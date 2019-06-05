@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
 public class Laboratory extends Building {
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     private static final int RADIX = 100000;
+    private static int EVA_TRANSITION_TIME;//eva提升的过度时间
+    private static int INVENT_TRANSITION_TIME;//发明过渡时间
     @Transient
     private MetaLaboratory meta;
 
@@ -44,6 +46,8 @@ public class Laboratory extends Building {
     @PostLoad
     private void _1() {
         this.meta = (MetaLaboratory) super.metaBuilding;
+        EVA_TRANSITION_TIME = meta.evaTransitionTime;
+        INVENT_TRANSITION_TIME = meta.inventTransitionTime;
         if(!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
             if (line.isRunning())
@@ -292,8 +296,11 @@ public class Laboratory extends Building {
         boolean update(long diffNano) {
             if(!isLaunched())
                 this.launch();
-            currentRoundPassNano += diffNano;
-            if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1)) {
+            currentRoundPassNano += diffNano;//当前通过的纳秒
+            /*if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1))*/
+            //TODO:研究的过渡时间是从配置表读取的，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
+            long transition = TimeUnit.SECONDS.toNanos(EVA_TRANSITION_TIME);
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(EVA_TRANSITION_TIME)) { //从配置表读取
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;

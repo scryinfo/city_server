@@ -134,7 +134,7 @@ public class CompeteAndExpectUtil {
             if (building.outOfBusiness())
                 continue;
             Apartment apartment = (Apartment) building;
-            int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
+            int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV()==0?1:BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
             int localQuality = (int) (apartment.quality() * (1+EvaManager.getInstance().computePercent(eva)));//玩家品质
             double totalWeight = getItemWeight(localQuality, at, bt, apartment.quality()) + getBrandWeight(localBrand, at);
             //玩家预期花费（住宅预期花费 = (总权重 * 200 / 3 + 1) * NPC预期花费比例 * NPC平均工资）

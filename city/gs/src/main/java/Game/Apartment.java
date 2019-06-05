@@ -2,7 +2,10 @@ package Game;
 
 import Game.Contract.BuildingContract;
 import Game.Contract.IBuildingContract;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaApartment;
+import Game.Meta.MetaBuilding;
 import gs.Gs;
 
 import javax.persistence.*;
@@ -63,7 +66,7 @@ public class Apartment extends Building implements IBuildingContract
                 .setRent(this.rent)
                 .setRenter(renters.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
-                .setQty(qty)
+                .setQty(getTotalQty())//加成过后的品质
                 .setLift(getLift())
                 .setContractInfo(this.buildingContract.toProto())
                 .build();
@@ -102,5 +105,10 @@ public class Apartment extends Building implements IBuildingContract
     public BuildingContract getBuildingContract()
     {
         return buildingContract;
+    }
+
+    private int getTotalQty(){
+        Eva eva = EvaManager.getInstance().getEva(this.ownerId(),type(), Gs.Eva.Btype.Quality_VALUE);
+        return (int)Math.ceil((this.qty * (1 + EvaManager.getInstance().computePercent(eva))));
     }
 }

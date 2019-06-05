@@ -301,7 +301,7 @@ public class GroundManager {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(renter.id()))
                 .setFaceId(renter.getFaceId())
-                .setCost(cost - minerCost)
+                .setCost(cost)
                 .setType(Gs.IncomeNotify.Type.RENT_GROUND)
                 .addAllCoord(miniIndexList)
                 .build();
@@ -394,7 +394,7 @@ public class GroundManager {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(buyer.id()))
                 .setFaceId(buyer.getFaceId())
-                .setCost(cost - minerCost)
+                .setCost(cost)
                 .setType(Gs.IncomeNotify.Type.BUY_GROUND)
                 .addAllCoord(miniIndexList)
                 .build();
