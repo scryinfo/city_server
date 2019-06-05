@@ -1182,7 +1182,7 @@ public class GameDb {
 		Collection<Mail> res = new ArrayList<>();
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
-		org.hibernate.Query query = session.createQuery(" FROM Mail where playerId = :x ");
+		org.hibernate.Query query = session.createQuery(" FROM Mail where playerId = :x ORDER BY ts");
 		query.setParameter("x", playerId);
 		List<Mail> mails = query.list();
 		if (null != mails && mails.size() != 0) {
