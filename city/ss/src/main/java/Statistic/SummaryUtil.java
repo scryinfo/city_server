@@ -678,25 +678,38 @@ public class SummaryUtil
         long startTime=startDate.getTime();
         Map<Long, Long> map = new LinkedHashMap<>();
 
-       String value = KEY_TOTAL;
         if (!isMoney) {
-            value = "size";
-        }
-        String finalValue = value;
-        collection.find(and(
-                eq(COUNTTYPE, countType.getValue()),
-                eq(TYPE, exchangeType),
-                eq(ID, id),
-                gte(TIME, startTime),
-                lt(TIME, endTime)
-        ))
+            collection.find(and(
+                    eq(COUNTTYPE, countType.getValue()),
+                    eq(TYPE, exchangeType),
+                    eq(ID, id),
+                    gte(TIME, startTime),
+                    lt(TIME, endTime)
+            ))
 
-                .projection(fields(include(TIME, finalValue), excludeId()))
-                .sort(Sorts.descending(TIME))
-                .forEach((Block<? super Document>) document ->
-                {
-                    map.put(document.getLong(TIME), document.getLong(finalValue));
-                });
+                    .projection(fields(include(TIME, "size"), excludeId()))
+                    .sort(Sorts.descending(TIME))
+                    .forEach((Block<? super Document>) document ->
+                    {
+                        map.put(document.getLong(TIME), Long.valueOf(document.getInteger("size")));
+                    });
+        } else {
+            collection.find(and(
+                    eq(COUNTTYPE, countType.getValue()),
+                    eq(TYPE, exchangeType),
+                    eq(ID, id),
+                    gte(TIME, startTime),
+                    lt(TIME, endTime)
+            ))
+
+                    .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+                    .sort(Sorts.descending(TIME))
+                    .forEach((Block<? super Document>) document ->
+                    {
+                        map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                    });
+        }
+
         return map;
     }
 

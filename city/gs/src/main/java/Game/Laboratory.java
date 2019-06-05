@@ -323,13 +323,6 @@ public class Laboratory extends Building {
         }
     }
 
-    public long getBeginProcessTs(UUID id) {
-        Line line = inProcess.get(inProcess.size() - 1);
-        if (line == null) {
-            line = completed.get(id);
-        }
-        return line.beginProcessTs;
-    }
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})

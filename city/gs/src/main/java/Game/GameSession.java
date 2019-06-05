@@ -1932,31 +1932,28 @@ public class GameSession {
 			lab.updateTodayIncome(cost - minerCost);
 			if (c.hasGoodCategory()) {
 				lab.updateTotalGoodIncome(cost - minerCost, c.getTimes());
-				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.getGoodCategory(), true);
 			} else {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
-				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, 0, false);
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
 		}
-        LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
-        Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
+		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
+		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
-            // 研究所预约通知
-//			long beginProcessTs = line.beginProcessTs;//预计开始时间
-            long beginProcessTs = lab.getBeginProcessTs(lab.id());
-            int times = c.getTimes();//研究时长
-            UUID[] buildingId = {lab.id()};
-            StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
-            MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
+			// 研究所预约通知
+			long beginProcessTs = line.beginProcessTs;//预计开始时间
+			int times = c.getTimes();//研究时长
+			UUID[] buildingId = {lab.id()};
+			StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
+			MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
         Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(player.id()))
                 .setFaceId(player.getFaceId())
-                .setCost(cost - minerCost)
+                .setCost(cost)
                 .setType(Gs.IncomeNotify.Type.LAB)
                 .setBid(building.metaId())
                 .setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
