@@ -13,6 +13,7 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.*;
+import Game.security.Bouncycastle_Secp256k1;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -32,13 +33,30 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-
 public class GameSession {
+
+	public static byte[] signData(String algorithm, byte[] data, PrivateKey key) throws Exception {
+		Signature signer = Signature.getInstance(algorithm);
+		signer.initSign(key);
+		signer.update(data);
+		return (signer.sign());
+	}
+
+	public static boolean verifySign(String algorithm, byte[] data, PublicKey key, byte[] sig) throws Exception {
+		Signature signer = Signature.getInstance(algorithm);
+		signer.initVerify(key);
+		signer.update(data);
+		return (signer.verify(sig));
+	}
+
 	private ChannelHandlerContext ctx;
 	private static final Logger logger = Logger.getLogger(GameSession.class);
 	private final static int UPDATE_MS = 200;
@@ -1287,6 +1305,7 @@ public class GameSession {
 			}
 			return;
 		}
+		fcySeller.setCurPromPricePerHour((int)adjustPromo.getPricePerHour());
 		fcySeller.setCurPromPricePerHour((int) adjustPromo.getPricePerHour());
 		fcySeller.setPromRemainTime(adjustPromo.getRemainTime());
 		fcySeller.setTakeOnNewOrder(adjustPromo.getTakeOnNewOrder());
@@ -1358,8 +1377,8 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
-		//TODO:矿工费用
+		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerS()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/1000;
+		//TODO:矿工费用(向下取整)
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(fee * minersRatio);
 		if(buyer.money() < fee+minerCost){
@@ -4076,28 +4095,68 @@ public class GameSession {
     }
 	//查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
-    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-    	Building building = City.instance().getBuilding(buildingId);
-    	Laboratory lab = (Laboratory) building ;
+		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		Laboratory lab = (Laboratory) building ;
 
-    	Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-      	builder.setSalary(lab.salaryRatio);
-    	builder.setStaffNum(lab.getWorkerNum());
-    	builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-    	builder.setGoodProb(lab.getGoodProb());
+		Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
+		builder.setSalary(lab.salaryRatio);
+		builder.setStaffNum(lab.getWorkerNum());
+		builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
+		builder.setGoodProb(lab.getGoodProb());
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
 		builder.setBuildingInfo(buildingInfo);
-    	for (int type : msg.getTypeIdsList()) {
-    		Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-    		Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-    		b.setTypeId(type);
-    		b.setAbility(EvaManager.getInstance().computePercent(eva));
+		for (int type : msg.getTypeIdsList()) {
+			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
+			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
+			b.setTypeId(type);
+			b.setAbility(EvaManager.getInstance().computePercent(eva));
 		}
-    	this.write(Package.create(cmd, builder.build()));
-    }
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void ct_createUser(short cmd,Message message){
+		ccapi.dddbind.Dddbind.ct_createUser msg = (ccapi.dddbind.Dddbind.ct_createUser) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		ccapi.cc.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		try {
+			chainClient.instance().CreateUser(req);
+		}  catch (Exception e) {
+			return ;
+		}
+		this.write(Package.create(cmd, msg));
+		int t = 0 ;
+	}
+
+	public void ct_GenerateOrderReq(short cmd,Message message){
+		ccapi.dddbind.Dddbind.ct_GenerateOrderReq msg = (ccapi.dddbind.Dddbind.ct_GenerateOrderReq) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString()).build()));
+		int t = 0 ;
+	}
+	public void ct_RechargeRequestReq(short cmd,Message message){
+		ccapi.dddbind.Dddbind.ct_RechargeRequestReq msg = (ccapi.dddbind.Dddbind.ct_RechargeRequestReq ) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		ccapi.cc.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
+		String privateKeyStr = "1368816272920190601123456";
+		String key = "123456";
+		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
+		if(pubStr.equals(req.getPubKey())){
+			int a = 0 ;
+		}
+		try {
+			String data = "Hello motal";
+			String signature =  Bouncycastle_Secp256k1.sig_s(data.getBytes(),privateKeyStr.getBytes(),key.getBytes());
+			chainClient.instance().RechargeRequestReq(req.toBuilder().setSignature(ByteString.copyFrom(signature.getBytes())).build());
+		}  catch (Exception e) {
+			return ;
+		}
+		//this.write(Package.create(cmd, msg));
+		int t = 0 ;
+	}
 
     //获取建筑的通用信息（抽取，yty）
     public Gs.BuildingGeneral.Builder buildingToBuildingGeneral(Building building){
