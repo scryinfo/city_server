@@ -7,6 +7,9 @@ import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
+
+
+
 public class GameEventDispatcher extends DispatcherBase {
 	private static final Logger logger = Logger.getLogger(GameEventDispatcher.class);
 	private static GameEventDispatcher instance = new GameEventDispatcher();
@@ -177,7 +180,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryMyBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBuildings.PARSER, GameSession.class,"queryMyBuildings"));
 			table.put((short) GsCode.OpCode.queryMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryMyEva"));
 			table.put((short) GsCode.OpCode.updateMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.Eva.PARSER, GameSession.class,"updateMyEva"));
-			//todo:
+			//todo：eva改版
 			table.put((short) GsCode.OpCode.updateMyEvas_VALUE, Wrapper.newWithMessageAsync(Gs.Evas.PARSER, GameSession.class,"updateMyEvas"));
 			table.put((short) GsCode.OpCode.queryBrand_VALUE, Wrapper.newWithMessageAsync(Gs.queryBrand.PARSER, GameSession.class,"queryBrand"));
 			table.put((short) GsCode.OpCode.queryMyBrands_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBrands.PARSER, GameSession.class,"queryMyBrands"));
@@ -248,6 +251,11 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryWarehouseInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryWarehouseInfo"));
 			//查询研究所信息
 			table.put((short) GsCode.OpCode.queryLaboratoryInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryLaboratoryInfo"));
+
+			//充提
+			table.put((short) GsCode.OpCode.ct_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.dddbind.Dddbind.ct_createUser.PARSER, GameSession.class,"ct_createUser"));
+			table.put((short) GsCode.OpCode.ct_GenerateOrderReq_VALUE, Wrapper.newWithMessageAsync(ccapi.dddbind.Dddbind.ct_GenerateOrderReq.PARSER, GameSession.class,"ct_GenerateOrderReq"));
+			table.put((short) GsCode.OpCode.ct_RechargeRequestReq_VALUE, Wrapper.newWithMessageAsync(ccapi.dddbind.Dddbind.ct_RechargeRequestReq.PARSER, GameSession.class,"ct_RechargeRequestReq"));
 			if(GlobalConfig.debug()){
 
 			}

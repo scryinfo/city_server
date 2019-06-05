@@ -13,6 +13,7 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.*;
+import Game.security.Bouncycastle_Secp256k1;
 import Shared.*;
 import Shared.Package;
 import com.google.common.base.Strings;
@@ -32,13 +33,30 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-
 public class GameSession {
+
+	public static byte[] signData(String algorithm, byte[] data, PrivateKey key) throws Exception {
+		Signature signer = Signature.getInstance(algorithm);
+		signer.initSign(key);
+		signer.update(data);
+		return (signer.sign());
+	}
+
+	public static boolean verifySign(String algorithm, byte[] data, PublicKey key, byte[] sig) throws Exception {
+		Signature signer = Signature.getInstance(algorithm);
+		signer.initVerify(key);
+		signer.update(data);
+		return (signer.verify(sig));
+	}
+
 	private ChannelHandlerContext ctx;
 	private static final Logger logger = Logger.getLogger(GameSession.class);
 	private final static int UPDATE_MS = 200;
@@ -1358,8 +1376,8 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerMs()) * (int)gs_AdAddNewPromoOrder.getPromDuration();
-		//TODO:矿工费用
+		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerS()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/1000;
+		//TODO:矿工费用(向下取整)
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(fee * minersRatio);
 		if(buyer.money() < fee+minerCost){
@@ -1461,14 +1479,13 @@ public class GameSession {
 				改： PromotionMgr 维护，结果值更新到建筑的品牌值
 				查： PromotionMgr 维护
 				*/
-			int buildingType = gs_AdAddNewPromoOrder.getBuildingType();
+			int buildingType = gs_AdAddNewPromoOrder.getBuildingType(); // 四位建筑id
 			newOrder.buildingType = buildingType;
-			LogDb.promotionRecord(seller.id(), buyer.id(), sellerBuildingId, selfPromo ? 0 : fcySeller.getCurPromPricePerMs(), fee, buildingType, MetaBuilding.type(buildingType),true);
+			LogDb.promotionRecord(seller.id(), buyer.id(), sellerBuildingId, selfPromo ? 0 : fcySeller.getCurPromPricePerMs(), fee, buildingType, buildingType / 100, true);
 		}else{
-			int productionType = gs_AdAddNewPromoOrder.getProductionType();
+			int productionType = gs_AdAddNewPromoOrder.getProductionType(); //七位商品id
 			newOrder.productionType = productionType;
             LogDb.promotionRecord(seller.id(), buyer.id(), sellerBuildingId, selfPromo ? 0 : fcySeller.getCurPromPricePerMs(), fee, productionType,MetaGood.category(productionType),false);
-
 		}
 		PromotionMgr.instance().AdAddNewPromoOrder(newOrder);
 		GameDb.saveOrUpdate(PromotionMgr.instance());
@@ -1489,22 +1506,29 @@ public class GameSession {
 		sellerBuilding.updateTodayIncome(fee);
 		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);//不含矿工费
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
-
+		//推广公司预约通知
+		long newPromoStartTs = newOrder.promStartTs; //预计开始时间
+		long promDuration = newOrder.promDuration; //广告时长
+		UUID[] buildingId = {sellerBuilding.id()};
+		StringBuilder sb = new StringBuilder().append(fee-minerCost+",").append(promDuration+",").append(newPromoStartTs);
+		MailBox.instance().sendMail(Mail.MailType.PUBLICFACILITY_APPOINTMENT.getMailType(), sellerBuilding.ownerId(), null, buildingId, null, sb.toString());
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
-
-		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(buyerPlayerId))
-				.setFaceId(buyer.getFaceId())
-				.setCost(fee)
-				.setType(Gs.IncomeNotify.Type.PROMO)
-				.setBid(sellerBuilding.metaId())
-				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
-				.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
-				.build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+		if (!buyerPlayerId.equals(seller.id()))
+		{
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(buyerPlayerId))
+					.setFaceId(buyer.getFaceId())
+					.setCost(fee - minerCost)
+					.setType(Gs.IncomeNotify.Type.PROMO)
+					.setBid(sellerBuilding.metaId())
+					.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+					.setDuration((int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000))
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+		}
 	}
 
 	public void AdGetPromoAbilityHistory(short cmd, Message message) {
@@ -1907,29 +1931,33 @@ public class GameSession {
 			lab.updateTodayIncome(cost - minerCost);
 			if (c.hasGoodCategory()) {
 				lab.updateTotalGoodIncome(cost - minerCost, c.getTimes());
-				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.getGoodCategory(), true);
 			} else {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
-				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, 0, false);
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
 		}
+		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
+			// 研究所预约通知
+			long beginProcessTs = line.beginProcessTs;//预计开始时间
+			int times = c.getTimes();//研究时长
+			UUID[] buildingId = {lab.id()};
+			StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
+			MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-
-		Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(player.id()))
-				.setFaceId(player.getFaceId())
-				.setCost(cost)
-				.setType(Gs.IncomeNotify.Type.LAB)
-				.setBid(building.metaId())
-				.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-				.setDuration(c.getTimes())
-				.build();
+        Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+                .setBuyerId(Util.toByteString(player.id()))
+                .setFaceId(player.getFaceId())
+                .setCost(cost)
+                .setType(Gs.IncomeNotify.Type.LAB)
+                .setBid(building.metaId())
+                .setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+                .setDuration(c.getTimes())
+                .build();
 		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 	public void labLineCancel(short cmd, Message message) {
@@ -2336,7 +2364,7 @@ public class GameSession {
 			}
 			//邮件通知添加好友成功
 			UUID[] oppositeId = {player.id()};
-			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId,null,oppositeId,null);
+			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId, null,oppositeId,null);
 		}
 		else
 		{
@@ -2542,8 +2570,10 @@ public class GameSession {
 				/**
 				 * TODO:
 				 * 2019/2/25
-				 * 邮件通知被踢出公会
+				 * 踢出公会
 				 */
+				UUID playerId = Util.toUuid(params.getPlayerId().toByteArray());
+				MailBox.instance().sendMail(Mail.MailType.SOCIETY_KICK_OUT.getMailType(), playerId,null, new UUID[]{societyId}, null);
 			}
 		}
 	}
@@ -4075,26 +4105,28 @@ public class GameSession {
     }
 	//查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
-    	Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-    	UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-    	UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-    	Building building = City.instance().getBuilding(buildingId);
-    	Laboratory lab = (Laboratory) building ;
+		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		Laboratory lab = (Laboratory) building ;
 
-    	Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-      	builder.setSalary(lab.salaryRatio);
-    	builder.setStaffNum(lab.getWorkerNum());
-    	builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-    	builder.setGoodProb(lab.getGoodProb());
+		Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
+		builder.setSalary(lab.salaryRatio);
+		builder.setStaffNum(lab.getWorkerNum());
+		builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
+		builder.setGoodProb(lab.getGoodProb());
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
 		builder.setBuildingInfo(buildingInfo);
-    	for (int type : msg.getTypeIdsList()) {
-    		Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-    		Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-    		b.setTypeId(type);
-    		b.setAbility(EvaManager.getInstance().computePercent(eva));
+		for (int type : msg.getTypeIdsList()) {
+			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
+			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
+			b.setTypeId(type);
+			b.setAbility(EvaManager.getInstance().computePercent(eva));
 		}
+		this.write(Package.create(cmd, builder.build()));
+	}
     	this.write(Package.create(cmd, builder.build()));
     }
     /*查询品牌信息*/
@@ -4111,6 +4143,46 @@ public class GameSession {
 		EvaManager.getInstance().getEva(pid,typeId).forEach(eva -> {
 			band.addEva(eva.toProto());
 		});
+	}
+
+	public void ct_createUser(short cmd,Message message){
+		ccapi.dddbind.Dddbind.ct_createUser msg = (ccapi.dddbind.Dddbind.ct_createUser) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		ccapi.cc.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		try {
+			chainClient.instance().CreateUser(req);
+		}  catch (Exception e) {
+			return ;
+		}
+		this.write(Package.create(cmd, msg));
+		int t = 0 ;
+	}
+
+	public void ct_GenerateOrderReq(short cmd,Message message){
+		ccapi.dddbind.Dddbind.ct_GenerateOrderReq msg = (ccapi.dddbind.Dddbind.ct_GenerateOrderReq) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString()).build()));
+		int t = 0 ;
+	}
+	public void ct_RechargeRequestReq(short cmd,Message message){
+		ccapi.dddbind.Dddbind.ct_RechargeRequestReq msg = (ccapi.dddbind.Dddbind.ct_RechargeRequestReq ) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		ccapi.cc.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
+		String privateKeyStr = "1368816272920190601123456";
+		String key = "123456";
+		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
+		if(pubStr.equals(req.getPubKey())){
+			int a = 0 ;
+		}
+		try {
+			String data = "Hello motal";
+			String signature =  Bouncycastle_Secp256k1.sig_s(data.getBytes(),privateKeyStr.getBytes(),key.getBytes());
+			chainClient.instance().RechargeRequestReq(req.toBuilder().setSignature(ByteString.copyFrom(signature.getBytes())).build());
+		}  catch (Exception e) {
+			return ;
+		}
+		//this.write(Package.create(cmd, msg));
+		int t = 0 ;
 	}
 
     //获取建筑的通用信息（抽取，yty）

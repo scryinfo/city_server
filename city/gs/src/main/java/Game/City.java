@@ -3,7 +3,10 @@ package Game;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import Game.Gambling.FlightManager;
@@ -25,6 +28,7 @@ import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import gs.Gs;
+import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 
 public class City {
@@ -647,5 +651,15 @@ public class City {
                 typeBuilding.put(b.type(),list);
             }
         });
+    }
+
+    public int getBuildingNumByType(int type){
+		Map<Integer,List<Building>> map=new HashMap<Integer,List<Building>>();
+		getAllBuilding().forEach(b->{
+			map.computeIfAbsent(b.type(),
+					k -> new ArrayList<Building>()).add(b);
+		});
+		List<Building> list=map.get(type);
+		return list!=null?list.size():0;
     }
 }

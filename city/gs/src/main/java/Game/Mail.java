@@ -2,14 +2,12 @@ package Game;
 
 import DB.Db;
 import Shared.Util;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import gs.Gs;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
-
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.UUID;
@@ -25,25 +23,31 @@ import java.util.UUID;
 public class Mail {
 
     public enum MailType {
-        EXCHANGE_GOODS_SOLD(1),
-        STORE_FULL(2),
-        PRODUCTION_LINE_COMPLETION(3),
-        EMPLOYEE_SATISFACTION(4),
-        LOCKOUT(5),
-        AD_SPACE_RENT_OUT(6),
+        APARTMENT_FULL(1),//住宅已满
+        STORE_FULL(2), //仓库已满
+        PRODUCTION_LINE_COMPLETION(3),//生产线完成
+        LOCKOUT(4),//停工
+        PUBLICFACILITY_APPOINTMENT(5),//推广公司预约
+        LABORATORY_APPOINTMENT(6),//研究所预约
+        PROMOTE_FINISH(7),// 推广完成
+        INVENT_FINISH(8),//发明商品完成
+        EVA_POINT_FINISH(9),//EVA点数研究完成
+        LAND_AUCTION(10),// 土地拍卖
+        ADD_FRIEND_SUCCESS(11),//好友通知
+        LAND_SALE(12),//土地出售
+        LAND_RENT(13),//土地出租
+        SOCIETY_KICK_OUT(14),//踢出公会
+        ADD_SOCIETY_SUCCESS(15),//同意公会申请
+        ADD_SOCIETY_FAIL(16),//拒绝公会申请
+        LAND_AUCTION_HIGHER(17);//更高出价
+
+
+     /*   AD_SPACE_RENT_OUT(6),
         SCIENTIFIC_PAYOFFS(7),
         INVENTIONS(8),
-        LAND_AUCTION(9),
         AD_PROMOTION_EXPIRE(10),
-        LAND_AUCTION_HIGHER(11),
-        ADD_FRIEND_SUCCESS(12),
-        LAND_SALE(13),
-        LAND_RENT(14),
         SHELF_SALE(15),
-        APARTMENT_CHECK_IN(16),
-        SOCIETY_KICK_OUT(17),
-        ADD_SOCIETY_SUCCESS(18),
-        ADD_SOCIETY_FAIL(19);
+        APARTMENT_CHECK_IN(16);*/
 
         private int mailType;
 
@@ -100,6 +104,17 @@ public class Mail {
         ts = System.currentTimeMillis();
         read = false;        //默认值为false,未读
     }
+    public Mail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,String tparas) {
+        id = UUID.randomUUID();
+        this.playerId = playerId;
+        this.type = type;
+        this.paras = paras;
+        this.uuidParas = uuidParas;
+        this.intParasArr = intParasArr;
+        this.tparas = tparas;
+        ts = System.currentTimeMillis();
+        read = false;        //默认值为false,未读
+    }
 
     protected Mail() {
     }
@@ -124,6 +139,7 @@ public class Mail {
     )
     private int[] intParasArr;
 
+    private String tparas;
 //    @ElementCollection(fetch = FetchType.EAGER)
 //    @CollectionTable(name = "mail_uuidPara", joinColumns = { @JoinColumn(name = "Mail_id")})
 //    private Set<UUID> uuidParas = new HashSet<>();
@@ -187,7 +203,10 @@ public class Mail {
                 builder.addUuidParas(Util.toByteString(uuidPara));
             }
         }
-
+        if (null != tparas) {
+            String[] split = tparas.split(",");
+            builder.addAllTparas(Arrays.asList(split));
+        }
         return builder.build();
     }
 

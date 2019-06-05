@@ -95,6 +95,13 @@ public class Laboratory extends Building {
                 if(line.isComplete()) {
                     this.inProcess.remove(0);
                     this.completed.put(line.id, line);
+                    if (line.goodCategory > 0) {
+                        //完成商品发明
+                        MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
+                    } else {
+                        //完成点数研究
+                        MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
+                    }
                 }
                 broadcastLine(line);
             }
@@ -332,6 +339,7 @@ public class Laboratory extends Building {
            }
         }
     }
+
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})

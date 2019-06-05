@@ -422,11 +422,28 @@ public class BrandManager {
     			getBuildingBrandOrQuality(b,brandMap,qtyMap);
     		}
     	});
+    	
     	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
     	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
     }
 
     public Map<Integer,Map<Integer,Double>> getTotalBrandQualityMap(){
+    	Map<Integer,Double> newBrandMap=new HashMap<Integer,Double>();
+    	Map<Integer,Double> newQtyMap=new HashMap<Integer,Double>();
+    	totalBrandQualityMap.get(Gs.Eva.Btype.Brand_VALUE).forEach((k,v)->{
+    		int num=City.instance().getBuildingNumByType(k);
+    		if(num>0){
+    			newBrandMap.put(k,v/num);
+    		}
+    	});
+    	totalBrandQualityMap.get(Gs.Eva.Btype.Quality_VALUE).forEach((k,v)->{
+    		int num=City.instance().getBuildingNumByType(k);
+    		if(num>0){
+    			newQtyMap.put(k,v/num);
+    		}
+    	});
+    	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, newBrandMap);
+    	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, newQtyMap);
     	return totalBrandQualityMap;
     }
     public double getValFromMap(Map<Integer,Double> map,int type){

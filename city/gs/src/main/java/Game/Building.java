@@ -390,10 +390,6 @@ public abstract class Building implements Ticker{
         this.happy = HAPPY_MIN;
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
         this.broadcastChange();
-
-     /*   //停工通知
-        UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
-        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);*/
     }
 
     public void setName(String name) {
@@ -780,10 +776,10 @@ public abstract class Building implements Ticker{
             return true;
         }
         else
-            happy = HAPPY_MIN;
-            //员工满意度通知
-            UUID[] ownerIdAndBuildingId = {p.id(),this.id()};
-            MailBox.instance().sendMail(Mail.MailType.EMPLOYEE_SATISFACTION.getMailType(),p.id(),null,ownerIdAndBuildingId,null);
+            shutdownBusiness();
+        //停工通知(不足支付工资)
+        UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
+        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
         return false;
     }
     private void calcuHappy() {
