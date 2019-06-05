@@ -122,7 +122,7 @@ public class City {
 
     private HashMap<UUID, HashMap<UUID, Building>> playerBuilding = new HashMap<>();
     public HashMap<UUID, Ground> playerGround = new HashMap<>();
-    private HashMap<Integer, Set<Building>> typeBuilding = new HashMap<>();
+    public HashMap<Integer, Set<Building>> typeBuilding = new HashMap<>();
     public static void init(MetaCity meta) {
         instance = new City(meta);
         instance.initAllBuildings();
