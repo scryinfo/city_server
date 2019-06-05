@@ -648,6 +648,7 @@ public class City {
         });
     }
 
+    //根据建筑类型获取所有建筑
     public int getBuildingNumByType(int type){
 		Map<Integer,List<Building>> map=new HashMap<Integer,List<Building>>();
 		getAllBuilding().forEach(b->{
