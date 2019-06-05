@@ -90,9 +90,9 @@ public class GlobalUtil {
     public static int getCityAvgPriceByType(int type) {
         int sumPrice = 0;
         int count = 0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.get(type);
         for (Building building : buildings) {
-            if (building.type() == type && !building.outOfBusiness()) {
+            if (!building.outOfBusiness()) {
                switch (type){
                    case MetaBuilding.RETAIL:
                        RetailShop retailShop = (RetailShop) building;
@@ -127,7 +127,7 @@ public class GlobalUtil {
     public static int getCityAvgSuccessOdds(int at,int bt){
         int sumBaseOdds = 0;
         int count=0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.get(at);
         for (Building building : buildings) {
             if (building instanceof Laboratory&&!building.outOfBusiness()) {
                 Laboratory lab = (Laboratory) building;
