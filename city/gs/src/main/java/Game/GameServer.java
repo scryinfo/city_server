@@ -142,9 +142,12 @@ public class GameServer {
         LeagueManager.getInstance().init();
         EvaManager.getInstance().init();
         TickManager.init();
-        City.instance().run();
         BrandManager.init();
         FlightManager.init();
+
+        // DO NOT put init below this!!! city might can't see the init
+        City.instance().run();
+
         thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
             try {
                 ThirdPartyDataSource.instance().update();
