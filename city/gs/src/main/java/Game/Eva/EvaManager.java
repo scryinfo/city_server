@@ -22,6 +22,7 @@ public class EvaManager
     }
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
+    public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
     public void init()
@@ -31,6 +32,24 @@ public class EvaManager
                 	evaMap.computeIfAbsent(eva.getPid(),
                             k -> new HashSet<>()).add(eva);
                 } );
+        initTypeEvaMap();
+    }
+    //分类eva类型
+    public void initTypeEvaMap(){
+        EvaKey key=null;
+        Set<Eva> set=null;
+        Set<Eva> evas = getAllEvas();
+        for (Eva eva : evas) {
+            key = new EvaKey(eva.getAt(),eva.getBt());
+            if(typeEvaMap.containsKey(key)){
+                set = typeEvaMap.get(key);
+                set.add(eva);
+            }else{
+                set = new HashSet<>();
+                set.add(eva);
+            }
+            typeEvaMap.put(key, set);
+        }
     }
 
     public Set<Eva> getEvaList(UUID playerId)

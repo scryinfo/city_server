@@ -2,6 +2,7 @@ package Game.Util;
 
 import Game.*;
 import Game.Eva.Eva;
+import Game.Eva.EvaKey;
 import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
@@ -17,23 +18,21 @@ public class GlobalUtil {
 
     /*1.获取全城最大和最小的加成信息（找出全城Eva提升最大的那一个，然后进行计算）*/
     public static Map<String, Eva>  getEvaMaxAndMinValue(int at,int bt){
-        Set<Eva> evas = EvaManager.getInstance().getAllEvas();
+        EvaKey key = new EvaKey(at,bt);
+        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.get(key);
         Eva maxEva = null;
         Eva minEva=null;
         Map<String, Eva> minOrMaxEva = new HashMap<>();
-        int init=0;
         for (Eva eva : evas) {
-            if(eva.getAt()==at&&eva.getBt()==bt){
-                if(maxEva==null&&minEva==null) {
+            if(maxEva==null&&minEva==null) {
+                maxEva = eva;
+                minEva = eva;
+            }else {
+                if(eva.getLv()>maxEva.getLv()) {
                     maxEva = eva;
+                }
+                if(eva.getLv()<maxEva.getLv()) {
                     minEva = eva;
-                }else {
-                    if(eva.getLv()>maxEva.getLv()) {
-                        maxEva = eva;
-                    }
-                    if(eva.getLv()<maxEva.getLv()) {
-                        minEva = eva;
-                    }
                 }
             }
         }
@@ -169,14 +168,13 @@ public class GlobalUtil {
    //7.获取全城Eva属性商品品质均加成信息
     public static int cityAvgEva(int at,int bt){
         //获取eva值，求平均，然后加上商品的基础值即可
-       Set<Eva> allEvas = EvaManager.getInstance().getAllEvas();
+       EvaKey key = new EvaKey(at,bt);
+       Set<Eva> evas = EvaManager.getInstance().typeEvaMap.get(key);
        double evaSum=0;
        int count = 0;
-       for (Eva eva : allEvas) {
-           if(eva.getAt()==at&&eva.getBt()==bt){
-               evaSum+=EvaManager.getInstance().computePercent(eva);
-               count++;
-           }
+       for (Eva eva : evas) {
+           evaSum+=EvaManager.getInstance().computePercent(eva);
+           count++;
        }
        return count==0?0: (int) (evaSum / count);
    }
@@ -185,7 +183,7 @@ public class GlobalUtil {
     public static int cityAvgPromotionAbilityValue(int type){
         int sum=0;
         int count = 0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.get(type);
         for (Building b: buildings) {
             if(b instanceof PublicFacility&&!b.outOfBusiness()){
                 PublicFacility facility = (PublicFacility) b;
@@ -203,12 +201,10 @@ public class GlobalUtil {
         int quality=0;
         int count = 0;
         //2.获得基本品质
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.get(at);
         for (Building building : buildings) {
-            if(building.type()==at){
                 quality+= building.quality();
                 count++;
-            }
         }
         return  count==0?0:(quality/count) * (1 + avgAdd);
     }
