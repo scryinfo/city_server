@@ -125,7 +125,8 @@ public class City {
     private HashMap<UUID, Building> allBuilding = new HashMap<>();
 
     private HashMap<UUID, HashMap<UUID, Building>> playerBuilding = new HashMap<>();
-    private HashMap<UUID, Ground> playerGround = new HashMap<>();
+    public HashMap<UUID, Ground> playerGround = new HashMap<>();
+    public HashMap<Integer, Set<Building>> typeBuilding = new HashMap<>();
     public static void init(MetaCity meta) {
         instance = new City(meta);
         instance.initAllBuildings();
@@ -133,6 +134,7 @@ public class City {
 
     private void initAllBuildings() {
         this.playerBuilding.values().forEach(m->m.values().forEach(b->b.init()));
+        instance.initTypeBuildings();//初始化不同的建筑类型,建筑分类
     }
 
     public static City instance() {
@@ -628,14 +630,30 @@ public class City {
     //获取该建筑类型已开放的数量
     public int getOpentNumByType(int type){
         int count=0;
-        for (Building building : getAllBuilding()) {
-            if(building.type()==type&&!building.outOfBusiness()){
+        Set<Building> buildings = typeBuilding.get(type);
+        for (Building building : buildings) {
+            if(building.type()==type&&!building.outOfBusiness())
                 count++;
-            }
         }
         return count;
     }
-    
+
+    //封装建筑类型建筑
+    private void initTypeBuildings(){
+        forEachBuilding(b->{
+            if(typeBuilding.containsKey(b.type())){
+                Set<Building> list = typeBuilding.get(b.type());
+                list.add(b);
+                typeBuilding.put(b.type(),list);
+            }else{
+                Set<Building> list = new HashSet<>();
+                list.add(b);
+                typeBuilding.put(b.type(),list);
+            }
+        });
+    }
+
+    //根据建筑类型获取所有建筑
     public int getBuildingNumByType(int type){
 		Map<Integer,List<Building>> map=new HashMap<Integer,List<Building>>();
 		getAllBuilding().forEach(b->{

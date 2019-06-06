@@ -15,7 +15,7 @@ public abstract class MetaItem {
     }
     public MetaItem(Document d) {
         this.id = d.getInteger("_id");
-        this.n = d.getDouble("numOneSec");
+        this.n = d.getDouble("numOneSec") /100000;
         this.useDirectly = d.getBoolean("default");
         this.size = d.getInteger("size");
     }

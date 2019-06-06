@@ -1305,7 +1305,6 @@ public class GameSession {
 			}
 			return;
 		}
-		fcySeller.setCurPromPricePerHour((int)adjustPromo.getPricePerHour());
 		fcySeller.setCurPromPricePerHour((int) adjustPromo.getPricePerHour());
 		fcySeller.setPromRemainTime(adjustPromo.getRemainTime());
 		fcySeller.setTakeOnNewOrder(adjustPromo.getTakeOnNewOrder());
@@ -1480,14 +1479,13 @@ public class GameSession {
 				改： PromotionMgr 维护，结果值更新到建筑的品牌值
 				查： PromotionMgr 维护
 				*/
-			int buildingType = gs_AdAddNewPromoOrder.getBuildingType();
+			int buildingType = gs_AdAddNewPromoOrder.getBuildingType(); // 四位建筑id
 			newOrder.buildingType = buildingType;
-			LogDb.promotionRecord(seller.id(), buyer.id(), sellerBuildingId, selfPromo ? 0 : fcySeller.getCurPromPricePerMs(), fee, buildingType, MetaBuilding.type(buildingType),true);
+			LogDb.promotionRecord(seller.id(), buyer.id(), sellerBuildingId, selfPromo ? 0 : fcySeller.getCurPromPricePerMs(), fee, buildingType, buildingType / 100, true);
 		}else{
-			int productionType = gs_AdAddNewPromoOrder.getProductionType();
+			int productionType = gs_AdAddNewPromoOrder.getProductionType(); //七位商品id
 			newOrder.productionType = productionType;
             LogDb.promotionRecord(seller.id(), buyer.id(), sellerBuildingId, selfPromo ? 0 : fcySeller.getCurPromPricePerMs(), fee, productionType,MetaGood.category(productionType),false);
-
 		}
 		PromotionMgr.instance().AdAddNewPromoOrder(newOrder);
 		GameDb.saveOrUpdate(PromotionMgr.instance());
@@ -1508,7 +1506,12 @@ public class GameSession {
 		sellerBuilding.updateTodayIncome(fee);
 		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);//不含矿工费
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
-
+		//推广公司预约通知
+		long newPromoStartTs = newOrder.promStartTs; //预计开始时间
+		long promDuration = newOrder.promDuration; //广告时长
+		UUID[] buildingId = {sellerBuilding.id()};
+		StringBuilder sb = new StringBuilder().append(fee-minerCost+",").append(promDuration+",").append(newPromoStartTs);
+		MailBox.instance().sendMail(Mail.MailType.PUBLICFACILITY_APPOINTMENT.getMailType(), sellerBuilding.ownerId(), null, buildingId, null, sb.toString());
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
@@ -1928,29 +1931,34 @@ public class GameSession {
 			lab.updateTodayIncome(cost - minerCost);
 			if (c.hasGoodCategory()) {
 				lab.updateTotalGoodIncome(cost - minerCost, c.getTimes());
-				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.getGoodCategory(), true);
 			} else {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
-				LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, 0, false);
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
-			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-					.setBuyerId(Util.toByteString(player.id()))
-					.setFaceId(player.getFaceId())
-					.setCost(cost - minerCost)
-					.setType(Gs.IncomeNotify.Type.LAB)
-					.setBid(building.metaId())
-					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-					.setDuration(c.getTimes())
-					.build();
-			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 		}
+		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
+			// 研究所预约通知
+			long beginProcessTs = line.beginProcessTs;//预计开始时间
+			int times = c.getTimes();//研究时长
+			UUID[] buildingId = {lab.id()};
+			StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
+			MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
+        Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+                .setBuyerId(Util.toByteString(player.id()))
+                .setFaceId(player.getFaceId())
+                .setCost(cost)
+                .setType(Gs.IncomeNotify.Type.LAB)
+                .setBid(building.metaId())
+                .setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+                .setDuration(c.getTimes())
+                .build();
+		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -2356,7 +2364,7 @@ public class GameSession {
 			}
 			//邮件通知添加好友成功
 			UUID[] oppositeId = {player.id()};
-			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId,null,oppositeId,null);
+			MailBox.instance().sendMail(Mail.MailType.ADD_FRIEND_SUCCESS.getMailType(),sourceId, null,oppositeId,null);
 		}
 		else
 		{
@@ -2562,8 +2570,10 @@ public class GameSession {
 				/**
 				 * TODO:
 				 * 2019/2/25
-				 * 邮件通知被踢出公会
+				 * 踢出公会
 				 */
+				UUID playerId = Util.toUuid(params.getPlayerId().toByteArray());
+				MailBox.instance().sendMail(Mail.MailType.SOCIETY_KICK_OUT.getMailType(), playerId,null, new UUID[]{societyId}, null);
 			}
 		}
 	}
@@ -3039,7 +3049,7 @@ public class GameSession {
 			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
 			//升级对比信息
-			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.原料厂品质提升（计算竞争力）（*）
+			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.加工厂品质提升（计算竞争力）（*）
 				//筛选玩家所有该建筑
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
 				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
@@ -4116,6 +4126,21 @@ public class GameSession {
 			b.setAbility(EvaManager.getInstance().computePercent(eva));
 		}
 		this.write(Package.create(cmd, builder.build()));
+	}
+    /*查询品牌信息*/
+	public void queryBrand(short cmd,Message message){
+		Gs.queryBrand brand = (Gs.queryBrand) message;
+		UUID pid = Util.toUuid(brand.getPId().toByteArray());
+		int typeId = brand.getTypeId();
+		BrandManager.BrandInfo info = BrandManager.instance().getBrand(pid, typeId);
+		Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+		band.setItemId(typeId).setPId(brand.getPId());
+		if(info.hasBrandName()){
+			band.setBrandName(info.getBrandName());
+		}
+		EvaManager.getInstance().getEva(pid,typeId).forEach(eva -> {
+			band.addEva(eva.toProto());
+		});
 	}
 
 	public void ct_createUser(short cmd,Message message){
