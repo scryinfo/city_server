@@ -2413,10 +2413,12 @@ public class GameSession {
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
 
-	public void getGroundInfo(short cmd)
+	public void getGroundInfo(short cmd,Message message)
 	{
+		Gs.Id id= (Gs.Id) message;
+		UUID pid = Util.toUuid(id.getId().toByteArray());
 		Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
-		builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+		builder.addAllInfo(GroundManager.instance().getGroundProto(pid));
 		this.write(Package.create(cmd, builder.build()));
 	}
 
