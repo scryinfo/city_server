@@ -89,24 +89,24 @@ public class Laboratory extends Building {
 
     @Override
     protected void _update(long diffNano) {
-        if(!this.inProcess.isEmpty()) {
+        if (!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
-            if(line.update(diffNano)) {
-                if(line.isComplete()) {
+            if (line.update(diffNano)) {
+                if (line.goodCategory > 0) {
+                    //完成商品发明
+                    MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.availableRoll,line.usedRoll+line.availableRoll}, new UUID[]{this.id()}, null);
+                } else {
+                    //完成点数研究
+                    MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
+                }
+                if (line.isComplete()) {
                     this.inProcess.remove(0);
                     this.completed.put(line.id, line);
-                    if (line.goodCategory > 0) {
-                        //完成商品发明
-                        MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
-                    } else {
-                        //完成点数研究
-                        MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
-                    }
                 }
                 broadcastLine(line);
             }
         }
-        if(this.dbTimer.update(diffNano)) {
+        if (this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
     }

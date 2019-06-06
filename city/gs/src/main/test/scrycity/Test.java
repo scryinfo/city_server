@@ -6,6 +6,9 @@ import Game.MailBox;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaGood;
 import Shared.LogDb;
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
 import java.text.DecimalFormat;
@@ -17,28 +20,14 @@ public class Test {
     {
 //        DecimalFormat df = new DecimalFormat("#.00");
         LogDb.init("mongodb://192.168.0.51:27017", "cityLiuyi");
-////        List<Document> documents = LogDb.queryHourMaterialInfo(new Date().getTime(), System.currentTimeMillis(), LogDb.getBuyInShelf());
-////        System.out.println(documents);
-//        List<Document> list = LogDb.dayPlayerExchange2(new Date().getTime(), System.currentTimeMillis(), LogDb.getBuyInShelf(), false);
-//        System.out.println(list);
-
-//        int category = MetaGood.category(2252203);
-//        System.out.println(category);
-//
-//        int type = MetaBuilding.type(1400003);
-//        System.out.println(type);
-
-//        LogDb.promotionRecord(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 6, 66, 2251203, 51, false);
-//        LogDb.promotionRecord(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 9, 99, 1400003, 14, true);
-        long playerAmount = GameDb.getPlayerAmount();
-        System.out.println(playerAmount);
-
-
+//        LogDb.buyGround(UUID.randomUUID(), UUID.randomUUID(), 1000l, new ArrayList<>());
+        MongoCollection<Document> buyGround = LogDb.getBuyGround();
+        FindIterable<Document> documents = buyGround.find();
+        documents.forEach((Block<? super Document>) document ->{
+            System.out.println(document.getInteger("size").longValue());
+        });
 
     }
 
-    @org.junit.Test
-    public void query() {
 
-    }
 }
