@@ -54,19 +54,22 @@ public class CompeteAndExpectUtil {
         Map<UUID, Double> map = new HashMap<>();
         int at = eva.getAt();
         int bt = eva.getBt();
-        for (Building b : buildings) {
-            Gs.Promote.Builder promote = Gs.Promote.newBuilder();
+        int length = buildings.size();
+        Gs.Promote.Builder promote =null;
+        for (int i = 0 ; i < length; i++) {
+            Building b=buildings.get(i);
+            promote=Gs.Promote.newBuilder();
             ProduceDepartment pro = (ProduceDepartment) b;
             //1.1判断是否该有该上架的商品
             if (!pro.getShelf().has(at)||b.outOfBusiness())
                 continue;
             int price = pro.getShelf().getSellInfo(at).get(0).price;//玩家定价
             MetaGood good = MetaData.getGood(at);
-            int base = good.quality;//商品的品质基础值
-            //获取品牌信息
+            int qtyBase = good.quality;//商品的品质基础值
+            //推荐价格
             int brandValue = BrandManager.instance().getBrand(b.ownerId(),at).getV()+good.brand;
             double evaAdd = EvaManager.getInstance().computePercent(eva);
-            int recommendPrice = GlobalUtil.getProduceRecommendPrice(at,bt,base,evaAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
+            int recommendPrice = GlobalUtil.getProduceRecommendPrice(at,bt,qtyBase,evaAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
             double competitive= Math.ceil(recommendPrice / price * 100);//竞争力
             map.put(b.id(),competitive);
         }

@@ -317,7 +317,7 @@ public class Laboratory extends Building {
             /*if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1))*/
             //TODO:研究的过渡时间是从配置表读取的，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
             long transition = TimeUnit.SECONDS.toNanos(eva_transition_time);
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;

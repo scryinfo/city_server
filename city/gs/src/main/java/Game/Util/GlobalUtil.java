@@ -8,7 +8,10 @@ import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import gs.Gs;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class GlobalUtil {
 
@@ -70,10 +73,10 @@ public class GlobalUtil {
     public static int getCityItemAvgPrice(int goodItem, int type) {
         int sumPrice = 0;
         int count = 0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.get(type);
         for (Building building : buildings) {
             //判断类型
-            if (building.type()!= type||building.outOfBusiness()||!(building instanceof  IShelf))
+            if (building.outOfBusiness()||!(building instanceof  IShelf))
                 continue;
             IShelf shelf = (IShelf) building;
             Map<Item, Integer> saleDetail = shelf.getSaleDetail(goodItem);
@@ -123,7 +126,7 @@ public class GlobalUtil {
             return 0;
     }
 
-    //5.查询根据类型研究成功几率，依然是建筑的成功平均值+eva的平均提升值
+    //5.查询根据类型查询全城研究成功几率，依然是建筑的成功平均值+eva的平均提升值
     public static int getCityAvgSuccessOdds(int at,int bt){
         int sumBaseOdds = 0;
         int count=0;
@@ -211,7 +214,7 @@ public class GlobalUtil {
     }
 
    //10.获取加工厂推荐定价
-    public static int getProduceRecommendPrice(int at,int bt,int base,double localEvaAdd,int localBrand,int buildingType){
+    public static int getProduceRecommendPrice(int at,int bt,int qtyBase,double localEvaAdd,int localBrand,int buildingType){
         //公式：推荐定价 = 全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
 
         //1.全城商品销售均价
@@ -219,14 +222,14 @@ public class GlobalUtil {
         //2.玩家知名度权重
         double brandWeight = CompeteAndExpectUtil.getBrandWeight(localBrand, at);
         //3.玩家品质权重
-        double localQuality = (base * (1 + localEvaAdd));
-        double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, base);
+        double localQuality = (qtyBase * (1 + localEvaAdd));
+        double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, qtyBase);
         //4.全城知名度权重
         int cityAvgBrand = cityAvgBrand(at);
         double cityBrandWeight = CompeteAndExpectUtil.getBrandWeight(cityAvgBrand, at);
         //5.全城品质权重
-        int cityAvgQuality =(int)(base * (1+ cityAvgEva(at, bt)));
-        double cityQualityWeight = CompeteAndExpectUtil.getItemWeight(cityAvgQuality, at, bt, base);
+        int cityAvgQuality =(int)(qtyBase * (1+ cityAvgEva(at, bt)));
+        double cityQualityWeight = CompeteAndExpectUtil.getItemWeight(cityAvgQuality, at, bt, qtyBase);
         return (int) (cityItemAvgPrice * (brandWeight + qualityWeight) / (cityBrandWeight + cityQualityWeight));
     }
 

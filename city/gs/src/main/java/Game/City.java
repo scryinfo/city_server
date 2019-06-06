@@ -1,23 +1,7 @@
 package Game;
 
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import Game.Gambling.FlightManager;
-import Shared.GlobalConfig;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
-
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -27,9 +11,20 @@ import Game.Util.DateUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
 import gs.Gs;
-import gs.Gs.BuildingInfo;
 import gscode.GsCode;
+import org.apache.log4j.Logger;
+
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class City {
     public static final UUID SysRoleId = UUID.nameUUIDFromBytes(new byte[16]);

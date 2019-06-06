@@ -2413,10 +2413,12 @@ public class GameSession {
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
 
-	public void getGroundInfo(short cmd)
+	public void getGroundInfo(short cmd,Message message)
 	{
+		Gs.Id id= (Gs.Id) message;
+		UUID pid = Util.toUuid(id.getId().toByteArray());
 		Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
-		builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+		builder.addAllInfo(GroundManager.instance().getGroundProto(pid));
 		this.write(Package.create(cmd, builder.build()));
 	}
 
@@ -3032,12 +3034,14 @@ public class GameSession {
 	{
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
 		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
+		Gs.EvaResultInfo.Builder result =null;
+		Eva oldEva=null;//修改前的Eva信息
 		for (Gs.Eva eva : evas.getEvaList()) {
-			Gs.EvaResultInfo.Builder result = Gs.EvaResultInfo.newBuilder();
+			result=Gs.EvaResultInfo.newBuilder();
 			//修改后eva信息
 			Eva newEva = EvaManager.getInstance().updateMyEva(eva);
 			//修改前的eva
-			Eva oldEva = new Eva();
+			oldEva= new Eva();
 			oldEva.setLv(eva.getLv());
 			oldEva.setAt(eva.getAt());
 			oldEva.setBt(eva.getBt().getNumber());

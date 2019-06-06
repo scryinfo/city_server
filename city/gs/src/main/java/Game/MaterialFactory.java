@@ -3,11 +3,8 @@ package Game;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
 import Game.Meta.MetaMaterialFactory;
-import Shared.Package;
-import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
-import gscode.GsCode;
 
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
