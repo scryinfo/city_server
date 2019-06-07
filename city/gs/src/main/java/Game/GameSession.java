@@ -4132,19 +4132,19 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
     /*查询品牌信息*/
-	public void queryBrand(short cmd,Message message){
+	public void queryBrand(short cmd, Message message) {
 		Gs.queryBrand brand = (Gs.queryBrand) message;
 		UUID pid = Util.toUuid(brand.getPId().toByteArray());
 		int typeId = brand.getTypeId();
 		BrandManager.BrandInfo info = BrandManager.instance().getBrand(pid, typeId);
-		Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+		Gs.BrandInfo.Builder band = Gs.BrandInfo.newBuilder();
 		band.setItemId(typeId).setPId(brand.getPId());
-		if(info.hasBrandName()){
+		if (info.hasBrandName()) {
 			band.setBrandName(info.getBrandName());
-		}
-		EvaManager.getInstance().getEva(pid,typeId).forEach(eva -> {
-			band.addEva(eva.toProto());
-		});
+		} else
+			// 现在暂时使用公司名称
+			band.setBrandName(GameDb.getPlayer(pid).getCompanyName());
+		this.write(Package.create(cmd, band.build()));
 	}
 
 	public void ct_createUser(short cmd,Message message){
