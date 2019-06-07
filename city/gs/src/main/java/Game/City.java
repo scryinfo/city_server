@@ -49,7 +49,7 @@ public class City {
     public int[] timeSection() {
         return meta.timeSection;
     }
-    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);//200毫秒转为纳秒的延迟时间
+    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);//1分钟转为200纳秒颗粒数
     public MetaCity getMeta() {
         return meta;
     }
