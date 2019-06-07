@@ -563,7 +563,6 @@ public class City {
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
-        updateTypeBuilding(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
         this.topBuildingQty.compute(building.type(), (k, oldV)->{
@@ -637,15 +636,7 @@ public class City {
     //封装建筑类型建筑
     private void initTypeBuildings(){
         forEachBuilding(b->{
-            if(typeBuilding.containsKey(b.type())){
-                Set<Building> list = typeBuilding.get(b.type());
-                list.add(b);
-                typeBuilding.put(b.type(),list);
-            }else{
-                Set<Building> list = new HashSet<>();
-                list.add(b);
-                typeBuilding.put(b.type(),list);
-            }
+            typeBuilding.computeIfAbsent(b.type(), k -> new HashSet<>()).add(b);
         });
     }
 
@@ -660,16 +651,8 @@ public class City {
 		return list!=null?list.size():0;
     }
 
-    //更新类型建筑
+   /* //更新类型建筑
     public void updateTypeBuilding(Building  b){
-        Set<Building> list;
-        if(typeBuilding.containsKey(b.type())){
-            list= typeBuilding.get(b.type());
-            list.add(b);
-        }else{
-            list = new HashSet<>();
-            list.add(b);
-        }
-        typeBuilding.put(b.type(),list);
-    }
+        typeBuilding.computeIfAbsent(b.type(), k -> new HashSet<>()).add(b);
+    }*/
 }
