@@ -22,6 +22,7 @@ public class EvaManager
     }
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
+    public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
     public void init()
@@ -31,6 +32,29 @@ public class EvaManager
                 	evaMap.computeIfAbsent(eva.getPid(),
                             k -> new HashSet<>()).add(eva);
                 } );
+        initTypeEvaMap();
+    }
+    //分类eva
+    public void initTypeEvaMap(){
+        EvaKey key=null;
+        Set<Eva> evas = getAllEvas();
+        for (Eva eva : evas) {
+            key = new EvaKey(eva.getAt(),eva.getBt());
+            typeEvaMap.computeIfAbsent(key, k -> new HashSet<>()).add(eva);
+        }
+    }
+    public void updateTypeEvaMap(Eva eva){
+        UUID id = eva.getId();
+        EvaKey key=new EvaKey(eva.getAt(),eva.getBt());
+        Set<Eva> evas = typeEvaMap.get(key);
+        Iterator<Eva> iterator = evas.iterator();
+        while (iterator.hasNext()){
+            Eva next = iterator.next();
+            if(next.getId().equals(id)){
+                iterator.remove();
+            }
+        }
+        evas.add(eva);
     }
 
     public Set<Eva> getEvaList(UUID playerId)
@@ -55,6 +79,8 @@ public class EvaManager
     	s.remove(getEva(eva.getPid(),eva.getAt(),eva.getBt()));
     	s.add(eva);
 		evaMap.put(eva.getPid(), s);
+		//同步Eva类型map
+        updateTypeEvaMap(eva);
      	GameDb.saveOrUpdate(eva);
     }
     
@@ -62,6 +88,9 @@ public class EvaManager
     	evaList.forEach(e->{
     	   	evaMap.computeIfAbsent(e.getPid(),
                     k -> new HashSet<>()).add(e);
+            //同步Eva类型map
+    	   	typeEvaMap.computeIfAbsent(new EvaKey(e.getAt(),e.getBt()),
+                    k->new HashSet<>()).add(e);
     	});
 		GameDb.saveOrUpdate(evaList);
     }
