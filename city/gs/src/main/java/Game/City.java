@@ -508,6 +508,8 @@ public class City {
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
         buildings.remove(building.id());
+       //类型建筑中也要删除
+        this.typeBuilding.get(building.type()).remove(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
         //重置土地建筑
@@ -563,6 +565,8 @@ public class City {
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
+        //同步类型建筑map
+        this.typeBuilding.computeIfAbsent(building.type(), k -> new HashSet<>()).add(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
         this.topBuildingQty.compute(building.type(), (k, oldV)->{
@@ -636,15 +640,7 @@ public class City {
     //封装建筑类型建筑
     private void initTypeBuildings(){
         forEachBuilding(b->{
-            if(typeBuilding.containsKey(b.type())){
-                Set<Building> list = typeBuilding.get(b.type());
-                list.add(b);
-                typeBuilding.put(b.type(),list);
-            }else{
-                Set<Building> list = new HashSet<>();
-                list.add(b);
-                typeBuilding.put(b.type(),list);
-            }
+            typeBuilding.computeIfAbsent(b.type(), k -> new HashSet<>()).add(b);
         });
     }
 
