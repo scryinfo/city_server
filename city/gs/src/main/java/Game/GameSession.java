@@ -1506,12 +1506,15 @@ public class GameSession {
 		sellerBuilding.updateTodayIncome(fee);
 		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);//不含矿工费
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
-		//推广公司预约通知
-		long newPromoStartTs = newOrder.promStartTs; //预计开始时间
-		long promDuration = newOrder.promDuration; //广告时长
-		UUID[] buildingId = {sellerBuilding.id()};
-		StringBuilder sb = new StringBuilder().append(fee-minerCost+",").append(promDuration+",").append(newPromoStartTs);
-		MailBox.instance().sendMail(Mail.MailType.PUBLICFACILITY_APPOINTMENT.getMailType(), sellerBuilding.ownerId(), null, buildingId, null, sb.toString());
+		//如果是在自己公司推广不发通知
+		if (!selfPromo) {
+			//推广公司预约通知
+			long newPromoStartTs = newOrder.promStartTs; //预计开始时间
+			long promDuration = newOrder.promDuration; //广告时长
+			UUID[] buildingId = {sellerBuilding.id()};
+			StringBuilder sb = new StringBuilder().append(fee - minerCost + ",").append(promDuration + ",").append(newPromoStartTs);
+			MailBox.instance().sendMail(Mail.MailType.PUBLICFACILITY_APPOINTMENT.getMailType(), sellerBuilding.ownerId(), null, buildingId, null, sb.toString());
+		}
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
@@ -1940,12 +1943,15 @@ public class GameSession {
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
-			// 研究所预约通知
-			long beginProcessTs = line.beginProcessTs;//预计开始时间
-			int times = c.getTimes();//研究时长
-			UUID[] buildingId = {lab.id()};
-			StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
-			MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
+			// 研究所预约通知(如果在自己公司研究不发通知)
+			boolean flag = this.player.id().equals(building.ownerId()) ;
+			if (!flag) {
+				long beginProcessTs = line.beginProcessTs;//预计开始时间
+				int times = c.getTimes();//研究时长
+				UUID[] buildingId = {lab.id()};
+				StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
+				MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
+			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
         Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
