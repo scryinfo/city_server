@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 public class Laboratory extends Building {
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     private static final int RADIX = 100000;
-    private static int eva_transition_time;//eva提升的过度时间
-    private static int invent_transition_time;//发明过渡时间
     @Transient
     private MetaLaboratory meta;
 
@@ -46,10 +44,10 @@ public class Laboratory extends Building {
     @PostLoad
     private void _1() {
         this.meta = (MetaLaboratory) super.metaBuilding;
-        eva_transition_time = meta.evaTransitionTime;
-        invent_transition_time = meta.inventTransitionTime;
         if(!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
+            line.eva_transition_time = meta.evaTransitionTime;
+            line.invent_transition_time = meta.inventTransitionTime;
             if (line.isRunning())
                 line.currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - line.beginProcessTs) % TimeUnit.HOURS.toNanos(1);
         }
@@ -126,6 +124,8 @@ public class Laboratory extends Building {
         //设置开始时间
         long beginTime=lastLine.beginProcessTs+ TimeUnit.HOURS.toMillis(lastLine.times);
         line.beginProcessTs = beginTime;
+        line.eva_transition_time = this.meta.evaTransitionTime;
+        line.invent_transition_time = this.meta.inventTransitionTime;
         inProcess.add(line);
         //this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
@@ -291,6 +291,11 @@ public class Laboratory extends Building {
         int availableRoll;
         int usedRoll;
         long payCost;
+
+        @Transient
+        private  int eva_transition_time;//eva提升的过度时间
+        @Transient
+        private  int invent_transition_time;//发明过渡时间
         @Transient
         long currentRoundPassNano = 0;
 
@@ -314,11 +319,8 @@ public class Laboratory extends Building {
             if(!isLaunched())
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
-            System.err.println("过渡时间"+TimeUnit.NANOSECONDS.toSeconds(currentRoundPassNano));
-            /*if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1))*/
             //TODO:研究的过渡时间是从配置表读取的，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
             if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取的过渡时间
-                System.err.println("更新1次成果============");
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
