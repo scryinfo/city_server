@@ -561,9 +561,9 @@ public class PublicFacility extends Building{
             //人流量
             Building bd = City.instance().getBuilding(buildingId);
             if(bd == null){
-                if(GlobalConfig.DEBUGLOG){
-                    GlobalConfig.cityError("PublicFacility.addPromoAbRecord: building not exist!");
-                }
+                //if(GlobalConfig.DEBUGLOG){
+                    //GlobalConfig.cityError("PublicFacility.addPromoAbRecord: building not exist!");
+                //}
                 return;
             }
             UUID pid = bd.ownerId();

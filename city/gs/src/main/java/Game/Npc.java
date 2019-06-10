@@ -165,6 +165,7 @@ public class Npc {
         if(aiBuilding == null)
            return null;
 
+
         double idleRatio = 1.d;
         double sumFlow = City.instance().getSumFlow();
         if(sumFlow > 0)
