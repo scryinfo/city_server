@@ -4123,12 +4123,15 @@ public class GameSession {
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
 		builder.setBuildingInfo(buildingInfo);
-		for (int type : msg.getTypeIdsList()) {
+		Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.LAB);
+		//现在可以得到研究所的所有at和研究所的所有bt，
+		buildingTech.forEach(item->{
 			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-			b.setTypeId(type);
+			//因为研究所一个atype只对应一个eva，所以获取第一个。
+			Eva eva = EvaManager.getInstance().getEva(playerId, item).get(0);
+			b.setTypeId(eva.getBt());
 			b.setAbility(EvaManager.getInstance().computePercent(eva));
-		}
+		});
 		this.write(Package.create(cmd, builder.build()));
 	}
     /*查询品牌信息*/

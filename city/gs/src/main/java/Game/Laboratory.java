@@ -10,7 +10,6 @@ import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +57,7 @@ public class Laboratory extends Building {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
+        calcuProb();
         return builder.setSellTimes(this.sellTimes)
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(this.evaProb)
@@ -320,7 +320,7 @@ public class Laboratory extends Building {
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
             //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取的过渡时间
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
