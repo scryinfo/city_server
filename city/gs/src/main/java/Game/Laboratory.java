@@ -191,6 +191,7 @@ public class Laboratory extends Building {
     }
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
+        //还需要加上eva的加成信息
         RollResult res = null;
         Line l = this.findInProcess(lineId);
         if(l == null)
@@ -256,6 +257,13 @@ public class Laboratory extends Building {
         }else
         return  inProcess.get(inProcess.size() - 1);
     }
+
+    /*public Map<String,Integer> getTotalSuccessProb(){
+        Map<String, Integer> map = new HashMap<>();
+        //首先获取eva信息
+        Set<Integer> buildingTech = MetaData.getBuildingTech();
+        buildingTech
+    }*/
     @Entity
     public static final class Line {
         public Line(int goodCategory, int times, UUID proposerId, long cost) {

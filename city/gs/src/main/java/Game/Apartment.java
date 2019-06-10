@@ -66,7 +66,7 @@ public class Apartment extends Building implements IBuildingContract
                 .setRent(this.rent)
                 .setRenter(renters.size())
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
-                .setQty(getTotalQty())//加成过后的品质
+                .setQty(this.qty)
                 .setLift(getLift())
                 .setContractInfo(this.buildingContract.toProto())
                 .build();
@@ -105,10 +105,5 @@ public class Apartment extends Building implements IBuildingContract
     public BuildingContract getBuildingContract()
     {
         return buildingContract;
-    }
-
-    private int getTotalQty(){
-        Eva eva = EvaManager.getInstance().getEva(this.ownerId(),type(), Gs.Eva.Btype.Quality_VALUE);
-        return (int)Math.ceil((this.qty * (1 + EvaManager.getInstance().computePercent(eva))));
     }
 }
