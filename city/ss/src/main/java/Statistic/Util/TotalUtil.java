@@ -43,7 +43,7 @@ public class TotalUtil {
     }
 
     //获取今日玩家收入支出最新数据
-    public  Long  todayIncomOrPay(Map<Long, Long> sourceMap){
+    public  Long  todayIncomeOrPay(Map<Long, Long> sourceMap){
         Long todayIncomeOrPay=0L;
         Map<Long, Long> today = new TreeMap<>();
         sourceMap.forEach((time,money)->{

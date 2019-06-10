@@ -292,8 +292,8 @@ public class StatisticSession {
 			totalMap.put(pay.getKey(),b.build());
 		}
 		//3.处理今日最新收入和支出信息
-		Long todayIncome = TotalUtil.getInstance().todayIncomOrPay(playerIncomeMap);
-		Long todayPay = TotalUtil.getInstance().todayIncomOrPay(playerPayMap);
+		Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
+		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);
 		builder.setTodayIncome(todayIncome);
 		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
