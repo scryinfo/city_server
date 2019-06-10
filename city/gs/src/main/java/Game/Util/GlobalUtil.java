@@ -9,10 +9,7 @@ import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import gs.Gs;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GlobalUtil {
 
@@ -75,7 +72,7 @@ public class GlobalUtil {
     public static int getCityItemAvgPrice(int goodItem, int type) {
         int sumPrice = 0;
         int count = 0;
-        Set<Building> buildings = City.instance().typeBuilding.get(type);
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(type,new HashSet<>());
         for (Building building : buildings) {
             //判断类型
             if (building.outOfBusiness()||!(building instanceof  IShelf))
@@ -95,7 +92,7 @@ public class GlobalUtil {
     public static int getCityAvgPriceByType(int type) {
         int sumPrice = 0;
         int count = 0;
-        Set<Building> buildings = City.instance().typeBuilding.get(type);
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(type,new HashSet<>());
         for (Building building : buildings) {
             if (!building.outOfBusiness()) {
                switch (type){
@@ -132,7 +129,7 @@ public class GlobalUtil {
     public static int getCityAvgSuccessOdds(int at,int bt){
         int sumBaseOdds = 0;
         int count=0;
-        Set<Building> buildings = City.instance().typeBuilding.get(at);
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB,new HashSet<>());
         for (Building building : buildings) {
             if (building instanceof Laboratory&&!building.outOfBusiness()) {
                 Laboratory lab = (Laboratory) building;
@@ -185,10 +182,10 @@ public class GlobalUtil {
    }
 
    //8.获取全城推广该类型的推广能力平均值
-    public static int cityAvgPromotionAbilityValue(int type){
+    public static int cityAvgPromotionAbilityValue(int type,int buildingType){
         int sum=0;
         int count = 0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(buildingType,new HashSet<>());
         for (Building b: buildings) {
             if(b instanceof PublicFacility&&!b.outOfBusiness()){
                 PublicFacility facility = (PublicFacility) b;
@@ -200,18 +197,18 @@ public class GlobalUtil {
     }
 
     //9.全城住宅零售店均品质(*)
-    public static int getCityApartmentOrRetailShopQuality(int at,int bt){
+    public static int getCityApartmentOrRetailShopQuality(int at,int bt,int buildingType){
         //1.计算均加成
         int avgAdd = cityAvgEva(at, bt);
         int quality=0;
         int count = 0;
         //2.获得基本品质
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(buildingType,new HashSet<>());
         for (Building building : buildings) {
-            if(building.type()==at){
+            if(building.type()==buildingType){
                 quality+= building.quality();
                 count++;
-        }
+            }
         }
         return  count==0?0:(quality/count) * (1 + avgAdd);
     }

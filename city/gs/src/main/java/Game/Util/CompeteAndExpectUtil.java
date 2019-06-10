@@ -82,7 +82,7 @@ public class CompeteAndExpectUtil {
         //1.全城推广均定价
         int cityAvgprice = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
         //2.全城的平均推广值
-        int cityAvgAbility = GlobalUtil.cityAvgPromotionAbilityValue(eva.getAt());
+        int cityAvgAbility = GlobalUtil.cityAvgPromotionAbilityValue(eva.getAt(),MetaBuilding.PUBLIC);
         //3.全城该类型推广均单位定价
         int cityAbilityPrice = cityAvgprice/cityAvgAbility;
         for (Building b : buildings) {
@@ -132,7 +132,7 @@ public class CompeteAndExpectUtil {
         int at = eva.getAt();
         int bt = eva.getBt();
         int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
-        int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt);//全城品质
+        int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt,MetaBuilding.APARTMENT);//全城品质
         for (Building building : buildings) {
             if (building.outOfBusiness())
                 continue;
