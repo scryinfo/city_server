@@ -106,9 +106,9 @@ public class CompeteAndExpectUtil {
         int at = eva.getAt();
         int bt = eva.getBt();
         for (Building building : buildings) {
-            if (building.outOfBusiness())
-                continue;
             Laboratory lab = (Laboratory) building;
+            if (lab.outOfBusiness()||lab.isExclusiveForOwner()||lab.getPricePreTime()==0)
+                continue;
             int playerSuccessOdds = 0;//当前的发明概率
             int price = lab.getPricePreTime();
             double evaAdd = EvaManager.getInstance().computePercent(eva);//加成
