@@ -1,23 +1,22 @@
 package Statistic;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import Statistic.Util.TimeUtil;
-import Statistic.Util.TotalUtil;
-import gs.Gs;
-import org.apache.log4j.Logger;
-import org.bson.Document;
-
-import com.google.protobuf.Message;
-
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import Statistic.SummaryUtil.CountType;
+import Statistic.Util.TotalUtil;
+import com.google.protobuf.Message;
+import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
+import org.apache.log4j.Logger;
+import org.bson.Document;
 import ss.Ss;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
@@ -294,10 +293,8 @@ public class StatisticSession {
 			totalMap.put(pay.getKey(),b.build());
 		}
 		//3.处理今日最新收入和支出信息
-		/*Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
-		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);*/
-		Long todayIncome = TotalUtil.getTodayPlayerLastPayOrIncome(LogDb.getPlayerIncome(), id, TimeUtil.todayStartTime());
-		Long todayPay = TotalUtil.getTodayPlayerLastPayOrIncome(LogDb.getPlayerPay(), id, TimeUtil.todayStartTime());
+		Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
+		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);
 		builder.setTodayIncome(todayIncome);
 		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
