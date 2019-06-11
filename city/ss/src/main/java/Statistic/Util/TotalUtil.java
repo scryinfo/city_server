@@ -51,18 +51,19 @@ public class TotalUtil {
         return total;
     }
 
-    //获取今日玩家收入支出最新数据
+    //获取今日玩家收入支出最新数据（也需要累积）
     public  Long  todayIncomeOrPay(Map<Long, Long> sourceMap){
-        Long todayIncomeOrPay=0L;
+        //Long todayIncomeOrPay=0L;
         Map<Long, Long> today = new TreeMap<>();
         sourceMap.forEach((time,money)->{
             if(time>=TimeUtil.todayStartTime()){
                 today.put(time, money);
             }
         });
-        Map.Entry<Long, Long> entry = ((TreeMap<Long, Long>) today).lastEntry();
+        Long todayIncomeOrPay = today.values().stream().reduce(Long::sum).orElse(0L);
+       /* Map.Entry<Long, Long> entry = ((TreeMap<Long, Long>) today).lastEntry();
         if(entry!=null)
-            todayIncomeOrPay = entry.getValue();
+            todayIncomeOrPay = entry.getValue();*/
         return todayIncomeOrPay;
     }
 
