@@ -3105,6 +3105,8 @@ public class GameSession {
 			}
 			results.addResultInfo(result);
 		}
+		//更新评分数据
+		BrandManager.instance().getAllBuildingBrandOrQuality();
 		this.write(Package.create(cmd, results.build()));
 	}
 
