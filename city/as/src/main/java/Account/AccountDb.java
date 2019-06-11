@@ -73,7 +73,8 @@ public class AccountDb {
 
 	public static synchronized As.CreateResult.Status createAccount(String account, String md5Pwd, String invataitonCode)
 	{
-		Document document = invitationCardCollection.find(Filters.eq("_id", invataitonCode)).first();
+		String pattern = String.format("^%s$", invataitonCode);
+		Document document = invitationCardCollection.find(Filters.regex("_id",pattern,"i")).first();
 		if (document == null || document.getBoolean("used"))
 		{
 			return As.CreateResult.Status.FAIL_INVCODE_USED;
