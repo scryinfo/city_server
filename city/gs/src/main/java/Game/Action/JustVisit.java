@@ -56,7 +56,7 @@ public class JustVisit implements IAction {
             double c = ((BrandManager.instance().buildingBrandScore(buildingType) + City.instance().buildingQtyScore(building.type(), building.quality())) /400.d * 7 + 1) * cost ;
             int r = 0;// (int) ((1.d-(building.cost() / c))*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
             if(1.d-(building.cost() / c)>0){
-                r = (int) ((building.cost() / c)*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                r = (int) ((c/ building.cost() )*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
             }else{
                 r = 1;
             }
