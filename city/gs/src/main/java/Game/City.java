@@ -629,7 +629,7 @@ public class City {
     //获取该建筑类型已开放的数量
     public int getOpentNumByType(int type){
         int count=0;
-        Set<Building> buildings = typeBuilding.get(type);
+        Set<Building> buildings = typeBuilding.getOrDefault(type,new HashSet<>());
         for (Building building : buildings) {
             if(building.type()==type&&!building.outOfBusiness())
                 count++;
