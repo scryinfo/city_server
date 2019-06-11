@@ -1,7 +1,9 @@
 package Statistic;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
+import Statistic.Util.TimeUtil;
 import Statistic.Util.TotalUtil;
 import gs.Gs;
 import org.apache.log4j.Logger;
@@ -292,8 +294,10 @@ public class StatisticSession {
 			totalMap.put(pay.getKey(),b.build());
 		}
 		//3.处理今日最新收入和支出信息
-		Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
-		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);
+		/*Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
+		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);*/
+		Long todayIncome = TotalUtil.getTodayPlayerLastPayOrIncome(LogDb.getPlayerIncome(), id, TimeUtil.todayStartTime());
+		Long todayPay = TotalUtil.getTodayPlayerLastPayOrIncome(LogDb.getPlayerPay(), id, TimeUtil.todayStartTime());
 		builder.setTodayIncome(todayIncome);
 		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());

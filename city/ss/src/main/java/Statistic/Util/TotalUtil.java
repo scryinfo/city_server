@@ -1,7 +1,16 @@
 package Statistic.Util;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Sorts;
+import org.bson.Document;
+
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
+
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
 
 /*统计工具类*/
 public class TotalUtil {
@@ -55,5 +64,18 @@ public class TotalUtil {
         if(entry!=null)
             todayIncomeOrPay = entry.getValue();
         return todayIncomeOrPay;
+    }
+
+    //获取今日最新收支信息
+    public static Long getTodayPlayerLastPayOrIncome(MongoCollection<Document> collection, UUID pid, Long startTime){
+        long account = 0L;
+        Document first = collection.find(and(
+                eq("p", pid),
+                gte("t", startTime)
+        )).sort(Sorts.descending("t")).first();
+        if(first!=null){
+            account = first.getLong("a");
+        }
+        return account;
     }
 }
