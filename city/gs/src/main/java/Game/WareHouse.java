@@ -34,8 +34,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
     private boolean enableRent=false;//是否出租
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
 
-    //@OneToMany(mappedBy = "wareHouse",cascade ={CascadeType.ALL},fetch = FetchType.EAGER)//让租户维护关系
-    @Transient
+    @OneToMany(mappedBy = "wareHouse",cascade ={CascadeType.ALL},fetch = FetchType.EAGER)//让租户维护关系
     protected Set<WareHouseRenter> renters = new HashSet<>();//租户信息
 
     //初始化原型、建筑坐标、建筑拥有者id
