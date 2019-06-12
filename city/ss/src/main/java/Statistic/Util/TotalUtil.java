@@ -8,9 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.*;
 
 /*统计工具类*/
 public class TotalUtil {
@@ -61,9 +59,6 @@ public class TotalUtil {
             }
         });
         Long todayIncomeOrPay = today.values().stream().reduce(Long::sum).orElse(0L);
-       /* Map.Entry<Long, Long> entry = ((TreeMap<Long, Long>) today).lastEntry();
-        if(entry!=null)
-            todayIncomeOrPay = entry.getValue();*/
         return todayIncomeOrPay;
     }
 
