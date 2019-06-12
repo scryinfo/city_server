@@ -3,11 +3,15 @@ package Game.Gambling;
 import gs.Gs;
 import org.json.JSONObject;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 public class Flight {
@@ -17,68 +21,65 @@ public class Flight {
         date = sdf.parse(datetimeStr);
         return (int) (date.getTime()/1000);
     }
-    public Flight(JSONObject json) throws ParseException {
-        id = json.getInt("id");
-        depart_municipality = json.getString("depart_municipality");
-        depart_name = json.getString("depart_name");
-        destina_name = json.getString("destina_name");
-        destina_municipality = json.getString("destina_municipality");
-        origin_font_weight = json.getString("origin_font_weight");
-        destination_font_weight = json.getString("destination_font_weight");
-        airline_name = json.getString("airline_name");
-        air_number = json.getString("air_number");
 
-        estimatedarrivaltime = json.getString("estimatedarrivaltime");
-        estimateddeparturetime = json.getString("estimateddeparturetime");
-        filed_arrivaltime = json.getString("filed_arrivaltime");
-        filed_departuretime = json.getString("filed_departuretime");
-        intime_n = json.getString("intime_n");
+    public Flight(JSONObject json) {
+        FlightDepcode = json.getString("FlightDepcode");
+        FlightArr = json.getString("FlightArr");
+        FlightDep = json.getString("FlightDep");
+        FlightArrtimePlanDate = json.getString("FlightArrtimePlanDate");
+        FlightDeptimePlanDate = json.getString("FlightDeptimePlanDate");
+        FlightArrAirport = json.getString("FlightArrAirport");
+        id = json.getString("FlightNo");
+        FlightCompany = json.getString("FlightCompany");
 
-        flightstatus = json.getString("flightstatus");
+        FlightArrcode = json.getString("FlightArrcode");
+        FlightDeptimeDate = json.getString("FlightDeptimeDate");
+        FlightArrtimeDate = json.getString("FlightArrtimeDate");
+        FlightDepAirport = json.getString("FlightDepAirport");
+        FlightState = json.getString("FlightState");
     }
     int getDelay() throws ParseException {
-        int e = toTs(this.estimateddeparturetime);
-        int a = toTs(this.filed_departuretime);
+        int e = toTs(this.FlightDeptimePlanDate);
+        int a = toTs(this.FlightDeptimeDate);
         return a - e;
     }
     protected Flight(){}
+
+    String FlightDepcode;//"NKG"
+    String FlightArr;//成都"
+    String FlightDep;//南京"
+    String FlightArrtimePlanDate;//2019-05-22 10:10:00"
+    String FlightDeptimePlanDate;//2019-05-22 07:25:00"
+    String FlightArrAirport;//成都双流"
+
     @Id
-    int id;
-    String depart_municipality;//出发城市
-    String depart_name;//                      出发机场
-    String destina_name;//	                          到达机场
-    String destina_municipality;//	              到达城市
-    String origin_font_weight;//	              出发机场编码
-    String destination_font_weight;//	  到达机场编码
-    String airline_name;//	                           航空公司
-    String air_number;//	                           航班号
-    String estimatedarrivaltime;//	              预计到达时间
-    String estimateddeparturetime;//	  预计起飞时间
-    String filed_arrivaltime;//	              实际降落时间
-    String filed_departuretime;//	              实际起飞时间
-    String intime_n;//	                          准点率
-    String flightstatus;//	                          航班状态
+    String id;//MU2805"
+    String FlightCompany;//中国东方航空股份有限公司"
+    String FlightArrcode;//CTU"
+    String FlightDeptimeDate;//2019-05-22 07:27:00"
+    String FlightArrtimeDate;//2019-05-22 09:41:00"
+    String FlightDepAirport;//南京禄口"
+    String FlightState;//到达"
 
     boolean departured() {
-        return !filed_departuretime.isEmpty();
+        return !FlightDeptimeDate.isEmpty();
     }
 
     Gs.FlightData toProto() {
         return Gs.FlightData.newBuilder()
-                .setAirlineName(this.airline_name)
-                .setAirNumber(this.air_number)
-                .setDepartMunicipality(this.depart_municipality)
-                .setDepartName(this.depart_name)
-                .setDestinaName(destina_name)
-                .setDestinaMunicipality(destina_municipality)
-                .setOriginFontWeight(origin_font_weight)
-                .setDestinationFontWeight(destination_font_weight)
-                .setEstimatedarrivaltime(estimatedarrivaltime)
-                .setEstimateddeparturetime(estimateddeparturetime)
-                .setFiledArrivaltime(filed_arrivaltime)
-                .setFiledDeparturetime(filed_departuretime)
-                .setIntimeN(intime_n)
-                .setFlightstatus(flightstatus)
+                .setFlightArr(this.FlightArr)
+                .setFlightDepcode(this.FlightDepcode)
+                .setFlightDep(this.FlightDep)
+                .setFlightArrtimePlanDate(this.FlightArrtimePlanDate)
+                .setFlightDeptimePlanDate(FlightDeptimePlanDate)
+                .setFlightArrAirport(FlightArrAirport)
+                .setFlightNo(id)
+                .setFlightCompany(FlightCompany)
+                .setFlightArrcode(FlightArrcode)
+                .setFlightDeptimeDate(FlightDeptimeDate)
+                .setFlightArrtimeDate(FlightArrtimeDate)
+                .setFlightDepAirport(FlightDepAirport)
+                .setFlightState(FlightState)
                 .build();
     }
 }

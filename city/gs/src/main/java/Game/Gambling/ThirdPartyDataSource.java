@@ -1,5 +1,6 @@
 package Game.Gambling;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -22,10 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -35,79 +34,77 @@ public class ThirdPartyDataSource {
     public static ThirdPartyDataSource instance() {
         return instance;
     }
-    private ThirdPartyDataSource() {}
-    private int totalPages;
-    private Map<Integer, Flight> data = new HashMap<>();
-    private Map<Integer, String> departured = new HashMap<>();
+    private ThirdPartyDataSource() {
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+    //private int totalPages;
+    private final Set<Set<String>> airPortCombination = Sets.combinations(new HashSet<>(Arrays.asList("ABC","BCD")), 2);
+    private Map<String, Flight> data = new HashMap<>();
+    private Map<String, String> departured = new HashMap<>();
     private ReadWriteLock lock = new ReentrantReadWriteLock(true);
+    private MessageDigest md;
     public List<Flight> getAllFlight() {
         lock.readLock().lock();
         List<Flight> res = data.values().stream().collect(Collectors.toList());
         lock.readLock().unlock();
         return res;
     }
-    public Map<Integer, String> getDepartured() {
+    public Map<String, String> getDepartured() {
         lock.writeLock().lock();
-        Map<Integer, String> res = new HashMap<>(departured);
+        Map<String, String> res = new HashMap<>(departured);
         lock.writeLock().unlock();
         return res;
     }
-    public void clear(int id) {
+    public void clear(String id) {
         lock.writeLock().lock();
         this.data.remove(id);
         this.departured.remove(id);
         lock.writeLock().unlock();
     }
-    private void syncPages() {
-        try {
-            URI uri = getFightBaseUriBuilder().build();
-            JSONObject o = doGetFight(uri);
-            totalPages = o==null?totalPages:o.getJSONObject("paginator").getInt("total_pages");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+
+    private void pullData(){
+        airPortCombination.forEach(s->{
+            Iterator<String> iterator = s.iterator();
+            String a = iterator.next();
+            String b = iterator.next();
+            getFlightJson(a, b);
+            getFlightJson(b, a);
+        });
+    }
+
+    private void getFlightJson(String srcAirPortCode, String dstAirPortCode) {
+        URIBuilder uriBuilder = getFightBaseUriBuilder()
+                .setParameter("appid", "10512")
+                .setParameter("arr", srcAirPortCode)
+                .setParameter("date", LocalDate.now().toString())
+                .setParameter("dep", dstAirPortCode);
+        List<JSONObject> jsonList = doGetFight(uriBuilder);
+        if(jsonList == null)
+            return;
+        for (JSONObject json : jsonList) {
+            Flight flight = new Flight(json);
+            lock.writeLock().lock();
+            this.data.putIfAbsent(flight.id, flight);
+            lock.writeLock().unlock();
         }
     }
-    private void pullCurrentPageData(){
-        try {
-            URI uri = getFightBaseUriBuilder().setParameter("_page", String.valueOf(totalPages)).build();
-            JSONObject o = doGetFight(uri);
-            if(o == null)
-                return;
-            List<JSONObject> jsonList  = extractResult(o);
-            for (JSONObject json : jsonList) {
-                try {
-                    Flight flight = new Flight(json);
-                    lock.writeLock().lock();
-                    this.data.put(flight.id, flight);
-                    lock.writeLock().unlock();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-    private List<Integer> getUnDeparturedIds() {
+
+    private List<String> getUnDeparturedIds() {
         lock.readLock().lock();
-        List<Integer> res = this.data.values().stream().filter(o->!o.departured()).mapToInt(o->o.id).boxed().collect(Collectors.toList());
+        List<String> res = this.data.values().stream().filter(o->!o.departured()).map(o->o.id).collect(Collectors.toList());
         lock.readLock().unlock();
         return res;
     }
     public void update() {
-        syncPages();
-        pullCurrentPageData();
+        pullData();
 
-        List<Integer> ids = getUnDeparturedIds();
-        for (Integer id : ids) {
-            String t = null;
-            try {
-                t = updateDepartureTime(id);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+        List<String> ids = getUnDeparturedIds();
+        for (String id : ids) {
+            String t = updateDepartureTime(id);
             if(t != null) {
                 lock.writeLock().lock();
                 departured.put(id, t);
@@ -125,40 +122,47 @@ public class ThirdPartyDataSource {
         }
         return list;
     }
-    private List<JSONObject> extractResult(JSONObject o) {
-        return toList(o.getJSONArray("results"));
-    }
+
     private URIBuilder getFightBaseUriBuilder() {
         return new URIBuilder()
-                .setScheme("https")
-                .setHost("api.scrydepot.info")
-                .setPath("/api/flight_data");
+                .setScheme("http")
+                .setHost("open-al.variflight.com")
+                .setPath("/api/flight");
     }
 
-    private String updateDepartureTime(int id) throws URISyntaxException, ParseException {
-        URI uri = getFightBaseUriBuilder().setParameter("id", String.valueOf(id)).build();
-        JSONObject o = doGetFight(uri);
-        if(o == null)
+    private String updateDepartureTime(String id) {
+        URIBuilder uriBuilder = getFightBaseUriBuilder()
+                .setParameter("appid", "10512")
+                .setParameter("date", LocalDate.now().toString())
+                .setParameter("fnum", id);
+        List<JSONObject> o = doGetFight(uriBuilder);
+        if(o == null || o.isEmpty())
             return null;
-        Flight fd = new Flight(extractResult(o).get(0));
+        Flight fd = new Flight(o.get(0));
         if(!fd.departured())
             return null;
-        return fd.filed_departuretime;
+        return fd.FlightDeptimeDate;
     }
-    public JSONObject doGetFight(URI uri) {
+    private URI sign(URIBuilder uriBuilder) throws URISyntaxException {
+        URI uri = uriBuilder.build();
+        md.update((uri.getQuery()+"5b0b5cfa5b903").getBytes());
+        md.update(DatatypeConverter.printHexBinary(md.digest()).toLowerCase().getBytes());
+        String token = DatatypeConverter.printHexBinary(md.digest()).toLowerCase();
+        uriBuilder.setParameter("token", token);
+        return uriBuilder.build();
+    }
+    public List<JSONObject> doGetFight(URIBuilder uriBuilder) {
+        URI uri = null;
+        try {
+            uri = sign(uriBuilder);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        if(uri == null)
+            return null;
+
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet(uri);
-        httpget.addHeader("api-id", "gY2F4kA7J8Fpt3XDLKVl");
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-
-        }
-        int ts = (int) (System.currentTimeMillis() / 1000);
-        md.update(("NKA5CK9fLtcoGYo0onBxWm147ZczY4PR" + "flight_data" + String.valueOf(ts)).getBytes());
-        httpget.addHeader("api-signature", DatatypeConverter.printHexBinary(md.digest()));
-        httpget.addHeader("timestamp", String.valueOf(ts));
         CloseableHttpResponse response = null;
         try {
             response = httpclient.execute(httpget);
@@ -167,7 +171,8 @@ public class ThirdPartyDataSource {
 
             Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
             String json = EntityUtils.toString(entity, encoding);
-            return new JSONObject(json);
+
+            return toList(new JSONArray(json));
         } catch (ClientProtocolException e) {
 
         } catch (IOException e) {
