@@ -746,7 +746,7 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.setPrice(item.key, c.getPrice())) {
+		if(s.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}

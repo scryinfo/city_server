@@ -236,4 +236,49 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         Eva eva = EvaManager.getInstance().getEva(this.ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
         return (int) Math.ceil((this.qty * (1 + EvaManager.getInstance().computePercent(eva))));
     }
+
+    @Override
+    public boolean shelfSet(Item item, int price,boolean autoRepOn) {
+        Shelf.Content content = this.shelf.getContent(item.key);
+        //仓库数量需变化
+        if(content == null)
+            return false;
+        if(!autoRepOn) {//非自动补货
+            int updateNum = content.n - item.n;//要增加或减少的就是以前货架数量-现在货架数量
+            //首先判断是否存的下
+            if (this.store.canSave(item.key, updateNum)) {
+                boolean lock = false;
+                if (updateNum < 0) {
+                    lock = this.store.lock(item.key, Math.abs(updateNum));
+                } else {
+                    lock = this.store.unLock(item.key, updateNum);
+                }
+                if (lock) {
+                    content.price = price;
+                    content.n = item.n;
+                    content.autoReplenish = autoRepOn;
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }else {
+            //1.判断容量是否已满
+            if(this.shelf.full())
+                return false;
+            content.autoReplenish = autoRepOn;
+            //2.设置价格
+            content.price = price;
+            IShelf shelf=this;
+            //删除
+            shelf.delshelf(item.key, content.n, true);
+            //3.修改货架上的数量
+            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
+            //重新上架
+            shelf.addshelf(itemInStore,price,autoRepOn);
+            return true;
+        }
+    }
 }

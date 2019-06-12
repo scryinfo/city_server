@@ -356,4 +356,9 @@ public class WareHouse extends Building implements IStorage, IShelf {
     public void updateOtherSize(){
         this.store.setOtherUseSize(this.rentUsedCapacity);
     }
+
+    @Override
+    public boolean shelfSet(Item item, int price,boolean autoRepOn) {
+        return false;
+    }
 }
