@@ -282,7 +282,7 @@ public class Society
         Gs.SocietyInfo.Builder builder = Gs.SocietyInfo.newBuilder();
         builder.setId(Util.toByteString(id))
                 .setName(name)
-                .setDeclaration(declaration)
+                .setDeclaration(Strings.nullToEmpty(declaration))
                 .setCreateTs(createTs)
                 .setAllCount(memberCount)
                 .setChairmanId(Util.toByteString(createId))
