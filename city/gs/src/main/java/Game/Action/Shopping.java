@@ -98,7 +98,7 @@ public class Shopping implements IAction {
               //int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
                 int w =0;// goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
                 if(1 - sell.price / goodSpendV > 0){
-                	w=goodSpendV==0?0: (int) ((sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                	w=goodSpendV==0?0: (int) ((goodSpendV /sell.price) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
                 }else{
                 	w=1;
                 }
