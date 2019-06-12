@@ -7,6 +7,7 @@ import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Util.BuildingUtil;
 import Game.Util.GlobalUtil;
 import Game.Util.NpcUtil;
 import Shared.LogDb;
@@ -625,15 +626,16 @@ public abstract class Building implements Ticker{
             Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(type, Gs.Eva.Btype.Quality_VALUE);
             double maxAdd=0;
             double minAdd=0;
-            int baseQty = this.quality();//基础品质
             if(cityQtyMap!=null){
                 Eva maxEva = cityQtyMap.get("max");//全城最大Eva
                 Eva minEva = cityQtyMap.get("min");//全城最小Eva
                 maxAdd=EvaManager.getInstance().computePercent(maxEva);
                 minAdd=EvaManager.getInstance().computePercent(minEva);
             }
-            double maxQty = baseQty * (1 + maxAdd);
-            double minQty = baseQty * (1 + minAdd);
+            //获取最大最小的基础品质
+            Map<String, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(this.type());
+            double maxQty = maxOrMinQty.get("max") * (1 + maxAdd);
+            double minQty = maxOrMinQty.get("min") * (1 + minAdd);
             int bd = (int)Math.ceil((brand / maxBrand < brand / minBrand ? brand / maxBrand : brand / minBrand) * 100);
             int qty=(int)Math.ceil((quality/maxQty<quality/minQty?quality/maxQty:quality/minQty)*100);
             builder.setBrand(bd).setQuality(qty);

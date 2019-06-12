@@ -449,6 +449,14 @@ public class MetaData {
         });
     }
 
+    public static TreeMap<Integer, MetaApartment> getApartment() {
+        return apartment;
+    }
+
+    public static TreeMap<Integer, MetaRetailShop> getRetailShop() {
+        return retailShop;
+    }
+
     public static void initGoodFormula() {
         mongoClient.getDatabase(dbName).getCollection(goodFormulaColName).find().forEach((Block<Document>) doc -> {
             GoodFormula m = new GoodFormula(doc);
