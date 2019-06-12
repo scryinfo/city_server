@@ -271,6 +271,7 @@ public class City {
         NpcManager.instance().countNpcNum(diffNano);
         LeagueManager.getInstance().update(diffNano);
         WareHouseManager.instance().update(diffNano);
+        BrandManager.instance().update(diffNano);
         // do this at last
         updateTimeSection(diffNano);
         specialTick(diffNano);

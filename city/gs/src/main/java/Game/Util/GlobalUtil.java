@@ -16,29 +16,29 @@ public class GlobalUtil {
     /*1.获取全城最大和最小的加成信息（找出全城Eva提升最大的那一个，然后进行计算）*/
     public static Map<String, Eva>  getEvaMaxAndMinValue(int at,int bt){
         EvaKey key = new EvaKey(at,bt);
-        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.get(key);
+        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.getOrDefault(key,new HashSet<>());
         Eva maxEva = null;
         Eva minEva=null;
         Map<String, Eva> minOrMaxEva = new HashMap<>();
         int init=0;
         for (Eva eva : evas) {
             if(eva.getAt()==at&&eva.getBt()==bt){
-            if(maxEva==null&&minEva==null) {
-                maxEva = eva;
-                minEva = eva;
-            }else {
-                if(eva.getLv()>maxEva.getLv()) {
+                if(maxEva==null&&minEva==null) {
                     maxEva = eva;
-                }
-                if(eva.getLv()<maxEva.getLv()) {
                     minEva = eva;
+                }else {
+                    if(eva.getLv()>maxEva.getLv()) {
+                        maxEva = eva;
+                    }
+                    if(eva.getLv()<maxEva.getLv()) {
+                        minEva = eva;
+                    }
                 }
             }
         }
-        }
         minOrMaxEva.put("max", maxEva);
         minOrMaxEva.put("min", minEva);
-        return minOrMaxEva;
+        return minOrMaxEva==null||maxEva==null?null: minOrMaxEva;
     }
 
     //2.获取指定选项知名度的最大最小信息

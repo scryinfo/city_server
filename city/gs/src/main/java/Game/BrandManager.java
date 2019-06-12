@@ -417,12 +417,17 @@ public class BrandManager {
     public void getAllBuildingBrandOrQuality(){
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-    	City.instance().forEachBuilding((Building b)->{
+    	City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>()).forEach(b->{
+            getBuildingBrandOrQuality(b,brandMap,qtyMap);
+        });
+        City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>()).forEach(b->{
+            getBuildingBrandOrQuality(b,brandMap,qtyMap);
+        });
+    	/*City.instance().forEachBuilding((Building b)->{
     		if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
     			getBuildingBrandOrQuality(b,brandMap,qtyMap);
     		}
-    	});
-    	
+    	});*/
     	totalBrandQualityMap.put(Gs.Eva.Btype.Brand_VALUE, brandMap);
     	totalBrandQualityMap.put(Gs.Eva.Btype.Quality_VALUE, qtyMap);
     }

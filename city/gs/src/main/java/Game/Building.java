@@ -2,9 +2,12 @@ package Game;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Util.GlobalUtil;
 import Game.Util.NpcUtil;
 import Shared.LogDb;
 import Shared.Package;
@@ -604,19 +607,36 @@ public abstract class Building implements Ticker{
     	   	//单个建筑
         	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
            	double brand=BrandManager.instance().getValFromMap(brandMap, type());
+            brand = brand == 0 ? 1 : brand;//如果品牌等于0，则设置初始值1
         	double quality=BrandManager.instance().getValFromMap(qtyMap, type());
         	brandMap.clear();
         	qtyMap.clear();
-        	//所有建筑
-          	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
-        	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
-        	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-        	double totalBrand=BrandManager.instance().getValFromMap(brandMap, type());
-        	double totalQuality=BrandManager.instance().getValFromMap(qtyMap, type());
-
-        	int bd=(totalBrand>0?(int)Math.ceil(brand/totalBrand*100):0);
-        	int qty=(totalQuality>0?(int)Math.ceil(quality/totalQuality*100):0);
-        	builder.setBrand(bd).setQuality(qty);
+            //1.知名度评分 = MIN (当前知名度 / 全城最高知名度 , 当前知名度 / 最低知名度) * 100
+            //获取全城最高和最低的知名度
+            Map<String, BrandManager.BrandInfo> cityBrandMap = GlobalUtil.getMaxOrMinBrandInfo(type);
+            int minBrand=1;
+            int maxBrand=1;
+            if(cityBrandMap!=null){
+                minBrand = cityBrandMap.get("min").getV();
+                maxBrand = cityBrandMap.get("max").getV();
+            }
+            //2.品质评分 = MIN (当前品质 / 全城最高品质 , 当前品质 / 最低品质) * 100
+            //品质=基础值+eva加成（其实就是获取Eva最高最低值）
+            Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(type, Gs.Eva.Btype.Quality_VALUE);
+            double maxAdd=0;
+            double minAdd=0;
+            int baseQty = this.quality();//基础品质
+            if(cityQtyMap!=null){
+                Eva maxEva = cityQtyMap.get("max");//全城最大Eva
+                Eva minEva = cityQtyMap.get("min");//全城最小Eva
+                maxAdd=EvaManager.getInstance().computePercent(maxEva);
+                minAdd=EvaManager.getInstance().computePercent(minEva);
+            }
+            double maxQty = baseQty * (1 + maxAdd);
+            double minQty = baseQty * (1 + minAdd);
+            int bd = (int)Math.ceil((brand / maxBrand < brand / minBrand ? brand / maxBrand : brand / minBrand) * 100);
+            int qty=(int)Math.ceil((quality/maxQty<quality/minQty?quality/maxQty:quality/minQty)*100);
+            builder.setBrand(bd).setQuality(qty);
     	}
         return builder.build();
     }
