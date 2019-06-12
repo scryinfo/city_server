@@ -2432,13 +2432,13 @@ public class GameSession {
 	{
 		Gs.CreateSociety gsSociety = (Gs.CreateSociety) message;
 		String name = gsSociety.getName();
-		String declaration = gsSociety.getDeclaration();
-		if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(declaration)
+		String introduction = gsSociety.getIntroduction();
+		if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(introduction)
 				|| player.getSocietyId() != null)
 		{
 			return;
 		}
-		Society society = SocietyManager.createSociety(player.id(), name, declaration);
+		Society society = SocietyManager.createSociety(player.id(), name, introduction);
 		if (society == null)
 		{
 			this.write(Package.fail(cmd,Common.Fail.Reason.societyNameDuplicated));
