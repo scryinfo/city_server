@@ -534,7 +534,7 @@ public class City {
             return false;
         GameDb.saveOrUpdate(b); // let hibernate generate the id value
  //     List updates = b.hireNpc();
-        List updates = b.createNpc();
+        List updates = new ArrayList();
         take(b);
         //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
         if(allBuilding!=null&&allBuilding.size()>=100){

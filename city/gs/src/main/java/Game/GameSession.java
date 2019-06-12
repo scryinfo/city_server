@@ -422,6 +422,7 @@ public class GameSession {
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
+		b.createNpc();//产生npc
 		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
