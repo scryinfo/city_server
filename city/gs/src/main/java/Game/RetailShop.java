@@ -236,4 +236,32 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         Eva eva = EvaManager.getInstance().getEva(this.ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
         return (int) Math.ceil((this.qty * (1 + EvaManager.getInstance().computePercent(eva))));
     }
+
+    @Override
+    public boolean shelfSet(Item item, int price,boolean autoRepOn) {
+        Shelf.Content i = this.shelf.getContent(item.key);
+        //仓库数量需变化
+        if(i == null)
+            return false;
+        //判断货架上是会否有那么多
+        int updateNum=i.n-item.n;//要增加或减少的就是以前货架数量-现在货架数量
+        //首先判断是否存的下
+        if(this.store.canSave(item.key, updateNum)){
+            boolean lock=false;
+            if(updateNum>0) {
+                lock = this.store.lock(item.key, updateNum);
+            }else{
+                lock = this.store.unLock(item.key, Math.abs(updateNum));
+            }
+            if(lock){
+                i.price = price;
+                i.n=item.n;
+                return true;
+            }else {
+                return false;
+            }
+        }else {
+            return false;
+        }
+    }
 }

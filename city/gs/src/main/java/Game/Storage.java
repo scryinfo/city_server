@@ -242,4 +242,19 @@ public class Storage implements IStorage {
         this.otherUseSize = otherUseSize;
     }
 
+    //当前货架是否可以存储
+    public boolean canSave(ItemKey item,int n){
+        if(n == 0)
+            return true;
+        else if(n > 0) {
+            if(item.meta.size*n > availableSize())
+                return false;
+        }
+        else if(n < 0) {
+            Integer c = this.inHand.get(item);
+            if(c == null || c < -n)
+                return false;
+        }
+        return true;
+    }
 }
