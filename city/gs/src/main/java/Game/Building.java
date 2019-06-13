@@ -781,28 +781,29 @@ public abstract class Building implements Ticker{
             }
         }
     }
+
     private boolean payOff(Player p) {
-        if(p.decMoney(this.allSalary())) {
-          	LogDb.playerPay(p.id(), this.allSalary());
+        if (p.decMoney(this.allSalary())) {
+            LogDb.playerPay(p.id(), this.allSalary());
             calcuHappy();
-            allStaff.forEach(npc ->{
-            	npc.addMoney(this.singleSalary());
-            	//缴纳社保
-            	npc.decMoney(this.singleTax());
-            	MoneyPool.instance().add(this.singleTax());
+            allStaff.forEach(npc -> {
+                npc.addMoney(this.singleSalary());
+                //缴纳社保
+                npc.decMoney(this.singleTax());
+                MoneyPool.instance().add(this.singleTax());
             });
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
             GameDb.saveOrUpdate(updates);
             LogDb.paySalary(p.id(), id(), this.singleSalary(), this.allStaff.size());
             return true;
-        }
-        else
+        } else {
             shutdownBusiness();
-        //停工通知(不足支付工资)
-        UUID[] ownerIdAndBuildingId = {this.ownerId(),this.id()};
-        MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(),this.ownerId(),null,ownerIdAndBuildingId,null);
-        return false;
+            //停工通知(不足支付工资)
+            UUID[] ownerIdAndBuildingId = {this.ownerId(), this.id()};
+            MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(), this.ownerId(), null, ownerIdAndBuildingId, null);
+            return false;
+        }
     }
     private void calcuHappy() {
         if(salaryRatio == 100)
