@@ -404,7 +404,7 @@ public class GameSession {
 		this.write(Package.create(cmd, GroundAuction.instance().toProto()));
 	}
 	public void bidGround(short cmd, Message message) throws IllegalArgumentException {
-		Gs.IntNum c = (Gs.IntNum)message;
+		Gs.BidGround c = (Gs.BidGround)message;
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(c.getId(), player, c.getNum());
 		if(err.isPresent())
 			this.write(Package.fail(cmd, err.get()));
@@ -4041,7 +4041,7 @@ public class GameSession {
 	   	//单个建筑的值
     	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
        	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
-		basicBrand=basicBrand==0?1:basicBrand;
+		basicBrand=basicBrand==0?1:basicBrand;//默认值设置1
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
@@ -4052,7 +4052,7 @@ public class GameSession {
     	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
     	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
     	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
-		totalBrand=totalBrand==0?1:totalBrand;
+		totalBrand=totalBrand==0?1:totalBrand;//默认值设置1
     	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
 
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
