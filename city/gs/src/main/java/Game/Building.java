@@ -608,7 +608,6 @@ public abstract class Building implements Ticker{
     	   	//单个建筑
         	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
            	double brand=BrandManager.instance().getValFromMap(brandMap, type());
-            brand = brand == 0 ? 1 : brand;//如果品牌等于0，则设置初始值1
         	double quality=BrandManager.instance().getValFromMap(qtyMap, type());
         	brandMap.clear();
         	qtyMap.clear();
