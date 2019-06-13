@@ -667,9 +667,10 @@ public class SummaryUtil
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND,0);
         Date endDate = calendar.getTime();
         long endTime=endDate.getTime();
 
@@ -684,14 +685,14 @@ public class SummaryUtil
                     eq(TYPE, exchangeType),
                     eq(ID, id),
                     gte(TIME, startTime),
-                    lt(TIME, endTime)
+                    lte(TIME, endTime)
             ))
 
                     .projection(fields(include(TIME, "size"), excludeId()))
                     .sort(Sorts.descending(TIME))
                     .forEach((Block<? super Document>) document ->
                     {
-                        map.put(document.getLong(TIME), document.getInteger("size").longValue());
+                        map.put(document.getLong(TIME), document.getLong("size"));
                     });
         } else {
             collection.find(and(
@@ -699,7 +700,7 @@ public class SummaryUtil
                     eq(TYPE, exchangeType),
                     eq(ID, id),
                     gte(TIME, startTime),
-                    lt(TIME, endTime)
+                    lte(TIME, endTime)
             ))
 
                     .projection(fields(include(TIME, KEY_TOTAL), excludeId()))

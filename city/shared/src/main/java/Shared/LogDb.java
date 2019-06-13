@@ -42,6 +42,7 @@ public class LogDb {
 	private static final String NPC_BUY_INSHELF = "npcBuyInShelf";
 	private static final String RENT_GROUND = "rentGround";
 	private static final String BUY_GROUND = "buyGround";
+	private static final String LAND_AUCTION = "landAuction"; //土地拍卖
 
 	private static final String EXTEND_BAG = "extendBag";
 	private static final String FLIGHT_BET = "flightBet";
@@ -89,6 +90,7 @@ public class LogDb {
 	private static MongoCollection<Document> payTransfer;
 	private static MongoCollection<Document> rentGround;
 	private static MongoCollection<Document> buyGround;
+	private static MongoCollection<Document> landAuction;
 	private static MongoCollection<Document> extendBag;
 	//-----------------------------------------
 
@@ -143,6 +145,8 @@ public class LogDb {
 		rentGround = database.getCollection(RENT_GROUND)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buyGround = database.getCollection(BUY_GROUND)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		landAuction = database.getCollection(LAND_AUCTION)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		extendBag = database.getCollection(EXTEND_BAG)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -608,6 +612,20 @@ public class LogDb {
 				.append("a", all)
 				.append("p", positionToDoc(plist1));
 		buyGround.insertOne(document);
+	}
+	public static void landAuction(UUID roleId, UUID ownerId, long price, List<Positon> plist1)
+	{
+		long all = price;
+		if (ownerId != null) {
+			all = price * plist1.size();
+		}
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("r", roleId)
+				.append("d", ownerId)
+				.append("s", price)
+				.append("a", all)
+				.append("p", positionToDoc(plist1));
+		landAuction.insertOne(document);
 	}
 
 	public static void extendBag(UUID id, int cost, int bagCapacity)

@@ -360,8 +360,8 @@ public class GameSession {
 			return;
 		}
 		Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
-		p.addMoney(999999999);
-		LogDb.playerIncome(p.id(), 999999999);
+		p.addMoney(999999999999999l);
+		LogDb.playerIncome(p.id(), 999999999999999l);
 		if(!GameDb.createPlayer(p)) {
 			this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
 		}
@@ -3762,7 +3762,6 @@ public class GameSession {
 		}
 		int sumPrice = 0;
 		int count = 0;
-		//1.城市原料均销售定价 货架上的
 		Collection<Building> allBuilding = City.instance().getAllBuilding();
 		for (Building b : allBuilding) {
 			if (b.type() != MetaBuilding.MATERIAL || !b.outOfBusiness() || !(b instanceof IShelf)) {
@@ -3776,22 +3775,23 @@ public class GameSession {
 			}
 
 		}
-		int avgPrice = sumPrice / count;
-		//2.定价   当前原料厂某原料定价
+		// 一.推荐定价 = 城市原料均销售定价
+		int price = sumPrice / count;
 		MaterialFactory materialFactory = (MaterialFactory) building;
 		if (materialFactory.ownerId() != playerId || !materialFactory.outOfBusiness()) {
 			return;
 		}
 		Map<Item, Integer> saleDetail = materialFactory.shelf.getSaleDetail(itemId);
-		int price = new ArrayList<>(saleDetail.values()).get(0);
-		//3.某原料生产速度
+		int currentPrice = new ArrayList<>(saleDetail.values()).get(0);
+		//二.竞争力 = 推荐定价 / 定价 * 100 (向上取整)
+		double competitiveness = Math.ceil(price / currentPrice * 100);
 		MetaMaterial material = MetaData.getMaterial(itemId);
 		double n = material.n;
-
-		//4. 原料厂建筑工资
 		double industrySalary = City.instance().getIndustrySalary(building.type());
+		//三.成本价 = 1 / 原料生产速度(秒产个) * 建筑工资(行业工资)
+		double costPrice = 1 / n * industrySalary;
 		Gs.MaterialRecommendPrice.Builder builder = Gs.MaterialRecommendPrice.newBuilder();
-		builder.setAvgPrice(avgPrice).setPrice(price).setNumOneSec(n).setSalary(industrySalary);
+		builder.setPrice(price).setPrice(price).setCompetitiveness(competitiveness).setCostPrice(costPrice);
 		this.write(Package.create(cmd, builder.build()));
 	}
 
@@ -3802,35 +3802,23 @@ public class GameSession {
 		Gs.QueryBuildingInfo info = msg.getInfo();
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
-		int pricePerMs = 0;
-		int abilitySum = 0;
-		int count = 0;
-		//所有的推广公司
-		Collection<Building> allBuilding = City.instance().getAllBuilding();
-		for (Building fcySeller : allBuilding) {
-			if (fcySeller == null || fcySeller.type() != MetaBuilding.PUBLIC) {
-				return;
-			}
-			PublicFacility publicFacility = (PublicFacility) fcySeller;
-			pricePerMs += publicFacility.getCurPromPricePerMs();
-			abilitySum += publicFacility.getAllPromoTypeAbility(typeId);
-			count++;
-		}
-		// 1.推广均价 毫秒总价/全城推广公司数量
-		int avgPrice = pricePerMs / count;
-		// 2. 均推广能力值
-		int avgAbility = abilitySum / count;
 		Building building = City.instance().getBuilding(buildingId);
+		//全城该类型推广均单位定价
+		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,MetaBuilding.type(building.metaBuilding.id));
 		if (building == null || building.type() != MetaBuilding.PUBLIC || !building.outOfBusiness()) {
 			return;
 		}
 		PublicFacility owner = (PublicFacility) building;
-		// 3.员工总数
+		//一.推荐定价 = 全城该类型推广均单位定价 * 该类型推广能力值
+		int price = (int) (cityAvgPromotionAbility * owner.getAllPromoTypeAbility(typeId));
+		//二.竞争力 = 推荐定价 / 定价(现在使用的毫秒价格!!) * 100 (向上取整)
+		double competitiveness = Math.ceil(price / owner.getCurPromPricePerMs() * 100);
 		int workerNum = owner.getWorkerNum();
-		//4. 推广公司建筑工资
 		double industrySalary = City.instance().getIndustrySalary(building.type());
+		//三.每小时成本价 = 工人总数 * 建筑工资(行业工资) / 24
+		double costPrice = workerNum * industrySalary / 24;
 		Gs.PromotionRecommendPrice.Builder builder = Gs.PromotionRecommendPrice.newBuilder();
-		builder.setAvgPrice(avgPrice).setAvgAbility(avgAbility).setWorkerNum(workerNum).setSalary(industrySalary);
+		builder.setPrice(price).setCompetitiveness(competitiveness).setCostPrice(costPrice);
 		this.write(Package.create(cmd, builder.build()));
 	}
 	// 研究所推荐定价
@@ -3845,17 +3833,19 @@ public class GameSession {
 			return;
 		}
 		Laboratory lab = (Laboratory) building;
-        //1.推荐定价   研究推荐定价 > 发明推荐定价 ? 研究推荐定价 : 发明推荐定价
-        int guidePriceA = GlobalUtil.getLabRecommendPrice(typeId, Gs.Eva.Btype.InventionUpgrade.getNumber(), lab.getGoodProb());
-        int guidePriceB = GlobalUtil.getLabRecommendPrice(typeId, Gs.Eva.Btype.EvaUpgrade.getNumber(), lab.getEvaProb());
-        //2.定价 当前研究所定价
-		int price = lab.getPricePreTime();
-		//3.工人总数
+        int guidePriceI = GlobalUtil.getLabRecommendPrice(typeId, Gs.Eva.Btype.InventionUpgrade.getNumber(), lab.getGoodProb());
+		int guidePriceE = GlobalUtil.getLabRecommendPrice(typeId, Gs.Eva.Btype.EvaUpgrade.getNumber(), lab.getEvaProb());
+		//一.推荐定价   研究推荐定价 > 发明推荐定价 ? 研究推荐定价 : 发明推荐定价
+		int price = guidePriceI > guidePriceE ? guidePriceI : guidePriceE;
+		//二.发明竞争力、研究竞争力
+		double competitivenessI = Math.ceil(guidePriceI / lab.getPricePreTime() * 100);
+		double competitivenessE = Math.ceil(guidePriceE / lab.getPricePreTime() * 100);
+		//三.每小时成本价 = 工人总数 * 建筑工资(行业工资) / 24
 		int workerNum = lab.getWorkerNum();
-		//4.建筑工资(行业工资)
 		double industrySalary = City.instance().getIndustrySalary(building.type());
+		double costPrice = workerNum * industrySalary / 24;
 		Gs.LaboratoryRecommendPrice.Builder builder = Gs.LaboratoryRecommendPrice.newBuilder();
-        builder.setGuidePrice(guidePriceA > guidePriceB ? guidePriceA : guidePriceB).setPrice(price).setWorkerNum(workerNum).setSalary(industrySalary);
+		builder.setPrice(price).setCompetitivenessI(competitivenessI).setCompetitivenessE(competitivenessE).setCostPrice(costPrice);
 		this.write(Package.create(cmd, builder.build()));
 
 	}
