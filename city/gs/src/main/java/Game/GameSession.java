@@ -408,6 +408,7 @@ public class GameSession {
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(c.getId(), player, c.getNum());
 		if(err.isPresent())
 			this.write(Package.fail(cmd, err.get()));
+		//多家一个返回，加上出价最高者的信息
 		else
 			this.write(Package.create(cmd, c));
 	}

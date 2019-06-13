@@ -146,7 +146,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 l.materialConsumed = this.consumeMaterial(l,ownerId());
                     if (!l.materialConsumed)
                         return;
-                    int add = l.update(diffNano);
+                    int add = l.update(diffNano,this.ownerId()); //新增了玩家id，作为eva查询
                     if (add > 0) {
                         l.materialConsumed = false;
                         ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId());
