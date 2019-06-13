@@ -13,9 +13,10 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Util.*;
-import Game.security.Bouncycastle_Secp256k1;
+import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
+import ccapi.CcOuterClass.RechargeRequestReq;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -30,9 +31,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
+import org.ethereum.crypto.ECKey;
+import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -40,7 +44,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
 public class GameSession {
 
 	public static byte[] signData(String algorithm, byte[] data, PrivateKey key) throws Exception {
@@ -3791,7 +3794,7 @@ public class GameSession {
 		//4. 原料厂建筑工资
 		double industrySalary = City.instance().getIndustrySalary(building.type());
 		Gs.MaterialRecommendPrice.Builder builder = Gs.MaterialRecommendPrice.newBuilder();
-		builder.setAvgPrice(avgPrice).setPrice(price).setNumOneSec(n).setSalary(industrySalary);
+        //builder.setAvgPrice(avgPrice).setPrice(price).setNumOneSec(n).setSalary(industrySalary);
 		this.write(Package.create(cmd, builder.build()));
 	}
 
@@ -3830,7 +3833,7 @@ public class GameSession {
 		//4. 推广公司建筑工资
 		double industrySalary = City.instance().getIndustrySalary(building.type());
 		Gs.PromotionRecommendPrice.Builder builder = Gs.PromotionRecommendPrice.newBuilder();
-		builder.setAvgPrice(avgPrice).setAvgAbility(avgAbility).setWorkerNum(workerNum).setSalary(industrySalary);
+		//builder.setAvgPrice(avgPrice).setAvgAbility(avgAbility).setWorkerNum(workerNum).setSalary(industrySalary);
 		this.write(Package.create(cmd, builder.build()));
 	}
 	// 研究所推荐定价
@@ -3855,7 +3858,7 @@ public class GameSession {
 		//4.建筑工资(行业工资)
 		double industrySalary = City.instance().getIndustrySalary(building.type());
 		Gs.LaboratoryRecommendPrice.Builder builder = Gs.LaboratoryRecommendPrice.newBuilder();
-        builder.setGuidePrice(guidePriceA > guidePriceB ? guidePriceA : guidePriceB).setPrice(price).setWorkerNum(workerNum).setSalary(industrySalary);
+        //builder.setGuidePrice(guidePriceA > guidePriceB ? guidePriceA : guidePriceB).setPrice(price).setWorkerNum(workerNum).setSalary(industrySalary);
 		this.write(Package.create(cmd, builder.build()));
 
 	}
@@ -4203,26 +4206,6 @@ public class GameSession {
 		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString()).build()));
 		int t = 0 ;
 	}
-	public void ct_RechargeRequestReq(short cmd,Message message){
-		ccapi.dddbind.Dddbind.ct_RechargeRequestReq msg = (ccapi.dddbind.Dddbind.ct_RechargeRequestReq ) message;
-		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		ccapi.cc.CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
-		String privateKeyStr = "1368816272920190601123456";
-		String key = "123456";
-		String pubStr = Bouncycastle_Secp256k1.GetPublicKeyFromPrivateKey(privateKeyStr);
-		if(pubStr.equals(req.getPubKey())){
-			int a = 0 ;
-		}
-		try {
-			String data = "Hello motal";
-			String signature =  Bouncycastle_Secp256k1.sig_s(data.getBytes(),privateKeyStr.getBytes(),key.getBytes());
-			chainClient.instance().RechargeRequestReq(req.toBuilder().setSignature(ByteString.copyFrom(signature.getBytes())).build());
-		}  catch (Exception e) {
-			return ;
-		}
-		//this.write(Package.create(cmd, msg));
-		int t = 0 ;
-	}
 
     //获取建筑的通用信息（抽取，yty）
     public Gs.BuildingGeneral.Builder buildingToBuildingGeneral(Building building){
@@ -4237,6 +4220,106 @@ public class GameSession {
 			return buildingInfo;
 		}else {
 			return null;
+		}
+	}
+
+	public void ct_RechargeRequestReq(short cmd,Message message){
+		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq ) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		RechargeRequestReq req = msg.getRechargeRequestReq();
+
+		//服务器签名验证测试
+		//计算哈希
+		byte[] pubKey = Hex.decode(req.getPubKey()) ;
+		byte[] pubK = req.getPubKey().getBytes() ;
+
+		SignCharge pSignCharge = new SignCharge(
+				req.getPurchaseId()
+				, req.getTs()
+				, req.getAmount()
+				//, pubKey
+		);
+		try{
+			byte[] hSignCharge = pSignCharge.ToHash();
+			//验证： 构造新的pubkey和签名
+			byte[] sigbts = Hex.decode(req.getSignature().toStringUtf8());
+			//byte[] sigbts1 = Hex.decode(req.getSignature().toString(16));
+			ECKey.ECDSASignature newsig = new ECKey.ECDSASignature(
+					new BigInteger(1,Arrays.copyOfRange(sigbts, 0, 32)),
+					new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
+			);
+			ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
+			boolean pass =  newpubkey.verify(hSignCharge ,newsig); //验证通过
+
+			int t = 0 ;
+		}catch (Exception e){
+
+		}
+
+		//添加交易
+		double dddAmount = Double.parseDouble(req.getAmount());
+		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()) , playerId, dddAmount ,"","");
+		if(dddPurchaseMgr.instance().addPurchase(pur)){
+			//转发给ccapi服务器
+			try{
+				chainRpcMgr.instance().RechargeRequestReq(req);
+				this.write(Package.create(cmd, msg));
+			}catch (Exception e){
+				this.write(Package.fail(cmd));
+			}
+		}else{
+			this.write(Package.fail(cmd));
+		}
+	}
+
+	//ct_DisChargeReq
+	public void ct_DisChargeReq(short cmd,Message message){
+		ccapi.Dddbind.ct_DisChargeReq msg = (ccapi.Dddbind.ct_DisChargeReq ) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		ccapi.CcOuterClass.DisChargeReq req = msg.getDisChargeReq();
+
+		//服务器签名验证测试
+		//计算哈希
+		byte[] pubKey = Hex.decode(req.getPubKey()) ;
+		byte[] pubK = req.getPubKey().getBytes() ;
+
+		ActiveSing activeSing = new ActiveSing(
+				req.getPurchaseId()
+				, req.getEthAddr()
+				, req.getTs()
+				, req.getAmount()
+				, pubKey
+		);
+		try{
+			byte[] hActiveSing = activeSing.ToHash();
+			//验证： 构造新的pubkey和签名
+			byte[] sigbts = Hex.decode(req.getSignature().toStringUtf8());
+			ECKey.ECDSASignature newsig = new ECKey.ECDSASignature(
+					new BigInteger(1,Arrays.copyOfRange(sigbts, 0, 32)),
+					new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
+			);
+			ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
+			boolean pass =  newpubkey.verify(hActiveSing ,newsig); //验证通过
+
+			int t = 0 ;
+		}catch (Exception e){
+
+		}
+
+		double dddAmount = Double.parseDouble(req.getAmount());
+		//添加交易
+		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
+		if(dddPurchaseMgr.instance().addPurchase(pur)){
+			try{
+				//转发给ccapi服务器
+				chainRpcMgr.instance().DisChargeReq(req);
+				this.write(Package.create(cmd, msg));
+			}catch (Exception e){
+				this.write(Package.fail(cmd));
+			}
+
+		}else{
+			this.write(Package.fail(cmd));
 		}
 	}
 
