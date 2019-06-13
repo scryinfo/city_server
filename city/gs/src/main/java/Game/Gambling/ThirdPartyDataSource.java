@@ -170,7 +170,8 @@ public class ThirdPartyDataSource {
 
             Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
             String json = EntityUtils.toString(entity, encoding);
-
+            ArrayList<Object> list = new ArrayList<>();
+            boolean add = list.add(json);
             return toList(new JSONArray(json));
         } catch (ClientProtocolException e) {
 
