@@ -612,30 +612,24 @@ public abstract class Building implements Ticker{
         	double quality=BrandManager.instance().getValFromMap(qtyMap, type());
         	brandMap.clear();
         	qtyMap.clear();
+        	//评分
             //1.知名度评分 = MIN (当前知名度 / 全城最高知名度 , 当前知名度 / 最低知名度) * 100
             //获取全城最高和最低的知名度
-            Map<String, BrandManager.BrandInfo> cityBrandMap = GlobalUtil.getMaxOrMinBrandInfo(type);
-            int minBrand=1;
-            int maxBrand=1;
-            if(cityBrandMap!=null){
-                minBrand = cityBrandMap.get("min").getV();
-                maxBrand = cityBrandMap.get("max").getV();
-            }
+            Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(type);
+            int minBrand=maxAndMinBrand.get(BuildingUtil.MIN);//最低知名度
+            int maxBrand=maxAndMinBrand.get(BuildingUtil.MAX);//最高知名度
+
             //2.品质评分 = MIN (当前品质 / 全城最高品质 , 当前品质 / 最低品质) * 100
             //品质=基础值+eva加成（其实就是获取Eva最高最低值）
             Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(type, Gs.Eva.Btype.Quality_VALUE);
-            double maxAdd=0;
-            double minAdd=0;
-            if(cityQtyMap!=null){
-                Eva maxEva = cityQtyMap.get("max");//全城最大Eva
-                Eva minEva = cityQtyMap.get("min");//全城最小Eva
-                maxAdd=EvaManager.getInstance().computePercent(maxEva);
-                minAdd=EvaManager.getInstance().computePercent(minEva);
-            }
-            //获取最大最小的基础品质
-            Map<String, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(this.type());
-            double maxQty = maxOrMinQty.get("max") * (1 + maxAdd);
-            double minQty = maxOrMinQty.get("min") * (1 + minAdd);
+            Eva maxEva = cityQtyMap.get("max");//全城最大Eva
+            Eva minEva = cityQtyMap.get("min");//全城最小Eva
+            double maxAdd=EvaManager.getInstance().computePercent(maxEva);
+            double minAdd=EvaManager.getInstance().computePercent(minEva);
+            //获取建筑最大最小的基础品质
+            Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(this.type());
+            double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
+            double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
             int bd = (int)Math.ceil((brand / maxBrand < brand / minBrand ? brand / maxBrand : brand / minBrand) * 100);
             int qty=(int)Math.ceil((quality/maxQty<quality/minQty?quality/maxQty:quality/minQty)*100);
             builder.setBrand(bd).setQuality(qty);
@@ -683,7 +677,11 @@ public abstract class Building implements Ticker{
 
     public void updateLift()
     {
-        float f = (float) this.flow / NpcManager.instance().getNpcCount();
+        float f =0;
+        long npcCount = NpcManager.instance().getNpcCount();
+        if(npcCount!=0) {
+            f = (float) this.flow / npcCount;
+        }
         lift = new BigDecimal(f).setScale(2, 1).floatValue();
     }
 
