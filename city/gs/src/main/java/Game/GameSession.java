@@ -4041,6 +4041,7 @@ public class GameSession {
 	   	//单个建筑的值
     	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
        	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
+		basicBrand=basicBrand==0?1:basicBrand;
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
@@ -4051,6 +4052,7 @@ public class GameSession {
     	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
     	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
     	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
+		totalBrand=totalBrand==0?1:totalBrand;
     	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
 
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());

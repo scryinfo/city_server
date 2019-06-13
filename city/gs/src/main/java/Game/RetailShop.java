@@ -85,7 +85,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         builder.setStore(this.store.toProto());
         builder.setInfo(this.toProto());
         builder.setAd(genAdPart());
-        builder.setQty(getTotalQty());//包含了加成值信息
+        builder.setQty(this.quality());
         builder.setLift(getLift());
         builder.setContractInfo(this.buildingContract.toProto());
         return builder.build();
@@ -232,10 +232,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         return buildingContract;
     }
 
-    private int getTotalQty(){
-        Eva eva = EvaManager.getInstance().getEva(this.ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
-        return (int) Math.ceil((this.qty * (1 + EvaManager.getInstance().computePercent(eva))));
-    }
 
     @Override
     public boolean shelfSet(Item item, int price,boolean autoRepOn) {
