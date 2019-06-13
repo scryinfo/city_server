@@ -463,6 +463,7 @@ public class Player {
         return this.name;
     }
     public void setName(String name) {
+        GameDb.invalidatePlayerInfoCache(id);
         this.name = name;
     }
 
@@ -507,6 +508,7 @@ public class Player {
 
     public void setCompanyName(String companyName)
     {
+        GameDb.invalidatePlayerInfoCache(id);
         this.companyName = companyName;
     }
 
@@ -522,6 +524,7 @@ public class Player {
 
     public void setFaceId(String faceId)
     {
+        GameDb.invalidatePlayerInfoCache(id);
         this.faceId = faceId;
     }
 
