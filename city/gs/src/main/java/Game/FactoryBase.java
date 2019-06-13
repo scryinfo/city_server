@@ -323,7 +323,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             } else
                 return false;
         }else {
-            content = this.shelf.getContent(item.key);
             //1.判断容量是否已满
             if(this.shelf.full())
                 return false;
@@ -331,11 +330,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             //2.设置价格
             content.price = price;
             IShelf shelf=this;
-            //删除
-            shelf.delshelf(item.key, content.n, true);
-            //3.修改货架上的数量
-            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
             //重新上架
+            shelf.delshelf(item.key, content.n, true);
+            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
             shelf.addshelf(itemInStore,price,autoRepOn);
             return true;
         }
