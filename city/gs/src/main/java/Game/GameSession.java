@@ -404,7 +404,7 @@ public class GameSession {
 		this.write(Package.create(cmd, GroundAuction.instance().toProto()));
 	}
 	public void bidGround(short cmd, Message message) throws IllegalArgumentException {
-		Gs.BidGround c = (Gs.BidGround)message;
+		Gs.IntNum c = (Gs.IntNum)message;
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(c.getId(), player, c.getNum());
 		if(err.isPresent())
 			this.write(Package.fail(cmd, err.get()));
