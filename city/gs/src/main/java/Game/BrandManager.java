@@ -1,25 +1,5 @@
 package Game;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
-
-import Shared.Package;
-import Shared.Util;
-import com.google.protobuf.Message;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Cascade;
-
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.League.BrandLeague;
@@ -402,6 +382,7 @@ public class BrandManager {
     		playerId=bl.getPlayerId();
     	}
     	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
+        buildingBrand=buildingBrand == 0 ? 1 : buildingBrand;//设置默认基础值为1
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
 

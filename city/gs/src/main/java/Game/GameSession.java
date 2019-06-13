@@ -404,7 +404,7 @@ public class GameSession {
 		this.write(Package.create(cmd, GroundAuction.instance().toProto()));
 	}
 	public void bidGround(short cmd, Message message) throws IllegalArgumentException {
-		Gs.IntNum c = (Gs.IntNum)message;
+		Gs.BidGround c = (Gs.BidGround)message;
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(c.getId(), player, c.getNum());
 		if(err.isPresent())
 			this.write(Package.fail(cmd, err.get()));
@@ -4046,26 +4046,44 @@ public class GameSession {
 	   	//单个建筑的值
     	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
        	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
-		basicBrand=basicBrand==0?1:basicBrand;
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
     	brandMap.clear();
     	qtyMap.clear();
-    	//所有建筑的值
-      	Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
+
+    	//1.获取全城所占最低的知名度
+		Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(building.type());
+		Integer maxBrand = maxAndMinBrand.get(BuildingUtil.MAX);
+		Integer minBrand = maxAndMinBrand.get(BuildingUtil.MIN);
+		double minnerBrand = basicBrand / maxBrand < basicBrand / minBrand ? maxBrand:minBrand;
+		//2.获取全城所占最低的品质值
+		Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(building.type(), Gs.Eva.Btype.Quality_VALUE);
+		Eva maxEva = cityQtyMap.get("max");//全城最大Eva
+		Eva minEva = cityQtyMap.get("min");//全城最小Eva
+		double maxAdd=EvaManager.getInstance().computePercent(maxEva);
+		double minAdd=EvaManager.getInstance().computePercent(minEva);
+		//获取建筑最大最小的基础品质
+		Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(building.type());
+		double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
+		double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
+		//
+		double localQty = basicQuality * (1 + addQuality);
+		double minnerQty=localQty/maxQty<localQty/minQty?maxQty:minQty;
+
+      	/*Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
     	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
     	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
     	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
-		totalBrand=totalBrand==0?1:totalBrand;
-    	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
+		totalBrand=totalBrand==0?1:totalBrand;//默认值设置1
+    	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());*/
 
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(totalBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(minnerBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddQuality).setVal(addQuality).build());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(totalQuality).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(minnerQty).build());
     	this.write(Package.create(cmd, builder.build()));
     }
 	//推广公司信息(修改版)

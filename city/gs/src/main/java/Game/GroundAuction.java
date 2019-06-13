@@ -45,7 +45,7 @@ public class GroundAuction {
             this.transactionId = UUID.randomUUID();
         }
 
-        public void bid(UUID id, int price, long ts) {
+        public void bid(UUID id, long price, long ts) {
             this.history.add(new BidRecord(id, price, ts));
             if(this.history.size() > BID_RECORD_MAX)
                 this.history.iterator().remove();
@@ -55,7 +55,7 @@ public class GroundAuction {
 
         @Embeddable
         public static final class BidRecord {
-            public BidRecord(UUID biderId, int price, long ts) {
+            public BidRecord(UUID biderId, long price, long ts) {
                 this.biderId = biderId;
                 this.price = price;
                 this.ts = ts;
@@ -64,7 +64,7 @@ public class GroundAuction {
             @Column(name = "biderId", nullable = false)
             UUID biderId;
             @Column(name = "price", nullable = false)
-            int price = 0;
+            long price = 0;
             @Column(name = "ts", nullable = false)
             long ts = 0;
         }
@@ -112,7 +112,7 @@ public class GroundAuction {
         public UUID biderId() {
             return history.isEmpty()?null:history.get(history.size()-1).biderId;
         }
-        public int price() {
+        public long price() {
             return history.isEmpty()?0:history.get(history.size()-1).price;
         }
     }
@@ -162,7 +162,7 @@ public class GroundAuction {
                 LogDb.buyGround(bider.id(), null,   p, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
                 LogDb.playerPay(bider.id(),p);//增加了土地拍卖  记录玩家的支出
-                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.IntNum.newBuilder().setId(a.meta.id).setNum((int) p).build()));
+                bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(p).build()));
                 //土地拍卖通知
                 List<Coordinate> areas = a.meta.area;
                 List<Integer> list = new ArrayList<>();
@@ -193,7 +193,7 @@ public class GroundAuction {
     public boolean contain(int id) {
         return this.auctions.containsKey(id);
     }
-    public Optional<Common.Fail.Reason> bid(int id, Player bider, int price) {
+    public Optional<Common.Fail.Reason> bid(int id, Player bider, long price) {
         Entry a = this.auctions.get(id);
         if(a == null)
             return Optional.of(Common.Fail.Reason.auctionNotFound);
