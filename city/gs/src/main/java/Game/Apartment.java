@@ -106,4 +106,8 @@ public class Apartment extends Building implements IBuildingContract
     {
         return buildingContract;
     }
+
+    public void deleteRenter(){
+        renters.clear();
+    }
 }
