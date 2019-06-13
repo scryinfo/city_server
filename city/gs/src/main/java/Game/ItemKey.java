@@ -82,8 +82,8 @@ public class ItemKey implements Serializable {
             double q=EvaManager.getInstance().computePercent(qualityEva);
             double totalBrand=goods.brand*(1+b);
             double totalQuality=goods.quality*(1+q);
-            builder.setBrand(String.valueOf(totalBrand));
-            builder.setQuality(String.valueOf(totalQuality));
+            builder.setBrand((int) Math.ceil(totalBrand));
+            builder.setQuality((int) Math.ceil(totalQuality));
 
             BrandManager.BrandInfo info = BrandManager.instance().getBrand(producerId, meta.id);
             if (info.hasBrandName()) {
