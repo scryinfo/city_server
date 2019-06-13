@@ -53,12 +53,12 @@ public class JustVisit implements IAction {
             Building building = iterator.next();
 //          double c = ((1.d + BrandManager.instance().buildingBrandScore(buildingType)/ 100.d) + (1.d + City.instance().buildingQtyScore(building.type(), building.quality()) / 100.d) + (1.d + 0)) /3*cost;
 //          int r = (int) ((1.d-(building.cost() / c))*100000);
-            double c = ((BrandManager.instance().buildingBrandScore(buildingType) + City.instance().buildingQtyScore(building.type(), building.quality())) /400.d * 7 + 1) * cost ;
+            double c = cost ;
             int r = 0;// (int) ((1.d-(building.cost() / c))*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
-            if(1.d-(building.cost() / c)>0){
-                r = (int) ((c/ building.cost() )*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+            if(1.d-(building.cost() / c)>=0){
+                r = (int) ((c/ building.cost() )*100000 *(1.d + (1.d-Building.distance(building, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d))*(int)((BrandManager.instance().buildingBrandScore(buildingType) + City.instance().buildingQtyScore(building.type(), building.quality())) /400.d * 7 + 1);
             }else{
-                r = 1;
+                r = 0;
             }
             buildingWeights[i++] = r<0?0:r;
         }

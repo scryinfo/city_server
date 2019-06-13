@@ -94,13 +94,13 @@ public class Shopping implements IAction {
             List<Shelf.SellInfo> sells = ((RetailShop)b).getSellInfo(chosenGoodMetaId);
             for (Shelf.SellInfo sell : sells) {
               //double goodSpendV = ((1 + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId) / 100.d) + (1 + sell.qty / 100.d) + shopScore)/3.d * spend;
-            	double goodSpendV = ((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1) * spend;
+            	double goodSpendV = spend;
               //int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
                 int w =0;// goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
-                if(1 - sell.price / goodSpendV > 0){
-                	w=goodSpendV==0?0: (int) ((goodSpendV /sell.price) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                if(1 - sell.price / goodSpendV >= 0){
+                	w=goodSpendV==0?0: (int) ((goodSpendV /sell.price) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d))*(int)((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1);
                 }else{
-                	w=1;
+                	w=0;
                 }
                 if(w < 0){
                     w = 0;
@@ -271,3 +271,5 @@ public class Shopping implements IAction {
         }
     }
 }
+
+
