@@ -1,5 +1,7 @@
 package Game;
 
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
@@ -28,7 +30,7 @@ public class ItemKey implements Serializable {
         if(item.hasProducerId()) {
             if(mi instanceof MetaMaterial)
                 throw new Exception();
-            if(item.getQty() < 0)
+            if(item.getQty()< 0)
                 throw new Exception();
             this.producerId = Util.toUuid(item.getProducerId().toByteArray());
             this.qty = item.getQty();
@@ -72,7 +74,23 @@ public class ItemKey implements Serializable {
         builder.setId(meta.id);
         if(!producerId.equals(NULL_PRODUCER_ID)) {
             builder.setProducerId(Util.toByteString(producerId));
-            builder.setQty(qty);
+
+            Eva brandEva=EvaManager.getInstance().getEva(producerId, meta.id,Gs.Eva.Btype.Brand_VALUE);
+            Eva qualityEva=EvaManager.getInstance().getEva(producerId, meta.id,Gs.Eva.Btype.Quality_VALUE);
+            MetaGood goods=MetaData.getGood(meta.id);
+            double b=EvaManager.getInstance().computePercent(brandEva);
+            double q=EvaManager.getInstance().computePercent(qualityEva);
+            double totalBrand=goods.brand*(1+b);
+            double totalQuality=goods.quality*(1+q);
+            builder.setBrand(String.valueOf(totalBrand));
+            builder.setQuality(String.valueOf(totalQuality));
+
+            BrandManager.BrandInfo info = BrandManager.instance().getBrand(producerId, meta.id);
+            if (info.hasBrandName()) {
+                builder.setBrandName(info.getBrandName());
+            } else{
+                builder.setBrandName(GameDb.getPlayer(producerId).getCompanyName());
+            }
         }
         return builder.build();
     }

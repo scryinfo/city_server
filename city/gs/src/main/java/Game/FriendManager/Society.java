@@ -30,10 +30,10 @@ public class Society
     @Column(nullable = false,unique = true)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String declaration;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String introduction;
 
     @Column(nullable = false)
@@ -73,14 +73,14 @@ public class Society
     {
     }
 
-    public Society(UUID createId, String name, String declaration)
+    public Society(UUID createId, String name, String introduction)
     {
         this.id = UUID.randomUUID();
         this.createId = createId;
         this.createTs = System.currentTimeMillis();
         this.lastModify = 0;
         this.name = name;
-        this.declaration = declaration;
+        this.introduction = introduction;
         addMember(createId, new SocietyMember(Gs.SocietyMember.Identity.CHAIRMAN_VALUE));
         this.noticeList.add(new SocietyNotice(createId, null, Gs.SocietyNotice.NoticeType.CREATE_SOCIETY_VALUE));
     }
@@ -268,7 +268,7 @@ public class Society
         Gs.SocietyInfo.Builder builder = Gs.SocietyInfo.newBuilder();
         builder.setId(Util.toByteString(id))
                 .setName(name)
-                .setDeclaration(declaration)
+                .setDeclaration(Strings.nullToEmpty(declaration))
                 .setCreateTs(createTs)
                 .setAllCount(memberCount)
                 .setChairmanId(Util.toByteString(createId))
@@ -282,7 +282,7 @@ public class Society
         Gs.SocietyInfo.Builder builder = Gs.SocietyInfo.newBuilder();
         builder.setId(Util.toByteString(id))
                 .setName(name)
-                .setDeclaration(declaration)
+                .setDeclaration(Strings.nullToEmpty(declaration))
                 .setCreateTs(createTs)
                 .setAllCount(memberCount)
                 .setChairmanId(Util.toByteString(createId))

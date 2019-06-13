@@ -422,6 +422,7 @@ public class GameSession {
 			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
+		b.createNpc();//产生npc
 		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
@@ -746,7 +747,7 @@ public class GameSession {
 		if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
 			return;
 		IShelf s = (IShelf)building;
-		if(s.setPrice(item.key, c.getPrice())) {
+		if(s.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
 		}
@@ -1506,12 +1507,15 @@ public class GameSession {
 		sellerBuilding.updateTodayIncome(fee);
 		LogDb.buildingIncome(sellerBuildingId, buyer.id(), fee, 0, 0);//不含矿工费
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
-		//推广公司预约通知
-		long newPromoStartTs = newOrder.promStartTs; //预计开始时间
-		long promDuration = newOrder.promDuration; //广告时长
-		UUID[] buildingId = {sellerBuilding.id()};
-		StringBuilder sb = new StringBuilder().append(fee-minerCost+",").append(promDuration+",").append(newPromoStartTs);
-		MailBox.instance().sendMail(Mail.MailType.PUBLICFACILITY_APPOINTMENT.getMailType(), sellerBuilding.ownerId(), null, buildingId, null, sb.toString());
+		//如果是在自己公司推广不发通知
+		if (!selfPromo) {
+			//推广公司预约通知
+			long newPromoStartTs = newOrder.promStartTs; //预计开始时间
+			long promDuration = newOrder.promDuration; //广告时长
+			UUID[] buildingId = {sellerBuilding.id()};
+			StringBuilder sb = new StringBuilder().append(fee - minerCost + ",").append(promDuration + ",").append(newPromoStartTs);
+			MailBox.instance().sendMail(Mail.MailType.PUBLICFACILITY_APPOINTMENT.getMailType(), sellerBuilding.ownerId(), null, buildingId, null, sb.toString());
+		}
 		//发送客户端通知
 		this.write(Package.create(cmd, gs_AdAddNewPromoOrder.toBuilder().setRemainTime(fcySeller.getPromRemainTime()).build()));
 		//能否在Fail中添加一个表示成功的枚举值 noFail ，直接把收到的包返回给客户端太浪费服务器带宽了
@@ -1940,12 +1944,15 @@ public class GameSession {
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
-			// 研究所预约通知
-			long beginProcessTs = line.beginProcessTs;//预计开始时间
-			int times = c.getTimes();//研究时长
-			UUID[] buildingId = {lab.id()};
-			StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
-			MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
+			// 研究所预约通知(如果在自己公司研究不发通知)
+			boolean flag = this.player.id().equals(building.ownerId()) ;
+			if (!flag) {
+				long beginProcessTs = line.beginProcessTs;//预计开始时间
+				int times = c.getTimes();//研究时长
+				UUID[] buildingId = {lab.id()};
+				StringBuilder sb = new StringBuilder().append(cost+",").append(times+",").append(beginProcessTs);
+				MailBox.instance().sendMail(Mail.MailType.LABORATORY_APPOINTMENT.getMailType(), lab.ownerId(), null, buildingId, null, sb.toString());
+			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
         Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
@@ -2413,10 +2420,12 @@ public class GameSession {
 		ManagerCommunication.getInstance().processing((Gs.CommunicationReq) message,player);
 	}
 
-	public void getGroundInfo(short cmd)
+	public void getGroundInfo(short cmd,Message message)
 	{
+		Gs.Id id= (Gs.Id) message;
+		UUID pid = Util.toUuid(id.getId().toByteArray());
 		Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
-		builder.addAllInfo(GroundManager.instance().getGroundProto(player.id()));
+		builder.addAllInfo(GroundManager.instance().getGroundProto(pid));
 		this.write(Package.create(cmd, builder.build()));
 	}
 
@@ -2424,13 +2433,13 @@ public class GameSession {
 	{
 		Gs.CreateSociety gsSociety = (Gs.CreateSociety) message;
 		String name = gsSociety.getName();
-		String declaration = gsSociety.getDeclaration();
-		if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(declaration)
+		String introduction = gsSociety.getIntroduction();
+		if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(introduction)
 				|| player.getSocietyId() != null)
 		{
 			return;
 		}
-		Society society = SocietyManager.createSociety(player.id(), name, declaration);
+		Society society = SocietyManager.createSociety(player.id(), name, introduction);
 		if (society == null)
 		{
 			this.write(Package.fail(cmd,Common.Fail.Reason.societyNameDuplicated));
@@ -3032,12 +3041,14 @@ public class GameSession {
 	{
 		Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
 		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
+		Gs.EvaResultInfo.Builder result =null;
+		Eva oldEva=null;//修改前的Eva信息
 		for (Gs.Eva eva : evas.getEvaList()) {
-			Gs.EvaResultInfo.Builder result = Gs.EvaResultInfo.newBuilder();
+			result=Gs.EvaResultInfo.newBuilder();
 			//修改后eva信息
 			Eva newEva = EvaManager.getInstance().updateMyEva(eva);
 			//修改前的eva
-			Eva oldEva = new Eva();
+			oldEva= new Eva();
 			oldEva.setLv(eva.getLv());
 			oldEva.setAt(eva.getAt());
 			oldEva.setBt(eva.getBt().getNumber());
@@ -3095,6 +3106,8 @@ public class GameSession {
 			}
 			results.addResultInfo(result);
 		}
+		//更新评分数据
+		BrandManager.instance().getAllBuildingBrandOrQuality();
 		this.write(Package.create(cmd, results.build()));
 	}
 
@@ -4028,6 +4041,7 @@ public class GameSession {
 	   	//单个建筑的值
     	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
        	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
+		basicBrand=basicBrand==0?1:basicBrand;
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
@@ -4038,6 +4052,7 @@ public class GameSession {
     	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
     	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
     	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
+		totalBrand=totalBrand==0?1:totalBrand;
     	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());
 
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
@@ -4119,28 +4134,31 @@ public class GameSession {
 		//建筑基本信息
 		Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
 		builder.setBuildingInfo(buildingInfo);
-		for (int type : msg.getTypeIdsList()) {
+		Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.LAB);
+		//现在可以得到研究所的所有at和研究所的所有bt，
+		buildingTech.forEach(item->{
 			Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-			Eva eva=EvaManager.getInstance().getEva(playerId, MetaBuilding.LAB, type);
-			b.setTypeId(type);
+			//因为研究所一个atype只对应一个eva，所以获取第一个。
+			Eva eva = EvaManager.getInstance().getEva(playerId, item).get(0);
+			b.setTypeId(eva.getBt());
 			b.setAbility(EvaManager.getInstance().computePercent(eva));
-		}
+		});
 		this.write(Package.create(cmd, builder.build()));
 	}
     /*查询品牌信息*/
-	public void queryBrand(short cmd,Message message){
+	public void queryBrand(short cmd, Message message) {
 		Gs.queryBrand brand = (Gs.queryBrand) message;
 		UUID pid = Util.toUuid(brand.getPId().toByteArray());
 		int typeId = brand.getTypeId();
 		BrandManager.BrandInfo info = BrandManager.instance().getBrand(pid, typeId);
-		Gs.MyBrands.Brand.Builder band = Gs.MyBrands.Brand.newBuilder();
+		Gs.BrandInfo.Builder band = Gs.BrandInfo.newBuilder();
 		band.setItemId(typeId).setPId(brand.getPId());
-		if(info.hasBrandName()){
+		if (info.hasBrandName()) {
 			band.setBrandName(info.getBrandName());
-		}
-		EvaManager.getInstance().getEva(pid,typeId).forEach(eva -> {
-			band.addEva(eva.toProto());
-		});
+		} else
+			// 现在暂时使用公司名称
+			band.setBrandName(GameDb.getPlayer(pid).getCompanyName());
+		this.write(Package.create(cmd, band.build()));
 	}
 
 	public void ct_createUser(short cmd,Message message){

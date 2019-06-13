@@ -10,7 +10,6 @@ import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -18,8 +17,6 @@ import java.util.concurrent.TimeUnit;
 public class Laboratory extends Building {
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     private static final int RADIX = 100000;
-    private static int eva_transition_time;//eva提升的过度时间
-    private static int invent_transition_time;//发明过渡时间
     @Transient
     private MetaLaboratory meta;
 
@@ -46,10 +43,10 @@ public class Laboratory extends Building {
     @PostLoad
     private void _1() {
         this.meta = (MetaLaboratory) super.metaBuilding;
-        eva_transition_time = meta.evaTransitionTime;
-        invent_transition_time = meta.inventTransitionTime;
         if(!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
+            line.eva_transition_time = meta.evaTransitionTime;
+            line.invent_transition_time = meta.inventTransitionTime;
             if (line.isRunning())
                 line.currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - line.beginProcessTs) % TimeUnit.HOURS.toNanos(1);
         }
@@ -60,6 +57,7 @@ public class Laboratory extends Building {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
+        calcuProb();
         return builder.setSellTimes(this.sellTimes)
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(this.evaProb)
@@ -89,24 +87,24 @@ public class Laboratory extends Building {
 
     @Override
     protected void _update(long diffNano) {
-        if(!this.inProcess.isEmpty()) {
+        if (!this.inProcess.isEmpty()) {
             Line line = this.inProcess.get(0);
-            if(line.update(diffNano)) {
-                if(line.isComplete()) {
+            if (line.update(diffNano)) {
+                if (line.goodCategory > 0) {
+                    //完成商品发明
+                    MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times}, new UUID[]{this.id()}, null);
+                } else {
+                    //完成点数研究
+                    MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times}, new UUID[]{this.id()}, null);
+                }
+                if (line.isComplete()) {
                     this.inProcess.remove(0);
                     this.completed.put(line.id, line);
-                    if (line.goodCategory > 0) {
-                        //完成商品发明
-                        MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
-                    } else {
-                        //完成点数研究
-                        MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, null, new UUID[]{this.id()}, null);
-                    }
                 }
                 broadcastLine(line);
             }
         }
-        if(this.dbTimer.update(diffNano)) {
+        if (this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
         }
     }
@@ -126,6 +124,8 @@ public class Laboratory extends Building {
         //设置开始时间
         long beginTime=lastLine.beginProcessTs+ TimeUnit.HOURS.toMillis(lastLine.times);
         line.beginProcessTs = beginTime;
+        line.eva_transition_time = this.meta.evaTransitionTime;
+        line.invent_transition_time = this.meta.inventTransitionTime;
         inProcess.add(line);
         //this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineAddInform_VALUE, Gs.LabLineInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).build()));
         return line;
@@ -191,13 +191,14 @@ public class Laboratory extends Building {
     }
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
+        //还需要加上eva的加成信息
         RollResult res = null;
         Line l = this.findInProcess(lineId);
         if(l == null)
              l = this.completed.get(lineId);
         if(l != null && l.availableRoll > 0) {
             res = new RollResult();
-            l.useRoll(l.eva());
+            l.useRoll();
             if(l.eva()) {//是否是eva发明提升
                 //1次开启5个成果，所以循环5次
                 for (int i = 0; i <5 ; i++) {//新增===========================================
@@ -256,6 +257,13 @@ public class Laboratory extends Building {
         }else
         return  inProcess.get(inProcess.size() - 1);
     }
+
+    /*public Map<String,Integer> getTotalSuccessProb(){
+        Map<String, Integer> map = new HashMap<>();
+        //首先获取eva信息
+        Set<Integer> buildingTech = MetaData.getBuildingTech();
+        buildingTech
+    }*/
     @Entity
     public static final class Line {
         public Line(int goodCategory, int times, UUID proposerId, long cost) {
@@ -291,6 +299,11 @@ public class Laboratory extends Building {
         int availableRoll;
         int usedRoll;
         long payCost;
+
+        @Transient
+        private  int eva_transition_time;//eva提升的过度时间
+        @Transient
+        private  int invent_transition_time;//发明过渡时间
         @Transient
         long currentRoundPassNano = 0;
 
@@ -314,10 +327,8 @@ public class Laboratory extends Building {
             if(!isLaunched())
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
-            /*if (currentRoundPassNano >= TimeUnit.MINUTES.toNanos(1))*/
-            //TODO:研究的过渡时间是从配置表读取的，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            long transition = TimeUnit.SECONDS.toNanos(eva_transition_time);
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取
+            //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -329,14 +340,9 @@ public class Laboratory extends Building {
             return beginProcessTs > 0;
         }
 
-        public void useRoll(boolean isEva) {//如果是eva点数宝箱开启，一次减5个可用点数，商品发明是一次减少1个
-           if(isEva){
-               this.availableRoll-=5;
-               this.usedRoll+=5;
-           }else {
-               this.availableRoll--;
-               this.usedRoll++;
-           }
+        public void useRoll() {
+           this.availableRoll--;
+           this.usedRoll++;
         }
     }
 

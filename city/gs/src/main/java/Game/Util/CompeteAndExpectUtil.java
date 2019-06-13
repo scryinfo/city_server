@@ -54,19 +54,22 @@ public class CompeteAndExpectUtil {
         Map<UUID, Double> map = new HashMap<>();
         int at = eva.getAt();
         int bt = eva.getBt();
-        for (Building b : buildings) {
-            Gs.Promote.Builder promote = Gs.Promote.newBuilder();
+        int length = buildings.size();
+        Gs.Promote.Builder promote =null;
+        for (int i = 0 ; i < length; i++) {
+            Building b=buildings.get(i);
+            promote=Gs.Promote.newBuilder();
             ProduceDepartment pro = (ProduceDepartment) b;
             //1.1判断是否该有该上架的商品
             if (!pro.getShelf().has(at)||b.outOfBusiness())
                 continue;
             int price = pro.getShelf().getSellInfo(at).get(0).price;//玩家定价
             MetaGood good = MetaData.getGood(at);
-            int base = good.quality;//商品的品质基础值
-            //获取品牌信息
+            int qtyBase = good.quality;//商品的品质基础值
+            //推荐价格
             int brandValue = BrandManager.instance().getBrand(b.ownerId(),at).getV()+good.brand;
             double evaAdd = EvaManager.getInstance().computePercent(eva);
-            int recommendPrice = GlobalUtil.getProduceRecommendPrice(at,bt,base,evaAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
+            int recommendPrice = GlobalUtil.getProduceRecommendPrice(at,bt,qtyBase,evaAdd, brandValue, MetaBuilding.PRODUCE);//推荐价格
             double competitive= Math.ceil(recommendPrice / price * 100);//竞争力
             map.put(b.id(),competitive);
         }
@@ -79,7 +82,7 @@ public class CompeteAndExpectUtil {
         //1.全城推广均定价
         int cityAvgprice = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
         //2.全城的平均推广值
-        int cityAvgAbility = GlobalUtil.cityAvgPromotionAbilityValue(eva.getAt());
+        int cityAvgAbility = GlobalUtil.cityAvgPromotionAbilityValue(eva.getAt(),MetaBuilding.PUBLIC);
         //3.全城该类型推广均单位定价
         int cityAbilityPrice = cityAvgprice/cityAvgAbility;
         for (Building b : buildings) {
@@ -103,9 +106,9 @@ public class CompeteAndExpectUtil {
         int at = eva.getAt();
         int bt = eva.getBt();
         for (Building building : buildings) {
-            if (building.outOfBusiness())
-                continue;
             Laboratory lab = (Laboratory) building;
+            if (lab.outOfBusiness()||lab.isExclusiveForOwner()||lab.getPricePreTime()==0)
+                continue;
             int playerSuccessOdds = 0;//当前的发明概率
             int price = lab.getPricePreTime();
             double evaAdd = EvaManager.getInstance().computePercent(eva);//加成
@@ -129,7 +132,7 @@ public class CompeteAndExpectUtil {
         int at = eva.getAt();
         int bt = eva.getBt();
         int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
-        int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt);//全城品质
+        int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt,MetaBuilding.APARTMENT);//全城品质
         for (Building building : buildings) {
             if (building.outOfBusiness())
                 continue;

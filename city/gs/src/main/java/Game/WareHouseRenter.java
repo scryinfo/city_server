@@ -330,4 +330,9 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     public boolean isOverTime() {//是否超期了
         return System.currentTimeMillis() > beginTs + TimeUnit.HOURS.toMillis(hourToRent);
     }
+
+    @Override
+    public boolean shelfSet(Item item, int price,boolean autoRepOn) {
+        return false;
+    }
 }

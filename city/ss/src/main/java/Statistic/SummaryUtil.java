@@ -691,7 +691,7 @@ public class SummaryUtil
                     .sort(Sorts.descending(TIME))
                     .forEach((Block<? super Document>) document ->
                     {
-                        map.put(document.getLong(TIME), Long.valueOf(document.getInteger("size")));
+                        map.put(document.getLong(TIME), document.getInteger("size").longValue());
                     });
         } else {
             collection.find(and(

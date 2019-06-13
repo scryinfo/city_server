@@ -161,7 +161,7 @@ public class GroundAuction {
                 }
                 LogDb.buyGround(bider.id(), null,   p, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
-
+                LogDb.playerPay(bider.id(),p);//增加了土地拍卖  记录玩家的支出
                 bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.IntNum.newBuilder().setId(a.meta.id).setNum((int) p).build()));
                 //土地拍卖通知
                 List<Coordinate> areas = a.meta.area;

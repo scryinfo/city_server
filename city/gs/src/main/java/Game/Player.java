@@ -291,7 +291,7 @@ public class Player {
         this.bag = new Storage(bagCapacity);
         this.createTs = System.currentTimeMillis();
         this.eva=10000;
-        this.last_modify_time=System.currentTimeMillis();
+        this.last_modify_time=0;
     }
     @PostLoad
     void _init() {

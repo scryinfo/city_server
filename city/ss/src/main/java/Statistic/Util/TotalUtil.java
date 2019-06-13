@@ -1,7 +1,14 @@
 package Statistic.Util;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Sorts;
+import org.bson.Document;
+
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
+
+import static com.mongodb.client.model.Filters.*;
 
 /*统计工具类*/
 public class TotalUtil {
@@ -42,18 +49,29 @@ public class TotalUtil {
         return total;
     }
 
-    //获取今日玩家收入支出最新数据
-    public  Long  todayIncomOrPay(Map<Long, Long> sourceMap){
-        Long todayIncomeOrPay=0L;
+    //获取今日玩家收入支出最新数据（也需要累积）
+    public  Long  todayIncomeOrPay(Map<Long, Long> sourceMap){
+        //Long todayIncomeOrPay=0L;
         Map<Long, Long> today = new TreeMap<>();
         sourceMap.forEach((time,money)->{
             if(time>=TimeUtil.todayStartTime()){
                 today.put(time, money);
             }
         });
-        Map.Entry<Long, Long> entry = ((TreeMap<Long, Long>) today).lastEntry();
-        if(entry!=null)
-            todayIncomeOrPay = entry.getValue();
+        Long todayIncomeOrPay = today.values().stream().reduce(Long::sum).orElse(0L);
         return todayIncomeOrPay;
+    }
+
+    //获取今日最新收支信息
+    public static Long getTodayPlayerLastPayOrIncome(MongoCollection<Document> collection, UUID pid, Long startTime){
+        long account = 0L;
+        Document first = collection.find(and(
+                eq("p", pid),
+                gte("t", startTime)
+        )).sort(Sorts.descending("t")).first();
+        if(first!=null){
+            account = first.getLong("a");
+        }
+        return account;
     }
 }

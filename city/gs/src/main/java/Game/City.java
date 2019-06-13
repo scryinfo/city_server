@@ -1,23 +1,7 @@
 package Game;
 
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import Game.Gambling.FlightManager;
-import Shared.GlobalConfig;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
-
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -27,9 +11,20 @@ import Game.Util.DateUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
 import gs.Gs;
-import gs.Gs.BuildingInfo;
 import gscode.GsCode;
+import org.apache.log4j.Logger;
+
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class City {
     public static final UUID SysRoleId = UUID.nameUUIDFromBytes(new byte[16]);
@@ -276,6 +271,7 @@ public class City {
         NpcManager.instance().countNpcNum(diffNano);
         LeagueManager.getInstance().update(diffNano);
         WareHouseManager.instance().update(diffNano);
+        BrandManager.instance().update(diffNano);
         // do this at last
         updateTimeSection(diffNano);
         specialTick(diffNano);
@@ -513,6 +509,8 @@ public class City {
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
         buildings.remove(building.id());
+       //类型建筑中也要删除
+        this.typeBuilding.get(building.type()).remove(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
         //重置土地建筑
@@ -537,7 +535,7 @@ public class City {
             return false;
         GameDb.saveOrUpdate(b); // let hibernate generate the id value
  //     List updates = b.hireNpc();
-        List updates = b.createNpc();
+        List updates = new ArrayList();
         take(b);
         //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间  
         if(allBuilding!=null&&allBuilding.size()>=100){
@@ -568,6 +566,8 @@ public class City {
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
+        //同步类型建筑map
+        this.typeBuilding.computeIfAbsent(building.type(), k -> new HashSet<>()).add(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
         this.topBuildingQty.compute(building.type(), (k, oldV)->{
@@ -630,7 +630,7 @@ public class City {
     //获取该建筑类型已开放的数量
     public int getOpentNumByType(int type){
         int count=0;
-        Set<Building> buildings = typeBuilding.get(type);
+        Set<Building> buildings = typeBuilding.getOrDefault(type,new HashSet<>());
         for (Building building : buildings) {
             if(building.type()==type&&!building.outOfBusiness())
                 count++;
@@ -641,15 +641,7 @@ public class City {
     //封装建筑类型建筑
     private void initTypeBuildings(){
         forEachBuilding(b->{
-            if(typeBuilding.containsKey(b.type())){
-                Set<Building> list = typeBuilding.get(b.type());
-                list.add(b);
-                typeBuilding.put(b.type(),list);
-            }else{
-                Set<Building> list = new HashSet<>();
-                list.add(b);
-                typeBuilding.put(b.type(),list);
-            }
+            typeBuilding.computeIfAbsent(b.type(), k -> new HashSet<>()).add(b);
         });
     }
 

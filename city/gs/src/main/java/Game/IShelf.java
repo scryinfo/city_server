@@ -11,7 +11,7 @@ public interface IShelf {
     Shelf.Content getContent(ItemKey id);
 
     boolean setPrice(ItemKey id, int price);
-
+    boolean shelfSet(Item item, int price,boolean autoRepOn);
     boolean setAutoReplenish(ItemKey id, boolean autoRepOn);
 
     int getSaleCount(int itemId);

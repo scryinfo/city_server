@@ -61,9 +61,9 @@ public class SocietyManager
         return societyInfoMap.values();
     }
 
-    public static Society createSociety(UUID createId, String name, String declaration)
+    public static Society createSociety(UUID createId, String name, String introduction)
     {
-        Society society = new Society(createId, name, declaration);
+        Society society = new Society(createId, name, introduction);
         if (GameDb.saveOrUpdSociety(society))
         {
             societyCache.put(society.getId(), Optional.of(society));
@@ -204,6 +204,7 @@ public class SocietyManager
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
             GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
+            societyInfoMap.put(society.getId(), society.toSimpleProto());
             //societyInfoMap.put(society.getId(), society.toProto(true));
         }
     }

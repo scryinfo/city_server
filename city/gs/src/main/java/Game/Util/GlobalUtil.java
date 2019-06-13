@@ -2,6 +2,7 @@ package Game.Util;
 
 import Game.*;
 import Game.Eva.Eva;
+import Game.Eva.EvaKey;
 import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
@@ -14,7 +15,8 @@ public class GlobalUtil {
 
     /*1.获取全城最大和最小的加成信息（找出全城Eva提升最大的那一个，然后进行计算）*/
     public static Map<String, Eva>  getEvaMaxAndMinValue(int at,int bt){
-        Set<Eva> evas = EvaManager.getInstance().getAllEvas();
+        EvaKey key = new EvaKey(at,bt);
+        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.getOrDefault(key,new HashSet<>());
         Eva maxEva = null;
         Eva minEva=null;
         Map<String, Eva> minOrMaxEva = new HashMap<>();
@@ -36,7 +38,7 @@ public class GlobalUtil {
         }
         minOrMaxEva.put("max", maxEva);
         minOrMaxEva.put("min", minEva);
-        return minOrMaxEva;
+        return minOrMaxEva==null||maxEva==null?null: minOrMaxEva;
     }
 
     //2.获取指定选项知名度的最大最小信息
@@ -70,10 +72,10 @@ public class GlobalUtil {
     public static int getCityItemAvgPrice(int goodItem, int type) {
         int sumPrice = 0;
         int count = 0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(type,new HashSet<>());
         for (Building building : buildings) {
             //判断类型
-            if (building.type()!= type||building.outOfBusiness()||!(building instanceof  IShelf))
+            if (building.outOfBusiness()||!(building instanceof  IShelf))
                 continue;
             IShelf shelf = (IShelf) building;
             Map<Item, Integer> saleDetail = shelf.getSaleDetail(goodItem);
@@ -90,7 +92,7 @@ public class GlobalUtil {
     public static int getCityAvgPriceByType(int type) {
         int sumPrice = 0;
         int count = 0;
-        Set<Building> buildings = City.instance().typeBuilding.get(type);
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(type,new HashSet<>());
         for (Building building : buildings) {
             if (!building.outOfBusiness()) {
                switch (type){
@@ -123,11 +125,11 @@ public class GlobalUtil {
             return 0;
     }
 
-    //5.查询根据类型研究成功几率，依然是建筑的成功平均值+eva的平均提升值
+    //5.查询根据类型查询全城研究成功几率，依然是建筑的成功平均值+eva的平均提升值
     public static int getCityAvgSuccessOdds(int at,int bt){
         int sumBaseOdds = 0;
         int count=0;
-        Set<Building> buildings = City.instance().typeBuilding.get(at);
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB,new HashSet<>());
         for (Building building : buildings) {
             if (building instanceof Laboratory&&!building.outOfBusiness()) {
                 Laboratory lab = (Laboratory) building;
@@ -166,23 +168,24 @@ public class GlobalUtil {
    //7.获取全城Eva属性商品品质均加成信息
     public static int cityAvgEva(int at,int bt){
         //获取eva值，求平均，然后加上商品的基础值即可
-       Set<Eva> allEvas = EvaManager.getInstance().getAllEvas();
+       EvaKey key = new EvaKey(at, bt);
+       Set<Eva> allEvas = EvaManager.getInstance().typeEvaMap.get(key);
        double evaSum=0;
        int count = 0;
        for (Eva eva : allEvas) {
            if(eva.getAt()==at&&eva.getBt()==bt){
                evaSum+=EvaManager.getInstance().computePercent(eva);
                count++;
-           }
+            }
        }
        return count==0?0: (int) (evaSum / count);
    }
 
    //8.获取全城推广该类型的推广能力平均值
-    public static int cityAvgPromotionAbilityValue(int type){
+    public static int cityAvgPromotionAbilityValue(int type,int buildingType){
         int sum=0;
         int count = 0;
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(buildingType,new HashSet<>());
         for (Building b: buildings) {
             if(b instanceof PublicFacility&&!b.outOfBusiness()){
                 PublicFacility facility = (PublicFacility) b;
@@ -194,15 +197,15 @@ public class GlobalUtil {
     }
 
     //9.全城住宅零售店均品质(*)
-    public static int getCityApartmentOrRetailShopQuality(int at,int bt){
+    public static int getCityApartmentOrRetailShopQuality(int at,int bt,int buildingType){
         //1.计算均加成
         int avgAdd = cityAvgEva(at, bt);
         int quality=0;
         int count = 0;
         //2.获得基本品质
-        List<Building> buildings = City.instance().getAllBuilding();
+        Set<Building> buildings = City.instance().typeBuilding.getOrDefault(buildingType,new HashSet<>());
         for (Building building : buildings) {
-            if(building.type()==at){
+            if(building.type()==buildingType){
                 quality+= building.quality();
                 count++;
             }
@@ -211,7 +214,7 @@ public class GlobalUtil {
     }
 
    //10.获取加工厂推荐定价
-    public static int getProduceRecommendPrice(int at,int bt,int base,double localEvaAdd,int localBrand,int buildingType){
+    public static int getProduceRecommendPrice(int at,int bt,int qtyBase,double localEvaAdd,int localBrand,int buildingType){
         //公式：推荐定价 = 全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
 
         //1.全城商品销售均价
@@ -219,14 +222,14 @@ public class GlobalUtil {
         //2.玩家知名度权重
         double brandWeight = CompeteAndExpectUtil.getBrandWeight(localBrand, at);
         //3.玩家品质权重
-        double localQuality = (base * (1 + localEvaAdd));
-        double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, base);
+        double localQuality = (qtyBase * (1 + localEvaAdd));
+        double qualityWeight = CompeteAndExpectUtil.getItemWeight(localQuality, at, bt, qtyBase);
         //4.全城知名度权重
         int cityAvgBrand = cityAvgBrand(at);
         double cityBrandWeight = CompeteAndExpectUtil.getBrandWeight(cityAvgBrand, at);
         //5.全城品质权重
-        int cityAvgQuality =(int)(base * (1+ cityAvgEva(at, bt)));
-        double cityQualityWeight = CompeteAndExpectUtil.getItemWeight(cityAvgQuality, at, bt, base);
+        int cityAvgQuality =(int)(qtyBase * (1+ cityAvgEva(at, bt)));
+        double cityQualityWeight = CompeteAndExpectUtil.getItemWeight(cityAvgQuality, at, bt, qtyBase);
         return (int) (cityItemAvgPrice * (brandWeight + qualityWeight) / (cityBrandWeight + cityQualityWeight));
     }
 

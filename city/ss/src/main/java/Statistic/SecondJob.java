@@ -5,6 +5,7 @@ import static Statistic.PerHourJob.RENTGROUND_ID;
 import static Statistic.SummaryUtil.SECOND_MILLISECOND;
 
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,10 +35,12 @@ public class SecondJob implements org.quartz.Job {
         calendar.set(Calendar.SECOND, 0);
         Date startDate = calendar.getTime();
         long startTime=startDate.getTime();
-        
 
         long time1 = System.currentTimeMillis();
         long endTime = time1 - time1%(1000 * 10);
+
+        long ltTime = SummaryUtil.secondStartTime(System.currentTimeMillis());
+        long gteTime = ltTime - SECOND_MILLISECOND;
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
@@ -53,27 +56,27 @@ public class SecondJob implements org.quartz.Job {
 
 
         //buy ground
-        documentList = LogDb.dayPlayerExchange1(startTime,endTime,LogDb.getBuyGround(), BUYGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange1(gteTime,ltTime,LogDb.getBuyGround(), BUYGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, ltTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
-        documentList = LogDb.dayPlayerExchange1(startTime,endTime, LogDb.getRentGround(), RENTGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange1(gteTime,ltTime, LogDb.getRentGround(), RENTGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GROUND, documentList, ltTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy goods in Shelf
-        documentList = LogDb.dayPlayerExchange2(startTime,endTime, LogDb.getBuyInShelf(), true);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange2(gteTime,ltTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.GOODS, documentList, ltTime, SummaryUtil.getPlayerExchangeAmount());
 
         //buy material in Shelf
-        documentList = LogDb.dayPlayerExchange2(startTime,endTime, LogDb.getBuyInShelf(), false);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange2(gteTime,ltTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.MATERIAL, documentList, ltTime, SummaryUtil.getPlayerExchangeAmount());
 
         // PublicFacility Promotion buildingOrGoods
-        documentList = LogDb.hourPromotionRecord(startTime,endTime, LogDb.getPromotionRecord());
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.PUBLICITY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.hourPromotionRecord(gteTime,ltTime, LogDb.getPromotionRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.PUBLICITY, documentList, ltTime, SummaryUtil.getPlayerExchangeAmount());
 
         // Laboratory  research EvapointOrinvent
-        documentList = LogDb.hourLaboratoryRecord(startTime,endTime, LogDb.getLaboratoryRecord());
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.LABORATORY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.hourLaboratoryRecord(gteTime,ltTime, LogDb.getLaboratoryRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYSECONDS, SummaryUtil.ExchangeType.LABORATORY, documentList, ltTime, SummaryUtil.getPlayerExchangeAmount());
 
         //统计耗时
         StatisticSession.setIsReady(true);
