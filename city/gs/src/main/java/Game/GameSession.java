@@ -2924,6 +2924,7 @@ public class GameSession {
 		NpcManager.instance().countNpcByType().forEach((k,v)->{
 			list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
 		});
+		list.setWorkNpcNum(NpcManager.instance().getNpcCount()).setUnEmployeeNpcNum(NpcManager.instance().getUnEmployeeNpcCount());
 		this.write(Package.create(cmd,list.build()));
 	}
 
