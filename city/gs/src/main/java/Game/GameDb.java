@@ -50,7 +50,7 @@ import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
 import Shared.RoleBriefInfo;
 import gs.Gs;
-
+import Game.ddd.dddPurchaseMgr;
 
 // there are 2 ways:
 // 1. use only one session, so all object state will not be detached. It will reduce re-query db times when object re-connect with session
@@ -302,7 +302,7 @@ public class GameDb {
 		session.close();
 		return list;
 	}
-	
+
 	public static List<IndustryIncrease> getAllIndustryIncrease()
 	{
 		Session session = sessionFactory.openSession();
@@ -1405,6 +1405,32 @@ public class GameDb {
 			return true;
 		}
 		return false;
+	}
+
+	public static void initDddPurchaseMgr() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(dddPurchaseMgr.class, dddPurchaseMgr.ID) == null)
+			statelessSession.insert(new dddPurchaseMgr());
+		transaction.commit();
+		statelessSession.close();
+	}
+
+	public static dddPurchaseMgr getDddPurchaseMgr() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		dddPurchaseMgr res = session.get(dddPurchaseMgr.class, dddPurchaseMgr.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
+
+	//游戏币/ddd的交换比率， 这里应该是访问数据库ddd与游戏币的交换比率
+	static public double getExchangeRate(){
+		return 1.00; //暂定1
+	}
+	static public double calGameCurrencyFromDDD(double ddd){
+		return ddd*getExchangeRate();
 	}
 }
 
