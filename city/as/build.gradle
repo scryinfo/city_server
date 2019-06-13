@@ -8,20 +8,20 @@ group 'info.scry'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+        maven { url "https://dl.bintray.com/ethereum/maven/" }
+    }
 }
 
 dependencies {
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
 }
 
-
 jar {
-    //baseName = 'as'
-    //version = '0.0.1'
     manifest {
         attributes 'Main-Class':'AccountServer'
-        attributes("Class-Path": configurations.compile.collect { "deps/$it.name" }.join(' '))
+        //attributes("Class-Path": configurations.compile.collect { "deps/$it.name" }.join(' '))
     }
 }
 task myCopyTask(type: Copy) {
