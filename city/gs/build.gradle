@@ -22,11 +22,13 @@ group 'info.scry.city'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+        maven { url "https://dl.bintray.com/ethereum/maven/" }
+    }
 }
 
 dependencies {
-    //compile 'com.google.protobuf:protobuf-java:2.5.0'
     compile 'io.grpc:grpc-netty-shaded:1.21.0'
     compile 'io.grpc:grpc-protobuf:1.21.0'
     compile 'io.grpc:grpc-stub:1.21.0'
@@ -37,6 +39,8 @@ dependencies {
     runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
+    //compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    //compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
 }
 sourceSets {
     main.java.srcDirs += 'src/jpaModelgen/generated'

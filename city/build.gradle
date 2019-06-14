@@ -4,43 +4,38 @@ allprojects {
 def grpcVersion = '1.21.0' // CURRENT_GRPC_VERSION
 def protobufVersion = '3.1.0'
 def protocVersion = protobufVersion
+
+repositories {
+    mavenCentral()
+    //jcenter()
+    maven { url "https://dl.bintray.com/ethereum/maven/" }
+    flatDir {
+        dirs 'lib'
+    }
+}
+
 allprojects {
     dependencies {
+        compile group: 'org.ethereum', name: 'ethereumj-core', version: '1.8.2-RELEASE'
         testCompile group: 'junit', name: 'junit', version: '4.12'
         compile group: 'io.netty', name: 'netty-all', version: '4.1.31.Final'
         compile 'com.google.protobuf:protobuf-java:3.1.0'
         compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0'
         compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.8.0'
-        compile group: 'log4j', name: 'log4j', version: '1.2.17'
-        compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
         compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
         compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.6.Final'
         compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
         compile 'com.vladmihalcea:hibernate-types-52:2.3.0'
-        //
         compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
         compile group: 'org.json', name: 'json', version: '20180813'
         compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
-        //compile group: 'org.ethereum', name: 'ethereumj-core', version: '1.8.27'
-        //compile "org.ethereum:ethereumj-core:1.8.1"
-        //compile "org.ethereum:ethereumj-core:1.8.+"
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
-
-    //compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
 group 'info.scry'
-//version '1.0-SNAPSHOT'
-
 sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-    jcenter()
-    maven { url "https://dl.bintray.com/ethereum/maven/" }
-}
 
 project(':as') {
     dependencies {
@@ -49,6 +44,11 @@ project(':as') {
 }
 
 project(':gs') {
+    repositories {
+        flatDir {
+            dirs '../lib'
+        }
+    }
     dependencies {
         compile project(':Shared')
     }
@@ -62,9 +62,7 @@ project(':ss') {
 
 jar {
     baseName = 'libs'
-    //version='0.0.1'
     from configurations.compile.collect{it.isDirectory()?it:zipTree(it)}
-    //from configurations.runtime.collect{zipTree(it)}
 }
 task myCopyTask(type: Copy) {
     dependsOn jar

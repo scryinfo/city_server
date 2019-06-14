@@ -6,9 +6,9 @@ import io.grpc.StatusRuntimeException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ccapi.global_def.*;
-import ccapi.dddbind.*;
-import ccapi.cc.*;
+import ccapi.GlobalDef.*;
+import ccapi.Dddbind.*;
+import ccapi.CcOuterClass.*;
 
 /**
  * A simple client that requests a greeting from the {@link HelloWorldServer}.
@@ -24,7 +24,7 @@ public class chainClient {
     private static final Logger logger = Logger.getLogger(chainClient.class.getName());
 
     private final ManagedChannel channel;
-    private final CcGrpc.CcBlockingStub blockingStub;
+    private final ccapi.CcGrpc.CcBlockingStub blockingStub;
 
     /** Construct client connecting to HelloWorld server at {@code host:port}. */
     public chainClient(String host, int port) {
@@ -36,7 +36,7 @@ public class chainClient {
     /** Construct client for accessing HelloWorld server using the existing channel. */
     chainClient(ManagedChannel channel) {
         this.channel = channel;
-        blockingStub = CcGrpc.newBlockingStub(channel);
+        blockingStub = ccapi.CcGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() throws InterruptedException {
@@ -56,9 +56,9 @@ public class chainClient {
         }
         logger.info("Greeting: " + response.getMessage());
     }*/
-    public void CreateUser(ccapi.cc.CcOuterClass.CreateUserReq req) {
+    public void CreateUser(ccapi.CcOuterClass.CreateUserReq req) {
         logger.info("Will try to greet " + req.getCityUserName() + " ...");
-        ccapi.global_def.GlobalDef.ResHeader response;
+        ccapi.GlobalDef.ResHeader response;
         try {
             response = blockingStub.createUser(req);
         } catch (StatusRuntimeException e) {
@@ -68,9 +68,9 @@ public class chainClient {
         logger.info("Greeting: " + response.getErrMsg());
     }
 
-    public void RechargeRequestReq(ccapi.cc.CcOuterClass.RechargeRequestReq req) {
+    public void RechargeRequestReq(ccapi.CcOuterClass.RechargeRequestReq req) {
         logger.info("Will try to greet " + req.getPurchaseId() + " ...");
-        ccapi.cc.CcOuterClass.RechargeRequestRes response;
+        ccapi.CcOuterClass.RechargeRequestRes response;
         try {
             response = blockingStub.rechargeRequest(req);
         } catch (StatusRuntimeException e) {
