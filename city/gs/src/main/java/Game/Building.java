@@ -612,7 +612,7 @@ public abstract class Building implements Ticker{
         	brandMap.clear();
         	qtyMap.clear();
         	//评分
-            //1.知名度评分 = MIN (当前知名度 / 全城最高知名度 , 当前知名度 / 最低知名度) * 100
+            //1.知名度评分 = (当前知名度 - 全城最低知名度) / (全城最高知名度 - 全城最低知名度)
             //获取全城最高和最低的知名度
             Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(type);
             int minBrand=maxAndMinBrand.get(BuildingUtil.MIN);//最低知名度
@@ -629,8 +629,14 @@ public abstract class Building implements Ticker{
             Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(this.type());
             double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
             double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
-            int bd = (int)Math.ceil((brand / maxBrand < brand / minBrand ? brand / maxBrand : brand / minBrand) * 100);
-            int qty=(int)Math.ceil((quality/maxQty<quality/minQty?quality/maxQty:quality/minQty)*100);
+            int bd =100;
+            if(brand>minBrand&&maxBrand!=minBrand) {
+                bd = (int) Math.ceil(((brand - minBrand) / (maxBrand - minBrand))*100);
+            }
+            int qty=100;
+            if(quality>minQty) {
+                qty = (int) Math.ceil(((quality - minQty) / (maxQty - minQty))*100);
+            }
             builder.setBrand(bd).setQuality(qty);
     	}
         return builder.build();

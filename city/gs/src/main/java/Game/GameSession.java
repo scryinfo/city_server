@@ -4059,7 +4059,10 @@ public class GameSession {
 		Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(building.type());
 		Integer maxBrand = maxAndMinBrand.get(BuildingUtil.MAX);
 		Integer minBrand = maxAndMinBrand.get(BuildingUtil.MIN);
-		double minnerBrand = basicBrand / maxBrand < basicBrand / minBrand ? maxBrand:minBrand;
+		double brandScore=100;
+		if(basicBrand>minBrand&&maxBrand!=minBrand) {
+			brandScore = Math.ceil(((basicBrand - minBrand) / (maxBrand - minBrand))*100);
+		}
 		//2.获取全城所占最低的品质值
 		Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(building.type(), Gs.Eva.Btype.Quality_VALUE);
 		Eva maxEva = cityQtyMap.get("max");//全城最大Eva
@@ -4070,23 +4073,19 @@ public class GameSession {
 		Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(building.type());
 		double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
 		double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
-		//
+		//品牌评分
 		double localQty = basicQuality * (1 + addQuality);
-		double minnerQty=localQty/maxQty<localQty/minQty?maxQty:minQty;
-
-      	/*Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
-    	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
-    	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-    	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
-		totalBrand=totalBrand==0?1:totalBrand;//默认值设置1
-    	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());*/
+		double qtyScore=100;
+		if(localQty>minQty) {
+			qtyScore = Math.ceil(((localQty - minQty) / (maxQty - minQty))*100);
+		}
 
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(minnerBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(brandScore).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddQuality).setVal(addQuality).build());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(minnerQty).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(qtyScore).build());
     	this.write(Package.create(cmd, builder.build()));
     }
 	//推广公司信息(修改版)
