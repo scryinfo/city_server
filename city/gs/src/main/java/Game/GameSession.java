@@ -406,9 +406,19 @@ public class GameSession {
 	public void bidGround(short cmd, Message message) throws IllegalArgumentException {
 		Gs.BidGround c = (Gs.BidGround)message;
 		Optional<Common.Fail.Reason> err = GroundAuction.instance().bid(c.getId(), player, c.getNum());
-		if(err.isPresent())
-			this.write(Package.fail(cmd, err.get()));
-		//多家一个返回，加上出价最高者的信息
+		if(err.isPresent()) {
+			GroundAuction.Entry entry = GroundAuction.instance().getAuctions(c.getId());
+			//如果是当前竞拍者并且价格相同则不发送高价竞拍者的信息
+            if(entry.price()!=c.getNum()&&!(entry.biderId().equals(player))){
+				Gs.BidChange.Builder builder = Gs.BidChange.newBuilder().setBiderId(Util.toByteString(entry.biderId()))
+						.setNowPrice(entry.price())
+						.setTargetId(c.getId())
+						.setTs(entry.ts());
+				Package pack = Package.create(GsCode.OpCode.bidChangeInform_VALUE, builder.build());
+				GameServer.sendToAll(pack);
+			}
+            this.write(Package.fail(cmd, err.get()));
+		}
 		else
 			this.write(Package.create(cmd, c));
 	}

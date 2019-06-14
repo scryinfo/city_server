@@ -115,6 +115,9 @@ public class GroundAuction {
         public long price() {
             return history.isEmpty()?0:history.get(history.size()-1).price;
         }
+        public long ts(){
+            return history.isEmpty()?0:history.get(history.size()-1).ts;
+        }
     }
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
@@ -222,4 +225,10 @@ public class GroundAuction {
     //public void unregist(ChannelId id) { this.watcher.remove(id); }
     @Transient
     private Set<ChannelId> watcher = new HashSet<>();
+
+    //获取土地拍卖信息
+    public Entry getAuctions(int id) {
+        return auctions.get(id);
+    }
+
 }
