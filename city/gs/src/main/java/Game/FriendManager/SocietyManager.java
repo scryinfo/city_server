@@ -24,6 +24,7 @@ public class SocietyManager
                 @Override
                 public Optional<Society> load(UUID key)
                 {
+                    offlineSocietyInfoHashMap.remove(key);
                     return Optional.ofNullable(GameDb.getSocietyById(key));
                 }
 
@@ -45,20 +46,17 @@ public class SocietyManager
     );
 
     private static final long modifyInterval = 7 * 24 * 3600 * 1000;
-    private static final long queryInterval = 5 * 60 * 1000;
 
-    private static long lastQueryTime = 0L;
-    private static Map<UUID,Gs.SocietyInfo> societyInfoMap = new HashMap<>();
+    private static Map<UUID,Gs.SocietyInfo> offlineSocietyInfoHashMap = new HashMap<>();
 
     public static Collection<Gs.SocietyInfo> getSocietyList()
     {
-        if (System.currentTimeMillis() - lastQueryTime > queryInterval)
-        {
-            GameDb.getAllSociety().forEach(society ->
-                    societyInfoMap.put(society.getId(),society.toSimpleProto()));
-            lastQueryTime = System.currentTimeMillis();
-        }
-        return societyInfoMap.values();
+        List<Gs.SocietyInfo> list = new ArrayList<>();
+        societyCache.asMap().values().forEach(option ->
+                option.ifPresent(society -> list.add(society.toSimpleProto())));
+
+        list.addAll(offlineSocietyInfoHashMap.values());
+        return list;
     }
 
     public static Society createSociety(UUID createId, String name, String introduction)
@@ -67,7 +65,6 @@ public class SocietyManager
         if (GameDb.saveOrUpdSociety(society))
         {
             societyCache.put(society.getId(), Optional.of(society));
-            societyInfoMap.put(society.getId(), society.toSimpleProto());
             return society;
         }
         return null;
@@ -128,6 +125,7 @@ public class SocietyManager
                         new HashSet<>(society.getMemberIds())).isEmpty())
                 {
                     societyCache.invalidate(society.getId());
+                    offlineSocietyInfoHashMap.put(society.getId(), society.toSimpleProto());
                     //GameDb.evict(society);
                 }
             }
@@ -170,7 +168,6 @@ public class SocietyManager
 
                     GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
                     GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
-                    societyInfoMap.put(society.getId(), society.toSimpleProto());
                 }
                 else
                 {
@@ -204,8 +201,6 @@ public class SocietyManager
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
             GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
-            societyInfoMap.put(society.getId(), society.toSimpleProto());
-            //societyInfoMap.put(society.getId(), society.toProto(true));
         }
     }
 
@@ -230,7 +225,6 @@ public class SocietyManager
                     .build();
             GameServer.sendTo(society.getMemberIds(), Package.create(cmd, info));
             GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE, notice.toProto(societyId)));
-            societyInfoMap.put(society.getId(), society.toSimpleProto());
         }
     }
 
@@ -405,7 +399,6 @@ public class SocietyManager
                 player.setSocietyId(null);
                 GameDb.saveOrUpdateAndDelete(Collections.singletonList(player), Collections.singletonList(society));
                 societyCache.invalidate(societyId);
-                societyInfoMap.remove(societyId);
                 return true;
             }
         }
@@ -471,7 +464,6 @@ public class SocietyManager
                 society.getMemberHashMap().get(appointId).setIdentity(Gs.SocietyMember.Identity.CHAIRMAN_VALUE);
                 society.addNotice(notice);
                 GameDb.saveOrUpdate(society);
-                societyInfoMap.put(societyId, society.toSimpleProto());
 
                 GameServer.sendTo(society.getMemberIds(), Package.create(GsCode.OpCode.noticeAdd_VALUE,
                         notice.toProto(societyId)));
