@@ -3896,8 +3896,6 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-
-
 	//查询城市主页
 	public void queryCityIndex(short cmd){
 		Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
