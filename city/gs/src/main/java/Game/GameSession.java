@@ -4322,4 +4322,60 @@ public class GameSession {
 		}
 	}
 
+	//查询原料厂所有的原料信息
+	public void queryBuildingMaterialInfo(short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		UUID playerId = building.ownerId();
+		int type = building.type();
+		int workerNum = building.getWorkerNum();
+		if(type!=MetaBuilding.MATERIAL)
+			return;
+		Gs.BuildingMaterialInfo.Builder materialInfo = Gs.BuildingMaterialInfo.newBuilder();
+		for (Integer materialId : MetaData.getBuildingTech(building.type())) {
+			MetaMaterial item = MetaData.getMaterial(materialId);
+			//查询eva信息
+			Eva eva = EvaManager.getInstance().getEva(playerId, materialId, Gs.Eva.Btype.ProduceSpeed_VALUE);
+			//生产速度等于 员工人数*基础值*（1+eva加成）
+			double numOneSec = workerNum * item.n * (1 + EvaManager.getInstance().computePercent(eva));
+			Gs.BuildingMaterialInfo.ItemInfo.Builder itemInfo = materialInfo.addItemsBuilder();
+			itemInfo.setKey(materialId).setNumOneSec(numOneSec);
+		}
+		this.write(Package.create(cmd,materialInfo.build()));
+	}
+
+	public void queryBuildingGoodInfo(short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		UUID playerId = building.ownerId();
+		int type = building.type();
+		int workerNum = building.getWorkerNum();
+		if(type!=MetaBuilding.PRODUCE)
+			return;
+		Gs.BuildingGoodInfo.Builder goodInfo = Gs.BuildingGoodInfo.newBuilder();
+		Player player = GameDb.getPlayer(playerId);
+		for (Integer goodId : MetaData.getBuildingTech(building.type())) {
+			MetaGood good = MetaData.getGood(goodId);
+			//查询eva信息
+			Eva speedEva = EvaManager.getInstance().getEva(playerId, goodId, Gs.Eva.Btype.ProduceSpeed_VALUE);
+			Eva qtyEva = EvaManager.getInstance().getEva(playerId, goodId, Gs.Eva.Btype.Quality_VALUE);
+			//1.生产速度等于 员工人数*基础值*（1+eva加成）
+			double numOneSec = workerNum * good.n * (1 + EvaManager.getInstance().computePercent(speedEva));
+			//2.品牌
+			int brand=good.brand;//基础值
+			brand += BrandManager.instance().getBrand(playerId, type).getV();
+			//3.品质总值（基础值*（1+eva加成））
+			double quality = good.quality;
+			quality =quality * (1+EvaManager.getInstance().computePercent(qtyEva));
+			//4.品牌名(如果没有则取公司名)
+			String brandName = BrandManager.instance().getBrand(playerId, goodId).getBrandName();
+			if(null==brandName)
+				brandName = player.getCompanyName();
+			Gs.BuildingGoodInfo.ItemInfo.Builder itemInfo = goodInfo.addItemsBuilder();
+			itemInfo.setKey(goodId).setNumOneSec(numOneSec).setBrand(brand).setQty(quality).setBrandName(brandName);
+		}
+		this.write(Package.create(cmd,goodInfo.build()));
+	}
 }
