@@ -16,7 +16,7 @@ import Game.Util.*;
 import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
-import ccapi.CcOuterClass.RechargeRequestReq;
+import ccapi.CcOuterClass;
 import ccapi.Dddbind;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
@@ -4217,7 +4217,7 @@ public class GameSession {
 	public void ct_RechargeRequestReq(short cmd,Message message){
 		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq ) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		RechargeRequestReq req = msg.getRechargeRequestReq();
+		CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
 
 		//服务器签名验证测试
 		//计算哈希
