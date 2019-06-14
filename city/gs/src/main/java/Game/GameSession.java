@@ -450,6 +450,7 @@ public class GameSession {
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
 		b.shutdownBusiness();
+		b.addUnEmployeeNpc();//变成失业人员
 		if(b instanceof Apartment){ //住宅停业，清空入住人数
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
