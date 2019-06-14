@@ -2079,7 +2079,7 @@ public class GameSession {
 	public void getFlightBetHistory(short cmd) {
 		Gs.FlightBetHistory.Builder builder = Gs.FlightBetHistory.newBuilder();
 		for(LogDb.FlightBetRecord r : LogDb.getFlightBetRecord(player.id())) {
-			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setData(r.data);
+			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setWin(r.win).setData(r.data);
 		}
 		this.write(Package.create(cmd, builder.build()));
 	}
