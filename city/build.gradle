@@ -29,6 +29,8 @@ allprojects {
         compile group:'com.yunpian.sdk',name:'yunpian-java-sdk',version: '1.2.7'
         compile group: 'org.json', name: 'json', version: '20180813'
         compile group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format', version: '1.4'
+        compile group: 'log4j', name: 'log4j', version: '1.2.17'
+        compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
     }
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
