@@ -17,6 +17,7 @@ import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
 import ccapi.CcOuterClass.RechargeRequestReq;
+import ccapi.Dddbind;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -4178,9 +4179,9 @@ public class GameSession {
 	}
 
 	public void ct_createUser(short cmd,Message message){
-		ccapi.dddbind.Dddbind.ct_createUser msg = (ccapi.dddbind.Dddbind.ct_createUser) message;
+		ccapi.Dddbind.ct_createUser msg = (ccapi.Dddbind.ct_createUser) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		ccapi.cc.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
+		ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
 		try {
 			chainClient.instance().CreateUser(req);
 		}  catch (Exception e) {
@@ -4191,9 +4192,9 @@ public class GameSession {
 	}
 
 	public void ct_GenerateOrderReq(short cmd,Message message){
-		ccapi.dddbind.Dddbind.ct_GenerateOrderReq msg = (ccapi.dddbind.Dddbind.ct_GenerateOrderReq) message;
+		ccapi.Dddbind.ct_GenerateOrderReq msg = (ccapi.Dddbind.ct_GenerateOrderReq) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString()).build()));
+		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString().replace("-","")).build()));
 		int t = 0 ;
 	}
 
@@ -4264,7 +4265,7 @@ public class GameSession {
 
 	//ct_DisChargeReq
 	public void ct_DisChargeReq(short cmd,Message message){
-		ccapi.Dddbind.ct_DisChargeReq msg = (ccapi.Dddbind.ct_DisChargeReq ) message;
+		Dddbind.ct_DisChargeReq msg = (Dddbind.ct_DisChargeReq) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.DisChargeReq req = msg.getDisChargeReq();
 

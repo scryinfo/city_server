@@ -4,10 +4,11 @@ import Game.GameDb;
 import Game.Player;
 import Shared.Package;
 import Shared.Util;
-import ccapi.CcOuterClass;
+import ccapi.CcOuterClass.DisChargeRes;
+import ccapi.CcOuterClass.RechargeRequestRes;
+import ccapi.Dddbind.ct_DisChargeRes;
+import ccapi.Dddbind.ct_RechargeRequestRes;
 import ccapi.GlobalDef;
-import ccapi.Dddbind.*;
-import ccapi.CcOuterClass.*;
 import cityapi.City.RechargeResultReq;
 import com.google.protobuf.ByteString;
 import gscode.GsCode;
@@ -29,6 +30,9 @@ public class dddPurchaseMgr {
 
     private static dddPurchaseMgr instance;
     public static dddPurchaseMgr instance() {
+        if(instance == null){
+            init();
+        }
         return instance;
     }
 
