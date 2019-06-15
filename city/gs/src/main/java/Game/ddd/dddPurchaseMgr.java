@@ -9,7 +9,7 @@ import ccapi.CcOuterClass.RechargeRequestRes;
 import ccapi.Dddbind.ct_DisChargeRes;
 import ccapi.Dddbind.ct_RechargeRequestRes;
 import ccapi.GlobalDef;
-import cityapi.City.RechargeResultReq;
+import cityapi.CityOuterClass.RechargeResultReq;
 import com.google.protobuf.ByteString;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
