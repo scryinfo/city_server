@@ -174,7 +174,9 @@ public class Shopping implements IAction {
             double repeatBuyRetio=mutilSpend/salary*spend;
             Random random = new Random();
             int num = random.nextInt(101);
-            if(num/100.d<repeatBuyRetio){
+            //更新剩余数量
+            saleCount=((IShelf) sellShop).getSaleCount(chosenGoodMetaId);
+            if(num/100.d<repeatBuyRetio&&saleCount>0){
             	//选出满足条件的商品后，走再次购物逻辑
                 repeatBuyGood(npc,chosen,mutilSpend);
             }
@@ -188,7 +190,8 @@ public class Shopping implements IAction {
         //TODO:计算旷工费
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
-
+        //获取货架商品数量
+        int saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//货架上的数量
         if(chosen.price+minerCost> npc.money()) {
           	//购买时所持金不足,行业涨薪指数 += 定价（已包含旷工费） - 所持金
           	int money=(int) ((chosen.price+minerCost)-npc.money());
@@ -196,6 +199,9 @@ public class Shopping implements IAction {
 
           	npc.hangOut(sellShop);
           	return null;
+          }else  if(saleCount<=0){
+            npc.hangOut(sellShop);
+            return null;
           }
           else {
               npc.decMoney((int) (chosen.price+minerCost));
@@ -240,7 +246,8 @@ public class Shopping implements IAction {
               double repeatBuyRetio=mutilSpend/salary*spend;
               Random random = new Random();
               int num = random.nextInt(101);
-              if(num/100.d<repeatBuyRetio){
+              saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//刷新货架上的数量
+              if(num/100.d<repeatBuyRetio&&saleCount>0){
                   //递归购物
                   repeatBuyGood(npc,chosen,mutilSpend);
               }

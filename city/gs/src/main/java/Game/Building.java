@@ -618,7 +618,7 @@ public abstract class Building implements Ticker{
             int minBrand=maxAndMinBrand.get(BuildingUtil.MIN);//最低知名度
             int maxBrand=maxAndMinBrand.get(BuildingUtil.MAX);//最高知名度
 
-            //2.品质评分 = MIN (当前品质 / 全城最高品质 , 当前品质 / 最低品质) * 100
+            //2.品质评分 = 品质评分 = (当前品质 - 全城最低品质) / (全城最高品质 - 全城最低品质)
             //品质=基础值+eva加成（其实就是获取Eva最高最低值）
             Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(type, Gs.Eva.Btype.Quality_VALUE);
             Eva maxEva = cityQtyMap.get("max");//全城最大Eva
