@@ -4374,9 +4374,10 @@ public class GameSession {
 			double quality = good.quality;
 			quality =quality * (1+EvaManager.getInstance().computePercent(qtyEva));
 			//4.品牌名(如果没有则取公司名)
-			String brandName = BrandManager.instance().getBrand(playerId, goodId).getBrandName();
-			if(null==brandName)
-				brandName = player.getCompanyName();
+			String brandName=player.getCompanyName();
+			BrandManager.BrandName brandNameInfo = BrandManager.instance().getBrand(playerId, goodId).brandName;
+			if(brandNameInfo!=null)
+				brandName = brandNameInfo.getBrandName();
 			Gs.BuildingGoodInfo.ItemInfo.Builder itemInfo = Gs.BuildingGoodInfo.ItemInfo.newBuilder();
 			itemInfo.setKey(goodId).setNumOneSec(numOneSec).setBrand(brand).setQty(quality).setBrandName(brandName);
 			goodInfo.addItems(itemInfo);
