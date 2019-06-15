@@ -79,9 +79,6 @@ public class Shelf {
     }
     public Collection<Integer> getMetaIds(MetaGood.Type type, int lux) {
         return this.slots.entrySet().stream().filter(e-> {
-            if(e.getValue().n<=0){
-                return false;
-            }
             if(e.getKey().meta instanceof MetaGood) {
                 MetaGood mg = (MetaGood)e.getKey().meta;
                 return mg.lux == lux && MetaGood.goodType(mg.id) == type;
