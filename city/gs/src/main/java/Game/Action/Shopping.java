@@ -78,7 +78,7 @@ public class Shopping implements IAction {
         }
         logger.info("good weight : " + Arrays.toString(weight));
         int idx = ProbBase.randomIdx(weight);
-        int chosenGoodMetaId = (int) goodMetaIds.toArray()[idx]; //选择具体的商品
+        int chosenGoodMetaId = (int) goodMetaIds.toArray()[idx];
         logger.info("chosen: " + chosenGoodMetaId);
         Iterator<Building> iterator = buildings.iterator();
         while(iterator.hasNext()) {
@@ -109,7 +109,7 @@ public class Shopping implements IAction {
                 wi.add(new WeightInfo(b.id(), sell.producerId, sell.qty, w, sell.price, (MetaGood) sell.meta, buildingBrand, b.quality()));
             }
         });
-        WeightInfo chosen = wi.get(ProbBase.randomIdx(wi.stream().mapToInt(WeightInfo::getW).toArray()));//挑选具体的建筑
+        WeightInfo chosen = wi.get(ProbBase.randomIdx(wi.stream().mapToInt(WeightInfo::getW).toArray()));
         Building sellShop = City.instance().getBuilding(chosen.bId);
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());

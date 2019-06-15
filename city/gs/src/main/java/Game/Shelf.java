@@ -148,7 +148,7 @@ public class Shelf {
     public boolean full() {
         return slots.size() >= capacity;
     }
-    public boolean has(int mId) {//要求货架数量大于0
+    public boolean has(int mId) {
         return this.slots.keySet().stream().anyMatch(k->k.meta.id == mId);
     }
     public Gs.Shelf toProto() {

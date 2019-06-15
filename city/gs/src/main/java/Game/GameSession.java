@@ -4060,6 +4060,7 @@ public class GameSession {
 		Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(building.type());
 		Integer maxBrand = maxAndMinBrand.get(BuildingUtil.MAX);
 		Integer minBrand = maxAndMinBrand.get(BuildingUtil.MIN);
+		//品牌评分
 		double brandScore=100;
 		if(basicBrand>minBrand&&maxBrand!=minBrand) {
 			brandScore = Math.ceil(((basicBrand - minBrand) / (maxBrand - minBrand))*100);
@@ -4074,8 +4075,8 @@ public class GameSession {
 		Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(building.type());
 		double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
 		double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
-		//品牌评分
 		double localQty = basicQuality * (1 + addQuality);
+		//品质评分
 		double qtyScore=100;
 		if(localQty>minQty) {
 			qtyScore = Math.ceil(((localQty - minQty) / (maxQty - minQty))*100);
