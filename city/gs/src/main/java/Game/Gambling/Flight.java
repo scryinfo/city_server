@@ -41,7 +41,7 @@ public class Flight {
     int getDelay() throws ParseException {
         int e = toTs(this.FlightDeptimePlanDate);
         int a = toTs(this.FlightDeptimeDate);
-        return a - e;
+        return (a - e)/60;
     }
     protected Flight(){}
 

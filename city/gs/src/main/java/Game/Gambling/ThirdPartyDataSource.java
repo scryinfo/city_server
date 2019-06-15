@@ -40,7 +40,6 @@ public class ThirdPartyDataSource {
             e.printStackTrace();
         }
     }
-    //private int totalPages;
     private final Set<Set<String>> airPortCombination = Sets.combinations(new HashSet<>(Arrays.asList("ABC","BCD")), 2);
     private Map<String, Flight> data = new HashMap<>();
     private Map<String, String> departured = new HashMap<>();
@@ -170,8 +169,6 @@ public class ThirdPartyDataSource {
 
             Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
             String json = EntityUtils.toString(entity, encoding);
-         /*   ArrayList<Object> list = new ArrayList<>();
-            list.add(json);*/
             return toList(new JSONArray(json));
         } catch (ClientProtocolException e) {
 
@@ -184,7 +181,7 @@ public class ThirdPartyDataSource {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return null;
         }
-        return null;
     }
 }

@@ -450,6 +450,7 @@ public class GameSession {
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
 		b.shutdownBusiness();
+		b.addUnEmployeeNpc();//变成失业人员
 		if(b instanceof Apartment){ //住宅停业，清空入住人数
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
@@ -2079,7 +2080,7 @@ public class GameSession {
 	public void getFlightBetHistory(short cmd) {
 		Gs.FlightBetHistory.Builder builder = Gs.FlightBetHistory.newBuilder();
 		for(LogDb.FlightBetRecord r : LogDb.getFlightBetRecord(player.id())) {
-			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setData(r.data);
+			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setWin(r.win).setData(r.data);
 		}
 		this.write(Package.create(cmd, builder.build()));
 	}

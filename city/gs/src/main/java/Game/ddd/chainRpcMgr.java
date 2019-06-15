@@ -110,7 +110,7 @@ public class chainRpcMgr {
 
         @Override
         public void rechargeResult(City.RechargeResultReq req, StreamObserver<City.RechargeResultRes> responseObserver) {
-            logger.info("Client RechargeResultReq recived ");
+            logger.info("Client RechargeResultRes recived ");
             ccapi.GlobalDef.ResHeader.Builder ResHeader = ccapi.GlobalDef.ResHeader.newBuilder();
             ResHeader.setReqId(req.getReqHeader().getReqId()).setVersion(req.getReqHeader().getVersion());
             City.RechargeResultRes reply = City.RechargeResultRes.newBuilder().setResHeader(ResHeader).build();

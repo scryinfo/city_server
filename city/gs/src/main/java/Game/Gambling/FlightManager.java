@@ -54,6 +54,7 @@ public class FlightManager {
             GameDb.saveOrUpdate(this);
     }
 
+    private static final int DELAY_MINIUTE_TOLERANCE = 3;
     private void fightDepartureAction(Flight f) {
         final BetInfos g = this.allGambling.get(f.id);
         if(g == null)
@@ -64,8 +65,8 @@ public class FlightManager {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        final int l = d - 3;
-        final int h = d + 3;
+        final int l = d - DELAY_MINIUTE_TOLERANCE;
+        final int h = d + DELAY_MINIUTE_TOLERANCE;
 
         Collection<Player> updates = new HashSet<>();
         for (BetInfos.Info e : g.infos.values()) {

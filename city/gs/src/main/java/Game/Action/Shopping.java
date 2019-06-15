@@ -103,8 +103,8 @@ public class Shopping implements IAction {
                 }else{
                 	w=0;
                 }
-                if(w < 0){
-                    w = 0;
+                if(w<=0){
+                    continue;
                 }
                 wi.add(new WeightInfo(b.id(), sell.producerId, sell.qty, w, sell.price, (MetaGood) sell.meta, buildingBrand, b.quality()));
             }

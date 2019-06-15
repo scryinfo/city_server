@@ -208,15 +208,8 @@ public class NpcManager {
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
-  	  //计算各类npc的数量
-	  allNpc.forEach((k,v)->{
-		  int type=v.type();
-		  if(!countMap.containsKey(type)){ 
-			  countMap.put(type, 1);
-		  }else{ 
-			  countMap.put(type,countMap.get(type)+1); 
-		  }
-	  });
+  	  countMap.put(1, allNpc.size());
+  	  countMap.put(2, unEmployeeNpc.size());
 	  return countMap;
    }
     public Map<Integer, Long> countNpcByBuildingType(){
