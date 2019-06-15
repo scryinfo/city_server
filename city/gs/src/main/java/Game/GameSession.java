@@ -4325,29 +4325,30 @@ public class GameSession {
 	//查询原料厂所有的原料信息
 	public void queryBuildingMaterialInfo(short cmd,Message message){
 		Gs.Id id = (Gs.Id) message;
-		UUID bid = Util.toUuid(id.toByteArray());
+		UUID bid = Util.toUuid(id.getId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		UUID playerId = building.ownerId();
-		int type = building.type();
-		int workerNum = building.getWorkerNum();
-		if(type!=MetaBuilding.MATERIAL)
+		if(building==null||building.type()!=MetaBuilding.MATERIAL)
 			return;
+		UUID playerId = building.ownerId();
+		int workerNum = building.getWorkerNum();
 		Gs.BuildingMaterialInfo.Builder materialInfo = Gs.BuildingMaterialInfo.newBuilder();
+		materialInfo.setBuildingId(id.getId());
 		for (Integer materialId : MetaData.getBuildingTech(building.type())) {
+			Gs.BuildingMaterialInfo.ItemInfo.Builder itemInfo = Gs.BuildingMaterialInfo.ItemInfo.newBuilder();
 			MetaMaterial item = MetaData.getMaterial(materialId);
 			//查询eva信息
 			Eva eva = EvaManager.getInstance().getEva(playerId, materialId, Gs.Eva.Btype.ProduceSpeed_VALUE);
-			//生产速度等于 员工人数*基础值*（1+eva加成）
+			//生产速度queryBuildingMaterialInfo等于 员工人数*基础值*（1+eva加成）
 			double numOneSec = workerNum * item.n * (1 + EvaManager.getInstance().computePercent(eva));
-			Gs.BuildingMaterialInfo.ItemInfo.Builder itemInfo = materialInfo.addItemsBuilder();
 			itemInfo.setKey(materialId).setNumOneSec(numOneSec);
+			materialInfo.addItems(itemInfo);
 		}
 		this.write(Package.create(cmd,materialInfo.build()));
 	}
 
 	public void queryBuildingGoodInfo(short cmd,Message message){
 		Gs.Id id = (Gs.Id) message;
-		UUID bid = Util.toUuid(id.toByteArray());
+		UUID bid = Util.toUuid(id.getId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
 		UUID playerId = building.ownerId();
 		int type = building.type();
@@ -4355,6 +4356,7 @@ public class GameSession {
 		if(type!=MetaBuilding.PRODUCE)
 			return;
 		Gs.BuildingGoodInfo.Builder goodInfo = Gs.BuildingGoodInfo.newBuilder();
+		goodInfo.setBuildingId(id.getId());
 		Player player = GameDb.getPlayer(playerId);
 		for (Integer goodId : MetaData.getBuildingTech(building.type())) {
 			MetaGood good = MetaData.getGood(goodId);
@@ -4373,8 +4375,9 @@ public class GameSession {
 			String brandName = BrandManager.instance().getBrand(playerId, goodId).getBrandName();
 			if(null==brandName)
 				brandName = player.getCompanyName();
-			Gs.BuildingGoodInfo.ItemInfo.Builder itemInfo = goodInfo.addItemsBuilder();
+			Gs.BuildingGoodInfo.ItemInfo.Builder itemInfo = Gs.BuildingGoodInfo.ItemInfo.newBuilder();
 			itemInfo.setKey(goodId).setNumOneSec(numOneSec).setBrand(brand).setQty(quality).setBrandName(brandName);
+			goodInfo.addItems(itemInfo);
 		}
 		this.write(Package.create(cmd,goodInfo.build()));
 	}
