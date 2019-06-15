@@ -49,6 +49,12 @@ public class SocietyManager
 
     private static Map<UUID,Gs.SocietyInfo> offlineSocietyInfoHashMap = new HashMap<>();
 
+    public static void init()
+    {
+        GameDb.getAllSociety().forEach(society ->
+                offlineSocietyInfoHashMap.put(society.getId(),society.toSimpleProto()));
+    }
+
     public static Collection<Gs.SocietyInfo> getSocietyList()
     {
         List<Gs.SocietyInfo> list = new ArrayList<>();
