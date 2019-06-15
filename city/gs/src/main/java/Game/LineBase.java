@@ -82,7 +82,7 @@ public abstract class LineBase {
         {
             Eva eva = EvaManager.getInstance().getEva(onwerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
             double evaAdd = EvaManager.getInstance().computePercent(eva);
-            accumulated += item.n * this.workerNum*(1+evaAdd)+2;
+            accumulated += item.n * this.workerNum*(1+evaAdd);
             add = accumulated >= 1 ? left():0;
             if(add > 0) {
                 this.count += add;
