@@ -128,7 +128,7 @@ public class StatisticSession {
     	}
     	if(ls!=null&&ls.size()>0){
     	 	for (Document document : ls) {
-        		info.setId(document.getInteger("id"));
+        		info.setId(document.getInteger("id")==null?0:document.getInteger("id"));
         		info.setTotal(document.getLong("total"));
         		info.setTime(document.getLong("time"));
         		list.addNumInfo(info.build());
