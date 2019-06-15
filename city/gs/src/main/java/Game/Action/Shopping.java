@@ -97,6 +97,17 @@ public class Shopping implements IAction {
             	double goodSpendV = spend;
               //int w = goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000);
                 int w =0;// goodSpendV==0?0: (int) ((1 - sell.price / goodSpendV) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d));
+                logger.debug("chosenGoodMetaId:"+chosenGoodMetaId);
+                logger.debug("sell.price:"+sell.price);
+                logger.debug("goodSpendV:"+goodSpendV);
+                logger.debug("sell.price / goodSpendV:"+sell.price / goodSpendV);
+                logger.debug("-----------");
+                logger.debug("(goodSpendV /sell.price):"+(goodSpendV /sell.price));
+                logger.debug("(goodSpendV /sell.price) * 100000:"+(goodSpendV /sell.price) * 100000);
+                logger.debug("(int) ((goodSpendV /sell.price) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d)):"+(int) ((goodSpendV /sell.price) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d)));
+                logger.debug("-----------");
+                logger.debug("((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1):"+(int)((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1));
+                logger.debug("1 - sell.price / goodSpendV: "+(1 - sell.price / goodSpendV ));
                 if(1 - sell.price / goodSpendV >= 0){
                 	w=goodSpendV==0?0: (int) ((goodSpendV /sell.price) * 100000 * (1 + (1-Building.distance(b, npc.buildingLocated())/(1.42*MetaData.getCity().x))/100.d))*(int)((buildingBrand + b.quality() + BrandManager.instance().getGood(sell.producerId, chosenGoodMetaId)  + sell.qty) / 400.d * 7 + 1);
                 }else{
@@ -104,6 +115,9 @@ public class Shopping implements IAction {
                 }
                 if(w < 0){
                     w = 0;
+                }
+                if(w==0){
+                    continue;
                 }
                 wi.add(new WeightInfo(b.id(), sell.producerId, sell.qty, w, sell.price, (MetaGood) sell.meta, buildingBrand, b.quality()));
             }
@@ -115,6 +129,10 @@ public class Shopping implements IAction {
         //TODO:计算旷工费
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
+        logger.debug("chosen.price:"+chosen.price);
+        logger.debug("minerCost:"+minerCost);
+        logger.debug("chosen.price+minerCost:"+chosen.price+minerCost);
+        logger.debug("npc.money():"+npc.money());
         if(chosen.price+minerCost > npc.money()) {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
         	int money=(int) ((chosen.price+minerCost)-npc.money());

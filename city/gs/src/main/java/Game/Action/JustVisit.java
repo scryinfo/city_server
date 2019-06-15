@@ -60,6 +60,9 @@ public class JustVisit implements IAction {
             }else{
                 r = 0;
             }
+            if(r==0){
+                continue;
+            }
             buildingWeights[i++] = r<0?0:r;
         }
         int idx = ProbBase.randomIdx(buildingWeights);
