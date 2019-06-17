@@ -179,15 +179,28 @@ public class StatisticSession {
       	Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
     	int id=g.getId();
 		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
-		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
+		Ss.NpcNumCurveMap.Builder bd=Ss.NpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
 	    map.forEach((k,v)->{
 	    	bd.setKey(k);
 			bd.setValue(v);
-			list.addGoodsNpcNumCurveMap(bd.build());
+			list.addNpcNumCurveMap(bd.build());
 	    });
 		this.write(Package.create(cmd,list.build()));
     }
+
+	public void queryApartmentNpcNumCurve(short cmd)
+	{
+		Map<Long, Long> map=SummaryUtil.queryApartmentNpcNumCurve(SummaryUtil.getDayApartmentNpcNum(),CountType.BYHOUR);
+		Ss.NpcNumCurveMap.Builder bd=Ss.NpcNumCurveMap.newBuilder();
+		Ss.ApartmentNpcNumCurve.Builder list = Ss.ApartmentNpcNumCurve.newBuilder();
+		map.forEach((k,v)->{
+			bd.setKey(k);
+			bd.setValue(v);
+			list.addNpcNumCurveMap(bd.build());
+		});
+		this.write(Package.create(cmd,list.build()));
+	}
     
     public void queryCityBroadcast(short cmd)
     {

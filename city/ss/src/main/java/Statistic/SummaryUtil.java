@@ -7,11 +7,6 @@ import com.mongodb.Block;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-
-import static Shared.LogDb.KEY_TOTAL;
-import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.*;
-
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
@@ -19,6 +14,10 @@ import org.bson.Document;
 import ss.Ss;
 
 import java.util.*;
+
+import static Shared.LogDb.KEY_TOTAL;
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.*;
 
 public class SummaryUtil
 {
@@ -239,6 +238,33 @@ public class SummaryUtil
     		map.put(document.getLong("time"), document.getLong("total"));
     	});
     	return map;
+    }
+    public static Map<Long, Long> queryApartmentNpcNumCurve(MongoCollection<Document> collection,CountType countType)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+        Map<Long, Long> map = new LinkedHashMap<>();
+        collection.find(and(
+                eq("type",countType.getValue()),
+                gte("time", startTime),
+                lt("time", endTime)
+        ))
+        .projection(fields(include("time", "total"), excludeId()))
+        .sort(Sorts.descending("time"))
+        .forEach((Block<? super Document>) document ->
+        {
+            map.put(document.getLong("time"), document.getLong("total"));
+        });
+        return map;
     }
     public static Map<Long, Long> queryPlayerIncomePayCurve(MongoCollection<Document> collection,UUID id)
     {
