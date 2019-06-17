@@ -4324,7 +4324,7 @@ public class GameSession {
 		}
 	}
 
-	//查询原料厂所有的原料信息
+	//查询原料厂所有的原料列表信息
 	public void queryBuildingMaterialInfo(short cmd,Message message){
 		Gs.Id id = (Gs.Id) message;
 		UUID bid = Util.toUuid(id.getId().toByteArray());
@@ -4347,7 +4347,7 @@ public class GameSession {
 		}
 		this.write(Package.create(cmd,materialInfo.build()));
 	}
-
+	//查询加工厂所有的商品列表详细信息
 	public void queryBuildingGoodInfo(short cmd,Message message){
 		Gs.Id id = (Gs.Id) message;
 		UUID bid = Util.toUuid(id.getId().toByteArray());
@@ -4383,5 +4383,14 @@ public class GameSession {
 			goodInfo.addItems(itemInfo);
 		}
 		this.write(Package.create(cmd,goodInfo.build()));
+	}
+	//查询推广公司的商品推广列表的详细信息
+	public void queryPromotionItemInfo(short cmd,Message message){
+		Gs.QueryPromotionItemInfo info = (Gs.QueryPromotionItemInfo) message;
+		UUID bid = Util.toUuid(info.getBuildingId().toByteArray());
+		List<Integer> typeIdsList = info.getTypeIdsList();
+		Building building = City.instance().getBuilding(bid);
+		if(null==building||building.type()!=MetaBuilding.PUBLIC)
+			return;
 	}
 }

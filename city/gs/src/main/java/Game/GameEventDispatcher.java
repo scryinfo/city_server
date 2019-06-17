@@ -256,7 +256,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryBuildingMaterialInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingMaterialInfo"));
 			//查询加工厂的商品信息
 			table.put((short) GsCode.OpCode.queryBuildingGoodInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingGoodInfo"));
-
+			//查询推广公司的商品推广选项详情
+			table.put((short) GsCode.OpCode.queryPromotionItemInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryPromotionItemInfo.PARSER, GameSession.class,"queryPromotionItemInfo"));
 			//充提
 			table.put((short) GsCode.OpCode.ct_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_createUser.PARSER, GameSession.class,"ct_createUser"));
 			table.put((short) GsCode.OpCode.ct_GenerateOrderReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GenerateOrderReq.PARSER, GameSession.class,"ct_GenerateOrderReq"));
