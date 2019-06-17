@@ -1,7 +1,7 @@
 package Game.ddd;
 
 import ccapi.CcGrpc.CcBlockingStub;
-import cityapi.City;
+import cityapi.CityGrpc.*;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 
@@ -106,16 +106,16 @@ public class chainRpcMgr {
     }
 
     //grpc服务器------------------------------------------------------------------------------------------------------
-    static class RechargeResultImpl extends cityapi.CitySGrpc.CitySImplBase {
-
+    static class RechargeResultImpl extends cityapi.CityGrpc.CityImplBase{
         @Override
-        public void rechargeResult(City.RechargeResultReq req, StreamObserver<City.RechargeResultRes> responseObserver) {
+        public void rechargeResult(cityapi.CityOuterClass.RechargeResultReq req, io.grpc.stub.StreamObserver<cityapi.CityOuterClass.RechargeResultRes> responseObserver) {
             logger.info("Client RechargeResultRes recived ");
             ccapi.GlobalDef.ResHeader.Builder ResHeader = ccapi.GlobalDef.ResHeader.newBuilder();
             ResHeader.setReqId(req.getReqHeader().getReqId()).setVersion(req.getReqHeader().getVersion());
-            City.RechargeResultRes reply = City.RechargeResultRes.newBuilder().setResHeader(ResHeader).build();
+            cityapi.CityOuterClass.RechargeResultRes reply = cityapi.CityOuterClass.RechargeResultRes.newBuilder().setResHeader(ResHeader).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
+            dddPurchaseMgr.instance().on_dddMsg(req);
         }
     }
     //grpc服务器------------------------------------------------------------------------------------------------------
