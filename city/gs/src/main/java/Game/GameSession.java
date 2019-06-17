@@ -442,6 +442,8 @@ public class GameSession {
 		b.createNpc();//产生npc
 		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
+			GameDb.saveOrUpdate(b);
+			GameDb.saveOrUpdate(NpcManager.instance());
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
 		}
 	}
@@ -457,6 +459,7 @@ public class GameSession {
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
 		}
+		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd,c));
 	}
 
