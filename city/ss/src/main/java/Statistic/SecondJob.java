@@ -1,11 +1,12 @@
 package Statistic;
 
-import static Statistic.PerHourJob.BUYGROUND_ID;
-import static Statistic.PerHourJob.RENTGROUND_ID;
-import static Statistic.SummaryUtil.SECOND_MILLISECOND;
+import Shared.LogDb;
+import org.apache.log4j.Logger;
+import org.bson.Document;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,12 +15,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.bson.Document;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-
-import Shared.LogDb;
+import static Statistic.PerHourJob.BUYGROUND_ID;
+import static Statistic.PerHourJob.RENTGROUND_ID;
+import static Statistic.SummaryUtil.SECOND_MILLISECOND;
 
 public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
@@ -51,7 +49,7 @@ public class SecondJob implements org.quartz.Job {
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
         //apartment交易
-        documentList = LogDb.dayTodayNpcExchangeAmount(startTime, endTime, LogDb.getNpcRentApartment());
+        documentList = LogDb.dayApartmentNpcNum(startTime, endTime, LogDb.getNpcRentApartment());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
 
 

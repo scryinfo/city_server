@@ -1,38 +1,12 @@
 package Game.Action;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-
-import Game.BrandManager;
-import Game.Building;
-import Game.City;
-import Game.GameDb;
-import Game.GameServer;
-import Game.IShelf;
-import Game.ItemKey;
-import Game.Npc;
-import Game.Player;
-import Game.RetailShop;
-import Game.Shelf;
-import Game.Meta.AIBuy;
-import Game.Meta.AILux;
-import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import Game.Meta.ProbBase;
+import Game.*;
+import Game.Meta.*;
 import Shared.LogDb;
 import Shared.Util;
 import gs.Gs;
+
+import java.util.*;
 
 public class Shopping implements IAction {
     public Shopping(int aiId) {
@@ -83,8 +57,7 @@ public class Shopping implements IAction {
         Iterator<Building> iterator = buildings.iterator();
         while(iterator.hasNext()) {
             Building b = iterator.next();
-            int saleCount = ((IShelf)b).getSaleCount(chosenGoodMetaId);
-            if(!((RetailShop)b).shelfHas(chosenGoodMetaId)||saleCount==0)//如果货架上该商品为0个，直接移除
+            if(!((RetailShop)b).shelfHas(chosenGoodMetaId))
                 iterator.remove();
         }
         List<WeightInfo> wi = new ArrayList<>();
@@ -116,15 +89,11 @@ public class Shopping implements IAction {
         //TODO:计算旷工费
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
-        int saleCount = ((IShelf) sellShop).getSaleCount(chosenGoodMetaId);//货架上的数量
         if(chosen.price+minerCost > npc.money()) {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
         	int money=(int) ((chosen.price+minerCost)-npc.money());
         	City.instance().addIndustryMoney(npc.building().type(),money);
-        	
-            npc.hangOut(sellShop);
-            return null;
-        }else if(saleCount<=0){//货架上无货物，不允许购买
+
             npc.hangOut(sellShop);
             return null;
         }
@@ -174,9 +143,7 @@ public class Shopping implements IAction {
             double repeatBuyRetio=mutilSpend/salary*spend;
             Random random = new Random();
             int num = random.nextInt(101);
-            //更新剩余数量
-            saleCount=((IShelf) sellShop).getSaleCount(chosenGoodMetaId);
-            if(num/100.d<repeatBuyRetio&&saleCount>0){
+            if(num/100.d<repeatBuyRetio){
             	//选出满足条件的商品后，走再次购物逻辑
                 repeatBuyGood(npc,chosen,mutilSpend);
             }
@@ -190,16 +157,12 @@ public class Shopping implements IAction {
         //TODO:计算旷工费
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
-        //获取货架商品数量
-        int saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//货架上的数量
+
         if(chosen.price+minerCost> npc.money()) {
           	//购买时所持金不足,行业涨薪指数 += 定价（已包含旷工费） - 所持金
           	int money=(int) ((chosen.price+minerCost)-npc.money());
           	City.instance().addIndustryMoney(npc.building().type(),money);
 
-          	npc.hangOut(sellShop);
-          	return null;
-          }else  if(saleCount<=0){
             npc.hangOut(sellShop);
             return null;
           }
@@ -246,8 +209,7 @@ public class Shopping implements IAction {
               double repeatBuyRetio=mutilSpend/salary*spend;
               Random random = new Random();
               int num = random.nextInt(101);
-              saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//刷新货架上的数量
-              if(num/100.d<repeatBuyRetio&&saleCount>0){
+              if(num/100.d<repeatBuyRetio){
                   //递归购物
                   repeatBuyGood(npc,chosen,mutilSpend);
               }

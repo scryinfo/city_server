@@ -28,16 +28,11 @@ public class FlightManager {
     public void update(long diffNano) {
         if(!timer.update(diffNano))
             return;
-        List<Flight> fs = ThirdPartyDataSource.instance().getAllFlight();
-        for (Flight f : fs) {
-            if(this.undeparturedFlights.containsKey(f.id))
-                continue;
-            this.undeparturedFlights.put(f.id, f);
-        }
 
         Map<String, String> d = ThirdPartyDataSource.instance().getDepartured();
-        Iterator<Map.Entry<String, Flight>> iterator = undeparturedFlights.entrySet().iterator();
+        Iterator<Map.Entry<String, Flight>> iterator = flightInfos.entrySet().iterator();
         boolean changed = false;
+        Collection updates = new ArrayList();
         while(iterator.hasNext()) {
             Map.Entry<String, Flight> en = iterator.next();
             String id = en.getKey();
@@ -47,18 +42,20 @@ public class FlightManager {
                 iterator.remove();
                 changed = true;
                 ThirdPartyDataSource.instance().clear(id);
-                fightDepartureAction(f);
+                updates.addAll(fightDepartureAction(f));
             }
+            this.allGambling.remove(f.id);
         }
         if(changed)
-            GameDb.saveOrUpdate(this);
+            updates.add(this);
+        GameDb.saveOrUpdate(updates);
     }
 
     private static final int DELAY_MINIUTE_TOLERANCE = 3;
-    private void fightDepartureAction(Flight f) {
+    private Collection fightDepartureAction(Flight f) {
         final BetInfos g = this.allGambling.get(f.id);
         if(g == null)
-            return;
+            return null;
         int d = 0;
         try {
             d = f.getDelay();
@@ -79,28 +76,28 @@ public class FlightManager {
             updates.add(p);
             LogDb.flightBet(e.id, e.delay, e.amount, s<0?false:true, f.toProto());
         }
-        GameDb.saveOrUpdate(updates);
+        return updates;
     }
 
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "m_id")
     @MapKey(name = "id")
-    private Map<String, Flight> undeparturedFlights = new HashMap<>();
+    private Map<String, Flight> flightInfos = new HashMap<>();
 
-    public boolean betFlight(UUID playerId, String flightId, int delay, int score) {
-        if(!undeparturedFlights.containsKey(flightId))
-            return false;
-        BetInfos g = this.allGambling.computeIfAbsent(flightId, k->new BetInfos());
+    public boolean betFlight(UUID playerId, Flight flight, int delay, int score) {
+        flightInfos.putIfAbsent(flight.id, flight);
+        BetInfos g = this.allGambling.computeIfAbsent(flight.id, k->new BetInfos());
         if(g.infos.containsKey(playerId))
             return false;
         g.infos.put(playerId, new BetInfos.Info(playerId, delay, score));
+        ThirdPartyDataSource.instance().trackDeparture(flight.id, flight.getDate());
         return true;
     }
 
     public Gs.Flights toProto(UUID playerId) {
         Gs.Flights.Builder builder = Gs.Flights.newBuilder();
-        for (Flight flight : this.undeparturedFlights.values()) {
+        for (Flight flight : this.flightInfos.values()) {
             Gs.Flights.Flight.Builder b = builder.addFlightBuilder();
             b.setData(flight.toProto());
             b.setId(flight.id);
@@ -158,6 +155,4 @@ public class FlightManager {
     }
 
     public FlightManager() {}
-
-
 }
