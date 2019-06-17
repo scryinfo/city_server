@@ -59,6 +59,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @Override
     public void consumeReserve(ItemKey m, int n, int price) {
         store.consumeReserve(m, n, price);
+        // 推送货架数量变更
+        Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
+        builder.setBuildingId(Util.toByteString(id())).setItemId(m.meta.id).setSelledCount(n);
+        this.sendToWatchers(Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build())
+        );
     }
 
     @Override

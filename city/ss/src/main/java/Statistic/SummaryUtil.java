@@ -43,6 +43,8 @@ public class SummaryUtil
     private static final String DAY_PLAYER_BUY_GROUND = "dayPlayerBuyGround";
     private static final String DAY_PLAYER_BUY_IN_SHELF = "dayPlayerBuyInShelf";
     private static final String DAY_PLAYER_RENT_GROUND = "dayPlayerRentGround";
+    private static final String DAY_PLAYER_RESEARCH = "dayPlayerResearch";
+    private static final String DAY_PLAYER_PROMOTION = "dayPlayePromotion";
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
@@ -63,6 +65,8 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerBuyGround;
     private static MongoCollection<Document> dayPlayerBuyInShelf;
     private static MongoCollection<Document> dayPlayerRentGround;
+    private static MongoCollection<Document> dayPlayerResearch;
+    private static MongoCollection<Document> dayPlayerPromotion;
     private static MongoCollection<Document> dayBuildingIncome;
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
@@ -101,7 +105,10 @@ public class SummaryUtil
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerRentGround = database.getCollection(DAY_PLAYER_RENT_GROUND)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-
+        dayPlayerResearch = database.getCollection(DAY_PLAYER_RESEARCH)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayPlayerPromotion = database.getCollection(DAY_PLAYER_PROMOTION)
+        		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
@@ -539,6 +546,14 @@ public class SummaryUtil
     public static MongoCollection<Document> getDayPlayerRentGround()
     {
     	return dayPlayerRentGround;
+    }
+    public static MongoCollection<Document> getDayPlayerResearch()
+    {
+    	return dayPlayerResearch;
+    }
+    public static MongoCollection<Document> getDayPlayerPromotion()
+    {
+    	return dayPlayerPromotion;
     }
     
     public static MongoCollection<Document> getDayPlayerIncome()
