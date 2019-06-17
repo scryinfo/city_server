@@ -455,6 +455,7 @@ public class GameSession {
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
 		}
+		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd,c));
 	}
 
