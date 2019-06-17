@@ -115,6 +115,7 @@ public class chainRpcMgr {
             cityapi.CityOuterClass.RechargeResultRes reply = cityapi.CityOuterClass.RechargeResultRes.newBuilder().setResHeader(ResHeader).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
+            dddPurchaseMgr.instance().on_dddMsg(req);
         }
     }
     //grpc服务器------------------------------------------------------------------------------------------------------

@@ -175,4 +175,8 @@ public class dddPurchaseMgr {
         }
     }
 
+    public void on_dddMsg(RechargeResultReq ccapiReq){
+
+    }
+
 }
