@@ -8,7 +8,9 @@ import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
+import Game.Gambling.Flight;
 import Game.Gambling.FlightManager;
+import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -450,6 +452,7 @@ public class GameSession {
 		if(b == null || !b.ownerId().equals(player.id()))
 			return;
 		b.shutdownBusiness();
+		b.addUnEmployeeNpc();//变成失业人员
 		if(b instanceof Apartment){ //住宅停业，清空入住人数
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
@@ -2068,18 +2071,26 @@ public class GameSession {
 		Gs.BetFlight c = (Gs.BetFlight)message;
 		if(c.getScore() > player.score())
 			return;
-
-		if(FlightManager.instance().betFlight(player.id(), c.getId(), c.getDelay(), c.getScore())) {
-			player.offsetScore(-c.getScore());
-			GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
-			this.write(Package.create(cmd, c));
-		}
+		ThirdPartyDataSource.instance().postFlightSearchRequest(c.getDate(), c.getId(), (Flight flight)->{
+			City.instance().execute(()->{
+				if(flight == null || flight.planDepatureTimePassed() || flight.departured()) {
+					this.write(Package.fail(cmd));
+				}
+				else {
+					if(FlightManager.instance().betFlight(player.id(), flight, c.getDelay(), c.getScore())) {
+						player.offsetScore(-c.getScore());
+						GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
+						this.write(Package.create(cmd, c));
+					}
+				}
+			});
+		});
 	}
 
 	public void getFlightBetHistory(short cmd) {
 		Gs.FlightBetHistory.Builder builder = Gs.FlightBetHistory.newBuilder();
 		for(LogDb.FlightBetRecord r : LogDb.getFlightBetRecord(player.id())) {
-			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setData(r.data);
+			builder.addInfoBuilder().setAmount(r.amount).setDelay(r.delay).setWin(r.win).setData(r.data);
 		}
 		this.write(Package.create(cmd, builder.build()));
 	}
@@ -2087,6 +2098,22 @@ public class GameSession {
 	public void getAllFlight(short cmd) {
 		this.write(Package.create(cmd, FlightManager.instance().toProto(player.id())));
 	}
+
+	public void searchFlight(short cmd, Message message) {
+		Gs.SearchFlight c = (Gs.SearchFlight)message;
+		if(c.getArrCode().isEmpty() || c.getDepCode().isEmpty() || c.getDate().isEmpty())
+			return;
+		final UUID playerId = player.id();
+		ThirdPartyDataSource.instance().postFlightSearchRequest(c.getDate(), c.getArrCode(), c.getDepCode(), (List<Flight> flights)->{
+			City.instance().execute(()->{
+				Gs.FlightSearchResult.Builder builder = Gs.FlightSearchResult.newBuilder();
+				flights.forEach(f->builder.addData(f.toProto()));
+				this.write(Package.create(cmd, builder.build()));
+				//GameServer.sendTo(Arrays.asList(playerId), Package.create(cmd, builder.build()));
+			});
+		});
+	}
+
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
 		MetaItem mi = MetaData.getItem(c.getItemId());
@@ -4059,7 +4086,11 @@ public class GameSession {
 		Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(building.type());
 		Integer maxBrand = maxAndMinBrand.get(BuildingUtil.MAX);
 		Integer minBrand = maxAndMinBrand.get(BuildingUtil.MIN);
-		double minnerBrand = basicBrand / maxBrand < basicBrand / minBrand ? maxBrand:minBrand;
+		//品牌评分
+		double brandScore=100;
+		if(basicBrand>minBrand&&maxBrand!=minBrand) {
+			brandScore = Math.ceil(((basicBrand - minBrand) / (maxBrand - minBrand))*100);
+		}
 		//2.获取全城所占最低的品质值
 		Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(building.type(), Gs.Eva.Btype.Quality_VALUE);
 		Eva maxEva = cityQtyMap.get("max");//全城最大Eva
@@ -4070,23 +4101,19 @@ public class GameSession {
 		Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(building.type());
 		double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
 		double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
-		//
 		double localQty = basicQuality * (1 + addQuality);
-		double minnerQty=localQty/maxQty<localQty/minQty?maxQty:minQty;
-
-      	/*Map<Integer,Map<Integer,Double>> map=BrandManager.instance().getTotalBrandQualityMap();
-    	brandMap=map.get(Gs.Eva.Btype.Brand_VALUE);
-    	qtyMap=map.get(Gs.Eva.Btype.Quality_VALUE);
-    	double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
-		totalBrand=totalBrand==0?1:totalBrand;//默认值设置1
-    	double totalQuality=BrandManager.instance().getValFromMap(qtyMap,building.type());*/
+		//品质评分
+		double qtyScore=100;
+		if(localQty>minQty) {
+			qtyScore = Math.ceil(((localQty - minQty) / (maxQty - minQty))*100);
+		}
 
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(minnerBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(brandScore).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddQuality).setVal(addQuality).build());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(minnerQty).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalQuality).setVal(qtyScore).build());
     	this.write(Package.create(cmd, builder.build()));
     }
 	//推广公司信息(修改版)

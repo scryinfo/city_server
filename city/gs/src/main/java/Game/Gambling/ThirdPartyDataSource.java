@@ -24,8 +24,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ThirdPartyDataSource {
@@ -40,73 +46,96 @@ public class ThirdPartyDataSource {
             e.printStackTrace();
         }
     }
-    //private int totalPages;
-    private final Set<Set<String>> airPortCombination = Sets.combinations(new HashSet<>(Arrays.asList("ABC","BCD")), 2);
-    private Map<String, Flight> data = new HashMap<>();
+    class TrackInfo {
+        public TrackInfo(String id, String date) {
+            this.id = id;
+            this.date = date;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TrackInfo trackInfo = (TrackInfo) o;
+            return Objects.equals(id, trackInfo.id) &&
+                    Objects.equals(date, trackInfo.date);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, date);
+        }
+
+        String id;
+        String date;
+    }
+    private Set<TrackInfo> track = new HashSet<>();
     private Map<String, String> departured = new HashMap<>();
     private ReadWriteLock lock = new ReentrantReadWriteLock(true);
     private MessageDigest md;
-    public List<Flight> getAllFlight() {
-        lock.readLock().lock();
-        List<Flight> res = data.values().stream().collect(Collectors.toList());
-        lock.readLock().unlock();
-        return res;
-    }
+
     public Map<String, String> getDepartured() {
-        lock.writeLock().lock();
+        lock.readLock().lock();
         Map<String, String> res = new HashMap<>(departured);
-        lock.writeLock().unlock();
+        lock.readLock().unlock();
         return res;
     }
     public void clear(String id) {
         lock.writeLock().lock();
-        this.data.remove(id);
         this.departured.remove(id);
         lock.writeLock().unlock();
     }
 
-    private void pullData(){
-        airPortCombination.forEach(s->{
-            Iterator<String> iterator = s.iterator();
-            String a = iterator.next();
-            String b = iterator.next();
-            getFlightJson(a, b);
-            getFlightJson(b, a);
-        });
-    }
-
-    private void getFlightJson(String srcAirPortCode, String dstAirPortCode) {
+    private List<Flight> getFlightJson(String srcAirPortCode, String dstAirPortCode, String date) {
+        List<Flight> res = new ArrayList<>();
         URIBuilder uriBuilder = getFightBaseUriBuilder()
                 .setParameter("appid", "10512")
                 .setParameter("arr", srcAirPortCode)
-                .setParameter("date", LocalDate.now().toString())
+                .setParameter("date", date)//LocalDate.now().toString())
                 .setParameter("dep", dstAirPortCode);
         List<JSONObject> jsonList = doGetFight(uriBuilder);
-        if(jsonList == null)
-            return;
-        for (JSONObject json : jsonList) {
-            Flight flight = new Flight(json);
-            lock.writeLock().lock();
-            this.data.putIfAbsent(flight.id, flight);
-            lock.writeLock().unlock();
+        if(jsonList != null) {
+            for (JSONObject json : jsonList) {
+                res.add(new Flight(json));
+            }
         }
+        return res;
     }
 
-    private List<String> getUnDeparturedIds() {
+    private Flight getFlightJson(String flightNo, String date) {
+        URIBuilder uriBuilder = getFightBaseUriBuilder()
+                .setParameter("appid", "10512")
+                .setParameter("date", date)
+                .setParameter("fnum", flightNo);
+        List<JSONObject> o = doGetFight(uriBuilder);
+        if(o == null || o.isEmpty())
+            return null;
+        return new Flight(o.get(0));
+    }
+
+    public void trackDeparture(String id, String date) {
+        lock.writeLock().lock();
+        track.add(new TrackInfo(id, date));
+        lock.writeLock().unlock();
+    }
+    public Set<TrackInfo> getTrack() {
+        Set<TrackInfo> res;
         lock.readLock().lock();
-        List<String> res = this.data.values().stream().filter(o->!o.departured()).map(o->o.id).collect(Collectors.toList());
+        res = new HashSet<>(track);
         lock.readLock().unlock();
         return res;
     }
     public void update() {
-        pullData();
-
-        List<String> ids = getUnDeparturedIds();
-        for (String id : ids) {
-            String t = updateDepartureTime(id);
-            if(t != null) {
+        while(!queue.isEmpty()) {
+            queue.poll().run();
+        }
+        for (TrackInfo t : getTrack()) {
+            Flight flight = this.getFlightJson(t.id, t.date);
+            if(flight != null && flight.departured())
+            {
                 lock.writeLock().lock();
-                departured.put(id, t);
+                departured.put(flight.id, flight.FlightDeptimeDate);
+                this.track.remove(t);
                 lock.writeLock().unlock();
             }
         }
@@ -129,19 +158,6 @@ public class ThirdPartyDataSource {
                 .setPath("/api/flight");
     }
 
-    private String updateDepartureTime(String id) {
-        URIBuilder uriBuilder = getFightBaseUriBuilder()
-                .setParameter("appid", "10512")
-                .setParameter("date", LocalDate.now().toString())
-                .setParameter("fnum", id);
-        List<JSONObject> o = doGetFight(uriBuilder);
-        if(o == null || o.isEmpty())
-            return null;
-        Flight fd = new Flight(o.get(0));
-        if(!fd.departured())
-            return null;
-        return fd.FlightDeptimeDate;
-    }
     private URI sign(URIBuilder uriBuilder) throws URISyntaxException {
         URI uri = uriBuilder.build();
         md.update((uri.getQuery()+"5b0b5cfa5b903").getBytes());
@@ -170,8 +186,6 @@ public class ThirdPartyDataSource {
 
             Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
             String json = EntityUtils.toString(entity, encoding);
-         /*   ArrayList<Object> list = new ArrayList<>();
-            list.add(json);*/
             return toList(new JSONArray(json));
         } catch (ClientProtocolException e) {
 
@@ -184,7 +198,19 @@ public class ThirdPartyDataSource {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return null;
         }
-        return null;
+    }
+
+    private LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    public void postFlightSearchRequest(String date, String arrCode, String depCode, Consumer<List<Flight>> callback) {
+        queue.offer(()->{
+            callback.accept(this.getFlightJson(arrCode, depCode, date));
+        });
+    }
+    public void postFlightSearchRequest(String date, String flightNo, Consumer<Flight> callback) {
+        queue.offer(()->{
+            callback.accept(this.getFlightJson(flightNo, date));
+        });
     }
 }

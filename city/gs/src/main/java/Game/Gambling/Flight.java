@@ -15,11 +15,12 @@ import java.util.UUID;
 
 @Entity
 public class Flight {
+
     private static int toTs(String datetimeStr) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = null;
         date = sdf.parse(datetimeStr);
-        return (int) (date.getTime()/1000);
+        return (int) (date.getTime());
     }
 
     public Flight(JSONObject json) {
@@ -38,10 +39,13 @@ public class Flight {
         FlightDepAirport = json.getString("FlightDepAirport");
         FlightState = json.getString("FlightState");
     }
+    String getDate() {
+        return this.FlightDeptimePlanDate.substring(0, 10);
+    }
     int getDelay() throws ParseException {
         int e = toTs(this.FlightDeptimePlanDate);
         int a = toTs(this.FlightDeptimeDate);
-        return a - e;
+        return (a - e)/60000;
     }
     protected Flight(){}
 
@@ -61,11 +65,19 @@ public class Flight {
     String FlightDepAirport;//南京禄口"
     String FlightState;//到达"
 
-    boolean departured() {
+    public boolean departured() {
         return !FlightDeptimeDate.isEmpty();
     }
-
-    Gs.FlightData toProto() {
+    public boolean planDepatureTimePassed() {
+        int e = 0;
+        try {
+            e = toTs(this.FlightDeptimePlanDate);
+        } catch (ParseException e1) {
+            return true;
+        }
+        return e <= System.currentTimeMillis();
+    }
+    public Gs.FlightData toProto() {
         return Gs.FlightData.newBuilder()
                 .setFlightArr(this.FlightArr)
                 .setFlightDepcode(this.FlightDepcode)

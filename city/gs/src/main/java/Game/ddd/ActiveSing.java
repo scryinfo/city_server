@@ -14,6 +14,7 @@ public class ActiveSing {
         Ts = ts;
         Amount = amount;
     }
+	
     String PurchaseId;
     long Ts;
     String EthAddr;         // Eee or ddd address
