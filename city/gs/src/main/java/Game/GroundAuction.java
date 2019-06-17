@@ -162,7 +162,8 @@ public class GroundAuction {
                 {
                     plist1.add(new LogDb.Positon(c.x, c.y));
                 }
-                LogDb.buyGround(bider.id(), null,   p, plist1);
+                // 现在分开记录在landAuction日志中
+                LogDb.landAuction(bider.id(), null,   p, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
                 LogDb.playerPay(bider.id(),p);//增加了土地拍卖  记录玩家的支出
                 bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(p).build()));

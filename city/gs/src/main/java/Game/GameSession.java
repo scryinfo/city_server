@@ -859,10 +859,6 @@ public class GameSession {
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 		this.write(Package.create(cmd, c));
-		// 购买货架商品后推送消息给客户端刷新界面
-		Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
-		builder.setSellerId(Util.toByteString(seller.id())).setBId(c.getBuildingId()).setItemId(itemId).setSelledCount(itemBuy.n);
-		GameServer.sendTo(Arrays.asList(seller.id()),Package.create(GsCode.OpCode.salesNotice_VALUE,builder.build()));
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
