@@ -237,7 +237,7 @@ public class Npc {
     }
     public void setBorn(Building born) {
 		this.born = born;
-		this.adapterData.apartmentId = born.id();
+		this.adapterData.buildingId = born.id();
 	}
 	public Building building() {
         return this.born;
