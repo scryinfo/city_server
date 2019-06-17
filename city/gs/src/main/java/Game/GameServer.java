@@ -3,6 +3,7 @@ package Game;
 import Game.Contract.ContractManager;
 import Game.Eva.EvaManager;
 import Game.FriendManager.FriendManager;
+import Game.FriendManager.SocietyManager;
 import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueManager;
@@ -133,6 +134,7 @@ public class GameServer {
         TickManager.init();
         BrandManager.init();
         FlightManager.init();
+        SocietyManager.init();
         BuildingUtil.instance().init();
 
         // DO NOT put init below this!!! city might can't see the init

@@ -1,38 +1,12 @@
 package Game.Action;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-
-import Game.BrandManager;
-import Game.Building;
-import Game.City;
-import Game.GameDb;
-import Game.GameServer;
-import Game.IShelf;
-import Game.ItemKey;
-import Game.Npc;
-import Game.Player;
-import Game.RetailShop;
-import Game.Shelf;
-import Game.Meta.AIBuy;
-import Game.Meta.AILux;
-import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import Game.Meta.ProbBase;
+import Game.*;
+import Game.Meta.*;
 import Shared.LogDb;
 import Shared.Util;
 import gs.Gs;
+
+import java.util.*;
 
 public class Shopping implements IAction {
     public Shopping(int aiId) {
@@ -102,8 +76,8 @@ public class Shopping implements IAction {
                 }else{
                 	w=0;
                 }
-                if(w < 0){
-                    w = 0;
+                if(w<=0){
+                    continue;
                 }
                 wi.add(new WeightInfo(b.id(), sell.producerId, sell.qty, w, sell.price, (MetaGood) sell.meta, buildingBrand, b.quality()));
             }
@@ -119,7 +93,7 @@ public class Shopping implements IAction {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
         	int money=(int) ((chosen.price+minerCost)-npc.money());
         	City.instance().addIndustryMoney(npc.building().type(),money);
-        	
+
             npc.hangOut(sellShop);
             return null;
         }
@@ -189,8 +163,8 @@ public class Shopping implements IAction {
           	int money=(int) ((chosen.price+minerCost)-npc.money());
           	City.instance().addIndustryMoney(npc.building().type(),money);
 
-          	npc.hangOut(sellShop);
-          	return null;
+            npc.hangOut(sellShop);
+            return null;
           }
           else {
               npc.decMoney((int) (chosen.price+minerCost));

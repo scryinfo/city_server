@@ -359,6 +359,25 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+
+	public static List<Document> dayApartmentNpcNum(long startTime, long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group(null,  Accumulators.sum(KEY_TOTAL, 1l)),
+                        Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	
 	public static List<Document> dayYesterdayExchangeAmount(long endTime, MongoCollection<Document> collection)
 	{
