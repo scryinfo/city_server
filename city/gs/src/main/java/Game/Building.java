@@ -550,7 +550,6 @@ public abstract class Building implements Ticker{
     		takeAsWorker(npc);
 			npc.goWork();
     	});
-    	GameDb.saveOrUpdate(npcs);
     	return npcs;
     }
 

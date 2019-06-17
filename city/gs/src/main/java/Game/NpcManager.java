@@ -95,7 +95,6 @@ public class NpcManager {
     		unEmployeeNpc.put(n.id(),n); //添加失业npc
     	});
     	GameDb.saveOrUpdate(npc);
-    	GameDb.saveOrUpdate(this);
     }
     public void addWorkNpc(Collection<Npc> npc,Building born) {
     	npc.forEach(n->{
