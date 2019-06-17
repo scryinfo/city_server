@@ -8,7 +8,9 @@ import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.FriendManager.*;
+import Game.Gambling.Flight;
 import Game.Gambling.FlightManager;
+import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -2069,12 +2071,20 @@ public class GameSession {
 		Gs.BetFlight c = (Gs.BetFlight)message;
 		if(c.getScore() > player.score())
 			return;
-
-		if(FlightManager.instance().betFlight(player.id(), c.getId(), c.getDelay(), c.getScore())) {
-			player.offsetScore(-c.getScore());
-			GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
-			this.write(Package.create(cmd, c));
-		}
+		ThirdPartyDataSource.instance().postFlightSearchRequest(c.getDate(), c.getId(), (Flight flight)->{
+			City.instance().execute(()->{
+				if(flight == null || flight.planDepatureTimePassed() || flight.departured()) {
+					this.write(Package.fail(cmd));
+				}
+				else {
+					if(FlightManager.instance().betFlight(player.id(), flight, c.getDelay(), c.getScore())) {
+						player.offsetScore(-c.getScore());
+						GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
+						this.write(Package.create(cmd, c));
+					}
+				}
+			});
+		});
 	}
 
 	public void getFlightBetHistory(short cmd) {
@@ -2088,6 +2098,22 @@ public class GameSession {
 	public void getAllFlight(short cmd) {
 		this.write(Package.create(cmd, FlightManager.instance().toProto(player.id())));
 	}
+
+	public void searchFlight(short cmd, Message message) {
+		Gs.SearchFlight c = (Gs.SearchFlight)message;
+		if(c.getArrCode().isEmpty() || c.getDepCode().isEmpty() || c.getDate().isEmpty())
+			return;
+		final UUID playerId = player.id();
+		ThirdPartyDataSource.instance().postFlightSearchRequest(c.getDate(), c.getArrCode(), c.getDepCode(), (List<Flight> flights)->{
+			City.instance().execute(()->{
+				Gs.FlightSearchResult.Builder builder = Gs.FlightSearchResult.newBuilder();
+				flights.forEach(f->builder.addData(f.toProto()));
+				this.write(Package.create(cmd, builder.build()));
+				//GameServer.sendTo(Arrays.asList(playerId), Package.create(cmd, builder.build()));
+			});
+		});
+	}
+
 	public void techTradeAdd(short cmd, Message message) {
 		Gs.TechTradeAdd c = (Gs.TechTradeAdd)message;
 		MetaItem mi = MetaData.getItem(c.getItemId());
