@@ -6,6 +6,7 @@ import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaMaterial;
+import Game.Util.GlobalUtil;
 import Shared.Util;
 import gs.Gs;
 
@@ -14,7 +15,6 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
-import Game.BrandManager;
 
 @Embeddable
 public class ItemKey implements Serializable {
@@ -80,10 +80,14 @@ public class ItemKey implements Serializable {
             MetaGood goods=MetaData.getGood(meta.id);
             double b=EvaManager.getInstance().computePercent(brandEva);
             double q=EvaManager.getInstance().computePercent(qualityEva);
-            double totalBrand=goods.brand*(1+b);
+            double totalBrand=goods.brand+BrandManager.instance().getBrand(producerId,meta.id).getV();
             double totalQuality=goods.quality*(1+q);
-            builder.setBrand((int) Math.ceil(totalBrand));
-            builder.setQuality((int) Math.ceil(totalQuality));
+            //品牌评分
+            double brandScore = GlobalUtil.getBrandScore(totalBrand, meta.id);
+            //品质评分
+            double goodQtyScore = GlobalUtil.getGoodQtyScore(totalQuality, meta.id, goods.quality);
+            builder.setBrandScore((int) brandScore);
+            builder.setQualityScore((int) goodQtyScore);
 
             BrandManager.BrandInfo info = BrandManager.instance().getBrand(producerId, meta.id);
             if (info.hasBrandName()) {
