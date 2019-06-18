@@ -158,6 +158,8 @@ public class dddPurchaseMgr {
                     .setPurchaseId( pur.purchaseId.toString())
                     .setResHeader(GlobalDef.ResHeader.newBuilder().setErrCode(ERR_SUCCESS).setReqId(ccapiReq.getReqHeader().getReqId()).setVersion(ccapiReq.getReqHeader().getVersion()));
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setDisChargeRes(disC.build());
+                Package pack = Package.create(GsCode.OpCode.ct_DisChargeRes_VALUE, msg.build());
+                player.send(pack);
             }
         }
     }
@@ -172,11 +174,12 @@ public class dddPurchaseMgr {
             }
             long eee = (long)GameDb.calGameCurrencyFromDDD(pur.ddd);
             player.addMoney(eee);
+            GameDb.saveOrUpdate(player);
         }
     }
 
     public void on_dddMsg(RechargeResultReq ccapiReq){
-
+        on_RechargeReqResp(ccapiReq);
     }
 
 }
