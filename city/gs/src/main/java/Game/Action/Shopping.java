@@ -98,7 +98,7 @@ public class Shopping implements IAction {
         	//购买时所持金不足,行业涨薪指数 += 定价 - 所持金
         	int money=(int) ((chosen.price+minerCost)-npc.money());
         	City.instance().addIndustryMoney(npc.building().type(),money);
-        	
+
             npc.hangOut(sellShop);
             return null;
         }else if(saleCount<=0){//货架上无货物，不允许购买
