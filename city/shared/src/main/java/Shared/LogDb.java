@@ -726,7 +726,7 @@ public class LogDb {
 		document.append("s", sellerId);
 		document.append("b", buyerId);
 		document.append("p", price); //每毫秒价格
-		document.append("c", cost);
+		document.append("a", cost);
 		document.append("bid", bid);
 		document.append("tp", type);
 		document.append("ct", categoryType);
@@ -743,7 +743,7 @@ public class LogDb {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("s", sellerId);
 		document.append("b", buyerId);
-		document.append("c", cost);
+		document.append("a", cost);
 		document.append("p", price);
 		document.append("bid", bid);
 		document.append("tpi", typeId);
@@ -1020,7 +1020,7 @@ public class LogDb {
                                 gte("t", startTime),
                                 lt("t", endTime)
                         )),
-                        Aggregates.group("$ct",Accumulators.sum(KEY_TOTAL, "$c"),Accumulators.sum("size", 1l)),
+                        Aggregates.group("$ct",Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)),
                         Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) documentList::add);
@@ -1040,7 +1040,7 @@ public class LogDb {
                                 gte("t", startTime),
                                 lt("t", endTime)
                         )),
-                        Aggregates.group("$tp",Accumulators.sum(KEY_TOTAL, "$c"),Accumulators.sum("size", 1l)),
+                        Aggregates.group("$tp",Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)),
                         Aggregates.project(projectObject)
                 )
         ).forEach((Block<? super Document>) documentList::add);

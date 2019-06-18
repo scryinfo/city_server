@@ -442,6 +442,7 @@ public class GameSession {
 		b.createNpc();//产生npc
 		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
+			GameDb.saveOrUpdate(b);
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
 		}
 	}
@@ -457,6 +458,7 @@ public class GameSession {
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
 		}
+		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd,c));
 	}
 
@@ -857,10 +859,6 @@ public class GameSession {
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 		this.write(Package.create(cmd, c));
-/*		//货架商品出售通知
-		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
-		int[] itemIdAndNum = {itemId, itemBuy.n};
-		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);*/
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
@@ -3846,7 +3844,7 @@ public class GameSession {
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
 		Building building = City.instance().getBuilding(buildingId);
 		//全城该类型推广均单位定价
-		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,MetaBuilding.type(building.metaBuilding.id));
+		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,building.type());
 		if (building == null || building.type() != MetaBuilding.PUBLIC || !building.outOfBusiness()) {
 			return;
 		}

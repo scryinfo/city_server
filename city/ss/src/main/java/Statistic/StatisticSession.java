@@ -12,6 +12,7 @@ import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import ss.Ss;
+import sun.rmi.runtime.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -151,28 +152,31 @@ public class StatisticSession {
     	builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
     	this.write(Package.create(cmd, builder.build()));
     }
-    
-    public void queryExchangeAmount(short cmd)
-    {
-    	Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
-    	//npc交易量
-    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
-    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
-    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
-      	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
-      	long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
-    	//player交易量
-    	long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
-    	long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
-    	long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
-    	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
-    	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
-    	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
-    	long playerExchangeAmount=yesterdayPlayerBuyGround+todayPlayerBuyGround+yesterdayPlayerBuyInShelf+todayPlayerBuyInShelf+yesterdayPlayerRentGround+todayPlayerRentGround;
-    	
-    	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
-    	this.write(Package.create(cmd, builder.build()));
-    }
+
+	public void queryExchangeAmount(short cmd) {
+		Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
+		//npc交易量
+		long yesterdayNpcBuyInShelf = SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(), CountType.BYDAY);
+		long todayNpcBuyInShelf = SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+		long yesterdayNpcRentApartment = SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(), CountType.BYDAY);
+		long todayNpcRentApartment = SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+		long npcExchangeAmount = yesterdayNpcBuyInShelf + todayNpcBuyInShelf + yesterdayNpcRentApartment + todayNpcRentApartment;
+		//player交易量
+		long yesterdayPlayerBuyGround = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(), CountType.BYDAY);
+		long todayPlayerBuyGround = SummaryUtil.getTodayData(LogDb.getBuyGround());
+		long yesterdayPlayerBuyInShelf = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(), CountType.BYDAY);
+		long todayPlayerBuyInShelf = SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+		long yesterdayPlayerRentGround = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(), CountType.BYDAY);
+		long todayPlayerRentGround = SummaryUtil.getTodayData(LogDb.getRentGround());
+		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
+		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
+		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
+		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
+		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+		builder.setExchangeAmount(npcExchangeAmount + playerExchangeAmount);
+		this.write(Package.create(cmd, builder.build()));
+	}
     
     public void queryGoodsNpcNumCurve(short cmd, Message message)
     {
