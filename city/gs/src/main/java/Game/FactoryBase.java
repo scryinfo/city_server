@@ -146,7 +146,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean consumeMaterial(LineBase line, UUID pid);
 
     protected void _update(long diffNano) {
-        if(this.outOfBusiness()){
+        if(getState()== Gs.BuildingState.SHUTDOWN_VALUE){
             return;
         }
 
