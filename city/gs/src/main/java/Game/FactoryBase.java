@@ -97,21 +97,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @MapKeyColumn(name = "line_id")
     List<LineBase> lines = new ArrayList<>();
 
-    @Override
-    public boolean startBusiness(Player player) {
-        boolean ok = super.startBusiness(player);
-        if(ok){
-            lines.forEach(lineBase -> lineBase.resume());
-        }
-        return ok;
-    }
-
-    @Override
-    public void shutdownBusiness() {
-        super.shutdownBusiness();
-        lines.forEach(lineBase -> lineBase.suspend(0));
-    }
-
     protected void __addLine(LineBase newLine){
         if(lines.indexOf(newLine.id) < 0){
             lines.add(newLine);
