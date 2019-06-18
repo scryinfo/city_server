@@ -92,4 +92,9 @@ public class MetaBuilding {
     public CoordPair area(Coordinate pos) {
         return new CoordPair(pos, pos.offset(this.x-1, this.y-1));
     }
+
+    /*判断是否是建筑，根据基础type，比如14 、13....*/
+    public static boolean isBuildingByBaseType(int type){
+        return  type<=PUBLIC&&type>=TRIVIAL;
+    }
 }

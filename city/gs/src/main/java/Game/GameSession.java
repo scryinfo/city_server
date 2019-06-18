@@ -4079,35 +4079,11 @@ public class GameSession {
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
-    	brandMap.clear();
-    	qtyMap.clear();
-
-    	//1.获取全城所占最低的知名度
-		Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(building.type());
-		Integer maxBrand = maxAndMinBrand.get(BuildingUtil.MAX);
-		Integer minBrand = maxAndMinBrand.get(BuildingUtil.MIN);
-		//品牌评分
-		double brandScore=100;
-		if(basicBrand>minBrand&&maxBrand!=minBrand) {
-			brandScore = Math.ceil(((basicBrand - minBrand) / (maxBrand - minBrand))*100);
-		}
-		//2.获取全城所占最低的品质值
-		Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(building.type(), Gs.Eva.Btype.Quality_VALUE);
-		Eva maxEva = cityQtyMap.get("max");//全城最大Eva
-		Eva minEva = cityQtyMap.get("min");//全城最小Eva
-		double maxAdd=EvaManager.getInstance().computePercent(maxEva);
-		double minAdd=EvaManager.getInstance().computePercent(minEva);
-		//获取建筑最大最小的基础品质
-		Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(building.type());
-		double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + maxAdd);
-		double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + minAdd);
-		double localQty = basicQuality * (1 + addQuality);
+		//知名度评分
+		double brandScore=GlobalUtil.getBrandScore(basicBrand,building.type());
 		//品质评分
-		double qtyScore=100;
-		if(localQty>minQty) {
-			qtyScore = Math.ceil(((localQty - minQty) / (maxQty - minQty))*100);
-		}
-
+		double localQty = basicQuality * (1 + addQuality);
+		double qtyScore=GlobalUtil.getBuildingQtyScore(localQty,building.type());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(brandScore).build());
@@ -4373,6 +4349,7 @@ public class GameSession {
 		}
 		this.write(Package.create(cmd,materialInfo.build()));
 	}
+
 	//查询加工厂所有的商品列表详细信息
 	public void queryBuildingGoodInfo(short cmd,Message message){
 		Gs.Id id = (Gs.Id) message;
@@ -4393,23 +4370,26 @@ public class GameSession {
 			Eva qtyEva = EvaManager.getInstance().getEva(playerId, goodId, Gs.Eva.Btype.Quality_VALUE);
 			//1.生产速度等于 员工人数*基础值*（1+eva加成）
 			double numOneSec = workerNum * good.n * (1 + EvaManager.getInstance().computePercent(speedEva));
-			//2.品牌
+			//2.知名度评分
 			int brand=good.brand;//基础值
-			brand += BrandManager.instance().getBrand(playerId, type).getV();
-			//3.品质总值（基础值*（1+eva加成））
+			brand += BrandManager.instance().getBrand(playerId, goodId).getV();//当前品牌值
+			double brandScore = GlobalUtil.getBrandScore(brand, goodId);
+			//3.品质评分
 			double quality = good.quality;
 			quality =quality * (1+EvaManager.getInstance().computePercent(qtyEva));
+			double qtyScore=GlobalUtil.getGoodQtyScore(quality, goodId,good.quality);
 			//4.品牌名(如果没有则取公司名)
 			String brandName=player.getCompanyName();
 			BrandManager.BrandName brandNameInfo = BrandManager.instance().getBrand(playerId, goodId).brandName;
 			if(brandNameInfo!=null)
 				brandName = brandNameInfo.getBrandName();
 			Gs.BuildingGoodInfo.ItemInfo.Builder itemInfo = Gs.BuildingGoodInfo.ItemInfo.newBuilder();
-			itemInfo.setKey(goodId).setNumOneSec(numOneSec).setBrand(brand).setQty(quality).setBrandName(brandName);
+			itemInfo.setKey(goodId).setNumOneSec(numOneSec).setBrandScore(brandScore).setQtyScore(qtyScore).setBrandName(brandName);
 			goodInfo.addItems(itemInfo);
 		}
 		this.write(Package.create(cmd,goodInfo.build()));
 	}
+
 	//查询推广公司的商品推广列表的详细信息
 	public void queryPromotionItemInfo(short cmd,Message message){
 		Gs.QueryPromotionItemInfo info = (Gs.QueryPromotionItemInfo) message;
@@ -4418,5 +4398,23 @@ public class GameSession {
 		Building building = City.instance().getBuilding(bid);
 		if(null==building||building.type()!=MetaBuilding.PUBLIC)
 			return;
+		UUID playerId = building.ownerId();
+		Gs.PromotionItemInfo.Builder itemInfo = Gs.PromotionItemInfo.newBuilder();
+		itemInfo.setBuildingId(info.getBuildingId());
+		for (Integer goodType : typeIdsList) {
+			MetaGood good = MetaData.getGood(goodType);
+			if(null==good)
+				return;
+			//1 当前商品知名度信息
+			int brand = good.brand;
+			BrandManager.BrandInfo brandInfo = BrandManager.instance().getBrand(playerId,goodType);
+			brand += brandInfo.getV();
+			//2 当前知名度评分
+			double brandScore=GlobalUtil.getGoodQtyScore(brand, goodType, good.brand);
+			Gs.PromotionItemInfo.ItemInfo.Builder item = Gs.PromotionItemInfo.ItemInfo.newBuilder();
+			item.setItemId(goodType).setBrand(brand).setBrandScore(brandScore);
+			itemInfo.addItems(item);
+		}
+		this.write(Package.create(cmd,itemInfo.build()));
 	}
 }

@@ -1,10 +1,8 @@
 package Game.Util;
 
 import Game.BrandManager;
-import Game.Meta.MetaApartment;
-import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
-import Game.Meta.MetaRetailShop;
+import Game.GameDb;
+import Game.Meta.*;
 
 import java.util.*;
 
@@ -57,16 +55,20 @@ public class BuildingUtil {
 
     public Map<Integer,Integer> getMaxAndMinBrand(int item){
         Map<Integer, Integer> map = new HashMap<>();
-        Map<String, BrandManager.BrandInfo> cityBrandMap = GlobalUtil.getMaxOrMinBrandInfo(item);
-        int minBrand=1;
-        int maxBrand=1;
-        if(cityBrandMap!=null){
-            minBrand = cityBrandMap.get("min").getV();
-            maxBrand = cityBrandMap.get("max").getV();
+        Map<String, Integer> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//如果没有推广过品牌，返回的最大最小值都是0，没有包含基础值
+        int minBrand=cityBrandMap.get("min");
+        int maxBrand=cityBrandMap.get("max");
+        //如果是商品(使用商品的默认知名度)
+        if(MetaGood.isItem(item)){
+            MetaGood good = MetaData.getGood(item);
+            minBrand += good.brand;
+            maxBrand += good.brand;
+        }else{
+            minBrand +=1;// 添加默认值
+            maxBrand +=1;// 添加基础值
         }
         map.put(MAX, maxBrand);
         map.put(MIN, minBrand);
         return map;
     }
-
 }
