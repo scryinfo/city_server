@@ -441,7 +441,6 @@ public class GameSession {
 		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
 			GameDb.saveOrUpdate(b);
-			GameDb.saveOrUpdate(NpcManager.instance());
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
 		}
 	}
