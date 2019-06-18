@@ -381,8 +381,8 @@ public class BrandManager {
     	if(bl!=null){//优先查询加盟玩家技术
     		playerId=bl.getPlayerId();
     	}
-    	int buildingBrand = BrandManager.instance().getBuilding(playerId, b.type());
-        buildingBrand=buildingBrand == 0 ? 1 : buildingBrand;//设置默认基础值为1
+    	int buildingBrand = 1;//基础默认值为1
+        buildingBrand+=BrandManager.instance().getBrand(playerId, b.type()*100).getV();//建筑类型需要乘以100，才能查找到品牌
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
 

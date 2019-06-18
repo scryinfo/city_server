@@ -43,6 +43,10 @@ public class GlobalUtil {
 
     //2.获取指定选项知名度的最大最小信息
     public static Map<String, BrandManager.BrandInfo> getMaxOrMinBrandInfo(int item){
+        //如果是建筑，需要再item基础上*100
+        if(MetaBuilding.isBuildingByBaseType(item)){
+            item *= 100;
+        }
         //1.获取到所有的品牌信息，找出其中v最大的数据
         BrandManager.BrandInfo maxBrand= null;
         BrandManager.BrandInfo minBrand= null;
@@ -66,6 +70,39 @@ public class GlobalUtil {
             return map;
         }else
             return null;
+    }
+
+    //获取最大最小的知名度
+    public static Map<String,Integer> getMaxOrMinBrandValue(int item){
+        HashMap<String,Integer> map=new HashMap<>();
+        //统计玩家人数
+        long playerAmount = GameDb.getPlayerAmount();
+        //如果是建筑，需要再item基础上*100
+        if(MetaBuilding.isBuildingByBaseType(item)){
+            item *= 100;
+        }
+        List<BrandManager.BrandInfo> brandInfos = BrandManager.instance().getAllBrandInfoByItem(item);
+        int maxBrand=0;
+        int minBrand=0;
+        //初始化
+        if(!brandInfos.isEmpty()){
+            maxBrand = brandInfos.get(0).getV();
+            minBrand = brandInfos.get(0).getV();
+            for (BrandManager.BrandInfo brandInfo : brandInfos) {
+                if(brandInfo.getV()>maxBrand){
+                    maxBrand = brandInfo.getV();
+                }
+                if(brandInfo.getV()<minBrand){
+                    minBrand = brandInfo.getV();
+                }
+            }
+        }
+        if(brandInfos.size()<playerAmount){//如果查询的知名度个数小于玩家数量，则设置0为最小知名度
+            minBrand=0;
+        }
+        map.put("max", maxBrand);
+        map.put("min", minBrand);
+        return map;
     }
 
     //3.获取商品的全城销售均价(获取所有货架上该商品的销售价格取平均值)(*)
@@ -244,5 +281,54 @@ public class GlobalUtil {
         //推荐定价=单位定价 * 玩家发明概率
         int recommendPrice = unitPrice * playerSuccessOdds;
         return recommendPrice;
+    }
+
+
+    //评分抽取======
+    //知名度评分(需要参数)  知名度评分 = (当前知名度 - 全城最低知名度) / (全城最高知名度 - 全城最低知名度)
+    public static double getBrandScore(double localBrand,int type){
+        //1.最高最低知名度
+        Map<Integer, Integer> maxAndMinBrand = BuildingUtil.instance().getMaxAndMinBrand(type);
+        int minBrand=maxAndMinBrand.get(BuildingUtil.MIN);//最低知名度
+        int maxBrand=maxAndMinBrand.get(BuildingUtil.MAX);//最高知名度
+        double brandScore =100;
+        if(localBrand>minBrand&&maxBrand!=minBrand) {
+            double local = localBrand - minBrand;
+            int max=maxBrand - minBrand;
+            brandScore = Math.ceil((local/max)*100);
+        }
+        return brandScore;
+    }
+
+    //获取建筑的品质评分  品质评分 = (当前品质 - 全城最低品质) / (全城最高品质 - 全城最低品质)
+    public static double getBuildingQtyScore(double localQuality,int buildingType){
+        Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(buildingType, Gs.Eva.Btype.Quality_VALUE);
+        Eva maxEva = cityQtyMap.get("max");//全城最大Eva
+        Eva minEva = cityQtyMap.get("min");//全城最小Eva
+        //获取建筑最大最小的基础品质
+        Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(buildingType);
+        double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + EvaManager.getInstance().computePercent(maxEva));
+        double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + EvaManager.getInstance().computePercent(minEva));
+        double qtyScore=100;
+        if(localQuality>minQty) {
+            qtyScore = Math.ceil(((localQuality-minQty)/(maxQty - minQty))*100);
+        }
+        return qtyScore;
+    }
+
+    //获取商品的品质评分(参数1 当前品质总值，参数2 商品id 参数3 基础品牌值)
+    public static double getGoodQtyScore(double localQuality,int goodId,int baseQty){
+        Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(goodId, Gs.Eva.Btype.Quality_VALUE);
+        Eva maxEva = cityQtyMap.get("max");//全城最大Eva
+        Eva minEva = cityQtyMap.get("min");//全城最小Eva
+        double maxAdd=EvaManager.getInstance().computePercent(maxEva);
+        double minAdd=EvaManager.getInstance().computePercent(minEva);
+        double maxQty = baseQty* (1 + maxAdd);
+        double minQty = baseQty* (1 + minAdd);
+        double qtyScore=100;
+        if(localQuality>minQty) {
+            qtyScore = Math.ceil(((localQuality - minQty) / (maxQty - minQty))*100);
+        }
+        return qtyScore;
     }
 }
