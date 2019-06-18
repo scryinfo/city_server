@@ -1,9 +1,15 @@
 package Game.ddd;
 
+import Game.GameDb;
+import Game.Player;
+import Shared.Package;
+import Shared.Util;
 import ccapi.CcGrpc.CcBlockingStub;
-import cityapi.CityGrpc.*;
+import ccapi.CcOuterClass;
+import ccapi.GlobalDef;
+import common.Common;
+import gscode.GsCode;
 import io.grpc.*;
-import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -103,6 +109,18 @@ public class chainRpcMgr {
             return;
         }
         logger.info("Greeting: " + response.getPurchaseId());
+        //因为提币操作是在ddd服务器操作，而且时间比较长，需提醒玩家提币请求开始处理了
+        ccapi.CcOuterClass.DisChargeStartRes.Builder msg = CcOuterClass.DisChargeStartRes.newBuilder();
+        msg.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(req.getReqHeader().getReqId()).setVersion(req.getReqHeader().getVersion()).build());
+
+        ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(req.getPurchaseId().getBytes()));
+        Player player = GameDb.getPlayer(dp.player_id);
+        if(!player.equals(null)){
+            Package pack = Package.create(GsCode.OpCode.ct_DisChargeStartRes_VALUE, msg.build());
+            player.send(pack);
+        }else{
+            player.send(Package.fail((short)GsCode.OpCode.ct_DisChargeReq_VALUE, Common.Fail.Reason.moneyNotEnough));
+        }
     }
 
     //grpc服务器------------------------------------------------------------------------------------------------------

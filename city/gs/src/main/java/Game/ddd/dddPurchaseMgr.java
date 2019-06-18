@@ -48,6 +48,9 @@ public class dddPurchaseMgr {
         instance = GameDb.getDddPurchaseMgr();
 }
 
+    public ddd_purchase getPurchase(UUID purId){
+        allddd_purchase.get(purId);
+    }
     //添加订单
     public boolean addPurchase(ddd_purchase purchase){
         //不允许多次设置相同id的交易
