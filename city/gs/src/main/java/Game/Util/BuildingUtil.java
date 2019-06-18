@@ -52,7 +52,7 @@ public class BuildingUtil {
     public Map<Integer,Integer> getMaxOrMinQty(int type){
         return maxQtyMap.get(type);
     }
-
+    /*获取最大最小品牌值*/
     public Map<Integer,Integer> getMaxAndMinBrand(int item){
         Map<Integer, Integer> map = new HashMap<>();
         Map<String, Integer> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//如果没有推广过品牌，返回的最大最小值都是0，没有包含基础值

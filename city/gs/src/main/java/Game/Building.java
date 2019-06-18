@@ -612,7 +612,7 @@ public abstract class Building implements Ticker{
         	//知名度评分
             int brandScore =(int)GlobalUtil.getBrandScore(brand, type);
             //品质评分
-            int qtyScore = (int) Math.ceil(GlobalUtil.getBuildingQtyScore(quality, type));
+            int qtyScore = (int)GlobalUtil.getBuildingQtyScore(quality, type);
             builder.setBrand(brandScore).setQuality(qtyScore);
     	}
         return builder.build();
