@@ -89,12 +89,9 @@ public class PromotionMgr {
     public void update(long diffNano) {
         if(_elapsedtime < _upDeltaNs){
             _elapsedtime += diffNano;
-            System.err.println("经过的时间为"+TimeUnit.NANOSECONDS.toSeconds(_elapsedtime)+"秒");
             return;
         }else{
-            System.err.println("经过的时间为"+TimeUnit.NANOSECONDS.toSeconds(_elapsedtime)+"秒");
             _elapsedtime = 0;
-            System.err.println("清0");
         }
 			/*
 			* 每小时计算一次，广告主品牌值根据当前广告公司推广能力进行累计
