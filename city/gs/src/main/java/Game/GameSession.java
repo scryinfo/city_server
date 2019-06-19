@@ -2475,6 +2475,11 @@ public class GameSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
+	public void queryWeatherInfo(short cmd)
+	{
+		this.write(Package.create(cmd,ThirdPartyDataSource.instance().getWeather().toProto()));
+	}
+
 	public void createSociety(short cmd, Message message)
 	{
 		Gs.CreateSociety gsSociety = (Gs.CreateSociety) message;
