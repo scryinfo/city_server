@@ -9,7 +9,7 @@ import ccapi.CcOuterClass.RechargeRequestRes;
 import ccapi.Dddbind.ct_DisChargeRes;
 import ccapi.Dddbind.ct_RechargeRequestRes;
 import ccapi.GlobalDef;
-import cityapi.City.RechargeResultReq;
+import cityapi.CityOuterClass.RechargeResultReq;
 import com.google.protobuf.ByteString;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
@@ -48,6 +48,9 @@ public class dddPurchaseMgr {
         instance = GameDb.getDddPurchaseMgr();
 }
 
+    public ddd_purchase getPurchase(UUID purId){
+        return allddd_purchase.get(purId);
+    }
     //添加订单
     public boolean addPurchase(ddd_purchase purchase){
         //不允许多次设置相同id的交易
@@ -158,6 +161,8 @@ public class dddPurchaseMgr {
                     .setPurchaseId( pur.purchaseId.toString())
                     .setResHeader(GlobalDef.ResHeader.newBuilder().setErrCode(ERR_SUCCESS).setReqId(ccapiReq.getReqHeader().getReqId()).setVersion(ccapiReq.getReqHeader().getVersion()));
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setDisChargeRes(disC.build());
+                Package pack = Package.create(GsCode.OpCode.ct_DisChargeRes_VALUE, msg.build());
+                player.send(pack);
             }
         }
     }
@@ -172,7 +177,12 @@ public class dddPurchaseMgr {
             }
             long eee = (long)GameDb.calGameCurrencyFromDDD(pur.ddd);
             player.addMoney(eee);
+            GameDb.saveOrUpdate(player);
         }
+    }
+
+    public void on_dddMsg(RechargeResultReq ccapiReq){
+        on_RechargeReqResp(ccapiReq);
     }
 
 }

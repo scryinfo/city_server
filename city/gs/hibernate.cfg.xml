@@ -96,5 +96,7 @@
 		<mapping class="Game.Gambling.FlightManager"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>
+		<mapping class="Game.ddd.ddd_purchase"></mapping>
+		<mapping class="Game.ddd.dddPurchaseMgr"></mapping>
 	</session-factory>
 </hibernate-configuration> 
