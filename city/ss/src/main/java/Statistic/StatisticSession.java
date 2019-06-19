@@ -168,8 +168,12 @@ public class StatisticSession {
     	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
     	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
     	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
-    	long playerExchangeAmount=yesterdayPlayerBuyGround+todayPlayerBuyGround+yesterdayPlayerBuyInShelf+todayPlayerBuyInShelf+yesterdayPlayerRentGround+todayPlayerRentGround;
-    	
+		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
+		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
+		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
+		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
+		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
     	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
     	this.write(Package.create(cmd, builder.build()));
     }
@@ -179,12 +183,25 @@ public class StatisticSession {
       	Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
     	int id=g.getId();
 		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
-		Ss.GoodsNpcNumCurveMap.Builder bd=Ss.GoodsNpcNumCurveMap.newBuilder();
+		Ss.NpcNumCurveMap.Builder bd=Ss.NpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
 	    map.forEach((k,v)->{
 	    	bd.setKey(k);
 			bd.setValue(v);
-			list.addGoodsNpcNumCurveMap(bd.build());
+			list.addNpcNumCurveMap(bd.build());
+	    });
+		this.write(Package.create(cmd,list.build()));
+    }
+
+	public void queryApartmentNpcNumCurve(short cmd)
+	{
+		Map<Long, Long> map=SummaryUtil.queryApartmentNpcNumCurve(SummaryUtil.getDayApartmentNpcNum(),CountType.BYHOUR);
+		Ss.NpcNumCurveMap.Builder bd=Ss.NpcNumCurveMap.newBuilder();
+		Ss.ApartmentNpcNumCurve.Builder list = Ss.ApartmentNpcNumCurve.newBuilder();
+		map.forEach((k,v)->{
+			bd.setKey(k);
+			bd.setValue(v);
+			list.addNpcNumCurveMap(bd.build());
 	    });
 		this.write(Package.create(cmd,list.build()));
     }
