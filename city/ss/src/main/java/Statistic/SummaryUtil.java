@@ -163,7 +163,7 @@ public class SummaryUtil
     
     public static Map<Long, Map> getNpcTypeNumHistoryData(MongoCollection<Document> collection)
     {
-    	Map<Long, Map> countMap= new TreeMap<Long, Map>(); //参数1 是时间，参数2 是各种类型的数量（必须成对出现）
+    	Map<Long, Map> countMap= new TreeMap<Long, Map>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -182,9 +182,9 @@ public class SummaryUtil
     	.projection(fields(include("t", "tp", "n"), excludeId()))
     	.forEach((Block<? super Document>) document ->
     	{ 
-    	  long t=document.getLong("t");//时间
-		  int tp=document.getInteger("tp");//类型
-		  long n=document.getLong("n");//数量
+    	  long t=document.getLong("t");
+		  int tp=document.getInteger("tp");
+		  long n=document.getLong("n");
 		  if(!countMap.containsKey(t)){
 			  Map<Integer,Long> m=new HashMap<Integer,Long>();
 			  m.put(tp, n);

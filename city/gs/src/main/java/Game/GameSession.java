@@ -4468,7 +4468,6 @@ public class GameSession {
 				break;
 		}
 		builder.setStore(store).setBuildingId(id.getId());
-		System.out.println("合并");
 		this.write(Package.create(cmd,builder.build()));
 	}
 }
