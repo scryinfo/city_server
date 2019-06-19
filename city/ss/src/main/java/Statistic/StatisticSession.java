@@ -12,7 +12,6 @@ import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import ss.Ss;
-import sun.rmi.runtime.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -230,17 +229,17 @@ public class StatisticSession {
     public void queryNpcTypeNum(short cmd)
     {
     	Ss.NpcHourTypeNum.Builder list = Ss.NpcHourTypeNum.newBuilder();
-    	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
-    	Ss.NpcTypeNumMap.Builder npcTypeNumMap = Ss.NpcTypeNumMap.newBuilder();
     	Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
     	map.forEach((k,v)->{
+            Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
      		info.setT(k);
      		Map<Integer,Long> m=v;
-	  		m.forEach((k1,v1)->{
-	  			npcTypeNumMap.setTp(k1);
-	    		npcTypeNumMap.setN(v1);
-	  		});
-	  		info.setNpcTypeNumMap(npcTypeNumMap.build());
+     		for(Map.Entry<Integer,Long> entry:m.entrySet()){
+                Ss.NpcTypeNumMap.Builder npcTypeNumMap=Ss.NpcTypeNumMap.newBuilder();
+                npcTypeNumMap.setTp(entry.getKey());
+                npcTypeNumMap.setN(entry.getValue());
+                info.addNpcTypeNumMap(npcTypeNumMap.build());
+			}
 	  		list.addNpcTypeNumInfo(info.build());
     	});
     	
