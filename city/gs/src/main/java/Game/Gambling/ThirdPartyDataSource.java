@@ -1,6 +1,5 @@
 package Game.Gambling;
 
-import com.google.common.collect.Sets;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -22,17 +21,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class ThirdPartyDataSource {
     private static ThirdPartyDataSource instance = new ThirdPartyDataSource();
@@ -46,7 +39,16 @@ public class ThirdPartyDataSource {
             e.printStackTrace();
         }
     }
-    class TrackInfo {
+
+    public Map<String, Flight> getFlights(List<TrackInfo> infos) {
+        Map<String, Flight> res = new HashMap<>();
+        for (TrackInfo trackInfo : infos) {
+            res.put(trackInfo.id, this.getFlightJson(trackInfo.id, trackInfo.date));
+        }
+        return res;
+    }
+
+    public static final class TrackInfo {
         public TrackInfo(String id, String date) {
             this.id = id;
             this.date = date;
@@ -88,12 +90,12 @@ public class ThirdPartyDataSource {
 
     private List<Flight> getFlightJson(String srcAirPortCode, String dstAirPortCode, String date) {
         List<Flight> res = new ArrayList<>();
-        URIBuilder uriBuilder = getFightBaseUriBuilder()
+        URIBuilder uriBuilder = getFlightBaseUriBuilder()
                 .setParameter("appid", "10512")
                 .setParameter("arr", srcAirPortCode)
                 .setParameter("date", date)//LocalDate.now().toString())
                 .setParameter("dep", dstAirPortCode);
-        List<JSONObject> jsonList = doGetFight(uriBuilder);
+        List<JSONObject> jsonList = doGetFlight(uriBuilder);
         if(jsonList != null) {
             for (JSONObject json : jsonList) {
                 res.add(new Flight(json));
@@ -103,11 +105,11 @@ public class ThirdPartyDataSource {
     }
 
     private Flight getFlightJson(String flightNo, String date) {
-        URIBuilder uriBuilder = getFightBaseUriBuilder()
+        URIBuilder uriBuilder = getFlightBaseUriBuilder()
                 .setParameter("appid", "10512")
                 .setParameter("date", date)
                 .setParameter("fnum", flightNo);
-        List<JSONObject> o = doGetFight(uriBuilder);
+        List<JSONObject> o = doGetFlight(uriBuilder);
         if(o == null || o.isEmpty())
             return null;
         return new Flight(o.get(0));
@@ -151,7 +153,7 @@ public class ThirdPartyDataSource {
         return list;
     }
 
-    private URIBuilder getFightBaseUriBuilder() {
+    private URIBuilder getFlightBaseUriBuilder() {
         return new URIBuilder()
                 .setScheme("http")
                 .setHost("open-al.variflight.com")
@@ -166,7 +168,7 @@ public class ThirdPartyDataSource {
         uriBuilder.setParameter("token", token);
         return uriBuilder.build();
     }
-    public List<JSONObject> doGetFight(URIBuilder uriBuilder) {
+    public List<JSONObject> doGetFlight(URIBuilder uriBuilder) {
         URI uri = null;
         try {
             uri = sign(uriBuilder);
@@ -198,8 +200,8 @@ public class ThirdPartyDataSource {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
         }
+        return null;
     }
 
     private LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();

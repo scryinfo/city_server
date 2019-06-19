@@ -23,74 +23,80 @@ public class FlightManager {
         GameDb.initFlightManager();
         instance = GameDb.getFlightManager();
     }
+    @PostLoad
+    void _init() {
+        if(!this.allGambling.isEmpty()) {
+            List<ThirdPartyDataSource.TrackInfo> i = new ArrayList<>();
+            this.allGambling.forEach((k,v)->{
+                i.add(new ThirdPartyDataSource.TrackInfo(k, v.date));
+                ThirdPartyDataSource.instance().trackDeparture(k, v.date); // let update do the departure action, delay it
+            });
+            this.flightInfos.putAll(ThirdPartyDataSource.instance().getFlights(i));
+        }
+    }
     @Transient
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(10));
     public void update(long diffNano) {
         if(!timer.update(diffNano))
             return;
-
-        Map<String, String> d = ThirdPartyDataSource.instance().getDepartured();
-        Iterator<Map.Entry<String, Flight>> iterator = flightInfos.entrySet().iterator();
-        boolean changed = false;
         Collection updates = new ArrayList();
-        while(iterator.hasNext()) {
-            Map.Entry<String, Flight> en = iterator.next();
-            String id = en.getKey();
-            Flight f = en.getValue();
-            if(d.containsKey(id)) {
-                f.FlightDeptimeDate = d.get(id);
-                iterator.remove();
-                changed = true;
+        Map<String, String> d = ThirdPartyDataSource.instance().getDepartured();
+        if(!d.isEmpty()) {
+            for (Map.Entry<String, String> e : d.entrySet()) {
+                String id = e.getKey();
+                String date = e.getValue();
+
+                Flight flight = this.flightInfos.remove(id);
+                flight.FlightDeptimeDate = date;
+
+
                 ThirdPartyDataSource.instance().clear(id);
-                updates.addAll(fightDepartureAction(f));
+                updates.addAll(fightDepartureAction(flight));
             }
-            this.allGambling.remove(f.id);
-        }
-        if(changed)
             updates.add(this);
-        GameDb.saveOrUpdate(updates);
+            GameDb.saveOrUpdate(updates);
+        }
     }
 
-    private static final int DELAY_MINIUTE_TOLERANCE = 3;
+    private static final int DELAY_MINUTE_TOLERANCE = 3;
     private Collection fightDepartureAction(Flight f) {
-        final BetInfos g = this.allGambling.get(f.id);
+        final BetInfos g = this.allGambling.remove(f.id);
         if(g == null)
             return null;
         int d = 0;
         try {
-            d = f.getDelay();
+            d = f.getDelayMinute();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        final int l = d - DELAY_MINIUTE_TOLERANCE;
-        final int h = d + DELAY_MINIUTE_TOLERANCE;
+        final int l = d - DELAY_MINUTE_TOLERANCE;
+        final int h = d + DELAY_MINUTE_TOLERANCE;
 
         Collection<Player> updates = new HashSet<>();
-        for (BetInfos.Info e : g.infos.values()) {
-            Player p = GameDb.getPlayer(e.id); // player is not thread safe
-            int s = -e.amount;
-            if(e.delay >= l && e.delay <= h)
-                s = e.amount;
+        for (Map.Entry<UUID, BetInfos.Info> e : g.infos.entrySet()) {
+            UUID playerId = e.getKey();
+            BetInfos.Info info = e.getValue();
+            Player p = GameDb.getPlayer(playerId); // player is not thread safe
+            int s = -info.amount;
+            if(info.delay >= l && info.delay <= h)
+                s = info.amount;
             p.offsetScore(s);
             p.send(Package.create(GsCode.OpCode.flightBetInform_VALUE, Gs.FlightBetInform.newBuilder().setFlightId(f.id).setFlightDeptimeDate(f.FlightDeptimeDate).build()));
             updates.add(p);
-            LogDb.flightBet(e.id, e.delay, e.amount, s<0?false:true, f.toProto());
+            LogDb.flightBet(playerId, info.delay, info.amount, s<0?false:true, f.toProto());
         }
         return updates;
     }
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @JoinColumn(name = "m_id")
-    @MapKey(name = "id")
+    @Transient
     private Map<String, Flight> flightInfos = new HashMap<>();
 
     public boolean betFlight(UUID playerId, Flight flight, int delay, int score) {
         flightInfos.putIfAbsent(flight.id, flight);
-        BetInfos g = this.allGambling.computeIfAbsent(flight.id, k->new BetInfos());
+        BetInfos g = this.allGambling.computeIfAbsent(flight.id, k->new BetInfos(flight.id, flight.getDate()));
         if(g.infos.containsKey(playerId))
             return false;
-        g.infos.put(playerId, new BetInfos.Info(playerId, delay, score));
+        g.infos.put(playerId, new BetInfos.Info(delay, score));
         ThirdPartyDataSource.instance().trackDeparture(flight.id, flight.getDate());
         return true;
     }
@@ -120,19 +126,27 @@ public class FlightManager {
 
     @Entity
     public static final class BetInfos {
+        public BetInfos(String fightId, String date) {
+            this.fightId = fightId;
+            this.date = date;
+        }
+
+        protected BetInfos() {}
+
         @Id
-        int fightId;
+        String fightId;
+        String date;
+
         @Embeddable
         public static final class Info {
-            UUID id;
             int delay;
             int amount;
 
-            public Info(UUID id, int delay, int amount) {
-                this.id = id;
+            public Info(int delay, int amount) {
                 this.delay = delay;
                 this.amount = amount;
             }
+            protected Info(){}
         }
         @ElementCollection(fetch = FetchType.EAGER)
         @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
@@ -144,7 +158,7 @@ public class FlightManager {
             return infos.size();
         }
     }
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @JoinColumn(name = "m_id")
     @MapKey(name = "fightId")
