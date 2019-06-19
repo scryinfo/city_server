@@ -243,7 +243,7 @@ public class StatisticSession {
 			}
 	  		list.addNpcTypeNumInfo(info.build());
     	});
-    	
+
     	this.write(Package.create(cmd, list.build()));
     }
 
