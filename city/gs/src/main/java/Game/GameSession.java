@@ -4099,15 +4099,6 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		Building building = City.instance().getBuilding(buildingId);
-
-		//检查是否是推广公司
-		Building sellerBuilding = City.instance().getBuilding(buildingId);
-		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
-			if(GlobalConfig.DEBUGLOG){
-				GlobalConfig.cityError("GameSession.queryPromotionCompanyInfo: building type of seller is not PublicFacility!");
-			}
-			return;
-		}
 		PublicFacility fcySeller = (PublicFacility) building ;
 		Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
 		builder.setSalary(building.salaryRatio);
