@@ -292,6 +292,7 @@ public class Player {
         this.createTs = System.currentTimeMillis();
         this.eva=10000;
         this.last_modify_time=0;
+        this.score = 999999;
     }
     @PostLoad
     void _init() {

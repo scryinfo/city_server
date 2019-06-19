@@ -2083,6 +2083,8 @@ public class GameSession {
 						GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
 						this.write(Package.create(cmd, c));
 					}
+					else
+						this.write(Package.fail(cmd));
 				}
 			});
 		});

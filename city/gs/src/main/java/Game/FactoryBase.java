@@ -36,6 +36,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(l.toProto()).setTs(l.ts).build()));
         return l;
     }
+
     @Override
     public boolean reserve(MetaItem m, int n) {
         return store.reserve(m, n);
@@ -125,6 +126,10 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected abstract boolean consumeMaterial(LineBase line, UUID pid);
 
     protected void _update(long diffNano) {
+        if(getState()== Gs.BuildingState.SHUTDOWN_VALUE){
+            return;
+        }
+
         List<UUID> completedLines = new ArrayList<>();
         if(__hasLineRemained()){
             LineBase l =  lines.get(0);

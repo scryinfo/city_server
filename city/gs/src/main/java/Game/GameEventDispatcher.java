@@ -63,6 +63,11 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.exchangeUnCollect_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"exchangeUnCollect"));
 			table.put((short) GsCode.OpCode.exchangeGetItemDealHistory_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"exchangeGetItemDealHistory"));
 
+			table.put((short) GsCode.OpCode.getAllFlight_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllFlight"));
+			table.put((short) GsCode.OpCode.betFlight_VALUE, Wrapper.newWithMessageAsync(Gs.BetFlight.PARSER, GameSession.class,"betFlight"));
+			table.put((short) GsCode.OpCode.getFlightBetHistory_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getFlightBetHistory"));
+			table.put((short) GsCode.OpCode.searchFlight_VALUE, Wrapper.newWithMessageAsync(Gs.SearchFlight.PARSER, GameSession.class,"searchFlight"));
+
 			table.put((short) GsCode.OpCode.adAddSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AddSlot.PARSER, GameSession.class,"adAddSlot"));
 			table.put((short) GsCode.OpCode.adDelSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdDelSlot.PARSER, GameSession.class,"adDelSlot"));
 			table.put((short) GsCode.OpCode.adPutAdToSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AddAd.PARSER, GameSession.class,"adPutAdToSlot"));
