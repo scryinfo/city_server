@@ -226,7 +226,7 @@ public class StatisticSession {
 		}
     	this.write(Package.create(cmd,list.build()));
     }
-    
+
     public void queryNpcTypeNum(short cmd)
     {
     	Ss.NpcHourTypeNum.Builder list = Ss.NpcHourTypeNum.newBuilder();
