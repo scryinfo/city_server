@@ -442,7 +442,6 @@ public class GameSession {
 		b.createNpc();//产生npc
 		if(b.startBusiness(player)){
 			this.write(Package.create(cmd,c));
-			GameDb.saveOrUpdate(b);
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
 		}
 	}
@@ -458,7 +457,6 @@ public class GameSession {
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
 		}
-		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd,c));
 	}
 
@@ -859,6 +857,10 @@ public class GameSession {
 
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
 		this.write(Package.create(cmd, c));
+/*		//货架商品出售通知
+		UUID[] sellBuildingAndSerller = {sellBuilding.id(),seller.id()};
+		int[] itemIdAndNum = {itemId, itemBuy.n};
+		MailBox.instance().sendMail(Mail.MailType.SHELF_SALE.getMailType(),seller.id(),null,sellBuildingAndSerller,itemIdAndNum);*/
 	}
 	public void exchangeItemList(short cmd) {
 		this.write(Package.create(cmd, Exchange.instance().getItemList()));
@@ -1194,7 +1196,8 @@ public class GameSession {
 		{
 			int bsTp = tp/100;
 			int subTp = tp % 100;
-			Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
+			//Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
+			Integer value = (int) fcySeller.getLocalPromoAbility(tp);
 			builder.addCurAbilitys(value);
 		}
 		this.write(Package.create(cmd, builder.build()));
@@ -3844,7 +3847,7 @@ public class GameSession {
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
 		Building building = City.instance().getBuilding(buildingId);
 		//全城该类型推广均单位定价
-		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,building.type());
+		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,MetaBuilding.type(building.metaBuilding.id));
 		if (building == null || building.type() != MetaBuilding.PUBLIC || !building.outOfBusiness()) {
 			return;
 		}
@@ -4408,11 +4411,67 @@ public class GameSession {
 			BrandManager.BrandInfo brandInfo = BrandManager.instance().getBrand(playerId,goodType);
 			brand += brandInfo.getV();
 			//2 当前知名度评分
-			double brandScore=GlobalUtil.getGoodQtyScore(brand, goodType, good.brand);
+			double brandScore=GlobalUtil.getBrandScore(brand,goodType);
 			Gs.PromotionItemInfo.ItemInfo.Builder item = Gs.PromotionItemInfo.ItemInfo.newBuilder();
 			item.setItemId(goodType).setBrand(brand).setBrandScore(brandScore);
 			itemInfo.addItems(item);
 		}
 		this.write(Package.create(cmd,itemInfo.build()));
+	}
+
+	//查询货架数据
+	public void getShelfData (short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof IShelf))
+			return;
+		int type = building.type();
+		Gs.ShelfData.Builder builder = Gs.ShelfData.newBuilder();
+		Gs.Shelf shelf=null;
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				shelf = materialFactory.shelf.toProto();
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				shelf = produceDepartment.shelf.toProto();
+				break;
+			case MetaBuilding.RETAIL:
+				RetailShop retailShop = (RetailShop) building;
+				shelf = retailShop.getShelf().toProto();
+				break;
+		}
+		builder.setShelf(shelf).setBuildingId(id.getId());
+		this.write(Package.create(cmd,builder.build()));
+	}
+
+	//查询仓库数据
+	public void getStorageData (short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof IStorage))
+			return;
+		int type = building.type();
+		Gs.StorageData.Builder builder = Gs.StorageData.newBuilder();
+		Gs.Store store=null;
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				store = materialFactory.store.toProto();
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				store = produceDepartment.store.toProto();
+				break;
+			case MetaBuilding.RETAIL:
+				RetailShop retailShop = (RetailShop) building;
+				store = retailShop.getStore().toProto();
+				break;
+		}
+		builder.setStore(store).setBuildingId(id.getId());
+		this.write(Package.create(cmd,builder.build()));
 	}
 }

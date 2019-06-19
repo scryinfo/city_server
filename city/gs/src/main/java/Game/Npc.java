@@ -116,7 +116,7 @@ public class Npc {
 
     @Embeddable //hide those members, the only purpose is to mapping to the table
     protected static class AdapterData {
-        @Column(name = "buildingId", updatable = true, nullable = false)
+        @Column(name = "buildingId", updatable = false, nullable = false)
         protected UUID buildingId;
         @Column(name = "tempBuildingId")
         protected UUID tempBuildingId;
@@ -237,7 +237,6 @@ public class Npc {
     }
     public void setBorn(Building born) {
 		this.born = born;
-		this.adapterData.buildingId = born.id();
 	}
 	public Building building() {
         return this.born;

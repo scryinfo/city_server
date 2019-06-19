@@ -9,8 +9,6 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueManager;
 import Game.Meta.MetaData;
 import Game.Util.BuildingUtil;
-import Game.ddd.chainRpcMgr;
-import Game.ddd.dddPurchaseMgr;
 import Shared.*;
 import Shared.Package;
 import com.google.common.collect.MapMaker;
@@ -137,9 +135,7 @@ public class GameServer {
         BrandManager.init();
         FlightManager.init();
         SocietyManager.init();
-        BuildingUtil.instance().init();
-        dddPurchaseMgr.init();
-        chainRpcMgr.instance();
+        BuildingUtil.instance().init();//建筑工具类缓存数据
 
         // DO NOT put init below this!!! city might can't see the init
         City.instance().run();

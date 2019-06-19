@@ -1,11 +1,5 @@
 package Statistic;
 
-import Shared.LogDb;
-import org.apache.log4j.Logger;
-import org.bson.Document;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -13,6 +7,14 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.bson.Document;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+import Shared.LogDb;
+
+import static Statistic.SummaryUtil.DAY_MILLISECOND;
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
 public class PerHourJob implements org.quartz.Job {
@@ -25,8 +27,8 @@ public class PerHourJob implements org.quartz.Job {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
 
-        long endTime = SummaryUtil.hourStartTime(System.currentTimeMillis());
-        long startTime = endTime - HOUR_MILLISECOND;
+        long startTime = SummaryUtil.hourStartTime(System.currentTimeMillis());
+        long endTime = startTime - HOUR_MILLISECOND;
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("PerHourJob start execute,time = " + timeStr);
@@ -34,30 +36,27 @@ public class PerHourJob implements org.quartz.Job {
         //每种商品购买的npc人数,每小时统计一次
         //并把统计结果保存到数据库
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
-        //apartment交易
-        documentList = LogDb.dayApartmentNpcNum(startTime, endTime, LogDb.getNpcRentApartment());
-        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
+        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, startTime, SummaryUtil.getDayGoodsNpcNum());
 
         // --player exchange info
         //buy ground
-        documentList = LogDb.dayPlayerExchange1(startTime, endTime, LogDb.getBuyGround(), BUYGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange1(endTime, startTime, LogDb.getBuyGround(), BUYGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
         //rent ground
-        documentList = LogDb.dayPlayerExchange1(startTime, endTime, LogDb.getRentGround(), RENTGROUND_ID);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange1(endTime, startTime, LogDb.getRentGround(), RENTGROUND_ID);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GROUND, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
         //buy goods in Shelf
-        documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), true);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GOODS, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange2(endTime, startTime, LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.GOODS, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
         //buy material in Shelf
-        documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.dayPlayerExchange2(endTime, startTime, LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
         // PublicFacility Promotion buildingOrGoods
-        documentList = LogDb.hourPromotionRecord(startTime, endTime, LogDb.getPromotionRecord());
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.PUBLICITY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.hourPromotionRecord(endTime, startTime, LogDb.getPromotionRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.PUBLICITY, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
         // Laboratory  research EvapointOrinvent
-        documentList = LogDb.hourLaboratoryRecord(startTime, endTime, LogDb.getLaboratoryRecord());
-        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.LABORATORY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
+        documentList = LogDb.hourLaboratoryRecord(endTime, startTime, LogDb.getLaboratoryRecord());
+        SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.LABORATORY, documentList, startTime, SummaryUtil.getPlayerExchangeAmount());
 
 
         //player income 由每小时统计变为每分钟统计

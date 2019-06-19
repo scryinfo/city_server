@@ -18,7 +18,6 @@ enum StatusPurchase
 
 @Entity
 public class ddd_purchase {
-    ddd_purchase(){}
     //关键数据----------------------------
     @Id
     //@GeneratedValue(strategy = GenerationType.AUTO)

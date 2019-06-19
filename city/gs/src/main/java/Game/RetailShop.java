@@ -277,4 +277,12 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             return true;
         }
     }
+
+    public Storage getStore() {
+        return store;
+    }
+
+    public Shelf getShelf() {
+        return shelf;
+    }
 }

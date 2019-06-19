@@ -113,18 +113,18 @@ public class FriendManager
     public void deleteFriendWithBlacklist(Player player,UUID fid)
     {
         GameDb.deleteFriendWithBlacklist(player, fid);
-        deleteCache(player.id(), fid, player.id());
-        deleteCache(fid, player.id(), player.id());
+        deleteCache(player.id(), fid);
+        deleteCache(fid, player.id());
     }
 
     public void deleteFriend(UUID pid,UUID fid)
     {
         GameDb.deleteFriend(pid, fid);
-        deleteCache(pid, fid, pid);
-        deleteCache(fid, pid, pid);
+        deleteCache(pid, fid);
+        deleteCache(fid, pid);
     }
 
-    private void deleteCache(UUID id1, UUID id2, UUID operate)
+    private void deleteCache(UUID id1, UUID id2)
     {
         Set<UUID> set = null;
         if ((set = playerFriends.getIfPresent(id1)) != null)
@@ -134,9 +134,8 @@ public class FriendManager
         GameSession gameSession = GameServer.allGameSessions.get(id1);
         if (gameSession != null)
         {
-            Gs.DeleteFriend delFirend = Gs.DeleteFriend.newBuilder()
-                    .setId(Util.toByteString(operate))
-                    .setFId(Util.toByteString(id2))
+            Gs.Id delFirend = Gs.Id.newBuilder()
+                    .setId(Util.toByteString(id2))
                     .build();
             gameSession.write(
                     Package.create(GsCode.OpCode.deleteFriend_VALUE, delFirend));

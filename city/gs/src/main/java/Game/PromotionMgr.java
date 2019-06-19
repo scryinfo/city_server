@@ -24,8 +24,8 @@ public class PromotionMgr {
     private Map<UUID, PromoOrder> promotions = new HashMap<>();
 
     private static long _elapsedtime = 0 ;    //上次更新时间
-    //public static final long _upDeltaNs = 3600*1000000000;    //更新间隔，单位是纳秒, 3600为一个小时
-    public static final long _upDeltaNs = 10*1000000000;        //更新间隔，单位是纳秒, 3600为一个小时Ns
+    public static final long _upDeltaNs = 3600*1000000000;    //更新间隔，单位是纳秒, 3600为一个小时
+    //public static final long _upDeltaNs = 10*1000000000;        //更新间隔，单位是纳秒, 3600为一个小时Ns
     public static final long _upDeltaMs = _upDeltaNs/1000000;   //更新间隔,毫秒
     private static PromotionMgr instance ;
     public static void init() {
@@ -85,7 +85,6 @@ public class PromotionMgr {
         promotions.putIfAbsent(neworder.promotionId,neworder);
     }
     public void update(long diffNano) {
-
         if(_elapsedtime < _upDeltaNs){
             _elapsedtime += diffNano;
             return;
@@ -136,7 +135,8 @@ public class PromotionMgr {
             float addition = 0;
             if(endTime >= System.currentTimeMillis()){
                 //计算每个推广的结果
-                addition = fcySeller.excutePromotion(promotion);
+                //addition = fcySeller.excutePromotion(promotion);
+                addition = fcySeller.getLocalPromoAbility(objType);
                 //累加提升值，以便计算平均值
                 promotion.promotedTotal += addition;
                 promotion.promProgress = (int)(((float)elapsedtime/(float)promotion.promDuration)*100);

@@ -61,12 +61,7 @@ public class YesterdayJob implements org.quartz.Job {
         //统计昨天包括以前player租别人的地的交易量
         documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getRentGround());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerRentGround());
-        //统计昨天包括以前player研究的交易量
-        documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getLaboratoryRecord());
-        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerResearch());
-        //统计昨天包括以前player推广的交易量
-        documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getPromotionRecord());
-        SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerPromotion());
+
         //统计耗时
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
