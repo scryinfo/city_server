@@ -44,7 +44,8 @@ public class PromoOrder {
     int promProgress;	//推广进度
     int promotedTotal;  //总的推广力增加值，用来计算平均值
     int transactionPrice; //成交价， 成交时，广告商 PublicFacility 中 curPromPricePerHour
-
+    @Transient
+    int promoNum=0;
 
     public void setPromoMgr(PromotionMgr promoMgr) {
         this.promoMgr = promoMgr;
