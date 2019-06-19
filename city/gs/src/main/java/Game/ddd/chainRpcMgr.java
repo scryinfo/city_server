@@ -87,40 +87,35 @@ public class chainRpcMgr {
         logger.info("Greeting: " + response.getErrMsg());
     }
 
-    public void RechargeRequestReq(ccapi.CcOuterClass.RechargeRequestReq req) {
+    public ccapi.CcOuterClass.RechargeRequestRes RechargeRequestReq(ccapi.CcOuterClass.RechargeRequestReq req) {
         logger.info("Will try to greet " + req.getPurchaseId() + " ...");
         ccapi.CcOuterClass.RechargeRequestRes response;
         try {
             response = blockingStubCl.rechargeRequest(req);
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
+            return null;
         }
         logger.info("Greeting: " + response.getPurchaseId());
+        return response;
     }
 
-    public void DisChargeReq(ccapi.CcOuterClass.DisChargeReq req) {
+    public ccapi.CcOuterClass.DisChargeRes DisChargeReq(ccapi.CcOuterClass.DisChargeReq req) {
         logger.info("Will try to greet " + req.getPurchaseId() + " ...");
         ccapi.CcOuterClass.DisChargeRes response;
         try {
             response = blockingStubCl.disCharge(req);
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
+            return null;
         }
-        logger.info("Greeting: " + response.getPurchaseId());
-        //因为提币操作是在ddd服务器操作，而且时间比较长，需提醒玩家提币请求开始处理了
-        ccapi.CcOuterClass.DisChargeStartRes.Builder msg = CcOuterClass.DisChargeStartRes.newBuilder();
-        msg.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(req.getReqHeader().getReqId()).setVersion(req.getReqHeader().getVersion()).build());
 
-        ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(req.getPurchaseId().getBytes()));
-        Player player = GameDb.getPlayer(dp.player_id);
-        if(!player.equals(null)){
-            Package pack = Package.create(GsCode.OpCode.ct_DisChargeStartRes_VALUE, msg.build());
-            player.send(pack);
-        }else{
-            player.send(Package.fail((short)GsCode.OpCode.ct_DisChargeReq_VALUE, Common.Fail.Reason.moneyNotEnough));
+        if(response.getResHeader().getErrCode() != GlobalDef.ErrCode.ERR_SUCCESS){
+            return response;
         }
+
+        logger.info("Greeting: " + response.getPurchaseId());
+        return response;
     }
 
     //grpc服务器------------------------------------------------------------------------------------------------------

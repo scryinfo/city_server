@@ -20,6 +20,7 @@ import Shared.*;
 import Shared.Package;
 import ccapi.CcOuterClass;
 import ccapi.Dddbind;
+import ccapi.GlobalDef;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -4193,11 +4194,14 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
 		try {
-			chainClient.instance().CreateUser(req);
+			ccapi.GlobalDef.ResHeader resp = chainClient.instance().CreateUser(req);
+			if(resp.getErrCode() == GlobalDef.ErrCode.ERR_SUCCESS)
+				this.write(Package.create(cmd, msg));
+			else
+				this.write(Package.fail(cmd));
 		}  catch (Exception e) {
 			return ;
 		}
-		this.write(Package.create(cmd, msg));
 		int t = 0 ;
 	}
 
@@ -4263,8 +4267,11 @@ public class GameSession {
 		if(dddPurchaseMgr.instance().addPurchase(pur)){
 			//转发给ccapi服务器
 			try{
-				chainRpcMgr.instance().RechargeRequestReq(req);
-				this.write(Package.create(cmd, msg));
+				ccapi.CcOuterClass.RechargeRequestRes resp = chainRpcMgr.instance().RechargeRequestReq(req);
+				if(resp.getResHeader().getErrCode() == GlobalDef.ErrCode.ERR_SUCCESS)
+					this.write(Package.create(cmd, msg));
+				else
+					this.write(Package.fail(cmd));
 			}catch (Exception e){
 				this.write(Package.fail(cmd));
 			}
@@ -4313,12 +4320,22 @@ public class GameSession {
 		if(dddPurchaseMgr.instance().addPurchase(pur)){
 			try{
 				//转发给ccapi服务器
-				chainRpcMgr.instance().DisChargeReq(req);
-				this.write(Package.create(cmd, msg));
+				ccapi.CcOuterClass.DisChargeRes response = chainRpcMgr.instance().DisChargeReq(req);
+
+				//因为提币操作是在ddd服务器操作，而且时间比较长，需提醒玩家提币请求开始处理了
+				ccapi.CcOuterClass.DisChargeStartRes.Builder msgStart = CcOuterClass.DisChargeStartRes.newBuilder();
+				msgStart.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(response.getResHeader().getReqId()).setVersion(response.getResHeader().getVersion()).build());
+				ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(response.getPurchaseId().getBytes()));
+				Player player = GameDb.getPlayer(dp.player_id);
+				if(!player.equals(null)){
+					Package pack = Package.create(GsCode.OpCode.ct_DisChargeStartRes_VALUE, msgStart.build());
+					player.send(pack);
+				}else{
+					player.send(Package.fail((short)GsCode.OpCode.ct_DisChargeReq_VALUE, Common.Fail.Reason.moneyNotEnough));
+				}
 			}catch (Exception e){
 				this.write(Package.fail(cmd));
 			}
-
 		}else{
 			this.write(Package.fail(cmd));
 		}
