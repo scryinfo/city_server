@@ -349,4 +349,5 @@ public class GlobalUtil {
         }
         return qtyScore;
     }
+
 }
