@@ -173,8 +173,8 @@ public class PromotionMgr {
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
                 //推广完成通知
-                //paras: 第一个是广告id，第二个是广告商建筑id，第三个提升点数
-                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, new int[(int) addition]);
+                //paras: 第一个是广告商建筑id，第二个是推广时长，第三个提升点数
+                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.sellerBuildingId}, null, addition + "," + promotion.promDuration);
                 //发送给广告商
                 GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
                         Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,
@@ -203,8 +203,8 @@ public class PromotionMgr {
         GameDb.saveOrUpdate(fcySeller);
         idToRemove.add(entry.getKey());
         //推广完成通知
-        //paras: 第一个是广告id，第二个是广告商建筑id，第三个提升点数
-        MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, fcySeller.id()}, new int[(int) addition]);
+        //paras: 第一个是广告商建筑id，第二个是推广时长，第三个提升点数
+        MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.sellerBuildingId}, null, addition + "," + promotion.promDuration);
         //发送给广告商
         GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
                 Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,

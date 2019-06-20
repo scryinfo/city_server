@@ -1398,7 +1398,7 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerS()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/1000;
+		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerHour()) * ((int)gs_AdAddNewPromoOrder.getPromDuration()/3600000);
 		//TODO:矿工费用(向下取整)
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(fee * minersRatio);
