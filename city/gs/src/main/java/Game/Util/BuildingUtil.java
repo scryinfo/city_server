@@ -61,7 +61,6 @@ public class BuildingUtil {
     }
 
     public Map<Integer,Integer> getMaxOrMinQty(int type){
-        System.out.println("全城最大和最小基础品质为："+maxQtyMap.get(type));
         return maxQtyMap.get(type);
     }
     /*获取最大最小品牌值*/
