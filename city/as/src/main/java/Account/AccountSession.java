@@ -14,11 +14,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 
-import java.security.MessageDigest;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -159,7 +156,7 @@ public class AccountSession {
             this.write(Package.fail(cmd,Common.Fail.Reason.highFrequency));
             return;
         }
-        String authCode = numberAuthCode();
+        String authCode = YunSmsManager.numberAuthCode();
         Result<SmsSingleSend> result = YunSmsManager.getInstance().sendAuthCode(phoneNumber, authCode);
         if (result.getCode() == 0)
         {
@@ -176,17 +173,6 @@ public class AccountSession {
                 this.write(Package.fail(cmd,Common.Fail.Reason.paramError));
             }
         }
-    }
-
-    private String numberAuthCode()
-    {
-        Random random = new Random();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < 4; i++)
-        {
-            stringBuilder.append(random.nextInt(10));
-        }
-        return stringBuilder.toString();
     }
 
     public void verificationInvitationCode(short cmd, Message message)

@@ -26,6 +26,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import com.yunpian.sdk.model.Result;
+import com.yunpian.sdk.model.SmsSingleSend;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -48,6 +50,33 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+class SmVerify {
+	UUID playerId;
+	String authCode;
+
+	public CcOuterClass.DisChargeReq getDisChargeReq() {
+		return disChargeReq;
+	}
+
+	ccapi.CcOuterClass.DisChargeReq disChargeReq;
+	public Long getTs() {
+		return ts;
+	}
+
+	Long    ts;
+	public SmVerify(UUID pid, String code, Long ints, ccapi.CcOuterClass.DisChargeReq req){
+		playerId = pid;
+		authCode = code;
+		ts = ints;
+		disChargeReq = req;
+	}
+
+	public boolean TimeoutChecks(){
+		return System.currentTimeMillis() - ts <= 30000;
+	}
+}
+
 public class GameSession {
 
 	public static byte[] signData(String algorithm, byte[] data, PrivateKey key) throws Exception {
@@ -80,6 +109,8 @@ public class GameSession {
 	public Player getPlayer() {
 		return player;
 	}
+	//支付短信验证码缓存
+	private Map<UUID, SmVerify> paySmCache = new HashMap<>();
 	private enum LoginState {
 		ROLE_NO_LOGIN,
 		ROLE_LOGIN
@@ -4212,6 +4243,79 @@ public class GameSession {
 		int t = 0 ;
 	}
 
+	public void ct_DisPaySmVefifyReq(short cmd,Message message){
+		ccapi.Dddbind.ct_DisPaySmVefifyReq msg = (ccapi.Dddbind.ct_DisPaySmVefifyReq) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		SmVerify sv = paySmCache.get(playerId);
+
+		if(paySmCache.get(playerId).equals(msg.getAuthCode())){
+			if(sv.TimeoutChecks()){
+				//验证成功
+				paySmCache.remove(playerId);
+				//服务器签名验证测试
+				ccapi.CcOuterClass.DisChargeReq req = sv.getDisChargeReq();
+				//计算哈希
+				byte[] pubKey = Hex.decode(req.getPubKey()) ;
+				byte[] pubK = req.getPubKey().getBytes() ;
+
+				ActiveSing activeSing = new ActiveSing(
+						req.getPurchaseId()
+						, req.getEthAddr()
+						, req.getTs()
+						, req.getAmount()
+						, pubKey
+				);
+				try{
+					byte[] hActiveSing = activeSing.ToHash();
+					//验证： 构造新的pubkey和签名
+					byte[] sigbts = Hex.decode(req.getSignature().toStringUtf8());
+					ECKey.ECDSASignature newsig = new ECKey.ECDSASignature(
+							new BigInteger(1,Arrays.copyOfRange(sigbts, 0, 32)),
+							new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
+					);
+					ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
+					boolean pass =  newpubkey.verify(hActiveSing ,newsig); //验证通过
+
+					int t = 0 ;
+				}catch (Exception e){
+
+				}
+
+				double dddAmount = Double.parseDouble(req.getAmount());
+				//添加交易
+				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
+				if(dddPurchaseMgr.instance().addPurchase(pur)){
+					try{
+						//转发给ccapi服务器
+						ccapi.CcOuterClass.DisChargeRes response = chainRpcMgr.instance().DisChargeReq(req);
+
+						//因为提币操作是在ddd服务器操作，而且时间比较长，需提醒玩家提币请求开始处理了
+						ccapi.CcOuterClass.DisChargeStartRes.Builder msgStart = CcOuterClass.DisChargeStartRes.newBuilder();
+						msgStart.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(response.getResHeader().getReqId()).setVersion(response.getResHeader().getVersion()).build());
+						ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(response.getPurchaseId().getBytes()));
+						Player player = GameDb.getPlayer(dp.player_id);
+						if(!player.equals(null)){
+							this.write(Package.create(cmd,msg.toBuilder().setErrorCode(0).build()));
+						}else{
+							this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+						}
+					}catch (Exception e){
+						this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+					}
+				}else{
+					this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+				}
+			}else{
+				//提示超时
+				this.write(Package.create(cmd,msg.toBuilder().setErrorCode(1).build()));
+			}
+		}else{
+			//验证失败
+			this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+		}
+		int t = 0 ;
+	}
+
     //获取建筑的通用信息（抽取，yty）
     public Gs.BuildingGeneral.Builder buildingToBuildingGeneral(Building building){
 		if(building!=null){
@@ -4228,9 +4332,11 @@ public class GameSession {
 		}
 	}
 
+
 	public void ct_RechargeRequestReq(short cmd,Message message){
 		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq ) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+
 		CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
 
 		//服务器签名验证测试
@@ -4255,7 +4361,6 @@ public class GameSession {
 			);
 			ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
 			boolean pass =  newpubkey.verify(hSignCharge ,newsig); //验证通过
-
 			int t = 0 ;
 		}catch (Exception e){
 
@@ -4269,9 +4374,14 @@ public class GameSession {
 			try{
 				ccapi.CcOuterClass.RechargeRequestRes resp = chainRpcMgr.instance().RechargeRequestReq(req);
 				if(resp.getResHeader().getErrCode() == GlobalDef.ErrCode.ERR_SUCCESS)
-					this.write(Package.create(cmd, msg));
-				else
+					this.write(Package.create(cmd, ccapi.Dddbind.ct_RechargeRequestRes.newBuilder()
+							.setRechargeRequestRes(resp)
+							.setPlayerId(msg.getPlayerId())
+							.build()));
+				else{
 					this.write(Package.fail(cmd));
+					logger.debug("ct_RechargeRequestReq: " + resp.getResHeader().getErrMsg());
+				}
 			}catch (Exception e){
 				this.write(Package.fail(cmd));
 			}
@@ -4286,59 +4396,11 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.DisChargeReq req = msg.getDisChargeReq();
 
-		//服务器签名验证测试
-		//计算哈希
-		byte[] pubKey = Hex.decode(req.getPubKey()) ;
-		byte[] pubK = req.getPubKey().getBytes() ;
-
-		ActiveSing activeSing = new ActiveSing(
-				req.getPurchaseId()
-				, req.getEthAddr()
-				, req.getTs()
-				, req.getAmount()
-				, pubKey
-		);
-		try{
-			byte[] hActiveSing = activeSing.ToHash();
-			//验证： 构造新的pubkey和签名
-			byte[] sigbts = Hex.decode(req.getSignature().toStringUtf8());
-			ECKey.ECDSASignature newsig = new ECKey.ECDSASignature(
-					new BigInteger(1,Arrays.copyOfRange(sigbts, 0, 32)),
-					new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
-			);
-			ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
-			boolean pass =  newpubkey.verify(hActiveSing ,newsig); //验证通过
-
-			int t = 0 ;
-		}catch (Exception e){
-
-		}
-
-		double dddAmount = Double.parseDouble(req.getAmount());
-		//添加交易
-		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
-		if(dddPurchaseMgr.instance().addPurchase(pur)){
-			try{
-				//转发给ccapi服务器
-				ccapi.CcOuterClass.DisChargeRes response = chainRpcMgr.instance().DisChargeReq(req);
-
-				//因为提币操作是在ddd服务器操作，而且时间比较长，需提醒玩家提币请求开始处理了
-				ccapi.CcOuterClass.DisChargeStartRes.Builder msgStart = CcOuterClass.DisChargeStartRes.newBuilder();
-				msgStart.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(response.getResHeader().getReqId()).setVersion(response.getResHeader().getVersion()).build());
-				ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(response.getPurchaseId().getBytes()));
-				Player player = GameDb.getPlayer(dp.player_id);
-				if(!player.equals(null)){
-					Package pack = Package.create(GsCode.OpCode.ct_DisChargeStartRes_VALUE, msgStart.build());
-					player.send(pack);
-				}else{
-					player.send(Package.fail((short)GsCode.OpCode.ct_DisChargeReq_VALUE, Common.Fail.Reason.moneyNotEnough));
-				}
-			}catch (Exception e){
-				this.write(Package.fail(cmd));
-			}
-		}else{
-			this.write(Package.fail(cmd));
-		}
+		String authCode = YunSmsManager.numberAuthCode();
+		paySmCache.put(playerId,new SmVerify(playerId,authCode,System.currentTimeMillis(),req));
+		String phoneNumber = GameDb.getPlayer(playerId).getAccount();
+		Result<SmsSingleSend> result = YunSmsManager.getInstance().sendAuthCode(phoneNumber, authCode);
+		int a = 0;
 	}
 
 	//查询原料厂所有的原料列表信息

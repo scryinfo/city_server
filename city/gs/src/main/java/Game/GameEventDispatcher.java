@@ -263,6 +263,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.ct_GenerateOrderReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GenerateOrderReq.PARSER, GameSession.class,"ct_GenerateOrderReq"));
 			table.put((short) GsCode.OpCode.ct_RechargeRequestReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_RechargeRequestReq.PARSER, GameSession.class,"ct_RechargeRequestReq"));
 			table.put((short) GsCode.OpCode.ct_DisChargeReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisChargeReq.PARSER, GameSession.class,"ct_DisChargeReq"));
+			table.put((short) GsCode.OpCode.ct_DisPaySmVefifyReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisPaySmVefifyReq.PARSER, GameSession.class,"ct_DisPaySmVefifyReq"));
 			if(GlobalConfig.debug()){
 
 			}

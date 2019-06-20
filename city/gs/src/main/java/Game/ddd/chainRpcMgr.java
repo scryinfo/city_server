@@ -94,7 +94,11 @@ public class chainRpcMgr {
             response = blockingStubCl.rechargeRequest(req);
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return null;
+            return ccapi.CcOuterClass.RechargeRequestRes.newBuilder().setResHeader(
+                    ccapi.GlobalDef.ResHeader.newBuilder()
+                            .setErrMsg(e.getMessage())
+                            .setErrCode(ccapi.GlobalDef.ErrCode.ERR_FAILED)
+            ).build();
         }
         logger.info("Greeting: " + response.getPurchaseId());
         return response;
