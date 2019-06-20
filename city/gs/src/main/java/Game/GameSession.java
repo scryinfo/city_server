@@ -4249,7 +4249,7 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		SmVerify sv = paySmCache.get(playerId);
 
-		if(paySmCache.get(playerId).equals(msg.getAuthCode())){
+		if(paySmCache.get(playerId).authCode.equals(msg.getAuthCode())){
 			if(sv.TimeoutChecks()){
 				//验证成功
 				paySmCache.remove(playerId);
@@ -4279,7 +4279,7 @@ public class GameSession {
 
 					int t = 0 ;
 				}catch (Exception e){
-
+					int t = 0;
 				}
 
 				double dddAmount = Double.parseDouble(req.getAmount());

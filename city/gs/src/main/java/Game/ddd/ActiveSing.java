@@ -20,12 +20,18 @@ public class ActiveSing {
     String EthAddr;         // Eee or ddd address
     String Amount;     // 附加信息，可以不写
 
+    public String formatAmount(String count)
+    {
+        if (count.length() % 2 == 1) count = "0" + count;
+        return count;
+    }
+
     public byte[] ToHash() throws IOException {
         ByteArrayOutputStream all = new ByteArrayOutputStream();
         byte[] purchaseId = Hex.decode(PurchaseId.getBytes());
         byte[] addr =DigestUtils.sha256((EthAddr.getBytes()));
         byte[] ts = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(Ts).array();
-        byte[] amount = Hex.decode(Amount.getBytes());
+        byte[] amount = Hex.decode(formatAmount(Amount).getBytes());
 
         all.write(purchaseId);
         all.write(addr);

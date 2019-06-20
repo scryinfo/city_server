@@ -111,7 +111,7 @@ public class chainRpcMgr {
             response = blockingStubCl.disCharge(req);
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return null;
+            return ccapi.CcOuterClass.DisChargeRes.newBuilder().setResHeader(ccapi.GlobalDef.);
         }
 
         if(response.getResHeader().getErrCode() != GlobalDef.ErrCode.ERR_SUCCESS){
