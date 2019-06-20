@@ -1,6 +1,10 @@
 package Game;
 
+import Game.Eva.Eva;
+import Game.Eva.EvaKey;
+import Game.Eva.EvaManager;
 import Game.Meta.GoodFormula;
+import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaLaboratory;
 import Game.Timers.PeriodicTimer;
@@ -54,20 +58,26 @@ public class Laboratory extends Building {
     }
     @Override
     public Gs.Laboratory detailProto() {
+        calcuProb();
+        getEvaAdd();//更新Eva加成信息
+        Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
-        calcuProb();
+     /*   Integer evaprob = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE).intValue();
+        Integer goodProb = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE).intValue();*/
         return builder.setSellTimes(this.sellTimes)
                 .setPricePreTime(this.pricePreTime)
-                .setProbEva(this.evaProb)
-                .setProbGood(this.goodProb)
+                .setProbEva(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE))
+                .setProbGood(successMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE))
                 .setRecommendPrice(0)
                 .setExclusive(this.exclusiveForOwner)
                 .setTotalEvaIncome(this.totalEvaIncome)
                 .setTotalEvaTimes(this.totalEvaTimes)
                 .setTotalGoodIncome(this.totalGoodIncome)
                 .setTotalGoodTimes(this.totalGoodTimes)
+                .setProbEvaAdd(evaMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE))
+                .setProbGoodAdd(evaMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE))
                 .build();
     }
     @Override
@@ -133,13 +143,14 @@ public class Laboratory extends Building {
 
     public boolean delLine(UUID lineId) {
         Line line = this.findInProcess(lineId);
-        if(line != null && !line.isLaunched()) {
+        if(line != null) {//因为队列的所有开始时间在加入队列的时候已经设置好了，因此，不必要判断开始时间是否大于0
 //            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
 //                            Gs.LabDelLine.newBuilder()
 //                                    .setBuildingId(Util.toByteString(id()))
 //                                    .setLineId(Util.toByteString(lineId))
 //                                    .build()));
             this.inProcess.remove(line);
+            GameDb.delete(line);
             return true;
         }
         return false;
@@ -191,7 +202,9 @@ public class Laboratory extends Building {
     }
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
-        //还需要加上eva的加成信息
+        //成功率还需要加上eva的加成信息
+        getEvaAdd();//更新Eva加成信息
+        Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         RollResult res = null;
         Line l = this.findInProcess(lineId);
         if(l == null)
@@ -202,7 +215,7 @@ public class Laboratory extends Building {
             if(l.eva()) {//是否是eva发明提升
                 //1次开启5个成果，所以循环5次
                 for (int i = 0; i <5 ; i++) {//新增===========================================
-                    if(Prob.success(this.evaProb, RADIX)) {//成功概率（第一个参数表示成功概率,后一个为基数）
+                    if(Prob.success(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE), RADIX)) {//成功概率（第一个参数表示成功概率,后一个为基数）
                         res.evaPoint++;
                         player.addEvaPoint(10);
                         //每次都需要把结果保存起来
@@ -214,7 +227,7 @@ public class Laboratory extends Building {
                 }
             }
             else {
-                if(Prob.success(this.goodProb, RADIX)) {
+                if(Prob.success(successMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE), RADIX)) {
                     res.itemIds = new ArrayList<>();
                     Integer newId = MetaData.randomGood(l.goodCategory, player.itemIds());
                     if(newId != null) {
@@ -328,7 +341,7 @@ public class Laboratory extends Building {
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
             //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(eva_transition_time)) { //从配置表读取的过渡时间
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(10)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -382,4 +395,24 @@ public class Laboratory extends Building {
     private int totalEvaTimes;
     private long totalGoodIncome;
     private int totalGoodTimes;
+    @Transient
+    Map<Integer, Double> evaMap = new HashMap<>();
+    //Eva总的成功率(map的key为btype)
+
+    public void getEvaAdd(){//更新eva
+        for (Integer type : MetaData.getBuildingTech(type())) {//atype,因为研究所一个atype只对应1个eva，所以取第一个
+            Eva eva = EvaManager.getInstance().getEva(ownerId(), type).get(0);
+            evaMap.put(eva.getBt(), EvaManager.getInstance().computePercent(eva));
+        }
+    }
+    //总的成功率数据（包含eva加成）
+    public Map<Integer,Double> getTotalSuccessProb(){
+        Map<Integer, Double> map = new HashMap<>();
+        //eva成功率
+        double evaProb = this.evaProb * (1 + evaMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE));
+        double goodProb = this.goodProb * (1 + evaMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE));
+        map.put(Gs.Eva.Btype.EvaUpgrade_VALUE, evaProb);
+        map.put(Gs.Eva.Btype.InventionUpgrade_VALUE,goodProb);
+        return map;
+    }
 }

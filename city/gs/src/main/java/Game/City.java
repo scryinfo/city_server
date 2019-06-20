@@ -7,6 +7,7 @@ import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
+import Game.Util.BuildingUtil;
 import Game.Util.DateUtil;
 import Shared.LogDb;
 import Shared.Package;
@@ -519,6 +520,10 @@ public class City {
                     terrain[x][y] = TERRIAN_NONE;
             }
         }
+        //更新零售店或者住宅建筑规模
+        if(building.type()==MetaBuilding.APARTMENT||building.type()==MetaBuilding.RETAIL){
+            BuildingUtil.instance().init();
+        }
         building.broadcastDelete();
    //   GameDb.delete(npcs.add(building));
         GameDb.delete(building);
@@ -547,6 +552,10 @@ public class City {
         	LogDb.cityBroadcast(null,null,0l,allBuilding.size(),5);
         }
         b.init();
+        //更新零售店或者住宅建筑规模
+        if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
+            BuildingUtil.instance().init();
+        }
         updates.add(b);
         GameDb.saveOrUpdate(updates);
         b.broadcastCreate();

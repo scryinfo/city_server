@@ -241,7 +241,7 @@ public class GroundManager {
                     return false;
             }
         }
-        int cost = rentPara.requiredPay() * coordinates.size();
+        long cost = rentPara.requiredPay() * coordinates.size();
         //TODO:矿工费用
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(cost * minersRatio);
@@ -320,7 +320,7 @@ public class GroundManager {
         return true;
     }
 
-    public boolean sellGround(UUID id, Set<Coordinate> coordinates, int price) {
+    public boolean sellGround(UUID id, Set<Coordinate> coordinates, long price) {
         List<GroundInfo> gis = new ArrayList<>();
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
@@ -337,7 +337,7 @@ public class GroundManager {
         this.broadcast(gis);
         return true;
     }
-    public boolean buyGround(Player buyer, Set<Coordinate> coordinates, int price) {
+    public boolean buyGround(Player buyer, Set<Coordinate> coordinates, long price) {
         List<GroundInfo> gis = new ArrayList<>();
         UUID sellerId = null;
         for(Coordinate c : coordinates) {
@@ -352,7 +352,7 @@ public class GroundManager {
             }
             gis.add(i);
         }
-        int cost = gis.size() * price;
+        long cost = gis.size() * price;
         //TODO:矿工费用
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(cost *minersRatio);
