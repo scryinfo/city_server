@@ -337,10 +337,10 @@ public class GlobalUtil {
         double minAdd=EvaManager.getInstance().computePercent(minEva);
         double maxQty = baseQty* (1 + maxAdd);
         double minQty = baseQty* (1 + minAdd);
-        double qtyScore=1;
+        double qtyScore=1;//最小评分默认为1
         if(localQuality==minQty){
             qtyScore=1;
-            if(localQuality==maxQty){//即是最小也是最大，评分100
+            if(localQuality==maxQty){//既是最小也是最大，评分100
                 qtyScore=100;
             }
         }
