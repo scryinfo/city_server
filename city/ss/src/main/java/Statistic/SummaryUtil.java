@@ -191,7 +191,7 @@ public class SummaryUtil
 			  countMap.put(t, m);
 		  }else{ 
 			  Map<Integer,Long> mm=countMap.get(t);
-			  mm.put(tp, n);
+			  mm.put(tp,n);
 			  countMap.put(t,mm); 
 		  }
     	});
@@ -581,7 +581,7 @@ public class SummaryUtil
     {
     	return dayPlayerPromotion;
     }
-    
+
     public static MongoCollection<Document> getDayPlayerIncome()
     {
     	return dayPlayerIncome;

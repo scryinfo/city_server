@@ -12,7 +12,6 @@ import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import ss.Ss;
-import sun.rmi.runtime.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -152,31 +151,32 @@ public class StatisticSession {
     	builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
     	this.write(Package.create(cmd, builder.build()));
     }
-
-	public void queryExchangeAmount(short cmd) {
-		Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
-		//npc交易量
-		long yesterdayNpcBuyInShelf = SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(), CountType.BYDAY);
-		long todayNpcBuyInShelf = SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
-		long yesterdayNpcRentApartment = SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(), CountType.BYDAY);
-		long todayNpcRentApartment = SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
-		long npcExchangeAmount = yesterdayNpcBuyInShelf + todayNpcBuyInShelf + yesterdayNpcRentApartment + todayNpcRentApartment;
-		//player交易量
-		long yesterdayPlayerBuyGround = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(), CountType.BYDAY);
-		long todayPlayerBuyGround = SummaryUtil.getTodayData(LogDb.getBuyGround());
-		long yesterdayPlayerBuyInShelf = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(), CountType.BYDAY);
-		long todayPlayerBuyInShelf = SummaryUtil.getTodayData(LogDb.getBuyInShelf());
-		long yesterdayPlayerRentGround = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(), CountType.BYDAY);
-		long todayPlayerRentGround = SummaryUtil.getTodayData(LogDb.getRentGround());
+    
+    public void queryExchangeAmount(short cmd)
+    {
+    	Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
+    	//npc交易量
+    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+      	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+      	long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
+    	//player交易量
+    	long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
+    	long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
+    	long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
+    	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+    	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
+    	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
 		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
 		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
 		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
 		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
 		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
-		builder.setExchangeAmount(npcExchangeAmount + playerExchangeAmount);
-		this.write(Package.create(cmd, builder.build()));
-	}
+    	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
+    	this.write(Package.create(cmd, builder.build()));
+    }
     
     public void queryGoodsNpcNumCurve(short cmd, Message message)
     {
@@ -202,9 +202,9 @@ public class StatisticSession {
 			bd.setKey(k);
 			bd.setValue(v);
 			list.addNpcNumCurveMap(bd.build());
-		});
+	    });
 		this.write(Package.create(cmd,list.build()));
-	}
+    }
     
     public void queryCityBroadcast(short cmd)
     {
@@ -226,24 +226,24 @@ public class StatisticSession {
 		}
     	this.write(Package.create(cmd,list.build()));
     }
-    
+
     public void queryNpcTypeNum(short cmd)
     {
     	Ss.NpcHourTypeNum.Builder list = Ss.NpcHourTypeNum.newBuilder();
-    	Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
-    	Ss.NpcTypeNumMap.Builder npcTypeNumMap = Ss.NpcTypeNumMap.newBuilder();
     	Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
     	map.forEach((k,v)->{
+            Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
      		info.setT(k);
      		Map<Integer,Long> m=v;
-	  		m.forEach((k1,v1)->{
-	  			npcTypeNumMap.setTp(k1);
-	    		npcTypeNumMap.setN(v1);
-	  		});
-	  		info.setNpcTypeNumMap(npcTypeNumMap.build());
+     		for(Map.Entry<Integer,Long> entry:m.entrySet()){
+                Ss.NpcTypeNumMap.Builder npcTypeNumMap=Ss.NpcTypeNumMap.newBuilder();
+                npcTypeNumMap.setTp(entry.getKey());
+                npcTypeNumMap.setN(entry.getValue());
+                info.addNpcTypeNumMap(npcTypeNumMap.build());
+			}
 	  		list.addNpcTypeNumInfo(info.build());
     	});
-    	
+
     	this.write(Package.create(cmd, list.build()));
     }
 

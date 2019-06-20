@@ -94,7 +94,6 @@
 		<mapping class="Game.EvaRecord"></mapping>			
 		<mapping class="Game.IndustryIncrease"></mapping>
 		<mapping class="Game.Gambling.FlightManager"></mapping>
-		<mapping class="Game.Gambling.Flight"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>
 		<mapping class="Game.ddd.ddd_purchase"></mapping>

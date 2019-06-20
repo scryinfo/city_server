@@ -1226,7 +1226,8 @@ public class GameSession {
 		{
 			int bsTp = tp/100;
 			int subTp = tp % 100;
-			Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
+			//Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
+			Integer value = (int) fcySeller.getLocalPromoAbility(tp);
 			builder.addCurAbilitys(value);
 		}
 		this.write(Package.create(cmd, builder.build()));
@@ -1429,7 +1430,7 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerS()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/1000;
+		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerHour()) * ((int)gs_AdAddNewPromoOrder.getPromDuration()/3600000);
 		//TODO:矿工费用(向下取整)
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(fee * minersRatio);
@@ -1991,6 +1992,18 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
+
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(player.id()))
+					.setFaceId(player.getFaceId())
+					.setCost(cost)
+					.setType(Gs.IncomeNotify.Type.LAB)
+					.setBid(building.metaId())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.setDuration(c.getTimes())
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 		}
 		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
@@ -2007,17 +2020,7 @@ public class GameSession {
 			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-        Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-                .setBuyerId(Util.toByteString(player.id()))
-                .setFaceId(player.getFaceId())
-                .setCost(cost)
-                .setType(Gs.IncomeNotify.Type.LAB)
-                .setBid(building.metaId())
-                .setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-                .setDuration(c.getTimes())
-                .build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -2112,6 +2115,8 @@ public class GameSession {
 						GameDb.saveOrUpdate(Arrays.asList(player, FlightManager.instance()));
 						this.write(Package.create(cmd, c));
 					}
+					else
+						this.write(Package.fail(cmd));
 				}
 			});
 		});
@@ -2503,6 +2508,11 @@ public class GameSession {
 		Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
 		builder.addAllInfo(GroundManager.instance().getGroundProto(pid));
 		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryWeatherInfo(short cmd)
+	{
+		this.write(Package.create(cmd,ThirdPartyDataSource.instance().getWeather().toProto()));
 	}
 
 	public void createSociety(short cmd, Message message)
@@ -4128,15 +4138,6 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		Building building = City.instance().getBuilding(buildingId);
-
-		//检查是否是推广公司
-		Building sellerBuilding = City.instance().getBuilding(buildingId);
-		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
-			if(GlobalConfig.DEBUGLOG){
-				GlobalConfig.cityError("GameSession.queryPromotionCompanyInfo: building type of seller is not PublicFacility!");
-			}
-			return;
-		}
 		PublicFacility fcySeller = (PublicFacility) building ;
 		Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
 		builder.setSalary(building.salaryRatio);
@@ -4487,11 +4488,67 @@ public class GameSession {
 			BrandManager.BrandInfo brandInfo = BrandManager.instance().getBrand(playerId,goodType);
 			brand += brandInfo.getV();
 			//2 当前知名度评分
-			double brandScore=GlobalUtil.getGoodQtyScore(brand, goodType, good.brand);
+			double brandScore=GlobalUtil.getBrandScore(brand,goodType);
 			Gs.PromotionItemInfo.ItemInfo.Builder item = Gs.PromotionItemInfo.ItemInfo.newBuilder();
 			item.setItemId(goodType).setBrand(brand).setBrandScore(brandScore);
 			itemInfo.addItems(item);
 		}
 		this.write(Package.create(cmd,itemInfo.build()));
+	}
+
+	//查询货架数据
+	public void getShelfData (short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof IShelf))
+			return;
+		int type = building.type();
+		Gs.ShelfData.Builder builder = Gs.ShelfData.newBuilder();
+		Gs.Shelf shelf=null;
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				shelf = materialFactory.shelf.toProto();
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				shelf = produceDepartment.shelf.toProto();
+				break;
+			case MetaBuilding.RETAIL:
+				RetailShop retailShop = (RetailShop) building;
+				shelf = retailShop.getShelf().toProto();
+				break;
+		}
+		builder.setShelf(shelf).setBuildingId(id.getId());
+		this.write(Package.create(cmd,builder.build()));
+	}
+
+	//查询仓库数据
+	public void getStorageData (short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof IStorage))
+			return;
+		int type = building.type();
+		Gs.StorageData.Builder builder = Gs.StorageData.newBuilder();
+		Gs.Store store=null;
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				store = materialFactory.store.toProto();
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				store = produceDepartment.store.toProto();
+				break;
+			case MetaBuilding.RETAIL:
+				RetailShop retailShop = (RetailShop) building;
+				store = retailShop.getStore().toProto();
+				break;
+		}
+		builder.setStore(store).setBuildingId(id.getId());
+		this.write(Package.create(cmd,builder.build()));
 	}
 }

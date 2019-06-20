@@ -13,14 +13,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity
 public class Flight {
 
-    private static int toTs(String datetimeStr) throws ParseException {
+    private static long toTs(String datetimeStr) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-        date = sdf.parse(datetimeStr);
-        return (int) (date.getTime());
+        Date date = sdf.parse(datetimeStr);
+        return date.getTime();
     }
 
     public Flight(JSONObject json) {
@@ -42,10 +40,10 @@ public class Flight {
     String getDate() {
         return this.FlightDeptimePlanDate.substring(0, 10);
     }
-    int getDelay() throws ParseException {
-        int e = toTs(this.FlightDeptimePlanDate);
-        int a = toTs(this.FlightDeptimeDate);
-        return (a - e)/60000;
+    int getDelayMinute() throws ParseException {
+        long e = toTs(this.FlightDeptimePlanDate);
+        long a = toTs(this.FlightDeptimeDate);
+        return (int) ((a - e)/60000);
     }
     protected Flight(){}
 
@@ -55,8 +53,6 @@ public class Flight {
     String FlightArrtimePlanDate;//2019-05-22 10:10:00"
     String FlightDeptimePlanDate;//2019-05-22 07:25:00"
     String FlightArrAirport;//成都双流"
-
-    @Id
     String id;//MU2805"
     String FlightCompany;//中国东方航空股份有限公司"
     String FlightArrcode;//CTU"
@@ -69,7 +65,7 @@ public class Flight {
         return !FlightDeptimeDate.isEmpty();
     }
     public boolean planDepatureTimePassed() {
-        int e = 0;
+        long e = 0;
         try {
             e = toTs(this.FlightDeptimePlanDate);
         } catch (ParseException e1) {

@@ -311,7 +311,8 @@ public class GlobalUtil {
         double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + EvaManager.getInstance().computePercent(minEva));
         double qtyScore=100;
         if(localQuality>minQty) {
-            qtyScore = Math.ceil(((localQuality-minQty)/(maxQty - minQty))*100);
+            double result = ((localQuality - minQty) / (maxQty - minQty)) * 100;
+            qtyScore = Math.ceil(result);
         }
         return qtyScore;
     }

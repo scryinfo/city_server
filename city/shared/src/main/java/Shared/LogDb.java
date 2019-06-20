@@ -447,7 +447,7 @@ public class LogDb {
 				.append("d", delay)
 				.append("a", amount)
 				.append("w", win)
-				.append("d", d.toByteArray());
+				.append("f", d.toByteArray());
 		flightBet.insertOne(document);
 	}
 	public static class FlightBetRecord {
@@ -476,7 +476,7 @@ public class LogDb {
 						o.getInteger("d"),
 						o.getInteger("a"),
 						o.getBoolean("w"),
-						Gs.FlightData.parseFrom(o.get("d", org.bson.types.Binary.class).getData()));
+						Gs.FlightData.parseFrom(o.get("f", org.bson.types.Binary.class).getData()));
 			} catch (InvalidProtocolBufferException e) {
 				return null;
 			}

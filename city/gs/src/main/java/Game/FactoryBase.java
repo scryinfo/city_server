@@ -60,11 +60,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     @Override
     public void consumeReserve(ItemKey m, int n, int price) {
         store.consumeReserve(m, n, price);
-        // 推送货架数量变更
-        Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
-        builder.setBuildingId(Util.toByteString(id())).setItemId(m.meta.id).setSelledCount(n);
-        this.sendToWatchers(Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build())
-        );
+        //推送变更信息
+//        this.sendToWatchers(id(), m.meta.id, n, price);
     }
 
     @Override
@@ -269,6 +266,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             return false;
         if(this.shelf.add(mi, price,autoReplenish)) {
             this.store.lock(mi.key, mi.n);
+            //推送货架信息
+//            this.sendToWatchers(id(), mi.key.meta.id, mi.n, price);
             return true;
         }
         else
@@ -283,6 +282,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             else{//如果是消费，那么需要消费lock的数量
                 this.store.consumeLock(id, n);
             }
+            //推送货架信息
+//            this.sendToWatchers(id(), id.meta.id, n, 0);
             return true;
         }
         return false;

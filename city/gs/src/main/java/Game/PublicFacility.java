@@ -166,6 +166,12 @@ public class PublicFacility extends Building{
         return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
     }
 
+    /*推广能力=基础推广值*员工人数*(1+eva加成)*/
+    public long getLocalPromoAbility(int type){
+        int evaAdd = evaPromoCur.getOrDefault(type,0);
+        return (long) (this.meta.output1P1Hour * this.getWorkerNum() * (1 + (float) evaAdd / 100000));
+    }
+
     public void updatePromoAbility() {
         //3、 计算Eva单项提升能力
         Set<Eva> sellerEvas = EvaManager.getInstance().getEvaList(this.ownerId());

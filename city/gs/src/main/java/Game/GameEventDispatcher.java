@@ -63,6 +63,11 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.exchangeUnCollect_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"exchangeUnCollect"));
 			table.put((short) GsCode.OpCode.exchangeGetItemDealHistory_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"exchangeGetItemDealHistory"));
 
+			table.put((short) GsCode.OpCode.getAllFlight_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllFlight"));
+			table.put((short) GsCode.OpCode.betFlight_VALUE, Wrapper.newWithMessageAsync(Gs.BetFlight.PARSER, GameSession.class,"betFlight"));
+			table.put((short) GsCode.OpCode.getFlightBetHistory_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getFlightBetHistory"));
+			table.put((short) GsCode.OpCode.searchFlight_VALUE, Wrapper.newWithMessageAsync(Gs.SearchFlight.PARSER, GameSession.class,"searchFlight"));
+
 			table.put((short) GsCode.OpCode.adAddSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AddSlot.PARSER, GameSession.class,"adAddSlot"));
 			table.put((short) GsCode.OpCode.adDelSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdDelSlot.PARSER, GameSession.class,"adDelSlot"));
 			table.put((short) GsCode.OpCode.adPutAdToSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AddAd.PARSER, GameSession.class,"adPutAdToSlot"));
@@ -166,6 +171,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryBuildingListByPlayerTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingListByPlayerTech"));
 			table.put((short) GsCode.OpCode.joinLeague_VALUE, Wrapper.newWithMessageAsync(Gs.JoinLeague.PARSER, GameSession.class, "joinLeague"));
 			table.put((short) GsCode.OpCode.queryBuildingTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingTech"));
+			table.put((short) GsCode.OpCode.queryWeatherInfo_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryWeatherInfo"));
 
 			//===========================================================
 
@@ -258,6 +264,10 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryBuildingGoodInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingGoodInfo"));
 			//查询推广公司的商品推广选项详情
 			table.put((short) GsCode.OpCode.queryPromotionItemInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryPromotionItemInfo.PARSER, GameSession.class,"queryPromotionItemInfo"));
+			//查询货架数据（用于客户端的更新）
+			table.put((short) GsCode.OpCode.getShelfData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getShelfData"));
+			//查询仓库数据（用于客户端的更新）
+			table.put((short) GsCode.OpCode.getStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getStorageData"));
 			//充提
 			table.put((short) GsCode.OpCode.ct_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_createUser.PARSER, GameSession.class,"ct_createUser"));
 			table.put((short) GsCode.OpCode.ct_GenerateOrderReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GenerateOrderReq.PARSER, GameSession.class,"ct_GenerateOrderReq"));

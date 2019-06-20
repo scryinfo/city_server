@@ -143,10 +143,10 @@ public class GameServer {
 
         // DO NOT put init below this!!! city might can't see the init
         City.instance().run();
-
+        thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());
         thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
             try {
-                ThirdPartyDataSource.instance().update();
+                ThirdPartyDataSource.instance().update(TimeUnit.SECONDS.toMillis(10));
             }
             catch (Exception e) {
                 e.printStackTrace();
