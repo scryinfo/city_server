@@ -1960,6 +1960,18 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
+
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(player.id()))
+					.setFaceId(player.getFaceId())
+					.setCost(cost)
+					.setType(Gs.IncomeNotify.Type.LAB)
+					.setBid(building.metaId())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.setDuration(c.getTimes())
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 		}
 		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
@@ -1976,17 +1988,7 @@ public class GameSession {
 			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-        Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-                .setBuyerId(Util.toByteString(player.id()))
-                .setFaceId(player.getFaceId())
-                .setCost(cost)
-                .setType(Gs.IncomeNotify.Type.LAB)
-                .setBid(building.metaId())
-                .setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-                .setDuration(c.getTimes())
-                .build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
