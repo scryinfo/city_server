@@ -136,9 +136,9 @@ public class PromotionMgr {
             long elapsedtime = promotion.promDuration - (endTime - curtime);//已经过的时间  10:00  12:00   2
             float addition = 0;
             long promHour = TimeUnit.MILLISECONDS.toHours(promotion.promDuration);
-            if(endTime >= System.currentTimeMillis()){
+            if(endTime >= System.currentTimeMillis()){ //此处即便条件成立也不能立刻推广，还需要判断是否经过1小时。
                 long now = System.currentTimeMillis();
-                long passTime = now - promotion.promStartTs;//经过的时间
+                long passTime = now - promotion.promStartTs;
                 passTime=TimeUnit.MILLISECONDS.toHours(passTime);
                 if(passTime-promotion.promoNum==1) {
                     System.err.println("开始推广");
@@ -151,10 +151,6 @@ public class PromotionMgr {
                     BrandManager.instance().update(promotion.buyerId, objType, (int) addition);
                     promotion.promoNum++;
                 }
-                if(promotion.promoNum==promHour){//推广已完成，移除推广
-                    removePromotions(promotion,fcySeller,idToRemove,entry, (int) addition);
-                }
-
             }else {
                 //判断推广完成后推广加成是正确
                 if(promotion.promoNum<promHour){//处理延时的问题
@@ -191,25 +187,4 @@ public class PromotionMgr {
         }
     }
 
-    //抽取移除广告队列
-    public void removePromotions(PromoOrder promotion,PublicFacility fcySeller,List<UUID> idToRemove,Entry<UUID, PromoOrder> entry,int addition){
-        //超出时间的，移除掉，并通知玩家
-        Player buyer = GameDb.getPlayer(promotion.buyerId);
-        //更新买家玩家信息中的广告缓存
-        buyer.delpayedPromotion(promotion.promotionId);
-        GameDb.saveOrUpdate(buyer);
-        //更新广告商广告列表
-        fcySeller.delSelledPromotion(promotion.promotionId, false);
-        GameDb.saveOrUpdate(fcySeller);
-        idToRemove.add(entry.getKey());
-        //推广完成通知
-        //paras: 第一个是广告id，第二个是广告商建筑id，第三个提升点数
-        MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, fcySeller.id()}, new int[(int) addition]);
-        //发送给广告商
-        GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
-                Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,
-                        Gs.AdRemovePromoOrder.newBuilder().setPromotionId(Util.toByteString(promotion.promotionId))
-                                .setBuildingId(Util.toByteString(promotion.sellerBuildingId))
-                                .build()));
-    }
 }
