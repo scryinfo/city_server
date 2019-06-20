@@ -64,14 +64,12 @@ public class Laboratory extends Building {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
-        /*Integer evaprob = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE).intValue();
+     /*   Integer evaprob = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE).intValue();
         Integer goodProb = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE).intValue();*/
         return builder.setSellTimes(this.sellTimes)
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE))
                 .setProbGood(successMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE))
-               /* .setProbEva(evaprob)
-                .setProbGood(goodProb)*/
                 .setRecommendPrice(0)
                 .setExclusive(this.exclusiveForOwner)
                 .setTotalEvaIncome(this.totalEvaIncome)

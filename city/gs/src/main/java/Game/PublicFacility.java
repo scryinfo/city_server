@@ -169,7 +169,6 @@ public class PublicFacility extends Building{
     /*推广能力=基础推广值*员工人数*(1+eva加成)*/
     public long getLocalPromoAbility(int type){
         int evaAdd = evaPromoCur.getOrDefault(type,0);
-        System.err.println("当前的Eva提升能力为"+evaAdd / 100000);
         return (long) (this.meta.output1P1Hour * this.getWorkerNum() * (1 + (float) evaAdd / 100000));
     }
 
