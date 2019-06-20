@@ -1,14 +1,14 @@
 package Game;
 
 public class RentPara {
-    public RentPara(int rentPreDay,int rentDaysMin, int rentDaysMax, int rentDays) {
+    public RentPara(long rentPreDay,int rentDaysMin, int rentDaysMax, int rentDays) {
         this.rentPreDay = rentPreDay;
         this.rentDays = rentDays;
         this.rentDaysMin = rentDaysMin;
         this.rentDaysMax = rentDaysMax;
         this.rentOut = false;
     }
-    public RentPara(int rentPreDay,int rentDaysMin, int rentDaysMax) {
+    public RentPara(long rentPreDay,int rentDaysMin, int rentDaysMax) {
         this.rentPreDay = rentPreDay;
         this.rentDays = 0;
         this.rentDaysMin = rentDaysMin;
@@ -16,11 +16,11 @@ public class RentPara {
         this.rentOut = true;
     }
     boolean rentOut;
-    int rentPreDay;
+    long rentPreDay;
     int rentDays;
     int rentDaysMin;
     int rentDaysMax;
-    public int requiredPay() {
+    public long requiredPay() {
         return rentPreDay * rentDays;
     }
     public boolean valid() {

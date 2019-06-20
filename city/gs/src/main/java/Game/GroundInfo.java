@@ -27,7 +27,7 @@ public class GroundInfo implements Serializable {
     public Coordinate coordinate() {
         return new Coordinate(x, y);
     }
-    int rentPreDay;
+    long rentPreDay;
     int rentDaysMin;
     int rentDaysMax;
     int rentDays;
@@ -35,7 +35,7 @@ public class GroundInfo implements Serializable {
     UUID rentTransactionId;
     @Column(nullable = false)
     UUID ownerId;
-    int sellPrice;
+    long sellPrice;
     long rentBeginTs;
     long payTs;
     int auctionPrice;   //拍地价格
@@ -141,7 +141,7 @@ public class GroundInfo implements Serializable {
                         || this.status == GroundStatus.STATELESS);
     }
 
-    public void sell(int price)
+    public void sell(long price)
     {
         this.sellPrice = price;
         this.status = GroundStatus.SELLING;

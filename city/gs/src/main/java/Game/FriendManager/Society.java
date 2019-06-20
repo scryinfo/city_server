@@ -36,9 +36,6 @@ public class Society
     @Column(nullable = false)
     private String introduction;
 
-    @Column(nullable = false)
-    private int memberCount;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "society_member", joinColumns = @JoinColumn(name = "society_id"))
     @MapKeyColumn(name = "member_id")
@@ -58,7 +55,6 @@ public class Society
     public void addMember(UUID id, SocietyMember member)
     {
         this.memberHashMap.put(id, member);
-        this.memberCount = this.memberHashMap.size();
     }
 
     public SocietyMember delMember(UUID id)
@@ -270,7 +266,7 @@ public class Society
                 .setName(name)
                 .setDeclaration(Strings.nullToEmpty(declaration))
                 .setCreateTs(createTs)
-                .setAllCount(memberCount)
+                .setAllCount(memberHashMap.size())
                 .setChairmanId(Util.toByteString(createId))
                 .setIntroduction(Strings.nullToEmpty(introduction));
         return builder.build();
@@ -284,7 +280,7 @@ public class Society
                 .setName(name)
                 .setDeclaration(Strings.nullToEmpty(declaration))
                 .setCreateTs(createTs)
-                .setAllCount(memberCount)
+                .setAllCount(memberHashMap.size())
                 .setChairmanId(Util.toByteString(createId))
                 .setIntroduction(Strings.nullToEmpty(introduction));
         memberHashMap.forEach((memberId, member) ->
