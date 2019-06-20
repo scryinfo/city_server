@@ -444,7 +444,7 @@ public class Player {
         int m = (int) this.unlockMoney(a.transactionId);
         GameDb.saveOrUpdate(this);
         if(!a.biderId().equals(id))
-            this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum( a.price()).build()));
+            this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(a.price()).build()));
         //更高出价通知
         UUID biderId = a.biderId();
         List<Coordinate> areas = a.meta.area;
