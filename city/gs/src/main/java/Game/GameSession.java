@@ -3177,12 +3177,14 @@ public class GameSession {
 				double spendMoneyRatio = MetaData.getBuildingSpendMoneyRatio(eva.getAt());
 				Map<UUID, List<Integer>> oldExpectSpend = CompeteAndExpectUtil.getApartmentExpectSpend(buildings, oldEva, spendMoneyRatio);//1.获取修改前的预期花费
 				EvaManager.getInstance().updateEva(newEva);
+				BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城最高最低品质
 				Map<UUID, List<Integer>> newExpectSpend = CompeteAndExpectUtil.getApartmentExpectSpend(buildings, newEva, spendMoneyRatio);//2.修改后的预期花费
 				//封装数据
 				List<Gs.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
 				result.addAllApartmentData(apartmentData);
 			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升率=提升的等级/全城该项eva最高等级
 				EvaManager.getInstance().updateEva(newEva);
+				BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城最高最低品质
 				//提升比例:提升的等级/全城该项eva最高等级  如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
 				int lv = newEva.getLv();

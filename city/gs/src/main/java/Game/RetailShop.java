@@ -285,4 +285,10 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     public Shelf getShelf() {
         return shelf;
     }
+
+    public double getTotalQty(){
+        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
+        double qty = (meta.qty * this.getWorkerNum()) * (1 + EvaManager.getInstance().computePercent(eva));
+        return qty;
+    }
 }

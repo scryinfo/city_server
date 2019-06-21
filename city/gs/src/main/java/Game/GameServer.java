@@ -137,7 +137,7 @@ public class GameServer {
         BrandManager.init();
         FlightManager.init();
         SocietyManager.init();
-        BuildingUtil.instance().init();
+        BuildingUtil.instance().updateMaxOrMinTotalQty();//初始化全城最大最小建筑品质
         dddPurchaseMgr.init();
         chainRpcMgr.instance();
 
