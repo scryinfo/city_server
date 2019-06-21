@@ -25,7 +25,8 @@ public class SignCharge {
         ByteArrayOutputStream all = new ByteArrayOutputStream();
         byte[] purchaseId = Hex.decode(PurchaseId.getBytes());
         byte[] ts = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(Ts).array();
-        byte[] metaData = Hex.decode(MetaData.getBytes());
+        //byte[] metaData = Hex.decode(MetaData.getBytes());
+        byte[] metaData = MetaData.getBytes();
 
         all.write(purchaseId);
         all.write(ts);
