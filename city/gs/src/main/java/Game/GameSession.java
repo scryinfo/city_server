@@ -4347,8 +4347,8 @@ public class GameSession {
 
 		SignCharge pSignCharge = new SignCharge(
 				req.getPurchaseId()
-				, req.getTs()
 				, req.getAmount()
+				, req.getTs()
 				//, pubKey
 		);
 		try{

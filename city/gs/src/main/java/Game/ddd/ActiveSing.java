@@ -34,9 +34,9 @@ public class ActiveSing {
         byte[] amount = Hex.decode(formatAmount(Amount).getBytes());
 
         all.write(purchaseId);
-        all.write(addr);
         all.write(amount);
         all.write(ts);
+        all.write(addr);
 
         all.flush();
         byte[] dd = DigestUtils.sha256(all.toByteArray());
