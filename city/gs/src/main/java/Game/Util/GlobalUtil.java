@@ -97,7 +97,7 @@ public class GlobalUtil {
                 }
             }
         }
-        if(brandInfos.size()<playerAmount){//如果查询的知名度个数小于玩家数量，则设置0为最小知名度
+        if(brandInfos.size()<playerAmount){//如果查询的知名度个数小于玩家数量，则设置0为最小知名度就是说没有推广过，此处不加基础默认值
             minBrand=0;
         }
         map.put("max", maxBrand);
@@ -297,8 +297,7 @@ public class GlobalUtil {
             if(localBrand==maxBrand){
                 brandScore=100;
             }
-        }
-        if(localBrand>minBrand&&maxBrand!=minBrand) {
+        }else if(localBrand>minBrand&&maxBrand!=minBrand) {
             double local = localBrand - minBrand;
             int max=maxBrand - minBrand;
             brandScore = Math.ceil((local/max)*100);
@@ -308,13 +307,10 @@ public class GlobalUtil {
 
     //获取建筑的品质评分  品质评分 = (当前品质 - 全城最低品质) / (全城最高品质 - 全城最低品质)
     public static double getBuildingQtyScore(double localQuality,int buildingType){
-        Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(buildingType, Gs.Eva.Btype.Quality_VALUE);
-        Eva maxEva = cityQtyMap.get("max");//全城最大Eva
-        Eva minEva = cityQtyMap.get("min");//全城最小Eva
-        //获取建筑最大最小的基础品质
-        Map<Integer, Integer> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(buildingType);
-        double maxQty = maxOrMinQty.get(BuildingUtil.MAX) * (1 + EvaManager.getInstance().computePercent(maxEva));
-        double minQty = maxOrMinQty.get(BuildingUtil.MIN) * (1 + EvaManager.getInstance().computePercent(minEva));
+        //获取全城最高最低品质（已存在的建筑中）
+        Map<Integer, Double> maxOrMinQty = BuildingUtil.instance().getMaxOrMinQty(buildingType);
+        double maxQty = maxOrMinQty.get(BuildingUtil.MAX);
+        double minQty = maxOrMinQty.get(BuildingUtil.MIN);
         double qtyScore=1;
         if(localQuality==minQty){
             qtyScore=1;
@@ -343,8 +339,7 @@ public class GlobalUtil {
             if(localQuality==maxQty){//既是最小也是最大，评分100
                 qtyScore=100;
             }
-        }
-        if(localQuality>minQty) {
+        }else if(localQuality>minQty) {
             qtyScore = Math.ceil(((localQuality - minQty) / (maxQty - minQty))*100);
         }
         return qtyScore;
