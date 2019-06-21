@@ -1,5 +1,10 @@
 package Game;
 
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
+import Game.Meta.MetaItem;
 import gs.Gs;
 
 import javax.persistence.Embeddable;
@@ -41,5 +46,15 @@ public class Item {
         builder.setKey(key.toProto());
         builder.setN(n);
         return builder.build();
+    }
+
+    //获取商品的总品质
+    public double getTotalQty(){
+        if(MetaGood.isItem(this.key.meta.id)){
+            Eva eva = EvaManager.getInstance().getEva(this.key.producerId, key.meta.id,Gs.Eva.Btype.Quality_VALUE);
+            MetaGood good = MetaData.getGood(key.meta.id);
+            return good.quality * (1 + EvaManager.getInstance().computePercent(eva));
+        }
+        return 0;
     }
 }
