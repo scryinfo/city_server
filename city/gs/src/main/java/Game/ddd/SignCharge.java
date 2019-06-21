@@ -23,7 +23,7 @@ public class SignCharge {
 
     public byte[] ToHash() throws IOException {
         ByteArrayOutputStream all = new ByteArrayOutputStream();
-        byte[] purchaseId = PurchaseId.getBytes(StandardCharsets.UTF_8);;
+        byte[] purchaseId = PurchaseId.getBytes(StandardCharsets.UTF_8);
         byte[] ts = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(Ts).array();
         byte[] metaData = Amount.getBytes(StandardCharsets.UTF_8);
         //byte[] addr = Addr.getBytes(StandardCharsets.UTF_8);
