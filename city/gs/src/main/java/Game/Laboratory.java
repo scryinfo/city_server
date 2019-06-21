@@ -59,7 +59,7 @@ public class Laboratory extends Building {
     @Override
     public Gs.Laboratory detailProto() {
         calcuProb();
-        getEvaAdd();//更新Eva加成信息
+        updateEvaAdd();//更新Eva加成信息
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
@@ -201,7 +201,7 @@ public class Laboratory extends Building {
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
         //成功率还需要加上eva的加成信息
-        getEvaAdd();//更新Eva加成信息
+        updateEvaAdd();//更新Eva加成信息
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         RollResult res = null;
         Line l = this.findInProcess(lineId);
@@ -398,7 +398,7 @@ public class Laboratory extends Building {
     @Transient
     Map<Integer, Double> evaMap = new HashMap<>();
 
-    public void getEvaAdd(){//更新eva
+    public void updateEvaAdd(){//更新eva
         for (Integer type : MetaData.getBuildingTech(type())) {//atype,因为研究所一个atype只对应1个eva，所以取第一个
             Eva eva = EvaManager.getInstance().getEva(ownerId(), type).get(0);
             evaMap.put(eva.getBt(), EvaManager.getInstance().computePercent(eva));
