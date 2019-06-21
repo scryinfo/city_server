@@ -47,14 +47,4 @@ public class Item {
         builder.setN(n);
         return builder.build();
     }
-
-    //获取商品的总品质
-    public double getTotalQty(){
-        if(MetaGood.isItem(this.key.meta.id)){
-            Eva eva = EvaManager.getInstance().getEva(this.key.producerId, key.meta.id,Gs.Eva.Btype.Quality_VALUE);
-            MetaGood good = MetaData.getGood(key.meta.id);
-            return good.quality * (1 + EvaManager.getInstance().computePercent(eva));
-        }
-        return 0;
-    }
 }
