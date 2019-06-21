@@ -110,4 +110,10 @@ public class Apartment extends Building implements IBuildingContract
     public void deleteRenter(){
         renters.clear();
     }
+
+    public double getTotalQty(){
+        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
+        double qty = (meta.qty * this.getWorkerNum()) * (1 + EvaManager.getInstance().computePercent(eva));
+        return qty;
+    }
 }

@@ -49,6 +49,7 @@ public class JustVisit implements IAction {
         logger.info("cost: " + cost);
         int i = 0;
         Iterator<Building> iterator = buildings.iterator();
+        List<Building> newBuildings=new ArrayList<Building>();
         while(iterator.hasNext()) {
             Building building = iterator.next();
 //          double c = ((1.d + BrandManager.instance().buildingBrandScore(buildingType)/ 100.d) + (1.d + City.instance().buildingQtyScore(building.type(), building.quality()) / 100.d) + (1.d + 0)) /3*cost;
@@ -63,10 +64,11 @@ public class JustVisit implements IAction {
             if(r<=0){
                 continue;
             }
+            newBuildings.add(building);
             buildingWeights[i++] = r<0?0:r;
         }
         int idx = ProbBase.randomIdx(buildingWeights);
-        Building chosen = buildings.get(idx);
+        Building chosen = newBuildings.get(idx);
         logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
