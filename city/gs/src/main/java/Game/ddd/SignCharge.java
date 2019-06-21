@@ -6,6 +6,7 @@ import org.spongycastle.util.encoders.Hex;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 
 public class SignCharge {
@@ -26,7 +27,8 @@ public class SignCharge {
         byte[] purchaseId = Hex.decode(PurchaseId.getBytes());
         byte[] ts = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(Ts).array();
         //byte[] metaData = Hex.decode(MetaData.getBytes());
-        byte[] metaData = MetaData.getBytes();
+        //byte[] metaData = MetaData.getBytes();
+        byte[] metaData = MetaData.getBytes(StandardCharsets.UTF_8);
 
         all.write(purchaseId);
         all.write(ts);
