@@ -393,9 +393,10 @@ public class Laboratory extends Building {
     private int totalEvaTimes;
     private long totalGoodIncome;
     private int totalGoodTimes;
+
+    //Eva加成信息(map的key为btype)，由getEvaAdd来更新
     @Transient
     Map<Integer, Double> evaMap = new HashMap<>();
-    //Eva总的成功率(map的key为btype)
 
     public void getEvaAdd(){//更新eva
         for (Integer type : MetaData.getBuildingTech(type())) {//atype,因为研究所一个atype只对应1个eva，所以取第一个
