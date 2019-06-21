@@ -78,8 +78,8 @@ public class ddd_purchase {
         byte[] pubKey = Hex.decode(pubkey);
         SignCharge pSignCharge = new SignCharge(
                 purchaseId.toString()
-                , create_time
                 , Double.toString(ddd)
+                , create_time
                 //, pubKey
         );
         try {
