@@ -3,10 +3,7 @@ package Game;
 import Game.Contract.ContractManager;
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
-import Game.Meta.MetaData;
-import Game.Meta.MetaExperiences;
-import Game.Meta.MetaItem;
-import Game.Meta.MetaPublicFacility;
+import Game.Meta.*;
 import Game.Timers.PeriodicTimer;
 import Shared.GlobalConfig;
 import Shared.Package;
@@ -168,8 +165,17 @@ public class PublicFacility extends Building{
 
     /*推广能力=基础推广值*员工人数*(1+eva加成)*/
     public long getLocalPromoAbility(int type){
-        int evaAdd = evaPromoCur.getOrDefault(type,0);
-        return (long) (this.meta.output1P1Hour * this.getWorkerNum() * (1 + (float) evaAdd / 100000));
+        int atype=0;
+        //确定a类型
+        if(MetaBuilding.isBuildingByBaseType(type/100)){ //如果是建筑,基础类型等于type/100
+            type=type/100;
+            atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString()); //确定Eva的a类型,拼接a类型，建筑类型+type
+        }else{//商品  基础类型%100
+            type=type%100;
+            atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString());//确定Eva的a类型,拼接a类型，建筑类型+type
+        }
+        double evaAdd = EvaManager.getInstance().computePercent(EvaManager.getInstance().getEva(this.ownerId(), atype, Gs.Eva.Btype.PromotionAbility_VALUE));
+        return (long) (this.meta.output1P1Hour * this.getWorkerNum() * (1 + evaAdd));
     }
 
     public void updatePromoAbility() {

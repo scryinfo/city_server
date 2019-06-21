@@ -52,12 +52,14 @@ public class BuildingUtil {
             Double minRetailQty = Collections.min(retailSet);
             retailMap.put(MAX, maxRetailQty);
             retailMap.put(MIN, minRetailQty);
+            System.err.println("零售店最高品质"+maxRetailQty+"  最低品质"+minRetailQty);
         }
         if(!apartmentSet.isEmpty()) {
             Double maxApartQty = Collections.max(apartmentSet);
             Double minApartQty = Collections.min(apartmentSet);
             apartmentMap.put(MAX, maxApartQty);
             apartmentMap.put(MIN, minApartQty);
+            System.err.println("住宅最高品质"+maxApartQty+"  最低品质"+minApartQty);
         }
         maxQtyTotalMap.put(MetaBuilding.RETAIL, retailMap);
         maxQtyTotalMap.put(MetaBuilding.APARTMENT,apartmentMap);

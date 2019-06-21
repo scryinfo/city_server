@@ -68,6 +68,9 @@ public class JustVisit implements IAction {
             buildingWeights[i++] = r<0?0:r;
         }
         int idx = ProbBase.randomIdx(buildingWeights);
+        if(newBuildings.isEmpty()){
+            return null;
+        }
         Building chosen = newBuildings.get(idx);
         logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
         if(npc.money() < chosen.cost()){

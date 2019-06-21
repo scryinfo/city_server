@@ -395,6 +395,7 @@ public abstract class Building implements Ticker{
     public void shutdownBusiness() {
         this.happy = HAPPY_MIN;
         this.state = Gs.BuildingState.SHUTDOWN_VALUE;
+        this.todayIncome = 0;
         this.broadcastChange();
     }
 
