@@ -78,8 +78,10 @@ public class FlightManager {
             BetInfos.Info info = e.getValue();
             Player p = GameDb.getPlayer(playerId); // player is not thread safe
             int s = -info.amount;
-            if(info.delay >= l && info.delay <= h)
-                s = info.amount;
+            if(d == info.delay)
+                s = (int) (info.amount*1.5d);
+            else if(info.delay >= l && info.delay <= h)
+                s = (int) (info.amount*1.3d);
             p.offsetScore(s);
             p.send(Package.create(GsCode.OpCode.flightBetInform_VALUE, Gs.FlightBetInform.newBuilder().setFlightId(f.id).setFlightDeptimeDate(f.FlightDeptimeDate).build()));
             updates.add(p);
