@@ -4569,11 +4569,11 @@ public class GameSession {
 		switch (type){
 			case MetaBuilding.MATERIAL:
 				MaterialFactory materialFactory = (MaterialFactory) building;
-				materialFactory.lines.forEach(l->lineBuilder.addStore(l.toProto()));
+				materialFactory.lines.forEach(l->lineBuilder.addLine(l.toProto()));
 				break;
 			case MetaBuilding.PRODUCE:
 				ProduceDepartment produceDepartment = (ProduceDepartment) building;
-				produceDepartment.lines.forEach(l->lineBuilder.addStore(l.toProto()));
+				produceDepartment.lines.forEach(l->lineBuilder.addLine(l.toProto()));
 				break;
 		}
 		lineBuilder.setBuildingId(id.getId());
