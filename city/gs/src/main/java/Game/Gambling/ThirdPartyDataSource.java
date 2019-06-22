@@ -17,6 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.xml.bind.DatatypeConverter;
@@ -206,7 +207,12 @@ public class ThirdPartyDataSource {
 
             Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
             String json = EntityUtils.toString(entity, encoding);
-            return toList(new JSONArray(json));
+            try {
+                return toList(new JSONArray(json));
+            }
+            catch(JSONException exception) {
+                return new ArrayList<>();
+            }
         } catch (ClientProtocolException e) {
 
         } catch (IOException e) {

@@ -64,14 +64,8 @@ public class Flight {
     public boolean departured() {
         return !FlightDeptimeDate.isEmpty();
     }
-    public boolean planDepatureTimePassed() {
-        long e = 0;
-        try {
-            e = toTs(this.FlightDeptimePlanDate);
-        } catch (ParseException e1) {
-            return true;
-        }
-        return e <= System.currentTimeMillis();
+    public boolean canBet() {
+        return this.FlightState.equals("计划");
     }
     public Gs.FlightData toProto() {
         return Gs.FlightData.newBuilder()

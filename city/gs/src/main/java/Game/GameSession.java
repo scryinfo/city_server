@@ -2106,7 +2106,7 @@ public class GameSession {
 			return;
 		ThirdPartyDataSource.instance().postFlightSearchRequest(c.getDate(), c.getId(), (Flight flight)->{
 			City.instance().execute(()->{
-				if(flight == null || flight.planDepatureTimePassed() || flight.departured()) {
+				if(flight == null || flight.canBet() || flight.departured()) {
 					this.write(Package.fail(cmd));
 				}
 				else {
