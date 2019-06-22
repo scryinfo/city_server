@@ -743,7 +743,8 @@ public class GameSession {
 		IShelf s = (IShelf)building;
 		if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
 			GameDb.saveOrUpdate(s);
-			this.write(Package.create(cmd, c));
+			Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
+			this.write(Package.create(cmd, builder.build()));
 		}
 		else
 			this.write(Package.fail(cmd));
@@ -3146,8 +3147,8 @@ public class GameSession {
 			//基础信息(加点前、加点后)
 			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
-			//升级对比信息
-			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.加工厂品质提升（计算竞争力）（*）
+			//升级对比信息(暂时不用，省略)
+			/*if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.加工厂品质提升（计算竞争力）（*）
 				//筛选玩家所有该建筑
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
 				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
@@ -3192,7 +3193,8 @@ public class GameSession {
 			}
 			else {
 				EvaManager.getInstance().updateEva(newEva);
-			}
+			}*/
+			EvaManager.getInstance().updateEva(newEva);
 			results.addResultInfo(result);
 		}
 		//更新评分数据
@@ -4119,14 +4121,16 @@ public class GameSession {
     	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
        	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
+        double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
+
 		//知名度评分
-		double brandScore=GlobalUtil.getBrandScore(basicBrand,building.type());
+		double brandScore=GlobalUtil.getBrandScore(totalBrand,building.type());
 		//品质评分
 		double localQty = basicQuality * (1 + addQuality);
 		double qtyScore=GlobalUtil.getBuildingQtyScore(localQty,building.type());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(totalBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(brandScore).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
