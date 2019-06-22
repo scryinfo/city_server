@@ -62,7 +62,7 @@ public class Shopping implements IAction {
                 iterator.remove();
         }
       //再次判断建筑是否为空，为空则return
-        if(buildings.isEmpty())
+        if(buildings.size()==0)
             return null;
         List<WeightInfo> wi = new ArrayList<>();
         buildings.forEach(b->{
