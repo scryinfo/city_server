@@ -86,6 +86,9 @@ public class Shopping implements IAction {
                 wi.add(new WeightInfo(b.id(), sell.producerId, sell.qty, w, sell.price, (MetaGood) sell.meta, buildingBrand, b.quality()));
             }
         });
+        if(wi.isEmpty()){
+            return null;
+        }
         WeightInfo chosen = wi.get(ProbBase.randomIdx(wi.stream().mapToInt(WeightInfo::getW).toArray()));
         Building sellShop = City.instance().getBuilding(chosen.bId);
         sellShop.addFlowCount();

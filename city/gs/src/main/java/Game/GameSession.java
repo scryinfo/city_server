@@ -3146,8 +3146,8 @@ public class GameSession {
 			//基础信息(加点前、加点后)
 			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
-			//升级对比信息
-			if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.加工厂品质提升（计算竞争力）（*）
+			//升级对比信息(暂时不用，省略)
+			/*if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.加工厂品质提升（计算竞争力）（*）
 				//筛选玩家所有该建筑
 				List<Building> buildings = City.instance().getPlayerBListByBtype(player.id(), MetaBuilding.PRODUCE);
 				Map<UUID, Double> oldCompetitiveMap = CompeteAndExpectUtil.getProductCompetitiveMap(buildings, oldEva);//1.加点前的竞争力
@@ -3192,7 +3192,8 @@ public class GameSession {
 			}
 			else {
 				EvaManager.getInstance().updateEva(newEva);
-			}
+			}*/
+			EvaManager.getInstance().updateEva(newEva);
 			results.addResultInfo(result);
 		}
 		//更新评分数据
