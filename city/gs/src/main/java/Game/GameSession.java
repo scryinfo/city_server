@@ -4329,6 +4329,7 @@ public class GameSession {
 			buildingInfo.setMid(info.getMId());
 			buildingInfo.setName(info.getName());
 			buildingInfo.setState(info.getState());
+			buildingInfo.setOpeningTs(info.getOpeningTs());
 			return buildingInfo;
 		}else {
 			return null;
