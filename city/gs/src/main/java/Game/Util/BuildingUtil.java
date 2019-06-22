@@ -77,8 +77,8 @@ public class BuildingUtil {
             minBrand += good.brand;
             maxBrand += good.brand;
         }else{
-            minBrand +=1;// 添加默认值
-            maxBrand +=1;// 添加基础值
+            minBrand +=100;// 添加默认值
+            maxBrand +=100;// 添加基础值
         }
         map.put(MAX, maxBrand);
         map.put(MIN, minBrand);

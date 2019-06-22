@@ -241,6 +241,13 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             return false;
         if(!autoRepOn) {//非自动补货
             int updateNum = content.n - item.n;//要增加或减少的就是以前货架数量-现在货架数量
+            if(content.n==0&&item.n==0){
+               //只设置自动补货为false
+                content.autoReplenish=false;
+                IShelf shelf=this;
+                shelf.delshelf(item.key, content.n, true);
+                return true;
+            }
             //首先判断是否存的下
             if (this.store.canSave(item.key, updateNum)) {
                 boolean lock = false;

@@ -743,7 +743,8 @@ public class GameSession {
 		IShelf s = (IShelf)building;
 		if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
 			GameDb.saveOrUpdate(s);
-			this.write(Package.create(cmd, c));
+			Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
+			this.write(Package.create(cmd, builder.build()));
 		}
 		else
 			this.write(Package.fail(cmd));
@@ -4120,14 +4121,16 @@ public class GameSession {
     	BrandManager.instance().getBuildingBrandOrQuality(building, brandMap, qtyMap);
        	double basicBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.BasicBrand_VALUE);
        	double addBrand=BrandManager.instance().getValFromMap(brandMap, Gs.ScoreType.AddBrand_VALUE);
+        double totalBrand=BrandManager.instance().getValFromMap(brandMap,building.type());
     	double basicQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.BasicQuality_VALUE);
     	double addQuality=BrandManager.instance().getValFromMap(qtyMap, Gs.ScoreType.AddQuality_VALUE);
+
 		//知名度评分
-		double brandScore=GlobalUtil.getBrandScore(basicBrand,building.type());
+		double brandScore=GlobalUtil.getBrandScore(totalBrand,building.type());
 		//品质评分
 		double localQty = basicQuality * (1 + addQuality);
 		double qtyScore=GlobalUtil.getBuildingQtyScore(localQty,building.type());
-    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(basicBrand).build());
+    	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicBrand).setVal(totalBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.AddBrand).setVal(addBrand).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.TotalBrand).setVal(brandScore).build());
     	builder.addScore(Gs.RetailShopOrApartmentInfo.Score.newBuilder().setType(Gs.ScoreType.BasicQuality).setVal(basicQuality).build());
