@@ -1,8 +1,12 @@
 package Game.Util;
 
-import Game.BrandManager;
-import Game.GameDb;
-import Game.Meta.*;
+import Game.Apartment;
+import Game.Building;
+import Game.City;
+import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
+import Game.RetailShop;
 
 import java.util.*;
 
@@ -16,43 +20,52 @@ public class BuildingUtil {
     }
 
     //缓存零售店和住宅最大最小的基础品质
-    private Map<Integer, Map<Integer, Integer>> maxQtyMap = new HashMap<>();
+    private Map<Integer, Map<Integer, Double>> maxQtyTotalMap = new HashMap<>();
+    //获取最大最小品牌值
+    public Map<Integer,Double> getMaxOrMinQty(int type){
+        return maxQtyTotalMap.get(type);
+    }
 
-    public void init(){
-        int apartQty=0;
-        int retailQty=0;
-        List<Integer> araptmentWorkers = new ArrayList<>();
-        List<Integer> retailShopWorkers = new ArrayList<>();
-        for (MetaApartment a : MetaData.getApartment().values()) {
-            araptmentWorkers.add(a.workerNum);
-            if(apartQty==0)
-                apartQty = a.qty;
+    //更新的时机，建造建筑\拆除建筑和修改eva时更新
+    public void updateMaxOrMinTotalQty(){
+        System.err.println("开始更新全城最高最低建筑品质");
+        Set<Double> retailSet = new HashSet<>();
+        Set<Double> apartmentSet = new HashSet<>();
+        Set<Building> retailShops = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
+        Set<Building> apartments = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>());
+        for (Building b : retailShops) {
+            RetailShop retailShop = (RetailShop) b;
+            retailSet.add(retailShop.getTotalQty());
         }
-        for (MetaRetailShop r : MetaData.getRetailShop().values()) {
-            retailShopWorkers.add(r.workerNum);
-            if(retailQty==0)
-                retailQty = r.qty;
+        for (Building b : apartments) {
+            Apartment apartment = (Apartment) b;
+            apartmentSet.add(apartment.getTotalQty());
         }
-        Map<Integer, Integer> apartMap = getMaxOrMinQty(apartQty, araptmentWorkers);
-        Map<Integer, Integer> retailMap = getMaxOrMinQty(retailQty, retailShopWorkers);
-        maxQtyMap.put(MetaBuilding.APARTMENT, apartMap);
-        maxQtyMap.put(MetaBuilding.RETAIL, retailMap);
+        HashMap<Integer,Double> retailMap = new HashMap<>();
+        retailMap.put(MAX,0d);
+        retailMap.put(MIN,0d);
+        HashMap<Integer,Double> apartmentMap = new HashMap<>();
+        apartmentMap.put(MAX, 0d);
+        apartmentMap.put(MIN, 0d);
+        if(!retailSet.isEmpty()) {
+            Double maxRetailQty = Collections.max(retailSet);
+            Double minRetailQty = Collections.min(retailSet);
+            retailMap.put(MAX, maxRetailQty);
+            retailMap.put(MIN, minRetailQty);
+            System.err.println("零售店最高品质"+maxRetailQty+"  最低品质"+minRetailQty);
+        }
+        if(!apartmentSet.isEmpty()) {
+            Double maxApartQty = Collections.max(apartmentSet);
+            Double minApartQty = Collections.min(apartmentSet);
+            apartmentMap.put(MAX, maxApartQty);
+            apartmentMap.put(MIN, minApartQty);
+            System.err.println("住宅最高品质"+maxApartQty+"  最低品质"+minApartQty);
+        }
+        maxQtyTotalMap.put(MetaBuilding.RETAIL, retailMap);
+        maxQtyTotalMap.put(MetaBuilding.APARTMENT,apartmentMap);
     }
 
-
-    private Map<Integer, Integer> getMaxOrMinQty(int qty,List<Integer> list){
-        Map<Integer, Integer> map = new HashMap<>();
-        Integer max = Collections.max(list);
-        Integer min = Collections.min(list);
-        map.put(MAX, qty * max);
-        map.put(MIN, qty * min);
-        return map;
-    }
-
-    public Map<Integer,Integer> getMaxOrMinQty(int type){
-        return maxQtyMap.get(type);
-    }
-    /*获取最大最小品牌值*/
+    /*获取最大最小知名度值*/
     public Map<Integer,Integer> getMaxAndMinBrand(int item){
         Map<Integer, Integer> map = new HashMap<>();
         Map<String, Integer> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//如果没有推广过品牌，返回的最大最小值都是0，没有包含基础值

@@ -98,4 +98,14 @@ public class ItemKey implements Serializable {
         }
         return builder.build();
     }
+
+    //获取商品的总品质
+    public double getTotalQty(){
+        if(MetaGood.isItem(this.meta.id)){
+            Eva eva = EvaManager.getInstance().getEva(this.producerId, meta.id,Gs.Eva.Btype.Quality_VALUE);
+            MetaGood good = MetaData.getGood(meta.id);
+            return good.quality * (1 + EvaManager.getInstance().computePercent(eva));
+        }
+        return 0;
+    }
 }

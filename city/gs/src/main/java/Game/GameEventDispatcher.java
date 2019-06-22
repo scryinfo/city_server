@@ -171,6 +171,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryBuildingListByPlayerTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingListByPlayerTech"));
 			table.put((short) GsCode.OpCode.joinLeague_VALUE, Wrapper.newWithMessageAsync(Gs.JoinLeague.PARSER, GameSession.class, "joinLeague"));
 			table.put((short) GsCode.OpCode.queryBuildingTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingTech"));
+			table.put((short) GsCode.OpCode.queryWeatherInfo_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryWeatherInfo"));
 
 			//===========================================================
 
@@ -263,11 +264,16 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryBuildingGoodInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingGoodInfo"));
 			//查询推广公司的商品推广选项详情
 			table.put((short) GsCode.OpCode.queryPromotionItemInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryPromotionItemInfo.PARSER, GameSession.class,"queryPromotionItemInfo"));
+			//查询货架数据（用于客户端的更新）
+			table.put((short) GsCode.OpCode.getShelfData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getShelfData"));
+			//查询仓库数据（用于客户端的更新）
+			table.put((short) GsCode.OpCode.getStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getStorageData"));
 			//充提
 			table.put((short) GsCode.OpCode.ct_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_createUser.PARSER, GameSession.class,"ct_createUser"));
 			table.put((short) GsCode.OpCode.ct_GenerateOrderReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GenerateOrderReq.PARSER, GameSession.class,"ct_GenerateOrderReq"));
 			table.put((short) GsCode.OpCode.ct_RechargeRequestReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_RechargeRequestReq.PARSER, GameSession.class,"ct_RechargeRequestReq"));
 			table.put((short) GsCode.OpCode.ct_DisChargeReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisChargeReq.PARSER, GameSession.class,"ct_DisChargeReq"));
+			table.put((short) GsCode.OpCode.ct_DisPaySmVefifyReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisPaySmVefifyReq.PARSER, GameSession.class,"ct_DisPaySmVefifyReq"));
 			if(GlobalConfig.debug()){
 
 			}

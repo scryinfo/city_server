@@ -2,6 +2,7 @@ package Game;
 
 import Shared.Package;
 import Shared.Util;
+import ch.qos.logback.core.util.TimeUtil;
 import gs.Gs;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 @Entity(name = "PromotionMgr")
 public class PromotionMgr {
@@ -24,8 +26,8 @@ public class PromotionMgr {
     private Map<UUID, PromoOrder> promotions = new HashMap<>();
 
     private static long _elapsedtime = 0 ;    //上次更新时间
-    //public static final long _upDeltaNs = 3600*1000000000;    //更新间隔，单位是纳秒, 3600为一个小时
-    public static final long _upDeltaNs = 10*1000000000;        //更新间隔，单位是纳秒, 3600为一个小时Ns
+    public static final long _upDeltaNs = TimeUnit.SECONDS.toNanos(10);    //更新间隔，单位是纳秒, 3600为一个小时
+    //public static final long _upDeltaNs = 10*1000000000;        //更新间隔，单位是纳秒, 3600为一个小时Ns
     public static final long _upDeltaMs = _upDeltaNs/1000000;   //更新间隔,毫秒
     private static PromotionMgr instance ;
     public static void init() {
@@ -85,7 +87,6 @@ public class PromotionMgr {
         promotions.putIfAbsent(neworder.promotionId,neworder);
     }
     public void update(long diffNano) {
-
         if(_elapsedtime < _upDeltaNs){
             _elapsedtime += diffNano;
             return;
@@ -132,16 +133,32 @@ public class PromotionMgr {
             PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
             int objType = promotion.buildingType > 0 ? promotion.buildingType: promotion.productionType;
             long endTime = promotion.promStartTs + promotion.promDuration;
-            long elapsedtime = promotion.promDuration - (endTime - curtime);
+            long elapsedtime = promotion.promDuration - (endTime - curtime);//已经过的时间  10:00  12:00   2
             float addition = 0;
-            if(endTime >= System.currentTimeMillis()){
-                //计算每个推广的结果
-                addition = fcySeller.excutePromotion(promotion);
-                //累加提升值，以便计算平均值
-                promotion.promotedTotal += addition;
-                promotion.promProgress = (int)(((float)elapsedtime/(float)promotion.promDuration)*100);
-                BrandManager.instance().update(promotion.buyerId, objType, (int)addition);
+            long promHour = TimeUnit.MILLISECONDS.toHours(promotion.promDuration);
+            if(endTime >= System.currentTimeMillis()){ //此处即便条件成立也不能立刻推广，还需要判断是否经过1小时。
+                long now = System.currentTimeMillis();
+                long passTime = now - promotion.promStartTs;
+                passTime=TimeUnit.MILLISECONDS.toHours(passTime);
+                if(passTime-promotion.promoNum==1) {
+                    System.err.println("开始推广");
+                    //计算每个推广的结果
+                    //addition = fcySeller.excutePromotion(promotion);
+                    addition = fcySeller.getLocalPromoAbility(objType);
+                    //累加提升值，以便计算平均值
+                    promotion.promotedTotal += addition;
+                    promotion.promProgress = (int) (((float) elapsedtime / (float) promotion.promDuration) * 100);
+                    BrandManager.instance().update(promotion.buyerId, objType, (int) addition);
+                    promotion.promoNum++;
+                }
             }else {
+                //判断推广完成后推广加成是正确
+                if(promotion.promoNum<promHour){//处理延时的问题
+                    addition= fcySeller.getLocalPromoAbility(objType);
+                    float residueProValue= (promHour - promotion.promoNum) * addition;
+                    promotion.promotedTotal += residueProValue;
+                    BrandManager.instance().update(promotion.buyerId, objType, (int)residueProValue);
+                }
                 //超出时间的，移除掉，并通知玩家
                 Player buyer = GameDb.getPlayer(promotion.buyerId);
                 //更新买家玩家信息中的广告缓存
@@ -152,8 +169,8 @@ public class PromotionMgr {
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
                 //推广完成通知
-                //paras: 第一个是广告id，第二个是广告商建筑id，第三个提升点数
-                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.promotionId, sellerBuilding.id()}, new int[(int) addition]);
+                //paras: 第一个是广告商建筑id，第二个是推广时长，第三个提升点数
+                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.sellerBuildingId}, null, addition + "," + promotion.promDuration);
                 //发送给广告商
                 GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
                         Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,
@@ -169,4 +186,5 @@ public class PromotionMgr {
             GameDb.saveOrUpdate(this);
         }
     }
+
 }

@@ -22,9 +22,9 @@ public class ddd_purchase {
     //关键数据----------------------------
     @Id
     //@GeneratedValue(strategy = GenerationType.AUTO)
-    UUID purchaseId;   //订单id city 提供
+    public UUID purchaseId;   //订单id city 提供
 
-    UUID player_id;      //玩家 uuid
+    public UUID player_id;      //玩家 uuid
     //关键数据----------------------------
 
     double ddd;	 		//ddd ，充值为正，提币为负
@@ -78,8 +78,8 @@ public class ddd_purchase {
         byte[] pubKey = Hex.decode(pubkey);
         SignCharge pSignCharge = new SignCharge(
                 purchaseId.toString()
-                , create_time
                 , Double.toString(ddd)
+                , create_time
                 //, pubKey
         );
         try {

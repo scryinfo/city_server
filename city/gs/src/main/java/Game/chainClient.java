@@ -56,16 +56,17 @@ public class chainClient {
         }
         logger.info("Greeting: " + response.getMessage());
     }*/
-    public void CreateUser(ccapi.CcOuterClass.CreateUserReq req) {
+    public ccapi.GlobalDef.ResHeader CreateUser(ccapi.CcOuterClass.CreateUserReq req) {
         logger.info("Will try to greet " + req.getCityUserName() + " ...");
         ccapi.GlobalDef.ResHeader response;
         try {
             response = blockingStub.createUser(req);
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
+            return null;
         }
         logger.info("Greeting: " + response.getErrMsg());
+        return response;
     }
 
     public void RechargeRequestReq(ccapi.CcOuterClass.RechargeRequestReq req) {

@@ -20,11 +20,14 @@ import Shared.*;
 import Shared.Package;
 import ccapi.CcOuterClass;
 import ccapi.Dddbind;
+import ccapi.GlobalDef;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import com.yunpian.sdk.model.Result;
+import com.yunpian.sdk.model.SmsSingleSend;
 import common.Common;
 import gs.Gs;
 import gs.Gs.BuildingInfo;
@@ -47,6 +50,33 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+class SmVerify {
+	UUID playerId;
+	String authCode;
+
+	public CcOuterClass.DisChargeReq getDisChargeReq() {
+		return disChargeReq;
+	}
+
+	ccapi.CcOuterClass.DisChargeReq disChargeReq;
+	public Long getTs() {
+		return ts;
+	}
+
+	Long    ts;
+	public SmVerify(UUID pid, String code, Long ints, ccapi.CcOuterClass.DisChargeReq req){
+		playerId = pid;
+		authCode = code;
+		ts = ints;
+		disChargeReq = req;
+	}
+
+	public boolean TimeoutChecks(){
+		return System.currentTimeMillis() - ts <= 30000;
+	}
+}
+
 public class GameSession {
 
 	public static byte[] signData(String algorithm, byte[] data, PrivateKey key) throws Exception {
@@ -79,6 +109,8 @@ public class GameSession {
 	public Player getPlayer() {
 		return player;
 	}
+	//支付短信验证码缓存
+	private Map<UUID, SmVerify> paySmCache = new HashMap<>();
 	private enum LoginState {
 		ROLE_NO_LOGIN,
 		ROLE_LOGIN
@@ -1194,7 +1226,8 @@ public class GameSession {
 		{
 			int bsTp = tp/100;
 			int subTp = tp % 100;
-			Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
+			//Integer value = (int)fcySeller.getAllPromoTypeAbility(tp);
+			Integer value = (int) fcySeller.getLocalPromoAbility(tp);
 			builder.addCurAbilitys(value);
 		}
 		this.write(Package.create(cmd, builder.build()));
@@ -1397,7 +1430,7 @@ public class GameSession {
 		}
 
 		//判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
-		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerS()) * (int)gs_AdAddNewPromoOrder.getPromDuration()/1000;
+		int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerHour()) * ((int)gs_AdAddNewPromoOrder.getPromDuration()/3600000);
 		//TODO:矿工费用(向下取整)
 		double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
 		long minerCost = (long) Math.floor(fee * minersRatio);
@@ -1959,6 +1992,18 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
+
+			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
+					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+					.setBuyerId(Util.toByteString(player.id()))
+					.setFaceId(player.getFaceId())
+					.setCost(cost)
+					.setType(Gs.IncomeNotify.Type.LAB)
+					.setBid(building.metaId())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.setDuration(c.getTimes())
+					.build();
+			GameServer.sendIncomeNotity(seller.id(),incomeNotify);
 		}
 		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
@@ -1975,17 +2020,7 @@ public class GameSession {
 			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-        Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
-                .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-                .setBuyerId(Util.toByteString(player.id()))
-                .setFaceId(player.getFaceId())
-                .setCost(cost)
-                .setType(Gs.IncomeNotify.Type.LAB)
-                .setBid(building.metaId())
-                .setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
-                .setDuration(c.getTimes())
-                .build();
-		GameServer.sendIncomeNotity(seller.id(),incomeNotify);
+
 	}
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
@@ -2473,6 +2508,11 @@ public class GameSession {
 		Gs.GroundChange.Builder builder = Gs.GroundChange.newBuilder();
 		builder.addAllInfo(GroundManager.instance().getGroundProto(pid));
 		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryWeatherInfo(short cmd)
+	{
+		this.write(Package.create(cmd,ThirdPartyDataSource.instance().getWeather().toProto()));
 	}
 
 	public void createSociety(short cmd, Message message)
@@ -3137,12 +3177,14 @@ public class GameSession {
 				double spendMoneyRatio = MetaData.getBuildingSpendMoneyRatio(eva.getAt());
 				Map<UUID, List<Integer>> oldExpectSpend = CompeteAndExpectUtil.getApartmentExpectSpend(buildings, oldEva, spendMoneyRatio);//1.获取修改前的预期花费
 				EvaManager.getInstance().updateEva(newEva);
+				BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城最高最低品质
 				Map<UUID, List<Integer>> newExpectSpend = CompeteAndExpectUtil.getApartmentExpectSpend(buildings, newEva, spendMoneyRatio);//2.修改后的预期花费
 				//封装数据
 				List<Gs.ApartmentData> apartmentData = ProtoUtil.getApartmentResultList(buildings, oldExpectSpend, newExpectSpend, MetaBuilding.APARTMENT);
 				result.addAllApartmentData(apartmentData);
 			}else if(eva.getAt()==MetaBuilding.RETAIL&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//5.零售店品质提升率=提升的等级/全城该项eva最高等级
 				EvaManager.getInstance().updateEva(newEva);
+				BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城最高最低品质
 				//提升比例:提升的等级/全城该项eva最高等级  如果平级，提升为0
 				int maxLv = GlobalUtil.getEvaMaxAndMinValue(eva.getAt(), eva.getBt().getNumber()).get("max").getLv();
 				int lv = newEva.getLv();
@@ -4098,15 +4140,6 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		Building building = City.instance().getBuilding(buildingId);
-
-		//检查是否是推广公司
-		Building sellerBuilding = City.instance().getBuilding(buildingId);
-		if(sellerBuilding == null || sellerBuilding.outOfBusiness() || sellerBuilding.type() != MetaBuilding.PUBLIC){
-			if(GlobalConfig.DEBUGLOG){
-				GlobalConfig.cityError("GameSession.queryPromotionCompanyInfo: building type of seller is not PublicFacility!");
-			}
-			return;
-		}
 		PublicFacility fcySeller = (PublicFacility) building ;
 		Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
 		builder.setSalary(building.salaryRatio);
@@ -4195,11 +4228,14 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.CreateUserReq req = msg.getCreateUserReq();
 		try {
-			chainClient.instance().CreateUser(req);
+			ccapi.GlobalDef.ResHeader resp = chainClient.instance().CreateUser(req);
+			if(resp.getErrCode() == GlobalDef.ErrCode.ERR_SUCCESS)
+				this.write(Package.create(cmd, msg));
+			else
+				this.write(Package.fail(cmd));
 		}  catch (Exception e) {
 			return ;
 		}
-		this.write(Package.create(cmd, msg));
 		int t = 0 ;
 	}
 
@@ -4207,6 +4243,79 @@ public class GameSession {
 		ccapi.Dddbind.ct_GenerateOrderReq msg = (ccapi.Dddbind.ct_GenerateOrderReq) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString().replace("-","")).build()));
+		int t = 0 ;
+	}
+
+	public void ct_DisPaySmVefifyReq(short cmd,Message message){
+		ccapi.Dddbind.ct_DisPaySmVefifyReq msg = (ccapi.Dddbind.ct_DisPaySmVefifyReq) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		SmVerify sv = paySmCache.get(playerId);
+
+		if(paySmCache.get(playerId).authCode.equals(msg.getAuthCode())){
+			if(sv.TimeoutChecks()){
+				//验证成功
+				paySmCache.remove(playerId);
+				//服务器签名验证测试
+				ccapi.CcOuterClass.DisChargeReq req = sv.getDisChargeReq();
+				//计算哈希
+				byte[] pubKey = Hex.decode(req.getPubKey()) ;
+				byte[] pubK = req.getPubKey().getBytes() ;
+
+				ActiveSing activeSing = new ActiveSing(
+						req.getPurchaseId()
+						, req.getEthAddr()
+						, req.getTs()
+						, req.getAmount()
+						, pubKey
+				);
+				try{
+					byte[] hActiveSing = activeSing.ToHash();
+					//验证： 构造新的pubkey和签名
+					byte[] sigbts = Hex.decode(req.getSignature().toStringUtf8());
+					ECKey.ECDSASignature newsig = new ECKey.ECDSASignature(
+							new BigInteger(1,Arrays.copyOfRange(sigbts, 0, 32)),
+							new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
+					);
+					ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
+					boolean pass =  newpubkey.verify(hActiveSing ,newsig); //验证通过
+
+					int t = 0 ;
+				}catch (Exception e){
+					int t = 0;
+				}
+
+				double dddAmount = Double.parseDouble(req.getAmount());
+				//添加交易
+				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
+				if(dddPurchaseMgr.instance().addPurchase(pur)){
+					try{
+						//转发给ccapi服务器
+						ccapi.CcOuterClass.DisChargeRes response = chainRpcMgr.instance().DisChargeReq(req);
+
+						//因为提币操作是在ddd服务器操作，而且时间比较长，需提醒玩家提币请求开始处理了
+						ccapi.CcOuterClass.DisChargeStartRes.Builder msgStart = CcOuterClass.DisChargeStartRes.newBuilder();
+						msgStart.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(response.getResHeader().getReqId()).setVersion(response.getResHeader().getVersion()).build());
+						ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(response.getPurchaseId().getBytes()));
+						Player player = GameDb.getPlayer(dp.player_id);
+						if(!player.equals(null)){
+							this.write(Package.create(cmd,msg.toBuilder().setErrorCode(0).build()));
+						}else{
+							this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+						}
+					}catch (Exception e){
+						this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+					}
+				}else{
+					this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+				}
+			}else{
+				//提示超时
+				this.write(Package.create(cmd,msg.toBuilder().setErrorCode(1).build()));
+			}
+		}else{
+			//验证失败
+			this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
+		}
 		int t = 0 ;
 	}
 
@@ -4226,9 +4335,11 @@ public class GameSession {
 		}
 	}
 
+
 	public void ct_RechargeRequestReq(short cmd,Message message){
 		ccapi.Dddbind.ct_RechargeRequestReq msg = (ccapi.Dddbind.ct_RechargeRequestReq ) message;
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+
 		CcOuterClass.RechargeRequestReq req = msg.getRechargeRequestReq();
 
 		//服务器签名验证测试
@@ -4238,8 +4349,8 @@ public class GameSession {
 
 		SignCharge pSignCharge = new SignCharge(
 				req.getPurchaseId()
-				, req.getTs()
 				, req.getAmount()
+				, req.getTs()
 				//, pubKey
 		);
 		try{
@@ -4253,7 +4364,6 @@ public class GameSession {
 			);
 			ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
 			boolean pass =  newpubkey.verify(hSignCharge ,newsig); //验证通过
-
 			int t = 0 ;
 		}catch (Exception e){
 
@@ -4265,8 +4375,16 @@ public class GameSession {
 		if(dddPurchaseMgr.instance().addPurchase(pur)){
 			//转发给ccapi服务器
 			try{
-				chainRpcMgr.instance().RechargeRequestReq(req);
-				this.write(Package.create(cmd, msg));
+				ccapi.CcOuterClass.RechargeRequestRes resp = chainRpcMgr.instance().RechargeRequestReq(req);
+				if(resp.getResHeader().getErrCode() == GlobalDef.ErrCode.ERR_SUCCESS)
+					this.write(Package.create(cmd, ccapi.Dddbind.ct_RechargeRequestRes.newBuilder()
+							.setRechargeRequestRes(resp)
+							.setPlayerId(msg.getPlayerId())
+							.build()));
+				else{
+					this.write(Package.fail(cmd));
+					logger.debug("ct_RechargeRequestReq: " + resp.getResHeader().getErrMsg());
+				}
 			}catch (Exception e){
 				this.write(Package.fail(cmd));
 			}
@@ -4281,49 +4399,11 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		ccapi.CcOuterClass.DisChargeReq req = msg.getDisChargeReq();
 
-		//服务器签名验证测试
-		//计算哈希
-		byte[] pubKey = Hex.decode(req.getPubKey()) ;
-		byte[] pubK = req.getPubKey().getBytes() ;
-
-		ActiveSing activeSing = new ActiveSing(
-				req.getPurchaseId()
-				, req.getEthAddr()
-				, req.getTs()
-				, req.getAmount()
-				, pubKey
-		);
-		try{
-			byte[] hActiveSing = activeSing.ToHash();
-			//验证： 构造新的pubkey和签名
-			byte[] sigbts = Hex.decode(req.getSignature().toStringUtf8());
-			ECKey.ECDSASignature newsig = new ECKey.ECDSASignature(
-					new BigInteger(1,Arrays.copyOfRange(sigbts, 0, 32)),
-					new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
-			);
-			ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
-			boolean pass =  newpubkey.verify(hActiveSing ,newsig); //验证通过
-
-			int t = 0 ;
-		}catch (Exception e){
-
-		}
-
-		double dddAmount = Double.parseDouble(req.getAmount());
-		//添加交易
-		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
-		if(dddPurchaseMgr.instance().addPurchase(pur)){
-			try{
-				//转发给ccapi服务器
-				chainRpcMgr.instance().DisChargeReq(req);
-				this.write(Package.create(cmd, msg));
-			}catch (Exception e){
-				this.write(Package.fail(cmd));
-			}
-
-		}else{
-			this.write(Package.fail(cmd));
-		}
+		String authCode = YunSmsManager.numberAuthCode();
+		paySmCache.put(playerId,new SmVerify(playerId,authCode,System.currentTimeMillis(),req));
+		String phoneNumber = GameDb.getPlayer(playerId).getAccount();
+		Result<SmsSingleSend> result = YunSmsManager.getInstance().sendAuthCode(phoneNumber, authCode);
+		int a = 0;
 	}
 
 	//查询原料厂所有的原料列表信息
@@ -4410,11 +4490,67 @@ public class GameSession {
 			BrandManager.BrandInfo brandInfo = BrandManager.instance().getBrand(playerId,goodType);
 			brand += brandInfo.getV();
 			//2 当前知名度评分
-			double brandScore=GlobalUtil.getGoodQtyScore(brand, goodType, good.brand);
+			double brandScore=GlobalUtil.getBrandScore(brand,goodType);
 			Gs.PromotionItemInfo.ItemInfo.Builder item = Gs.PromotionItemInfo.ItemInfo.newBuilder();
 			item.setItemId(goodType).setBrand(brand).setBrandScore(brandScore);
 			itemInfo.addItems(item);
 		}
 		this.write(Package.create(cmd,itemInfo.build()));
+	}
+
+	//查询货架数据
+	public void getShelfData (short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof IShelf))
+			return;
+		int type = building.type();
+		Gs.ShelfData.Builder builder = Gs.ShelfData.newBuilder();
+		Gs.Shelf shelf=null;
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				shelf = materialFactory.shelf.toProto();
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				shelf = produceDepartment.shelf.toProto();
+				break;
+			case MetaBuilding.RETAIL:
+				RetailShop retailShop = (RetailShop) building;
+				shelf = retailShop.getShelf().toProto();
+				break;
+		}
+		builder.setShelf(shelf).setBuildingId(id.getId());
+		this.write(Package.create(cmd,builder.build()));
+	}
+
+	//查询仓库数据
+	public void getStorageData (short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof IStorage))
+			return;
+		int type = building.type();
+		Gs.StorageData.Builder builder = Gs.StorageData.newBuilder();
+		Gs.Store store=null;
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				store = materialFactory.store.toProto();
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				store = produceDepartment.store.toProto();
+				break;
+			case MetaBuilding.RETAIL:
+				RetailShop retailShop = (RetailShop) building;
+				store = retailShop.getStore().toProto();
+				break;
+		}
+		builder.setStore(store).setBuildingId(id.getId());
+		this.write(Package.create(cmd,builder.build()));
 	}
 }

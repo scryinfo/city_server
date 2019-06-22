@@ -1,4 +1,4 @@
-package Account;
+package Shared;
 
 import com.yunpian.sdk.YunpianClient;
 import com.yunpian.sdk.model.Result;
@@ -7,6 +7,7 @@ import com.yunpian.sdk.model.SmsSingleSend;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class YunSmsManager
 {
@@ -22,6 +23,17 @@ public class YunSmsManager
     public static YunSmsManager getInstance()
     {
         return instance;
+    }
+
+    public static String numberAuthCode()
+    {
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 4; i++)
+        {
+            stringBuilder.append(random.nextInt(10));
+        }
+        return stringBuilder.toString();
     }
 
     public Result<SmsSingleSend> sendAuthCode(String phoneNumber, String authCode)
