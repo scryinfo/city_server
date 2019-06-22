@@ -659,9 +659,6 @@ public class GameSession {
 
 					for (int tp : c.getTypeIdsList())
 					{
-						int bsTp = tp/100;
-						int subTp = tp % 100;
-						// (int)s.getAllPromoTypeAbility(tp);
 						long value =s.getLocalPromoAbility(tp);
 						bb.addCurAbilitys((int) value);
 					}
