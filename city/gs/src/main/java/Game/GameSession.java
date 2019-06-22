@@ -36,6 +36,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
+import javafx.scene.shape.LineBuilder;
 import org.apache.log4j.Logger;
 import org.ethereum.crypto.ECKey;
 import org.spongycastle.util.encoders.Hex;
@@ -4557,4 +4558,25 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
+	public void getLineData(short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID bid = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(bid);
+		if(building==null||!(building instanceof FactoryBase))
+			return;
+		int type = building.type();
+		Gs.LineData.Builder lineBuilder = Gs.LineData.newBuilder();
+		switch (type){
+			case MetaBuilding.MATERIAL:
+				MaterialFactory materialFactory = (MaterialFactory) building;
+				materialFactory.lines.forEach(l->lineBuilder.addLine(l.toProto()));
+				break;
+			case MetaBuilding.PRODUCE:
+				ProduceDepartment produceDepartment = (ProduceDepartment) building;
+				produceDepartment.lines.forEach(l->lineBuilder.addLine(l.toProto()));
+				break;
+		}
+		lineBuilder.setBuildingId(id.getId());
+		this.write(Package.create(cmd,lineBuilder.build()));
+	}
 }
