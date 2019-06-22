@@ -108,4 +108,12 @@ public class ItemKey implements Serializable {
         }
         return 0;
     }
+    //获取商品的总知名度
+    public double getTotalBrand(){
+        if(MetaGood.isItem(this.meta.id)){
+            MetaGood good = MetaData.getGood(meta.id);
+            return good.brand+BrandManager.instance().getBrand(this.producerId,meta.id).getV();
+        }
+        return 0;
+    }
 }

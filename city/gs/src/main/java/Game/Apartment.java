@@ -116,4 +116,8 @@ public class Apartment extends Building implements IBuildingContract
         double qty = (meta.qty * this.getWorkerNum()) * (1 + EvaManager.getInstance().computePercent(eva));
         return qty;
     }
+    //获取总知名度
+    public double getTotalBrand(){
+        return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();
+    }
 }
