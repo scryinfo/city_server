@@ -661,8 +661,9 @@ public class GameSession {
 					{
 						int bsTp = tp/100;
 						int subTp = tp % 100;
-						Integer value = (int)s.getAllPromoTypeAbility(tp);
-						bb.addCurAbilitys(value);
+						// (int)s.getAllPromoTypeAbility(tp);
+						long value =s.getLocalPromoAbility(tp);
+						bb.addCurAbilitys((int) value);
 					}
 					bb.setPricePerHour(s.getCurPromPricePerHour());
 					bb.setRemainTime(s.getPromRemainTime());
