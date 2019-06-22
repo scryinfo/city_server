@@ -4557,11 +4557,4 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	public void getLineData(short cmd,Message message){
-		Gs.Id id = (Gs.Id) message;
-		UUID bid = Util.toUuid(id.getId().toByteArray());
-		Building building = City.instance().getBuilding(bid);
-		if(building==null||!(building instanceof FactoryBase))
-			return;
-	}
 }
