@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 )
 public class Player {
     public static final int MAX_FACE_ID_LEN = 100;
-
+    public static final int COST_FACE_SCORE_VALUE=100;//每次改变avata要扣减的积分值
     public List<UUID> getPayedPromotions() {
         return payedPromotions;
     }
@@ -560,5 +560,15 @@ public class Player {
             return true;
         }else
             return false;
+    }
+
+    public boolean decScoreValue(int value){//扣除幸运券
+        if(value>this.score){//不够扣减，返回false
+            return false;
+        }else{
+            //扣减幸运券
+            this.score -= value;
+            return true;
+        }
     }
 }

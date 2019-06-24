@@ -563,8 +563,15 @@ public class GameSession {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
 			return;
-		this.player.setFaceId(c.getStr());
-		GameDb.saveOrUpdate(player);
+		Gs.Bool.Builder result = Gs.Bool.newBuilder();
+		if(this.player.decScoreValue(Player.COST_FACE_SCORE_VALUE)){
+			this.player.setFaceId(c.getStr());
+			GameDb.saveOrUpdate(player);
+			result.setB(true);
+		}else{
+			result.setB(false);
+		}
+		this.write(Package.create(cmd,result.build()));
 	}
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
