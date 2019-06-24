@@ -4576,11 +4576,8 @@ public class GameSession {
 				produceDepartment.lines.forEach(l->{
 					//获取生产线的itemkey
 					ItemKey itemKey = new ItemKey(l.item, building.ownerId(), l.itemLevel, building.ownerId());
-					MetaGood good = MetaData.getGood(l.item.id);
-					//设置评分
-					double brandScore = GlobalUtil.getBrandScore(itemKey.getTotalBrand(), l.item.id);
-					double qtyScore = GlobalUtil.getGoodQtyScore(itemKey.getTotalQty(), l.item.id, good.quality);
-					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore((int) brandScore).setQtyScore((int) qtyScore);
+					Gs.ItemKey key = itemKey.toProto();
+					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore(key.getBrandScore()).setQtyScore(key.getQualityScore()).setBrandName(key.getBrandName());
 					lineBuilder.addLine(builder.build());
 				});
 				break;

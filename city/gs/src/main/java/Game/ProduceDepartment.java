@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Meta.*;
+import Game.Util.GlobalUtil;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 
@@ -66,7 +67,15 @@ public class ProduceDepartment extends FactoryBase {
         Gs.ProduceDepartment.Builder builder = Gs.ProduceDepartment.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
-        this.lines.forEach(line -> builder.addLine(line.toProto()));
+        this.lines.forEach(line -> {
+            ItemKey itemKey = new ItemKey(line.item,ownerId(), line.itemLevel,ownerId());
+            Gs.ItemKey key = itemKey.toProto();
+            Gs.Line.Builder l = line.toProto().toBuilder()
+                    .setBrandScore(key.getBrandScore())
+                    .setQtyScore(key.getQualityScore())
+                    .setBrandName(key.getBrandName());
+            builder.addLine(l.build());
+        });
         return builder.build();
     }
     @Override
