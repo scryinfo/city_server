@@ -226,7 +226,7 @@ public class GlobalUtil {
         for (Building b: buildings) {
             if(b instanceof PublicFacility&&!b.outOfBusiness()){
                 PublicFacility facility = (PublicFacility) b;
-                sum+=facility.getAllPromoTypeAbility(type);
+                sum+=facility.getLocalPromoAbility(type);
                 count++;
             }
         }
