@@ -4573,7 +4573,16 @@ public class GameSession {
 				break;
 			case MetaBuilding.PRODUCE:
 				ProduceDepartment produceDepartment = (ProduceDepartment) building;
-				produceDepartment.lines.forEach(l->lineBuilder.addLine(l.toProto()));
+				produceDepartment.lines.forEach(l->{
+					//获取生产线的itemkey
+					ItemKey itemKey = new ItemKey(l.item, building.ownerId(), l.itemLevel, building.ownerId());
+					MetaGood good = MetaData.getGood(l.item.id);
+					//设置评分
+					double brandScore = GlobalUtil.getBrandScore(itemKey.getTotalBrand(), l.item.id);
+					double qtyScore = GlobalUtil.getGoodQtyScore(itemKey.getTotalQty(), l.item.id, good.quality);
+					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore((int) brandScore).setQtyScore((int) qtyScore);
+					lineBuilder.addLine(builder.build());
+				});
 				break;
 		}
 		lineBuilder.setBuildingId(id.getId());

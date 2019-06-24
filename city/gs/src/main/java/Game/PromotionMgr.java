@@ -131,7 +131,8 @@ public class PromotionMgr {
             }
             Building sellerBuilding = City.instance().getBuilding(promotion.sellerBuildingId);
             PublicFacility fcySeller = (PublicFacility) sellerBuilding ;
-            int objType = promotion.buildingType > 0 ? promotion.buildingType: promotion.productionType;
+            int objType = promotion.buildingType > 0 ? promotion.buildingType: promotion.productionType;//具体的商品或建筑知名度类型
+            int promType=promotion.buildingType > 0 ? promotion.buildingType: promotion.productionType/1000;//推广能力大类型
             long endTime = promotion.promStartTs + promotion.promDuration;
             long elapsedtime = promotion.promDuration - (endTime - curtime);//已经过的时间  10:00  12:00   2
             float addition = 0;
@@ -144,7 +145,7 @@ public class PromotionMgr {
                     System.err.println("开始推广");
                     //计算每个推广的结果
                     //addition = fcySeller.excutePromotion(promotion);
-                    addition = fcySeller.getLocalPromoAbility(objType);
+                    addition = fcySeller.getLocalPromoAbility(promType);
                     //累加提升值，以便计算平均值
                     promotion.promotedTotal += addition;
                     promotion.promProgress = (int) (((float) elapsedtime / (float) promotion.promDuration) * 100);
@@ -154,7 +155,7 @@ public class PromotionMgr {
             }else {
                 //判断推广完成后推广加成是正确
                 if(promotion.promoNum<promHour){//处理延时的问题
-                    addition= fcySeller.getLocalPromoAbility(objType);
+                    addition= fcySeller.getLocalPromoAbility(promType);
                     float residueProValue= (promHour - promotion.promoNum) * addition;
                     promotion.promotedTotal += residueProValue;
                     BrandManager.instance().update(promotion.buyerId, objType, (int)residueProValue);
