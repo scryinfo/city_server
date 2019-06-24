@@ -285,14 +285,12 @@ public class StatisticSession {
     	//统计整理数据
 		Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
 		Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
-		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
-    	builder.setId(Util.toByteString(id));
 		//1.处理收入信息
     	monthTotalIncome.forEach((k,v)->{
-    		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=builder.addPlayerIncomeBuilder();
+    		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
     		b.setTime(k);
     		b.setIncome(v);
-    		b.setPay((monthTotalpay!=null&&monthTotalpay.size()>0&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
+    		b.setPay((monthTotalpay!=null&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
 			totalMap.put(k,b.build());
     	});
 		//2.处理支出信息
@@ -306,12 +304,17 @@ public class StatisticSession {
 			//添加其他的信息
 			b.setTime(pay.getKey());
 			b.setPay(pay.getValue());
-			b.setIncome((monthTotalIncome!=null&&monthTotalIncome.size()>0&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
+			//由于所有的收入在上面已经处理过了，所以，现在不可能存在收入的情况了，统一设置为0 ，一旦经过这里，都是有支出无收入的情况
+			//b.setIncome((monthTotalIncome!=null&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
+			b.setIncome(0);
 			totalMap.put(pay.getKey(),b.build());
 		}
 		//3.处理今日最新收入和支出信息
 		Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
 		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);
+		//返回数据
+		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
+		builder.setId(Util.toByteString(id));
 		builder.setTodayIncome(todayIncome);
 		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
