@@ -392,7 +392,7 @@ public class Laboratory extends Building {
     private long totalGoodIncome;
     private int totalGoodTimes;
 
-    //Eva加成信息(map的key为btype)，由getEvaAdd来更新
+    //Eva加成信息(map的key为btype)，由updateEvaAdd来更新
     @Transient
     Map<Integer, Double> evaMap = new HashMap<>();
 
