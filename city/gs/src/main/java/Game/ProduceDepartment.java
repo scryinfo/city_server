@@ -1,7 +1,6 @@
 package Game;
 
 import Game.Meta.*;
-import Game.Util.GlobalUtil;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gs.Gs;
 
@@ -10,9 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.List;
 
 @Entity(name = "ProduceDepartment")
 public class ProduceDepartment extends FactoryBase {
