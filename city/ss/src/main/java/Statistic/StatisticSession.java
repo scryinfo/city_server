@@ -251,7 +251,20 @@ public class StatisticSession {
 
     public void queryPlayerExchangeAmount(short cmd) {
         Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
-        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
+//        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
+		//player交易量
+		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
+		long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
+		long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
+		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+		long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
+		long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
+		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
+		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
+		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
+		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
+		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
         builder.setPlayExchangeAmount(playerExchangeAmount);
         this.write(Package.create(cmd, builder.build()));
     }
