@@ -431,7 +431,7 @@ public class GroundManager {
             return v;
         });
         playerGround.computeIfAbsent(seller, k->new HashSet<>()).add(info);*/
-      //写反啦
+      //之前是反的
         playerGround.computeIfPresent(seller,(k,v)->{
             v.remove(info);
             return v;
