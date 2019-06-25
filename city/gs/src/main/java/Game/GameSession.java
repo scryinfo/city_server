@@ -74,7 +74,7 @@ class SmVerify {
 	}
 
 	public boolean TimeoutChecks(){
-		return System.currentTimeMillis() - ts <= 30000;
+		return System.currentTimeMillis() - ts <= 60000;
 	}
 }
 
