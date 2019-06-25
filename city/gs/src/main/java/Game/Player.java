@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 )
 public class Player {
     public static final int MAX_FACE_ID_LEN = 100;
-    public static final int COST_FACE_SCORE_VALUE=100;//每次改变avata要扣减的积分值
+    public static final int COST_FACE_SCORE_VALUE=10;//每次改变avata要扣减的积分值
     public List<UUID> getPayedPromotions() {
         return payedPromotions;
     }
@@ -292,7 +292,7 @@ public class Player {
         this.createTs = System.currentTimeMillis();
         this.eva=10000;
         this.last_modify_time=0;
-        this.score = 999999;
+        this.score = 100;
     }
     @PostLoad
     void _init() {
