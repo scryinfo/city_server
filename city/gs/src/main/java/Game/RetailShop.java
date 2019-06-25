@@ -256,8 +256,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
                     content.price = price;
                     content.n = item.n;
                     content.autoReplenish = autoRepOn;
-                    //消息推送货物发生改变
-                    this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn);
                     return true;
                 } else {
                     return false;
@@ -279,9 +277,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
             //重新上架
             shelf.addshelf(itemInStore,price,autoRepOn);
-            //消息推送货物发生改变
-            int count = shelf.getSaleCount(item.key.meta.id);
-            this.sendToWatchers(id(),item.key.meta.id,count,price,autoRepOn);//推送消息
             return true;
         }
     }
