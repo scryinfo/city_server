@@ -14,7 +14,9 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
-import Game.Util.*;
+import Game.Util.CityUtil;
+import Game.Util.GlobalUtil;
+import Game.Util.WareHouseUtil;
 import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
@@ -36,7 +38,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
-import javafx.scene.shape.LineBuilder;
 import org.apache.log4j.Logger;
 import org.ethereum.crypto.ECKey;
 import org.spongycastle.util.encoders.Hex;
@@ -4576,11 +4577,8 @@ public class GameSession {
 				produceDepartment.lines.forEach(l->{
 					//获取生产线的itemkey
 					ItemKey itemKey = new ItemKey(l.item, building.ownerId(), l.itemLevel, building.ownerId());
-					MetaGood good = MetaData.getGood(l.item.id);
-					//设置评分
-					double brandScore = GlobalUtil.getBrandScore(itemKey.getTotalBrand(), l.item.id);
-					double qtyScore = GlobalUtil.getGoodQtyScore(itemKey.getTotalQty(), l.item.id, good.quality);
-					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore((int) brandScore).setQtyScore((int) qtyScore);
+					Gs.ItemKey key = itemKey.toProto();
+					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore(key.getBrandScore()).setQtyScore(key.getQualityScore()).setBrandName(key.getBrandName());
 					lineBuilder.addLine(builder.build());
 				});
 				break;
