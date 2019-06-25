@@ -1,5 +1,6 @@
 package Game.ddd;
 
+import Shared.Util;
 import org.ethereum.crypto.ECKey;
 import org.spongycastle.util.encoders.Hex;
 
@@ -57,6 +58,12 @@ public class ddd_purchase {
         status = StatusPurchase.PROCESSED;
     }
 
+    ccapi.Dddbind.ct_TradingRecord toProto() {
+        return ccapi.Dddbind.ct_TradingRecord.newBuilder()
+                .setPurchaseId(Util.toByteString(purchaseId))
+                .setDdd(Double.toString(ddd))
+                .build();
+    }
     public void bindReqSignature( String reqPbk, byte[] reqSig){
         req_pubkey = reqPbk;
         req_Signature = reqSig;

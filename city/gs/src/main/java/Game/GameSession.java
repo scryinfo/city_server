@@ -40,6 +40,7 @@ import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
 import org.ethereum.crypto.ECKey;
+import org.hibernate.query.Query;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
@@ -4248,6 +4249,17 @@ public class GameSession {
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString().replace("-","")).build()));
 		int t = 0 ;
+	}
+
+	public void ct_GetTradingRecords(short cmd,Message message){
+		ccapi.Dddbind.ct_GetTradingRecords msg = (ccapi.Dddbind.ct_GetTradingRecords) message;
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		long range_StartTime = msg.getRangeStartTime();
+		long range_EndTime = msg.getRangeEndTime();
+		List<ddd_purchase> list = GameDb.GetTradingRecords(playerId, range_StartTime, range_EndTime);
+
+		//this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString().replace("-","")).build()));
+		//int t = 0 ;
 	}
 
 	public void ct_DisPaySmVefifyReq(short cmd,Message message){

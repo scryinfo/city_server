@@ -19,6 +19,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import Game.Gambling.FlightManager;
+import Game.ddd.ddd_purchase;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -268,6 +269,15 @@ public class GameDb {
 						builder.equal(root.get("pid"), playerId)
 						, builder.equal(root.get("at"), techId)));
 		return session.createQuery(query).list();
+	}
+
+	public static List<ddd_purchase> GetTradingRecords(UUID playerId, long range_StartTime, long range_EndTime)
+	{
+		Session session = sessionFactory.openSession();
+		String hql = "from ddd_purchase pur where pur.type between 5 and 10";
+		Query query = session.createQuery(hql);
+		List<ddd_purchase> purchase = query.list();
+		return purchase;
 	}
 
 	public static <T> List<T> getAllFromOneEntity(Class<T> c)
