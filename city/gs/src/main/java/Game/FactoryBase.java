@@ -315,7 +315,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             return false;
         if(!autoRepOn) {//非自动补货
             int updateNum = content.n - item.n;//增加或减少：当前货架数量-现在货架数量
-            if(content.n==0&&item.n==0){//把已关闭自动补货切货架数量为0的商品下架
+            if(content.n==0&&item.n==0){//若非自动补货，切货架数量为0，直接删除
                 content.autoReplenish=autoRepOn;
                 IShelf shelf=this;
                 shelf.delshelf(item.key, content.n, true);

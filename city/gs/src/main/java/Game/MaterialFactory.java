@@ -62,6 +62,7 @@ public class MaterialFactory extends FactoryBase {
 
     @Override
     public Gs.MaterialFactory detailProto() {
+        System.err.println(this.detailWatchers);
         Gs.MaterialFactory.Builder builder = Gs.MaterialFactory.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
