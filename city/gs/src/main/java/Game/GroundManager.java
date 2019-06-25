@@ -279,7 +279,7 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            i.rented(rentPara, tid, renter.id(), now);
+            i.rented(rentPara, tid, renter.id(), now);//设置土地状态
             gis.add(i);
             this.summaryInfo.get(i.coordinate().toGridIndex()).rentingCount--;
         }
@@ -414,12 +414,18 @@ public class GroundManager {
     }
 
     private void swapOwner(UUID buyer, UUID seller, GroundInfo info) {
-        info.buyGround(buyer);
-        playerGround.computeIfPresent(buyer,(k,v)->{
+        info.buyGround(buyer);//改变土地状态
+      /*  playerGround.computeIfPresent(buyer,(k,v)->{
             v.remove(info);
             return v;
         });
-        playerGround.computeIfAbsent(seller, k->new HashSet<>()).add(info);
+        playerGround.computeIfAbsent(seller, k->new HashSet<>()).add(info);*/
+      //写反啦
+        playerGround.computeIfPresent(seller,(k,v)->{
+            v.remove(info);
+            return v;
+        });
+        playerGround.computeIfAbsent(buyer, k->new HashSet<>()).add(info);
         summaryInfo.get(info.coordinate().toGridIndex()).sellingCount--;
     }
 
