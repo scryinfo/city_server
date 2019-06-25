@@ -792,6 +792,12 @@ public class GameSession {
 		IShelf s = (IShelf)building;
 		if(s.delshelf(item.key, item.n, true)) {
 			GameDb.saveOrUpdate(s);
+			//如果货架上还有该商品则推送，否则不推送
+			Shelf.Content content = s.getContent(item.key);
+			if(content!=null){
+				/*sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish*/
+				building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish);
+			}
 			this.write(Package.create(cmd, c));
 		}
 		else{
@@ -816,7 +822,8 @@ public class GameSession {
 			this.write(Package.create(cmd, c));
 		}
 		else
-			this.write(Package.fail(cmd));
+			this.write(Package.fail(cmd,Common.Fail.Reason.shelfSetFail));
+			//this.write(Package.fail(cmd));
 	}
 
 	public void buyInShelf(short cmd, Message message) throws Exception {
@@ -836,7 +843,8 @@ public class GameSession {
 		IShelf sellShelf = (IShelf)sellBuilding;
 		Shelf.Content i = sellShelf.getContent(itemBuy.key);
 		if(i == null || i.price != c.getPrice() || i.n < itemBuy.n) {
-			this.write(Package.fail(cmd));
+			//返回数量不足错误码
+			this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
 			return;
 		}
 		long cost = itemBuy.n*c.getPrice();
@@ -847,11 +855,15 @@ public class GameSession {
 		long minerCost = (long) Math.floor(cost * minersRatio);
 		long income =cost - minerCost;//收入（扣除矿工费后）
 		long pay=cost+minerCost;
-		if(player.money() < cost + freight+minerCost)
+		if(player.money() < cost + freight+minerCost) {
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
+		}
 		// begin do modify
-		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n))
+		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n)) {
+			this.write(Package.fail(cmd, Common.Fail.Reason.spaceNotEnough));
 			return;
+		}
 		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
 		seller.addMoney(income);
 		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
@@ -896,8 +908,12 @@ public class GameSession {
 		sellBuilding.updateTodayIncome(income);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
-
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
+		//如果货架上已经没有该商品了，不推送，有则推送
+		i = sellShelf.getContent(itemBuy.key);
+		if(i!=null){
+			sellBuilding.sendToWatchers(sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish);
+		}
 		this.write(Package.create(cmd, c));
 	}
 	public void exchangeItemList(short cmd) {
