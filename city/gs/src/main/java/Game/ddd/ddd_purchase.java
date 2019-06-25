@@ -36,6 +36,7 @@ public class ddd_purchase {
     StatusPurchase status;         //交易状态
     long expire_time;
     long create_time;
+    long completion_time;
     int type;
 
     //关键数据签名验证----------------------------

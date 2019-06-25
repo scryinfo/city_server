@@ -1,6 +1,8 @@
 package Game.ddd;
 
 import Game.GameDb;
+import Game.Mail;
+import Game.MailBox;
 import Game.Player;
 import Shared.Package;
 import Shared.Util;
@@ -134,8 +136,9 @@ public class dddPurchaseMgr {
             }
             player.addMoney(eee);
             pur.status = StatusPurchase.PROCESSED;
-
+            pur.completion_time = System.currentTimeMillis();
             GameDb.saveOrUpdate(player);
+            GameDb.saveOrUpdate(pur);
 
             if(pur.ddd > 0){//充值成功
                 ct_RechargeRequestRes.Builder msg = ct_RechargeRequestRes.newBuilder();
@@ -154,7 +157,7 @@ public class dddPurchaseMgr {
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setRechargeRequestRes(pRechargeRequestRes);
                 Package pack = Package.create(GsCode.OpCode.ct_RechargeRequestRes_VALUE, msg.build());
                 player.send(pack);
-                //MailBox.instance().sendMail(Mail.MailType.DDD_RECHARGEREQUESTRES.getMailType(), pur.player_id, null, null);
+                MailBox.instance().sendMail(Mail.MailType.DDD_RECHARGEREQUESTRES.getMailType(), pur.player_id, null, null);
             }else{//提币
                 ct_DisChargeRes.Builder msg = ct_DisChargeRes.newBuilder();
                 DisChargeRes.Builder disC = DisChargeRes.newBuilder();
@@ -164,7 +167,7 @@ public class dddPurchaseMgr {
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setDisChargeRes(disC.build());
                 Package pack = Package.create(GsCode.OpCode.ct_DisChargeRes_VALUE, msg.build());
                 player.send(pack);
-                //MailBox.instance().sendMail(Mail.MailType.DDD_DISCHARGERES.getMailType(), pur.player_id, null, null);
+                MailBox.instance().sendMail(Mail.MailType.DDD_DISCHARGERES.getMailType(), pur.player_id, null, null);
             }
         }
     }
