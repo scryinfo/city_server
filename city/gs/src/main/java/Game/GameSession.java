@@ -1049,7 +1049,8 @@ public class GameSession {
 		this.write(Package.create(cmd, MoneyPool.instance().toProto()));
 	}
 	private void registBuildingDetail(Building building) {
-		if(buildingDetail.size() < MAX_DETAIL_BUILDING && building.canUseBy(player.id())) {
+		/*if(buildingDetail.size() < MAX_DETAIL_BUILDING && building.canUseBy(player.id())) {*/
+		if(buildingDetail.size() < MAX_DETAIL_BUILDING) {
 			building.watchDetailInfoAdd(this);
 			buildingDetail.add(building.id());
 		}
@@ -1079,6 +1080,7 @@ public class GameSession {
 			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
+		System.err.println(b.detailWatchers.size());
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
