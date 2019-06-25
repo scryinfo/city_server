@@ -47,4 +47,8 @@ public class Item {
         builder.setN(n);
         return builder.build();
     }
+
+    public ItemKey getKey() {
+        return this.key;
+    }
 }

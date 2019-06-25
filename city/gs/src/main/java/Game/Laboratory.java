@@ -99,10 +99,10 @@ public class Laboratory extends Building {
             if (line.update(diffNano)) {
                 if (line.goodCategory > 0) {
                     //完成商品发明
-                    MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times}, new UUID[]{this.id()}, null);
+                    MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times,line.goodCategory}, new UUID[]{this.id()}, null);
                 } else {
                     //完成点数研究
-                    MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times}, new UUID[]{this.id()}, null);
+                    MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times,line.goodCategory}, new UUID[]{this.id()}, null);
                 }
                 if (line.isComplete()) {
                     this.inProcess.remove(0);
