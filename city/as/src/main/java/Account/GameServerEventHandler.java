@@ -27,8 +27,7 @@ public class GameServerEventHandler extends SimpleChannelInboundHandler<Package>
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Package msg) throws Exception {
-		if(!GameServerEventDispatcher.getInstance().call(msg, session)){
-			System.err.println("发生协议号不匹配，协议是:"+msg);
+		if(!GameServerEventDispatcher.getInstance().call(msg, session)) {
 			ctx.close();
 		}
 	}

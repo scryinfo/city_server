@@ -339,8 +339,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 } else {
                     return false;
                 }
-            } else
+            } else{
                 return false;
+            }
         }else {//自动补货
             //1.判断容量是否已满
             if(this.shelf.full())

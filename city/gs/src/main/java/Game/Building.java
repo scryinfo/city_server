@@ -132,7 +132,7 @@ public abstract class Building implements Ticker{
     }
     protected void sendToWatchers(UUID buidlingId,int itemId,int count,int price,boolean autoReplenish) {
         Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
-        builder.setBuildingId(Util.toByteString(buidlingId)).setItemId(itemId).setSelledCount(count).setSelledPrice(price).setAutoReplenish(autoReplenish);
+        builder.setBuildingId(Util.toByteString(buidlingId)).setItemId(itemId).setSelledCount(count).setSelledPrice(price).setAutoRepOn(autoReplenish);
         GameServer.sendTo(this.detailWatchers, Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build()));
     }
     public List<Building> getAllBuildingInEffectRange() {
