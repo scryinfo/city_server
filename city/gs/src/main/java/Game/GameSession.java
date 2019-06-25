@@ -4257,9 +4257,9 @@ public class GameSession {
 		long range_StartTime = msg.getRangeStartTime();
 		long range_EndTime = msg.getRangeEndTime();
 		List<ddd_purchase> list = GameDb.GetTradingRecords(playerId, range_StartTime, range_EndTime);
-
-		//this.write(Package.create(cmd, msg.toBuilder().setPurchaseId(UUID.randomUUID().toString().replace("-","")).build()));
-		//int t = 0 ;
+		ccapi.Dddbind.ct_GetTradingRecords.Builder retMsg = msg.toBuilder();
+		list.forEach(ddd_purchase -> retMsg.addRecords(ddd_purchase.toProto()));
+		this.write(Package.create(cmd, retMsg.build()));
 	}
 
 	public void ct_DisPaySmVefifyReq(short cmd,Message message){

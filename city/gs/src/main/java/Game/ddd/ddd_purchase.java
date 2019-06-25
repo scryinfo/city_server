@@ -58,10 +58,16 @@ public class ddd_purchase {
         status = StatusPurchase.PROCESSED;
     }
 
-    ccapi.Dddbind.ct_TradingRecord toProto() {
+    public ccapi.Dddbind.ct_TradingRecord toProto() {
         return ccapi.Dddbind.ct_TradingRecord.newBuilder()
                 .setPurchaseId(Util.toByteString(purchaseId))
                 .setDdd(Double.toString(ddd))
+                .setDddFrom(ddd_from)
+                .setDddTo(ddd_to)
+                .setStatus(status.ordinal())
+                .setExpireTime(expire_time)
+                .setCreateTime(create_time)
+                .setCompletionTime(completion_time)
                 .build();
     }
     public void bindReqSignature( String reqPbk, byte[] reqSig){
