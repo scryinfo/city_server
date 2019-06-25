@@ -256,6 +256,19 @@ public class MetaData {
     public static final MetaMaterial getMaterial(int id) {
         return material.get(id);
     }
+
+    //获取所有原料id
+    public static final Set<Integer> getAllMaterialId() {
+        return material.keySet() == null ? new HashSet() : material.keySet();
+    }
+    //获取所有商品id
+    public static final Set<Integer> getAllGoodId() {
+        return good.keySet() == null ? new HashSet() : good.keySet();
+    }
+    //获取所有推广类型id
+    public static final Set<Integer> getAllPromotionId(int id) {
+        return buildingTech.get(id) == null ? new HashSet<>() : buildingTech.get(id);
+    }
     public static final MetaGood getGood(int id) {
         return good.get(id);
     }
