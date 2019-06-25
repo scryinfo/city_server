@@ -1,22 +1,25 @@
 package Game.Gambling;
 
+import common.Common;
 import gs.Gs;
 import org.json.JSONObject;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
-import java.util.UUID;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class Flight {
 
     private static long toTs(String datetimeStr) throws ParseException {
+        return toTs(datetimeStr, (int) TimeUnit.MILLISECONDS.toHours(TimeZone.getDefault().getRawOffset()));
+    }
+    private static long toTs(String datetimeStr, int offsetHour) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone(ZoneId.from(ZoneOffset.ofHours(offsetHour))));
         Date date = sdf.parse(datetimeStr);
         return date.getTime();
     }
@@ -36,6 +39,7 @@ public class Flight {
         FlightArrtimeDate = json.getString("FlightArrtimeDate");
         FlightDepAirport = json.getString("FlightDepAirport");
         FlightState = json.getString("FlightState");
+        org_offset_hours = (int) TimeUnit.SECONDS.toHours(Integer.valueOf(json.getString("org_timezone")));
     }
     String getDate() {
         return this.FlightDeptimePlanDate.substring(0, 10);
@@ -60,18 +64,23 @@ public class Flight {
     String FlightArrtimeDate;//2019-05-22 09:41:00"
     String FlightDepAirport;//南京禄口"
     String FlightState;//到达"
+    int org_offset_hours;
 
     public boolean departured() {
         return !FlightDeptimeDate.isEmpty();
     }
-    public boolean planDepatureTimePassed() {
-        long e = 0;
+    public Common.Fail.Reason canBet() {
+        if(this.departured())
+            return Common.Fail.Reason.flightDepartured;
         try {
-            e = toTs(this.FlightDeptimePlanDate);
-        } catch (ParseException e1) {
-            return true;
+            if(System.currentTimeMillis() >= toTs(this.FlightDeptimePlanDate, org_offset_hours))
+                return Common.Fail.Reason.flightDeparturePlanTimePassed;
+            else
+                return null;
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        return e <= System.currentTimeMillis();
+        return Common.Fail.Reason.noReason;
     }
     public Gs.FlightData toProto() {
         return Gs.FlightData.newBuilder()

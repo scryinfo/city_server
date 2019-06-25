@@ -39,7 +39,9 @@ public class Mail {
         SOCIETY_KICK_OUT(14),//踢出公会
         ADD_SOCIETY_SUCCESS(15),//同意公会申请
         ADD_SOCIETY_FAIL(16),//拒绝公会申请
-        LAND_AUCTION_HIGHER(17);//更高出价
+        LAND_AUCTION_HIGHER(17),//更高出价
+        DDD_RECHARGEREQUESTRES(18),//充值成功通知
+        DDD_DISCHARGERES(19);   //提币成功通知
 
 
      /*   AD_SPACE_RENT_OUT(6),

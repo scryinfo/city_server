@@ -48,7 +48,7 @@ public class GroundAuction {
         public void bid(UUID id, long price, long ts) {
             this.history.add(new BidRecord(id, price, ts));
             if(this.history.size() > BID_RECORD_MAX)
-                this.history.iterator().remove();
+                this.history.remove(0);
             this.tweakTicking(ts);
         }
         private static final int BID_RECORD_MAX = 10;

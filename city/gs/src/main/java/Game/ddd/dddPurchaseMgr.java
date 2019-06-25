@@ -154,6 +154,7 @@ public class dddPurchaseMgr {
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setRechargeRequestRes(pRechargeRequestRes);
                 Package pack = Package.create(GsCode.OpCode.ct_RechargeRequestRes_VALUE, msg.build());
                 player.send(pack);
+                //MailBox.instance().sendMail(Mail.MailType.DDD_RECHARGEREQUESTRES.getMailType(), pur.player_id, null, null);
             }else{//提币
                 ct_DisChargeRes.Builder msg = ct_DisChargeRes.newBuilder();
                 DisChargeRes.Builder disC = DisChargeRes.newBuilder();
@@ -163,6 +164,7 @@ public class dddPurchaseMgr {
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setDisChargeRes(disC.build());
                 Package pack = Package.create(GsCode.OpCode.ct_DisChargeRes_VALUE, msg.build());
                 player.send(pack);
+                //MailBox.instance().sendMail(Mail.MailType.DDD_DISCHARGERES.getMailType(), pur.player_id, null, null);
             }
         }
     }

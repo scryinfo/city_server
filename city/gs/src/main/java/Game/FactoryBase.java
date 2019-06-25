@@ -106,6 +106,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 return lines.remove(i);
             }
         }
+        if(lines.size() > 0){
+            lines.get(0).ts = System.currentTimeMillis();
+        }
         return null;
     }
 
