@@ -41,7 +41,6 @@ import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
 import org.ethereum.crypto.ECKey;
-import org.hibernate.query.Query;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
