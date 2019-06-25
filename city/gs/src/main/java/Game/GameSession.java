@@ -892,7 +892,7 @@ public class GameSession {
 		LogDb.minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
+		//((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n); 在删除商品的时候已经消费过了，这里会造成二次消费
 		sellBuilding.updateTodayIncome(income);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
