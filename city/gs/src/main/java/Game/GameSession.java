@@ -14,6 +14,7 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
+import Game.Util.BuildingUtil;
 import Game.Util.CityUtil;
 import Game.Util.GlobalUtil;
 import Game.Util.WareHouseUtil;
@@ -3837,6 +3838,152 @@ public class GameSession {
 
 	}
 
+
+	//原料竞争力
+	public void materialGuidePrice(short cmd, Message message) {
+		Gs.GoodSummary msg = (Gs.GoodSummary) message;
+		Map<Integer, Double> materialMap = BuildingUtil.getMaterial();
+		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
+		materialMap.forEach((k,v)->{
+			Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
+			builder.addGoodMap(goodMap.addItemId(k).addGudePrice(v).build());
+		});
+		this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()) .build()));
+	}
+
+	//住宅竞争力
+	public void apartmentGuidePrice(short cmd, Message message) {
+		Gs.AartmentMsg msg = (Gs.AartmentMsg) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		Apartment apartment = (Apartment) building;
+		//当前建筑评分
+		double score = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
+		List<Double> info = BuildingUtil.getApartment();
+		Gs.AartmentMsg.ApartmentPrice.Builder apartmentPrice = Gs.AartmentMsg.ApartmentPrice.newBuilder();
+		apartmentPrice.setAvgPrice(info.get(0)).setAvgScore(info.get(1)).setScore(score);
+		this.write(Package.create(cmd, Gs.AartmentMsg.newBuilder().addApartmentPrice(apartmentPrice.build()).setBuildingId(msg.getBuildingId()).build()));
+	}
+
+	//加工厂竞争力
+	public void produceGuidePrice(short cmd, Message message) {
+		Gs.GoodSummary msg = (Gs.GoodSummary) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.PRODUCE) {
+			return;
+		}
+		ProduceDepartment department = (ProduceDepartment) building;
+		Set<Integer> ids = MetaData.getAllGoodId();
+		Map<Integer, List<Double>> listMap = BuildingUtil.getProduce();
+		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
+		for (Object id : ids) {
+			Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
+			int itemId = 0;
+			double score = 0;
+			if (id instanceof Integer) {
+				itemId = (Integer) id;
+				List<Double> list = listMap.get(itemId);
+				double priceAvg = list.get(0);
+				double scoreAvg = list.get(1);
+				Map<Item, Integer> saleDetail = department.getSaleDetail(itemId);
+				for (Item item : saleDetail.keySet()) {
+					score = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, item.getKey().qty);
+				}
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(priceAvg, scoreAvg, score));
+			}
+			builder.addGoodMap(goodMap.build());
+		}
+		this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()).build()));
+	}
+	//零售店竞争力
+	public void retailGuidePrice(short cmd, Message message) {
+		Gs.GoodSummary msg = (Gs.GoodSummary) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.RETAIL) {
+			return;
+		}
+		RetailShop retailShop = (RetailShop) building;
+		Set<Integer> ids = MetaData.getAllGoodId();
+		Map<Integer, List<Double>> retail = BuildingUtil.getRetail();
+		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
+		int itemId = 0;
+		for (Integer id : ids) {
+			Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
+			if (id instanceof Integer && retail != null && retail.size() > 0) {
+				itemId = id;
+				List<Double> list = retail.get(itemId);
+				double avgPrice = list.get(0);
+				double avgGoodScore = list.get(1);
+				double avgRetailScore = list.get(2);
+				Map<Item, Integer> saleDetail = retailShop.getSaleDetail(itemId);
+				//当前商品评分
+				double curScore = 0;
+				for (Item item : saleDetail.keySet()) {
+					curScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, item.getKey().qty);
+				}
+				//当前建筑评分
+				double curRetailScore = GlobalUtil.getBuildingQtyScore(retailShop.getTotalQty(), building.type());
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore, avgRetailScore, curScore, curRetailScore));
+			}
+			builder.addGoodMap(goodMap.build());
+		}
+		this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()).build()));
+	}
+	//推广竞争力
+	public void promotionGuidePrice(short cmd, Message message) {
+		Gs.PromotionMsg msg = (Gs.PromotionMsg) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		//四种推广类型
+		Set<Integer> proIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.PUBLIC) {
+			return;
+		}
+		PublicFacility facility = (PublicFacility) building;
+		List<Integer> abilitys = new ArrayList<>();
+		for (Integer typeId : proIds) {
+			abilitys.add((int) facility.getLocalPromoAbility(typeId));
+		}
+		List<Double> list = BuildingUtil.getPromotion();
+		double price = list.get(0) / list.get(1) == 0 ? -1 : list.get(1);
+		for (Integer proId : proIds) {
+			if (proId instanceof Integer) {
+
+			}
+		}
+		Gs.PromotionMsg.PromotionPrice.Builder promotionPrice = Gs.PromotionMsg.PromotionPrice.newBuilder();
+		promotionPrice.addAllCurAbilitys(abilitys).setGuidePrice(price);
+		this.write(Package.create(cmd, Gs.PromotionMsg.newBuilder().addProPrice(promotionPrice.build()).setBuildingId(msg.getBuildingId()).build()));
+	}
+	//研究竞争力
+	public void laboratoryGuidePrice(short cmd, Message message) {
+		Gs.LaboratoryMsg msg = (Gs.LaboratoryMsg) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.LAB) {
+			return;
+		}
+		Laboratory laboratory = (Laboratory) building;
+		List<Double> list = BuildingUtil.getLaboratory();
+		double price = list.get(0) / list.get(1) == 0 ? -1 : list.get(1);
+		//总概率
+		Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
+		double evaProb = prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+		double goodProb = prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
+		Gs.LaboratoryMsg.LaboratoryPrice.Builder labPrice = Gs.LaboratoryMsg.LaboratoryPrice.newBuilder();
+		labPrice.setGoodProb(goodProb).setEvaProb(evaProb).setGuidePrice(price);
+		this.write(Package.create(cmd, Gs.LaboratoryMsg.newBuilder().addLabPrice(labPrice.build()).setBuildingId(msg.getBuildingId()).build()));
+	}
+
 	//原料推荐价格 √
 	public void queryMaterialRecommendPrice(short cmd, Message message) {
 		Gs.MaterialMsg msg = (Gs.MaterialMsg) message;
@@ -3884,7 +4031,7 @@ public class GameSession {
 
 	//推广推荐价格 √
 	public void queryPromotionRecommendPrice(short cmd, Message message) {
-		Gs.PromotionMsg msg = (Gs.PromotionMsg) message;
+		Gs.PromotionInfo msg = (Gs.PromotionInfo) message;
 		int typeId = msg.getTypeId(); // 推广类型
 		Gs.QueryBuildingInfo info = msg.getInfo();
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
@@ -3910,7 +4057,7 @@ public class GameSession {
 	}
 	// 研究所推荐定价
 	public void queryLaboratoryRecommendPrice(short cmd, Message message) {
-		Gs.LaboratoryMsg msg = (Gs.LaboratoryMsg) message;
+		Gs.LaboratoryInfos msg = (Gs.LaboratoryInfos) message;
 		int typeId = msg.getTypeId(); // 研究商品 或者 发明点数
 		Gs.QueryBuildingInfo info = msg.getInfo();
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
@@ -4322,6 +4469,7 @@ public class GameSession {
 						this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
 					}
 				}else{
+
 					this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));
 				}
 			}else{
