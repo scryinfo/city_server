@@ -93,21 +93,32 @@ public class GroundManager {
     void update(long diffNano) {
         final long now = System.currentTimeMillis();
         List<UUID> del = new ArrayList<>();
+        Map<GridIndex, Set<Coordinate>> needDeconstruct = new HashMap<>();
         rentGround.forEach((k,v)->{
             if(v.isEmpty())
                 return;
             GroundInfo head = v.iterator().next();
             if(now - head.rentBeginTs >= TimeUnit.DAYS.toMillis(head.rentDays)) {
-                v.forEach(i->i.endRent());
+                v.forEach(i->{
+                    i.endRent();
+                    needDeconstruct.computeIfAbsent(i.coordinate().toGridIndex(), kk->new HashSet<>()).add(i.coordinate());
+                });
                 del.add(k);
                 List updates = new ArrayList<>();
                 updates.addAll(v);
                 GameDb.saveOrUpdate(updates);
+                this.broadcast(new ArrayList<>(v));
             }
         });
         for(UUID tid : del) {
             rentGround.remove(tid).forEach(gi->this.summaryInfo.get(gi.coordinate().toGridIndex()).rentingCount--);
         }
+        needDeconstruct.forEach((k,v)->{
+            City.instance().forEachBuilding(k, building -> {
+                if(v.contains(building.coordinate()))
+                    City.instance().delBuilding(building);
+            });
+        });
     }
     // role id --> all grounds belong to this role
     @Transient

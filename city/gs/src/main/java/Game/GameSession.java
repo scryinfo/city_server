@@ -999,9 +999,9 @@ public class GameSession {
 	}
 	public void setBuildingInfo(short cmd, Message message) {
 		Gs.SetBuildingInfo c = (Gs.SetBuildingInfo) message;
-		if(c.hasName() && (c.getName().length() == 0 || c.getName().length() >= 30))
+		if(c.hasName() && (c.getName().length() == 0 || c.getName().length() >= 30*3))
 			return;
-		if(c.hasDes() && (c.getDes().length() == 0 || c.getDes().length() >= 30))
+		if(c.hasDes() && (c.getDes().length() == 0 || c.getDes().length() >= 30*3))
 			return;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
@@ -2106,8 +2106,14 @@ public class GameSession {
 			return;
 		ThirdPartyDataSource.instance().postFlightSearchRequest(c.getDate(), c.getId(), (Flight flight)->{
 			City.instance().execute(()->{
-				if(flight == null || flight.canBet() || flight.departured()) {
+				if(flight == null) {
 					this.write(Package.fail(cmd));
+					return;
+				}
+
+				Common.Fail.Reason reason = flight.canBet();
+				if(reason != null) {
+					this.write(Package.fail(cmd, reason));
 				}
 				else {
 					if(FlightManager.instance().betFlight(player.id(), flight, c.getDelay(), c.getScore())) {
