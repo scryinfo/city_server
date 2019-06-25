@@ -26,6 +26,7 @@ public class BrandManager {
         return instance;
     }
     public static final int ID = 0;
+    public static final int BASE_BRAND=100;//建筑基础知名度值
     private static final Logger logger = Logger.getLogger(BrandManager.class);
     protected BrandManager() {}
     public static void init(){
@@ -381,13 +382,12 @@ public class BrandManager {
     	if(bl!=null){//优先查询加盟玩家技术
     		playerId=bl.getPlayerId();
     	}
-    	int buildingBrand = 1;//基础默认值为1
-        buildingBrand+=BrandManager.instance().getBrand(playerId, b.type()*100).getV();//建筑类型需要乘以100，才能查找到品牌
+        int buildingBrand=BASE_BRAND+BrandManager.instance().getBrand(playerId, b.type()*100).getV();//建筑类型需要乘以100，才能查找到品牌
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
 
-		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand*(1+EvaManager.getInstance().computePercent(brandEva))));
-		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(buildingBrand));
+		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand));
+		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(BASE_BRAND));
 		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
         //住宅和零售店初始品质 = qty * workerNum
 		qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double((b.quality()*b.getWorkerNum())*(1+EvaManager.getInstance().computePercent(qualityEva))));

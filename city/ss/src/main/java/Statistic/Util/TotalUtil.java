@@ -31,7 +31,6 @@ public class TotalUtil {
     //统计前面29天的数据
     public  Map<Long,Long> monthTotal(Map<Long, Long> sourceMap){
         Map<Long, Long> total = new TreeMap<>();
-        Map<Long, Long> today = new TreeMap<>();
         //1.处理29天以前的数据，以天数统计求和
         sourceMap.forEach((time,money)->{
             //处理29天以前的数据

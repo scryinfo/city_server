@@ -167,12 +167,17 @@ public class PublicFacility extends Building{
     public long getLocalPromoAbility(int type){
         int atype=0;
         //确定a类型
-        if(MetaBuilding.isBuildingByBaseType(type/100)){ //如果是建筑,基础类型等于type/100
-            type=type/100;
-            atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString()); //确定Eva的a类型,拼接a类型，建筑类型+type
-        }else{//商品  基础类型%100
-            type=type%100;
-            atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString());//确定Eva的a类型,拼接a类型，建筑类型+type
+        if(type/100==type()) {//如果传递的是eva中的类型，直接查询
+            atype = type;
+        }
+        else{
+            if (MetaBuilding.isBuildingByBaseType(type / 100)) { //如果是建筑,基础类型等于type/100
+                type = type / 100;
+                atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString()); //确定Eva的a类型,拼接a类型，建筑类型+type
+            } else {//商品  基础类型%100
+                type = type % 100;
+                atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString());//确定Eva的a类型,拼接a类型，建筑类型+type
+            }
         }
         double evaAdd = EvaManager.getInstance().computePercent(EvaManager.getInstance().getEva(this.ownerId(), atype, Gs.Eva.Btype.PromotionAbility_VALUE));
         return (long) (this.meta.output1P1Hour * this.getWorkerNum() * (1 + evaAdd));

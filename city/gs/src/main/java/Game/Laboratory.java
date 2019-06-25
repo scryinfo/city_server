@@ -1,10 +1,8 @@
 package Game;
 
 import Game.Eva.Eva;
-import Game.Eva.EvaKey;
 import Game.Eva.EvaManager;
 import Game.Meta.GoodFormula;
-import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaLaboratory;
 import Game.Timers.PeriodicTimer;
@@ -59,7 +57,6 @@ public class Laboratory extends Building {
     @Override
     public Gs.Laboratory detailProto() {
         calcuProb();
-        updateEvaAdd();//更新Eva加成信息
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
@@ -100,10 +97,10 @@ public class Laboratory extends Building {
             if (line.update(diffNano)) {
                 if (line.goodCategory > 0) {
                     //完成商品发明
-                    MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times}, new UUID[]{this.id()}, null);
+                    MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times,line.goodCategory}, new UUID[]{this.id()}, null);
                 } else {
                     //完成点数研究
-                    MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times}, new UUID[]{this.id()}, null);
+                    MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times,line.goodCategory}, new UUID[]{this.id()}, null);
                 }
                 if (line.isComplete()) {
                     this.inProcess.remove(0);
@@ -126,7 +123,7 @@ public class Laboratory extends Building {
         Line lastLine = getLastLine();
         if(lastLine==null){
             lastLine = new Line();
-            lastLine.beginProcessTs=System.currentTimeMillis();;
+            lastLine.beginProcessTs=System.currentTimeMillis();
             lastLine.times=0;
         }
         //设置开始时间
@@ -201,7 +198,6 @@ public class Laboratory extends Building {
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
         //成功率还需要加上eva的加成信息
-        updateEvaAdd();//更新Eva加成信息
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         RollResult res = null;
         Line l = this.findInProcess(lineId);
@@ -339,7 +335,7 @@ public class Laboratory extends Building {
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
             //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(10)) { //从配置表读取的过渡时间
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -394,7 +390,7 @@ public class Laboratory extends Building {
     private long totalGoodIncome;
     private int totalGoodTimes;
 
-    //Eva加成信息(map的key为btype)，由getEvaAdd来更新
+    //Eva加成信息(map的key为btype)，由updateEvaAdd来更新
     @Transient
     Map<Integer, Double> evaMap = new HashMap<>();
 
@@ -406,6 +402,7 @@ public class Laboratory extends Building {
     }
     //总的成功率数据（包含eva加成）
     public Map<Integer,Double> getTotalSuccessProb(){
+        updateEvaAdd();//更新eva信息
         Map<Integer, Double> map = new HashMap<>();
         //eva成功率
         double evaProb = this.evaProb * (1 + evaMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE));

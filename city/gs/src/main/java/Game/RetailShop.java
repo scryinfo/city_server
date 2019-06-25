@@ -17,14 +17,11 @@ import javax.persistence.Transient;
 
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
-import Game.Meta.MetaBuilding;
+import Game.Meta.*;
 import com.google.protobuf.Message;
 
 import Game.Contract.BuildingContract;
 import Game.Contract.IBuildingContract;
-import Game.Meta.MetaGood;
-import Game.Meta.MetaItem;
-import Game.Meta.MetaRetailShop;
 import gs.Gs;
 
 @Entity
@@ -240,8 +237,14 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         if(content == null)
             return false;
         if(!autoRepOn) {//非自动补货
-            int updateNum = content.n - item.n;//要增加或减少的就是以前货架数量-现在货架数量
-            //首先判断是否存的下
+            int updateNum = content.n - item.n;//增加或减少：当前货架数量-现在货架数量
+            if(content.n==0&&item.n==0){//把已关闭自动补货切货架数量为0的商品下架
+                content.autoReplenish=autoRepOn;
+                IShelf shelf=this;
+                shelf.delshelf(item.key, content.n, true);
+                return true;
+            }
+            //判断存储空间
             if (this.store.canSave(item.key, updateNum)) {
                 boolean lock = false;
                 if (updateNum < 0) {
@@ -290,5 +293,9 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
         double qty = (meta.qty * this.getWorkerNum()) * (1 + EvaManager.getInstance().computePercent(eva));
         return qty;
+    }
+    //获取总知名度
+    public double getTotalBrand(){
+        return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();
     }
 }

@@ -595,7 +595,8 @@ public abstract class Building implements Ticker{
                 .setSetSalaryTs(salaryRatioTs)
                 .setHappy(happy)
                 .setConstructCompleteTs(constructCompleteTs)
-                .setTodayVisitor(this.getTodayVisitor());
+                .setTodayVisitor(this.getTodayVisitor())
+                .setOpeningTs(openingTs);
         if(this.name != null && this.name.length() > 0)
             builder.setName(this.name);
         if(this.des != null && this.des.length() > 0)

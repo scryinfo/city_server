@@ -9,9 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.List;
 
 @Entity(name = "ProduceDepartment")
 public class ProduceDepartment extends FactoryBase {
@@ -66,7 +66,15 @@ public class ProduceDepartment extends FactoryBase {
         Gs.ProduceDepartment.Builder builder = Gs.ProduceDepartment.newBuilder().setInfo(super.toProto());
         builder.setStore(this.store.toProto());
         builder.setShelf(this.shelf.toProto());
-        this.lines.forEach(line -> builder.addLine(line.toProto()));
+        this.lines.forEach(line -> {
+            ItemKey itemKey = new ItemKey(line.item,ownerId(), line.itemLevel,ownerId());
+            Gs.ItemKey key = itemKey.toProto();
+            Gs.Line.Builder l = line.toProto().toBuilder()
+                    .setBrandScore(key.getBrandScore())
+                    .setQtyScore(key.getQualityScore())
+                    .setBrandName(key.getBrandName());
+            builder.addLine(l.build());
+        });
         return builder.build();
     }
     @Override
