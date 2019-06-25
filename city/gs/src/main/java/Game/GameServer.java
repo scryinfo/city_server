@@ -139,7 +139,7 @@ public class GameServer {
         SocietyManager.init();
         BuildingUtil.instance().updateMaxOrMinTotalQty();//初始化全城最大最小建筑品质
         dddPurchaseMgr.init();
-        chainRpcMgr.instance();
+//        chainRpcMgr.instance();
 
         // DO NOT put init below this!!! city might can't see the init
         City.instance().run();

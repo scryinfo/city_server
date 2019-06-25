@@ -1,10 +1,8 @@
 package Game;
 
 import Game.Eva.Eva;
-import Game.Eva.EvaKey;
 import Game.Eva.EvaManager;
 import Game.Meta.GoodFormula;
-import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaLaboratory;
 import Game.Timers.PeriodicTimer;
@@ -125,7 +123,7 @@ public class Laboratory extends Building {
         Line lastLine = getLastLine();
         if(lastLine==null){
             lastLine = new Line();
-            lastLine.beginProcessTs=System.currentTimeMillis();;
+            lastLine.beginProcessTs=System.currentTimeMillis();
             lastLine.times=0;
         }
         //设置开始时间

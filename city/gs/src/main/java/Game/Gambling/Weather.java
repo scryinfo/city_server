@@ -9,7 +9,7 @@ public class Weather
     private String icon = "";
     private double temp;
 
-    public Weather(String icon, double tempw)
+    public Weather(String icon, double temp)
     {
         this.icon = icon;
         this.temp = temp;
