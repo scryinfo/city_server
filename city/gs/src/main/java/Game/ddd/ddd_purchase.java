@@ -14,7 +14,7 @@ import java.util.UUID;
 
 enum StatusPurchase
 {
-    PROCESSING, PROCESSED, NONE;
+    PROCESSING, PROCESSED, FAILED, NONE;
 }
 
 @Entity
