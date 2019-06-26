@@ -1437,10 +1437,13 @@ public class GameDb {
 
 	//游戏币/ddd的交换比率， 这里应该是访问数据库ddd与游戏币的交换比率
 	static public double getExchangeRate(){
-		return 1.00; //暂定1
+		return 1000000.00; //暂定1
 	}
 	static public double calGameCurrencyFromDDD(double ddd){
 		return ddd*getExchangeRate();
 	}
+    static public double calDDDFromEEE(double eee){
+        return eee/getExchangeRate();
+    }
 }
 

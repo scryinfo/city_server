@@ -4446,7 +4446,7 @@ public class GameSession {
 					int t = 0;
 				}
 
-				double dddAmount = Double.parseDouble(req.getAmount());
+				double dddAmount = GameDb.calDDDFromEEE(Double.parseDouble(req.getAmount()));
 				//添加交易
 				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
 				if(dddPurchaseMgr.instance().addPurchase(pur)){
