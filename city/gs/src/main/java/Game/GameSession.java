@@ -1986,6 +1986,7 @@ public class GameSession {
 		GameDb.saveOrUpdate(lab);
 		this.write(Package.create(cmd, c));
 	}
+
 	public void labLineAdd(short cmd, Message message) {
 		Gs.LabAddLine c = (Gs.LabAddLine) message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());

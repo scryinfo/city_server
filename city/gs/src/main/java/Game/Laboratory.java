@@ -33,8 +33,10 @@ public class Laboratory extends Building {
     }
 
     private void calcuProb() {
-        this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
-        this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());
+        /*this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
+        this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());*/
+        this.evaProb = (int) (this.meta.evaProb*100/ 100.f * this.getAllStaffSize());
+        this.goodProb = (int) (this.meta.goodProb*100/ 100.f * this.getAllStaffSize());
     }
 
     @Override
@@ -199,6 +201,9 @@ public class Laboratory extends Building {
         calcuProb();
         //成功率还需要加上eva的加成信息
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
+        Double evaPro = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE);//eva成功率
+        Double goodPro = successMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE);//商品发明成功率
+
         RollResult res = null;
         Line l = this.findInProcess(lineId);
         if(l == null)
