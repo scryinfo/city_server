@@ -493,6 +493,19 @@ public class GameSession {
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
 		}
+		//清理其他数据
+		if(b instanceof  FactoryBase){//有仓库和货架，以及生产线，清除
+			FactoryBase f = (FactoryBase) b;
+			f.cleanData();
+		}else if(b instanceof RetailShop){//若是零售店，清除货架和仓库
+			RetailShop r = (RetailShop) b;
+			r.cleanData();
+		}
+		for (Building building : City.instance().typeBuilding.get(b.type())) {
+			if(building.id().equals(id)){
+				System.out.println(building);
+			}
+		}
 		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd,c));
 	}
@@ -1986,6 +1999,7 @@ public class GameSession {
 		GameDb.saveOrUpdate(lab);
 		this.write(Package.create(cmd, c));
 	}
+
 	public void labLineAdd(short cmd, Message message) {
 		Gs.LabAddLine c = (Gs.LabAddLine) message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());

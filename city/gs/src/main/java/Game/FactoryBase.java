@@ -11,10 +11,7 @@ import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 public abstract class FactoryBase extends Building implements IStorage, IShelf {
@@ -103,11 +100,14 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     protected  LineBase __delLine(UUID lineId){
         for (int i = lines.size() - 1; i >= 0 ; i--) {
             if (lines.get(i).id.equals(lineId)){
-                return lines.remove(i);
+                LineBase remove = lines.remove(i);
+                if(lines.size() > 0){
+                    if(i==0) {//如果删除的就是当前生产线，第一条，则设置移除后的第一条为当前生产时间
+                        lines.get(0).ts = System.currentTimeMillis();
+                    }
+                }
+                return remove;
             }
-        }
-        if(lines.size() > 0){
-            lines.get(0).ts = System.currentTimeMillis();
         }
         return null;
     }
@@ -399,4 +399,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         return shelf;
     }
 
+    public void cleanData(){
+        //删除生产线
+        GameDb.delete(lines);
+        this.lines.clear();
+        this.store.clearData();
+        this.shelf.clearData();
+    }
 }
