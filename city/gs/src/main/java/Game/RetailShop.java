@@ -298,4 +298,9 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     public double getTotalBrand(){
         return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();
     }
+
+    public void cleanData(){
+        this.store.clearData();
+        this.shelf.clearData();
+    }
 }
