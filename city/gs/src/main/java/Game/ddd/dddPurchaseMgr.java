@@ -55,10 +55,6 @@ public class dddPurchaseMgr {
     }
     //添加订单
     public boolean addPurchase(ddd_purchase purchase){
-        //不允许多次设置相同id的交易
-        if(allddd_purchase.containsKey(purchase.purchaseId))
-            return  false;
-
         //有足够的eee的情况下
         purchase.status = StatusPurchase.PROCESSING;
         Player player = GameDb.getPlayer(purchase.player_id);
@@ -72,12 +68,15 @@ public class dddPurchaseMgr {
             player.lockMoney(purchase.purchaseId,eee);
         }
 
-        allddd_purchase.put(purchase.purchaseId,purchase);
-        //持久化
-        if(purchase.ddd < 0){
-            GameDb.saveOrUpdate(player);
+        //不允许多次设置相同id的交易
+        if(!allddd_purchase.containsKey(purchase.purchaseId)){
+            allddd_purchase.put(purchase.purchaseId,purchase);
+            //持久化
+            if(purchase.ddd < 0){
+                GameDb.saveOrUpdate(player);
+            }
+            GameDb.saveOrUpdate(this);
         }
-        GameDb.saveOrUpdate(this);
         return  true;
     }
 
