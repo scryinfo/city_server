@@ -398,4 +398,5 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public Shelf getShelf() {
         return shelf;
     }
+
 }

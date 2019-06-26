@@ -33,8 +33,10 @@ public class Laboratory extends Building {
     }
 
     private void calcuProb() {
-        this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
-        this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());
+        /*this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
+        this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());*/
+        this.evaProb = (int) (this.meta.evaProb*100/ 100.f * this.getAllStaffSize());
+        this.goodProb = (int) (this.meta.goodProb*100/ 100.f * this.getAllStaffSize());
     }
 
     @Override
