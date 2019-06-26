@@ -402,6 +402,7 @@ public class Laboratory extends Building {
     }
     //总的成功率数据（包含eva加成）
     public Map<Integer,Double> getTotalSuccessProb(){
+        calcuProb();
         updateEvaAdd();//更新eva信息
         Map<Integer, Double> map = new HashMap<>();
         //eva成功率
