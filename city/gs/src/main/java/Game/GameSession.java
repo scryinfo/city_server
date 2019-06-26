@@ -564,8 +564,15 @@ public class GameSession {
 		Gs.Str c = (Gs.Str) message;
 		if(c.getStr().length() > Player.MAX_FACE_ID_LEN)
 			return;
-		this.player.setFaceId(c.getStr());
-		GameDb.saveOrUpdate(player);
+		Gs.Bool.Builder result = Gs.Bool.newBuilder();
+		if(this.player.decScoreValue(Player.COST_FACE_SCORE_VALUE)){
+			this.player.setFaceId(c.getStr());
+			GameDb.saveOrUpdate(player);
+			result.setB(true);
+		}else{
+			result.setB(false);
+		}
+		this.write(Package.create(cmd,result.build()));
 	}
 	public void queryGroundSummary(short cmd) {
 		this.write(Package.create(cmd, GroundManager.instance().getGroundSummaryProto()));
@@ -786,6 +793,12 @@ public class GameSession {
 		IShelf s = (IShelf)building;
 		if(s.delshelf(item.key, item.n, true)) {
 			GameDb.saveOrUpdate(s);
+			//如果货架上还有该商品则推送，否则不推送
+			Shelf.Content content = s.getContent(item.key);
+			if(content!=null){
+				/*sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish*/
+				building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish);
+			}
 			this.write(Package.create(cmd, c));
 		}
 		else{
@@ -810,7 +823,8 @@ public class GameSession {
 			this.write(Package.create(cmd, c));
 		}
 		else
-			this.write(Package.fail(cmd));
+			this.write(Package.fail(cmd,Common.Fail.Reason.shelfSetFail));
+			//this.write(Package.fail(cmd));
 	}
 
 	public void buyInShelf(short cmd, Message message) throws Exception {
@@ -830,7 +844,8 @@ public class GameSession {
 		IShelf sellShelf = (IShelf)sellBuilding;
 		Shelf.Content i = sellShelf.getContent(itemBuy.key);
 		if(i == null || i.price != c.getPrice() || i.n < itemBuy.n) {
-			this.write(Package.fail(cmd));
+			//返回数量不足错误码
+			this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
 			return;
 		}
 		long cost = itemBuy.n*c.getPrice();
@@ -841,11 +856,15 @@ public class GameSession {
 		long minerCost = (long) Math.floor(cost * minersRatio);
 		long income =cost - minerCost;//收入（扣除矿工费后）
 		long pay=cost+minerCost;
-		if(player.money() < cost + freight+minerCost)
+		if(player.money() < cost + freight+minerCost) {
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
+		}
 		// begin do modify
-		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n))
+		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n)) {
+			this.write(Package.fail(cmd, Common.Fail.Reason.spaceNotEnough));
 			return;
+		}
 		Player seller = GameDb.getPlayer(sellBuilding.ownerId());
 		seller.addMoney(income);
 		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
@@ -886,12 +905,16 @@ public class GameSession {
 		LogDb.minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-		((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n);
+		//((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n); 在删除商品的时候已经消费过了，这里会造成二次消费
 		sellBuilding.updateTodayIncome(income);
 
 		buyStore.consumeReserve(itemBuy.key, itemBuy.n, c.getPrice());
-
 		GameDb.saveOrUpdate(Arrays.asList(player, seller, buyStore, sellBuilding));
+		//如果货架上已经没有该商品了，不推送，有则推送
+		i = sellShelf.getContent(itemBuy.key);
+		if(i!=null){
+			sellBuilding.sendToWatchers(sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish);
+		}
 		this.write(Package.create(cmd, c));
 	}
 	public void exchangeItemList(short cmd) {
@@ -1026,7 +1049,8 @@ public class GameSession {
 		this.write(Package.create(cmd, MoneyPool.instance().toProto()));
 	}
 	private void registBuildingDetail(Building building) {
-		if(buildingDetail.size() < MAX_DETAIL_BUILDING && building.canUseBy(player.id())) {
+		/*if(buildingDetail.size() < MAX_DETAIL_BUILDING && building.canUseBy(player.id())) {*/
+		if(buildingDetail.size() < MAX_DETAIL_BUILDING) {
 			building.watchDetailInfoAdd(this);
 			buildingDetail.add(building.id());
 		}
@@ -1056,6 +1080,7 @@ public class GameSession {
 			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
+		System.err.println(b.detailWatchers.size());
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
@@ -1812,21 +1837,27 @@ public class GameSession {
 		UUID dstId = Util.toUuid(c.getDst().toByteArray());
 		IStorage src = IStorage.get(srcId, player);
 		IStorage dst = IStorage.get(dstId, player);
-		if(src == null || dst == null)
+		if(src == null || dst == null) {
+			System.err.println("运输失败：运输地址不对");
 			return;
+		}
 		int charge = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(src, dst));
-		if(player.money() < charge)
+		if(player.money() < charge) {
+			System.err.println("运输失败：钱不够");
 			return;
+		}
 		Item item = new Item(c.getItem());
 		//如果运出的一方没有足够的存量进行锁定，那么操作失败
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
+			System.err.println("运输失败：数量不够");
 			return;
 		}
 		//如果运入的一方没有足够的预留空间，那么操作失败
 		if(!dst.reserve(item.key.meta, item.n)) {
 			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
+			System.err.println("运输失败：空间不足");
 			return;
 		}
 
