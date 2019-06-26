@@ -1837,21 +1837,27 @@ public class GameSession {
 		UUID dstId = Util.toUuid(c.getDst().toByteArray());
 		IStorage src = IStorage.get(srcId, player);
 		IStorage dst = IStorage.get(dstId, player);
-		if(src == null || dst == null)
+		if(src == null || dst == null) {
+			System.err.println("运输失败：运输地址不对");
 			return;
+		}
 		int charge = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(src, dst));
-		if(player.money() < charge)
+		if(player.money() < charge) {
+			System.err.println("运输失败：钱不够");
 			return;
+		}
 		Item item = new Item(c.getItem());
 		//如果运出的一方没有足够的存量进行锁定，那么操作失败
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
+			System.err.println("运输失败：数量不够");
 			return;
 		}
 		//如果运入的一方没有足够的预留空间，那么操作失败
 		if(!dst.reserve(item.key.meta, item.n)) {
 			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
+			System.err.println("运输失败：空间不足");
 			return;
 		}
 
