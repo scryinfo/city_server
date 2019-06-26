@@ -493,6 +493,16 @@ public class GameSession {
 			Apartment apartment=(Apartment)b;
 			apartment.deleteRenter();
 		}
+		//清理其他数据，如果是有仓库货架的，清理货架和仓库
+		if(b instanceof  FactoryBase){//有仓库和货架，以及生产线，清除
+			FactoryBase f = (FactoryBase) b;
+			f.clearData();
+		}
+		for (Building building : City.instance().typeBuilding.get(b.type())) {
+			if(building.id().equals(id)){
+				System.out.println(building);
+			}
+		}
 		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd,c));
 	}

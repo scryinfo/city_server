@@ -398,4 +398,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     public Shelf getShelf() {
         return shelf;
     }
+
+    public void clearData(){
+        this.lines.clear();
+        GameDb.delete(lines);
+        this.store.clearData();
+        this.shelf.clearData();
+    }
 }
