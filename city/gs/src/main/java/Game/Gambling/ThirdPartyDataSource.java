@@ -137,7 +137,7 @@ public class ThirdPartyDataSource {
         return res;
     }
 
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(15));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(5));
     public void update(long updatePeriod) {
         long start = System.currentTimeMillis();
         while(!queue.isEmpty()) {
