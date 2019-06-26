@@ -106,6 +106,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 return lines.remove(i);
             }
         }
+        if(lines.size() > 0){
+            lines.get(0).ts = System.currentTimeMillis();
+        }
         return null;
     }
 
@@ -267,7 +270,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         if(this.shelf.add(mi, price,autoReplenish)) {
             this.store.lock(mi.key, mi.n);
             //推送货架信息
-//            this.sendToWatchers(id(), mi.key.meta.id, mi.n, price);
+            //this.sendToWatchers(id(), mi.key.meta.id, mi.n, price);
             return true;
         }
         else
@@ -283,7 +286,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 this.store.consumeLock(id, n);
             }
             //推送货架信息
-//            this.sendToWatchers(id(), id.meta.id, n, 0);
+            //this.sendToWatchers(id(), id.meta.id, n, 0);
             return true;
         }
         return false;
@@ -315,7 +318,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             return false;
         if(!autoRepOn) {//非自动补货
             int updateNum = content.n - item.n;//增加或减少：当前货架数量-现在货架数量
-            if(content.n==0&&item.n==0){//把已关闭自动补货切货架数量为0的商品下架
+            if(content.n==0&&item.n==0){//若非自动补货，切货架数量为0，直接删除
                 content.autoReplenish=autoRepOn;
                 IShelf shelf=this;
                 shelf.delshelf(item.key, content.n, true);
@@ -333,13 +336,16 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     content.price = price;
                     content.n = item.n;
                     content.autoReplenish = autoRepOn;
+                    //消息推送货物发生改变
+                    this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn);
                     return true;
                 } else {
                     return false;
                 }
-            } else
+            } else{
                 return false;
-        }else {
+            }
+        }else {//自动补货
             //1.判断容量是否已满
             if(this.shelf.full())
                 return false;
@@ -351,6 +357,9 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             shelf.delshelf(item.key, content.n, true);
             Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
             shelf.addshelf(itemInStore,price,autoRepOn);
+            int count = shelf.getSaleCount(item.key.meta.id);
+            //消息推送货物发生改变
+            this.sendToWatchers(id(),item.key.meta.id,count,price,autoRepOn);//推送消息
             return true;
         }
     }

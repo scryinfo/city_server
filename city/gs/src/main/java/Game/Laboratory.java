@@ -1,10 +1,8 @@
 package Game;
 
 import Game.Eva.Eva;
-import Game.Eva.EvaKey;
 import Game.Eva.EvaManager;
 import Game.Meta.GoodFormula;
-import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaLaboratory;
 import Game.Timers.PeriodicTimer;
@@ -125,7 +123,7 @@ public class Laboratory extends Building {
         Line lastLine = getLastLine();
         if(lastLine==null){
             lastLine = new Line();
-            lastLine.beginProcessTs=System.currentTimeMillis();;
+            lastLine.beginProcessTs=System.currentTimeMillis();
             lastLine.times=0;
         }
         //设置开始时间
@@ -337,7 +335,7 @@ public class Laboratory extends Building {
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
             //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //从配置表读取的过渡时间
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(10)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -404,6 +402,7 @@ public class Laboratory extends Building {
     }
     //总的成功率数据（包含eva加成）
     public Map<Integer,Double> getTotalSuccessProb(){
+        calcuProb();
         updateEvaAdd();//更新eva信息
         Map<Integer, Double> map = new HashMap<>();
         //eva成功率
