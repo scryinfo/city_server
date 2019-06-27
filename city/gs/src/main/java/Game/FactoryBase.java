@@ -175,7 +175,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                                 //目前使用 公司名字+产品类型id 的组合作为服务器的品牌名字，客户端需要解析出 _ 之后的id，找到对应的多语言字符串来表现
                                 BrandManager.instance().addBrand(ownerId(), l.item.id);
                             }
-                            System.err.println("剩余容量"+this.store.availableSize());
                             /*//再次判断是仓库否已满
                             if(this.store.availableSize()==0){
                                 //停止生产
