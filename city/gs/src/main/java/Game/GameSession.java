@@ -809,14 +809,14 @@ public class GameSession {
 			//如果货架上还有该商品则推送，否则不推送
 			Shelf.Content content = s.getContent(item.key);
 			if(content!=null){
-				/*sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish*/
 				building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish);
 			}
 			this.write(Package.create(cmd, c));
 		}
 		else{
 			//this.write(Package.fail(cmd));
-			this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
+			this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
+			//this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
 		}
 	}
 	public void shelfSet(short cmd, Message message) throws Exception {
@@ -1093,7 +1093,6 @@ public class GameSession {
 			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-		System.err.println(b.detailWatchers.size());
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 

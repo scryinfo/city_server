@@ -270,7 +270,7 @@ public class Shopping implements IAction {
             return new ItemKey(meta, producerId, qty,producerId);
         }
     }
-
+    //货架更新推送
     public void sendShelfNotice(Building sellShop,WeightInfo chosen){
         Shelf.Content content = ((IShelf) sellShop).getContent(chosen.getItemKey());
         if(content!=null){
