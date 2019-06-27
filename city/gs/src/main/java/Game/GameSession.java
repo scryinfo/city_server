@@ -1856,6 +1856,7 @@ public class GameSession {
 		int charge = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(src, dst));
 		if(player.money() < charge) {
 			System.err.println("运输失败：钱不够");
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
 		Item item = new Item(c.getItem());
@@ -1863,6 +1864,7 @@ public class GameSession {
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
 			System.err.println("运输失败：数量不够");
+			this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
 			return;
 		}
 		//如果运入的一方没有足够的预留空间，那么操作失败
@@ -1870,6 +1872,7 @@ public class GameSession {
 			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
 			System.err.println("运输失败：空间不足");
+			this.write(Package.fail(cmd, Common.Fail.Reason.spaceNotEnough));
 			return;
 		}
 
@@ -3135,7 +3138,24 @@ public class GameSession {
 
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
-			list.addEva(eva.toProto());
+			Gs.Eva evaData = eva.toProto();
+			//重新设置品牌值
+			if(evaData.getBt().getNumber()==(Gs.Eva.Btype.Brand_VALUE)){
+				//判断是建筑还是商品
+				int brandType=eva.getAt();
+				if(MetaGood.isItem(eva.getAt())) {
+					brandType = eva.getAt();
+				}else{//否则是建筑
+					brandType = eva.getAt() % 100 * 100;
+				}
+				int addBrand = BrandManager.instance().getBrand(pid,brandType).getV();
+				long totalBrand = eva.getB()+addBrand;
+				Gs.Eva.Builder builder = evaData.toBuilder().setB(totalBrand);
+				list.addEva(builder.build());
+			}else{
+				list.addEva(evaData);
+			}
+
 		});
 		this.write(Package.create(cmd, list.build()));
 	}

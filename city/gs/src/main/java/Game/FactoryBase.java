@@ -175,7 +175,22 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                                 //目前使用 公司名字+产品类型id 的组合作为服务器的品牌名字，客户端需要解析出 _ 之后的id，找到对应的多语言字符串来表现
                                 BrandManager.instance().addBrand(ownerId(), l.item.id);
                             }
+                            System.err.println("剩余容量"+this.store.availableSize());
+                            //再次判断是仓库否已满
+                            if(this.store.availableSize()==0){
+                                //停止生产
+                                l.suspend = true;
+                                ArrayList<UUID> owner = new ArrayList<>();
+                                owner.add(ownerId());
+                                Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
+                                GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE,builder.build()));
+                            }
                         } else {
+                            //推广仓库已满通知
+                            ArrayList<UUID> owner = new ArrayList<>();
+                            owner.add(ownerId());
+                            Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
+                            GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE, builder.build()));
                             //(加工厂/原料厂)仓库已满通知
                             l.count -= add;
                             MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
