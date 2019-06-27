@@ -634,10 +634,6 @@ public abstract class Building implements Ticker{
         addFlowCount();
 //        flowCount += 1;
         enterImpl(npc);
-      /*  //住宅入住通知
-        int[] num = {flowCount};
-        UUID[] apartmentOwerIdAndBid = {this.ownerId,id()};
-        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);*/
     }
 
     public void addFlowCount()

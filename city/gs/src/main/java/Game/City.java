@@ -282,6 +282,7 @@ public class City {
         updateInsurance(diffNano);
         //计算下周行业工资
         updateIndustryMoney(diffNano);
+        BuildingUtil.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

@@ -257,4 +257,21 @@ public class Storage implements IStorage {
         }
         return true;
     }
+
+    public void clearData(){//清除当前仓库的所有数据
+        this.inHand.clear();
+        this.inHandPrice.clear();
+        this.locked.clear();
+        this.reserved.clear();
+        this.otherUseSize=0;
+    }
+
+    public List<Item> getItem(int itemId) {
+        List<Item> res = new ArrayList<>();
+        this.inHand.forEach((k,v)->{
+            if(k.meta.id == itemId)
+                res.add(new Item(k, v));
+        });
+        return res;
+    }
 }

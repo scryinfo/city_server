@@ -97,6 +97,7 @@ public class Flight {
                 .setFlightArrtimeDate(FlightArrtimeDate)
                 .setFlightDepAirport(FlightDepAirport)
                 .setFlightState(FlightState)
+                .setOrgTimeZoneHours(this.org_offset_hours)
                 .build();
     }
 }

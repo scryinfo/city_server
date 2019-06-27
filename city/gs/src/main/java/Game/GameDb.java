@@ -1336,7 +1336,7 @@ public class GameDb {
 		try {
 			session = sessionFactory.openStatelessSession();
 			transaction = session.beginTransaction();
-			amount = (Long) session.createQuery("SELECT COUNT(*) FROM Player").uniqueResult();
+			amount = (Long) session.createQuery("SELECT COUNT(ID) FROM Player").uniqueResult();
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();

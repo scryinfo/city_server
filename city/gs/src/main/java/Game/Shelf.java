@@ -102,6 +102,18 @@ public class Shelf {
         int price;
         boolean autoReplenish;
         protected Content() {}
+
+        public int getN() {
+            return n;
+        }
+
+        public int getPrice() {
+            return price;
+        }
+
+        public boolean isAutoReplenish() {
+            return autoReplenish;
+        }
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -160,5 +172,9 @@ public class Shelf {
                 res += e.getValue().n;
         }
         return res;
+    }
+
+    public void clearData(){//清除货架数据
+        this.slots.clear();
     }
 }
