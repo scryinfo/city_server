@@ -2020,8 +2020,11 @@ public class GameSession {
 		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if (!c.hasTimes())
 				return;
-			if (c.getTimes() > lab.getSellTimes())
+			if (c.getTimes() > lab.getRemainingTime())
 				return;
+			lab.useTime(c.getTimes());
+			//如果时间租完了，应当关闭研究所的开启业务
+			lab.setExclusive(true);
 			cost = c.getTimes() * lab.getPricePreTime();
 			//TODO:矿工费用
 			double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
@@ -2069,8 +2072,8 @@ public class GameSession {
 			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-
 	}
+
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
@@ -2102,7 +2105,7 @@ public class GameSession {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory))
 			return;
 		Laboratory lab = (Laboratory)building;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());

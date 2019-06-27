@@ -63,7 +63,7 @@ public class Laboratory extends Building {
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
-        return builder.setSellTimes(this.sellTimes)
+        return builder.setSellTimes(this.getRemainingTime())
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE))
                 .setProbGood(successMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE))
@@ -261,6 +261,7 @@ public class Laboratory extends Building {
     public void setting(int maxTimes, int pricePreTime) {
         this.sellTimes = maxTimes;
         this.pricePreTime = pricePreTime;
+        this.usedTime=0;
     }
     //获取最后一条的研究信息
     public Line getLastLine(){
@@ -371,6 +372,8 @@ public class Laboratory extends Building {
     @JoinColumn(name = "labId2")
     private Map<UUID, Line> completed = new HashMap<>();
 
+    private int usedTime=0;//已使用的时间
+
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
 
@@ -416,5 +419,17 @@ public class Laboratory extends Building {
         map.put(Gs.Eva.Btype.EvaUpgrade_VALUE, evaProb);
         map.put(Gs.Eva.Btype.InventionUpgrade_VALUE,goodProb);
         return map;
+    }
+
+    public void useTime(int time){
+        this.usedTime +=time;
+    }
+
+    public void resetUseTime(){
+        this.usedTime =0;
+    }
+    public int getRemainingTime(){
+        //获取剩余时间
+        return this.sellTimes - usedTime;
     }
 }
