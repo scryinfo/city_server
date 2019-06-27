@@ -733,10 +733,6 @@ public class GameSession {
 			this.write(Package.fail(cmd));
 		}
 		else{
-			//如果是住宅或者零售店，更新最大最小品牌
-			if(building.type()==MetaBuilding.APARTMENT||building.type()==MetaBuilding.RETAIL){
-				BuildingUtil.instance().updateMaxOrMinTotalQty();
-			}
 			building.postAddToWorld();
 			this.write(Package.create(cmd, building.toProto()));
 		}
@@ -748,10 +744,6 @@ public class GameSession {
 		if(b == null || b.type() == MetaBuilding.TRIVIAL || !b.canUseBy(player.id()))
 			return;
 		City.instance().delBuilding(b);
-		//如果是住宅或者零售店，更新最大最小品牌
-		if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
-			BuildingUtil.instance().updateMaxOrMinTotalQty();
-		}
 	}
 
 	public void extendBag(short cmd) {
