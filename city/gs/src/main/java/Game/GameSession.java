@@ -3183,6 +3183,7 @@ public class GameSession {
 		Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
 		Gs.EvaResultInfo.Builder result =null;
 		Eva oldEva=null;//修改前的Eva信息
+        boolean retailOrApartmentQtyIsChange = false;//（标志）永攀确定是否更新了零售店或者住宅的品质，以便于更新全城最大最小的建筑品质值
 		for (Gs.Eva eva : evas.getEvaList()) {
 			result=Gs.EvaResultInfo.newBuilder();
 			//修改后eva信息
@@ -3199,6 +3200,10 @@ public class GameSession {
 			//基础信息(加点前、加点后)
 			Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
 			result.setEvasInfo(evaInfo);
+			//判断最大最小建筑品质是否要更新标志
+			if((eva.getAt()==MetaBuilding.APARTMENT||eva.getAt()==MetaBuilding.RETAIL)&&eva.getBt().equals(Gs.Eva.Btype.Quality)){
+                retailOrApartmentQtyIsChange = true;
+            }
 			//升级对比信息(暂时不用，省略)
 			/*if(MetaGood.isItem(eva.getAt())&&eva.getBt().equals(Gs.Eva.Btype.Quality)){//1.加工厂品质提升（计算竞争力）（*）
 				//筛选玩家所有该建筑
@@ -3246,11 +3251,14 @@ public class GameSession {
 			else {
 				EvaManager.getInstance().updateEva(newEva);
 			}*/
-			EvaManager.getInstance().updateEva(newEva);
+			EvaManager.getInstance().updateEva(newEva);//同步保存eva
 			results.addResultInfo(result);
 		}
-		//更新评分数据
-		BrandManager.instance().getAllBuildingBrandOrQuality();
+		if(retailOrApartmentQtyIsChange) {
+            //更新建筑最大最小品质
+            BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
+        }
+		//BrandManager.instance().getAllBuildingBrandOrQuality();
 		this.write(Package.create(cmd, results.build()));
 	}
 
@@ -3493,7 +3501,7 @@ public class GameSession {
 		Shelf.Content i = sellShelf.getContent(itemBuy.key);
 		//4.如果和上架的价格不对应或者上架数量小于要购买的数量，失败
 		if(i == null || i.price != inShelf.getGood().getPrice() || i.n < itemBuy.n) {
-			this.write(Package.fail(cmd));
+            this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
 			return;
 		}
 		//5.计算价格（运费+商品所需价值）
@@ -3501,11 +3509,15 @@ public class GameSession {
 		//商品的运费
 		int freight = (int) (MetaData.getSysPara().transferChargeRatio * Math.ceil(IStorage.distance(buyStore, (IStorage) sellBuilding)))*itemBuy.n;
 		//6.如果玩家钱少于要支付的，交易失败
-		if(player.money() < cost + freight)
-			return;
+		if(player.money() < cost + freight) {
+            this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
+            return;
+        }
 		//7.仓库存放不下，失败
-		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n))
-			return;
+		if(!buyStore.reserve(itemBuy.key.meta, itemBuy.n)) {
+            this.write(Package.fail(cmd,Common.Fail.Reason.spaceNotEnough));
+            return;
+        }
 		//========================
 		//8.开始修改数据
 		//8.1获取到商品主人的信息
