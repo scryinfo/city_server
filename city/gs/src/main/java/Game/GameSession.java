@@ -814,14 +814,14 @@ public class GameSession {
 			//如果货架上还有该商品则推送，否则不推送
 			Shelf.Content content = s.getContent(item.key);
 			if(content!=null){
-				/*sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish*/
 				building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish);
 			}
 			this.write(Package.create(cmd, c));
 		}
 		else{
 			//this.write(Package.fail(cmd));
-			this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
+			this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
+			//this.write(Package.create(cmd, c.toBuilder().setCurCount(s.getContent(item.key).getCount()).build()));
 		}
 	}
 	public void shelfSet(short cmd, Message message) throws Exception {
@@ -1098,7 +1098,6 @@ public class GameSession {
 			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-		System.err.println(b.detailWatchers.size());
 		this.write(Package.create(cmd, b.detailProto()));
 	}
 
@@ -1862,6 +1861,7 @@ public class GameSession {
 		int charge = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(src, dst));
 		if(player.money() < charge) {
 			System.err.println("运输失败：钱不够");
+			this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
 			return;
 		}
 		Item item = new Item(c.getItem());
@@ -1869,6 +1869,7 @@ public class GameSession {
 		if(!src.lock(item.key, item.n)) {
 			this.write(Package.fail(cmd));
 			System.err.println("运输失败：数量不够");
+			this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
 			return;
 		}
 		//如果运入的一方没有足够的预留空间，那么操作失败
@@ -1876,6 +1877,7 @@ public class GameSession {
 			src.unLock(item.key, item.n);
 			this.write(Package.fail(cmd));
 			System.err.println("运输失败：空间不足");
+			this.write(Package.fail(cmd, Common.Fail.Reason.spaceNotEnough));
 			return;
 		}
 
@@ -2023,8 +2025,11 @@ public class GameSession {
 		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
 			if (!c.hasTimes())
 				return;
-			if (c.getTimes() > lab.getSellTimes())
+			if (c.getTimes() > lab.getRemainingTime())
 				return;
+			lab.useTime(c.getTimes());
+			//如果时间租完了，应当关闭研究所的开启业务
+			lab.setExclusive(true);
 			cost = c.getTimes() * lab.getPricePreTime();
 			//TODO:矿工费用
 			double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
@@ -2072,8 +2077,8 @@ public class GameSession {
 			}
 			this.write(Package.create(cmd, Gs.LabAddLineACK.newBuilder().setBuildingId(Util.toByteString(lab.id())).setLine(line.toProto()).build()));
 		}
-
 	}
+
 	public void labLineCancel(short cmd, Message message) {
 		Gs.LabCancelLine c = (Gs.LabCancelLine)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
@@ -2105,7 +2110,7 @@ public class GameSession {
 		Gs.LabRoll c = (Gs.LabRoll)message;
 		UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
 		Building building = City.instance().getBuilding(bid);
-		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory) || !building.canUseBy(player.id()))
+		if(building == null || building.outOfBusiness() || !(building instanceof Laboratory))
 			return;
 		Laboratory lab = (Laboratory)building;
 		UUID lineId = Util.toUuid(c.getLineId().toByteArray());
@@ -3141,7 +3146,24 @@ public class GameSession {
 
 		Gs.Evas.Builder list = Gs.Evas.newBuilder();
 		EvaManager.getInstance().getEvaList(pid).forEach(eva->{
-			list.addEva(eva.toProto());
+			Gs.Eva evaData = eva.toProto();
+			//重新设置品牌值
+			if(evaData.getBt().getNumber()==(Gs.Eva.Btype.Brand_VALUE)){
+				//判断是建筑还是商品
+				int brandType=eva.getAt();
+				if(MetaGood.isItem(eva.getAt())) {
+					brandType = eva.getAt();
+				}else{//否则是建筑
+					brandType = eva.getAt() % 100 * 100;
+				}
+				int addBrand = BrandManager.instance().getBrand(pid,brandType).getV();
+				long totalBrand = eva.getB()+addBrand;
+				Gs.Eva.Builder builder = evaData.toBuilder().setB(totalBrand);
+				list.addEva(builder.build());
+			}else{
+				list.addEva(evaData);
+			}
+
 		});
 		this.write(Package.create(cmd, list.build()));
 	}
