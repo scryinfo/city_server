@@ -102,6 +102,18 @@ public class Shelf {
         int price;
         boolean autoReplenish;
         protected Content() {}
+
+        public int getN() {
+            return n;
+        }
+
+        public int getPrice() {
+            return price;
+        }
+
+        public boolean isAutoReplenish() {
+            return autoReplenish;
+        }
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
