@@ -174,7 +174,7 @@ public class Shelf {
         return res;
     }
 
-    public void clearData(){//清楚货架数据
+    public void clearData(){//清除货架数据
         this.slots.clear();
     }
 }

@@ -176,7 +176,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                                 BrandManager.instance().addBrand(ownerId(), l.item.id);
                             }
                             System.err.println("剩余容量"+this.store.availableSize());
-                            //再次判断是仓库否已满
+                            /*//再次判断是仓库否已满
                             if(this.store.availableSize()==0){
                                 //停止生产
                                 l.suspend = true;
@@ -184,13 +184,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                                 owner.add(ownerId());
                                 Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
                                 GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE,builder.build()));
-                            }
+                            }*/
                         } else {
-                            //推广仓库已满通知
+                           /* //推广仓库已满通知
                             ArrayList<UUID> owner = new ArrayList<>();
                             owner.add(ownerId());
                             Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
-                            GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE, builder.build()));
+                            GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE, builder.build()));*/
                             //(加工厂/原料厂)仓库已满通知
                             l.count -= add;
                             MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
