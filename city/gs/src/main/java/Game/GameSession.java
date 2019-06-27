@@ -506,11 +506,7 @@ public class GameSession {
 			RetailShop r = (RetailShop) b;
 			r.cleanData();
 		}
-		for (Building building : City.instance().typeBuilding.get(b.type())) {
-			if (building.id().equals(id)) {
-				System.out.println(building);
-			}
-		}
+
 		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd, c));
 	}
