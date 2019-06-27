@@ -395,7 +395,7 @@ public class BrandManager {
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 
-    public void getAllBuildingBrandOrQuality(){
+    public void getAllBuildingBrandOrQuality(){ //暂不使用
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
     	City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>()).forEach(b->{

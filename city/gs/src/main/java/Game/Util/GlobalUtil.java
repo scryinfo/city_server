@@ -324,7 +324,7 @@ public class GlobalUtil {
         return qtyScore;
     }
 
-    //获取商品的品质评分(参数1 当前品质总值，参数2 商品id 参数3 基础品牌值)
+    //获取商品的品质评分(参数1 当前品质总值，参数2 商品id 参数3 商品的基础品质值)
     public static double getGoodQtyScore(double localQuality,int goodId,int baseQty){
         Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(goodId, Gs.Eva.Btype.Quality_VALUE);
         Eva maxEva = cityQtyMap.get("max");//全城最大Eva
