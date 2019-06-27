@@ -27,7 +27,8 @@ public class GameServerEventHandler extends SimpleChannelInboundHandler<Package>
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Package msg) throws Exception {
-		if(!GameServerEventDispatcher.getInstance().call(msg, session))
+		if(!GameServerEventDispatcher.getInstance().call(msg, session)) {
 			ctx.close();
+		}
 	}
 }

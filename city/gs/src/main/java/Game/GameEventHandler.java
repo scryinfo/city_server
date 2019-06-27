@@ -37,7 +37,8 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Package msg) {
         if(!GameEventDispatcher.getInstance().process(msg, session)) {
-            logger.debug("incorrect request, server disconnect actively, msg = "+msg);
+            logger.debug("incorrect request, server disconnect actively"+msg);
+            System.err.println("发生协议号不匹配，协议是:"+msg.opcode);
             ctx.close();
         }
     }

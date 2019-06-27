@@ -435,8 +435,10 @@ public class City {
         this.allBuilding.values().forEach(f);
     }
     public void forEachBuilding(List<GridIndex> index, Consumer<Building> f) {
-        for(GridIndex idx : index)
-            grids[idx.x][idx.y].forAllBuilding(f);
+        index.forEach(i->this.forEachBuilding(i, f));
+    }
+    public void forEachBuilding(GridIndex index, Consumer<Building> f) {
+        grids[index.x][index.y].forAllBuilding(f);
     }
     public void forEachBuilding(GridIndexPair range, Consumer<Building> f) {
         for(int x = range.l.x; x <= range.r.x; ++x)

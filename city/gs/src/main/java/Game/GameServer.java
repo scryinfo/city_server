@@ -108,7 +108,6 @@ public class GameServer {
         LogDb.startUp();
         MetaData.init(gsInfo.getMetaDbUri());
         MetaData.startUp();
-
         // db info is in hibernate.xml now
         //GameDb.startUp(gsInfo.getGameDbUrl());
         //GameDb.startUp();

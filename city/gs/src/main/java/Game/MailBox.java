@@ -19,16 +19,16 @@ public class MailBox {
     protected MailBox() {
     }
 
-    void sendMail(int type, UUID playerId, int[] paras, int[] intParasArr) {
+    public void sendMail(int type, UUID playerId, int[] paras, int[] intParasArr) {
         Mail mail = new Mail(type, playerId, paras, intParasArr);
         sendMailImpl(playerId, mail);
     }
 
-    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr) {
+    public void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr) {
         Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr);
         sendMailImpl(playerId, mail);
     }
-    void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,String tparas) {
+    public void sendMail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,String tparas) {
         Mail mail = new Mail(type, playerId, paras, uuidParas, intParasArr,tparas);
         sendMailImpl(playerId, mail);
     }

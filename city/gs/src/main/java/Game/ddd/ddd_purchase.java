@@ -1,5 +1,6 @@
 package Game.ddd;
 
+import Shared.Util;
 import org.ethereum.crypto.ECKey;
 import org.spongycastle.util.encoders.Hex;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 enum StatusPurchase
 {
-    PROCESSING, PROCESSED, NONE;
+    PROCESSING, PROCESSED, FAILED, NONE;
 }
 
 @Entity
@@ -28,14 +29,15 @@ public class ddd_purchase {
     //关键数据----------------------------
 
     double ddd;	 		//ddd ，充值为正，提币为负
-    String ddd_from;    //
-    String ddd_to;	    //ddd 充值到的用户地址
+    public String ddd_from;    //
+    public String ddd_to;	    //ddd 充值到的用户地址
     String ddd_tx_id;	//todo add
     String ddd_tx_info;	//
-    int ddd_date;
+    public int ddd_date;
     StatusPurchase status;         //交易状态
     long expire_time;
     long create_time;
+    long completion_time;
     int type;
 
     //关键数据签名验证----------------------------
@@ -56,6 +58,18 @@ public class ddd_purchase {
         status = StatusPurchase.PROCESSED;
     }
 
+    public ccapi.Dddbind.ct_TradingRecord toProto() {
+        return ccapi.Dddbind.ct_TradingRecord.newBuilder()
+                .setPurchaseId(Util.toByteString(purchaseId))
+                .setDdd(Double.toString(ddd))
+                .setDddFrom(ddd_from)
+                .setDddTo(ddd_to)
+                .setStatus(status.ordinal())
+                .setExpireTime(expire_time)
+                .setCreateTime(create_time)
+                .setCompletionTime(completion_time)
+                .build();
+    }
     public void bindReqSignature( String reqPbk, byte[] reqSig){
         req_pubkey = reqPbk;
         req_Signature = reqSig;
