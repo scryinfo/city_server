@@ -29,11 +29,11 @@ public class ddd_purchase {
     //关键数据----------------------------
 
     double ddd;	 		//ddd ，充值为正，提币为负
-    String ddd_from;    //
-    String ddd_to;	    //ddd 充值到的用户地址
+    public String ddd_from;    //
+    public String ddd_to;	    //ddd 充值到的用户地址
     String ddd_tx_id;	//todo add
     String ddd_tx_info;	//
-    int ddd_date;
+    public int ddd_date;
     StatusPurchase status;         //交易状态
     long expire_time;
     long create_time;

@@ -4457,7 +4457,7 @@ public class GameSession {
 				//服务器签名验证测试
 				ccapi.CcOuterClass.DisChargeReq req = sv.getDisChargeReq();
 				//计算哈希
-				byte[] pubKey = Hex.decode(req.getPubKey()) ;
+ 				byte[] pubKey = Hex.decode(req.getPubKey()) ;
 				byte[] pubK = req.getPubKey().getBytes() ;
 
 				ActiveSing activeSing = new ActiveSing(
@@ -4485,7 +4485,7 @@ public class GameSession {
 
 				double dddAmount = GameDb.calDDDFromEEE(Double.parseDouble(req.getAmount()));
 				//添加交易
-				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"","");
+				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"",req.getEthAddr());
 				if(dddPurchaseMgr.instance().addPurchase(pur)){
 					try{
 						//转发给ccapi服务器
@@ -4496,6 +4496,7 @@ public class GameSession {
 						msgStart.setResHeader(GlobalDef.ResHeader.newBuilder().setReqId(response.getResHeader().getReqId()).setVersion(response.getResHeader().getVersion()).build());
 						ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(response.getPurchaseId().getBytes()));
 						Player player = GameDb.getPlayer(dp.player_id);
+						GameDb.saveOrUpdate(pur);
 						if(!player.equals(null)){
 							this.write(Package.create(cmd,msg.toBuilder().setErrorCode(0).build()));
 						}else{
@@ -4577,6 +4578,7 @@ public class GameSession {
 			//转发给ccapi服务器
 			try{
 				ccapi.CcOuterClass.RechargeRequestRes resp = chainRpcMgr.instance().RechargeRequestReq(req);
+				pur.ddd_to = resp.getEthAddr();
 				if(resp.getResHeader().getErrCode() == GlobalDef.ErrCode.ERR_SUCCESS)
 					this.write(Package.create(cmd, ccapi.Dddbind.ct_RechargeRequestRes.newBuilder()
 							.setRechargeRequestRes(resp)
