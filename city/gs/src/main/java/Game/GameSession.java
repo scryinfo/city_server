@@ -2025,7 +2025,6 @@ public class GameSession {
 				return;
 			lab.useTime(c.getTimes());
 			//如果时间租完了，应当关闭研究所的开启业务
-			lab.setExclusive(true);
 			cost = c.getTimes() * lab.getPricePreTime();
 			//TODO:矿工费用
 			double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
@@ -2060,6 +2059,7 @@ public class GameSession {
 		}
 		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
+		lab.setExclusive(true);
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
 			// 研究所预约通知(如果在自己公司研究不发通知)
