@@ -22,15 +22,16 @@ public class BuildingUtil {
     public static BuildingUtil instance(){
         return instance;
     }
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(10));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(2));
     //缓存全城原料均定价
     private static Map<Integer, Double> materialAvg = new HashMap<>();
     //缓存全城住宅均定价和评分
     private static List<Double> apartmentAvg = new ArrayList<>();
     //缓存全城加工厂定价和评分
     private static Map<Integer, List<Double>> produceAvg = new HashMap<>();
-    //缓存全城零售店定价和评分
-    private static Map<Integer, List<Double>> retailAvg = new HashMap<>();
+    //缓存全城零售店商品定价和商品评分
+    private static Map<Integer, List<Double>> retailGoodsAvg = new HashMap<>();
+    private static double retailScore = 0;
     //缓存全城推广能力
     private static List<Double> promotionAvg = new ArrayList<>();
     //缓存全城研究概率
@@ -111,8 +112,11 @@ public class BuildingUtil {
     public static Map<Integer, List<Double>> getProduce() {
         return produceAvg;
     }
-    public static Map<Integer, List<Double>> getRetail() {
-        return retailAvg;
+    public static Map<Integer, List<Double>> getRetailGood() {
+        return retailGoodsAvg;
+    }
+    public static double getRetail() {
+        return retailScore;
     }
 
     public static List<Double> getPromotion() {
@@ -139,6 +143,7 @@ public class BuildingUtil {
         this.getRetailInfo();
         this.getPromotionInfo();
         this.getLaboratoryInfo();
+        this.retailScore = GlobalUtil.getRetailInfo();
     }
     public void getPromotionInfo() {
         Set<Integer> promotionIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
@@ -172,8 +177,8 @@ public class BuildingUtil {
             if (id instanceof Integer) {
                 itemId = (Integer) id;
             }
-            List<Double> info = GlobalUtil.getRetailInfo(itemId);
-            retailAvg.put(itemId, info);
+            List<Double> info = GlobalUtil.getRetailGoodInfo(itemId);
+            retailGoodsAvg.put(itemId, info);
         }
 
     }
@@ -202,8 +207,7 @@ public class BuildingUtil {
         }
     }
     public  void getApartmentInfo() {
-        List<Double> info = GlobalUtil.getApartmentInfo();
-        this.apartmentAvg = info;
+        this.apartmentAvg = GlobalUtil.getApartmentInfo();
     }
 
 }

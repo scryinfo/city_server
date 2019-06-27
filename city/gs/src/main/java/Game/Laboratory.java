@@ -417,4 +417,9 @@ public class Laboratory extends Building {
         map.put(Gs.Eva.Btype.InventionUpgrade_VALUE,goodProb);
         return map;
     }
+    //清除研究队列
+    public void clear() {
+        this.completed.clear();
+        this.inProcess.clear();
+    }
 }

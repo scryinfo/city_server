@@ -265,4 +265,13 @@ public class Storage implements IStorage {
         this.reserved.clear();
         this.otherUseSize=0;
     }
+
+    public List<Item> getItem(int itemId) {
+        List<Item> res = new ArrayList<>();
+        this.inHand.forEach((k,v)->{
+            if(k.meta.id == itemId)
+                res.add(new Item(k, v));
+        });
+        return res;
+    }
 }

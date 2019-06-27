@@ -481,33 +481,38 @@ public class GameSession {
 			GameDb.saveOrUpdate(Arrays.asList(b,player));
 		}
 	}
+
 	public void shutdownBusiness(short cmd, Message message) {
-		Gs.Id c = (Gs.Id)message;
+		Gs.Id c = (Gs.Id) message;
 		UUID id = Util.toUuid(c.getId().toByteArray());
 		Building b = City.instance().getBuilding(id);
-		if(b == null || !b.ownerId().equals(player.id()))
+		if (b == null || !b.ownerId().equals(player.id()))
 			return;
 		b.shutdownBusiness();
 		b.addUnEmployeeNpc();//变成失业人员
-		if(b instanceof Apartment){ //住宅停业，清空入住人数
-			Apartment apartment=(Apartment)b;
+		if (b instanceof Apartment) { //住宅停业，清空入住人数
+			Apartment apartment = (Apartment) b;
 			apartment.deleteRenter();
-		}
-		//清理其他数据
-		if(b instanceof  FactoryBase){//有仓库和货架，以及生产线，清除
+		} else if (b instanceof Laboratory) {
+			Laboratory laboratory = (Laboratory) b;
+			laboratory.clear();//清除研究队列
+		} else if (b instanceof PublicFacility) {
+			PublicFacility facility = (PublicFacility) b;
+			facility.clear();//清除推广队列
+		} else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
 			FactoryBase f = (FactoryBase) b;
 			f.cleanData();
-		}else if(b instanceof RetailShop){//若是零售店，清除货架和仓库
+		} else if (b instanceof RetailShop) {//若是零售店，清除货架和仓库
 			RetailShop r = (RetailShop) b;
 			r.cleanData();
 		}
 		for (Building building : City.instance().typeBuilding.get(b.type())) {
-			if(building.id().equals(id)){
+			if (building.id().equals(id)) {
 				System.out.println(building);
 			}
 		}
 		GameDb.saveOrUpdate(b);
-		this.write(Package.create(cmd,c));
+		this.write(Package.create(cmd, c));
 	}
 
 	public void queryMarketSummary(short cmd, Message message) {
@@ -3921,7 +3926,9 @@ public class GameSession {
 		Building building = City.instance().getBuilding(buildingId);
 		Apartment apartment = (Apartment) building;
 		//当前建筑评分
-		double score = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
+		double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
+		double apartmentScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
+		double score = (brandScore + apartmentScore) / 2;
 		List<Double> info = BuildingUtil.getApartment();
 		Gs.AartmentMsg.ApartmentPrice.Builder apartmentPrice = Gs.AartmentMsg.ApartmentPrice.newBuilder();
 		apartmentPrice.setAvgPrice(info.get(0)).setAvgScore(info.get(1)).setScore(score);
@@ -3940,22 +3947,24 @@ public class GameSession {
 		}
 		ProduceDepartment department = (ProduceDepartment) building;
 		Set<Integer> ids = MetaData.getAllGoodId();
-		Map<Integer, List<Double>> listMap = BuildingUtil.getProduce();
+		Map<Integer, List<Double>> produce = BuildingUtil.getProduce();
 		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
 		for (Object id : ids) {
 			Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
 			int itemId = 0;
-			double score = 0;
-			if (id instanceof Integer) {
+			double goodQtyScore = 0;
+            double brandScore = 0;
+			if (id instanceof Integer && produce != null && produce.size() > 0) {
 				itemId = (Integer) id;
-				List<Double> list = listMap.get(itemId);
+				List<Double> list = produce.get(itemId);
 				double priceAvg = list.get(0);
 				double scoreAvg = list.get(1);
 				Map<Item, Integer> saleDetail = department.getSaleDetail(itemId);
 				for (Item item : saleDetail.keySet()) {
-					score = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, item.getKey().qty);
+					brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), itemId);
+					goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
 				}
-				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(priceAvg, scoreAvg, score));
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(priceAvg, scoreAvg, (brandScore + goodQtyScore) / 2));
 			}
 			builder.addGoodMap(goodMap.build());
 		}
@@ -3973,7 +3982,7 @@ public class GameSession {
 		}
 		RetailShop retailShop = (RetailShop) building;
 		Set<Integer> ids = MetaData.getAllGoodId();
-		Map<Integer, List<Double>> retail = BuildingUtil.getRetail();
+		Map<Integer, List<Double>> retail = BuildingUtil.getRetailGood();
 		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
 		int itemId = 0;
 		for (Integer id : ids) {
@@ -3983,16 +3992,17 @@ public class GameSession {
 				List<Double> list = retail.get(itemId);
 				double avgPrice = list.get(0);
 				double avgGoodScore = list.get(1);
-				double avgRetailScore = list.get(2);
-				Map<Item, Integer> saleDetail = retailShop.getSaleDetail(itemId);
-				//当前商品评分
+				List<Item> itemList = retailShop.getStore().getItem(itemId);
+				//当前商品评分(取自仓库)
 				double curScore = 0;
-				for (Item item : saleDetail.keySet()) {
-					curScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, item.getKey().qty);
+				for (Item item : itemList) {
+					curScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
 				}
 				//当前建筑评分
-				double curRetailScore = GlobalUtil.getBuildingQtyScore(retailShop.getTotalQty(), building.type());
-				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore, avgRetailScore, curScore, curRetailScore));
+				double brandScore = GlobalUtil.getBrandScore(retailShop.getTotalBrand(), retailShop.type());
+				double retailScore = GlobalUtil.getBuildingQtyScore(retailShop.getTotalQty(), retailShop.type());
+				double curRetailScore = (brandScore + retailScore) / 2;
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore,BuildingUtil.getRetail(), curScore, curRetailScore));
 			}
 			builder.addGoodMap(goodMap.build());
 		}
@@ -4015,12 +4025,7 @@ public class GameSession {
 			abilitys.add((int) facility.getLocalPromoAbility(typeId));
 		}
 		List<Double> list = BuildingUtil.getPromotion();
-		double price = list.get(0) / list.get(1) == 0 ? -1 : list.get(1);
-		for (Integer proId : proIds) {
-			if (proId instanceof Integer) {
-
-			}
-		}
+		double price = list.get(0) / (list.get(1) == 0 ? -1 : list.get(1));
 		Gs.PromotionMsg.PromotionPrice.Builder promotionPrice = Gs.PromotionMsg.PromotionPrice.newBuilder();
 		promotionPrice.addAllCurAbilitys(abilitys).setGuidePrice(price);
 		this.write(Package.create(cmd, Gs.PromotionMsg.newBuilder().addProPrice(promotionPrice.build()).setBuildingId(msg.getBuildingId()).build()));
