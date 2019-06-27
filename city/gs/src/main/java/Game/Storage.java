@@ -258,7 +258,7 @@ public class Storage implements IStorage {
         return true;
     }
 
-    public void clearData(){//清楚当前仓库的所有数据
+    public void clearData(){//清除当前仓库的所有数据
         this.inHand.clear();
         this.inHandPrice.clear();
         this.locked.clear();

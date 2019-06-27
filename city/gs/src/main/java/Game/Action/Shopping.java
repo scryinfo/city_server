@@ -120,8 +120,6 @@ public class Shopping implements IAction {
             LogDb.playerIncome(owner.id(),chosen.price-minerCost);
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
             sellShop.updateTodayIncome(chosen.price-minerCost);
-            //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
-            sendShelfNotice(sellShop,chosen);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 
 
@@ -196,8 +194,6 @@ public class Shopping implements IAction {
               LogDb.playerIncome(owner.id(), chosen.price-minerCost);
               ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
               sellShop.updateTodayIncome(chosen.price-minerCost);
-              //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
-              sendShelfNotice(sellShop,chosen);
               GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
               Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
@@ -268,17 +264,6 @@ public class Shopping implements IAction {
         MetaGood meta;
         public ItemKey getItemKey() {
             return new ItemKey(meta, producerId, qty,producerId);
-        }
-    }
-
-    public void sendShelfNotice(Building sellShop,WeightInfo chosen){
-        Shelf.Content content = ((IShelf) sellShop).getContent(chosen.getItemKey());
-        if(content!=null){
-            List<UUID> owerId = new ArrayList<>();
-            owerId.add(sellShop.ownerId());
-            Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
-            builder.setBuildingId(Util.toByteString(sellShop.id())).setItemId(chosen.getItemKey().meta.id).setSelledCount(content.getCount()).setSelledPrice(content.getPrice()).setAutoRepOn(content.isAutoReplenish());
-            GameServer.sendTo(owerId, Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build()));
         }
     }
 }
