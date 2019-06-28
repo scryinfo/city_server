@@ -1849,7 +1849,14 @@ public class GameSession {
 		UUID srcId = Util.toUuid(c.getSrc().toByteArray());
 		UUID dstId = Util.toUuid(c.getDst().toByteArray());
 		IStorage src = IStorage.get(srcId, player);
+		Building s1 = (Building) src;
+		System.err.println(s1.getName()+"运输到");
 		IStorage dst = IStorage.get(dstId, player);
+		Building s2 = (Building) dst;
+		System.err.println(s2.getName());
+		if(srcId==dstId){
+			System.err.println("错误，运入和运出地址相同");
+		}
 		if(src == null || dst == null) {
 			System.err.println("运输失败：运输地址不对");
 			return;
