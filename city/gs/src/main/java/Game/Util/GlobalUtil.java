@@ -367,7 +367,7 @@ public class GlobalUtil {
             }
         }
         list.add((double) (count == 0 ? 0 : sumPrice / count));
-        list.add(count == 0 ? 0 : sumScore / count);
+        list.add(count == 0 ? 1 : sumScore / count);
         return list;
     }
 
@@ -376,20 +376,23 @@ public class GlobalUtil {
         int sumPrice = 0;
         double sumGoodScore = 0;
         int count = 0;
-        Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>());
         for (Building b : allBuilding) {
-            RetailShop retailShop = (RetailShop) b;
-            Map<Item, Integer> saleDetail = retailShop.getSaleDetail(itemId);
-            for (Item item : saleDetail.keySet()) {
-                sumPrice += saleDetail.get(item);
-                double brandScore = getBrandScore(item.getKey().getTotalBrand(), itemId);
-                double goodQtyScore = getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
-                sumGoodScore += (brandScore + goodQtyScore) / 2;
-                count++;
+            if (!b.outOfBusiness()) {
+                RetailShop retailShop = (RetailShop) b;
+                Map<Item, Integer> saleDetail = retailShop.getSaleDetail(itemId);
+                for (Item item : saleDetail.keySet()) {
+                    sumPrice += saleDetail.get(item);
+                    double brandScore = getBrandScore(item.getKey().getTotalBrand(), itemId);
+                    double goodQtyScore = getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+                    sumGoodScore += (brandScore + goodQtyScore) / 2;
+                    count++;
+                }
+
             }
         }
         list.add((double) (count == 0 ? 0 : sumPrice / count));
-        list.add(count == 0 ? 0 : sumGoodScore / count);
+        list.add(count == 0 ? 1 : sumGoodScore / count);
         return list;
     }
 
@@ -407,20 +410,22 @@ public class GlobalUtil {
             }
 
         }
-        return count == 0 ? 0 : sumRetailScore / count;
+        return count == 0 ? 1 : sumRetailScore / count;
     }
 
     public static double getMaterialInfo(int itemId) {
         double sumPrice = 0;
         int count = 0;
-        Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL,new HashSet<>());
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>());
         for (Building b : allBuilding) {
+            if (!b.outOfBusiness()) {
                 MaterialFactory mf = (MaterialFactory) b;
                 Map<Item, Integer> saleInfo = mf.getSaleDetail(itemId);
                 if (saleInfo != null && saleInfo.size() != 0) {
                     sumPrice += new ArrayList<>(saleInfo.values()).get(0);
                     count++;
                 }
+            }
         }
         return count == 0 ? 0 : sumPrice / count;
     }
@@ -440,19 +445,21 @@ public class GlobalUtil {
             }
         }
         list.add((double) (count == 0 ? 0 : sumPrice / count));
-        list.add(count == 0 ? 0 : sumScore / count);
+        list.add(count == 0 ? 1 : sumScore / count);
         return list;
     }
 
     public static double getLaboratoryInfo() {
         double sumEvaProb = 0;
         double sumGoodProb = 0;
-        Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB,new HashSet<>());
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB, new HashSet<>());
         for (Building b : allBuilding) {
-            Laboratory laboratory = (Laboratory) b;
-            Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
-            sumGoodProb += prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
-            sumEvaProb += prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+            if (!b.outOfBusiness()) {
+                Laboratory laboratory = (Laboratory) b;
+                Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
+                sumGoodProb += prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
+                sumEvaProb += prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+            }
         }
         //研发能力 = (发明成功率 *2 + 研究成功率)/2
         return (sumGoodProb * 2 + sumEvaProb) / 2;

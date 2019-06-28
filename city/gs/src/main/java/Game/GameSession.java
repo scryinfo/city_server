@@ -4042,8 +4042,7 @@ public class GameSession {
 		for (Integer typeId : proIds) {
 			abilitys.add((int) facility.getLocalPromoAbility(typeId));
 		}
-		List<Double> list = BuildingUtil.getPromotion();
-		double price = list.get(0) / (list.get(1) == 0 ? -1 : list.get(1));
+		double price = BuildingUtil.getPromotion();
 		Gs.PromotionMsg.PromotionPrice.Builder promotionPrice = Gs.PromotionMsg.PromotionPrice.newBuilder();
 		promotionPrice.addAllCurAbilitys(abilitys).setGuidePrice(price);
 		this.write(Package.create(cmd, Gs.PromotionMsg.newBuilder().addProPrice(promotionPrice.build()).setBuildingId(msg.getBuildingId()).build()));
@@ -4058,8 +4057,7 @@ public class GameSession {
 			return;
 		}
 		Laboratory laboratory = (Laboratory) building;
-		List<Double> list = BuildingUtil.getLaboratory();
-		double price = list.get(0) / list.get(1) == 0 ? -1 : list.get(1);
+		double price = BuildingUtil.getLaboratory();
 		//总概率
 		Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
 		double evaProb = prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
