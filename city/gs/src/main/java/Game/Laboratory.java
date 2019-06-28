@@ -215,11 +215,12 @@ public class Laboratory extends Building {
                 //1次开启5个成果，所以循环5次
                 for (int i = 0; i <5 ; i++) {//新增===========================================
                     if(Prob.success(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE), RADIX)) {//成功概率（第一个参数表示成功概率,后一个为基数）
-                        res.evaPoint++;
+                        res.evaPoint+=10;
                         player.addEvaPoint(10);
                         //每次都需要把结果保存起来
                         res.labResult.add(1);
                     }else{//失败
+                        res.evaPoint+=1;
                         player.addEvaPoint(1);
                         res.labResult.add(0);
                     }
@@ -231,7 +232,6 @@ public class Laboratory extends Building {
                     Integer newId = MetaData.randomGood(l.goodCategory, player.itemIds());
                     if(newId != null) {
                         player.addItem(newId, 0);
-                        player.addEvaPoint(1);
                         res.itemIds.add(newId);
                         GoodFormula f = MetaData.getFormula(newId);
                         for (GoodFormula.Info info : f.material) {
@@ -241,8 +241,6 @@ public class Laboratory extends Building {
                             }
                         }
                     }
-                }else{ //失败
-                    player.addEvaPoint(1);
                 }
             }
         }
