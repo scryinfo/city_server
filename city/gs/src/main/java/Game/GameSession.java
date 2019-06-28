@@ -2018,7 +2018,7 @@ public class GameSession {
 		Laboratory lab = (Laboratory) building;
 		long cost = 0;
 		Player seller = GameDb.getPlayer(lab.ownerId());
-		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主任，同时要求开放研究所
+		if (!building.canUseBy(this.player.id()) && !lab.isExclusiveForOwner()) {//如果不是建筑主人，同时要求开放研究所
 			if (!c.hasTimes())
 				return;
 			if (c.getTimes() > lab.getRemainingTime())
@@ -2059,7 +2059,10 @@ public class GameSession {
 		}
 		LogDb.laboratoryRecord(lab.ownerId(), player.id(), lab.id(), lab.getPricePreTime(), cost, c.hasGoodCategory() ? c.getGoodCategory() : 0, c.hasGoodCategory() ? true : false);
 		Laboratory.Line line = lab.addLine(c.hasGoodCategory() ? c.getGoodCategory() : 0, c.getTimes(), this.player.id(), cost);
-		lab.setExclusive(true);
+		//如果不是建筑主人且数量租完了，建筑不开放
+		if(!building.canUseBy(this.player.id()) && lab.getRemainingTime()==0){
+			lab.setExclusive(true);
+		}
 		if (null != line) {
 			GameDb.saveOrUpdate(Arrays.asList(lab, player, seller)); // let hibernate generate the fucking line.id first
 			// 研究所预约通知(如果在自己公司研究不发通知)
