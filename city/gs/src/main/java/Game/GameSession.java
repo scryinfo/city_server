@@ -917,7 +917,7 @@ public class GameSession {
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
 		//矿工费用日志记录(需调整)
-		LogDb.minersCost(player.id(),minerCost,minersRatio);
+		LogDb .minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		//((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n); 在删除商品的时候已经消费过了，这里会造成二次消费
@@ -4826,7 +4826,6 @@ public class GameSession {
 			case MetaBuilding.PRODUCE:
 				ProduceDepartment produceDepartment = (ProduceDepartment) building;
 				produceDepartment.lines.forEach(l->{
-					//获取生产线的itemkey
 					ItemKey itemKey = new ItemKey(l.item, building.ownerId(), l.itemLevel, building.ownerId());
 					Gs.ItemKey key = itemKey.toProto();
 					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore(key.getBrandScore()).setQtyScore(key.getQualityScore()).setBrandName(key.getBrandName());
@@ -4834,7 +4833,8 @@ public class GameSession {
 				});
 				break;
 		}
-		lineBuilder.setBuildingId(id.getId());
+		FactoryBase factoryBase = (FactoryBase) building;
+		lineBuilder.setBuildingId(id.getId()).setWarehouseCapacity(factoryBase.store.usedSize());
 		this.write(Package.create(cmd,lineBuilder.build()));
 	}
 }
