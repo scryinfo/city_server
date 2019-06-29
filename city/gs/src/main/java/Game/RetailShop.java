@@ -244,22 +244,17 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
                 shelf.delshelf(item.key, content.n, true);
                 return true;
             }
-            //判断存储空间
-            if (this.store.canSave(item.key, updateNum)) {
-                boolean lock = false;
-                if (updateNum < 0) {
-                    lock = this.store.lock(item.key, Math.abs(updateNum));
-                } else {
-                    lock = this.store.unLock(item.key, updateNum);
-                }
-                if (lock) {
-                    content.price = price;
-                    content.n = item.n;
-                    content.autoReplenish = autoRepOn;
-                    return true;
-                } else {
-                    return false;
-                }
+            boolean lock = false;
+            if (updateNum < 0) {
+                lock = this.store.lock(item.key, Math.abs(updateNum));
+            } else {
+                lock = this.store.unLock(item.key, updateNum);
+            }
+            if (lock) {
+                content.price = price;
+                content.n = item.n;
+                content.autoReplenish = autoRepOn;
+                return true;
             } else {
                 return false;
             }
