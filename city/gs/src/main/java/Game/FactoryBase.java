@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Meta.MetaFactoryBase;
+import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import Shared.Package;
@@ -130,6 +131,8 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     }
     protected abstract boolean consumeMaterial(LineBase line, UUID pid);
 
+    protected abstract boolean hasEnoughMaterial(LineBase line, UUID pid);
+
     protected void _update(long diffNano) {
         if(getState()== Gs.BuildingState.SHUTDOWN_VALUE){
             return;
@@ -143,6 +146,17 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     completedLines.add(l.id);
                 }
             }
+            if(l.isPauseStatue()) {
+                if (this.store.availableSize() > 0 && this.hasEnoughMaterial(l, ownerId())) {//当仓库容量已经足够并且有足够的数量,重新开始
+                    l.start();
+                    l.ts = System.currentTimeMillis();
+                }
+            }
+            if(l.isPauseStatue()){//如果当前是暂停状态，取消执行
+                if(completedLines.size()>0)
+                    delComplementLine(completedLines);//删除已完成生产的线
+                return;
+            }
             if(l.isSuspend()) {
                 assert l.left() > 0;
                 ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId());
@@ -152,51 +166,53 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
             }
             else {
-                if (l.materialConsumed == false)
-                l.materialConsumed = this.consumeMaterial(l,ownerId());
-                    if (!l.materialConsumed)
-                        return;
-                    int add = l.update(diffNano,this.ownerId()); //新增了玩家id，作为eva查询
-                    if (add > 0) {
-                        l.materialConsumed = false;
-                        ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId());
-                        if (this.store.offset(key, add)) {
-                            IShelf s = (IShelf)this;
-                            Shelf.Content i = s.getContent(key);
-                            broadcastLineInfo(l,key);
-                            //处理自动补货
-                            if(i != null && i.autoReplenish){
-                                IShelf.updateAutoReplenish(s,key);
-                            }
-                            //绑定品牌
-                            if(BrandManager.instance().getBrand(ownerId(),l.item.id) == null){
+                if(this.store.availableSize()<=0){
+                    //停止生产，推送容量不足
+                    l.pause();
+                    List<UUID> owner = Arrays.asList(ownerId());
+                    Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
+                    GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE,builder.build()));
+                    return;
+                }
+                if (l.materialConsumed == false) {
+                    l.materialConsumed = this.consumeMaterial(l, ownerId());
+                }
+                if (!l.materialConsumed) {
+                    //推送材料不足
+                    l.pause();
+                    List<UUID> owner = Arrays.asList(ownerId());
+                    Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
+                    GameServer.sendTo(owner,Package.create(GsCode.OpCode.materialNotEnough_VALUE,builder.build()));
+                    return;
+                }
+                int add = l.update(diffNano,this.ownerId()); //新增了玩家id，作为eva查询
+                if (add > 0) {
+                    l.materialConsumed = false;
+                    ItemKey key = l.newItemKey(ownerId(), l.itemLevel,ownerId());
+                    if (this.store.offset(key, add)) {
+                        IShelf s = (IShelf)this;
+                        Shelf.Content i = s.getContent(key);
+                        broadcastLineInfo(l,key);
+                        //处理自动补货
+                        if(i != null && i.autoReplenish){
+                            IShelf.updateAutoReplenish(s,key);
+                        }
+                        //绑定品牌(如果是商品)
+                        if(MetaGood.isItem(l.item.id)) {
+                            if (!BrandManager.instance().brandIsExist(ownerId(), l.item.id)) {
                                 Player owner = GameDb.getPlayer(ownerId());
                                 //这里之所以直接用公司名字，是因为公司名字是唯一的,而公司与类型的组合也是唯一的
                                 //目前使用 公司名字+产品类型id 的组合作为服务器的品牌名字，客户端需要解析出 _ 之后的id，找到对应的多语言字符串来表现
                                 BrandManager.instance().addBrand(ownerId(), l.item.id);
                             }
-                            /*//再次判断是仓库否已满
-                            if(this.store.availableSize()==0){
-                                //停止生产
-                                l.suspend = true;
-                                ArrayList<UUID> owner = new ArrayList<>();
-                                owner.add(ownerId());
-                                Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
-                                GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE,builder.build()));
-                            }*/
-                        } else {
-                           /* //推广仓库已满通知
-                            ArrayList<UUID> owner = new ArrayList<>();
-                            owner.add(ownerId());
-                            Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
-                            GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE, builder.build()));*/
-                            //(加工厂/原料厂)仓库已满通知
-                            l.count -= add;
-                            MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
-                            l.suspend(add);
                         }
+                    } else {
+                        l.count -= add;
+                        MailBox.instance().sendMail(Mail.MailType.STORE_FULL.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
+                        l.suspend(add);
                     }
                 }
+            }
         }
         if (completedLines.size() > 0){
             UUID nextId = null;
@@ -338,25 +354,20 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 shelf.delshelf(item.key, content.n, true);
                 return true;
             }
-            //判断存储空间
-            if (this.store.canSave(item.key, updateNum)) {
-                boolean lock = false;
-                if (updateNum < 0) {
-                    lock = this.store.lock(item.key, Math.abs(updateNum));
-                } else {
-                    lock = this.store.unLock(item.key, updateNum);
-                }
-                if (lock) {
-                    content.price = price;
-                    content.n = item.n;
-                    content.autoReplenish = autoRepOn;
-                    //消息推送货物发生改变
-                    this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn);
-                    return true;
-                } else {
-                    return false;
-                }
-            } else{
+            boolean lock = false;
+            if (updateNum < 0) {
+                lock = this.store.lock(item.key, Math.abs(updateNum));
+            } else {
+                lock = this.store.unLock(item.key, updateNum);
+            }
+            if (lock) {
+                content.price = price;
+                content.n = item.n;
+                content.autoReplenish = autoRepOn;
+                //消息推送货物发生改变
+                this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn);
+                return true;
+            } else {
                 return false;
             }
         }else {//自动补货
@@ -419,5 +430,22 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
         this.lines.clear();
         this.store.clearData();
         this.shelf.clearData();
+    }
+
+    public void delComplementLine(List<UUID> completedLines){
+        if(completedLines.size()>0) {
+            UUID nextId = null;
+            if (lines.size() >= 2) {
+                nextId = lines.get(1).id; //第二条生产线
+            }
+            LineBase l = __delLine(completedLines.get(0));
+            if (nextId != null) {
+                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
+            } else {
+                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
+            }
+            //生产线完成通知
+            MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
+        }
     }
 }

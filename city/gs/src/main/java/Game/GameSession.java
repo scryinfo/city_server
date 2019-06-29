@@ -497,16 +497,17 @@ public class GameSession {
 			Laboratory laboratory = (Laboratory) b;
 			laboratory.clear();//清除研究队列
 		} else if (b instanceof PublicFacility) {
-			PublicFacility facility = (PublicFacility) b;
-			facility.clear();//清除推广队列
+			if(b.type()==MetaBuilding.RETAIL){
+				RetailShop r = (RetailShop) b;
+				r.cleanData();
+			}else {
+				PublicFacility facility = (PublicFacility) b;
+				facility.clear();//清除推广队列
+			}
 		} else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
 			FactoryBase f = (FactoryBase) b;
 			f.cleanData();
-		} else if (b instanceof RetailShop) {//若是零售店，清除货架和仓库
-			RetailShop r = (RetailShop) b;
-			r.cleanData();
 		}
-
 		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd, c));
 	}
@@ -916,7 +917,7 @@ public class GameSession {
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
 		//矿工费用日志记录(需调整)
-		LogDb.minersCost(player.id(),minerCost,minersRatio);
+		LogDb .minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
 		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
 		//((IStorage)sellBuilding).consumeLock(itemBuy.key, itemBuy.n); 在删除商品的时候已经消费过了，这里会造成二次消费
@@ -1849,7 +1850,14 @@ public class GameSession {
 		UUID srcId = Util.toUuid(c.getSrc().toByteArray());
 		UUID dstId = Util.toUuid(c.getDst().toByteArray());
 		IStorage src = IStorage.get(srcId, player);
+		Building s1 = (Building) src;
+		System.err.println(s1.getName()+s1.type()+"运输到");
 		IStorage dst = IStorage.get(dstId, player);
+		Building s2 = (Building) dst;
+		System.err.println(s2.getName());
+		if(srcId.equals(dstId)){
+			System.err.println("错误，运入和运出地址相同=========");
+		}
 		if(src == null || dst == null) {
 			System.err.println("运输失败：运输地址不对");
 			return;
@@ -4725,12 +4733,8 @@ public class GameSession {
 	//查询推广公司的商品推广列表的详细信息
 	public void queryPromotionItemInfo(short cmd,Message message){
 		Gs.QueryPromotionItemInfo info = (Gs.QueryPromotionItemInfo) message;
-		UUID bid = Util.toUuid(info.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray());
 		List<Integer> typeIdsList = info.getTypeIdsList();
-		Building building = City.instance().getBuilding(bid);
-		if(null==building||building.type()!=MetaBuilding.PUBLIC)
-			return;
-		UUID playerId = building.ownerId();
 		Gs.PromotionItemInfo.Builder itemInfo = Gs.PromotionItemInfo.newBuilder();
 		itemInfo.setBuildingId(info.getBuildingId());
 		for (Integer goodType : typeIdsList) {
@@ -4822,7 +4826,6 @@ public class GameSession {
 			case MetaBuilding.PRODUCE:
 				ProduceDepartment produceDepartment = (ProduceDepartment) building;
 				produceDepartment.lines.forEach(l->{
-					//获取生产线的itemkey
 					ItemKey itemKey = new ItemKey(l.item, building.ownerId(), l.itemLevel, building.ownerId());
 					Gs.ItemKey key = itemKey.toProto();
 					Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore(key.getBrandScore()).setQtyScore(key.getQualityScore()).setBrandName(key.getBrandName());
@@ -4830,7 +4833,8 @@ public class GameSession {
 				});
 				break;
 		}
-		lineBuilder.setBuildingId(id.getId());
+		FactoryBase factoryBase = (FactoryBase) building;
+		lineBuilder.setBuildingId(id.getId()).setWarehouseCapacity(factoryBase.store.usedSize());
 		this.write(Package.create(cmd,lineBuilder.build()));
 	}
 }

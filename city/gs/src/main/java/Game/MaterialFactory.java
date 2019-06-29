@@ -97,7 +97,12 @@ public class MaterialFactory extends FactoryBase {
         return true;
     }
 
-//    protected void _update(long diffNano) {
+    @Override
+    protected boolean hasEnoughMaterial(LineBase line, UUID pid) {
+        return true;
+    }
+
+    //    protected void _update(long diffNano) {
 //        super._update(diffNano);
 //    }
 }
