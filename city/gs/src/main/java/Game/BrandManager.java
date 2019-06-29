@@ -465,4 +465,8 @@ public class BrandManager {
         return infos;
     }
 
+    public boolean brandIsExist(UUID pid, int typeId){//查询是否存在该品牌信息
+        BrandKey bk = new BrandKey(pid,typeId);
+        return null==allBrandInfo.get(bk)?false:true;
+    }
 }
