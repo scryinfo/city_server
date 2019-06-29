@@ -497,16 +497,17 @@ public class GameSession {
 			Laboratory laboratory = (Laboratory) b;
 			laboratory.clear();//清除研究队列
 		} else if (b instanceof PublicFacility) {
-			PublicFacility facility = (PublicFacility) b;
-			facility.clear();//清除推广队列
+			if(b.type()==MetaBuilding.RETAIL){
+				RetailShop r = (RetailShop) b;
+				r.cleanData();
+			}else {
+				PublicFacility facility = (PublicFacility) b;
+				facility.clear();//清除推广队列
+			}
 		} else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
 			FactoryBase f = (FactoryBase) b;
 			f.cleanData();
-		} else if (b instanceof RetailShop) {//若是零售店，清除货架和仓库
-			RetailShop r = (RetailShop) b;
-			r.cleanData();
 		}
-
 		GameDb.saveOrUpdate(b);
 		this.write(Package.create(cmd, c));
 	}
@@ -4732,12 +4733,8 @@ public class GameSession {
 	//查询推广公司的商品推广列表的详细信息
 	public void queryPromotionItemInfo(short cmd,Message message){
 		Gs.QueryPromotionItemInfo info = (Gs.QueryPromotionItemInfo) message;
-		UUID bid = Util.toUuid(info.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray());
 		List<Integer> typeIdsList = info.getTypeIdsList();
-		Building building = City.instance().getBuilding(bid);
-		if(null==building||building.type()!=MetaBuilding.PUBLIC)
-			return;
-		UUID playerId = building.ownerId();
 		Gs.PromotionItemInfo.Builder itemInfo = Gs.PromotionItemInfo.newBuilder();
 		itemInfo.setBuildingId(info.getBuildingId());
 		for (Integer goodType : typeIdsList) {

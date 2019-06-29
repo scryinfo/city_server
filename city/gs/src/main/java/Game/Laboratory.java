@@ -243,6 +243,8 @@ public class Laboratory extends Building {
                     }
                 }
             }
+        }else{//表明传递的数据有误
+            return null;
         }
         if(l.isComplete() && l.availableRoll == 0)
             this.completed.remove(l.id);

@@ -103,14 +103,14 @@ public class ProduceDepartment extends FactoryBase {
     @Override
     protected boolean consumeMaterial(LineBase line,UUID pid) {
         Line l = (Line)line;
-        for(GoodFormula.Info i : l.formula.material) {
+        for(GoodFormula.Info i : l.formula.material) {  //此步判断数量是否足够
             if(i.item == null)
                 continue;
             if(!this.store.has(new ItemKey(i.item,pid), i.n)) {
                 return false;
             }
         }
-        for(GoodFormula.Info i : l.formula.material) {
+        for(GoodFormula.Info i : l.formula.material) { //此步消耗材料
             if (i.item == null)
                 continue;
             ItemKey key = new ItemKey(i.item,pid);
@@ -127,7 +127,20 @@ public class ProduceDepartment extends FactoryBase {
         return true;
     }
 
-//    protected void _update(long diffNano) {
+    @Override
+    protected boolean hasEnoughMaterial(LineBase line, UUID pid) {//是否有足够的数量
+        Line l = (Line)line;
+        for(GoodFormula.Info i : l.formula.material) {
+            if(i.item == null)
+                continue;
+            if(!this.store.has(new ItemKey(i.item,pid), i.n)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //    protected void _update(long diffNano) {
 //        super._update(diffNano);
 //    }
 }
