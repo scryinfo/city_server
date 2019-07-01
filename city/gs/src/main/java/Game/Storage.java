@@ -274,4 +274,8 @@ public class Storage implements IStorage {
         });
         return res;
     }
+
+    public  int getItemCount(ItemKey key){
+        return inHand.getOrDefault(key, 0);
+    }
 }

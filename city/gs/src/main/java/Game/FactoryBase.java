@@ -390,7 +390,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             IShelf shelf=this;
             //重新上架
             shelf.delshelf(item.key, content.n, true);
-            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
+            Item itemInStore = new Item(item.key,this.store.getItemCount(item.key));
             shelf.addshelf(itemInStore,price,autoRepOn);
             int count = shelf.getSaleCount(item.key.meta.id);
             UUID produceId=null;

@@ -269,7 +269,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             //删除
             shelf.delshelf(item.key, content.n, true);
             //3.修改货架上的数量
-            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
+            Item itemInStore = new Item(item.key,this.store.getItemCount(item.key));
             //重新上架
             shelf.addshelf(itemInStore,price,autoRepOn);
             return true;
