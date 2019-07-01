@@ -277,7 +277,8 @@ public class Shopping implements IAction {
             List<UUID> owerId = new ArrayList<>();
             owerId.add(sellShop.ownerId());
             Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
-            builder.setBuildingId(Util.toByteString(sellShop.id())).setItemId(chosen.getItemKey().meta.id).setSelledCount(content.getCount()).setSelledPrice(content.getPrice()).setAutoRepOn(content.isAutoReplenish());
+            builder.setBuildingId(Util.toByteString(sellShop.id())).setItemId(chosen.getItemKey().meta.id).setSelledCount(content.getCount())
+                    .setSelledPrice(content.getPrice()).setAutoRepOn(content.isAutoReplenish()).setProducerId(Util.toByteString(chosen.producerId));
             GameServer.sendTo(owerId, Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build()));
         }
     }
