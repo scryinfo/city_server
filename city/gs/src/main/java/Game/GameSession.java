@@ -811,7 +811,11 @@ public class GameSession {
 			//如果货架上还有该商品则推送，否则不推送
 			Shelf.Content content = s.getContent(item.key);
 			if(content!=null){
-				building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish);
+				UUID producerId=null;
+				if(MetaGood.isItem(item.key.meta.id)){
+					producerId = item.key.producerId;
+				}
+				building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish,producerId);
 			}
 			this.write(Package.create(cmd, c));
 		}
@@ -928,7 +932,12 @@ public class GameSession {
 		//如果货架上已经没有该商品了，不推送，有则推送
 		i = sellShelf.getContent(itemBuy.key);
 		if(i!=null){
-			sellBuilding.sendToWatchers(sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish);
+			//如果是商品则传递produceId
+			UUID produceId=null;
+			if(MetaGood.isItem(itemBuy.key.meta.id)){
+				produceId = itemBuy.key.producerId;
+			}
+			sellBuilding.sendToWatchers(sellBuilding.id(),itemId,i.n,i.price,i.autoReplenish,produceId);
 		}
 		this.write(Package.create(cmd, c));
 	}

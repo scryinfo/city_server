@@ -371,7 +371,11 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 content.n = item.n;
                 content.autoReplenish = autoRepOn;
                 //消息推送货物发生改变
-                this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn);
+                UUID produceId=null;
+                if(MetaGood.isItem(item.key.meta.id)){
+                    produceId = item.key.producerId;
+                }
+                this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn,produceId);
                 return true;
             } else {
                 return false;
@@ -389,8 +393,12 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
             Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
             shelf.addshelf(itemInStore,price,autoRepOn);
             int count = shelf.getSaleCount(item.key.meta.id);
+            UUID produceId=null;
+            if(MetaGood.isItem(item.key.meta.id)){
+                produceId = item.key.producerId;
+            }
             //消息推送货物发生改变
-            this.sendToWatchers(id(),item.key.meta.id,count,price,autoRepOn);//推送消息
+            this.sendToWatchers(id(),item.key.meta.id,count,price,autoRepOn,produceId);//推送消息
             return true;
         }
     }
