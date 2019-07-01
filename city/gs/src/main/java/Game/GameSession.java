@@ -3990,9 +3990,9 @@ public class GameSession {
 				List<Double> list = produce.get(itemId);
 				double priceAvg = list.get(0);
 				double scoreAvg = list.get(1);
-				Map<Item, Integer> saleDetail = department.getSaleDetail(itemId);
-				for (Item item : saleDetail.keySet()) {
-					brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), itemId);
+				List<Item> itemList = department.store.getItem(itemId);
+				for (Item item : itemList) {
+					brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
 					goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
 				}
 				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(priceAvg, scoreAvg, (brandScore + goodQtyScore) / 2));
@@ -4025,15 +4025,17 @@ public class GameSession {
 				double avgGoodScore = list.get(1);
 				List<Item> itemList = retailShop.getStore().getItem(itemId);
 				//当前商品评分(取自仓库)
-				double curScore = 0;
+				double curBrandScore = 0;
+				double curQtyScore = 0;
 				for (Item item : itemList) {
-					curScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+					curBrandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
+					curQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
 				}
 				//当前建筑评分
 				double brandScore = GlobalUtil.getBrandScore(retailShop.getTotalBrand(), retailShop.type());
 				double retailScore = GlobalUtil.getBuildingQtyScore(retailShop.getTotalQty(), retailShop.type());
 				double curRetailScore = (brandScore + retailScore) / 2;
-				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore,BuildingUtil.getRetail(), curScore, curRetailScore));
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore, BuildingUtil.getRetail(), (curBrandScore + curQtyScore) / 2, curRetailScore));
 			}
 			builder.addGoodMap(goodMap.build());
 		}
@@ -4051,13 +4053,15 @@ public class GameSession {
 			return;
 		}
 		PublicFacility facility = (PublicFacility) building;
-		List<Integer> abilitys = new ArrayList<>();
+		int sumAbilitys = 0;
 		for (Integer typeId : proIds) {
-			abilitys.add((int) facility.getLocalPromoAbility(typeId));
+			sumAbilitys += ((int) facility.getLocalPromoAbility(typeId));
 		}
 		double price = BuildingUtil.getPromotion();
+		//全城均推广能力
+		double promotionInfo = GlobalUtil.getPromotionInfo();
 		Gs.PromotionMsg.PromotionPrice.Builder promotionPrice = Gs.PromotionMsg.PromotionPrice.newBuilder();
-		promotionPrice.addAllCurAbilitys(abilitys).setGuidePrice(price);
+		promotionPrice.setCurAbilitys((sumAbilitys / 4)).setGuidePrice(price).setAvgAbility(promotionInfo);
 		this.write(Package.create(cmd, Gs.PromotionMsg.newBuilder().addProPrice(promotionPrice.build()).setBuildingId(msg.getBuildingId()).build()));
 	}
 	//研究竞争力
@@ -4075,8 +4079,10 @@ public class GameSession {
 		Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
 		double evaProb = prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
 		double goodProb = prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
+		//全城均研发能力
+		double labProb = GlobalUtil.getLaboratoryInfo();
 		Gs.LaboratoryMsg.LaboratoryPrice.Builder labPrice = Gs.LaboratoryMsg.LaboratoryPrice.newBuilder();
-		labPrice.setGoodProb(goodProb).setEvaProb(evaProb).setGuidePrice(price);
+		labPrice.setAvgProb(labProb).setCurProb((evaProb + goodProb) / 2).setGuidePrice(price);
 		this.write(Package.create(cmd, Gs.LaboratoryMsg.newBuilder().addLabPrice(labPrice.build()).setBuildingId(msg.getBuildingId()).build()));
 	}
 
