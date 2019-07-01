@@ -13,6 +13,7 @@ import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 public abstract class FactoryBase extends Building implements IStorage, IShelf {
@@ -153,9 +154,22 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
             }
             if(l.isPauseStatue()){//如果当前还是暂停状态，取消执行
-                if(completedLines.size()>0)
+                if(completedLines.size()>0) {
                     delComplementLine(completedLines);//删除已完成生产的线
+                }
                 return;
+            }else{
+                if(this.store.availableSize()<=0){
+                    //停止生产，推送容量不足
+                    l.pause();
+                    List<UUID> owner = Arrays.asList(ownerId());
+                    Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
+                    GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE,builder.build()));
+                    if(completedLines.size()>0) {
+                        delComplementLine(completedLines);//删除已完成生产的线
+                    }
+                    return;
+                }
             }
             if(l.isSuspend()) {
                 assert l.left() > 0;
@@ -166,14 +180,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
             }
             else {
-                if(this.store.availableSize()<=0){
-                    //停止生产，推送容量不足
-                    l.pause();
-                    List<UUID> owner = Arrays.asList(ownerId());
-                    Gs.ByteBool.Builder builder = Gs.ByteBool.newBuilder().setB(true).setId(Util.toByteString(id()));
-                    GameServer.sendTo(owner,Package.create(GsCode.OpCode.storeIsFullNotice_VALUE,builder.build()));
-                    return;
-                }
                 if (l.materialConsumed == false) {
                     l.materialConsumed = this.consumeMaterial(l, ownerId());
                 }
