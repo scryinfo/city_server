@@ -240,12 +240,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     }
 
     private void broadcastLineInfo(LineBase l,ItemKey key) {
+
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(l.id))
                 .setNowCount(l.count)
                 .setBuildingId(Util.toByteString(this.id()))
                 .setIKey(key.toProto())
-                .setNowCountInStore(this.availableQuantity(key.meta))
+                .setNowCountInStore(this.availableQuantity(key.meta)+this.getSaleCount(key.meta.id))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
