@@ -452,6 +452,7 @@ public class GlobalUtil {
     public static double getLaboratoryInfo() {
         double sumEvaProb = 0;
         double sumGoodProb = 0;
+        int count = 0;
         Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB, new HashSet<>());
         for (Building b : allBuilding) {
             if (!b.outOfBusiness()) {
@@ -459,9 +460,27 @@ public class GlobalUtil {
                 Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
                 sumGoodProb += prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
                 sumEvaProb += prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+                count++;
             }
         }
         //研发能力 = (发明成功率 *2 + 研究成功率)/2
-        return (sumGoodProb * 2 + sumEvaProb) / 2;
+        return (sumGoodProb * 2 + sumEvaProb) / 2 / count;
+    }
+    public static double getPromotionInfo() {
+        int count = 0;
+        double sumAbilitys = 0;
+        Set<Integer> proIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.PUBLIC, new HashSet<>());
+        for (Building b : allBuilding) {
+            if (!b.outOfBusiness()) {
+                PublicFacility facility = (PublicFacility) b;
+                for (Integer typeId : proIds) {
+                    sumAbilitys += facility.getLocalPromoAbility(typeId);
+                }
+                count++;
+            }
+        }
+        //全城推广能力 = 所有不同类型推广能力和 / 4
+        return sumAbilitys / count / 4;
     }
 }
