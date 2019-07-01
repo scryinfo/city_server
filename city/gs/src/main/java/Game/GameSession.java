@@ -1867,17 +1867,15 @@ public class GameSession {
 		Item item = new Item(c.getItem());
 		//如果运出的一方没有足够的存量进行锁定，那么操作失败
 		if(!src.lock(item.key, item.n)) {
-			this.write(Package.fail(cmd));
 			System.err.println("运输失败：数量不够");
-			this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+			this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
 			return;
 		}
 		//如果运入的一方没有足够的预留空间，那么操作失败
 		if(!dst.reserve(item.key.meta, item.n)) {
 			src.unLock(item.key, item.n);
-			this.write(Package.fail(cmd));
 			System.err.println("运输失败：空间不足");
-			this.write(Package.fail(cmd, Common.Fail.Reason.spaceNotEnough));
+			this.write(Package.fail(cmd,Common.Fail.Reason.spaceNotEnough));
 			return;
 		}
 
