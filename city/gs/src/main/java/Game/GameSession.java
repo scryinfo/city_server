@@ -836,10 +836,10 @@ public class GameSession {
 		if(s.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
 			GameDb.saveOrUpdate(s);
 			this.write(Package.create(cmd, c));
-		}
-		else
-			this.write(Package.fail(cmd,Common.Fail.Reason.shelfSetFail));
+		} else {
+			this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
 			//this.write(Package.fail(cmd));
+		}
 	}
 
 	public void buyInShelf(short cmd, Message message) throws Exception {
@@ -1843,7 +1843,7 @@ public class GameSession {
 			this.write(Package.create(cmd, c));
 		}
 		else
-			this.write(Package.fail(cmd));
+			this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
 	}
 	public void transferItem(short cmd, Message message) throws Exception {
 		Gs.TransferItem c = (Gs.TransferItem)message;
