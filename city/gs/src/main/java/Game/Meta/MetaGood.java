@@ -45,4 +45,7 @@ public final class MetaGood extends MetaItem
     public static boolean legalCategory(int category) {
         return mapping.keySet().contains(category);
     }
+    public static boolean isItem(int id) {
+        return id / MetaData.ID_RADIX >= GOOD;
+    }
 }

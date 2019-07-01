@@ -238,7 +238,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             return false;
         if(!autoRepOn) {//非自动补货
             int updateNum = content.n - item.n;//增加或减少：当前货架数量-现在货架数量
-            if(content.n==0&&item.n==0){//若非自动补货，切货架数量为0，直接删除
+            if(content.n==0&&item.n==0){//若非自动补货，且货架数量为0，直接删除
                 content.autoReplenish=autoRepOn;
                 IShelf shelf=this;
                 shelf.delshelf(item.key, content.n, true);
@@ -269,7 +269,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             //删除
             shelf.delshelf(item.key, content.n, true);
             //3.修改货架上的数量
-            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
+            Item itemInStore = new Item(item.key,this.store.getItemCount(item.key));
             //重新上架
             shelf.addshelf(itemInStore,price,autoRepOn);
             return true;
@@ -297,5 +297,10 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     public void cleanData(){
         this.store.clearData();
         this.shelf.clearData();
+    }
+
+    @Override
+    public int getItemCount(ItemKey key) {
+        return this.store.getItemCount(key);
     }
 }
