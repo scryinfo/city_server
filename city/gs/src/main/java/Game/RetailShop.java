@@ -298,4 +298,9 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         this.store.clearData();
         this.shelf.clearData();
     }
+
+    @Override
+    public int getItemCount(ItemKey key) {
+        return this.store.getItemCount(key);
+    }
 }

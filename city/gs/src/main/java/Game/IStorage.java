@@ -47,4 +47,5 @@ public interface IStorage {
     boolean offset(ItemKey item, int n);
     boolean offset(MetaItem item, int n, UUID pid, int typeId);
     boolean delItem(Item item);
+    int getItemCount(ItemKey key);//获取当前不同商品种类的数量
 }
