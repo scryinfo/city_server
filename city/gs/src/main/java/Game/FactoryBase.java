@@ -146,10 +146,13 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                     completedLines.add(l.id);
                 }
             }
-            if (this.store.availableSize() > 0 && this.hasEnoughMaterial(l, ownerId())) {//当仓库容量已经足够并且有足够的数量,重新开始
-                l.start();
+            if(l.isPauseStatue()) {
+                if (this.store.availableSize() > 0 && this.hasEnoughMaterial(l, ownerId())) {//当仓库容量已经足够并且有足够的数量,重新开始
+                    l.start();
+                    l.ts = System.currentTimeMillis();
+                }
             }
-            if(l.isPauseStatue()){//如果当前是暂停状态，取消执行
+            if(l.isPauseStatue()){//如果当前还是暂停状态，取消执行
                 if(completedLines.size()>0)
                     delComplementLine(completedLines);//删除已完成生产的线
                 return;
