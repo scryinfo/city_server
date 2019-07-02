@@ -769,8 +769,10 @@ public class GameSession {
 			Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
 			this.write(Package.create(cmd, builder.build()));
 		}
-		else
-			this.write(Package.fail(cmd));
+		else {
+			this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+			System.err.println("数量或者货架空间不足");
+		}
 	}
 
 	public void setAutoReplenish(short cmd, Message message) throws Exception {

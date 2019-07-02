@@ -378,14 +378,12 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
                 this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn,produceId);
                 return true;
-            } else {
+            } else
                 return false;
-            }
         }else {//自动补货
             //1.判断容量是否已满
             if(this.shelf.full())
                 return false;
-            content.autoReplenish = autoRepOn;
             //2.设置价格
             content.price = price;
             IShelf shelf=this;

@@ -262,7 +262,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             //1.判断容量是否已满
             if(this.shelf.full())
                 return false;
-            content.autoReplenish = autoRepOn;
             //2.设置价格
             content.price = price;
             IShelf shelf=this;
