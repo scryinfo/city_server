@@ -130,7 +130,6 @@ public class BuildingUtil {
 
     public  void update(long diffNano) {
         if (timer.update(diffNano)) {
-            System.out.println("--------------走位.走位--------------");
             apartmentAvg.clear();
             _update();
         }
