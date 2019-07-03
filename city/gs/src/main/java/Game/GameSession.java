@@ -2100,7 +2100,8 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId)) {
 			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, c));
+			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllInProcessProto());
+			this.write(Package.create(cmd, builder.build()));
 		}
 		else
 			this.write(Package.fail(cmd));
