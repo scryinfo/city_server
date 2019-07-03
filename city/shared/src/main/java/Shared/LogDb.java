@@ -535,13 +535,17 @@ public class LogDb {
 
 	public static void flowAndLift(UUID buildingId,int flowcount,float lift)
 	{
-		long now = System.currentTimeMillis();
-		long time = now - now % 3600000;
-		Document document = new Document().append("t", time)
-				.append("b", buildingId)
-				.append("f", flowcount)
-				.append("l", lift);
-		flowAndLift.insertOne(document);
+		try {
+			long now = System.currentTimeMillis();
+			long time = now - now % 3600000;
+			Document document = new Document().append("t", time)
+					.append("b", buildingId)
+					.append("f", flowcount)
+					.append("l", lift);
+			flowAndLift.insertOne(document);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
