@@ -4287,7 +4287,7 @@ public class GameSession {
 			GameDb.saveOrUpdate(building);
 			this.write(Package.create(cmd, building.toProto()));
 		}else{
-			this.write(Package.fail(cmd,Common.Fail.Reason.accountInFreeze));
+			this.write(Package.fail(cmd,Common.Fail.Reason.timeNotSatisfy));
 		}
     }
     //查询原料厂信息
