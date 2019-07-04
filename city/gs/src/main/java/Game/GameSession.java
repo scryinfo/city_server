@@ -3408,6 +3408,15 @@ public class GameSession {
 		}else{
 			player.setCompanyName(newName);
 			player.setLast_modify_time(new Date().getTime());
+			//修改玩家未修改名称的建筑
+            List<Building> buildings = new ArrayList<>();
+            City.instance().forEachBuilding(player.id(),b->{
+                if(b.getLast_modify_time()==0){
+                    b.setName(newName);
+                    buildings.add(b);
+                }
+            });
+            GameDb.saveOrUpdate(buildings);
 			GameDb.saveOrUpdate(player);
 			Gs.RoleInfo roleInfo = playerToRoleInfo(player);
 			this.write(Package.create(cmd,roleInfo));
