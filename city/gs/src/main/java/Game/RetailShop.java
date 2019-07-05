@@ -238,28 +238,23 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             return false;
         if(!autoRepOn) {//非自动补货
             int updateNum = content.n - item.n;//增加或减少：当前货架数量-现在货架数量
-            if(content.n==0&&item.n==0){//把已关闭自动补货切货架数量为0的商品下架
+            if(content.n==0&&item.n==0){//若非自动补货，且货架数量为0，直接删除
                 content.autoReplenish=autoRepOn;
                 IShelf shelf=this;
                 shelf.delshelf(item.key, content.n, true);
                 return true;
             }
-            //判断存储空间
-            if (this.store.canSave(item.key, updateNum)) {
-                boolean lock = false;
-                if (updateNum < 0) {
-                    lock = this.store.lock(item.key, Math.abs(updateNum));
-                } else {
-                    lock = this.store.unLock(item.key, updateNum);
-                }
-                if (lock) {
-                    content.price = price;
-                    content.n = item.n;
-                    content.autoReplenish = autoRepOn;
-                    return true;
-                } else {
-                    return false;
-                }
+            boolean lock = false;
+            if (updateNum < 0) {
+                lock = this.store.lock(item.key, Math.abs(updateNum));
+            } else {
+                lock = this.store.unLock(item.key, updateNum);
+            }
+            if (lock) {
+                content.price = price;
+                content.n = item.n;
+                content.autoReplenish = autoRepOn;
+                return true;
             } else {
                 return false;
             }
@@ -267,14 +262,13 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
             //1.判断容量是否已满
             if(this.shelf.full())
                 return false;
-            content.autoReplenish = autoRepOn;
             //2.设置价格
             content.price = price;
             IShelf shelf=this;
             //删除
             shelf.delshelf(item.key, content.n, true);
             //3.修改货架上的数量
-            Item itemInStore = new Item(item.key,this.store.availableQuantity(item.key.meta));
+            Item itemInStore = new Item(item.key,this.store.getItemCount(item.key));
             //重新上架
             shelf.addshelf(itemInStore,price,autoRepOn);
             return true;
@@ -297,5 +291,15 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     //获取总知名度
     public double getTotalBrand(){
         return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();
+    }
+
+    public void cleanData(){
+        this.store.clearData();
+        this.shelf.clearData();
+    }
+
+    @Override
+    public int getItemCount(ItemKey key) {
+        return this.store.getItemCount(key);
     }
 }

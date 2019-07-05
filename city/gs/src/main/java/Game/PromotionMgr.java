@@ -170,8 +170,8 @@ public class PromotionMgr {
                 GameDb.saveOrUpdate(fcySeller);
                 idToRemove.add(entry.getKey());
                 //推广完成通知
-                //paras: 第一个是广告商建筑id，第二个是提升点数，第三个推广时长
-                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.sellerBuildingId}, new int[]{(int) addition, (int) promHour});
+                //paras: 第一个是广告商建筑id，第二个是推广类型，第三个加成值,第四个是推广时长
+                MailBox.instance().sendMail(Mail.MailType.PROMOTE_FINISH.getMailType(), promotion.buyerId, null, new UUID[]{promotion.sellerBuildingId}, new int[]{objType,(int) addition, (int) promHour});
                 //发送给广告商
                 GameServer.sendTo(new ArrayList<UUID>(Arrays.asList(promotion.sellerId)) ,
                         Package.create( GsCode.OpCode.adRemovePromoOrder_VALUE,

@@ -335,4 +335,9 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     public boolean shelfSet(Item item, int price,boolean autoRepOn) {
         return false;
     }
+
+    @Override
+    public int getItemCount(ItemKey key) {
+        return this.store.getItemCount(key);
+    }
 }

@@ -19,6 +19,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import Game.Gambling.FlightManager;
+import Game.ddd.ddd_purchase;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -268,6 +269,18 @@ public class GameDb {
 						builder.equal(root.get("pid"), playerId)
 						, builder.equal(root.get("at"), techId)));
 		return session.createQuery(query).list();
+	}
+
+	public static List<ddd_purchase> GetTradingRecords(UUID playerId, long range_StartTime, long range_EndTime)
+	{
+		Session session = sessionFactory.openSession();
+		String hql = "from ddd_purchase pur where pur.player_id is :pid and pur.create_time between :st and :ed or pur.completion_time between :st and :ed";
+		Query query = session.createQuery(hql)
+				.setParameter("st",range_StartTime)
+				.setParameter("ed",range_EndTime)
+				.setParameter("pid",playerId);
+		List<ddd_purchase> purchase = query.list();
+		return purchase;
 	}
 
 	public static <T> List<T> getAllFromOneEntity(Class<T> c)
@@ -1323,7 +1336,7 @@ public class GameDb {
 		try {
 			session = sessionFactory.openStatelessSession();
 			transaction = session.beginTransaction();
-			amount = (Long) session.createQuery("SELECT COUNT(*) FROM Player").uniqueResult();
+			amount = (Long) session.createQuery("SELECT COUNT(ID) FROM Player").uniqueResult();
 			transaction.commit();
 		} catch (RuntimeException e) {
 			transaction.rollback();
@@ -1427,10 +1440,13 @@ public class GameDb {
 
 	//游戏币/ddd的交换比率， 这里应该是访问数据库ddd与游戏币的交换比率
 	static public double getExchangeRate(){
-		return 1.00; //暂定1
+		return 1000000.00; //暂定1
 	}
 	static public double calGameCurrencyFromDDD(double ddd){
 		return ddd*getExchangeRate();
 	}
+    static public double calDDDFromEEE(double eee){
+        return eee/getExchangeRate();
+    }
 }
 

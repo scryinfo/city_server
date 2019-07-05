@@ -655,4 +655,8 @@ public class PublicFacility extends Building{
         int workerAdd1H = meta.output1P1Hour;
         return salaryAdd * workerAdd1H;
     }
+
+    public void clear() {
+        this.selledPromotion.clear();
+    }
 }

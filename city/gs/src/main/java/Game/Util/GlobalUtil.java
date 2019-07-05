@@ -135,22 +135,26 @@ public class GlobalUtil {
                switch (type){
                    case MetaBuilding.RETAIL:
                        RetailShop retailShop = (RetailShop) building;
-                       sumPrice += retailShop.getCurPromPricePerHour();
+                       int retailPrice = retailShop.getCurPromPricePerHour();
+                       sumPrice += retailPrice;
                        count++;
                        break;
                    case MetaBuilding.APARTMENT:
                        Apartment apartment = (Apartment) building;
-                       sumPrice += apartment.cost();
+                       int aparPrice = apartment.cost();
+                       sumPrice += aparPrice;
                        count++;
                        break;
                    case MetaBuilding.LAB:
                        Laboratory lab = (Laboratory) building;
-                       sumPrice += lab.getPricePreTime();
+                       int labPrice = lab.getPricePreTime();
+                       sumPrice += labPrice;
                        count++;
                        break;
                    case MetaBuilding.PUBLIC:
                        PublicFacility facility = (PublicFacility) building;
-                       sumPrice += facility.getCurPromPricePerHour();
+                       int facPrice = facility.getCurPromPricePerHour();
+                       sumPrice += facPrice;
                        count++;
                        break;
                }
@@ -324,7 +328,7 @@ public class GlobalUtil {
         return qtyScore;
     }
 
-    //获取商品的品质评分(参数1 当前品质总值，参数2 商品id 参数3 基础品牌值)
+    //获取商品的品质评分(参数1 当前品质总值，参数2 商品id 参数3 商品的基础品质值)
     public static double getGoodQtyScore(double localQuality,int goodId,int baseQty){
         Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(goodId, Gs.Eva.Btype.Quality_VALUE);
         Eva maxEva = cityQtyMap.get("max");//全城最大Eva
@@ -357,57 +361,73 @@ public class GlobalUtil {
             for (Item item : saleDetail.keySet()) {
                 sumPrice += saleDetail.get(item);
                 double brandScore = getBrandScore(item.getKey().getTotalBrand(), itemId);
-                double goodQtyScore = getGoodQtyScore(item.getKey().getTotalQty(), itemId, item.getKey().qty);
+                double goodQtyScore = getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
                 sumScore += (brandScore + goodQtyScore) / 2;
+                count++;
             }
-            count++;
         }
-        list.add((double) (sumPrice / (count == 0 ? -1 : count)));
-        list.add((sumScore / (count == 0 ? -1 : count)));
+        list.add((double) (count == 0 ? 0 : sumPrice / count));
+        list.add(count == 0 ? 1 : sumScore / count);
         return list;
     }
 
-    public static List<Double> getRetailInfo(int itemId) {
+    public static List<Double> getRetailGoodInfo(int itemId) {
         List<Double> list = new ArrayList<>();
         int sumPrice = 0;
         double sumGoodScore = 0;
-        double sumRetailScore = 0;
         int count = 0;
-        Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>());
         for (Building b : allBuilding) {
-            RetailShop retailShop = (RetailShop) b;
-            Map<Item, Integer> saleDetail = retailShop.getSaleDetail(itemId);
-            for (Item item : saleDetail.keySet()) {
-                sumPrice += saleDetail.get(item);
-                double brandScore = getBrandScore(item.getKey().getTotalBrand(), itemId);
-                double goodQtyScore = getGoodQtyScore(item.getKey().getTotalQty(), itemId, item.getKey().qty);
-                sumGoodScore += (brandScore + goodQtyScore) / 2;
+            if (!b.outOfBusiness()) {
+                RetailShop retailShop = (RetailShop) b;
+                Map<Item, Integer> saleDetail = retailShop.getSaleDetail(itemId);
+                for (Item item : saleDetail.keySet()) {
+                    sumPrice += saleDetail.get(item);
+                    double brandScore = getBrandScore(item.getKey().getTotalBrand(), itemId);
+                    double goodQtyScore = getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+                    sumGoodScore += (brandScore + goodQtyScore) / 2;
+                    count++;
+                }
+
             }
-            double brandScore = getBrandScore(retailShop.getTotalBrand(), retailShop.type());
-            double retailScore = getBuildingQtyScore(retailShop.getTotalQty(), retailShop.type());
-            sumRetailScore += (brandScore + retailScore) / 2;
-            count++;
         }
-        list.add((double) (sumPrice / (count == 0 ? -1 : count)));
-        list.add(sumGoodScore / (count == 0 ? -1 : count));
-        list.add(sumRetailScore / (count == 0 ? -1 : count));
+        list.add((double) (count == 0 ? 0 : sumPrice / count));
+        list.add(count == 0 ? 1 : sumGoodScore / count);
         return list;
     }
 
-    public static double getMaterialInfo(int itemId) {
-        int sumPrice = 0;
+    public static double getRetailInfo() {
+        double sumRetailScore = 0;
         int count = 0;
-        Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL,new HashSet<>());
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>());
         for (Building b : allBuilding) {
+            if (!b.outOfBusiness()) {
+                RetailShop retailShop = (RetailShop) b;
+                double brandScore = getBrandScore(retailShop.getTotalBrand(), retailShop.type());
+                double retailScore = getBuildingQtyScore(retailShop.getTotalQty(), retailShop.type());
+                sumRetailScore += (brandScore + retailScore) / 2;
+                count++;
+            }
+
+        }
+        return count == 0 ? 1 : sumRetailScore / count;
+    }
+
+    public static double getMaterialInfo(int itemId) {
+        double sumPrice = 0;
+        int count = 0;
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>());
+        for (Building b : allBuilding) {
+            if (!b.outOfBusiness()) {
                 MaterialFactory mf = (MaterialFactory) b;
                 Map<Item, Integer> saleInfo = mf.getSaleDetail(itemId);
                 if (saleInfo != null && saleInfo.size() != 0) {
                     sumPrice += new ArrayList<>(saleInfo.values()).get(0);
                     count++;
                 }
+            }
         }
-        double price = sumPrice / (count == 0 ? -1 : count);
-        return price;
+        return count == 0 ? 0 : sumPrice / count;
     }
 
     public static List<Double> getApartmentInfo() {
@@ -418,28 +438,49 @@ public class GlobalUtil {
         Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>());
         for (Building b : allBuilding) {
             Apartment apartment = (Apartment) b;
-            if (apartment.cost() > 0) {
+            if (!apartment.outOfBusiness()) {
                 sumScore += GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
                 sumPrice += apartment.cost();
                 count++;
             }
         }
-        list.add((double) (sumPrice / (count == 0 ? -1 : count)));
-        list.add(sumScore / (count == 0 ? -1 : count));
+        list.add((double) (count == 0 ? 0 : sumPrice / count));
+        list.add(count == 0 ? 1 : sumScore / count);
         return list;
     }
 
     public static double getLaboratoryInfo() {
         double sumEvaProb = 0;
         double sumGoodProb = 0;
-        Collection<Building> allBuilding =  City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB,new HashSet<>());
+        int count = 0;
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.LAB, new HashSet<>());
         for (Building b : allBuilding) {
-            Laboratory laboratory = (Laboratory) b;
-            Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
-            sumGoodProb += prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
-            sumEvaProb += prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+            if (!b.outOfBusiness()) {
+                Laboratory laboratory = (Laboratory) b;
+                Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
+                sumGoodProb += prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
+                sumEvaProb += prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+                count++;
+            }
         }
         //研发能力 = (发明成功率 *2 + 研究成功率)/2
-        return (sumGoodProb * 2 + sumEvaProb) / 2;
+        return (sumGoodProb * 2 + sumEvaProb) / 2 / count;
+    }
+    public static double getPromotionInfo() {
+        int count = 0;
+        double sumAbilitys = 0;
+        Set<Integer> proIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
+        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.PUBLIC, new HashSet<>());
+        for (Building b : allBuilding) {
+            if (!b.outOfBusiness()) {
+                PublicFacility facility = (PublicFacility) b;
+                for (Integer typeId : proIds) {
+                    sumAbilitys += facility.getLocalPromoAbility(typeId);
+                }
+                count++;
+            }
+        }
+        //全城推广能力 = 所有不同类型推广能力和 / 4
+        return sumAbilitys / count / 4;
     }
 }

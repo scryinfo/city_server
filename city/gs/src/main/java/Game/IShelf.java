@@ -23,7 +23,7 @@ public interface IShelf {
         if(i != null){
             shelf.delshelf(k, i.n, true);
         }
-        Item itemInStore = new Item(k,storage.availableQuantity(k.meta));
+        Item itemInStore = new Item(k,storage.getItemCount(k));
         shelf.addshelf(itemInStore,i.price, i.autoReplenish);
     }
     Map<Item, Integer> getSaleDetail(int itemId);

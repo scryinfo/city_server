@@ -81,7 +81,7 @@ public class Apartment extends Building implements IBuildingContract
         renters.put(npc.id(), npc);
         if (!npcSelectable()) {
             //住宅已满通知
-            MailBox.instance().sendMail(Mail.MailType.APARTMENT_FULL.getMailType(), this.ownerId(), null, null);
+            MailBox.instance().sendMail(Mail.MailType.APARTMENT_FULL.getMailType(), this.ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
         }
     }
 

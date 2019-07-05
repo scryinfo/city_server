@@ -395,7 +395,7 @@ public class BrandManager {
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 
-    public void getAllBuildingBrandOrQuality(){
+    public void getAllBuildingBrandOrQuality(){ //暂不使用
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
     	City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>()).forEach(b->{
@@ -465,4 +465,8 @@ public class BrandManager {
         return infos;
     }
 
+    public boolean brandIsExist(UUID pid, int typeId){//查询是否存在该品牌信息
+        BrandKey bk = new BrandKey(pid,typeId);
+        return null==allBrandInfo.get(bk)?false:true;
+    }
 }

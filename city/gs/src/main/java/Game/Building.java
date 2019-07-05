@@ -105,12 +105,19 @@ public abstract class Building implements Ticker{
 
     public void watchDetailInfoAdd(GameSession s) {
         detailWatchers.add(s.channelId());
+        if(canUseBy(s.id())){
+            ownerWatchers.add(s.channelId());
+        }
     }
     public void watchDetailInfoDel(GameSession s) {
         detailWatchers.remove(s.channelId());
+        ownerWatchers.remove(s.channelId());
     }
     @Transient
-    Set<ChannelId> detailWatchers = new HashSet<>();
+    Set<ChannelId> detailWatchers = new HashSet<>();//所有在当前建筑中的人
+
+    @Transient
+    Set<ChannelId> ownerWatchers = new HashSet<>();//建筑本人的ChannelId
 
     public void broadcastCreate() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
@@ -128,11 +135,15 @@ public abstract class Building implements Ticker{
         City.instance().send(gip, pack);
     }
     protected void sendToWatchers(Shared.Package p) {
-        GameServer.sendTo(this.detailWatchers, p);
+        //GameServer.sendTo(this.detailWatchers, p);
+        GameServer.sendTo(this.ownerWatchers, p);
     }
-    protected void sendToWatchers(UUID buidlingId,int itemId,int count,int price,boolean autoReplenish) {
+    protected void sendToWatchers(UUID buidlingId,int itemId,int count,int price,boolean autoReplenish,UUID producerId) {
         Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
         builder.setBuildingId(Util.toByteString(buidlingId)).setItemId(itemId).setSelledCount(count).setSelledPrice(price).setAutoRepOn(autoReplenish);
+        if(producerId!=null){
+            builder.setProducerId(Util.toByteString(producerId));
+        }
         GameServer.sendTo(this.detailWatchers, Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build()));
     }
     public List<Building> getAllBuildingInEffectRange() {
@@ -634,10 +645,6 @@ public abstract class Building implements Ticker{
         addFlowCount();
 //        flowCount += 1;
         enterImpl(npc);
-      /*  //住宅入住通知
-        int[] num = {flowCount};
-        UUID[] apartmentOwerIdAndBid = {this.ownerId,id()};
-        MailBox.instance().sendMail(Mail.MailType.APARTMENT_CHECK_IN.getMailType(),this.ownerId,null,apartmentOwerIdAndBid,num);*/
     }
 
     public void addFlowCount()

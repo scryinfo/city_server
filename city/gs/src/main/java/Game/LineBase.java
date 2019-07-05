@@ -42,6 +42,9 @@ public abstract class LineBase {
     @Column(nullable = false)
     long ts = 0;      //生产开始时间
 
+    @Transient
+    boolean pause=false;//生产线状态
+
     protected LineBase() {
     }
     public abstract ItemKey newItemKey(UUID producerId, int qty,UUID pid);
@@ -114,5 +117,16 @@ public abstract class LineBase {
 
     public void resume() {
         this.suspend = false;
+    }
+
+    public void pause(){
+        this.pause = true;
+    }
+    public boolean isPauseStatue(){
+        return pause;
+    }
+
+    public void start(){
+        this.pause = false;
     }
 }
