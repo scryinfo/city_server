@@ -26,6 +26,7 @@ public class NpcManager {
         if(waitToUpdate.isEmpty())
             return;
         Set updates = new HashSet();
+        Map<GridIndexPair, Gs.MoneyChange> packs = new HashMap<>();
         Set<UUID> ids = waitToUpdate.get(updateIdx);
         Iterator<UUID> i = ids.iterator();
         while(i.hasNext()) {
@@ -38,6 +39,10 @@ public class NpcManager {
                     updates.addAll(u);
             }
         }
+
+        packs.forEach((k,v)->{
+            City.instance().send(k, Package.create(GsCode.OpCode.moneyChange_VALUE, v));
+        });
         GameDb.saveOrUpdate(updates);
         if(reCalcuWaitToUpdate) {
             ids.forEach(id -> {
