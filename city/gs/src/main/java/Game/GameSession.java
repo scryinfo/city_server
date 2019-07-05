@@ -2100,7 +2100,8 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId)) {
 			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, c));
+			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllInProcessProto());
+			this.write(Package.create(cmd, builder.build()));
 		}
 		else
 			this.write(Package.fail(cmd));
@@ -3407,6 +3408,15 @@ public class GameSession {
 		}else{
 			player.setCompanyName(newName);
 			player.setLast_modify_time(new Date().getTime());
+			//修改玩家未修改名称的建筑
+            List<Building> buildings = new ArrayList<>();
+            City.instance().forEachBuilding(player.id(),b->{
+                if(b.getLast_modify_time()==0){
+                    b.setName(newName);
+                    buildings.add(b);
+                }
+            });
+            GameDb.saveOrUpdate(buildings);
 			GameDb.saveOrUpdate(player);
 			Gs.RoleInfo roleInfo = playerToRoleInfo(player);
 			this.write(Package.create(cmd,roleInfo));
@@ -4297,7 +4307,7 @@ public class GameSession {
 			GameDb.saveOrUpdate(building);
 			this.write(Package.create(cmd, building.toProto()));
 		}else{
-			this.write(Package.fail(cmd,Common.Fail.Reason.accountInFreeze));
+			this.write(Package.fail(cmd,Common.Fail.Reason.timeNotSatisfy));
 		}
     }
     //查询原料厂信息

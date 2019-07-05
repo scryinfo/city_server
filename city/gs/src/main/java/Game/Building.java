@@ -105,12 +105,19 @@ public abstract class Building implements Ticker{
 
     public void watchDetailInfoAdd(GameSession s) {
         detailWatchers.add(s.channelId());
+        if(canUseBy(s.id())){
+            ownerWatchers.add(s.channelId());
+        }
     }
     public void watchDetailInfoDel(GameSession s) {
         detailWatchers.remove(s.channelId());
+        ownerWatchers.remove(s.channelId());
     }
     @Transient
-    Set<ChannelId> detailWatchers = new HashSet<>();
+    Set<ChannelId> detailWatchers = new HashSet<>();//所有在当前建筑中的人
+
+    @Transient
+    Set<ChannelId> ownerWatchers = new HashSet<>();//建筑本人的ChannelId
 
     public void broadcastCreate() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
@@ -128,7 +135,8 @@ public abstract class Building implements Ticker{
         City.instance().send(gip, pack);
     }
     protected void sendToWatchers(Shared.Package p) {
-        GameServer.sendTo(this.detailWatchers, p);
+        //GameServer.sendTo(this.detailWatchers, p);
+        GameServer.sendTo(this.ownerWatchers, p);
     }
     protected void sendToWatchers(UUID buidlingId,int itemId,int count,int price,boolean autoReplenish,UUID producerId) {
         Gs.salesNotice.Builder builder = Gs.salesNotice.newBuilder();
