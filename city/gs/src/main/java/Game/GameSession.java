@@ -3923,6 +3923,17 @@ public class GameSession {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
 	}
+
+	//查询建筑名称
+	public void queryBuildingName(short cmd, Message message) {
+		Gs.Id id = (Gs.Id) message;
+		UUID buildingId = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.outOfBusiness()) {
+			return;
+		}
+		this.write(Package.create(cmd, Gs.Str.newBuilder().setStr(building.getName()).build()));
+	}
 	//住宅推荐价格 √
 	public void queryApartmentRecommendPrice(short cmd, Message message) {
 		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;

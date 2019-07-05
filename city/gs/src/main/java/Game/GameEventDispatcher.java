@@ -217,6 +217,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.retailGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.GoodSummary.PARSER, GameSession.class, "retailGuidePrice"));
 			table.put((short) GsCode.OpCode.promotionGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.PromotionMsg.PARSER, GameSession.class, "promotionGuidePrice"));
 			table.put((short) GsCode.OpCode.laboratoryGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.LaboratoryMsg.PARSER, GameSession.class, "laboratoryGuidePrice"));
+			table.put((short) GsCode.OpCode.queryBuildingName_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryBuildingName"));
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));
