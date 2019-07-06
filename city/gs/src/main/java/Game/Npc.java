@@ -156,6 +156,7 @@ public class Npc {
     public boolean hasApartment() {
         return this.apartment != null;
     }
+
     public Set<Object> update(long diffNano) {
         if(this.born.outOfBusiness())
             return null;

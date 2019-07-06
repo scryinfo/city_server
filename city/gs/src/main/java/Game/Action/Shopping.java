@@ -124,6 +124,7 @@ public class Shopping implements IAction {
             sendShelfNotice(sellShop,chosen);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 
+            City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setMoney((int) (chosen.price-minerCost)).build()));
 
             Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
@@ -220,8 +221,9 @@ public class Shopping implements IAction {
               //db操作 从外部挪进来
               Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
               GameDb.saveOrUpdate(u);
-              
-              //再次购物
+              City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setMoney((int) (chosen.price-minerCost)).build()));
+
+            //再次购物
               double spend=MetaData.getGoodSpendMoneyRatio(chosen.meta.id);
               //工资区分失业与否
               int salary=npc.building().singleSalary();

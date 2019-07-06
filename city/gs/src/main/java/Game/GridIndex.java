@@ -36,7 +36,7 @@ public class GridIndex implements Comparable<GridIndex> {
         return Objects.hash(x, y);
     }
 
-    GridIndexPair toSyncRange() {
+    public GridIndexPair toSyncRange() {
         GridIndexPair res = new GridIndexPair();
         int delta = Grid.SYNC_RANGE_DELTA;
         int ux = this.x-delta<0?0:this.x-delta;
