@@ -726,8 +726,10 @@ public class GameSession {
 		if(m == null)
 			return;
 		Coordinate ul = new Coordinate(c.getPos());
-		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
+		if(!GroundManager.instance().canBuild(player.id(), m.area(ul))) {
+			System.err.println("建造失败");
 			return;
+		}
 		Building building = Building.create(mid, ul, player.id());
 		building.setName(player.getCompanyName());
 		boolean ok = City.instance().addBuilding(building);
