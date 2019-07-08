@@ -726,8 +726,10 @@ public class GameSession {
 		if(m == null)
 			return;
 		Coordinate ul = new Coordinate(c.getPos());
-		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
+		if(!GroundManager.instance().canBuild(player.id(), m.area(ul))) {
+			System.err.println("建造失败");
 			return;
+		}
 		Building building = Building.create(mid, ul, player.id());
 		building.setName(player.getCompanyName());
 		boolean ok = City.instance().addBuilding(building);
@@ -3932,6 +3934,17 @@ public class GameSession {
 	public void getPlayerAmount(short cmd) {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
+	}
+
+	//查询建筑名称
+	public void queryBuildingName(short cmd, Message message) {
+		Gs.Id id = (Gs.Id) message;
+		UUID buildingId = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.outOfBusiness()) {
+			return;
+		}
+		this.write(Package.create(cmd, Gs.Str.newBuilder().setStr(building.getName()).build()));
 	}
 	//住宅推荐价格 √
 	public void queryApartmentRecommendPrice(short cmd, Message message) {
