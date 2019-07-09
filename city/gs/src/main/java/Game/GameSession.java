@@ -1386,9 +1386,25 @@ public class GameSession {
 		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId,true);
 		Gs.AdRemovePromoOrder.Builder newMsg = gs_AdRemovePromoOrder.toBuilder();
 		tslist.forEach(ts->newMsg.addPromoTsChanged(ts.toProto()));
-		GameDb.saveOrUpdate(fcySeller);
 		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
 		seller.delpayedPromotion(promoId);
+
+		//获取该广告公司最后一个广告
+		UUID lastPromotion = fcySeller.getLastPromotion();
+
+		if(lastPromotion == null){
+			fcySeller.setNewPromoStartTs(-1);
+		}else{
+			PromoOrder lastOrder = PromotionMgr.instance().getPromotion(lastPromotion);
+			if(lastOrder != null){
+				fcySeller.setNewPromoStartTs(lastOrder.promStartTs);
+			}else{
+				if(GlobalConfig.DEBUGLOG){
+					GlobalConfig.cityError("GameSession.AdRemovePromoOrder(): PromoOrder not exist which id equal to "+ lastPromotion);
+				}
+			}
+		}
+		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知
 		this.write(Package.create(cmd, newMsg.build()));
