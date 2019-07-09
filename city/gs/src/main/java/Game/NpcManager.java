@@ -197,8 +197,8 @@ public class NpcManager {
     public void hourTickAction(int nowHour) {
     }
     PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
-    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
-    //PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//每天0点开始更新数据
+   // PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
+    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//每天0点开始更新数据
 
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
@@ -208,7 +208,7 @@ public class NpcManager {
             calendar.set(Calendar.SECOND, 0);
             Date startDate = calendar.getTime();
             long countTime=startDate.getTime()+1000 * 60  * 60;
-            countNpcByType().forEach((k,v)->{
+            countRealNpcByType().forEach((k,v)->{
             	LogDb.npcTypeNum(countTime,k,v);//统计并入库
             });
         }
@@ -219,10 +219,17 @@ public class NpcManager {
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
-  	  countMap.put(1, realNpc.get(1));
-  	  countMap.put(2, realNpc.get(2));
+        countMap.put(1, allNpc.size());
+        countMap.put(2, unEmployeeNpc.size());
 	  return countMap;
-   }
+    }
+
+    public Map<Integer, Integer> countRealNpcByType(){
+        Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
+        countMap.put(1, realNpc.getOrDefault(1,0));
+        countMap.put(2, realNpc.getOrDefault(2,0));
+        return countMap;
+    }
     public Map<Integer, Long> countNpcByBuildingType(){
     	Map<Integer, Long> countMap= new HashMap<Integer, Long>();
     	//计算各种建筑npc的数量，包括工作npc和失业npc
@@ -273,27 +280,28 @@ public class NpcManager {
     //添加实际需求工作npc
     public void startBusiness(int npcNum){//添加实际工作npc
         long nowSecond = DateUtil.getNowSecond();
+        int v = (int)Math.ceil(npcNum * ((86400 - (int) nowSecond) / 86400.0));//要增加或减少的npc数量
         //增加工作npc人口
-        int workNum = (int) (realNpc.getOrDefault(1,0) + npcNum * ((86400 - (int)nowSecond) / 86400.0));
+        int workNum = realNpc.getOrDefault(1,0) + v;
 
         //失业npc减少
-        int unEmployeeNpc = (int) (realNpc.getOrDefault(2,0) - npcNum * ((86400 - (int)nowSecond) / 86400.0));
+        int unEmployeeNpc =realNpc.getOrDefault(2,0) - v;
         if (unEmployeeNpc<0){
             unEmployeeNpc=0;
         }
         realNpc.put(1, workNum);
         realNpc.put(2, unEmployeeNpc);
-
     }
 
     //添加实际需求失业人口
     public void shutdownBusiness(int npcNum){//添加实际工作npc
         long nowSecond = DateUtil.getNowSecond();
+        int v = (int)Math.ceil(npcNum * ((86400 - (int) nowSecond) / 86400.0));
         //失业npc增加
-        int unEmployeeNpc = (int) (realNpc.getOrDefault(2,0) + npcNum * ((86400 - (int)nowSecond) / 86400.0));
+        int unEmployeeNpc = realNpc.getOrDefault(2,0) + v;
 
        //就业npc减少
-        int workNum = (int) (realNpc.getOrDefault(1,0) - npcNum * ((86400 - (int)nowSecond) / 86400.0));
+        int workNum = realNpc.getOrDefault(1,0) - v;
         if (workNum<0){
             workNum=0;
         }
@@ -302,6 +310,6 @@ public class NpcManager {
     }
 
     public int getRealNpcNumByType(int type){
-        return realNpc.get(type);
+        return realNpc.getOrDefault(type,0);
     }
 }

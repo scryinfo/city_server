@@ -531,6 +531,7 @@ public abstract class Building implements Ticker{
     		NpcManager.instance().addWorkNpc(npcList,this);
     		npcs.addAll(npcList);
     		int num=(requireWorkNum-unEmployeeNpcNum)/4; //每种类型还差npc数量
+            NpcManager.instance().startBusiness(requireWorkNum-unEmployeeNpcNum);
     	  	this.metaBuilding.npc.forEach((k,v)->{
         		for(Npc npc : NpcManager.instance().create(k, num, this, 0))
         		{
