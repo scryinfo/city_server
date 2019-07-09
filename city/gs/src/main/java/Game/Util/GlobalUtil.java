@@ -469,7 +469,7 @@ public class GlobalUtil {
     public static double getPromotionInfo() {
         int count = 0;
         double sumAbilitys = 0;
-        Set<Integer> proIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
+        Set<Integer> proIds = MetaData.getAllBuildingTech(MetaBuilding.PUBLIC);
         Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.PUBLIC, new HashSet<>());
         for (Building b : allBuilding) {
             if (!b.outOfBusiness()) {

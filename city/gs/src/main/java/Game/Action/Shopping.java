@@ -125,6 +125,7 @@ public class Shopping implements IAction {
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
 
             City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
+
             Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))
