@@ -67,4 +67,14 @@ public class DateUtil{
 		System.out.println(format.format(getTodayEnd()));
 		System.out.println(format.format(getCurrentHour55()));
 	}
+
+	public static long  getNowSecond(){
+		//得到今天经过的秒数
+		Calendar calendar = Calendar.getInstance();
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+		int minute = calendar.get(Calendar.MINUTE);
+		int seconds = calendar.get(Calendar.SECOND);
+		int todaySecond = (hour * 3600 + minute * 60 + seconds);
+		return todaySecond;
+	}
 }
