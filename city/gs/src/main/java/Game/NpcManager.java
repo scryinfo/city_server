@@ -100,7 +100,7 @@ public class NpcManager {
             n.setUnEmpts(System.currentTimeMillis());
             unEmployeeNpc.put(n.id(),n); //添加失业npc
         });
-        //添加真实失业npc人口
+        //添加真实失业npc
         shutdownBusiness(npc.size());
         GameDb.saveOrUpdate(npc);
     }
