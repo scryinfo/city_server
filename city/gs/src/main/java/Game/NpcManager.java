@@ -272,24 +272,32 @@ public class NpcManager {
 
     //添加实际需求工作npc
     public void startBusiness(int npcNum){//添加实际工作npc
+        long nowSecond = DateUtil.getNowSecond();
         //增加工作npc人口
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-        int workNum = realNpc.getOrDefault(1,0) + npcNum * ((86400 - (int) seconds) / 86400);
-        realNpc.put(1, workNum);
+        int workNum = (int) (realNpc.getOrDefault(1,0) + npcNum * ((86400 - (int)nowSecond) / 86400.0));
+
         //失业npc减少
-        int unEmployeeNpc = realNpc.getOrDefault(2,0) - npcNum * ((86400 - (int) seconds) / 86400);
+        int unEmployeeNpc = (int) (realNpc.getOrDefault(2,0) - npcNum * ((86400 - (int)nowSecond) / 86400.0));
+        if (unEmployeeNpc<0){
+            unEmployeeNpc=0;
+        }
+        realNpc.put(1, workNum);
         realNpc.put(2, unEmployeeNpc);
 
     }
 
     //添加实际需求失业人口
     public void shutdownBusiness(int npcNum){//添加实际工作npc
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        long nowSecond = DateUtil.getNowSecond();
         //失业npc增加
-        int unEmployeeNpc = realNpc.getOrDefault(2,0) + npcNum * ((86400 - (int) seconds) / 86400);
-        realNpc.put(2, unEmployeeNpc);
+        int unEmployeeNpc = (int) (realNpc.getOrDefault(2,0) + npcNum * ((86400 - (int)nowSecond) / 86400.0));
+
        //就业npc减少
-        int workNum = realNpc.getOrDefault(1,0) - npcNum * ((86400 - (int) seconds) / 86400);
+        int workNum = (int) (realNpc.getOrDefault(1,0) - npcNum * ((86400 - (int)nowSecond) / 86400.0));
+        if (workNum<0){
+            workNum=0;
+        }
+        realNpc.put(2, unEmployeeNpc);
         realNpc.put(1, workNum);
     }
 
