@@ -3084,7 +3084,7 @@ public class GameSession {
 	 */
 	public void eachTypeNpcNum(short cmd) {
 		Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
-		NpcManager.instance().countNpcByType().forEach((k,v)->{
+		NpcManager.instance().countRealNpcByType().forEach((k,v)->{
 			list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
 		});
 		list.setWorkNpcNum(NpcManager.instance().getNpcCount())
