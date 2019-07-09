@@ -101,7 +101,7 @@ public class NpcManager {
             unEmployeeNpc.put(n.id(),n); //添加失业npc
         });
         //添加真实失业npc人口
-        startBusiness(npc.size());
+        shutdownBusiness(npc.size());
         GameDb.saveOrUpdate(npc);
     }
 
@@ -113,8 +113,8 @@ public class NpcManager {
     		n.setBorn(born);  //改为新建筑
     		allNpc.put(n.id(),n); //添加工作npc
     	});
-    	//添加真实失业npc
-        shutdownBusiness(npc.size());
+    	//添加真实就业npc
+        startBusiness(npc.size());
     	GameDb.saveOrUpdate(npc);
     }
     public List<Npc> create(int type, int n, Building building, int salary) {
