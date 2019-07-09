@@ -1401,7 +1401,7 @@ public class GameSession {
 		}else{
 			PromoOrder lastOrder = PromotionMgr.instance().getPromotion(lastPromotion);
 			if(lastOrder != null){
-				fcySeller.setNewPromoStartTs(lastOrder.promStartTs);
+				fcySeller.setNewPromoStartTs(lastOrder.promStartTs+lastOrder.promDuration);
 			}else{
 				if(GlobalConfig.DEBUGLOG){
 					GlobalConfig.cityError("GameSession.AdRemovePromoOrder(): PromoOrder not exist which id equal to "+ lastPromotion);
