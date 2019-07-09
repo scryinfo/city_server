@@ -1390,9 +1390,25 @@ public class GameSession {
 		List<PromoOdTs> tslist = fcySeller.delSelledPromotion(promoId,true);
 		Gs.AdRemovePromoOrder.Builder newMsg = gs_AdRemovePromoOrder.toBuilder();
 		tslist.forEach(ts->newMsg.addPromoTsChanged(ts.toProto()));
-		GameDb.saveOrUpdate(fcySeller);
 		Player seller = GameDb.getPlayer(sellerBuilding.ownerId());
 		seller.delpayedPromotion(promoId);
+
+		//获取该广告公司最后一个广告
+		UUID lastPromotion = fcySeller.getLastPromotion();
+
+		if(lastPromotion == null){
+			fcySeller.setNewPromoStartTs(-1);
+		}else{
+			PromoOrder lastOrder = PromotionMgr.instance().getPromotion(lastPromotion);
+			if(lastOrder != null){
+				fcySeller.setNewPromoStartTs(lastOrder.promStartTs+lastOrder.promDuration);
+			}else{
+				if(GlobalConfig.DEBUGLOG){
+					GlobalConfig.cityError("GameSession.AdRemovePromoOrder(): PromoOrder not exist which id equal to "+ lastPromotion);
+				}
+			}
+		}
+		GameDb.saveOrUpdate(fcySeller);
 
 		//发送客户端通知
 		this.write(Package.create(cmd, newMsg.build()));
@@ -4577,9 +4593,10 @@ public class GameSession {
 					int t = 0;
 				}
 
-				double dddAmount = GameDb.calDDDFromEEE(Double.parseDouble(req.getAmount()));
+				//double dddAmount = GameDb.calDDDFromEEE(Double.parseDouble(req.getAmount()));
+				double dddAmount = Double.parseDouble(req.getAmount());
 				//添加交易
-				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"",req.getEthAddr());
+				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, dddAmount ,"",req.getEthAddr());
 				if(dddPurchaseMgr.instance().addPurchase(pur)){
 					try{
 						//转发给ccapi服务器
@@ -4667,7 +4684,7 @@ public class GameSession {
 
 		//添加交易
 		double dddAmount = Double.parseDouble(req.getAmount());
-		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()) , playerId, dddAmount ,"","");
+		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()) , playerId, -dddAmount ,"","");
 		if(dddPurchaseMgr.instance().addPurchase(pur)){
 			//转发给ccapi服务器
 			try{
