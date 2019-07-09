@@ -8,6 +8,7 @@ import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
 
+import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -93,14 +94,17 @@ public class NpcManager {
         //waitToUpdate.forEach(s->s.removeAll(ids)); // can save this by check npc is null in saveOrUpdate
     }
     public void addUnEmployeeNpc(Collection<Npc> npc) {
-    	npc.forEach(n->{
-    		allNpc.remove(n.id()); //移除失业npc
-    		n.setStatus(1);  //状态改成失业
-    		n.setUnEmpts(System.currentTimeMillis());
-    		unEmployeeNpc.put(n.id(),n); //添加失业npc
-    	});
-    	GameDb.saveOrUpdate(npc);
+        npc.forEach(n->{
+            allNpc.remove(n.id()); //移除失业npc
+            n.setStatus(1);  //状态改成失业
+            n.setUnEmpts(System.currentTimeMillis());
+            unEmployeeNpc.put(n.id(),n); //添加失业npc
+        });
+        //添加真实失业npc人口
+        startBusiness(npc.size());
+        GameDb.saveOrUpdate(npc);
     }
+
     public void addWorkNpc(Collection<Npc> npc,Building born) {
     	npc.forEach(n->{
     		unEmployeeNpc.remove(n.id()); //移除失业npc
@@ -109,6 +113,8 @@ public class NpcManager {
     		n.setBorn(born);  //改为新建筑
     		allNpc.put(n.id(),n); //添加工作npc
     	});
+    	//添加真实失业npc
+        shutdownBusiness(npc.size());
     	GameDb.saveOrUpdate(npc);
     }
     public List<Npc> create(int type, int n, Building building, int salary) {
@@ -151,7 +157,10 @@ public class NpcManager {
             ;
     }
     private Map<UUID, Npc> allNpc = new HashMap<>();  //工作npc
-    private Map<UUID, Npc> unEmployeeNpc = new HashMap<>();
+    private Map<UUID, Npc> unEmployeeNpc = new HashMap<>();//未工作npc
+
+    private Map<Integer,Integer> realNpc = new HashMap<>();  //所有的实际需求npc，1 工作 2失业
+
     private List<Set<UUID>> waitToUpdate = new ArrayList<>();
     private List<Set<UUID>> waitToUpdateNext = new ArrayList<>();
     private int updateTimesAtCurrentTimeSection;
@@ -188,6 +197,8 @@ public class NpcManager {
     public void hourTickAction(int nowHour) {
     }
     PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
+    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
+
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
             Calendar calendar = Calendar.getInstance();
@@ -199,6 +210,10 @@ public class NpcManager {
             countNpcByType().forEach((k,v)->{
             	LogDb.npcTypeNum(countTime,k,v);//统计并入库
             });
+        }
+        if(realNpcTimer.update(diffNano)){//每天凌晨初始化npc实际需求数据
+            realNpc.put(1, allNpc.size());
+            realNpc.put(2, unEmployeeNpc.size());
         }
     }
     public Map<Integer, Integer> countNpcByType(){
@@ -252,5 +267,28 @@ public class NpcManager {
 
     public Map<UUID, Npc> getAllNpc() {
         return allNpc;
+    }
+
+    //添加真实工作npc
+    public void startBusiness(int npcNum){//添加实际工作npc
+        //增加工作npc数量
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        int workNum = realNpc.getOrDefault(1,0) + npcNum * ((86400 - (int) seconds) / 86400);
+        realNpc.put(1, workNum);
+        //失业npc减少
+        int unEmployeeNpc = realNpc.getOrDefault(2,0) - npcNum * ((86400 - (int) seconds) / 86400);
+        realNpc.put(2, unEmployeeNpc);
+
+    }
+
+    //添加真实失业npc
+    public void shutdownBusiness(int npcNum){//添加实际工作npc
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        //失业npc增加
+        int unEmployeeNpc = realNpc.getOrDefault(2,0) + npcNum * ((86400 - (int) seconds) / 86400);
+        realNpc.put(2, unEmployeeNpc);
+       //就业npc减少
+        int workNum = realNpc.getOrDefault(1,0) - npcNum * ((86400 - (int) seconds) / 86400);
+        realNpc.put(1, workNum);
     }
 }
