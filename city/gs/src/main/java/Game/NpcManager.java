@@ -197,7 +197,8 @@ public class NpcManager {
     public void hourTickAction(int nowHour) {
     }
     PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
-    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
+    //PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
+    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//每天0点开始更新数据
 
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
@@ -269,9 +270,9 @@ public class NpcManager {
         return allNpc;
     }
 
-    //添加真实工作npc
+    //添加实际需求工作npc
     public void startBusiness(int npcNum){//添加实际工作npc
-        //增加工作npc数量
+        //增加工作npc人口
         long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         int workNum = realNpc.getOrDefault(1,0) + npcNum * ((86400 - (int) seconds) / 86400);
         realNpc.put(1, workNum);
@@ -281,7 +282,7 @@ public class NpcManager {
 
     }
 
-    //添加真实失业npc
+    //添加实际需求失业人口
     public void shutdownBusiness(int npcNum){//添加实际工作npc
         long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         //失业npc增加
@@ -290,5 +291,9 @@ public class NpcManager {
        //就业npc减少
         int workNum = realNpc.getOrDefault(1,0) - npcNum * ((86400 - (int) seconds) / 86400);
         realNpc.put(1, workNum);
+    }
+
+    public int getRealNpcNumByType(int type){
+        return realNpc.get(type);
     }
 }

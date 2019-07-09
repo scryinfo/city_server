@@ -73,8 +73,12 @@ public class ProtoUtil {
             //统计npc各个类型数量npc
             Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
             NpcManager.instance().countNpcByBuildingType().forEach((k,v)->{
-               list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build()).setWorkNpcNum(NpcManager.instance().getNpcCount()).setUnEmployeeNpcNum(NpcManager.instance().getUnEmployeeNpcCount());
+               list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
             });
+            list.setWorkNpcNum(NpcManager.instance().getNpcCount())
+                    .setUnEmployeeNpcNum(NpcManager.instance().getUnEmployeeNpcCount())
+                    .setRealWorkNpc(NpcManager.instance().getRealNpcNumByType(1))
+                    .setRealUnEmployeeNpcNum(NpcManager.instance().getRealNpcNumByType(2));
             ra.setName(name).setPrice(price)
                     .setCityPrice(cityAvgPrice)
                     .setBuildingRich(buildingRich)
