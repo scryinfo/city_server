@@ -219,8 +219,8 @@ public class NpcManager {
     }
     public Map<Integer, Integer> countNpcByType(){
   	  Map<Integer, Integer> countMap= new HashMap<Integer, Integer>();
-  	  countMap.put(1, allNpc.size());
-  	  countMap.put(2, unEmployeeNpc.size());
+  	  countMap.put(1, realNpc.get(1));
+  	  countMap.put(2, realNpc.get(2));
 	  return countMap;
    }
     public Map<Integer, Long> countNpcByBuildingType(){

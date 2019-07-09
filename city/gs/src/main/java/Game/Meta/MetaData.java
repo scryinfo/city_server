@@ -270,7 +270,7 @@ public class MetaData {
         return good.keySet() == null ? new HashSet() : good.keySet();
     }
     //获取所有推广类型id
-    public static final Set<Integer> getAllPromotionId(int id) {
+    public static final Set<Integer> getAllBuildingTech(int id) {
         return buildingTech.get(id) == null ? new HashSet<>() : buildingTech.get(id);
     }
     public static final MetaGood getGood(int id) {

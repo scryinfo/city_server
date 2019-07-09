@@ -4075,7 +4075,7 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		//四种推广类型
-		Set<Integer> proIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
+		Set<Integer> proIds = MetaData.getAllBuildingTech(MetaBuilding.PUBLIC);
 		Building building = City.instance().getBuilding(buildingId);
 		if (building == null || building.type() != MetaBuilding.PUBLIC) {
 			return;
@@ -4128,7 +4128,7 @@ public class GameSession {
 		int count = 0;
 		Collection<Building> allBuilding = City.instance().getAllBuilding();
 		for (Building b : allBuilding) {
-			if (b.type() != MetaBuilding.MATERIAL || !b.outOfBusiness() || !(b instanceof IShelf)) {
+			if (b.type() != MetaBuilding.MATERIAL || b.outOfBusiness() || !(b instanceof IShelf)) {
 				return;
 			}
 			MaterialFactory mf = (MaterialFactory) b;
@@ -4142,7 +4142,7 @@ public class GameSession {
 		// 一.推荐定价 = 城市原料均销售定价
 		int price = sumPrice / count;
 		MaterialFactory materialFactory = (MaterialFactory) building;
-		if (materialFactory.ownerId() != playerId || !materialFactory.outOfBusiness()) {
+		if (materialFactory.ownerId() != playerId || materialFactory.outOfBusiness()) {
 			return;
 		}
 		Map<Item, Integer> saleDetail = materialFactory.shelf.getSaleDetail(itemId);
@@ -4169,7 +4169,7 @@ public class GameSession {
 		Building building = City.instance().getBuilding(buildingId);
 		//全城该类型推广均单位定价
 		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,building.type());
-		if (building == null || building.type() != MetaBuilding.PUBLIC || !building.outOfBusiness()) {
+		if (building == null || building.type() != MetaBuilding.PUBLIC || building.outOfBusiness()) {
 			return;
 		}
 		PublicFacility owner = (PublicFacility) building;
@@ -4193,7 +4193,7 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
 		Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.LAB || !building.outOfBusiness()) {
+		if (building == null || building.type() != MetaBuilding.LAB || building.outOfBusiness()) {
 			return;
 		}
 		Laboratory lab = (Laboratory) building;
@@ -4222,7 +4222,7 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
 		Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.PRODUCE || !building.outOfBusiness()) {
+		if (building == null || building.type() != MetaBuilding.PRODUCE || building.outOfBusiness()) {
 			return;
 		}
 		//推荐定价 guidePrice   全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
