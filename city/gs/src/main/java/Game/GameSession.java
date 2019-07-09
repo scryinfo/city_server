@@ -726,8 +726,10 @@ public class GameSession {
 		if(m == null)
 			return;
 		Coordinate ul = new Coordinate(c.getPos());
-		if(!GroundManager.instance().canBuild(player.id(), m.area(ul)))
+		if(!GroundManager.instance().canBuild(player.id(), m.area(ul))) {
+			System.err.println("建造失败");
 			return;
+		}
 		Building building = Building.create(mid, ul, player.id());
 		building.setName(player.getCompanyName());
 		boolean ok = City.instance().addBuilding(building);
@@ -769,8 +771,10 @@ public class GameSession {
 			Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
 			this.write(Package.create(cmd, builder.build()));
 		}
-		else
-			this.write(Package.fail(cmd));
+		else {
+			this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+			System.err.println("数量或者货架空间不足");
+		}
 	}
 
 	public void setAutoReplenish(short cmd, Message message) throws Exception {
@@ -2114,7 +2118,8 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId)) {
 			GameDb.saveOrUpdate(lab);
-			this.write(Package.create(cmd, c));
+			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllInProcessProto());
+			this.write(Package.create(cmd, builder.build()));
 		}
 		else
 			this.write(Package.fail(cmd));
@@ -3098,7 +3103,10 @@ public class GameSession {
 		NpcManager.instance().countNpcByType().forEach((k,v)->{
 			list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
 		});
-		list.setWorkNpcNum(NpcManager.instance().getNpcCount()).setUnEmployeeNpcNum(NpcManager.instance().getUnEmployeeNpcCount());
+		list.setWorkNpcNum(NpcManager.instance().getNpcCount())
+				.setUnEmployeeNpcNum(NpcManager.instance().getUnEmployeeNpcCount())
+				.setRealWorkNpc(NpcManager.instance().getRealNpcNumByType(1))
+				.setRealUnEmployeeNpcNum(NpcManager.instance().getRealNpcNumByType(2));
 		this.write(Package.create(cmd,list.build()));
 	}
 
@@ -3421,6 +3429,15 @@ public class GameSession {
 		}else{
 			player.setCompanyName(newName);
 			player.setLast_modify_time(new Date().getTime());
+			//修改玩家未修改名称的建筑
+            List<Building> buildings = new ArrayList<>();
+            City.instance().forEachBuilding(player.id(),b->{
+                if(b.getLast_modify_time()==0){
+                    b.setName(newName);
+                    buildings.add(b);
+                }
+            });
+            GameDb.saveOrUpdate(buildings);
 			GameDb.saveOrUpdate(player);
 			Gs.RoleInfo roleInfo = playerToRoleInfo(player);
 			this.write(Package.create(cmd,roleInfo));
@@ -3937,6 +3954,17 @@ public class GameSession {
 		long playerAmount = GameDb.getPlayerAmount();
 		this.write(Package.create(cmd, Gs.PlayerAmount.newBuilder().setPlayerAmount(playerAmount).build()));
 	}
+
+	//查询建筑名称
+	public void queryBuildingName(short cmd, Message message) {
+		Gs.Id id = (Gs.Id) message;
+		UUID buildingId = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.outOfBusiness()) {
+			return;
+		}
+		this.write(Package.create(cmd, Gs.Str.newBuilder().setStr(building.getName()).build()));
+	}
 	//住宅推荐价格 √
 	public void queryApartmentRecommendPrice(short cmd, Message message) {
 		Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
@@ -4063,7 +4091,7 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
 		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 		//四种推广类型
-		Set<Integer> proIds = MetaData.getAllPromotionId(MetaBuilding.PUBLIC);
+		Set<Integer> proIds = MetaData.getAllBuildingTech(MetaBuilding.PUBLIC);
 		Building building = City.instance().getBuilding(buildingId);
 		if (building == null || building.type() != MetaBuilding.PUBLIC) {
 			return;
@@ -4116,7 +4144,7 @@ public class GameSession {
 		int count = 0;
 		Collection<Building> allBuilding = City.instance().getAllBuilding();
 		for (Building b : allBuilding) {
-			if (b.type() != MetaBuilding.MATERIAL || !b.outOfBusiness() || !(b instanceof IShelf)) {
+			if (b.type() != MetaBuilding.MATERIAL || b.outOfBusiness() || !(b instanceof IShelf)) {
 				return;
 			}
 			MaterialFactory mf = (MaterialFactory) b;
@@ -4130,7 +4158,7 @@ public class GameSession {
 		// 一.推荐定价 = 城市原料均销售定价
 		int price = sumPrice / count;
 		MaterialFactory materialFactory = (MaterialFactory) building;
-		if (materialFactory.ownerId() != playerId || !materialFactory.outOfBusiness()) {
+		if (materialFactory.ownerId() != playerId || materialFactory.outOfBusiness()) {
 			return;
 		}
 		Map<Item, Integer> saleDetail = materialFactory.shelf.getSaleDetail(itemId);
@@ -4157,7 +4185,7 @@ public class GameSession {
 		Building building = City.instance().getBuilding(buildingId);
 		//全城该类型推广均单位定价
 		int cityAvgPromotionAbility = GlobalUtil.cityAvgPromotionAbilityValue(typeId,building.type());
-		if (building == null || building.type() != MetaBuilding.PUBLIC || !building.outOfBusiness()) {
+		if (building == null || building.type() != MetaBuilding.PUBLIC || building.outOfBusiness()) {
 			return;
 		}
 		PublicFacility owner = (PublicFacility) building;
@@ -4181,7 +4209,7 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
 		Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.LAB || !building.outOfBusiness()) {
+		if (building == null || building.type() != MetaBuilding.LAB || building.outOfBusiness()) {
 			return;
 		}
 		Laboratory lab = (Laboratory) building;
@@ -4210,7 +4238,7 @@ public class GameSession {
 		UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
 		UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
 		Building building = City.instance().getBuilding(buildingId);
-		if (building == null || building.type() != MetaBuilding.PRODUCE || !building.outOfBusiness()) {
+		if (building == null || building.type() != MetaBuilding.PRODUCE || building.outOfBusiness()) {
 			return;
 		}
 		//推荐定价 guidePrice   全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
@@ -4300,7 +4328,7 @@ public class GameSession {
 			GameDb.saveOrUpdate(building);
 			this.write(Package.create(cmd, building.toProto()));
 		}else{
-			this.write(Package.fail(cmd,Common.Fail.Reason.accountInFreeze));
+			this.write(Package.fail(cmd,Common.Fail.Reason.timeNotSatisfy));
 		}
     }
     //查询原料厂信息

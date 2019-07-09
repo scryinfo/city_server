@@ -12,6 +12,7 @@ import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -146,7 +147,9 @@ public class Laboratory extends Building {
 //                                    .setBuildingId(Util.toByteString(id()))
 //                                    .setLineId(Util.toByteString(lineId))
 //                                    .build()));
-            this.inProcess.remove(line);
+            List<Line> lines = removeAndUpdateLine(lineId, true);
+            //this.inProcess.remove(line);
+            //更新所有的队列
             GameDb.delete(line);
             return true;
         }
@@ -436,5 +439,44 @@ public class Laboratory extends Building {
     public void clear() {
         this.completed.clear();
         this.inProcess.clear();
+    }
+
+    public  List<Line> removeAndUpdateLine(UUID delId,boolean delOrder){
+        long nextTs = 0;//下个开始时间
+        int findPos = -1 ;//定位
+        Line delLine=null;
+        List<Line> changed = new ArrayList<>();
+        SimpleDateFormat sm = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        for (int i = 0; i < inProcess.size(); i++) {
+            Line line = inProcess.get(i);
+            if(delId.equals(line.id)){
+                if(i==0){
+                    line.beginProcessTs = System.currentTimeMillis();
+                }
+                line.times=0;
+                findPos=i;
+                delLine=line;
+                System.err.println("已找到要删除的生产线,设置开始时间为"+sm.format(new Date(line.beginProcessTs)));
+            }else if(findPos >= 0){
+                line.beginProcessTs = nextTs;
+                changed.add(line);
+                System.err.println("下一个开始时间设置为"+sm.format(new Date(line.beginProcessTs)));
+            }
+            nextTs = line.beginProcessTs + TimeUnit.HOURS.toMillis(line.times);
+        }
+        //更新完之后，移除掉要删除的推广。
+        if(delOrder){
+            if(delLine!=null){
+                inProcess.remove(delLine);
+            }
+        }
+        return changed;
+    }
+    public List<Gs.Laboratory.Line> getAllInProcessProto(){
+        List<Gs.Laboratory.Line> lines = new ArrayList<>();
+        inProcess.forEach(l->{
+            lines.add(l.toProto());
+        });
+        return lines;
     }
 }

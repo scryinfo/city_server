@@ -246,7 +246,7 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 .setNowCount(l.count)
                 .setBuildingId(Util.toByteString(this.id()))
                 .setIKey(key.toProto())
-                .setNowCountInStore(this.availableQuantity(key.meta)+this.getSaleCount(key.meta.id))
+                .setNowCountInStore(this.getItemCount(key)+this.getSaleCount(key.meta.id))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
@@ -378,14 +378,12 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
                 }
                 this.sendToWatchers(id(),item.key.meta.id,item.n,price,autoRepOn,produceId);
                 return true;
-            } else {
+            } else
                 return false;
-            }
         }else {//自动补货
             //1.判断容量是否已满
             if(this.shelf.full())
                 return false;
-            content.autoReplenish = autoRepOn;
             //2.设置价格
             content.price = price;
             IShelf shelf=this;

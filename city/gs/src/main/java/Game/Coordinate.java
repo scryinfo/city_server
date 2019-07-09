@@ -37,7 +37,7 @@ public class Coordinate {
     public static double distance(Coordinate a, Coordinate b) {
         return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
     }
-    GridIndex toGridIndex() {
+    public GridIndex toGridIndex() {
         return new GridIndex(x/City.GridX, y/City.GridY);
     }
     public Coordinate shiftLU(int n) {

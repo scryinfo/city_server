@@ -148,13 +148,15 @@ public class Storage implements IStorage {
 
     @Override
     public boolean unLock(ItemKey m, int n) {
-        Integer i = this.locked.get(m);
-        if(i == null || i < n)
-            return false;
-        this.locked.put(m, i-n);
-        if(i == n)
-            this.locked.remove(m);
-        this.inHand.put(m, this.inHand.getOrDefault(m, 0) + n);
+        if(n!=0) {
+            Integer i = this.locked.get(m);
+            if (i == null || i < n)
+                return false;
+            this.locked.put(m, i - n);
+            if (i == n)
+                this.locked.remove(m);
+            this.inHand.put(m, this.inHand.getOrDefault(m, 0) + n);
+        }
         return true;
     }
 

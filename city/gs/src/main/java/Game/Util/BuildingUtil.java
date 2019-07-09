@@ -47,7 +47,6 @@ public class BuildingUtil {
 
     //更新的时机，建造建筑\拆除建筑和修改eva时更新
     public void updateMaxOrMinTotalQty(){
-        System.err.println("开始更新全城最高最低建筑品质");
         Set<Double> retailSet = new HashSet<>();
         Set<Double> apartmentSet = new HashSet<>();
         Set<Building> retailShops = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
@@ -71,14 +70,12 @@ public class BuildingUtil {
             Double minRetailQty = Collections.min(retailSet);
             retailMap.put(MAX, maxRetailQty);
             retailMap.put(MIN, minRetailQty);
-            System.err.println("零售店最高品质"+maxRetailQty+"  最低品质"+minRetailQty);
         }
         if(!apartmentSet.isEmpty()) {
             Double maxApartQty = Collections.max(apartmentSet);
             Double minApartQty = Collections.min(apartmentSet);
             apartmentMap.put(MAX, maxApartQty);
             apartmentMap.put(MIN, minApartQty);
-            System.err.println("住宅最高品质"+maxApartQty+"  最低品质"+minApartQty);
         }
         maxQtyTotalMap.put(MetaBuilding.RETAIL, retailMap);
         maxQtyTotalMap.put(MetaBuilding.APARTMENT,apartmentMap);
@@ -130,7 +127,6 @@ public class BuildingUtil {
 
     public  void update(long diffNano) {
         if (timer.update(diffNano)) {
-            System.out.println("--------------走位.走位--------------");
             apartmentAvg.clear();
             _update();
         }
