@@ -197,8 +197,8 @@ public class NpcManager {
     public void hourTickAction(int nowHour) {
     }
     PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
-   // PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
-    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//每天0点开始更新数据
+    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
+    //PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//每天0点开始更新数据
 
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
