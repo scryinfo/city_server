@@ -4910,10 +4910,10 @@ public class GameSession {
 			if(lines.size()==0){
 				builder.setStatue(Gs.BuildingProduceStatue.Statue.LineUnUsed);
 			}else {//有生产线
-			//2.空间是否充足，获取第一条生产线状态,并设置商品id
+				//2.空间是否充足，获取第一条生产线状态,并设置生产商品id
 				LineBase lineBase = lines.get(0);
 				builder.setItemId(lineBase.item.id);
-				if(lineBase.pause) {//如果生产线暂停
+				if(lineBase.pause) {//如果生产线状态是暂停
 					if (!factory.hasEnoughMaterial(lineBase, factory.ownerId())) {	//3.原材料不足
 						builder.setStatue(Gs.BuildingProduceStatue.Statue.MaterialNotEnough);
 					}else if(factory.store.availableSize()<=0){	//4.空间不足
