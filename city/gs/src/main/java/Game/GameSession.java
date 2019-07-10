@@ -2151,7 +2151,7 @@ public class GameSession {
 			builder.setLineId(c.getLineId());
 			if(r.evaPoint > 0) {
 				builder.setEvaPoint(r.evaPoint);
-                builder.addAllLabResult(r.labResult);//开启的5个结果集（新增）
+                builder.addAllLabResult(r.labResult);//开启的5个结果集
 			}
 			else {
 				if(r.itemIds != null)
