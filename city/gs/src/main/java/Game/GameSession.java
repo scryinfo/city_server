@@ -4891,4 +4891,39 @@ public class GameSession {
 		lineBuilder.setBuildingId(id.getId()).setWarehouseCapacity(factoryBase.store.usedSize());
 		this.write(Package.create(cmd,lineBuilder.build()));
 	}
+	/*查询建筑生产线状态*/
+	public void queryBuildingProduceStatue(short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID buildingId = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if(null==building||!(building instanceof FactoryBase)){
+			System.err.println("建筑为空或不属于工厂建筑");
+			return;
+		}
+		FactoryBase factory = (FactoryBase) building;
+		List<LineBase> lines = factory.lines;
+		Gs.BuildingProduceStatue.Builder builder = Gs.BuildingProduceStatue.newBuilder();
+		if(building.getState()==Gs.BuildingState.SHUTDOWN_VALUE){  //停业状态
+			builder.setStatue(Gs.BuildingProduceStatue.Statue.StopBusiness);
+		}else{
+			//1.没有生产线，生产线空闲
+			if(lines.size()==0){
+				builder.setStatue(Gs.BuildingProduceStatue.Statue.LineUnUsed);
+			}else {//有生产线
+			//2.空间是否充足，获取第一条生产线状态,并设置商品id
+				LineBase lineBase = lines.get(0);
+				builder.setItemId(lineBase.item.id);
+				if(lineBase.pause) {//如果生产线暂停
+					if (!factory.hasEnoughMaterial(lineBase, factory.ownerId())) {	//3.原材料不足
+						builder.setStatue(Gs.BuildingProduceStatue.Statue.MaterialNotEnough);
+					}else if(factory.store.availableSize()<=0){	//4.空间不足
+						builder.setStatue(Gs.BuildingProduceStatue.Statue.StoreCapacityFull);
+					}
+				}else{//5.生产中
+					builder.setStatue(Gs.BuildingProduceStatue.Statue.InProduction);
+				}
+			}
+		}
+		this.write(Package.create(cmd,builder.build()));
+	}
 }

@@ -285,6 +285,9 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.ct_DisChargeReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisChargeReq.PARSER, GameSession.class,"ct_DisChargeReq"));
 			table.put((short) GsCode.OpCode.ct_DisPaySmVefifyReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisPaySmVefifyReq.PARSER, GameSession.class,"ct_DisPaySmVefifyReq"));
 			table.put((short) GsCode.OpCode.ct_GetTradingRecords_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GetTradingRecords.PARSER, GameSession.class,"ct_GetTradingRecords"));
+
+			//小地图改版（查询建筑生产线状态）
+			table.put((short) GsCode.OpCode.queryBuildingProduceStatue_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingProduceStatue"));
 			if(GlobalConfig.debug()){
 
 			}
