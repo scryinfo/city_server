@@ -177,6 +177,21 @@ public class Laboratory extends Building {
         return times;
     }
 
+    //Todo:可能以后的过渡时间不是1小时一次，而是不同类型有不同过渡时间
+    public Long getLastQueuedCompleteTime(){
+        int size = this.inProcess.size();
+        long endTime = -1;
+        //有队列设置时间为最后一个队列完成时间，无队列设置为-1
+        if(size>0){
+            //获取最后一个队列
+            Line line = this.inProcess.get(size - 1);
+            //那么整个完成时间为 开始时间
+            int labTime = line.times - line.usedRoll - line.availableRoll;//剩余的研究时间
+            endTime = line.beginProcessTs + TimeUnit.HOURS.toMillis(labTime);
+        }
+        return endTime;
+    }
+
     public void updateTotalGoodIncome(long cost, int times) {
         this.totalGoodIncome += cost;
         this.totalGoodTimes += times;

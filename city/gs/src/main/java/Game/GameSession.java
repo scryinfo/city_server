@@ -654,7 +654,8 @@ public class GameSession {
 					bb.setGoodProb(s.getGoodProb());
 					bb.setPrice(s.getPricePreTime());
 					bb.setAvailableTimes(s.getSellTimes());
-					bb.setQueuedTimes(s.getQueuedTimes());
+					//bb.setQueuedTimes(s.getQueuedTimes());
+					bb.setQueuedTimes(s.getLastQueuedCompleteTime());  //改为最后一个队列完成的时间
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
 					bb.setMetaId(building.metaId());
