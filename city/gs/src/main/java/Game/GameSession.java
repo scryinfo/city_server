@@ -4891,6 +4891,7 @@ public class GameSession {
 		lineBuilder.setBuildingId(id.getId()).setWarehouseCapacity(factoryBase.store.usedSize());
 		this.write(Package.create(cmd,lineBuilder.build()));
 	}
+
 	/*查询建筑生产线状态*/
 	public void queryBuildingProduceStatue(short cmd,Message message){
 		Gs.Id id = (Gs.Id) message;
