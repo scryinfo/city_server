@@ -846,4 +846,9 @@ public abstract class Building implements Ticker{
         }else
             return false;
     }
+
+    public Gs.MiniIndex getMiniIndex(){
+        Gs.MiniIndex miniIndex = this.coordinate().toProto();
+        return miniIndex;
+    }
 }

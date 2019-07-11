@@ -78,6 +78,8 @@ public class LogDb {
 
 	//收入通知
 	private static final String INCOME_NOTIFY = "incomeNotify";
+
+	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//建筑收入者货架收入
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -118,6 +120,8 @@ public class LogDb {
 	//npc and player pay Miner cost
 	private static MongoCollection<Document> minersCost;	//矿工费用
 	private static MongoCollection<Document> npcMinersCost;//矿工费用
+	/*用作离线通知*/
+	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 
 	public static final String KEY_TOTAL = "total";
 
@@ -194,6 +198,9 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
 		incomeNotify = database.getCollection(INCOME_NOTIFY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		/*离线通知统计使用*/
+		sellerBuildingIncome=database.getCollection(SELLER_BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -828,6 +835,17 @@ public class LogDb {
 				.append("ratio", ratio);//矿工费用收取比例
 		npcMinersCost.insertOne(document);
 	}
+
+	public static void sellerBuildingIncome(UUID bid,int buildingType,UUID playerId,int n,int price,int itemId){
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("bid", bid)
+				.append("bt", buildingType)
+				.append("pid", playerId)
+				.append("n", n)
+				.append("price",price)
+				.append("itemId",itemId);
+		sellerBuildingIncome.insertOne(document);
+	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
@@ -934,6 +952,11 @@ public class LogDb {
 
 	public static MongoCollection<Document> getNpcMinersCost() {
 		return npcMinersCost;
+	}
+
+	/*用于离线通知，货架收入*/
+	public static MongoCollection<Document> getSellerBuildingIncome() {
+		return sellerBuildingIncome;
 	}
 
 	public static class Positon

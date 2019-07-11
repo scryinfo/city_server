@@ -63,7 +63,11 @@ public class Laboratory extends Building {
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
-        this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
+        /*this.completed.values().forEach(line -> {
+            //如果是已完成的线的主人是当前玩家，则显示已完成的线
+           builder.addCompleted(line.toProto()));
+        );*/
+
         return builder.setSellTimes(this.getRemainingTime())
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE))
@@ -177,6 +181,21 @@ public class Laboratory extends Building {
         return times;
     }
 
+    //Todo:可能以后的过渡时间不是1小时一次，而是不同类型有不同过渡时间
+    public Long getLastQueuedCompleteTime(){
+        int size = this.inProcess.size();
+        long endTime = -1;
+        //有队列设置时间为最后一个队列完成时间，无队列设置为-1
+        if(size>0){
+            //获取最后一个队列
+            Line line = this.inProcess.get(size - 1);
+            //那么整个完成时间为 开始时间
+            int labTime = line.times - line.usedRoll - line.availableRoll;//剩余的研究时间
+            endTime = line.beginProcessTs + TimeUnit.HOURS.toMillis(labTime);
+        }
+        return endTime;
+    }
+
     public void updateTotalGoodIncome(long cost, int times) {
         this.totalGoodIncome += cost;
         this.totalGoodTimes += times;
@@ -202,12 +221,8 @@ public class Laboratory extends Building {
     }
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
-        //成功率还需要加上eva的加成信息
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
-        Double evaPro = successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE);//eva成功率
-        Double goodPro = successMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE);//商品发明成功率
-
-        RollResult res = null;
+        RollResult res = null;//研究成果
         Line l = this.findInProcess(lineId);
         if(l == null)
              l = this.completed.get(lineId);
@@ -472,10 +487,25 @@ public class Laboratory extends Building {
         }
         return changed;
     }
-    public List<Gs.Laboratory.Line> getAllInProcessProto(){
+    public List<Gs.Laboratory.Line> getAllLineProto(UUID proposerId){
         List<Gs.Laboratory.Line> lines = new ArrayList<>();
         inProcess.forEach(l->{
             lines.add(l.toProto());
+        });
+        completed.values().forEach(l->{
+           if(l.proposerId.equals(proposerId)){
+               lines.add(l.toProto());
+           }
+        });
+        return lines;
+    }
+    /*获取已完成生产线中自己的线*/
+    public List<Gs.Laboratory.Line> getOwnerLine(UUID proposerId){
+        List<Gs.Laboratory.Line> lines = new ArrayList<>();
+        this.completed.values().forEach(line->{
+            if(line.proposerId.equals(proposerId)){
+                lines.add(line.toProto());
+            }
         });
         return lines;
     }

@@ -185,19 +185,47 @@ public class GameSession {
 		Cheat cheat = _parseCheatString(c.getStr());
 		if(cheat != null)
 			_runCheat(cheat);
+		this.write(Package.create(cmd, message));
 	}
 	private static class Cheat {
 		enum Type {
 			addmoney,
 			additem,
 			addground,
-			invent
+			invent,
+            fill_warehouse
 		}
 		Type cmd;
-		int[] paras;
+		String[] paras;
 	}
 	private void _runCheat(Cheat cheat) {
 		switch (cheat.cmd) {
+            case fill_warehouse:
+            {
+                int itemId = Integer.parseInt(cheat.paras[0]);
+                int count = Integer.parseInt(cheat.paras[1]);
+                String buildingId = cheat.paras[2];
+				MetaItem m = MetaData.getItem(itemId);
+				int lv = 0;
+				if(m instanceof MetaGood)
+					lv = player.getGoodLevel(m.id);
+
+				Building building = City.instance().getBuilding(UUID.fromString(buildingId));
+				IStorage iStorage = (IStorage) building;
+				ItemKey itemKey = new ItemKey(m, building.ownerId(), lv, building.ownerId());
+				if (!MetaGood.isItem(m.id)) {
+					itemKey = new ItemKey(m, building.ownerId());
+				}
+				iStorage.offset(itemKey, count);
+				if(MetaGood.isItem(m.id)) {
+					if (!BrandManager.instance().brandIsExist(building.ownerId(), m.id)) {
+						//Player owner = GameDb.getPlayer(building.ownerId());
+						BrandManager.instance().addBrand(building.ownerId(), m.id);
+					}
+				}
+				GameDb.saveOrUpdate(building);
+				break;
+            }
 			case addmoney: {
 				int n = Integer.valueOf(cheat.paras[0]);
 				if(n <= 0)
@@ -208,8 +236,8 @@ public class GameSession {
 				break;
 			}
 			case additem: {
-				int id = cheat.paras[0];
-				int n = cheat.paras[1];
+				int id = Integer.parseInt(cheat.paras[0]);
+				int n = Integer.parseInt(cheat.paras[1]);
 				MetaItem mi = MetaData.getItem(id);
 				if (mi == null)
 					return;
@@ -227,10 +255,10 @@ public class GameSession {
 				break;
 			}
 			case addground: {
-				int x1 = cheat.paras[0];
-				int y1 = cheat.paras[1];
-				int x2 = cheat.paras[2];
-				int y2 = cheat.paras[3];
+				int x1 = Integer.parseInt(cheat.paras[0]);
+				int y1 = Integer.parseInt(cheat.paras[1]);
+				int x2 = Integer.parseInt(cheat.paras[2]);
+				int y2 = Integer.parseInt(cheat.paras[3]);
 				if(x1 > x2) {
 					int z = x1;
 					x1 = x2;
@@ -251,8 +279,8 @@ public class GameSession {
 				break;
 			}
 			case invent: {
-				int mId = cheat.paras[0];
-				int lv = cheat.paras[1];
+				int mId = Integer.parseInt(cheat.paras[0]);
+				int lv = Integer.parseInt(cheat.paras[1]);
 				MetaItem mi = MetaData.getItem(mId);
 				if(mi == null)
 					return;
@@ -278,9 +306,10 @@ public class GameSession {
 		catch(IllegalArgumentException e) {
 			return null;
 		}
-		res.paras = new int[sa.length-1];
+
+		res.paras = new String[sa.length-1];
 		for(int i = 1; i < sa.length; ++i) {
-			res.paras[i-1] = Integer.valueOf(sa[i]);
+			res.paras[i-1] = sa[i];
 		}
 		return res;
 	}
@@ -654,7 +683,8 @@ public class GameSession {
 					bb.setGoodProb(s.getGoodProb());
 					bb.setPrice(s.getPricePreTime());
 					bb.setAvailableTimes(s.getSellTimes());
-					bb.setQueuedTimes(s.getQueuedTimes());
+					//bb.setQueuedTimes(s.getQueuedTimes());
+					bb.setQueuedTimes(s.getLastQueuedCompleteTime());  //改为最后一个队列完成的时间
 					bb.setOwnerId(Util.toByteString(building.ownerId()));
 					bb.setName(building.getName());
 					bb.setMetaId(building.metaId());
@@ -917,6 +947,14 @@ public class GameSession {
 		player.decMoney(freight);
 		LogDb.playerPay(player.id(), freight);
 
+		GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+				.setBuildingId(Util.toByteString(bid))
+				.setMoney(cost)
+				.setPos(sellBuilding.toProto().getPos())
+				.setItemId(itemBuy.key.meta.id)
+				.build()
+		));
+
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
 		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
@@ -924,6 +962,7 @@ public class GameSession {
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
+		LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
 		//矿工费用日志记录(需调整)
 		LogDb .minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
@@ -1139,7 +1178,12 @@ public class GameSession {
 			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-		this.write(Package.create(cmd, b.detailProto()));
+		Gs.Laboratory laboratory = (Gs.Laboratory) b.detailProto();
+		Gs.Laboratory.Builder builder = laboratory.toBuilder();
+		//设置已完成的线只显示当前玩家本人研究的生产线
+		Laboratory lab = (Laboratory) b;
+		builder.addAllCompleted(lab.getOwnerLine(player.id()));
+		this.write(Package.create(cmd, builder.build()));
 	}
 	public void detailRetailShop(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
@@ -1618,10 +1662,18 @@ public class GameSession {
 		seller.addMoney(fee-minerCost);
         LogDb.playerPay(buyer.id(), fee+minerCost);
         LogDb.playerIncome(seller.id(), fee-minerCost);
+
+		GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+				.setBuildingId(Util.toByteString(b.id()))
+				.setMoney(fee-minerCost)
+				.setPos(b.toProto().getPos())
+				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+				.build()
+		));
+
         //矿工费用记录
 		LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-
 		//更新买家玩家信息中的广告缓存
 		buyer.addPayedPromotion(newOrder.promotionId);
 		GameDb.saveOrUpdate(buyer);
@@ -1632,6 +1684,9 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
 		//如果是在自己公司推广不发通知
 		if (!selfPromo) {
+			//增加玩家建筑收入记录
+			LogDb.sellerBuildingIncome(sellerBuildingId,fcySeller.type(),seller.id(), (int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000),fcySeller.getCurPromPricePerHour(),0);//暂时推广内容没有记录，以后可以加上
+
 			//推广公司预约通知
 			long newPromoStartTs = newOrder.promStartTs; //预计开始时间
 			long promDuration = newOrder.promDuration; //广告时长
@@ -2064,6 +2119,15 @@ public class GameSession {
 			seller.addMoney(cost - minerCost);
 			LogDb.playerPay(this.player.id(), cost + minerCost);
 			LogDb.playerIncome(seller.id(), cost - minerCost);
+
+			GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+					.setBuildingId(Util.toByteString(bid))
+					.setMoney(cost - minerCost)
+					.setPos(building.toProto().getPos())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.build()
+			));
+
 			//矿工费用记录
 			LogDb.minersCost(this.player.id(), minerCost, MetaData.getSysPara().minersCostRatio);
 			LogDb.minersCost(seller.id(), minerCost, MetaData.getSysPara().minersCostRatio);
@@ -2074,6 +2138,9 @@ public class GameSession {
 				lab.updateTotalEvaIncome(cost - minerCost, c.getTimes());
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
+
+            int itemId = c.hasGoodCategory() ? c.getGoodCategory() : 0;//用于统计研究的是什么
+            LogDb.sellerBuildingIncome(lab.id(),lab.type(),lab.ownerId(),c.getTimes(),lab.getPricePreTime(),itemId);
 
 			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
 					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
@@ -2118,7 +2185,7 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId)) {
 			GameDb.saveOrUpdate(lab);
-			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllInProcessProto());
+			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllLineProto(player.id()));
 			this.write(Package.create(cmd, builder.build()));
 		}
 		else
@@ -2151,7 +2218,7 @@ public class GameSession {
 			builder.setLineId(c.getLineId());
 			if(r.evaPoint > 0) {
 				builder.setEvaPoint(r.evaPoint);
-                builder.addAllLabResult(r.labResult);//开启的5个结果集（新增）
+                builder.addAllLabResult(r.labResult);//开启的5个结果集
 			}
 			else {
 				if(r.itemIds != null)
@@ -3100,7 +3167,7 @@ public class GameSession {
 	 */
 	public void eachTypeNpcNum(short cmd) {
 		Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
-		NpcManager.instance().countNpcByType().forEach((k,v)->{
+		NpcManager.instance().countRealNpcByType().forEach((k,v)->{
 			list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
 		});
 		list.setWorkNpcNum(NpcManager.instance().getNpcCount())
@@ -4890,5 +4957,41 @@ public class GameSession {
 		FactoryBase factoryBase = (FactoryBase) building;
 		lineBuilder.setBuildingId(id.getId()).setWarehouseCapacity(factoryBase.store.usedSize());
 		this.write(Package.create(cmd,lineBuilder.build()));
+	}
+
+	/*查询建筑生产线状态*/
+	public void queryBuildingProduceStatue(short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID buildingId = Util.toUuid(id.getId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if(null==building||!(building instanceof FactoryBase)){
+			System.err.println("建筑为空或不属于工厂建筑");
+			return;
+		}
+		FactoryBase factory = (FactoryBase) building;
+		List<LineBase> lines = factory.lines;
+		Gs.BuildingProduceStatue.Builder builder = Gs.BuildingProduceStatue.newBuilder();
+		if(building.getState()==Gs.BuildingState.SHUTDOWN_VALUE){  //停业状态
+			builder.setStatue(Gs.BuildingProduceStatue.Statue.StopBusiness);
+		}else{
+			//1.没有生产线，生产线空闲
+			if(lines.size()==0){
+				builder.setStatue(Gs.BuildingProduceStatue.Statue.LineUnUsed);
+			}else {//有生产线
+				//2.空间是否充足，获取第一条生产线状态,并设置生产商品id
+				LineBase lineBase = lines.get(0);
+				builder.setItemId(lineBase.item.id);
+				if(lineBase.pause) {//如果生产线状态是暂停
+					if (!factory.hasEnoughMaterial(lineBase, factory.ownerId())) {	//3.原材料不足
+						builder.setStatue(Gs.BuildingProduceStatue.Statue.MaterialNotEnough);
+					}else if(factory.store.availableSize()<=0){	//4.空间不足
+						builder.setStatue(Gs.BuildingProduceStatue.Statue.StoreCapacityFull);
+					}
+				}else{//5.生产中
+					builder.setStatue(Gs.BuildingProduceStatue.Statue.InProduction);
+				}
+			}
+		}
+		this.write(Package.create(cmd,builder.build()));
 	}
 }

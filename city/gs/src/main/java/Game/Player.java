@@ -571,4 +571,12 @@ public class Player {
             return true;
         }
     }
+
+    public long getOfflineTs() {
+        return offlineTs;
+    }
+
+    public long getOnlineTs() {
+        return onlineTs;
+    }
 }
