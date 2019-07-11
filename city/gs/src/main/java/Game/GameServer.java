@@ -47,6 +47,23 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GameServer {
+    public static void testRechargeRequestRes(){
+        String str0 = "123456";
+        String str1 = str0.substring(0,5);
+        int xx = 0;
+        /*CcOuterClass.RechargeRequestRes.Builder pRechargeRequestRes = CcOuterClass.RechargeRequestRes.newBuilder();
+        ddd_purchase pur = new ddd_purchase(UUID.randomUUID(),UUID.randomUUID(),1,"addsfrom","addsto");
+        *//*if(ccapiReq.getSignature().size() > 0)
+            pur.setResp_Signature(Hex.decode(ccapiReq.getSignature().toStringUtf8()));*//*
+        Dddbind.ct_RechargeRequestRes.Builder msg = Dddbind.ct_RechargeRequestRes.newBuilder();
+        pRechargeRequestRes
+                .setPurchaseId(pur.purchaseId.toString())
+                .setEthAddr(pur.ddd_from)
+                .setTs(pur.getCreate_time())
+                .setExpireTime(pur.getExpire_time());
+                //.setSignature(ByteString.copyFrom(pur.getResp_Signature()));
+        msg.setPlayerId(Util.toByteString(pur.player_id)).setRechargeRequestRes(pRechargeRequestRes.build());*/
+    }
     private static final Logger logger = Logger.getLogger(GameServer.class);
     private static final ScheduledExecutorService thirdPartyDataSourcePullExecutor = Executors.newScheduledThreadPool(1);
     private static final EventExecutorGroup businessLogicExecutor = new DefaultEventExecutorGroup(4);
@@ -205,6 +222,7 @@ public class GameServer {
         }
     }
     public static void main(String[] args) throws Exception {
+        testRechargeRequestRes();
         // By default, logging is enabled via the popular SLF4J API. The use of SLF4J is optional; the driver will use SLF4J if the driver detects the presence of SLF4J in the classpath. Otherwise, the driver will fall back to JUL (java.util.logging)
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.SIMPLE);
         java.util.logging.Logger.getLogger("org.mongodb").setLevel(java.util.logging.Level.OFF);

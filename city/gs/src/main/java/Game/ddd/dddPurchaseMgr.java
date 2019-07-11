@@ -12,6 +12,7 @@ import ccapi.Dddbind.ct_DisChargeRes;
 import ccapi.Dddbind.ct_RechargeRequestRes;
 import ccapi.GlobalDef;
 import cityapi.CityOuterClass.RechargeResultReq;
+import com.google.protobuf.ByteString;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
 
@@ -135,8 +136,8 @@ public class dddPurchaseMgr {
             }
             pur.status = StatusPurchase.PROCESSED;
             pur.completion_time = System.currentTimeMillis();
-            /*if(ccapiReq.getSignature().size() > 0)
-                pur.req_Signature = Hex.decode(ccapiReq.getSignature().toStringUtf8());*/
+            if(ccapiReq.getSignature().size() > 0)
+                pur.resp_Signature = ccapiReq.getSignature().toByteArray();
             GameDb.saveOrUpdate(player);
             GameDb.saveOrUpdate(pur);
 
@@ -148,11 +149,12 @@ public class dddPurchaseMgr {
                 RechargeRequestRes.Builder pRechargeRequestRes = RechargeRequestRes.newBuilder();
 
                 pRechargeRequestRes
+                        .setResHeader(header)
                         .setPurchaseId(pur.purchaseId.toString())
                         .setEthAddr(pur.ddd_from)
                         .setTs(pur.create_time)
-                        .setExpireTime(pur.expire_time);
-                        //.setSignature(ByteString.copyFrom(pur.req_Signature));
+                        .setExpireTime(pur.expire_time)
+                        .setSignature(ByteString.copyFrom(pur.resp_Signature));
 
                 msg.setPlayerId(Util.toByteString(pur.player_id)).setRechargeRequestRes(pRechargeRequestRes.build());
                 Package pack = Package.create(GsCode.OpCode.ct_RechargeRequestRes_VALUE, msg.build());
