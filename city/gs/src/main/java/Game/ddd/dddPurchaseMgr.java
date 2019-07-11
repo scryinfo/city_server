@@ -12,10 +12,8 @@ import ccapi.Dddbind.ct_DisChargeRes;
 import ccapi.Dddbind.ct_RechargeRequestRes;
 import ccapi.GlobalDef;
 import cityapi.CityOuterClass.RechargeResultReq;
-import com.google.protobuf.ByteString;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
-import org.spongycastle.util.encoders.Hex;
 
 import javax.persistence.*;
 import java.util.*;
@@ -66,7 +64,7 @@ public class dddPurchaseMgr {
                 return false;
             }
             //提币操作，需锁定eee
-            player.lockMoney(purchase.purchaseId,eee);
+            player.lockMoney(purchase.purchaseId,-eee*10000);
         }
 
         //不允许多次设置相同id的交易
@@ -128,16 +126,17 @@ public class dddPurchaseMgr {
                 //todo 这种是异常的情况，city服务器没有订单，但是ccap服务器还有，这种情况需要人工处理
             }
 
-            long eee = 0;
             if(pur.ddd < 0){
-                eee = player.unlockMoney(purId);
+                player.spentLockMoney(purId);
             }else{
+                long eee = 0;
                 eee = (long)GameDb.calGameCurrencyFromDDD(pur.ddd);
+                player.addMoney(eee * 10000);
             }
-            player.addMoney(eee);
             pur.status = StatusPurchase.PROCESSED;
             pur.completion_time = System.currentTimeMillis();
-            pur.req_Signature = Hex.decode(ccapiReq.getSignature().toStringUtf8());
+            /*if(ccapiReq.getSignature().size() > 0)
+                pur.req_Signature = Hex.decode(ccapiReq.getSignature().toStringUtf8());*/
             GameDb.saveOrUpdate(player);
             GameDb.saveOrUpdate(pur);
 
@@ -152,10 +151,10 @@ public class dddPurchaseMgr {
                         .setPurchaseId(pur.purchaseId.toString())
                         .setEthAddr(pur.ddd_from)
                         .setTs(pur.create_time)
-                        .setExpireTime(pur.expire_time)
-                        .setSignature(ByteString.copyFrom(pur.req_Signature));
+                        .setExpireTime(pur.expire_time);
+                        //.setSignature(ByteString.copyFrom(pur.req_Signature));
 
-                msg.setPlayerId(Util.toByteString(pur.player_id)).setRechargeRequestRes(pRechargeRequestRes);
+                msg.setPlayerId(Util.toByteString(pur.player_id)).setRechargeRequestRes(pRechargeRequestRes.build());
                 Package pack = Package.create(GsCode.OpCode.ct_RechargeRequestRes_VALUE, msg.build());
                 player.send(pack);
                 MailBox.instance().sendMail(Mail.MailType.DDD_RECHARGEREQUESTRES.getMailType(), pur.player_id, null, null);
