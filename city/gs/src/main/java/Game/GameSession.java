@@ -1149,7 +1149,12 @@ public class GameSession {
 			return;
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
-		this.write(Package.create(cmd, b.detailProto()));
+		Gs.Laboratory laboratory = (Gs.Laboratory) b.detailProto();
+		Gs.Laboratory.Builder builder = laboratory.toBuilder();
+		//设置已完成的线只显示当前玩家本人研究的生产线
+		Laboratory lab = (Laboratory) b;
+		builder.addAllCompleted(lab.getOwnerLine(player.id()));
+		this.write(Package.create(cmd, builder.build()));
 	}
 	public void detailRetailShop(short cmd, Message message) {
 		Gs.Id c = (Gs.Id) message;
@@ -1640,7 +1645,6 @@ public class GameSession {
         //矿工费用记录
 		LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-
 		//更新买家玩家信息中的广告缓存
 		buyer.addPayedPromotion(newOrder.promotionId);
 		GameDb.saveOrUpdate(buyer);
@@ -1651,6 +1655,9 @@ public class GameSession {
 		GameDb.saveOrUpdate(Arrays.asList(fcySeller,sellerBuilding));
 		//如果是在自己公司推广不发通知
 		if (!selfPromo) {
+			//增加玩家建筑收入记录
+			LogDb.sellerBuildingIncome(sellerBuildingId,fcySeller.type(),seller.id(), (int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000),fcySeller.getCurPromPricePerHour(),0);//暂时推广内容没有记录，以后可以加上
+
 			//推广公司预约通知
 			long newPromoStartTs = newOrder.promStartTs; //预计开始时间
 			long promDuration = newOrder.promDuration; //广告时长
@@ -2149,7 +2156,7 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId)) {
 			GameDb.saveOrUpdate(lab);
-			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllLineProto());
+			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllLineProto(player.id()));
 			this.write(Package.create(cmd, builder.build()));
 		}
 		else
