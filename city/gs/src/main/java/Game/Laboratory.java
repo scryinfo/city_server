@@ -483,9 +483,12 @@ public class Laboratory extends Building {
         }
         return changed;
     }
-    public List<Gs.Laboratory.Line> getAllInProcessProto(){
+    public List<Gs.Laboratory.Line> getAllLineProto(){
         List<Gs.Laboratory.Line> lines = new ArrayList<>();
         inProcess.forEach(l->{
+            lines.add(l.toProto());
+        });
+        completed.values().forEach(l->{
             lines.add(l.toProto());
         });
         return lines;

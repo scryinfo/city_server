@@ -925,6 +925,7 @@ public class GameSession {
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
+		LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
 		//矿工费用日志记录(需调整)
 		LogDb .minersCost(player.id(),minerCost,minersRatio);
 		LogDb.minersCost(seller.id(),minerCost,minersRatio);
@@ -2076,6 +2077,9 @@ public class GameSession {
 			}
 			LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
 
+            int itemId = c.hasGoodCategory() ? c.getGoodCategory() : 0;//用于统计研究的是什么
+            LogDb.sellerBuildingIncome(lab.id(),lab.type(),lab.ownerId(),c.getTimes(),lab.getPricePreTime(),itemId);
+
 			Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
 					.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
 					.setBuyerId(Util.toByteString(player.id()))
@@ -2119,7 +2123,7 @@ public class GameSession {
 		Laboratory lab = (Laboratory)building;
 		if(lab.delLine(lineId)) {
 			GameDb.saveOrUpdate(lab);
-			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllInProcessProto());
+			Gs.LabCancelLine.Builder builder = c.toBuilder().addAllInProcessLine(lab.getAllLineProto());
 			this.write(Package.create(cmd, builder.build()));
 		}
 		else

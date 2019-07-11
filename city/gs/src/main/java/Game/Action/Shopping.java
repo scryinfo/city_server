@@ -141,6 +141,7 @@ public class Shopping implements IAction {
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
                     chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
             LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
+            LogDb.sellerBuildingIncome(chosen.bId,sellShop.type(),owner.id(),1,chosen.price,chosen.meta.id);//记录建筑收益详细信息
             //矿工费用记录
             LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
@@ -215,6 +216,7 @@ public class Shopping implements IAction {
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
                       chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
+              LogDb.sellerBuildingIncome(chosen.bId,sellShop.type(),owner.id(),1,chosen.price,chosen.meta.id);//记录建筑收益详细信息
               //矿工费用记录
               LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
