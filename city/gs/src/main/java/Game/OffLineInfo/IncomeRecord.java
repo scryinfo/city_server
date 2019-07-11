@@ -1,4 +1,4 @@
-package Game;
+package Game.OffLineInfo;
 
 import java.util.UUID;
 

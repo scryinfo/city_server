@@ -63,7 +63,11 @@ public class Laboratory extends Building {
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
-        this.completed.values().forEach(line -> builder.addCompleted(line.toProto()));
+        /*this.completed.values().forEach(line -> {
+            //如果是已完成的线的主人是当前玩家，则显示已完成的线
+           builder.addCompleted(line.toProto()));
+        );*/
+
         return builder.setSellTimes(this.getRemainingTime())
                 .setPricePreTime(this.pricePreTime)
                 .setProbEva(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE))
@@ -355,7 +359,7 @@ public class Laboratory extends Building {
                 this.launch();
             currentRoundPassNano += diffNano;//当前通过的纳秒
             //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //从配置表读取的过渡时间
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(20)) { //从配置表读取的过渡时间
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -483,13 +487,25 @@ public class Laboratory extends Building {
         }
         return changed;
     }
-    public List<Gs.Laboratory.Line> getAllLineProto(){
+    public List<Gs.Laboratory.Line> getAllLineProto(UUID proposerId){
         List<Gs.Laboratory.Line> lines = new ArrayList<>();
         inProcess.forEach(l->{
             lines.add(l.toProto());
         });
         completed.values().forEach(l->{
-            lines.add(l.toProto());
+           if(l.proposerId.equals(proposerId)){
+               lines.add(l.toProto());
+           }
+        });
+        return lines;
+    }
+    /*获取已完成生产线中自己的线*/
+    public List<Gs.Laboratory.Line> getOwnerLine(UUID proposerId){
+        List<Gs.Laboratory.Line> lines = new ArrayList<>();
+        this.completed.values().forEach(line->{
+            if(line.proposerId.equals(proposerId)){
+                lines.add(line.toProto());
+            }
         });
         return lines;
     }
