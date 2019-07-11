@@ -4596,7 +4596,7 @@ public class GameSession {
 				//double dddAmount = GameDb.calDDDFromEEE(Double.parseDouble(req.getAmount()));
 				double dddAmount = Double.parseDouble(req.getAmount());
 				//添加交易
-				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, dddAmount ,"",req.getEthAddr());
+				ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()),playerId, -dddAmount ,"",req.getEthAddr());
 				if(dddPurchaseMgr.instance().addPurchase(pur)){
 					try{
 						//转发给ccapi服务器
@@ -4684,7 +4684,7 @@ public class GameSession {
 
 		//添加交易
 		double dddAmount = Double.parseDouble(req.getAmount());
-		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()) , playerId, -dddAmount ,"","");
+		ddd_purchase pur = new ddd_purchase(Util.toUuid(req.getPurchaseId().getBytes()) , playerId, dddAmount ,"","");
 		if(dddPurchaseMgr.instance().addPurchase(pur)){
 			//转发给ccapi服务器
 			try{

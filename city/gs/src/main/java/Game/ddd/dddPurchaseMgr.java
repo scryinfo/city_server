@@ -15,6 +15,7 @@ import cityapi.CityOuterClass.RechargeResultReq;
 import com.google.protobuf.ByteString;
 import gscode.GsCode;
 import org.hibernate.annotations.Cascade;
+import org.spongycastle.util.encoders.Hex;
 
 import javax.persistence.*;
 import java.util.*;
@@ -136,6 +137,7 @@ public class dddPurchaseMgr {
             player.addMoney(eee);
             pur.status = StatusPurchase.PROCESSED;
             pur.completion_time = System.currentTimeMillis();
+            pur.req_Signature = Hex.decode(ccapiReq.getSignature().toStringUtf8());
             GameDb.saveOrUpdate(player);
             GameDb.saveOrUpdate(pur);
 
