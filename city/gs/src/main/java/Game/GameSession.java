@@ -185,19 +185,47 @@ public class GameSession {
 		Cheat cheat = _parseCheatString(c.getStr());
 		if(cheat != null)
 			_runCheat(cheat);
+		this.write(Package.create(cmd, message));
 	}
 	private static class Cheat {
 		enum Type {
 			addmoney,
 			additem,
 			addground,
-			invent
+			invent,
+            fill_warehouse
 		}
 		Type cmd;
-		int[] paras;
+		String[] paras;
 	}
 	private void _runCheat(Cheat cheat) {
 		switch (cheat.cmd) {
+            case fill_warehouse:
+            {
+                int itemId = Integer.parseInt(cheat.paras[0]);
+                int count = Integer.parseInt(cheat.paras[1]);
+                String buildingId = cheat.paras[2];
+				MetaItem m = MetaData.getItem(itemId);
+				int lv = 0;
+				if(m instanceof MetaGood)
+					lv = player.getGoodLevel(m.id);
+
+				Building building = City.instance().getBuilding(UUID.fromString(buildingId));
+				IStorage iStorage = (IStorage) building;
+				ItemKey itemKey = new ItemKey(m, building.ownerId(), lv, building.ownerId());
+				if (!MetaGood.isItem(m.id)) {
+					itemKey = new ItemKey(m, building.ownerId());
+				}
+				iStorage.offset(itemKey, count);
+				if(MetaGood.isItem(m.id)) {
+					if (!BrandManager.instance().brandIsExist(building.ownerId(), m.id)) {
+						//Player owner = GameDb.getPlayer(building.ownerId());
+						BrandManager.instance().addBrand(building.ownerId(), m.id);
+					}
+				}
+				GameDb.saveOrUpdate(building);
+				break;
+            }
 			case addmoney: {
 				int n = Integer.valueOf(cheat.paras[0]);
 				if(n <= 0)
@@ -208,8 +236,8 @@ public class GameSession {
 				break;
 			}
 			case additem: {
-				int id = cheat.paras[0];
-				int n = cheat.paras[1];
+				int id = Integer.parseInt(cheat.paras[0]);
+				int n = Integer.parseInt(cheat.paras[1]);
 				MetaItem mi = MetaData.getItem(id);
 				if (mi == null)
 					return;
@@ -227,10 +255,10 @@ public class GameSession {
 				break;
 			}
 			case addground: {
-				int x1 = cheat.paras[0];
-				int y1 = cheat.paras[1];
-				int x2 = cheat.paras[2];
-				int y2 = cheat.paras[3];
+				int x1 = Integer.parseInt(cheat.paras[0]);
+				int y1 = Integer.parseInt(cheat.paras[1]);
+				int x2 = Integer.parseInt(cheat.paras[2]);
+				int y2 = Integer.parseInt(cheat.paras[3]);
 				if(x1 > x2) {
 					int z = x1;
 					x1 = x2;
@@ -251,8 +279,8 @@ public class GameSession {
 				break;
 			}
 			case invent: {
-				int mId = cheat.paras[0];
-				int lv = cheat.paras[1];
+				int mId = Integer.parseInt(cheat.paras[0]);
+				int lv = Integer.parseInt(cheat.paras[1]);
 				MetaItem mi = MetaData.getItem(mId);
 				if(mi == null)
 					return;
@@ -278,9 +306,10 @@ public class GameSession {
 		catch(IllegalArgumentException e) {
 			return null;
 		}
-		res.paras = new int[sa.length-1];
+
+		res.paras = new String[sa.length-1];
 		for(int i = 1; i < sa.length; ++i) {
-			res.paras[i-1] = Integer.valueOf(sa[i]);
+			res.paras[i-1] = sa[i];
 		}
 		return res;
 	}
