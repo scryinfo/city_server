@@ -6,8 +6,10 @@ import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.ProbBase;
 import Shared.LogDb;
+import Shared.Package;
 import Shared.Util;
 import gs.Gs;
+import gscode.GsCode;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -104,6 +106,15 @@ public class JustVisit implements IAction {
             owner.addMoney(income);
             npc.decMoney((int) pay);
             npc.setBuyApartmentTs(System.currentTimeMillis());
+
+            GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+                    .setBuildingId(Util.toByteString(chosen.id()))
+                    .setMoney(income)
+                    .setPos(chosen.toProto().getPos())
+                    .setItemId(0)
+                    .build()
+            ));
+
             LogDb.playerIncome(owner.id(), income);
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);

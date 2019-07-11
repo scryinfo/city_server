@@ -918,6 +918,14 @@ public class GameSession {
 		player.decMoney(freight);
 		LogDb.playerPay(player.id(), freight);
 
+		GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+				.setBuildingId(Util.toByteString(bid))
+				.setMoney(cost)
+				.setPos(sellBuilding.toProto().getPos())
+				.setItemId(itemBuy.key.meta.id)
+				.build()
+		));
+
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
 		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
@@ -1619,6 +1627,15 @@ public class GameSession {
 		seller.addMoney(fee-minerCost);
         LogDb.playerPay(buyer.id(), fee+minerCost);
         LogDb.playerIncome(seller.id(), fee-minerCost);
+
+		GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+				.setBuildingId(Util.toByteString(b.id()))
+				.setMoney(fee-minerCost)
+				.setPos(b.toProto().getPos())
+				.setItemId(gs_AdAddNewPromoOrder.hasBuildingType() ? gs_AdAddNewPromoOrder.getBuildingType() : gs_AdAddNewPromoOrder.getProductionType())
+				.build()
+		));
+
         //矿工费用记录
 		LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
 		LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
@@ -2065,6 +2082,15 @@ public class GameSession {
 			seller.addMoney(cost - minerCost);
 			LogDb.playerPay(this.player.id(), cost + minerCost);
 			LogDb.playerIncome(seller.id(), cost - minerCost);
+
+			GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+					.setBuildingId(Util.toByteString(bid))
+					.setMoney(cost - minerCost)
+					.setPos(building.toProto().getPos())
+					.setItemId(c.hasGoodCategory() ? c.getGoodCategory() : 0)
+					.build()
+			));
+
 			//矿工费用记录
 			LogDb.minersCost(this.player.id(), minerCost, MetaData.getSysPara().minersCostRatio);
 			LogDb.minersCost(seller.id(), minerCost, MetaData.getSysPara().minersCostRatio);

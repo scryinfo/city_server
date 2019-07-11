@@ -136,6 +136,15 @@ public class Shopping implements IAction {
                     .setItemId(chosen.meta.id)
                     .build();
             GameServer.sendIncomeNotity(owner.id(),notify);
+
+            GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+                    .setBuildingId(Util.toByteString(chosen.bId))
+                    .setMoney(chosen.price)
+                    .setPos(sellShop.toProto().getPos())
+                    .setItemId(chosen.meta.id)
+                    .build()
+            ));
+
             LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
@@ -210,6 +219,15 @@ public class Shopping implements IAction {
                       .setItemId(chosen.meta.id)
                       .build();
               GameServer.sendIncomeNotity(owner.id(),notify);
+
+              GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+                    .setBuildingId(Util.toByteString(chosen.bId))
+                    .setMoney(chosen.price)
+                    .setPos(sellShop.toProto().getPos())
+                    .setItemId(chosen.meta.id)
+                    .build()
+              ));
+
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
