@@ -14,6 +14,7 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
+import Game.OffLineInfo.UnLineInformation;
 import Game.Util.BuildingUtil;
 import Game.Util.CityUtil;
 import Game.Util.GlobalUtil;
@@ -1148,6 +1149,7 @@ public class GameSession {
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
+		new UnLineInformation().getPlayerUnLineInformation(player.id());
 	}
 
 	public void detailProduceDepartment(short cmd, Message message) {

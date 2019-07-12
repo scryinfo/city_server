@@ -447,14 +447,15 @@ public class LogDb {
 		playerInfo.insertOne(new Document("r", uuid).append("male",isMale));
 	}
 
-	public static void flightBet(UUID playerId, int delay, int amount, boolean win, Gs.FlightData d)
+	public static void flightBet(UUID playerId, int delay, int amount, boolean win, Gs.FlightData d,int s)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("i", playerId)
 				.append("d", delay)
 				.append("a", amount)
 				.append("w", win)
-				.append("f", d.toByteArray());
+				.append("f", d.toByteArray())
+				.append("s", s);
 		flightBet.insertOne(document);
 	}
 	public static class FlightBetRecord {
@@ -957,6 +958,10 @@ public class LogDb {
 	/*用于离线通知，货架收入*/
 	public static MongoCollection<Document> getSellerBuildingIncome() {
 		return sellerBuildingIncome;
+	}
+
+	public static MongoCollection<Document> getFlightBet() {
+		return flightBet;
 	}
 
 	public static class Positon
