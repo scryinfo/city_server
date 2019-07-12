@@ -126,7 +126,7 @@ public class PromotionMgr {
             Entry<UUID, PromoOrder> entry = iterator.next();
             PromoOrder promotion = (PromoOrder)entry.getValue();
             long curtime = System.currentTimeMillis();
-            if(promotion.promStartTs > curtime){
+            if(promotion.promStartTs > curtime){ //没到研究开始时间
                 continue;
             }
             Building sellerBuilding = City.instance().getBuilding(promotion.sellerBuildingId);
@@ -139,9 +139,9 @@ public class PromotionMgr {
             long promHour = TimeUnit.MILLISECONDS.toHours(promotion.promDuration);
             if(endTime >= System.currentTimeMillis()){ //此处即便条件成立也不能立刻推广，还需要判断是否经过1小时。
                 long now = System.currentTimeMillis();
-                long passTime = now - promotion.promStartTs;
-                passTime=TimeUnit.MILLISECONDS.toHours(passTime);
-                if(passTime-promotion.promoNum==1) {
+                //long passTime = now - promotion.promStartTs;//这是剩余时间
+                long passTime=TimeUnit.MILLISECONDS.toHours(elapsedtime);
+                if(passTime-promotion.promoNum==1) {  //经过时间-推广次数（这就相当于每经过1小时就执行一次推广）
                     System.err.println("开始推广");
                     //计算每个推广的结果
                     //addition = fcySeller.excutePromotion(promotion);

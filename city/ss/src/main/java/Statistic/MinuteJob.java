@@ -13,7 +13,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class OneSecondJob implements org.quartz.Job{
+public class MinuteJob implements org.quartz.Job{
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
 
     @Override
@@ -26,7 +26,7 @@ public class OneSecondJob implements org.quartz.Job{
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
-        LOGGER.debug("OneSecondJob start execute,time = " + timeStr);
+        LOGGER.debug("MinuteJob start execute,time = " + timeStr);
 
         //player income
         List<Document> documentList=documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());//统计每分钟的收入量
@@ -40,7 +40,7 @@ public class OneSecondJob implements org.quartz.Job{
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));
-        LOGGER.debug(MessageFormat.format("OneSecondJob end execute, time = {0}, consume = {1} ms",
+        LOGGER.debug(MessageFormat.format("MinuteJob end execute, time = {0}, consume = {1} ms",
                 timeStr, nowTime1 - nowTime));
     }
 }
