@@ -35,16 +35,40 @@ public class ddd_purchase {
     String ddd_tx_info;	//
     public int ddd_date;
     StatusPurchase status;         //交易状态
+
+    public long getExpire_time() {
+        return expire_time;
+    }
+
     long expire_time;
+
+    public long getCreate_time() {
+        return create_time;
+    }
+
     long create_time;
     long completion_time;
     int type;
 
     //关键数据签名验证----------------------------
     String req_pubkey;     	//请求方公钥
+
+    public byte[] getReq_Signature() {
+        return req_Signature;
+    }
+
     byte[] req_Signature;	//请求方签名
 
     String resp_pubkey;    	//响应服务器公钥
+
+    public byte[] getResp_Signature() {
+        return resp_Signature;
+    }
+
+    public void setResp_Signature(byte[] resp_Signature) {
+        this.resp_Signature = resp_Signature;
+    }
+
     byte[] resp_Signature;	//响应方方签名
     //关键数据签名验证----------------------------
 
