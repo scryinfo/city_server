@@ -14,7 +14,7 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
-import Game.OffLineInfo.UnLineInformation;
+import Game.OffLineInfo.OffLineInformation;
 import Game.Util.BuildingUtil;
 import Game.Util.CityUtil;
 import Game.Util.GlobalUtil;
@@ -1149,7 +1149,6 @@ public class GameSession {
 		registBuildingDetail(b);
 		updateBuildingVisitor(b);
 		this.write(Package.create(cmd, b.detailProto()));
-		new UnLineInformation().getPlayerUnLineInformation(player.id());
 	}
 
 	public void detailProduceDepartment(short cmd, Message message) {
@@ -4996,4 +4995,11 @@ public class GameSession {
 		}
 		this.write(Package.create(cmd,builder.build()));
 	}
+
+	/*查询离线通知*/
+	public void queryOffLineInformation(short cmd){
+		Gs.UnLineInformation playerUnLineInformation = OffLineInformation.instance().getPlayerUnLineInformation(player.id());
+		this.write(Package.create(cmd,playerUnLineInformation));
+	}
+
 }

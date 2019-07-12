@@ -2,20 +2,19 @@ package Game.OffLineInfo;
 
 import Game.*;
 import Game.Meta.MetaBuilding;
-import Shared.LogDb;
 import Shared.Util;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.mongodb.Block;
 import gs.Gs;
-import org.bson.Document;
-import org.bson.types.Binary;
 
 import java.util.*;
 
-import static com.mongodb.client.model.Filters.*;
-
 //离线通知
-public class UnLineInformation {
+public class OffLineInformation {
+
+    private OffLineInformation(){}
+    private static OffLineInformation instance=new OffLineInformation();
+    public static OffLineInformation instance(){
+        return instance;
+    }
 
     public Gs.UnLineInformation getPlayerUnLineInformation(UUID playerId){
         Player player = GameDb.getPlayer(playerId);
