@@ -25,7 +25,7 @@ public class OffLineInformation {
         });
         //2.获取离线期间玩家所有建筑的收益
         Map<Integer, List<OffLineBuildingRecord>> recordMap = OffLineSummaryUtil.getOffLineBuildingIncome(player.getOfflineTs(), player.getOnlineTs(),playerId);
-        Map<Integer,Gs.BuildingIncome> resultMap = totalUnLineBuildingIncome(recordMap, buildingMap);//可以进行数据封装了（包含了研究所，零售店，除了预测）
+        Map<Integer,Gs.BuildingIncome> resultMap = totalUnLineBuildingIncome(recordMap, buildingMap);//可以进行数据封装了（包含了研究所，零售店...除了预测）
 
         //3.获取离线期间玩家预测盈亏
         List<OffLineFlightRecord> playerFlightForecast = OffLineSummaryUtil.getPlayerFlightForecast(playerId, player.getOfflineTs(), player.getOnlineTs());
