@@ -8,7 +8,6 @@ import Shared.Package;
 import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
