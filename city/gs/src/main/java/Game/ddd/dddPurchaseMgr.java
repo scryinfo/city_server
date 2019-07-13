@@ -61,7 +61,7 @@ public class dddPurchaseMgr {
         if(purchase.ddd < 0){
             //判断交易是否合法
             long eee = (long)GameDb.calGameCurrencyFromDDD(purchase.ddd);
-            if(player.money() + eee < 0 ){ //游戏币不够
+            if(player.money() + eee*10000 < 0 ){ //游戏币不够
                 return false;
             }
             //提币操作，需锁定eee
