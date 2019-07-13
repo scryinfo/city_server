@@ -36,6 +36,7 @@ import gs.Gs;
 import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
@@ -147,7 +148,7 @@ public class GameSession {
 	public void write(Package pack) {
 		ctx.channel().writeAndFlush(pack);
 	}
-	public void disconnect() {ctx.channel().disconnect();}
+	public ChannelFuture disconnect() {return ctx.channel().disconnect();}
 	public void asyncExecute(Method m, short cmd, Message message) {
 		City.instance().execute(()->{
 			try {
@@ -348,14 +349,15 @@ public class GameSession {
 		Gs.HeartBeat b = (Gs.HeartBeat)message;
 		this.write(Package.create(cmd, Gs.HeartBeatACK.newBuilder().setClientTs(b.getTs()).setServerTs(System.currentTimeMillis()).build()));
 	}
-	private boolean kickOff = false;
 	private Player kickOff() {
 		assert player != null;
-		kickOff = true;
+
+		// logout can not rely on channelInactive, it will called by netty asynchronously, so that might called after the disconnect future complete
+		this.logout(true);
 		this.disconnect();
 		return player;
 	}
-	public void logout(){
+	public void logout(boolean kickOff){
 		if(!this.roleLogin()){
 			return;
 		}
@@ -384,6 +386,7 @@ public class GameSession {
 			SocietyManager.broadOffline(player);
 		}
 		Validator.getInstance().unRegist(accountName, token);
+		this.valid = false;
 	}
 	public void roleLogin(short cmd, Message message) {
 		// in city thread
@@ -391,34 +394,34 @@ public class GameSession {
 		UUID roleId = Util.toUuid(c.getId().toByteArray());
 		GameSession otherOne = GameServer.allGameSessions.get(roleId);
 		if(otherOne != null) {
-			player = otherOne.kickOff();
+			this.player = otherOne.kickOff();
 		}
 		else {
-			player = GameDb.getPlayer(roleId);
+			this.player = GameDb.getPlayer(roleId);
 			if (player == null) {
 				this.write(Package.fail(cmd));
 				return;
 			}
 		}
-
-		player.setSession(this);
+		this.player.setSession(this);
 		loginState = LoginState.ROLE_LOGIN;
-		GameServer.allGameSessions.put(player.id(), this);
+		GameServer.allGameSessions.put(this.player.id(), this);
 
-		player.setCity(City.instance()); // toProto will use Player.city
+		this.player.setCity(City.instance()); // toProto will use Player.city
 		logger.debug("account: " + this.accountName + " login");
 		//添加矿工费用（系统参数）
-		Gs.Role.Builder role = player.toProto().toBuilder();
+		Gs.Role.Builder role = this.player.toProto().toBuilder();
 		role.setMinersCostRatio(MetaData.getSysPara().minersCostRatio);
-		this.write(Package.create(cmd,role.build()));
-		City.instance().add(player); // will send UnitCreate
-		player.online();
-		if (player.getSocietyId() != null)
+		this.write(Package.create(cmd, role.build()));
+		City.instance().add(this.player); // will send UnitCreate
+		this.player.online();
+		if (this.player.getSocietyId() != null)
 		{
-			SocietyManager.broadOnline(player);
+			SocietyManager.broadOnline(this.player);
 		}
 		sendSocialInfo();
 	}
+
 	private static final int MAX_PLAYER_NAME_LEN = 20;
 	public void createRole(short cmd, Message message) {
 		Gs.CreateRole c = (Gs.CreateRole)message;
