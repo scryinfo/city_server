@@ -14,11 +14,7 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
-import Game.OffLineInfo.OffLineInformation;
-import Game.Util.BuildingUtil;
-import Game.Util.CityUtil;
-import Game.Util.GlobalUtil;
-import Game.Util.WareHouseUtil;
+import Game.Util.*;
 import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
@@ -41,6 +37,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
+import org.bson.Document;
 import org.ethereum.crypto.ECKey;
 import org.spongycastle.util.encoders.Hex;
 
@@ -52,6 +49,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -4996,10 +4994,44 @@ public class GameSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	/*查询离线通知*/
-	public void queryOffLineInformation(short cmd){
-		Gs.UnLineInformation playerUnLineInformation = OffLineInformation.instance().getPlayerUnLineInformation(player.id());
-		this.write(Package.create(cmd,playerUnLineInformation));
-	}
+	public void queryRetailShopGoods(short cmd,Message message){
+		Gs.Id id = (Gs.Id) message;
+		UUID buildingId = Util.toUuid(id.getId().toByteArray());
+		Building b = City.instance().getBuilding(buildingId);
+		if(null==b||!(b instanceof PublicFacility)||!(b.type()==MetaBuilding.RETAIL)){
+			System.err.println("建筑为空或不属于零售店");
+			return;
+		}
+		RetailShop r = (RetailShop) b;
+		Collection<ItemKey> collection=r.getShelf().getGoodsItemKey();
 
+		Gs.RetailShopGoods.Builder list = Gs.RetailShopGoods.newBuilder();
+		collection.forEach(itemKey->{
+			Gs.RetailShopGoods.ShopGoods.Builder builder= Gs.RetailShopGoods.ShopGoods.newBuilder();
+			builder.setItemId(itemKey.meta.id);
+			builder.setBrandName(itemKey.toProto().getBrandName());
+
+			int itemId=itemKey.meta.id;
+			UUID produceId=itemKey.producerId;
+
+			List<Document> todayDocumentList = LogDb.getDayGoodsSoldDetail(DateUtil.getTodayStart(),System.currentTimeMillis(), LogDb.getNpcBuyInShelf());
+			List<Document> yesterdayDocumentList = LogDb.getDayGoodsSoldDetail(DateUtil.getTodayStart()-TimeUnit.HOURS.toMillis(24),DateUtil.getTodayStart(), LogDb.getNpcBuyInShelf());
+			todayDocumentList.forEach(document ->{
+				UUID p=document.get("p",UUID.class);
+				int i=document.getInteger("id");
+				if((itemId==i)&&(produceId==p)){
+					builder.setTodaySoldAmount(document.getLong("total"));
+				}
+			});
+			yesterdayDocumentList.forEach(document ->{
+				UUID p=document.get("p",UUID.class);
+				int i=document.getInteger("id");
+				if((itemId==i)&&(produceId==p)){
+					builder.setYestdaySoldAmount(document.getLong("total"));
+				}
+			});
+			list.addGoods(builder.build());
+		});
+		this.write(Package.create(cmd,list.build()));
+	}
 }

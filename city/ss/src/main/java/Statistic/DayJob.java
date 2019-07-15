@@ -73,6 +73,10 @@ public class DayJob implements org.quartz.Job {
         documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), true,false);
         SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.PAY, documentList, yestodayStartTime, SummaryUtil.getDayGoods());
 
+        //Goods Sold Num Amount
+        documentList=documentList = LogDb.getDayGoodsSoldDetail(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
+        SummaryUtil.insertNpcHistoryData(documentList, yestodayStartTime, SummaryUtil.getDayGoodsSoldDetail());
+
         //material Shelf income
         documentList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false,true);
         SummaryUtil.insertDaySummaryWithTypeId(SummaryUtil.Type.INCOME, documentList,yestodayStartTime,SummaryUtil.getDayMaterial());

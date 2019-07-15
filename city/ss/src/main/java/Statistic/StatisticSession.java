@@ -4,9 +4,9 @@ import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
 import Statistic.SummaryUtil.CountType;
+import Statistic.Util.TimeUtil;
 import Statistic.Util.TotalUtil;
 import com.google.protobuf.Message;
-import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
@@ -334,9 +334,48 @@ public class StatisticSession {
     	this.write(Package.create(cmd,builder.build()));
     }
 
+	public void queryGoodsSoldDetailCurve(short cmd, Message message)
+	{
+		int itemId = ((Ss.GoodsSoldDetailCurve) message).getItemId();
+		UUID produceId = Util.toUuid(((Ss.GoodsSoldDetailCurve) message).getProduceId().toByteArray());
+
+		Map<Long,Ss.GoodsSoldDetailCurve.GoodsSoldDetail> totalMap = new TreeMap<>();//用于统计商品的销售量和销售额的合并数据
+		Map<Long, Document> goodsSoldMap=SummaryUtil.queryGoodsSoldDetailCurve(SummaryUtil.getDayGoodsSoldDetail(),itemId,produceId);
+		goodsSoldMap.forEach((k,v)->{
+			Ss.GoodsSoldDetailCurve.GoodsSoldDetail.Builder b=Ss.GoodsSoldDetailCurve.GoodsSoldDetail.newBuilder();
+			b.setTime(k);
+			b.setSoldNum(v.getInteger("n"));
+			b.setSoldAmount(v.getLong("total"));
+			totalMap.put(k,b.build());
+		});
+		//处理今日最新销售量和销售额信息
+		List<Document> documentList = LogDb.getDayGoodsSoldDetail(TimeUtil.todayStartTime(),System.currentTimeMillis(), LogDb.getNpcBuyInShelf());
+		//返回数据
+		Ss.GoodsSoldDetailCurve.Builder builder=Ss.GoodsSoldDetailCurve.newBuilder();
+		builder.setItemId(itemId);
+		builder.setProduceId(Util.toByteString(produceId));
+
+		documentList.forEach(document ->{
+			UUID p=document.get("p",UUID.class);
+			int id=document.getInteger("id");
+			long todayTime=System.currentTimeMillis();
+			if((itemId==id)&&(produceId==p)){
+				Ss.GoodsSoldDetailCurve.GoodsSoldDetail.Builder b=Ss.GoodsSoldDetailCurve.GoodsSoldDetail.newBuilder();
+				b.setTime(todayTime).setSoldNum(document.getInteger("n")).setSoldAmount(document.getLong("total"));
+				totalMap.put(todayTime,b.build());
+			}else{
+				Ss.GoodsSoldDetailCurve.GoodsSoldDetail.Builder b=Ss.GoodsSoldDetailCurve.GoodsSoldDetail.newBuilder();
+				b.setTime(todayTime).setSoldNum(0).setSoldAmount(0);
+				totalMap.put(todayTime,b.build());
+			}
+		});
+		builder.addAllSoldDetail(totalMap.values());
+		this.write(Package.create(cmd,builder.build()));
+	}
+
 	public void queryIncomeNotify(short cmd, Message message)
 	{
-		UUID playerId = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+		UUID playerId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
 		this.write(Package.create(cmd,
 				Ss.IncomeNotifys.newBuilder()
 						.setId(Util.toByteString(playerId))

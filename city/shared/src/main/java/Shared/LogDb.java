@@ -426,17 +426,41 @@ public class LogDb {
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
-        Document projectObject = new Document()
-                .append("id", "$_id")
-                .append(KEY_TOTAL, "$" + KEY_TOTAL)
-                .append("_id",0);
-        collection.aggregate(
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
 						Aggregates.group("$p",  Accumulators.sum(KEY_TOTAL, "$a")),
-                        Aggregates.project(projectObject)
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> getDayGoodsSoldDetail(long startTime, long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("p", "$_id._id.i")
+				.append("id", "$_id._id.tpi")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("n", "$n")
+				.append("_id",0);
+		Document groupObject = new Document("_id",
+				new Document("i", "$i")
+						.append("tpi", "$tpi"));
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", 1l)),
+						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
