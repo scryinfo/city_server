@@ -959,7 +959,7 @@ public class GameSession {
 		int itemId = itemBuy.key.meta.id;
 		int type = MetaItem.type(itemBuy.key.meta.id);
 		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+		//LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
 		LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
 				itemBuy.key.producerId, sellBuilding.id(), type, itemId);
 		LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
@@ -3692,9 +3692,11 @@ public class GameSession {
 		LogDb.playerPay(player.id(), freight);
 		//9.1记录运输日志(区分建筑还是租户仓库)
 		if(sellRenter==null&&buyRenter==null) {
-		//记录商品品质及知名度
-        double brand = BrandManager.instance().getGood(player.id(), itemId);
-        double quality = itemBuy.key.qty;LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);}else{
+			//记录商品品质及知名度
+			double brand = BrandManager.instance().getGood(player.id(), itemId);
+			double quality = itemBuy.key.qty;
+			LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+		}else{
 			Serializable srcId=bid;
 			Serializable dstId=wid;
 			if(sellRenter!=null)
