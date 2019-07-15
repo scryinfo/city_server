@@ -274,11 +274,11 @@ public class GameDb {
 	public static List<ddd_purchase> GetTradingRecords(UUID playerId, long range_StartTime, long range_EndTime)
 	{
 		Session session = sessionFactory.openSession();
-		String hql = "from ddd_purchase pur where pur.player_id is :pid and pur.create_time between :st and :ed or pur.completion_time between :st and :ed";
+		String hql = "FROM ddd_purchase WHERE (player_id  =:pid) and ((create_time between :st and :ed) or (completion_time between :st and :ed))";
 		Query query = session.createQuery(hql)
+				.setParameter("pid",playerId)
 				.setParameter("st",range_StartTime)
-				.setParameter("ed",range_EndTime)
-				.setParameter("pid",playerId);
+				.setParameter("ed",range_EndTime);
 		List<ddd_purchase> purchase = query.list();
 		return purchase;
 	}
