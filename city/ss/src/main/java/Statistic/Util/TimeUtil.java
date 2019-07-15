@@ -29,6 +29,16 @@ public class TimeUtil {
         calendar.add(Calendar.DAY_OF_MONTH,-30);
         return calendar.getTime().getTime();
     }
+    //前30天
+    public static Calendar monthCalendar(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.DATE, -30);
+        return calendar;
+    }
     //获取指定时间的起始时间
     public static Long getTimeDayStartTime(Long time){
         //获取东八区的时间

@@ -2,6 +2,7 @@ package Statistic;
 
 import Shared.LogDb;
 import Shared.Util;
+import Statistic.Util.TimeUtil;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.WriteConcern;
@@ -47,6 +48,7 @@ public class SummaryUtil
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
+    private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
@@ -69,6 +71,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayBuildingIncome;
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
+    private static MongoCollection<Document> dayGoodsSoldDetail;
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
@@ -114,6 +117,8 @@ public class SummaryUtil
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayGoodsSoldDetail = database.getCollection(DAY_GOODS_SOLD_DETAIL)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
@@ -275,12 +280,7 @@ public class SummaryUtil
     }
     public static Map<Long, Long> queryPlayerIncomePayCurve(MongoCollection<Document> collection,UUID id)
     {
-    	Calendar calendar = Calendar.getInstance();
-    	calendar.setTime(new Date());
-    	calendar.set(Calendar.HOUR_OF_DAY, 0);
-    	calendar.set(Calendar.MINUTE, 0);
-    	calendar.set(Calendar.SECOND, 0);
-    	calendar.add(Calendar.DATE, -30);//把7天的统计改为30天统计
+    	Calendar calendar =TimeUtil.monthCalendar();
         //开始时间
     	Date startDate = calendar.getTime();
     	long startTime=startDate.getTime();
@@ -299,6 +299,31 @@ public class SummaryUtil
     	.forEach((Block<? super Document>) document ->
     	{   
     		map.put(document.getLong("time"), document.getLong("total"));
+    	});
+    	return map;
+    }
+    public static Map<Long, Document> queryGoodsSoldDetailCurve(MongoCollection<Document> collection,int itemId,UUID produceId)
+    {
+    	Calendar calendar =TimeUtil.monthCalendar();
+        //开始时间
+    	Date startDate = calendar.getTime();
+    	long startTime=startDate.getTime();
+    	calendar.setTime(new Date());
+    	//结束时间（到现在时间点的统计）
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+    	Map<Long, Document> map = new LinkedHashMap<>();
+    	collection.find(and(
+                eq("id",itemId),
+    			eq("p",produceId),
+    			gte("time", startTime),
+    			lt("time", endTime)
+    			))
+    	.projection(fields(include("time", "total"), excludeId()))
+    	.sort(Sorts.descending("time"))
+    	.forEach((Block<? super Document>) document ->
+    	{
+    		map.put(document.getLong("time"), document);
     	});
     	return map;
     }
@@ -397,6 +422,17 @@ public class SummaryUtil
     	if (!documentList.isEmpty()) {
     		collection.insertMany(documentList);
     	}
+    }
+
+    public static void insertNpcHistoryData(List<Document> documentList,
+                                               long time,MongoCollection<Document> collection)
+    {
+        //document already owned : id,total
+        documentList.forEach(document ->
+                document.append(TIME, time));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
     }
     
     public static Ss.EconomyInfos getPlayerEconomy(UUID playerId)
@@ -590,6 +626,11 @@ public class SummaryUtil
     public static MongoCollection<Document> getDayPlayerPay()
     {
     	return dayPlayerPay;
+    }
+
+    public static MongoCollection<Document> getDayGoodsSoldDetail()
+    {
+        return dayGoodsSoldDetail;
     }
 
     public static void insertBuildingDayIncome(List<Document> documentList,long time)

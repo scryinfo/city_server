@@ -34,6 +34,18 @@ public class DateUtil{
 		return c.getTime().getTime();
 	}
 	/**
+	* 得到今天0点
+	*/
+	public static long getTodayStart(){
+ 	    Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date endDate = calendar.getTime();
+        return endDate.getTime();
+    }
+    /**
 	* 得到今天晚上24点
 	*/
 	public static long getTodayEnd(){
@@ -66,6 +78,7 @@ public class DateUtil{
 		System.out.println(format.format(getSundayOfThisWeek()));
 		System.out.println(format.format(getTodayEnd()));
 		System.out.println(format.format(getCurrentHour55()));
+		System.out.println(format.format(getTodayStart()));
 	}
 
 	public static long  getNowSecond(){
