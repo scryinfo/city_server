@@ -6,7 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.log4j.Logger;
 
 public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
-	private GameSession session;
+    private GameSession session;
     private static final Logger logger = Logger.getLogger(GameEventHandler.class);
 //    @Override
 //    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -20,7 +20,7 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
 //            }
 //        }
 //    }
-	
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         session = new GameSession(ctx);
@@ -29,8 +29,8 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if(session.valid())
-            City.instance().execute(()->session.logout(false));
+        //if(session.valid())
+        //    City.instance().execute(()->session.logout()); // because logout will evict the player object, we must serialize the evict and all other logic which will get this object
         super.channelInactive(ctx);
     }
 
@@ -48,5 +48,5 @@ public class GameEventHandler extends SimpleChannelInboundHandler<Package> {
 //        cause.printStackTrace();
 //        //ctx.close();
 //    }
-    
+
 }
