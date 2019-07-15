@@ -85,7 +85,7 @@ public class FlightManager {
             p.offsetScore(s);
             p.send(Package.create(GsCode.OpCode.flightBetInform_VALUE, Gs.FlightBetInform.newBuilder().setFlightId(f.id).setFlightDeptimeDate(f.FlightDeptimeDate).build()));
             updates.add(p);
-            LogDb.flightBet(playerId, info.delay, info.amount, s<0?false:true, f.toProto());
+            LogDb.flightBet(playerId, info.delay, info.amount, s<0?false:true, f.toProto(),s);
         }
         return updates;
     }
