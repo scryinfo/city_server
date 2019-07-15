@@ -288,6 +288,7 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			//小地图改版（查询建筑生产线状态）
 			table.put((short) GsCode.OpCode.queryBuildingProduceStatue_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingProduceStatue"));
+			table.put((short) GsCode.OpCode.queryRetailShopGoods_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryRetailShopGoods"));
 			if(GlobalConfig.debug()){
 
 			}

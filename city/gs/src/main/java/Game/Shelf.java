@@ -90,6 +90,14 @@ public class Shelf {
         // .mapToInt(e->e.getKey().meta.id).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         // this is most stupid api design what I have ever seen
     }
+    public Collection<ItemKey> getGoodsItemKey() {
+        return this.slots.entrySet().stream().filter(e-> {
+            if(e.getKey().meta instanceof MetaGood) {
+              return true;
+            }
+            return false;
+        }).map(e->e.getKey()).collect(Collectors.toList());
+    }
     @Embeddable
     public static final class Content {
         public Content(int n, int price,boolean autoReplenish) {
