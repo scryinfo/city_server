@@ -357,6 +357,21 @@ public class Laboratory extends Building {
         boolean update(long diffNano) {
             if(!isLaunched())
                 this.launch();
+            //为了保证服务器即使在断线状态下，也可以按时完成研究成果，此处加判断，如果现在>研究的结束时间,直接把剩余的点数全部研究完成
+            int transitionTime=0;//当前研究的过渡时间
+            if(goodCategory>0){
+                transitionTime = (int) TimeUnit.SECONDS.toHours(this.invent_transition_time);
+            }else{
+                transitionTime=(int) TimeUnit.SECONDS.toHours(this.eva_transition_time);
+            }
+            long endTime = this.beginProcessTs + TimeUnit.HOURS.toMillis(this.times*transitionTime);//结束时间
+            long now = System.currentTimeMillis();
+            if(now>endTime){//本来应该全部完成，但是到点还没有完成，全部出成果
+                //获取剩余的成果数量
+                int addPoint = this.times - usedRoll - availableRoll;
+                this.availableRoll += addPoint;
+                return true;
+            }
             currentRoundPassNano += diffNano;//当前通过的纳秒
             //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
             if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //从配置表读取的过渡时间

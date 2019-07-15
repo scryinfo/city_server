@@ -3474,7 +3474,7 @@ public class GameSession {
         }
         int techId=msg.getTypeId();
         Long result = BrandManager.instance().changeBrandName(pId, techId, msg.getNewBrandName());
-        //-1 名称重复、1修改成功。其他，返回上次修改时间（只有可能是不能修改的时间）
+		//-1 名称重复、1修改成功。其他，返回上次修改时间
         if(result==-1){
             this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
         }else if(result==1){
