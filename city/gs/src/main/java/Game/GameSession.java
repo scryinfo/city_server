@@ -3474,7 +3474,7 @@ public class GameSession {
         }
         int techId=msg.getTypeId();
         Long result = BrandManager.instance().changeBrandName(pId, techId, msg.getNewBrandName());
-        //-1 名称重复、1修改成功。其他，返回上次修改时间（只有可能是不能修改的时间）
+		//-1 名称重复、1修改成功。其他，返回上次修改时间
         if(result==-1){
             this.write(Package.fail(cmd,Common.Fail.Reason.roleNameDuplicated));
         }else if(result==1){
@@ -3745,92 +3745,6 @@ public class GameSession {
             WareHouseManager.updateWareHouseMap((WareHouseRenter) buyStore);
         else if(buyStore instanceof  WareHouse)
             WareHouseManager.updateWareHouseMap((WareHouse) buyStore);
-		//========================
-		//8.开始修改数据
-		//8.1获取到商品主人的信息
-		Player seller = GameDb.getPlayer(sellOwnerId);
-		seller.addMoney(cost);//交易
-		player.decMoney(cost+freight);//扣除商品+运费
-		//8.2向出售方发送收入通知提示
-		Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
-				.setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
-				.setBuyerId(Util.toByteString(player.id()))
-				.setFaceId(player.getFaceId())
-				.setCost(cost)
-				.setType(Gs.IncomeNotify.Type.INSHELF)
-				.setBid(sellBuilding.metaBuilding.id)
-				.setItemId(itemBuy.key.meta.id)
-				.setCount(itemBuy.n)
-				.build();
-		GameServer.sendIncomeNotity(seller.id(),notify);
-		//8.3 发送消息通知
-		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
-			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
-					.setType(1)
-					.setSellerId(Util.toByteString(seller.id()))
-					.setBuyerId(Util.toByteString(player.id()))
-					.setCost(cost)
-					.setTs(System.currentTimeMillis())
-					.build()));
-			LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
-		}
-		//9.日志记录
-		int itemId = itemBuy.key.meta.id;
-		int type = MetaItem.type(itemBuy.key.meta.id);//获取商品类型
-		LogDb.playerIncome(seller.id(), cost);
-		LogDb.playerPay(player.id(), cost);
-		LogDb.playerPay(player.id(), freight);
-		//9.1记录运输日志(区分建筑还是租户仓库)
-		if(sellRenter==null&&buyRenter==null) {
-			//记录商品品质及知名度
-			double brand = BrandManager.instance().getGood(player.id(), itemId);
-			double quality = itemBuy.key.qty;
-			LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-		}else{
-			Serializable srcId=bid;
-			Serializable dstId=wid;
-			if(sellRenter!=null)
-				srcId = inShelf.getGood().hasOrderid();
-			if(buyRenter!=null)
-				dstId = inShelf.getOrderid();
-			LogDb.payRenterTransfer(player.id(),freight,srcId,dstId,itemBuy.key.producerId, itemBuy.n);
-		}
-		//9.2记录货架收入与建筑收入信息(区分建筑还是租户仓库)
-		//8.6记录交易日志
-		LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-		if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
-			LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-					itemBuy.key.producerId, sellBuilding.id(), type, itemId);
-			LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
-		}
-		else{//租户货架上购买的（统计日志）
-			LogDb.buyRenterInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-					itemBuy.key.producerId,sellRenter.getOrderId(), type, itemId);
-			//租户货架收入记录
-			LogDb.renterShelfIncome(inShelf.getGood().getOrderid(),player.id(), cost, type, itemId);
-		}
-		//8.7.销售方减少上架数量
-		sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
-		IStorage sellStorage = (IStorage) sellShelf;
-		sellStorage.consumeLock(itemBuy.key, itemBuy.n);
-		//更每每日的收入
-		if(sellRenter!=null){
-			sellRenter.updateTodayIncome(cost);//更新今日收入
-		}else{
-			sellBuilding.updateTodayIncome(cost);
-		}
-		buyStore.consumeReserve(itemBuy.key, itemBuy.n, inShelf.getGood().getPrice());
-		GameDb.saveOrUpdate(Arrays.asList(player,seller,sellStorage,buyStore));
-		//同步缓存数据
-		if(sellStorage instanceof WareHouseRenter){
-			WareHouseManager.updateWareHouseMap((WareHouseRenter) sellStorage);
-		}else if(sellStorage instanceof  WareHouse){
-			WareHouseManager.updateWareHouseMap((WareHouse) sellStorage);
-		}
-		if(buyStore instanceof WareHouseRenter)
-			WareHouseManager.updateWareHouseMap((WareHouseRenter) buyStore);
-		else if(buyStore instanceof  WareHouse)
-			WareHouseManager.updateWareHouseMap((WareHouse) buyStore);
 
         this.write(Package.create(cmd,inShelf));
     }
