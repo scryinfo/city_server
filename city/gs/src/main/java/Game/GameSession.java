@@ -5065,4 +5065,16 @@ public class GameSession {
         this.write(Package.create(cmd,playerUnLineInformation));
     }
 
+    public void queryBuildingProsperity(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID buildingId = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(buildingId);
+        if(building==null){
+            return;
+        }
+        double prosperityValue = ProsperityManager.instance().getLocalProsperity(building);
+        Gs.BuildingProsperity.Builder builder = Gs.BuildingProsperity.newBuilder();
+        builder.setBuildingId(Util.toByteString(buildingId)).setProsperityValue(prosperityValue);
+        this.write(Package.create(cmd,builder.build()));
+    }
 }
