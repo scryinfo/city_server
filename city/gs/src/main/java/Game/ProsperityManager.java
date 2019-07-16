@@ -1,21 +1,18 @@
 package Game;
 
-import Game.Meta.MetaData;
-import Game.Meta.MetaGroundAuction;
 import Game.Timers.PeriodicTimer;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /*繁华度*/
-public class ProsperousDegreeManager {
+public class ProsperityManager {
 
-    private ProsperousDegreeManager() {}
+    private ProsperityManager() {}
 
-    private static ProsperousDegreeManager instance=new ProsperousDegreeManager();
+    private static ProsperityManager instance=new ProsperityManager();
 
-    public static ProsperousDegreeManager instance(){
+    public static ProsperityManager instance(){
         return instance;
     }
 

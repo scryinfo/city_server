@@ -284,7 +284,7 @@ public class City {
         updateIndustryMoney(diffNano);
         BuildingUtil.instance().update(diffNano);
         //繁荣度统计
-        ProsperousDegreeManager.instance().totalProsperity(diffNano);
+        ProsperityManager.instance().totalProsperity(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
