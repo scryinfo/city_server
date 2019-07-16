@@ -4090,119 +4090,136 @@ public class GameSession {
         UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
 
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.PRODUCE) {
-            return;
-        }
-        ProduceDepartment department = (ProduceDepartment) building;
-        Set<Integer> ids = MetaData.getAllGoodId();
-        Map<Integer, List<Double>> produce = BuildingUtil.getProduce();
-        Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
-        for (Object id : ids) {
-            Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
-            int itemId = 0;
-            double goodQtyScore = 0;
-            double brandScore = 0;
-            if (id instanceof Integer && produce != null && produce.size() > 0) {
-                itemId = (Integer) id;
-                List<Double> list = produce.get(itemId);
-                double priceAvg = list.get(0);
-                double scoreAvg = list.get(1);
-                List<Item> itemList = department.store.getItem(itemId);
-                for (Item item : itemList) {
-                    brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
-                    goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
-                }
-                goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(priceAvg, scoreAvg, (brandScore + goodQtyScore) / 2));
-            }
-            builder.addGoodMap(goodMap.build());
-        }
-        this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()).build()));
-    }
-    //零售店竞争力
-    public void retailGuidePrice(short cmd, Message message) {
-        Gs.GoodSummary msg = (Gs.GoodSummary) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.PRODUCE) {
+			return;
+		}
+		ProduceDepartment department = (ProduceDepartment) building;
+		Set<Integer> ids = MetaData.getAllGoodId();
+		Map<Integer, List<Double>> produce = BuildingUtil.getProduce();
+		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
+		for (Object id : ids) {
+			Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
+			int itemId = 0;
+			double goodQtyScore = 0;
+			double brandScore = 0;
+			if (id instanceof Integer && produce != null && produce.size() > 0) {
+				itemId = (Integer) id;
+				List<Double> list = produce.get(itemId);
+				double priceAvg = list.get(0);
+				double scoreAvg = list.get(1);
+				List<Item> itemList = department.store.getItem(itemId);
+				if (!itemList.isEmpty()) {
+					for (Item item : itemList) {
+						brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
+						goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+					}
+				} else {
+					List<Item> saleList = new ArrayList<>(department.getSaleDetail(itemId).keySet());
+					for (Item item : saleList) {
+						brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
+						goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+					}
+				}
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(priceAvg, scoreAvg, (brandScore + goodQtyScore) / 2));
+			}
+			builder.addGoodMap(goodMap.build());
+		}
+		this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()).build()));
+	}
 
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.RETAIL) {
-            return;
-        }
-        RetailShop retailShop = (RetailShop) building;
-        Set<Integer> ids = MetaData.getAllGoodId();
-        Map<Integer, List<Double>> retail = BuildingUtil.getRetailGood();
-        Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
-        int itemId = 0;
-        for (Integer id : ids) {
-            Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
-            if (id instanceof Integer && retail != null && retail.size() > 0) {
-                itemId = id;
-                List<Double> list = retail.get(itemId);
-                double avgPrice = list.get(0);
-                double avgGoodScore = list.get(1);
-                List<Item> itemList = retailShop.getStore().getItem(itemId);
-                //当前商品评分(取自仓库)
-                double curBrandScore = 0;
-                double curQtyScore = 0;
-                for (Item item : itemList) {
-                    curBrandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
-                    curQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
-                }
-                //当前建筑评分
-                double brandScore = GlobalUtil.getBrandScore(retailShop.getTotalBrand(), retailShop.type());
-                double retailScore = GlobalUtil.getBuildingQtyScore(retailShop.getTotalQty(), retailShop.type());
-                double curRetailScore = (brandScore + retailScore) / 2;
-                goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore, BuildingUtil.getRetail(), (curBrandScore + curQtyScore) / 2, curRetailScore));
-            }
-            builder.addGoodMap(goodMap.build());
-        }
-        this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()).build()));
-    }
-    //推广竞争力
-    public void promotionGuidePrice(short cmd, Message message) {
-        Gs.PromotionMsg msg = (Gs.PromotionMsg) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-        //四种推广类型
-        Set<Integer> proIds = MetaData.getAllBuildingTech(MetaBuilding.PUBLIC);
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.PUBLIC) {
-            return;
-        }
-        PublicFacility facility = (PublicFacility) building;
-        int sumAbilitys = 0;
-        for (Integer typeId : proIds) {
-            sumAbilitys += ((int) facility.getLocalPromoAbility(typeId));
-        }
-        double price = BuildingUtil.getPromotion();
-        //全城均推广能力
-        double promotionInfo = GlobalUtil.getPromotionInfo();
-        Gs.PromotionMsg.PromotionPrice.Builder promotionPrice = Gs.PromotionMsg.PromotionPrice.newBuilder();
-        promotionPrice.setCurAbilitys((sumAbilitys / 4)).setGuidePrice(price).setAvgAbility(promotionInfo);
-        this.write(Package.create(cmd, Gs.PromotionMsg.newBuilder().addProPrice(promotionPrice.build()).setBuildingId(msg.getBuildingId()).build()));
-    }
-    //研究竞争力
-    public void laboratoryGuidePrice(short cmd, Message message) {
-        Gs.LaboratoryMsg msg = (Gs.LaboratoryMsg) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.LAB) {
-            return;
-        }
-        Laboratory laboratory = (Laboratory) building;
-        double price = BuildingUtil.getLaboratory();
-        //总概率
-        Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
-        double evaProb = prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
-        double goodProb = prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
-        //全城均研发能力
-        double labProb = GlobalUtil.getLaboratoryInfo();
-        Gs.LaboratoryMsg.LaboratoryPrice.Builder labPrice = Gs.LaboratoryMsg.LaboratoryPrice.newBuilder();
-        labPrice.setAvgProb(labProb).setCurProb((evaProb + goodProb) / 2).setGuidePrice(price);
-        this.write(Package.create(cmd, Gs.LaboratoryMsg.newBuilder().addLabPrice(labPrice.build()).setBuildingId(msg.getBuildingId()).build()));
-    }
+	//零售店竞争力
+	public void retailGuidePrice(short cmd, Message message) {
+		Gs.GoodSummary msg = (Gs.GoodSummary) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.RETAIL) {
+			return;
+		}
+		RetailShop retailShop = (RetailShop) building;
+		Set<Integer> ids = MetaData.getAllGoodId();
+		Map<Integer, List<Double>> retail = BuildingUtil.getRetailGood();
+		Gs.GoodSummary.Builder builder = Gs.GoodSummary.newBuilder();
+		int itemId = 0;
+		for (Integer id : ids) {
+			//当前商品评分(取自仓库)
+			double curBrandScore = 0;
+			double curQtyScore = 0;
+			Gs.GoodSummary.GoodMap.Builder goodMap = Gs.GoodSummary.GoodMap.newBuilder();
+			if (id instanceof Integer && retail != null && retail.size() > 0) {
+				itemId = id;
+				List<Double> list = retail.get(itemId);
+				double avgPrice = list.get(0);
+				double avgGoodScore = list.get(1);
+				List<Item> itemList = retailShop.getStore().getItem(itemId);
+				if (!itemList.isEmpty()) {
+					for (Item item : itemList) {
+						curBrandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
+						curQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+					}
+				} else {
+					List<Item> saleList = new ArrayList<>(retailShop.getSaleDetail(itemId).keySet());
+					for (Item item : saleList) {
+						curBrandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), itemId);
+						curQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+					}
+				}
+				//当前建筑评分
+				double brandScore = GlobalUtil.getBrandScore(retailShop.getTotalBrand(), retailShop.type());
+				double retailScore = GlobalUtil.getBuildingQtyScore(retailShop.getTotalQty(), retailShop.type());
+				double curRetailScore = (brandScore + retailScore) / 2;
+				goodMap.addItemId(itemId).addAllGudePrice(Arrays.asList(avgPrice, avgGoodScore, BuildingUtil.getRetail(), (curBrandScore + curQtyScore) / 2, curRetailScore));
+			}
+			builder.addGoodMap(goodMap.build());
+		}
+		this.write(Package.create(cmd, builder.setBuildingId(msg.getBuildingId()).build()));
+	}
+	//推广竞争力
+	public void promotionGuidePrice(short cmd, Message message) {
+		Gs.PromotionMsg msg = (Gs.PromotionMsg) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		//四种推广类型
+		Set<Integer> proIds = MetaData.getAllBuildingTech(MetaBuilding.PUBLIC);
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.PUBLIC) {
+			return;
+		}
+		PublicFacility facility = (PublicFacility) building;
+		int sumAbilitys = 0;
+		for (Integer typeId : proIds) {
+			sumAbilitys += ((int) facility.getLocalPromoAbility(typeId));
+		}
+		double price = BuildingUtil.getPromotion();
+		//全城均推广能力
+		double promotionInfo = GlobalUtil.getPromotionInfo();
+		Gs.PromotionMsg.PromotionPrice.Builder promotionPrice = Gs.PromotionMsg.PromotionPrice.newBuilder();
+		promotionPrice.setCurAbilitys((sumAbilitys / 4)).setGuidePrice(price).setAvgAbility(promotionInfo);
+		this.write(Package.create(cmd, Gs.PromotionMsg.newBuilder().addProPrice(promotionPrice.build()).setBuildingId(msg.getBuildingId()).build()));
+	}
+	//研究竞争力
+	public void laboratoryGuidePrice(short cmd, Message message) {
+		Gs.LaboratoryMsg msg = (Gs.LaboratoryMsg) message;
+		UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+		UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
+		Building building = City.instance().getBuilding(buildingId);
+		if (building == null || building.type() != MetaBuilding.LAB) {
+			return;
+		}
+		Laboratory laboratory = (Laboratory) building;
+		double price = BuildingUtil.getLaboratory();
+		//总概率
+		Map<Integer, Double> prob = laboratory.getTotalSuccessProb();
+		double evaProb = prob.get(Gs.Eva.Btype.EvaUpgrade_VALUE);
+		double goodProb = prob.get(Gs.Eva.Btype.InventionUpgrade_VALUE);
+		//全城均研发能力
+		double labProb = GlobalUtil.getLaboratoryInfo();
+		Gs.LaboratoryMsg.LaboratoryPrice.Builder labPrice = Gs.LaboratoryMsg.LaboratoryPrice.newBuilder();
+		labPrice.setAvgProb(labProb).setCurProb((evaProb + goodProb) / 2).setGuidePrice(price);
+		this.write(Package.create(cmd, Gs.LaboratoryMsg.newBuilder().addLabPrice(labPrice.build()).setBuildingId(msg.getBuildingId()).build()));
+	}
 
     //原料推荐价格 √
     public void queryMaterialRecommendPrice(short cmd, Message message) {

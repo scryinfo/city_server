@@ -45,7 +45,7 @@ public class City {
     private boolean taskIsRunning = false;
     private PeriodicTimer metaAuctionLoadTimer = new PeriodicTimer();
     private PeriodicTimer insuranceTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(24),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));
-    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
+    private PeriodicTimer industryMoneyTimer = new PeriodicTimer((int)TimeUnit.DAYS.toMillis(7),(int)TimeUnit.SECONDS.toMillis((DateUtil.getSundayOfThisWeek()-nowTime)/1000));
 
     public int[] timeSection() {
         return meta.timeSection;
