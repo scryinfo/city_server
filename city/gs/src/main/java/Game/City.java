@@ -283,6 +283,8 @@ public class City {
         //计算下周行业工资
         updateIndustryMoney(diffNano);
         BuildingUtil.instance().update(diffNano);
+        //繁荣度统计
+        ProsperousDegreeManager.instance().totalProsperity(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

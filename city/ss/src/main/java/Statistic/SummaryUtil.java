@@ -15,6 +15,7 @@ import org.bson.Document;
 import ss.Ss;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static Shared.LogDb.KEY_TOTAL;
 import static com.mongodb.client.model.Filters.*;
@@ -652,8 +653,11 @@ public class SummaryUtil
                 .sort(Sorts.ascending(TIME))
                 .forEach((Block<? super Document>) document ->
                 {
-                    list.add(Ss.NodeIncome.newBuilder()
+                   /* list.add(Ss.NodeIncome.newBuilder()
                             .setTime(document.getLong(TIME))
+                            .setIncome(document.getLong(KEY_TOTAL)).build());*/
+                    list.add(Ss.NodeIncome.newBuilder()
+                            .setTime(TimeUtil.getTimeDayStartTime(document.getLong(TIME)))
                             .setIncome(document.getLong(KEY_TOTAL)).build());
                 });
         return list;
