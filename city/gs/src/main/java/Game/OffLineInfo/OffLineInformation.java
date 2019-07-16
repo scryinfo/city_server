@@ -93,7 +93,7 @@ public class OffLineInformation {
         //5.完成统计后加入总收入
         for (Map.Entry<Integer, List<Gs.BuildingIncome.UnLineIncome>> totalEntry : allIncomeMap.entrySet()) {
             Integer totalIncome = getTotalIncome(totalEntry.getValue());
-            resultMap.put(totalEntry.getKey(),Gs.BuildingIncome.newBuilder().setTotalIncom(totalIncome).addAllUnLineIncome(totalEntry.getValue()).build());
+            resultMap.put(totalEntry.getKey(),Gs.BuildingIncome.newBuilder().setTotalIncome(totalIncome).addAllUnLineIncome(totalEntry.getValue()).build());
         }
         return resultMap;
     }
@@ -197,16 +197,17 @@ public class OffLineInformation {
             unLineIncome.setFlightCompany(record.data.getFlightCompany())
                     .setFlightArrtimeDate(record.data.getFlightDeptimeDate())
                     .setFlightDepcode(record.data.getFlightDepcode())
-                    .setProfitOrLoss(record.profitOrLoss)
                     .setWin(record.win);
-            builder.addUnLineIncome(unLineIncome);
             if(record.win){
-                sum += record.profitOrLoss;
+                unLineIncome.setProfitOrLoss(record.profitOrLoss);
+                sum += record.profitOrLoss;//盈利则是正数
             }else{
+                unLineIncome.setProfitOrLoss(-record.profitOrLoss);
                 sum -= record.profitOrLoss;
             }
+            builder.addUnLineIncome(unLineIncome);//亏损是负数
         }
-        builder.setTotalIncom(sum);
+        builder.setTotalIncome(sum);
         return builder.build();
     }
 }
