@@ -205,7 +205,7 @@ public class OffLineInformation {
                 unLineIncome.setProfitOrLoss(-record.profitOrLoss);
                 sum -= record.profitOrLoss;
             }
-            builder.addUnLineIncome(unLineIncome);//亏损是负数
+            builder.addFlightIncome(unLineIncome);//亏损是负数
         }
         builder.setTotalIncome(sum);
         return builder.build();
