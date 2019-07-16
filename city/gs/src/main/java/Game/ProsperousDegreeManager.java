@@ -32,32 +32,6 @@ public class ProsperousDegreeManager {
     //定时器（1小时统计一次）
     PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(1),0);
 
-    /*public int getLocalProsperity(int groundX, int groundY) {
-        int disTemp = 0;//距离
-        int prosperity = 0;//土地繁华度值
-        for (int x = 1; x < cityLen; x++) {  //初始坐标从1开始 100次
-            for (int y = 1; y < cityLen; y++) {//100次
-
-                //1.位置关系（不可优化，因为要跟着循环一起变化）
-                int absX = Math.abs(groundX - x);
-                int absY = Math.abs(groundY - y);
-                disTemp = absX > absY ? absX : absY;
-
-                //2.offsetTemp 位置偏差比例（不可优化）
-                int offsetTemp = 1 - (disTemp / cityLen);
-
-
-                //3.统计获取当前位置的人流量（其实统计的是建筑周围的人流量，可优化）
-                GridIndex groundIndex = new Coordinate(x, y).toGridIndex();
-                City.instance().forEachBuilding(groundIndex, b -> {
-                    trafficTemp += b.getFlow();
-                });
-                //4.计算繁华值
-                prosperity += trafficTemp * offsetTemp;
-            }
-        }
-        return prosperity;
-    }*/
 
     public int getBuildingProsperity(Building building) {
         Coordinate coordinate = building.coordinate();
@@ -72,9 +46,17 @@ public class ProsperousDegreeManager {
                 //2.offsetTemp 位置偏差比例
                 int offsetTemp = 1 - (disTemp / cityLen);
                 //3.统计获取当前位置的人流量
-                GridIndex groundIndex = new Coordinate(x, y).toGridIndex();
-                City.instance().forEachBuilding(groundIndex, b -> {
-                    trafficTemp += b.getFlow();
+                Coordinate coor = new Coordinate(x, y);
+                //如何获取这个地表上是否有建筑
+                int finalX = x;
+                int finalY = y;
+                City.instance().forEachBuilding(coor.toGridIndex(), b -> {
+                    if(finalX >=building.area().l.x&&
+                            finalX <= building.area().r.x&&
+                            finalY >=building.area().l.y&&
+                            finalY <= building.area().r.y) {
+                        trafficTemp += b.getFlow();
+                    }
                 });
                 //4.计算繁华值
                 prosperity += trafficTemp * offsetTemp;
@@ -84,14 +66,24 @@ public class ProsperousDegreeManager {
     }
 
 
-    /*全城繁华值总和，由于每次都是遍历全城土地，所以肯定不能一次全部统计完，目前采用1小时的时间去统计,1小时内根据地块位置逐步更新.*/
+    /*全城繁华值总和,1小时更新内根据地块位置逐步更新.*/
     public void totalProsperity(long diffNano) {
         if (timer.update(diffNano)) {
             //统计全城所有建筑的繁华度
             City.instance().forEachBuilding(b->{
+                trafficTemp=0;
                 int prosperity = getBuildingProsperity(b);
                 buildingProsperityMap.put(b, prosperity);
             });
+            System.err.println(buildingProsperityMap);
         }
     }
+
+    /*获取当前繁华度:建筑繁华度 = 当前建筑包含地块的繁华值总和 / 全城繁华值总和*/
+    public double getLocalProsperity(Building building){
+        double localBuildProsperity = buildingProsperityMap.get(building);//当前建筑繁荣度
+        Integer sumProsperity = buildingProsperityMap.values().stream().reduce(Integer::sum).orElse(0);
+        return localBuildProsperity/sumProsperity;
+    }
+
 }
