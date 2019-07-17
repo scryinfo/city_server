@@ -14,6 +14,7 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
+import Game.RecommendPrice.GuidePriceMgr;
 import Game.Util.*;
 import Game.OffLineInfo.OffLineInformation;
 import Game.Util.BuildingUtil;
@@ -4043,13 +4044,24 @@ public class GameSession {
     public void queryApartmentRecommendPrice(short cmd, Message message) {
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
         UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
         Building building = City.instance().getBuilding(buildingId);
         if (building == null || building.type() != MetaBuilding.APARTMENT) {
             return;
         }
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
+        Apartment apartment = (Apartment) building;
+        // 玩家住宅总评分
+        double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
+        double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
+        double curRetailScore = (brandScore + retailScore) / 2;
+        // 玩家住宅繁荣度
+        double i = 0;
+        double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore,i);
+        //NPC预期消费 = 行业工资(可能会调整为城市工资) * 住宅预期消费比例
+        double moneyRatio = MetaData.getBuildingSpendMoneyRatio(building.type());
+        double salary = City.instance().getIndustrySalary(building.type());
         Gs.ApartmentRecommendPrice.Builder builder = Gs.ApartmentRecommendPrice.newBuilder();
-
+        builder.setNpc(moneyRatio * salary).setGuidePrice(guidePrice);
         this.write(Package.create(cmd,builder.build()));
 
     }
