@@ -347,7 +347,55 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
+												 MongoCollection<Document> collection,boolean isIncomne,UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		String groupStr = "$r";
+		if (isIncomne) {
+			groupStr = "$d";
+		}
+		Document groupObject = new Document("_id",
+				new Document("r", groupStr));
+		Document projectObject = new Document()
+				.append("id", "$_id._id.r")
+				.append("total","$total")
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("id", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
+												 MongoCollection<Document> collection,UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("t","$t")
+				.append("tpi","$tpi")
+				.append("a","$a")
+				.append("p","$p")
+				.append("_id","$_id");
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.match(or(
+								eq("r", playerId),
+								eq("d", playerId))),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document> dayNpcGoodsNum(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
