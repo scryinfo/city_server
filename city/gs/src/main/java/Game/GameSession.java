@@ -5117,11 +5117,8 @@ public class GameSession {
                     }else{
                         typeBuilding.setIsopen(true);
                         Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
-                        Player player = GameDb.getPlayer(b.ownerId());
                         //通用信息设置
                         summary.setOwnerId(Util.toByteString(b.ownerId()))
-                                .setCompanyName(player.getCompanyName())
-                                .setUserName(player.getName())
                                 .setPos(b.coordinate().toProto());
                         if(b instanceof  IShelf){       //货架建筑的出售信息
                             IShelf shelf = (IShelf) b;
