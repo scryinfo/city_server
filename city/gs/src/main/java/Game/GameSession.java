@@ -1155,7 +1155,7 @@ public class GameSession {
         registBuildingDetail(b);
         updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
-        double prosperity = ProsperityManager.instance().getBuildingProsperity(b);
+        double prosperity = ProsperityManager.instance().getBuildingProsperity(b.coordinate());
     }
 
     public void detailProduceDepartment(short cmd, Message message) {
@@ -5074,13 +5074,13 @@ public class GameSession {
         if(building==null){
             return;
         }
-        double prosperityValue = ProsperityManager.instance().getBuildingProsperity(building);
+        double prosperityValue = ProsperityManager.instance().getBuildingProsperity(building.coordinate());
         Gs.BuildingProsperity.Builder builder = Gs.BuildingProsperity.newBuilder();
         builder.setBuildingId(Util.toByteString(buildingId)).setProsperityValue(prosperityValue);
         this.write(Package.create(cmd,builder.build()));
     }
 
-    /*查询全城所有类别建筑*/
+    /*查询小地图全城类别建筑*/
     public void queryTypeBuildingInMap(short cmd,Message message){
         Gs.Num num = (Gs.Num) message;
         int type = num.getNum();
@@ -5110,7 +5110,7 @@ public class GameSession {
                 }else if(b instanceof Apartment){//添加住宅信息
                     Apartment apartment = (Apartment) b;
                     Gs.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.BuildingSummary.ApartmentSummary.newBuilder();
-                    apartSummary.setCapacity(apartment.getWorkerNum())
+                    apartSummary.setCapacity(apartment.getCapacity())
                             .setRent(apartment.cost())
                             .setRenter(apartment.getRenterNum());
                     summary.setApartmentSummary(apartSummary);

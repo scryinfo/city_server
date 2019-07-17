@@ -119,6 +119,10 @@ public class Apartment extends Building implements IBuildingContract
     public int getRenterNum(){
         return renters.size();
     }
+
+    public int getCapacity(){
+        return this.meta.npc;
+    }
     //获取总知名度
     public double getTotalBrand(){
         return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();

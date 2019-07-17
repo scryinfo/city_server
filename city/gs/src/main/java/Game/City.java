@@ -669,4 +669,18 @@ public class City {
 		List<Building> list=map.get(type);
 		return list!=null?list.size():0;
     }
+
+    public int getTraffic(int x,int y){//获取位置人流量
+        List<Integer> sum = new ArrayList<>();
+        Coordinate local = new Coordinate(x, y);
+        //1.找出这个坐标点是否有建筑，没有则为0
+        GridIndex gridIndex = local.toGridIndex();
+        City.instance().forEachBuilding(gridIndex, b -> {
+            Collection<Coordinate> coordinates = b.area().toCoordinates();
+            if(coordinates.contains(local)){
+                sum.add(b.getFlow());
+            }
+        });
+        return sum.stream().reduce(Integer::sum).orElse(0);
+    }
 }
