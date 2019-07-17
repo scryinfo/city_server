@@ -293,6 +293,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryOffLineInformation_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryOffLineInformation"));
 			//查询建筑繁荣度（1小时更新）
 			table.put((short) GsCode.OpCode.queryBuildingProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"queryBuildingProsperity"));
+			//查询小地图建筑类别
+			table.put((short) GsCode.OpCode.queryTypeBuildingInMap_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER,GameSession.class,"queryTypeBuildingInMap"));
 
 			if(GlobalConfig.debug()){
 

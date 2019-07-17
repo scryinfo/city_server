@@ -185,4 +185,9 @@ public class Shelf {
     public void clearData(){//清除货架数据
         this.slots.clear();
     }
+
+    public Integer getTotalContentNum(){
+        int sum = this.slots.values().stream().mapToInt(c -> c.n).sum();
+        return sum;
+    }
 }

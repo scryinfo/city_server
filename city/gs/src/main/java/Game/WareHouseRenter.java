@@ -340,4 +340,9 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     public int getItemCount(ItemKey key) {
         return this.store.getItemCount(key);
     }
+
+    @Override
+    public int getTotalSaleCount() {
+        return this.shelf.getTotalContentNum();
+    }
 }

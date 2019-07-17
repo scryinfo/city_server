@@ -29,8 +29,7 @@ public class ProsperityManager {
     //定时器（1小时统计一次）
     PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(1),0);
 
-
-    public int getBuildingProsperity(Building building) {
+    private int getLocalProsperity(Building building) {  //经用于获取坐标的点的繁荣度，并非最终繁华度
         Coordinate coordinate = building.coordinate();
         int disTemp = 0;//距离
         int prosperity = 0;//土地繁华度值
@@ -44,14 +43,13 @@ public class ProsperityManager {
                 int offsetTemp = 1 - (disTemp / cityLen);
                 //3.统计获取当前位置的人流量
                 Coordinate coor = new Coordinate(x, y);
-                //如何获取这个地表上是否有建筑
                 int finalX = x;
                 int finalY = y;
                 City.instance().forEachBuilding(coor.toGridIndex(), b -> {
-                    if(finalX >=building.area().l.x&&
-                            finalX <= building.area().r.x&&
-                            finalY >=building.area().l.y&&
-                            finalY <= building.area().r.y) {
+                    if(finalX >= b.area().l.x&&
+                            finalX <= b.area().r.x&&
+                            finalY >=b.area().l.y&&
+                            finalY <= b.area().r.y) {
                         trafficTemp += b.getFlow();
                     }
                 });
@@ -69,7 +67,7 @@ public class ProsperityManager {
             //统计全城所有建筑的繁华度
             City.instance().forEachBuilding(b->{
                 trafficTemp=0;
-                int prosperity = getBuildingProsperity(b);
+                int prosperity = getLocalProsperity(b);
                 buildingProsperityMap.put(b, prosperity);
             });
             System.err.println(buildingProsperityMap);
@@ -77,10 +75,13 @@ public class ProsperityManager {
     }
 
     /*获取当前繁华度:建筑繁华度 = 当前建筑包含地块的繁华值总和 / 全城繁华值总和*/
-    public double getLocalProsperity(Building building){
+    public double getBuildingProsperity(Building building){
         double localBuildProsperity = buildingProsperityMap.get(building);//当前建筑繁荣度
         Integer sumProsperity = buildingProsperityMap.values().stream().reduce(Integer::sum).orElse(0);
         return localBuildProsperity/sumProsperity;
     }
+
+
+
 
 }

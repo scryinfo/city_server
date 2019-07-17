@@ -1155,6 +1155,7 @@ public class GameSession {
         registBuildingDetail(b);
         updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
+        double prosperity = ProsperityManager.instance().getBuildingProsperity(b);
     }
 
     public void detailProduceDepartment(short cmd, Message message) {
@@ -5065,6 +5066,7 @@ public class GameSession {
         this.write(Package.create(cmd,playerUnLineInformation));
     }
 
+    //查询建筑繁荣度
     public void queryBuildingProsperity(short cmd,Message message){
         Gs.Id id = (Gs.Id) message;
         UUID buildingId = Util.toUuid(id.getId().toByteArray());
@@ -5072,9 +5074,51 @@ public class GameSession {
         if(building==null){
             return;
         }
-        double prosperityValue = ProsperityManager.instance().getLocalProsperity(building);
+        double prosperityValue = ProsperityManager.instance().getBuildingProsperity(building);
         Gs.BuildingProsperity.Builder builder = Gs.BuildingProsperity.newBuilder();
         builder.setBuildingId(Util.toByteString(buildingId)).setProsperityValue(prosperityValue);
         this.write(Package.create(cmd,builder.build()));
+    }
+
+    /*查询全城所有类别建筑*/
+    public void queryTypeBuildingInMap(short cmd,Message message){
+        Gs.Num num = (Gs.Num) message;
+        int type = num.getNum();
+        Set<Building> buildings = City.instance().typeBuilding.get(type);
+        Gs.AllTypeBuilding.Builder allTypeBuilding = Gs.AllTypeBuilding.newBuilder();
+        buildings.forEach(b->{
+            Gs.TypeBuildingInfo.Builder typeBuildingInfo = Gs.TypeBuildingInfo.newBuilder();
+            if(b.state==Gs.BuildingState.SHUTDOWN_VALUE){//未开业,不添加其他建筑数据
+                typeBuildingInfo.setIsopen(false);
+            }else{
+                typeBuildingInfo.setIsopen(true);
+                Gs.BuildingSummary.Builder summary = Gs.BuildingSummary.newBuilder();
+                BuildingInfo info = b.toProto();
+                GridIndex gridIndex = b.coordinate().toGridIndex();
+                Player player = GameDb.getPlayer(b.ownerId());
+                //通用信息
+                summary.setId(info.getId())
+                        .setOwnerId(info.getOwnerId())
+                        .setIdx(gridIndex.toProto())
+                        .setCompanyName(player.getCompanyName())
+                        .setUserName(player.getName())
+                        .setPos(info.getPos());
+                if(b instanceof  IShelf){       //货架出售信息
+                    IShelf shelf = (IShelf) b;
+                    summary.setShelfCount(shelf.getTotalSaleCount());
+
+                }else if(b instanceof Apartment){//添加住宅信息
+                    Apartment apartment = (Apartment) b;
+                    Gs.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.BuildingSummary.ApartmentSummary.newBuilder();
+                    apartSummary.setCapacity(apartment.getWorkerNum())
+                            .setRent(apartment.cost())
+                            .setRenter(apartment.getRenterNum());
+                    summary.setApartmentSummary(apartSummary);
+                }
+                typeBuildingInfo.setBuildingInfo(summary);
+            }
+            allTypeBuilding.addBuilding(typeBuildingInfo);
+        });
+        this.write(Package.create(cmd,allTypeBuilding.build()));
     }
 }
