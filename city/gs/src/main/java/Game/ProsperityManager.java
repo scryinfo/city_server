@@ -35,7 +35,7 @@ public class ProsperityManager {
             //统计全城所有建筑的繁华度
             City.instance().forEachBuilding(b->{
                 trafficTemp=0;
-                int prosperity = getBuildingProsperity(b.coordinate());
+                int prosperity = getBuildingProsperity(b);
                 buildingProsperityMap.put(b, prosperity);
             });
             System.err.println(buildingProsperityMap);
@@ -43,9 +43,11 @@ public class ProsperityManager {
     }
 
     /*获取建筑繁荣度*/
-    public int getBuildingProsperity(Coordinate coordinate) {  //获取坐标点的繁荣度
-        int disTemp = 0;//距离
+    public int getBuildingProsperity(Building building) {  //获取坐标点的繁荣度
+        trafficTemp=0;//清空人流量
+        double disTemp = 0;//位置关系
         int prosperity = 0;//土地繁华度值
+        Coordinate coordinate = building.coordinate();
         for (int x = 1; x < cityLen; x++) {  //初始坐标从1开始 100次
             for (int y = 1; y < cityLen; y++) {//100次
                 //1.位置关系
@@ -53,19 +55,22 @@ public class ProsperityManager {
                 int absY = Math.abs(coordinate.y - y);
                 disTemp = absX > absY ? absX : absY;
                 //2.offsetTemp 位置偏差比例
-                int offsetTemp = 1 - (disTemp / cityLen);
+                double offsetTemp = 1 - (disTemp / cityLen);
                 //3.统计获取当前位置的人流量
                 Coordinate coor = new Coordinate(x, y);
                 int finalX = x;
                 int finalY = y;
-                City.instance().forEachBuilding(coor.toGridIndex(), b -> {
-                    if(finalX >= b.area().l.x&&
+                //筛选这一片范围内的建筑，如果有在建筑上的，计算人流量
+                int traffic = City.instance().getTraffic(finalX, finalY);
+                if(traffic!=0){
+                    trafficTemp =City.instance().getTraffic(finalX,finalY);
+                }
+                   /* if(finalX >= b.area().l.x&&
                             finalX <= b.area().r.x&&
                             finalY >=b.area().l.y&&
                             finalY <= b.area().r.y) {
                         trafficTemp += b.getFlow();
-                    }
-                });
+                    }*/
                 //4.计算繁华值
                 prosperity += trafficTemp * offsetTemp;
             }
@@ -77,6 +82,7 @@ public class ProsperityManager {
     public int getGroundProsperity(int beginX,int beginY){
         int disTemp = 0;//距离
         int prosperity = 0;//土地繁华度值
+        trafficTemp=0;
         for (int x = 1; x < cityLen; x++) {     //初始坐标从1开始 100次
             for (int y = 1; y < cityLen; y++) {
                 int absX = Math.abs(beginX - x);
@@ -88,7 +94,7 @@ public class ProsperityManager {
                 Coordinate coor = new Coordinate(x, y);
                 int finalX = x;
                 int finalY = y;
-                trafficTemp+= City.instance().getTraffic(x, y);//获取位置人流量
+                trafficTemp= City.instance().getTraffic(x, y);//获取位置人流量
                 //4.计算繁华值
                 prosperity += trafficTemp * offsetTemp;
             }
