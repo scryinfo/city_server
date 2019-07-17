@@ -670,7 +670,7 @@ public class City {
 		return list!=null?list.size():0;
     }
 
-    public int getTraffic(int x,int y){//获取位置人流量
+    public int getTraffic(int x,int y){//获取位置人流量(单块的建筑)
         List<Integer> sum = new ArrayList<>();
         Coordinate local = new Coordinate(x, y);
         //1.找出这个坐标点是否有建筑，没有则为0
