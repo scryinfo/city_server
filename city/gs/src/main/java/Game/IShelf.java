@@ -27,4 +27,6 @@ public interface IShelf {
         shelf.addshelf(itemInStore,i.price, i.autoReplenish);
     }
     Map<Item, Integer> getSaleDetail(int itemId);
+
+    int getTotalSaleCount();//获取总的出售数量
 }
