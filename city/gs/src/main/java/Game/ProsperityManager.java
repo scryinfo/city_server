@@ -22,7 +22,7 @@ public class ProsperityManager {
     //2.城市人流量，可以先算出所有地块的的人流量
     int trafficTemp = 0;
 
-    //缓存全城繁华度
+    //3.缓存全城繁华度
     private Map<Building, Integer> buildingProsperityMap = new HashMap<>();//全城所有的繁荣度
     List<Building> indexs = new ArrayList<>();
 
