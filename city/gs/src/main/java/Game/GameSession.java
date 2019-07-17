@@ -5079,45 +5079,68 @@ public class GameSession {
         this.write(Package.create(cmd,builder.build()));
     }
 
-    /*查询小地图全城类别建筑*/
-    public void queryTypeBuildingInMap(short cmd,Message message){
+
+    /*查询小地图建筑类别摘要信息*/
+    public void queryBuildingSummary(short cmd,Message message){
         Gs.Num num = (Gs.Num) message;
         int type = num.getNum();
-        Set<Building> buildings = City.instance().typeBuilding.get(type);
-        Gs.AllTypeBuilding.Builder allTypeBuilding = Gs.AllTypeBuilding.newBuilder();
-        buildings.forEach(b->{
-            Gs.TypeBuildingInfo.Builder typeBuildingInfo = Gs.TypeBuildingInfo.newBuilder();
-            if(b.state==Gs.BuildingState.SHUTDOWN_VALUE){//未开业,不添加其他建筑数据
-                typeBuildingInfo.setIsopen(false);
-            }else{
-                typeBuildingInfo.setIsopen(true);
-                Gs.BuildingSummary.Builder summary = Gs.BuildingSummary.newBuilder();
-                BuildingInfo info = b.toProto();
-                GridIndex gridIndex = b.coordinate().toGridIndex();
-                Player player = GameDb.getPlayer(b.ownerId());
-                //通用信息
-                summary.setId(info.getId())
-                        .setOwnerId(info.getOwnerId())
-                        .setIdx(gridIndex.toProto())
-                        .setCompanyName(player.getCompanyName())
-                        .setUserName(player.getName())
-                        .setPos(info.getPos());
-                if(b instanceof  IShelf){       //货架出售信息
-                    IShelf shelf = (IShelf) b;
-                    summary.setShelfCount(shelf.getTotalSaleCount());
-
-                }else if(b instanceof Apartment){//添加住宅信息
-                    Apartment apartment = (Apartment) b;
-                    Gs.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.BuildingSummary.ApartmentSummary.newBuilder();
-                    apartSummary.setCapacity(apartment.getCapacity())
-                            .setRent(apartment.cost())
-                            .setRenter(apartment.getRenterNum());
-                    summary.setApartmentSummary(apartSummary);
+        Gs.BuildingGridSummary.Builder builder = Gs.BuildingGridSummary.newBuilder();
+        City.instance().forAllGrid((grid)->{
+            AtomicInteger n = new AtomicInteger(0);
+            grid.forAllBuilding(building -> {
+                if(building.type()==type&& !building.outOfBusiness()) {
+                        n.addAndGet(1);
                 }
-                typeBuildingInfo.setBuildingInfo(summary);
-            }
-            allTypeBuilding.addBuilding(typeBuildingInfo);
+            });
+            builder.addInfoBuilder()
+                    .setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
+                    .setType(type)
+                    .setNum(n.intValue());
         });
-        this.write(Package.create(cmd,allTypeBuilding.build()));
+        this.write(Package.create(cmd,builder.build()));
+    }
+
+    /*查询小地图全城类别建筑类别详细信息*/
+    public void queryTypeBuildingDetail(short cmd,Message message){
+        Gs.QueryTypeBuildingDetail query = (Gs.QueryTypeBuildingDetail) message;
+        int type = query.getType();
+        GridIndex centerIdx = new GridIndex(query.getCenterIdx().getX(), query.getCenterIdx().getY());
+        Gs.TypeBuildingDetail.Builder builder = Gs.TypeBuildingDetail.newBuilder();
+        City.instance().forEachGrid(centerIdx.toSyncRange(), (grid)->{
+            Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
+            gridInfo.getIdxBuilder().setX(grid.getX()).setX(grid.getY());
+            grid.forAllBuilding(b->{
+                if(b.type()==type&& !b.outOfBusiness()) {
+                    Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
+                    if(b.state==Gs.BuildingState.SHUTDOWN_VALUE){//未开业,不添加其他建筑数据
+                        typeBuilding.setIsopen(false);
+                    }else{
+                        typeBuilding.setIsopen(true);
+                        Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
+                        Player player = GameDb.getPlayer(b.ownerId());
+                        //通用信息设置
+                        summary.setOwnerId(Util.toByteString(b.ownerId()))
+                                .setCompanyName(player.getCompanyName())
+                                .setUserName(player.getName())
+                                .setPos(b.coordinate().toProto());
+                        if(b instanceof  IShelf){       //货架建筑的出售信息
+                            IShelf shelf = (IShelf) b;
+                            summary.setShelfCount(shelf.getTotalSaleCount());
+                        }else if(b instanceof Apartment){//住宅类型信息
+                            Apartment apartment = (Apartment) b;
+                            Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.Builder apartSummary =  Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.newBuilder();
+                            apartSummary.setCapacity(apartment.getCapacity())
+                                    .setRent(apartment.cost())
+                                    .setRenter(apartment.getRenterNum());
+                            summary.setApartmentSummary(apartSummary);
+                        }
+                        typeBuilding.setBuildingInfo(summary);
+                    }
+                    gridInfo.addTypeInfo(typeBuilding);
+                }
+            });
+            builder.addInfo(gridInfo);
+        });
+        this.write(Package.create(cmd,builder.build()));
     }
 }
