@@ -18,7 +18,7 @@ public class GuidePriceMgr {
     // 缓存全城均值
     private Map<Integer, Map<String, Double>> avgInfomation = new HashMap<>();
     private Map<Integer, Map<String, Double>> produceInfomation = new HashMap<>();
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(5));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
 
     private GuidePriceMgr() {
     }
@@ -64,6 +64,7 @@ public class GuidePriceMgr {
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
+            System.err.println("这就很舒服了...");
             _update();
         }
     }

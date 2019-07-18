@@ -1170,7 +1170,7 @@ public class LogDb {
 								lt("t", endTime)
 						)),
 						Aggregates.group(null,Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)
-								,Accumulators.sum("score", "$s"),Accumulators.sum("prosp", "$prosp")),
+								,Accumulators.sum("score", "$score"),Accumulators.sum("prosp", "$prosp")),
 						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
