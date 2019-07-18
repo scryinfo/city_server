@@ -888,7 +888,7 @@ public class GameSession {
         }
     }
 
-    public void buyInShelf(short cmd, Message message) throws Exception {
+        public void buyInShelf(short cmd, Message message) throws Exception {
         Gs.BuyInShelf c = (Gs.BuyInShelf)message;
         if(c.getPrice() <= 0)
             return;
@@ -966,9 +966,13 @@ public class GameSession {
         int itemId = itemBuy.key.meta.id;
         int type = MetaItem.type(itemBuy.key.meta.id);
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+        // 记录商品评分
+        double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalQty(), itemId);
+        double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+        double score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                itemBuy.key.producerId, sellBuilding.id(), type, itemId);
+                itemBuy.key.producerId, sellBuilding.id(), type, itemId,score);
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
         //矿工费用日志记录(需调整)
@@ -3715,7 +3719,7 @@ public class GameSession {
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), type, itemId);
+                    itemBuy.key.producerId, sellBuilding.id(), type, itemId, 0);
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
@@ -4050,13 +4054,13 @@ public class GameSession {
             return;
         }
         Apartment apartment = (Apartment) building;
-        // 玩家住宅总评分
+        // 玩家住宅评分
         double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
         double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
         double curRetailScore = (brandScore + retailScore) / 2;
         // 玩家住宅繁荣度
-        double i = 0;
-        double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore,i);
+        double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(building);
+        double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore,prosperityScore);
         //NPC预期消费 = 行业工资(可能会调整为城市工资) * 住宅预期消费比例
         double moneyRatio = MetaData.getBuildingSpendMoneyRatio(building.type());
         double salary = City.instance().getIndustrySalary(building.type());
@@ -4064,6 +4068,48 @@ public class GameSession {
         builder.setNpc(moneyRatio * salary).setGuidePrice(guidePrice);
         this.write(Package.create(cmd,builder.build()));
 
+    }
+
+    //原料推荐价格 √
+    public void queryMaterialRecommendPrice(short cmd, Message message) {
+        Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray()); // 建筑id
+        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
+        Building building = City.instance().getBuilding(buildingId);
+        if (building == null || building.type() != MetaBuilding.MATERIAL) {
+            return;
+        }
+        this.write(Package.create(cmd, GuidePriceMgr.instance().getMaterialPrice()));
+    }
+
+
+    //加工厂商品推荐价格
+    public void queryProduceDepRecommendPrice(short cmd, Message message) {
+        Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
+        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
+        Building building = City.instance().getBuilding(buildingId);
+        if (building == null || building.type() != MetaBuilding.PRODUCE || building.outOfBusiness()) {
+            return;
+        }
+        ProduceDepartment department = (ProduceDepartment) building;
+        List<Item> itemList = department.store.getAllItem();
+        Map<Integer, Double> map = new HashMap<>();
+        if (!itemList.isEmpty()) {
+            for (Item item : itemList) {
+               double brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id);
+               double goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), item.key.meta.id, MetaData.getGoodQuality(item.key.meta.id));
+                map.put(item.key.meta.id, (brandScore + goodQtyScore) / 2);
+            }
+        } else {
+            List<Item> allSaleDetail = department.getShelf().getAllSaleDetail();
+            for (Item item : allSaleDetail) {
+               double brandScore = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id);
+               double goodQtyScore = GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), item.key.meta.id, MetaData.getGoodQuality(item.key.meta.id));
+                map.put(item.key.meta.id, (brandScore + goodQtyScore) / 2);
+            }
+        }
+        this.write(Package.create(cmd, GuidePriceMgr.instance().getProducePrice(map)));
     }
 
 
@@ -4233,50 +4279,6 @@ public class GameSession {
 		this.write(Package.create(cmd, Gs.LaboratoryMsg.newBuilder().addLabPrice(labPrice.build()).setBuildingId(msg.getBuildingId()).build()));
 	}
 
-    //原料推荐价格 √
-    public void queryMaterialRecommendPrice(short cmd, Message message) {
-        Gs.MaterialMsg msg = (Gs.MaterialMsg) message;
-        int itemId = msg.getMaterialId();// 原料id
-        UUID buildingId = Util.toUuid(msg.getInfo().getBuildingId().toByteArray()); //建筑id
-        UUID playerId = Util.toUuid(msg.getInfo().getPlayerId().toByteArray()); //玩家id
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.MATERIAL) {
-            return;
-        }
-        int sumPrice = 0;
-        int count = 0;
-        Collection<Building> allBuilding = City.instance().getAllBuilding();
-        for (Building b : allBuilding) {
-            if (b.type() != MetaBuilding.MATERIAL || b.outOfBusiness() || !(b instanceof IShelf)) {
-                return;
-            }
-            MaterialFactory mf = (MaterialFactory) b;
-            Map<Item, Integer> saleInfo = mf.shelf.getSaleDetail(itemId);
-            if (saleInfo != null) {
-                sumPrice += new ArrayList<>(saleInfo.values()).get(0);
-                count++;
-            }
-
-        }
-        // 一.推荐定价 = 城市原料均销售定价
-        int price = sumPrice / count;
-        MaterialFactory materialFactory = (MaterialFactory) building;
-        if (materialFactory.ownerId() != playerId || materialFactory.outOfBusiness()) {
-            return;
-        }
-        Map<Item, Integer> saleDetail = materialFactory.shelf.getSaleDetail(itemId);
-        int currentPrice = new ArrayList<>(saleDetail.values()).get(0);
-        //二.竞争力 = 推荐定价 / 定价 * 100 (向上取整)
-        double competitiveness = Math.ceil(price / currentPrice * 100);
-        MetaMaterial material = MetaData.getMaterial(itemId);
-        double n = material.n;
-        double industrySalary = City.instance().getIndustrySalary(building.type());
-        //三.成本价 = 1 / 原料生产速度(秒产个) * 建筑工资(行业工资)
-        double costPrice = 1 / n * industrySalary;
-        Gs.MaterialRecommendPrice.Builder builder = Gs.MaterialRecommendPrice.newBuilder();
-        builder.setPrice(price).setPrice(price).setCompetitiveness(competitiveness).setCostPrice(costPrice);
-        this.write(Package.create(cmd, builder.build()));
-    }
 
     //推广推荐价格 √
     public void queryPromotionRecommendPrice(short cmd, Message message) {
@@ -4331,25 +4333,6 @@ public class GameSession {
         builder.setPrice(price).setCompetitivenessI(competitivenessI).setCompetitivenessE(competitivenessE).setCostPrice(costPrice);
         this.write(Package.create(cmd, builder.build()));
 
-    }
-
-    //加工厂商品推荐价格
-    public void queryProduceDepRecommendPrice(short cmd, Message message) {
-        Gs.ProduceDepMsg msg = (Gs.ProduceDepMsg) message;
-        int itemId = msg.getItemId();
-        Gs.QueryBuildingInfo info = msg.getInfo();
-        UUID buildingId = Util.toUuid(info.getBuildingId().toByteArray()); //建筑id
-        UUID playerId = Util.toUuid(info.getPlayerId().toByteArray()); //玩家id
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.PRODUCE || building.outOfBusiness()) {
-            return;
-        }
-        //推荐定价 guidePrice   全城商品销售均价 * (玩家知名度权重 + 玩家品质权重) / (全城知名度权重 + 全城品质权重)
-        //加工厂成本 cost   配方原料成本(单个建筑购买) + 1 / 商品生产速度(秒产个) * 建筑工资(行业工资
-        //竞争力 comp   推荐定价 / 玩家定价 * 100 (向上取整)
-
-        Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
-        this.write(Package.create(cmd, builder.build()));
     }
 
     //零售店推荐价格

@@ -197,20 +197,20 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			table.put((short) GsCode.OpCode.getOneSocietyInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "getOneSocietyInfo"));
 			table.put((short) GsCode.OpCode.getPlayerAmount_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerAmount"));
-			//获取原料推荐价格
-//			table.put((short) GsCode.OpCode.queryMaterialRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.MaterialMsg.PARSER, GameSession.class, "queryMaterialRecommendPrice"));
 //			//获取推广推荐价格
 //			table.put((short) GsCode.OpCode.queryPromotionRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.PromotionInfo.PARSER, GameSession.class, "queryPromotionRecommendPrice"));
 //			//获取研究所推荐价格
 //			table.put((short) GsCode.OpCode.queryLaboratoryRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.LaboratoryInfos.PARSER, GameSession.class, "queryLaboratoryRecommendPrice"));
-//			//获取加工厂商品推荐价格
-//			table.put((short) GsCode.OpCode.queryProduceDepRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.ProduceDepMsg.PARSER, GameSession.class, "queryProduceDepRecommendPrice"));
 //			//获取零售店推荐价格
 //			table.put((short) GsCode.OpCode.queryRetailShopRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.RetailShopMsg.PARSER, GameSession.class, "queryRetailShopRecommendPrice"));
 
 			//new
 			//获取住宅推荐价格
 			table.put((short) GsCode.OpCode.queryApartmentRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryApartmentRecommendPrice"));
+//			获取原料推荐价格
+			table.put((short) GsCode.OpCode.queryMaterialRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryMaterialRecommendPrice"));
+			//获取加工厂商品推荐价格
+			table.put((short) GsCode.OpCode.queryProduceDepRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryProduceDepRecommendPrice"));
 			//old
 			table.put((short) GsCode.OpCode.materialGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.GoodSummary.PARSER, GameSession.class, "materialGuidePrice"));
 			table.put((short) GsCode.OpCode.apartmentGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.AartmentMsg.PARSER, GameSession.class, "apartmentGuidePrice"));

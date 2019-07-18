@@ -21,6 +21,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.excludeId;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -625,7 +628,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+								  UUID producerId, UUID bid, int type, int typeId,double score)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -758,7 +761,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId)
+			UUID ownerId, UUID bid, int type, int mId,double score,double prosp)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -768,7 +771,9 @@ public class LogDb {
 				.append("o", ownerId)
 				.append("b", bid)
 				.append("tp", type)
-				.append("mid", mId);
+				.append("mid", mId)
+				.append("score", score)
+				.append("prosp", prosp);
 		npcRentApartment.insertOne(document);
 	}
 
@@ -1147,5 +1152,54 @@ public class LogDb {
         return documentList;
     }
 
+	public static List<Document> sumApartMent(long startTime, long endTime)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Map<Integer, Double> map = new HashMap<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$"+KEY_TOTAL)
+				.append("size", "$size" )
+				.append("score", "$score" )
+				.append("prosp", "$prosp" )
+				.append("_id",0);
+		npcRentApartment.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime)
+						)),
+						Aggregates.group(null,Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)
+								,Accumulators.sum("score", "$s"),Accumulators.sum("prosp", "$prosp")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> sumMaterialOrGoods(long startTime, long endTime,boolean isGoods) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("score", "$score")
+				.append("size", "$size")
+				.append("_id",0);
+		int tp = TP_TYPE_GOODS;
+		if (!isGoods) {
+			tp = TP_TYPE_MATERIAL;
+		}
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", tp),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("score", "$score"),Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
 }
