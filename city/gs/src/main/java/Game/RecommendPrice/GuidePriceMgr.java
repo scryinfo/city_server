@@ -18,7 +18,7 @@ public class GuidePriceMgr {
     // 缓存全城均值
     private Map<Integer, Map<String, Double>> avgInfomation = new HashMap<>();
     private Map<Integer, Map<String, Double>> produceInfomation = new HashMap<>();
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(1));
 
     private GuidePriceMgr() {
     }
@@ -31,20 +31,24 @@ public class GuidePriceMgr {
     public double getApartmentGuidePrice(double currScore, double currProsp) {
 //        推荐定价 = (全城均住宅成交价 * (玩家住宅总评分 /400 * 7 + 1) * (1 + 玩家住宅繁荣度)) / ((全城均住宅总评分 /400 * 7 + 1) * (1 + 全城均住宅繁荣度))
         Map<String, Double> map = avgInfomation.get(MetaBuilding.APARTMENT);
-        Double price = map.get(AVG_PRICE);
-        Double score = map.get(AVG_SCORE);
-        Double prosp = map.get(AVG_PROSPEROUS);
-        double guidePrice = (price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp);
-        return guidePrice == 0 ? 1 : guidePrice;
+        if (null!=map) {
+            Double price = map.get(AVG_PRICE);
+            Double score = map.get(AVG_SCORE);
+            Double prosp = map.get(AVG_PROSPEROUS);
+            return (price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp);
+        }
+        return 0;
     }
 
     public Gs.MaterialRecommendPrices getMaterialPrice() {
 //        推荐定价 = 全城均原料成交价
         Gs.MaterialRecommendPrices.Builder builder = Gs.MaterialRecommendPrices.newBuilder();
         Map<String, Double> map = avgInfomation.get(MetaBuilding.MATERIAL);
-        map.forEach((k, v) -> {
-            builder.addMsg(Gs.MaterialRecommendPrices.MaterailMsg.newBuilder().setMid(Integer.parseInt(k)).setGuidePrice(v));
-        });
+        if (null!=map) {
+            map.forEach((k, v) -> {
+                builder.addMsg(Gs.MaterialRecommendPrices.MaterailMsg.newBuilder().setMid(Integer.parseInt(k)).setGuidePrice(v));
+            });
+        }
         return builder.build();
     }
 
@@ -90,7 +94,7 @@ public class GuidePriceMgr {
         if (!documents.isEmpty()) {
             documents.forEach(document -> {
                 Long size = document.getLong("size");
-                map.put(String.valueOf(document.getObjectId("id")), (double) document.getLong("total") / size);
+                map.put(String.valueOf(document.getInteger("id")), (double) document.getLong("total") / size);
             });
         }
         avgInfomation.put(MetaBuilding.MATERIAL, map);
@@ -103,8 +107,8 @@ public class GuidePriceMgr {
                 Map<String, Double> map = new HashMap<>();
                 Long size = document.getLong("size");
                 map.put(AVG_PRICE, (double) (document.getLong("total") / size));
-                map.put(AVG_SCORE, (double) (document.getLong("score") / size));
-                produceInfomation.put((Integer) document.get("id"), map);
+                map.put(AVG_SCORE, (double) (document.getInteger("score") / size));
+                produceInfomation.put((Integer) document.getInteger("id"), map);
             });
         }
     }
@@ -119,7 +123,7 @@ public class GuidePriceMgr {
         Date endDate = calendar.getTime();
         long endTime = endDate.getTime();
 
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(Calendar.DATE, -30);
         Date startDate = calendar.getTime();
         long startTime = startDate.getTime();
         queryApartmentAvg(startTime, endTime);

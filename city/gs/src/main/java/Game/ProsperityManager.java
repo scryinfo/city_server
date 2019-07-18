@@ -57,15 +57,8 @@ public class ProsperityManager {
                     disTemp = absX > absY ? absX : absY;
                     //2.offsetTemp 位置偏差比例
                     double offsetTemp = 1 - (disTemp / cityLen);
-                    //3.统计获取当前位置的人流量
-                    Coordinate coor = new Coordinate(x, y);
-                    int finalX = x;
-                    int finalY = y;
-                    //筛选这一片范围内的建筑，如果有在建筑上的，计算人流量
-                    int traffic = City.instance().getTraffic(finalX, finalY);
-                    if(traffic!=0){
-                        trafficTemp =City.instance().getTraffic(finalX,finalY);
-                    }
+                    //3.统计获取当前位置的人流量,筛选这一片范围内的建筑，如果有在建筑上的，计算人流量
+                    trafficTemp =City.instance().getTraffic(x,y);
                     //4.计算繁华值
                     prosperity += trafficTemp * offsetTemp;
                     buildingSumProsperity += prosperity;
@@ -88,9 +81,6 @@ public class ProsperityManager {
                 //2.offsetTemp 位置偏差比例
                 int offsetTemp = 1 - (disTemp / cityLen);
                 //3.统计获取当前位置的人流量(也就是获取这个土地上是否修建了建筑，获取这个建筑的人流量)
-                Coordinate coor = new Coordinate(x, y);
-                int finalX = x;
-                int finalY = y;
                 trafficTemp= City.instance().getTraffic(x, y);//获取位置人流量
                 //4.计算繁华值
                 prosperity += trafficTemp * offsetTemp;
@@ -103,10 +93,13 @@ public class ProsperityManager {
     public int  getBuildingProsperity(Building building){
         return buildingProsperityMap.getOrDefault(building,0);
     }
+
     /*获取建筑繁荣度评分:建筑繁华度 = 当前建筑包含地块的繁华值总和 / 全城繁华值总和*/
     public double getBuildingProsperityScore(Building building){
-        double localBuildProsperity = buildingProsperityMap.get(building);//当前建筑繁荣度
+        double localBuildProsperity = buildingProsperityMap.getOrDefault(building,0);//当前建筑繁荣度
         Integer sumProsperity = buildingProsperityMap.values().stream().reduce(Integer::sum).orElse(0);
+        if(sumProsperity==0)
+            return 0;
         return localBuildProsperity/sumProsperity;
     }
 
@@ -114,6 +107,8 @@ public class ProsperityManager {
     public double getGroundProsperityScore(int x,int y){
         int groundProsperity = getGroundProsperity(x, y);
         Integer sumProsperity = buildingProsperityMap.values().stream().reduce(Integer::sum).orElse(0);
+        if(sumProsperity==0)
+            return 0;
         return groundProsperity / sumProsperity;
     }
 }
