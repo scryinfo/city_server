@@ -29,10 +29,13 @@ public class OffLineInformation {
 
         //3.获取离线期间玩家预测盈亏
         List<OffLineFlightRecord> playerFlightForecast = OffLineSummaryUtil.getPlayerFlightForecast(playerId, player.getOfflineTs(), player.getOnlineTs());
-        //转换为proto
-        Gs.ForecastIncome forecastIncome = forecastIncomeToProto(playerFlightForecast);
-        Gs.UnLineInformation.Builder builder = Gs.UnLineInformation.newBuilder();
 
+        Gs.UnLineInformation.Builder builder = Gs.UnLineInformation.newBuilder();
+        //转换为proto
+        if(!playerFlightForecast.isEmpty()){
+            Gs.ForecastIncome forecastIncome = forecastIncomeToProto(playerFlightForecast);
+            builder.setForecast(forecastIncome);
+        }
         Gs.BuildingIncome material = resultMap.get(MetaBuilding.MATERIAL);
         if(material!=null&&material.getUnLineIncomeList().size()>0){
             builder.setMaterial(material);
