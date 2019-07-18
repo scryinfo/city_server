@@ -342,11 +342,12 @@ public abstract class Building implements Ticker{
                 .setTime(now);
         if (now - todayIncomeTs >= DAY_MILLISECOND)
         {
-            builder.setTodayIncome(0);
+            builder.setTodayIncome(0).setTodayPay(LogDb.getTodayBuildingPay(id()));
         }
         else
         {
-            builder.setTodayIncome(todayIncome);
+            builder.setTodayIncome(todayIncome)
+                   .setTodayPay(LogDb.getTodayBuildingPay(id()));
         }
         return builder.build();
     }
@@ -787,6 +788,7 @@ public abstract class Building implements Ticker{
             updates.add(p);
             GameDb.saveOrUpdate(updates);
             LogDb.paySalary(p.id(), id(), this.singleSalary(), this.allStaff.size());
+            LogDb.buildingPay(id(),p.id(),this.singleSalary()*this.allStaff.size());//记录建筑支出
             return true;
         } else {
             shutdownBusiness();

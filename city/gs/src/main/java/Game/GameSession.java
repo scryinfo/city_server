@@ -837,6 +837,7 @@ public class GameSession {
         else
             this.write(Package.fail(cmd));
     }
+
     public void shelfDel(short cmd, Message message) throws Exception {
         Gs.ShelfDel c = (Gs.ShelfDel)message;
         Item item = new Item(c.getItem());
@@ -965,10 +966,11 @@ public class GameSession {
         int itemId = itemBuy.key.meta.id;
         int type = MetaItem.type(itemBuy.key.meta.id);
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-        LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+        //LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
                 itemBuy.key.producerId, sellBuilding.id(), type, itemId);
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
+        LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
         LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
         //矿工费用日志记录(需调整)
         LogDb .minersCost(player.id(),minerCost,minersRatio);
@@ -1974,6 +1976,7 @@ public class GameSession {
         LogDb.playerPay(player.id(), charge);
         MoneyPool.instance().add(charge);
         LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+        LogDb.buildingPay(srcId,player.id(),charge);
         Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
         dst.consumeReserve(item.key, item.n, (int) avg.avg);
         IShelf srcShelf = (IShelf)src;

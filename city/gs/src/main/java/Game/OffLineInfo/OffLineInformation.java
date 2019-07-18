@@ -31,11 +31,7 @@ public class OffLineInformation {
         List<OffLineFlightRecord> playerFlightForecast = OffLineSummaryUtil.getPlayerFlightForecast(playerId, player.getOfflineTs(), player.getOnlineTs());
 
         Gs.UnLineInformation.Builder builder = Gs.UnLineInformation.newBuilder();
-        //转换为proto
-        if(!playerFlightForecast.isEmpty()){
-            Gs.ForecastIncome forecastIncome = forecastIncomeToProto(playerFlightForecast);
-            builder.setForecast(forecastIncome);
-        }
+
         Gs.BuildingIncome material = resultMap.get(MetaBuilding.MATERIAL);
         if(material!=null&&material.getUnLineIncomeList().size()>0){
             builder.setMaterial(material);
@@ -59,6 +55,11 @@ public class OffLineInformation {
         Gs.BuildingIncome lab = resultMap.get(MetaBuilding.LAB);
         if(lab!=null&&lab.getUnLineIncomeList().size()>0){
             builder.setLaboratory(lab);
+        }
+        //转换为proto
+        if(!playerFlightForecast.isEmpty()){
+            Gs.ForecastIncome forecastIncome = forecastIncomeToProto(playerFlightForecast);
+            builder.setForecast(forecastIncome);
         }
         return builder.build();
     }
@@ -198,17 +199,12 @@ public class OffLineInformation {
         for (OffLineFlightRecord record : playerFlightForecast) {
             Gs.ForecastIncome.FlightForecast.Builder unLineIncome = Gs.ForecastIncome.FlightForecast.newBuilder();
             unLineIncome.setFlightCompany(record.data.getFlightCompany())
-                    .setFlightArrtimeDate(record.data.getFlightDeptimeDate())
-                    .setFlightDepcode(record.data.getFlightDepcode())
-                    .setWin(record.win);
-            if(record.win){
-                unLineIncome.setProfitOrLoss(record.profitOrLoss);
-                sum += record.profitOrLoss;//盈利则是正数
-            }else{
-                unLineIncome.setProfitOrLoss(-record.profitOrLoss);
-                sum -= record.profitOrLoss;
-            }
-            builder.addFlightIncome(unLineIncome);//亏损是负数
+                    .setFlightDeptimeDate(record.data.getFlightDeptimeDate())
+                    .setFlightNo(record.data.getFlightNo())
+                    .setWin(record.win)
+                    .setProfitOrLoss(record.profitOrLoss);
+            sum += record.profitOrLoss;//盈利则是正数，亏损是负数
+            builder.addFlightIncome(unLineIncome);
         }
         builder.setTotalIncome(sum);
         return builder.build();

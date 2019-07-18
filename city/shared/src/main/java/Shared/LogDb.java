@@ -1,5 +1,6 @@
 package Shared;
 
+import ch.qos.logback.core.util.TimeUtil;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -7,6 +8,7 @@ import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
@@ -50,6 +52,7 @@ public class LogDb {
 
 	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
+	private static final String BUILDING_PAY = "buildingPay";
 	//研究所日志记录
 	private static final String LABORATORY_RECORD = "laboratoryRecord";
 	// 推广公司日志记录
@@ -101,6 +104,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
+	private static MongoCollection<Document> buildingPay;		//建筑支出
 	private static MongoCollection<Document> flightBet;
 	private static MongoCollection<Document> laboratoryRecord;
 	private static MongoCollection<Document> promotionRecord;
@@ -120,6 +124,7 @@ public class LogDb {
 	//npc and player pay Miner cost
 	private static MongoCollection<Document> minersCost;	//矿工费用
 	private static MongoCollection<Document> npcMinersCost;//矿工费用
+
 	/*用作离线通知*/
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 
@@ -163,7 +168,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buildingIncome = database.getCollection(BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-
+		buildingPay= database.getCollection(BUILDING_PAY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityBroadcast = database.getCollection(CITY_BROADCAST)
@@ -585,6 +591,15 @@ public class LogDb {
 		buildingIncome.insertOne(document);
 	}
 
+	public static void buildingPay(UUID bId,UUID payId,long cost)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("b", bId)
+				.append("p", payId)
+				.append("a", cost);
+		buildingPay.insertOne(document);
+	}
+
 	public static List<Document> buildingDayIncomeSummary(long yestodayStartTime, long todayStartTime)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -593,6 +608,25 @@ public class LogDb {
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
 				.append("_id", 0);
 		buildingIncome.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group("$b", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> buildingDayPaySummary(long yestodayStartTime, long todayStartTime)		//统计玩家建筑一天的所有支出（不含详细信息）
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		buildingPay.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
 								gte("t", yestodayStartTime),
@@ -952,6 +986,22 @@ public class LogDb {
 	public static MongoCollection<Document> getBuildingIncome()
 	{
 		return buildingIncome;
+	}
+
+	public static MongoCollection<Document> getBuildingPay() {
+		return buildingPay;
+	}
+	public static Long getTodayBuildingPay(UUID buildingId){
+		Long sum=0L;
+		//获取今日建筑的支出金额
+		FindIterable<Document> documents = buildingPay.find(and(
+				eq("b", buildingId),
+				gte("t", Util.getTodayStartTs())
+		));
+		for (Document document : documents) {
+			sum+= document.getLong("a");
+		}
+		return sum;
 	}
 
 	public static MongoCollection<Document> getNpcBuyInShelf()

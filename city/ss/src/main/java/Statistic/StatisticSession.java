@@ -13,10 +13,7 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 import ss.Ss;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
@@ -71,7 +68,27 @@ public class StatisticSession {
         UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
         Ss.BuildingIncome.Builder builder = Ss.BuildingIncome.newBuilder();
         builder.setBuildingId(Util.toByteString(buildingId));
-		builder.addAllNodes(SummaryUtil.getBuildDayIncomeById(buildingId));
+		Map<Long, Long> income = SummaryUtil.getBuildDayIncomeById(buildingId);//建筑今日的营收
+		Map<Long, Long> pay = SummaryUtil.getBuildDayPayById(buildingId);//建筑今日的支出
+		//合并收入支出
+		Map<Long,Ss.NodeIncome> nodes = new HashMap<>();
+		income.forEach((k,v)->{
+			Ss.NodeIncome.Builder node = Ss.NodeIncome.newBuilder();
+			node.setTime(k)
+					.setIncome(v)
+					.setPay(pay.getOrDefault(k,0L));
+			nodes.put(k,node.build());
+		});
+		pay.forEach((k,v)->{
+			if(!nodes.containsKey(k)){
+				Ss.NodeIncome.Builder node = Ss.NodeIncome.newBuilder();
+				node.setTime(k)
+						.setPay(v)
+						.setIncome(income.getOrDefault(k,0L));
+				nodes.put(k, node.build());
+			}
+		});
+		builder.addAllNodes(nodes.values());
         this.write(Package.create(cmd, builder.build()));
     }
 

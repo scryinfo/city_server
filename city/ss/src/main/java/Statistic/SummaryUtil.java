@@ -47,6 +47,7 @@ public class SummaryUtil
     private static final String DAY_PLAYER_RESEARCH = "dayPlayerResearch";
     private static final String DAY_PLAYER_PROMOTION = "dayPlayePromotion";
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
+    private static final String DAY_BUILDING_PAY = "dayBuildingPay";            //建筑每日收入统计
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
@@ -70,6 +71,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerResearch;
     private static MongoCollection<Document> dayPlayerPromotion;
     private static MongoCollection<Document> dayBuildingIncome;
+    private static MongoCollection<Document> dayBuildingPay;        //建筑每日收入
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
@@ -113,6 +115,8 @@ public class SummaryUtil
         dayPlayerPromotion = database.getCollection(DAY_PLAYER_PROMOTION)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayBuildingPay = database.getCollection(DAY_BUILDING_PAY)           //建筑每日收入统计
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -644,7 +648,17 @@ public class SummaryUtil
         }
     }
 
-    public static List<Ss.NodeIncome> getBuildDayIncomeById(UUID bid)
+    public static void insertBuildingDayPay(List<Document> documentList,long time)
+    {
+        documentList.forEach(document -> {
+            document.append(TIME, time);
+        });
+        if (!documentList.isEmpty()) {
+            dayBuildingPay.insertMany(documentList);
+        }
+    }
+
+ /*   public static List<Ss.NodeIncome> getBuildDayIncomeById(UUID bid)
     {
         long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
         List<Ss.NodeIncome> list = new ArrayList<>();
@@ -658,6 +672,34 @@ public class SummaryUtil
                             .setIncome(document.getLong(KEY_TOTAL)).build());
                 });
         return list;
+    }*/
+
+    public static Map<Long,Long> getBuildDayIncomeById(UUID bid)
+    {
+        Map<Long, Long> income = new HashMap<>();
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
+        dayBuildingIncome.find(and(eq(ID, bid),
+                gte(TIME, startTime)))
+                .sort(Sorts.ascending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    income.put(TimeUtil.getTimeDayStartTime(document.getLong(TIME)),document.getLong(KEY_TOTAL));
+                });
+        return income;
+    }
+
+    public static Map<Long,Long> getBuildDayPayById(UUID bid)         //获取建筑一个月的收入
+    {
+        Map<Long, Long> pay = new HashMap<>();
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
+        dayBuildingPay.find(and(eq(ID, bid),
+                gte(TIME, startTime)))
+                .sort(Sorts.ascending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    pay.put(TimeUtil.getTimeDayStartTime(document.getLong(TIME)),document.getLong(KEY_TOTAL));
+                });
+        return pay;
     }
 
 
