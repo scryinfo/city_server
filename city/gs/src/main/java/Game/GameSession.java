@@ -1155,6 +1155,8 @@ public class GameSession {
         registBuildingDetail(b);
         updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
+        double buildingProsperityScore = ProsperityManager.instance().getBuildingProsperityScore(b);
+
     }
 
     public void detailProduceDepartment(short cmd, Message message) {
