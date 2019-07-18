@@ -32,7 +32,7 @@ public class OffLineInformation {
         //转换为proto
         Gs.ForecastIncome forecastIncome = forecastIncomeToProto(playerFlightForecast);
         Gs.UnLineInformation.Builder builder = Gs.UnLineInformation.newBuilder();
-
+        builder.setForecast(forecastIncome);
         Gs.BuildingIncome material = resultMap.get(MetaBuilding.MATERIAL);
         if(material!=null&&material.getUnLineIncomeList().size()>0){
             builder.setMaterial(material);
