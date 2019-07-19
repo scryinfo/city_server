@@ -848,6 +848,9 @@ public class GameSession {
         if(building instanceof RetailShop && item.key.meta instanceof MetaMaterial)
             return;
         IShelf s = (IShelf)building;
+        //这里是全部下架，所以统一把自动补货关掉
+        Shelf.Content delContent = s.getContent(item.key);
+        delContent.autoReplenish = false;
         if(s.delshelf(item.key, item.n, true)) {
             GameDb.saveOrUpdate(s);
             //如果货架上还有该商品则推送，否则不推送
