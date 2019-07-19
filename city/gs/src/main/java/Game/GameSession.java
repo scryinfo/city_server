@@ -895,6 +895,7 @@ public class GameSession {
         UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
         UUID wid = Util.toUuid(c.getWareHouseId().toByteArray());
         Building sellBuilding = City.instance().getBuilding(bid);
+        Building buyBuilding = City.instance().getBuilding(wid);
         // player can not buy things in retail shop
         if(sellBuilding == null || !(sellBuilding instanceof IShelf) || !(sellBuilding instanceof IStorage) || sellBuilding instanceof RetailShop || sellBuilding.canUseBy(player.id()) || sellBuilding.outOfBusiness())
             return;
@@ -967,7 +968,7 @@ public class GameSession {
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                itemBuy.key.producerId, sellBuilding.id(), type, itemId);
+                itemBuy.key.producerId, sellBuilding.id(),sellBuilding.getName(),sellBuilding.metaId(), wid,buyBuilding.getName(),buyBuilding.metaId(), type, itemId);
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
         //矿工费用日志记录(需调整)
@@ -3620,6 +3621,7 @@ public class GameSession {
         WareHouseRenter sellRenter=null;
         WareHouseRenter buyRenter=null;
         Building sellBuilding = City.instance().getBuilding(bid);//销售方
+        Building buyBuilding = City.instance().getBuilding(wid);
         IShelf sellShelf = (IShelf) sellBuilding;
         IStorage buyStore = IStorage.get(wid, player);//买方
         UUID sellOwnerId=sellBuilding.ownerId();
@@ -3714,7 +3716,7 @@ public class GameSession {
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), type, itemId);
+                    itemBuy.key.producerId, sellBuilding.id(),sellBuilding.getName(),sellBuilding.metaId(), wid,buyBuilding.getName(),buyBuilding.metaId(),  type, itemId);
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）

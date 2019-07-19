@@ -383,26 +383,72 @@ public class StatisticSession {
 						.build()));
 	}
 
-	public void queryPlayerWeekIncomePay(short cmd, Message message){
-		UUID playerId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
-		Ss.PlayerWeekIncomePay.Builder build=Ss.PlayerWeekIncomePay.newBuilder();
-		long yestodayStartTime=TimeUtil.beforeSixDay().getTime().getTime();
-		long todayStartTime=System.currentTimeMillis();
-		List<Document> incomeList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),true,playerId);
-		List<Document> payList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),false,playerId);
+	public void queryPlayerIncomePay(short cmd, Message message){
+		UUID playerId = Util.toUuid(((Ss.PlayerIncomePay) message).getPlayerId().toByteArray());
+		int buildType = ((Ss.PlayerIncomePay) message).getBType().getNumber();
+		boolean isIncome = ((Ss.PlayerIncomePay) message).getIsIncome();
+        int type=0;
+		if(buildType==Ss.PlayerIncomePay.BuildType.MATERIAL.getNumber()){
+			type=21;//原料厂-原料
+		}else if(buildType==Ss.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+			type=22;//加工厂-商品
+		}
+		Ss.PlayerIncomePay.Builder build=Ss.PlayerIncomePay.newBuilder();
+		build.setPlayerId(((Ss.PlayerIncomePay) message).getPlayerId()).setBType(((Ss.PlayerIncomePay) message).getBType()).setIsIncome(isIncome);
 
-		build.setIncome(incomeList.get(0).getLong("total"))
-				.setPay(payList.get(0).getLong("total"));
-		//列表
-		List<Document> summaryShelfList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),playerId);
-		summaryShelfList.forEach(document ->{
-			Ss.PlayerWeekIncomePay.WeekIncomePay.Builder incomePay=Ss.PlayerWeekIncomePay.WeekIncomePay.newBuilder();
-			incomePay.setItemId(document.getInteger("tpi"))
-					.setTime(document.getLong("t"))
-					.setPrice(document.getLong("p"))
-					.setAmount(document.getLong("a"));
-			build.addWeekIncomePay(incomePay.build());
-		});
+		long yestodayStartTime=TimeUtil.todayStartTime();
+		long todayStartTime=System.currentTimeMillis();
+		List<Document> list=null;
+		if(isIncome){//收入
+			if(buildType==Ss.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Ss.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+				list = LogDb.daySummaryShelfIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
+				list.forEach(document -> {
+					Ss.PlayerIncomePay.IncomePay.Builder incomePay=Ss.PlayerIncomePay.IncomePay.newBuilder();
+					incomePay.setItemId(document.getInteger("tpi"))
+							.setPrice(document.getLong("p"))
+							.setAmount(document.getLong("a"))
+							.setTime(document.getLong("t"))
+							.setName(document.getString("sn"))
+							.setMetaId(document.getInteger("sm"));
+					build.addIncomePay(incomePay.build());
+				});
+			}else if(buildType==Ss.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
+
+			}else if(buildType==Ss.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
+
+			}
+
+		}else{//支出
+			if(buildType==Ss.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Ss.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+				list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
+				list.forEach(document -> {
+					Ss.PlayerIncomePay.IncomePay.Builder incomePay=Ss.PlayerIncomePay.IncomePay.newBuilder();
+					incomePay.setItemId(document.getInteger("tpi"))
+							.setPrice(document.getLong("p"))
+							.setAmount(document.getLong("a"))
+							.setTime(document.getLong("t"))
+							.setName(document.getString("bn"))
+							.setMetaId(document.getInteger("bm"));
+					build.addIncomePay(incomePay.build());
+				});
+			}else if(buildType==Ss.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
+
+			}else if(buildType==Ss.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
+
+			}
+			//员工工资（几种建筑通用）  支出
+			list = LogDb.daySummaryStaffSalaryPay(yestodayStartTime, todayStartTime, LogDb.getPaySalary(),buildType,playerId);
+			list.forEach(document ->{
+				Ss.PlayerIncomePay.IncomePay.Builder incomePay=Ss.PlayerIncomePay.IncomePay.newBuilder();
+				incomePay.setItemId(1000)
+						.setPrice(document.getLong("s"))
+						.setAmount(document.getLong("a"))
+						.setTime(document.getLong("t"))
+						.setName(document.getString("bn"))
+						.setMetaId(document.getInteger("bm"));
+				build.addIncomePay(incomePay.build());
+			});
+		}
 		this.write(Package.create(cmd,build.build()));
 	}
 }

@@ -786,7 +786,7 @@ public abstract class Building implements Ticker{
             List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
             updates.add(p);
             GameDb.saveOrUpdate(updates);
-            LogDb.paySalary(p.id(), id(), this.singleSalary(), this.allStaff.size());
+            LogDb.paySalary(p.id(),type(),id(),getName(),metaId(),this.singleSalary(), this.allStaff.size());
             return true;
         } else {
             shutdownBusiness();

@@ -21,6 +21,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.excludeId;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -336,7 +339,8 @@ public class LogDb {
 		}
 		//npc buy
         collection.aggregate(
-                Arrays.asList(
+                Arrays.asList
+						(
                         Aggregates.match(and(
                                 eq("tp", tp),
                                 gte("t", yestodayStartTime),
@@ -347,51 +351,50 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
-												 MongoCollection<Document> collection,boolean isIncomne,UUID playerId)
+	public static List<Document> daySummaryShelfIncome(long yestodayStartTime, long todayStartTime,
+												 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
 		List<Document> documentList = new ArrayList<>();
-		String groupStr = "$r";
-		if (isIncomne) {
-			groupStr = "$d";
-		}
-		Document groupObject = new Document("_id",
-				new Document("r", groupStr));
-		Document projectObject = new Document()
-				.append("id", "$_id._id.r")
-				.append("total","$total")
-				.append("_id",0);
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("id", playerId),
+								eq("tp", buildType),
+								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a")),
-						Aggregates.project(projectObject)
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
-												 MongoCollection<Document> collection,UUID playerId)
+	public static List<Document> daySummaryShelfPay(long yestodayStartTime, long todayStartTime,
+														 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("t","$t")
-				.append("tpi","$tpi")
-				.append("a","$a")
-				.append("p","$p")
-				.append("_id","$_id");
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.match(or(
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryStaffSalaryPay(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
 								eq("r", playerId),
-								eq("d", playerId))),
-						Aggregates.project(projectObject)
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("s","a","t","r","b","bn","bm"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -625,12 +628,17 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+								  UUID producerId, UUID bid,String sellBuildingName,int sellBuildingMetaId, UUID wid,String buyBuildingName,int buyBuildingMetaId,int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
 				.append("d", sellId)
 				.append("b", bid)
+				.append("sn", sellBuildingName)
+				.append("sm", sellBuildingMetaId)
+				.append("w", wid)
+				.append("bn", buyBuildingName)
+				.append("bm", buyBuildingMetaId)
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId)
@@ -666,10 +674,13 @@ public class LogDb {
 		npcBuyInRetailCol.insertOne(document);
 	}
 
-	public static void paySalary(UUID roleId, UUID buildingId, long salary, long workers) {
+	public static void paySalary(UUID roleId,int type, UUID buildingId,String buyBuildingName,int buyBuildingMetaId, long salary, long workers) {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
+				.append("tp", type)
 				.append("b", buildingId)
+				.append("bn", buyBuildingName)
+				.append("bm", buyBuildingMetaId)
 				.append("s", salary)
 				.append("a", salary * workers)
 				.append("w", workers);
