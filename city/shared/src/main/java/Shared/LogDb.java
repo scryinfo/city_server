@@ -383,6 +383,38 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document> daySummaryRetailShopIncome(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("d", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("tpi","p","a","t","d","b","sn","sm"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryApartmentIncome(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("d", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("p","a","t","d","b","sn","mid"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document> daySummaryStaffSalaryPay(long yestodayStartTime, long todayStartTime,
 													MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
@@ -648,12 +680,14 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+								  UUID producerId, UUID bid,String sellBuildingName,int sellBuildingMetaId,int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
 				.append("d", sellId)
 				.append("b", bid)
+				.append("sn", sellBuildingName)
+				.append("sm", sellBuildingMetaId)
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId)
@@ -769,7 +803,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId)
+			UUID ownerId, UUID bid,String sellBuildingName,int type, int mId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -778,6 +812,7 @@ public class LogDb {
 				.append("a", n * price)
 				.append("o", ownerId)
 				.append("b", bid)
+				.append("sn", sellBuildingName)
 				.append("tp", type)
 				.append("mid", mId);
 		npcRentApartment.insertOne(document);

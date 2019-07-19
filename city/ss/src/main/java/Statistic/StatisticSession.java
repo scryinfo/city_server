@@ -413,11 +413,30 @@ public class StatisticSession {
 					build.addIncomePay(incomePay.build());
 				});
 			}else if(buildType==Ss.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
-
+				list = LogDb.daySummaryRetailShopIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),buildType,playerId);
+				list.forEach(document -> {
+					Ss.PlayerIncomePay.IncomePay.Builder incomePay=Ss.PlayerIncomePay.IncomePay.newBuilder();
+					incomePay.setItemId(document.getInteger("tpi"))
+							.setPrice(document.getLong("p"))
+							.setAmount(document.getLong("a"))
+							.setTime(document.getLong("t"))
+							.setName(document.getString("sn"))
+							.setMetaId(document.getInteger("sm"));
+					build.addIncomePay(incomePay.build());
+				});
 			}else if(buildType==Ss.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
-
+				list = LogDb.daySummaryRetailShopIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),buildType,playerId);
+				list.forEach(document -> {
+					Ss.PlayerIncomePay.IncomePay.Builder incomePay=Ss.PlayerIncomePay.IncomePay.newBuilder();
+					incomePay.setItemId(2000)
+							.setPrice(document.getLong("p"))
+							.setAmount(document.getLong("a"))
+							.setTime(document.getLong("t"))
+							.setName(document.getString("sn"))
+							.setMetaId(document.getInteger("mid"));
+					build.addIncomePay(incomePay.build());
+				});
 			}
-
 		}else{//支出
 			if(buildType==Ss.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Ss.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
 				list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
@@ -432,9 +451,7 @@ public class StatisticSession {
 					build.addIncomePay(incomePay.build());
 				});
 			}else if(buildType==Ss.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
-
 			}else if(buildType==Ss.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
-
 			}
 			//员工工资（几种建筑通用）  支出
 			list = LogDb.daySummaryStaffSalaryPay(yestodayStartTime, todayStartTime, LogDb.getPaySalary(),buildType,playerId);
