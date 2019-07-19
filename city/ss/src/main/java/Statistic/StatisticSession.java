@@ -1,5 +1,7 @@
 package Statistic;
 
+import Param.ItemKey;
+import Param.MetaBuilding;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
@@ -7,6 +9,8 @@ import Statistic.SummaryUtil.CountType;
 import Statistic.Util.TimeUtil;
 import Statistic.Util.TotalUtil;
 import com.google.protobuf.Message;
+import com.mongodb.client.MongoCollection;
+import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
@@ -421,5 +425,56 @@ public class StatisticSession {
 			build.addWeekIncomePay(incomePay.build());
 		});
 		this.write(Package.create(cmd,build.build()));
+	}
+
+	/*查询今日的商品销售情况*/
+	public void queryBuildingGoodSaleDetail(short cmd, Message message){
+		Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
+		UUID bid = Util.toUuid(saleDetail.getBid().toByteArray());
+		int buildingType = saleDetail.getType();
+		//返回数据
+		Ss.BuildingTodaySaleDetail.Builder builder = Ss.BuildingTodaySaleDetail.newBuilder();
+		builder.setBuildingId(saleDetail.getBid());
+		//1.查询并且获取到7天的销售信息
+		Map<Long, Map<ItemKey, Document>> historyDetail = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), bid);
+		/*2.查询今日的经营详情，直接从buyInshelf中统计（需要根据建筑类型来选择统计哪些）*/
+		List<Document> todaySale = new ArrayList<>();
+		Long todayStartTime = TimeUtil.todayStartTime();
+		Long now = System.currentTimeMillis();
+		if(buildingType!=MetaBuilding.RETAIL){
+			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
+		}else{
+			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
+		}
+		//获取今日收入的所有销售额度
+		List<ItemKey> todayAllItem = new ArrayList<>();
+		for (Document d : todaySale) {
+			ItemKey itemKey = new ItemKey(d.getInteger("itemId"), (UUID) d.get("p"));
+			todayAllItem.add(itemKey);
+			Ss.TodaySaleDetail.Builder saleInfo = Ss.TodaySaleDetail.newBuilder();
+			saleInfo.setItemId(d.getInteger("itemId"))
+					.setNum(d.getInteger("num"))
+					.setSaleAccount(d.getLong("total"));
+			if(buildingType==MetaBuilding.PRODUCE){	//如果是加工厂，还需要设置商品的生产者
+				UUID producerId = (UUID) d.get("p");
+				saleInfo.setProducerId(Util.toByteString(producerId));
+			}
+			builder.addTodaSaleDetail(saleInfo);
+		}
+
+		Set<ItemKey> otherKeys = new HashSet<>();
+		//从7天内的历史记录获取是否有其他的销售shaping记录（有有则代表记录为0）
+		historyDetail.values().forEach(m->{
+			otherKeys.addAll(m.keySet());
+		});
+		otherKeys.forEach(key->{
+			if(!todayAllItem.contains(key)){
+				//设置出售信息为0
+				Ss.TodaySaleDetail.Builder saleInfo = Ss.TodaySaleDetail.newBuilder();
+			}
+		});
+
+
+
 	}
 }

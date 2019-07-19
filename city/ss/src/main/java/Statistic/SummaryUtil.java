@@ -1,5 +1,6 @@
 package Statistic;
 
+import Param.ItemKey;
 import Shared.LogDb;
 import Shared.Util;
 import Statistic.Util.TimeUtil;
@@ -11,6 +12,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
+import gs.Gs;
 import org.bson.Document;
 import ss.Ss;
 
@@ -18,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static Shared.LogDb.KEY_TOTAL;
+import static Shared.LogDb.cityBroadcast;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -51,6 +54,7 @@ public class SummaryUtil
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
+    private static final String DAY_BUILDING__GOOD_SOLD_DETAIL="dayBuildingGoodSoldDetail";
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
@@ -75,6 +79,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
+    private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
@@ -123,6 +128,8 @@ public class SummaryUtil
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayGoodsSoldDetail = database.getCollection(DAY_GOODS_SOLD_DETAIL)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayBuildingGoodSoldDetail = database.getCollection(DAY_BUILDING__GOOD_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -638,7 +645,11 @@ public class SummaryUtil
         return dayGoodsSoldDetail;
     }
 
-    public static void insertBuildingDayIncome(List<Document> documentList,long time)
+    public static MongoCollection<Document> getDayBuildingGoodSoldDetail() {
+        return dayBuildingGoodSoldDetail;
+    }
+
+    public static void insertBuildingDayIncome(List<Document> documentList, long time)
     {
         documentList.forEach(document -> {
             document.append(TIME, time);
@@ -656,6 +667,17 @@ public class SummaryUtil
         if (!documentList.isEmpty()) {
             dayBuildingPay.insertMany(documentList);
         }
+    }
+
+    public static void insertDayBuildingGoodSoldDetail(Map<Integer,List<Document>> detailMap, long time) {
+        detailMap.values().forEach(c->{
+            c.forEach(document -> {
+                document.append(TIME, time);
+            });
+            if (!c.isEmpty()) {
+                dayBuildingGoodSoldDetail.insertMany(c);
+            }
+        });
     }
 
  /*   public static List<Ss.NodeIncome> getBuildDayIncomeById(UUID bid)
@@ -700,6 +722,22 @@ public class SummaryUtil
                     pay.put(TimeUtil.getTimeDayStartTime(document.getLong(TIME)),document.getLong(KEY_TOTAL));
                 });
         return pay;
+    }
+    /*查询建筑7天内收入统计*/
+    public static Map<Long, Map<ItemKey, Document>> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection, UUID bid) {
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        /*存储格式  key为时间，value直接放Document（这个document有很多的，所以要用Lits来存）*/
+        /*由于没有指定是哪一个商品和，我们要把这七天内出现的的所有商品统统统计出来，所以key用时间  ，如果有相同时间的表明肯定是不同商品。
+        对于value为了方便我们取出不同的商品，用一个Map*/
+        Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
+        dayBuildingPay.find(and(eq("bid", bid),
+                gte(TIME, startTime)))
+                .sort(Sorts.ascending(TIME))
+                .forEach((Block<? super Document>) d ->
+                {
+                    detail.computeIfAbsent(TimeUtil.getTimeDayStartTime(d.getLong(TIME)), k -> new HashMap<>()).put(new ItemKey(d.getInteger("itemId"),(UUID) d.get("p")),d);
+                });
+        return detail;
     }
 
 
@@ -835,7 +873,6 @@ public class SummaryUtil
                         map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
                     });
         }
-
         return map;
     }
 

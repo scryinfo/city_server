@@ -8,6 +8,7 @@ import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -638,6 +639,75 @@ public class LogDb {
 		return documentList;
 	}
 
+	/*统计所有货架建筑的经营详情(包括了零售店)的货物销售详情*/
+	public static Map<Integer,List<Document>> buildingDaySaleDetailIncomeSummary(long yestodayStartTime, long todayStartTime){
+		Map<Integer, List<Document>> map = new HashMap<>();
+		List<Document> factoryInshelf = new ArrayList<>();
+		List<Document> retailInshelf = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("bid","$_id._id.b")
+				.append("itemId","$_id._id.tpi")
+				.append("p","$_id.i")
+				.append("num","$n")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		//分组id(根据生产者id、建筑id、商品id分组)
+		Document groupObject = new Document("_id",
+				new Document("b", "$b")
+						.append("tpi", "$tpi"))
+						.append("i","$i");
+		buyInShelf.aggregate(
+				Arrays.asList(
+					Aggregates.match(and(
+							gte("t", yestodayStartTime),
+							lt("t", todayStartTime))),
+						Aggregates.group(groupObject, Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
+					Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) factoryInshelf::add);
+
+		//再统计零售店建筑的每日经营详情
+		npcBuyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) retailInshelf::add);
+		map.put(1,factoryInshelf);
+		map.put(2,retailInshelf);
+		return map;
+	}
+
+	/*统计货架上某一建筑在某一时间段内的收入记录*/
+	public static List<Document> buildingDaySaleDetailByBuilding(long startTime,long endTime,UUID bid,MongoCollection<Document> collection){
+		List<Document> record = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("bid","$_id._id.b")
+				.append("itemId","$_id._id.tpi")
+				.append("p","$_id.i")
+				.append("num","$n")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		Document groupObject = new Document("_id",
+				new Document("b", "$b")
+						.append("tpi", "$tpi"))
+						.append("i","$i");
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("b","$b"),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group(groupObject, Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) record::add);
+		return record;
+	}
+
 	public static List<Document> queryBuildingFlowAndLift(long startTime,UUID buildingId)
 	{
 		List<Document> list = new ArrayList<>();
@@ -665,6 +735,7 @@ public class LogDb {
 		document.append("r", buyId)
 				.append("d", sellId)
 				.append("b", bid)
+				.append("n",n)				//新增出售的个数
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId)
@@ -681,6 +752,7 @@ public class LogDb {
 				.append("d", sellId)
 				.append("b", bid)
 				.append("p", price)
+				.append("n",n)
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
