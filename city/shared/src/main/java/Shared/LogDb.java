@@ -362,7 +362,7 @@ public class LogDb {
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn","sm"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -378,7 +378,7 @@ public class LogDb {
 								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn","sm","f"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b","f"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -394,7 +394,7 @@ public class LogDb {
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","d","b","sn","sm"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","d","b"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -410,7 +410,7 @@ public class LogDb {
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("p","a","t","d","b","sn","mid"), excludeId()))
+						Aggregates.project(fields(include("p","a","t","d","b","mid"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -456,7 +456,7 @@ public class LogDb {
 								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("s","a","t","r","b","bn","bm"), excludeId()))
+						Aggregates.project(fields(include("s","a","t","r","b"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -690,17 +690,13 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,String sellBuildingName,int sellBuildingMetaId, UUID wid,String buyBuildingName,int buyBuildingMetaId,long freight,int type, int typeId)
+								  UUID producerId, UUID bid, UUID wid,long freight,int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
 				.append("d", sellId)
 				.append("b", bid)
-				.append("sn", sellBuildingName)
-				.append("sm", sellBuildingMetaId)
 				.append("w", wid)
-				.append("bn", buyBuildingName)
-				.append("bm", buyBuildingMetaId)
 				.append("f", freight)
 				.append("p", price)
 				.append("a", n * price)
@@ -711,14 +707,12 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,String sellBuildingName,int sellBuildingMetaId,int type, int typeId)
+								  UUID producerId, UUID bid,int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
 				.append("d", sellId)
 				.append("b", bid)
-				.append("sn", sellBuildingName)
-				.append("sm", sellBuildingMetaId)
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId)
@@ -739,13 +733,11 @@ public class LogDb {
 		npcBuyInRetailCol.insertOne(document);
 	}
 
-	public static void paySalary(UUID roleId,int type, UUID buildingId,String buyBuildingName,int buyBuildingMetaId, long salary, long workers) {
+	public static void paySalary(UUID roleId,int type, UUID buildingId, long salary, long workers) {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("tp", type)
 				.append("b", buildingId)
-				.append("bn", buyBuildingName)
-				.append("bm", buyBuildingMetaId)
 				.append("s", salary)
 				.append("a", salary * workers)
 				.append("w", workers);
@@ -834,7 +826,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid,String sellBuildingName,int type, int mId)
+			UUID ownerId, UUID bid,int type, int mId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -843,7 +835,6 @@ public class LogDb {
 				.append("a", n * price)
 				.append("o", ownerId)
 				.append("b", bid)
-				.append("sn", sellBuildingName)
 				.append("tp", type)
 				.append("mid", mId);
 		npcRentApartment.insertOne(document);
