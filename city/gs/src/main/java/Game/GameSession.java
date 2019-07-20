@@ -5142,4 +5142,124 @@ public class GameSession {
         });
         this.write(Package.create(cmd,builder.build()));
     }
+    public void queryPlayerIncomePay(short cmd, Message message){
+        UUID playerId = Util.toUuid(((Gs.PlayerIncomePay) message).getPlayerId().toByteArray());
+        int buildType = ((Gs.PlayerIncomePay) message).getBType().getNumber();
+        boolean isIncome = ((Gs.PlayerIncomePay) message).getIsIncome();
+        int type=0;
+        if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()){
+            type=21;//原料厂-原料
+        }else if(buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+            type=22;//加工厂-商品
+        }
+        Gs.PlayerIncomePay.Builder build=Gs.PlayerIncomePay.newBuilder();
+        build.setPlayerId(((Gs.PlayerIncomePay) message).getPlayerId()).setBType(((Gs.PlayerIncomePay) message).getBType()).setIsIncome(isIncome);
+
+        long yestodayStartTime=TimeUtil.todayStartTime();
+        long todayStartTime=System.currentTimeMillis();
+        List<Document> list=null;
+        if(isIncome){//收入
+            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+                list = LogDb.daySummaryShelfIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(document.getInteger("tpi"))
+                            .setPrice(document.getLong("p"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.getString("sn"))
+                            .setMetaId(document.getInteger("sm"));
+                    build.addIncomePay(incomePay.build());
+                });
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
+                list = LogDb.daySummaryRetailShopIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),buildType,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(document.getInteger("tpi"))
+                            .setPrice(document.getLong("p"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.getString("sn"))
+                            .setMetaId(document.getInteger("sm"));
+                    build.addIncomePay(incomePay.build());
+                });
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
+                list = LogDb.daySummaryApartmentIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),buildType,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(2000)
+                            .setPrice(document.getLong("p"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.getString("sn"))
+                            .setMetaId(document.getInteger("mid"));
+                    build.addIncomePay(incomePay.build());
+                });
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
+                list = LogDb.daySummaryGroundIncome(yestodayStartTime, todayStartTime, LogDb.getBuyGround(),buildType,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(3000)
+                            .setPrice(document.getLong("s"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.get("p").toString());
+                    build.addIncomePay(incomePay.build());
+                });
+            }
+        }else{//支出
+            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+                list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(document.getInteger("tpi"))
+                            .setPrice(document.getLong("p"))
+                            .setAmount(document.getLong("a"))
+                            .setFreight(document.getLong("f"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.getString("bn"))
+                            .setMetaId(document.getInteger("bm"));
+                    build.addIncomePay(incomePay.build());
+                });
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
+                list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getBuyGround(),buildType,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(3000)
+                            .setPrice(document.getLong("s"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.get("p").toString());
+                    build.addIncomePay(incomePay.build());
+                });
+                list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getLandAuction(),buildType,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(3000)
+                            .setPrice(document.getLong("s"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.get("p").toString());
+                    build.addIncomePay(incomePay.build());
+                });
+            }
+            //员工工资（几种建筑通用）  支出
+            if(buildType!=Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
+                list = LogDb.daySummaryStaffSalaryPay(yestodayStartTime, todayStartTime, LogDb.getPaySalary(),buildType,playerId);
+                list.forEach(document ->{
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    incomePay.setItemId(1000)
+                            .setPrice(document.getLong("s"))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(document.getString("bn"))
+                            .setMetaId(document.getInteger("bm"));
+                    build.addIncomePay(incomePay.build());
+                });
+            }
+        }
+        this.write(Package.create(cmd,build.build()));
+    }
 }
