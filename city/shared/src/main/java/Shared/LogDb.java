@@ -415,6 +415,36 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document> daySummaryGroundIncome(long yestodayStartTime, long todayStartTime,
+														   MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("d", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("s","a","p","t"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryGroundPay(long yestodayStartTime, long todayStartTime,
+														MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("r", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("s","a","p","t"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document> daySummaryStaffSalaryPay(long yestodayStartTime, long todayStartTime,
 													MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
@@ -994,7 +1024,10 @@ public class LogDb {
 	{
 		return buyGround;
 	}
-
+	public static MongoCollection<Document> getLandAuction()
+	{
+		return landAuction;
+	}
 	public static MongoCollection<Document> getBuildingIncome()
 	{
 		return buildingIncome;
