@@ -456,6 +456,7 @@ public class StatisticSession {
 					incomePay.setItemId(document.getInteger("tpi"))
 							.setPrice(document.getLong("p"))
 							.setAmount(document.getLong("a"))
+							.setFreight(document.getLong("f"))
 							.setTime(document.getLong("t"))
 							.setName(document.getString("bn"))
 							.setMetaId(document.getInteger("bm"));

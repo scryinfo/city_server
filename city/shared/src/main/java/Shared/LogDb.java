@@ -362,7 +362,7 @@ public class LogDb {
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn","sm"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -378,7 +378,7 @@ public class LogDb {
 								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","bn","d","b","sn","sm","f"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -690,7 +690,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,String sellBuildingName,int sellBuildingMetaId, UUID wid,String buyBuildingName,int buyBuildingMetaId,int type, int typeId)
+								  UUID producerId, UUID bid,String sellBuildingName,int sellBuildingMetaId, UUID wid,String buyBuildingName,int buyBuildingMetaId,long freight,int type, int typeId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -701,6 +701,7 @@ public class LogDb {
 				.append("w", wid)
 				.append("bn", buyBuildingName)
 				.append("bm", buyBuildingMetaId)
+				.append("f", freight)
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId)

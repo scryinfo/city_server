@@ -968,7 +968,7 @@ public class GameSession {
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                itemBuy.key.producerId, sellBuilding.id(),sellBuilding.getName(),sellBuilding.metaId(), wid,buyBuilding.getName(),buyBuilding.metaId(), type, itemId);
+                itemBuy.key.producerId, sellBuilding.id(),sellBuilding.getName(),sellBuilding.metaId(), wid,buyBuilding.getName(),buyBuilding.metaId(),freight, type, itemId);
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
         //矿工费用日志记录(需调整)
@@ -3716,7 +3716,7 @@ public class GameSession {
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(),sellBuilding.getName(),sellBuilding.metaId(), wid,buyBuilding.getName(),buyBuilding.metaId(),  type, itemId);
+                    itemBuy.key.producerId, sellBuilding.id(),sellBuilding.getName(),sellBuilding.metaId(), wid,buyBuilding.getName(),buyBuilding.metaId(), freight, type, itemId);
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
