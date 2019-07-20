@@ -726,11 +726,9 @@ public class SummaryUtil
     /*查询建筑7天内收入统计*/
     public static Map<Long, Map<ItemKey, Document>> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection, UUID bid) {
         long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
-        /*存储格式  key为时间，value直接放Document（这个document有很多的，所以要用Lits来存）*/
-        /*由于没有指定是哪一个商品和，我们要把这七天内出现的的所有商品统统统计出来，所以key用时间  ，如果有相同时间的表明肯定是不同商品。
-        对于value为了方便我们取出不同的商品，用一个Map*/
+        /*存储格式  key为时间，value存这人一天内出现过的销售商品*/
         Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
-        dayBuildingPay.find(and(eq("bid", bid),
+        collection.find(and(eq("bid", bid),
                 gte(TIME, startTime)))
                 .sort(Sorts.ascending(TIME))
                 .forEach((Block<? super Document>) d ->
@@ -738,6 +736,21 @@ public class SummaryUtil
                     detail.computeIfAbsent(TimeUtil.getTimeDayStartTime(d.getLong(TIME)), k -> new HashMap<>()).put(new ItemKey(d.getInteger("itemId"),(UUID) d.get("p")),d);
                 });
         return detail;
+    }
+
+    /*获取建筑中某一个商品的历史销售记录*/
+    public static Map<Long,Document> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection,int itemId,UUID bid,UUID producerId){
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        Map<Long, Document> map = new HashMap<>();
+        collection.find(and(eq("bid", bid),
+                eq("itemId",itemId),
+                eq("p",producerId),
+                gte(TIME, startTime)))
+                .forEach((Block<? super Document>) doc ->
+                {
+                    map.put(TimeUtil.getTimeDayStartTime(doc.getLong(TIME)),doc);
+                });
+        return map;
     }
 
 

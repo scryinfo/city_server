@@ -647,6 +647,7 @@ public class LogDb {
 		Document projectObject = new Document()
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")
+				.append("brand","$_id._id.brandName")
 				.append("p","$_id.i")
 				.append("num","$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
@@ -688,6 +689,7 @@ public class LogDb {
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")
 				.append("p","$_id.i")
+				.append("brand","$_id._id.brand")
 				.append("num","$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
 				.append("_id", 0);
@@ -729,7 +731,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+								  UUID producerId, UUID bid, int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -737,6 +739,7 @@ public class LogDb {
 				.append("b", bid)
 				.append("n",n)				//新增出售的个数
 				.append("p", price)
+				.append("brand",brand)
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
@@ -745,7 +748,7 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+								  UUID producerId, UUID bid, int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -753,6 +756,7 @@ public class LogDb {
 				.append("b", bid)
 				.append("p", price)
 				.append("n",n)
+				.append("brand",brand)
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)

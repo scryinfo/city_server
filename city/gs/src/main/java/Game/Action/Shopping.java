@@ -147,8 +147,11 @@ public class Shopping implements IAction {
 
             LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
+            //获取品牌名
+            BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
+            String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
-                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
+                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
             LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
             LogDb.sellerBuildingIncome(chosen.bId,sellShop.type(),owner.id(),1,chosen.price,chosen.meta.id);//记录建筑收益详细信息
             //矿工费用记录
@@ -231,8 +234,10 @@ public class Shopping implements IAction {
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
+            BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
+            String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
-                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
+                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
               LogDb.sellerBuildingIncome(chosen.bId,sellShop.type(),owner.id(),1,chosen.price,chosen.meta.id);//记录建筑收益详细信息
               //矿工费用记录

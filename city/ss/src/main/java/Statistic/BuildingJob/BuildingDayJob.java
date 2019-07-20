@@ -40,7 +40,7 @@ public class BuildingDayJob implements Job
         List<Document> documentListPay = LogDb.buildingDayPaySummary(yestodayStartTime, todayStartTime);
         SummaryUtil.insertBuildingDayPay(documentListPay,yestodayStartTime);
 
-        //建筑经营详统计
+        //建筑经营详统计(已确定)
         Map<Integer, List<Document>> detailMap = LogDb.buildingDaySaleDetailIncomeSummary(yestodayStartTime, todayStartTime);
         SummaryUtil.insertDayBuildingGoodSoldDetail(detailMap, yestodayStartTime);
 

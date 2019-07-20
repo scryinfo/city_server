@@ -1,8 +1,11 @@
 package Statistic.Util;
 
+import Param.MetaBuilding;
+import Shared.Util;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
+import ss.Ss;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -72,5 +75,22 @@ public class TotalUtil {
             account = first.getLong("a");
         }
         return account;
+    }
+
+    /*参数1.要统计的销售详情,参数2.表示建筑类型，参数3.表示是否有今日收入统计（false 则直接设置受益为0）*/
+    public static Ss.BuildingTodaySaleDetail.TodaySaleDetail totalBuildingSaleDetail(Document document,int buildingType, boolean isTodayIncome){
+        Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder saleInfo = Ss.BuildingTodaySaleDetail.TodaySaleDetail.newBuilder();
+        /*设置通用信息*/
+        UUID producerId = (UUID) document.get("p");
+        saleInfo.setItemId(document.getInteger("itemId"))
+                .setProducerId(Util.toByteString(producerId));
+        if(!isTodayIncome){
+            saleInfo.setSaleAccount(0).setNum(0);
+        }else{
+            saleInfo.setNum(document.getInteger("num"))
+                    .setSaleAccount(document.getLong("total"))
+                    .setBrandName(document.getString("brand"));
+        }
+        return saleInfo.build();
     }
 }
