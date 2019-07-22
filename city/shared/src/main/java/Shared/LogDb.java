@@ -628,7 +628,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId,double score)
+								  UUID producerId, UUID bid, int type, int typeId,double score,String roleName,String companyName)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -638,7 +638,10 @@ public class LogDb {
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
-				.append("tpi", typeId);
+				.append("tpi", typeId)
+				.append("score", score)
+				.append("rn", roleName)
+				.append("cn", companyName);
 		buyInShelf.insertOne(document);
 	}
 
@@ -761,7 +764,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId,double score,double prosp)
+			UUID ownerId, UUID bid, int type, int mId,double score,double prosp,String roleName,String companyName)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -773,7 +776,9 @@ public class LogDb {
 				.append("tp", type)
 				.append("mid", mId)
 				.append("score", score)
-				.append("prosp", prosp);
+				.append("prosp", prosp)
+				.append("rn", roleName)
+				.append("cn", companyName);
 		npcRentApartment.insertOne(document);
 	}
 
@@ -1202,4 +1207,49 @@ public class LogDb {
 		return documentList;
 	}
 
+	public static List<Document> queryApartmentTop(MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("rn", "$rn")
+				.append("cn", "$cn")
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.group("$d", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.first("rn", "$rn")
+								, Accumulators.first("cn", "$cn")),
+						Aggregates.sort(and(eq(KEY_TOTAL, -1))),
+						Aggregates.project(projectObject),
+						Aggregates.limit(50)// 暂时过滤前50条
+				)
+		).forEach((Block<? super Document>) documentList::add);
+
+		return documentList;
+	}
+	public static List<Document> queryMaterilOrGoodTop(MongoCollection<Document> collection,boolean isGoods) {
+		int tp = TP_TYPE_GOODS;
+		if (!isGoods) {
+			tp = TP_TYPE_MATERIAL;
+		}
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("rn", "$rn")
+				.append("cn", "$cn")
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("tp", tp))),
+						Aggregates.group("$d", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.first("rn", "$rn")
+								, Accumulators.first("cn", "$cn")),
+						Aggregates.sort(and(eq(KEY_TOTAL, -1))),
+						Aggregates.project(projectObject),
+						Aggregates.limit(50)// 暂时过滤前50条
+				)
+		).forEach((Block<? super Document>) documentList::add);
+
+		return documentList;
+	}
 }

@@ -11,18 +11,28 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
+import gs.Gs;
+import io.opencensus.stats.Aggregation;
 import org.bson.Document;
 import ss.Ss;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static Shared.LogDb.KEY_TOTAL;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
-public class SummaryUtil
-{
+public class SummaryUtil {
+    public static final int TRIVIAL = 10;
+    public static final int MATERIAL = 11;
+    public static final int PRODUCE = 12;
+    public static final int RETAIL = 13;
+    public static final int APARTMENT = 14;
+    public static final int LAB = 15;
+    public static final int PUBLIC = 16;
+    public static final int TALENT = 17;
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     public static final long HOUR_MILLISECOND = 1000 * 3600;
     public static final long SECOND_MILLISECOND = 1000 * 10;
@@ -53,6 +63,7 @@ public class SummaryUtil
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
+    public static final String TOP_INFO = "topInfo";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -76,6 +87,7 @@ public class SummaryUtil
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
+    private static MongoCollection<Document> topInfo;
 
     public static void init()
     {
@@ -121,6 +133,8 @@ public class SummaryUtil
         dayGoodsSoldDetail = database.getCollection(DAY_GOODS_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        topInfo = database.getCollection(TOP_INFO)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -795,6 +809,63 @@ public class SummaryUtil
         }
 
         return map;
+    }
+
+    public static MongoCollection<Document> getTopInfo() {
+        return topInfo;
+    }
+
+    public static void insertTopInfo(MongoCollection<Document> collection, List<Document> documentList, int type) {
+        documentList.forEach(document -> {
+            document.append("tp", type);
+        });
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+
+    }
+
+    public static long getTodayIncome(MongoCollection<Document> collection, UUID pid) {
+        final long[] todayIncome = {0};
+        long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis();
+        collection.find(and(eq("d", pid),
+                gte(TIME, startTime),
+                lte(TIME, currentTimeMillis)
+        ))
+//                .sort(Sorts.ascending(TIME))
+                .projection(Aggregates.count("total"))
+                .forEach((Block<? super Document>) document ->
+                {
+                    todayIncome[0] = document.getLong("total");
+                });
+        return todayIncome[0];
+    }
+
+    public static Ss.TopInfo queryIndustryTop(UUID pid) {
+        Ss.TopInfo.Builder builder = Ss.TopInfo.newBuilder();
+        Ss.TopInfo.TopMsg.Builder topMsg = Ss.TopInfo.TopMsg.newBuilder();
+        Ss.TopInfo.IndustryMsg.Builder msg = Ss.TopInfo.IndustryMsg.newBuilder();
+        final int[] count = {0};
+        topInfo.find()
+                .projection(Aggregates.group("$tp"))
+                .forEach((Block<? super Document>) document ->
+                {
+                    count[0]++;
+                    UUID id = (UUID) document.get("id");
+                    if (pid.equals(id)) {
+                        topMsg.setOwner(count[0]);
+                    }
+                    long todayIncome = getTodayIncome(topInfo, id);
+                    msg.setTodayIncome(todayIncome);
+                    msg.setSumIncome(document.getLong("total"));
+                    msg.setName(Gs.Str.newBuilder().setStr(document.getString("rn")).build());
+                    msg.setCompanyName(Gs.Str.newBuilder().setStr(document.getString("cn")).build());
+                    topMsg.setOwner(0);
+                    topMsg.setIndustry(document.getInteger("tp"));
+                    topMsg.addIndustryMsg(msg.build());
+                });
+        return builder.addMsg(topMsg.build()).build();
     }
 
 }

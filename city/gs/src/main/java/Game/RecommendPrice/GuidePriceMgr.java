@@ -3,6 +3,7 @@ package Game.RecommendPrice;
 import Game.Meta.MetaBuilding;
 import Game.Timers.PeriodicTimer;
 import Shared.LogDb;
+import com.google.protobuf.ByteString;
 import gs.Gs;
 import org.bson.Document;
 import java.util.*;
@@ -18,7 +19,7 @@ public class GuidePriceMgr {
     // 缓存全城均值
     private Map<Integer, Map<String, Double>> avgInfomation = new HashMap<>();
     private Map<Integer, Map<String, Double>> produceInfomation = new HashMap<>();
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(1));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
 
     private GuidePriceMgr() {
     }
@@ -31,7 +32,7 @@ public class GuidePriceMgr {
     public double getApartmentGuidePrice(double currScore, double currProsp) {
 //        推荐定价 = (全城均住宅成交价 * (玩家住宅总评分 /400 * 7 + 1) * (1 + 玩家住宅繁荣度)) / ((全城均住宅总评分 /400 * 7 + 1) * (1 + 全城均住宅繁荣度))
         Map<String, Double> map = avgInfomation.get(MetaBuilding.APARTMENT);
-        if (null!=map) {
+        if (null != map && map.size() > 0) {
             Double price = map.get(AVG_PRICE);
             Double score = map.get(AVG_SCORE);
             Double prosp = map.get(AVG_PROSPEROUS);
@@ -40,19 +41,19 @@ public class GuidePriceMgr {
         return 0;
     }
 
-    public Gs.MaterialRecommendPrices getMaterialPrice() {
+    public Gs.MaterialRecommendPrices getMaterialPrice(ByteString buildingId) {
 //        推荐定价 = 全城均原料成交价
         Gs.MaterialRecommendPrices.Builder builder = Gs.MaterialRecommendPrices.newBuilder();
         Map<String, Double> map = avgInfomation.get(MetaBuilding.MATERIAL);
-        if (null!=map) {
+        if (null != map && map.size() > 0) {
             map.forEach((k, v) -> {
                 builder.addMsg(Gs.MaterialRecommendPrices.MaterailMsg.newBuilder().setMid(Integer.parseInt(k)).setGuidePrice(v));
             });
         }
-        return builder.build();
+        return builder.setBuildingId(buildingId).build();
     }
 
-    public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore) {
+    public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, ByteString buildingId) {
 //        推荐定价 = 全城均商品成交价 * (1 + (玩家商品总评分 - 全城均商品总评分) / 50)
         Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
         playerGoodsScore.forEach((a, b) -> {
@@ -63,7 +64,7 @@ public class GuidePriceMgr {
                 }
             });
         });
-        return builder.build();
+        return builder.setBuildingId(buildingId).build();
     }
 
     public void update(long diffNano) {

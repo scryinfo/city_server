@@ -126,7 +126,7 @@ public class JustVisit implements IAction {
             double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
             double curRetailScore = (brandScore + retailScore) / 2;
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
-                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore); //不包含矿工费用
+                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName()); //不包含矿工费用
             LogDb.sellerBuildingIncome(chosen.id(),chosen.type(),owner.id(),1,chosen.cost(),0);
             chosen.updateTodayIncome(income);
             GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));

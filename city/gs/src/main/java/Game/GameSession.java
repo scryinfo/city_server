@@ -394,7 +394,7 @@ public class GameSession {
         this.valid = false;
     }
     public void roleLogin(short cmd, Message message) {
-        // in city thread
+        // in java thread
         Gs.Id c = (Gs.Id)message;
         UUID roleId = Util.toUuid(c.getId().toByteArray());
         GameSession otherOne = GameServer.allGameSessions.get(roleId);
@@ -412,7 +412,7 @@ public class GameSession {
         loginState = LoginState.ROLE_LOGIN;
         GameServer.allGameSessions.put(this.player.id(), this);
 
-        this.player.setCity(City.instance()); // toProto will use Player.city
+        this.player.setCity(City.instance()); // toProto will use Player.java
         logger.debug("account: " + this.accountName + " login");
         //添加矿工费用（系统参数）
         Gs.Role.Builder role = this.player.toProto().toBuilder();
@@ -972,7 +972,7 @@ public class GameSession {
         double score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                itemBuy.key.producerId, sellBuilding.id(), type, itemId,score);
+                itemBuy.key.producerId, sellBuilding.id(), type, itemId,score,seller.getName(),seller.getCompanyName());
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
         //矿工费用日志记录(需调整)
@@ -3719,7 +3719,7 @@ public class GameSession {
         LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
         if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), type, itemId, 0);
+                    itemBuy.key.producerId, sellBuilding.id(), type, itemId, 0,seller.getName(),seller.getCompanyName());
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
@@ -4066,7 +4066,7 @@ public class GameSession {
         double salary = City.instance().getIndustrySalary(building.type());
         Gs.ApartmentRecommendPrice.Builder builder = Gs.ApartmentRecommendPrice.newBuilder();
         builder.setNpc(moneyRatio * salary).setGuidePrice(guidePrice);
-        this.write(Package.create(cmd,builder.build()));
+        this.write(Package.create(cmd,builder.setBuildingId(msg.getBuildingId()).build()));
 
     }
 
@@ -4079,11 +4079,11 @@ public class GameSession {
         if (building == null || building.type() != MetaBuilding.MATERIAL) {
             return;
         }
-        this.write(Package.create(cmd, GuidePriceMgr.instance().getMaterialPrice()));
+        this.write(Package.create(cmd, GuidePriceMgr.instance().getMaterialPrice(msg.getBuildingId())));
     }
 
 
-    //加工厂商品推荐价格
+    //加工厂商品推荐价格 √
     public void queryProduceDepRecommendPrice(short cmd, Message message) {
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
         UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
@@ -4109,7 +4109,7 @@ public class GameSession {
                 map.put(item.key.meta.id, (brandScore + goodQtyScore) / 2);
             }
         }
-        this.write(Package.create(cmd, GuidePriceMgr.instance().getProducePrice(map)));
+        this.write(Package.create(cmd, GuidePriceMgr.instance().getProducePrice(map,msg.getBuildingId())));
     }
 
 

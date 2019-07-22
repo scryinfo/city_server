@@ -405,4 +405,9 @@ public class StatisticSession {
 		});
 		this.write(Package.create(cmd,build.build()));
 	}
+
+	public void queryIndustryTop(short cmd, Message message) {
+		UUID playerId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
+		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(playerId)));
+	}
 }

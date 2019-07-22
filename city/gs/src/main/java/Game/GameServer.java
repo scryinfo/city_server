@@ -138,7 +138,7 @@ public class GameServer {
     }
     public void run() throws Exception {
         FriendManager.getInstance().init();
-        City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
+        City.init(MetaData.getCity()); // some other object depend on java, so startUp it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
         GroundManager.init();
@@ -157,7 +157,7 @@ public class GameServer {
         dddPurchaseMgr.init();
         chainRpcMgr.instance();
 
-        // DO NOT put init below this!!! city might can't see the init
+        // DO NOT put init below this!!! java might can't see the init
         City.instance().run();
         thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());
         thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
@@ -203,7 +203,7 @@ public class GameServer {
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder(GsCode.OpCode.class));
                                 //ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));
-                                ch.pipeline().addLast(businessLogicExecutor, new GameEventHandler()); // seems helpless. it only can relieve some db read operation cost due to all business are run in city thread
+                                ch.pipeline().addLast(businessLogicExecutor, new GameEventHandler()); // seems helpless. it only can relieve some db read operation cost due to all business are run in java thread
                                 ch.pipeline().addLast(new ExceptionHandler());
                             }
                         }).option(ChannelOption.SO_BACKLOG, 128).option(ChannelOption.SO_REUSEADDR, true)
@@ -236,7 +236,7 @@ public class GameServer {
 //        GameDb.startUp(args[1]);
 //
 //        GameServer gs = new GameServer();
-//        City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
+//        City.init(MetaData.getCity()); // some other object depend on java, so startUp it first
 //
 //
 //    }
