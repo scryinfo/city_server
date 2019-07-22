@@ -17,6 +17,7 @@ public class Shopping implements IAction {
     private int aiId;
     @Override
     public Set<Object> act(Npc npc) {
+        Set<Object> buyerNpc = new HashSet<>();//用于一次性保存所有购买过商品的npc信息
         logger.info("npc " + npc.id().toString() + " type " + npc.type() + " begin to shopping who located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(MetaBuilding.RETAIL);
         if(buildings.isEmpty())
@@ -122,7 +123,7 @@ public class Shopping implements IAction {
             sellShop.updateTodayIncome(chosen.price-minerCost);
             //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
             sendShelfNotice(sellShop,chosen);
-            GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+            //GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));  ===============下面已经保存过了
 
             City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
 
@@ -155,9 +156,8 @@ public class Shopping implements IAction {
             LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             //db操作 从外部挪进来
-            Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
-            GameDb.saveOrUpdate(u);
-            
+           //Set u = new HashSet(Arrays.asList(owner, sellShop));
+            buyerNpc.addAll(Arrays.asList(npc,owner, sellShop));//添加到已购物npc
             //再次购物
             double spend=MetaData.getGoodSpendMoneyRatio(chosen.meta.id);
             //工资区分失业与否
@@ -175,12 +175,16 @@ public class Shopping implements IAction {
             saleCount=((IShelf) sellShop).getSaleCount(chosenGoodMetaId);
             if(num/100.d<repeatBuyRetio&&saleCount>0){
             	//选出满足条件的商品后，走再次购物逻辑
-                repeatBuyGood(npc,chosen,mutilSpend);
+                Set<Object> objects = repeatBuyGood(npc, chosen, mutilSpend);
+                if(objects!=null&&objects.size()>0){
+                    buyerNpc.addAll(objects);
+                }
             }
-            return null;
+            return buyerNpc;
         }
     }
     private Set<Object> repeatBuyGood(Npc npc,WeightInfo chosen,double mutilSpend){
+      Set<Object> buyerNpc = new HashSet<>();
           Building sellShop = City.instance().getBuilding(chosen.bId);
           sellShop.addFlowCount();
           logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
@@ -209,7 +213,7 @@ public class Shopping implements IAction {
               sellShop.updateTodayIncome(chosen.price-minerCost);
               //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
               sendShelfNotice(sellShop,chosen);
-              GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+              //GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
               Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                       .setBuyerId(Util.toByteString(npc.id()))
@@ -239,8 +243,9 @@ public class Shopping implements IAction {
               LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               //db操作 从外部挪进来
-              Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
-              GameDb.saveOrUpdate(u);
+              //Set u = new HashSet(Arrays.asList(owner, sellShop));
+             // GameDb.saveOrUpdate(u);
+              buyerNpc.addAll(Arrays.asList(npc,owner, sellShop));
               City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
 
             //再次购物
@@ -259,10 +264,13 @@ public class Shopping implements IAction {
               saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//刷新货架上的数量
               if(num/100.d<repeatBuyRetio&&saleCount>0){
                   //递归购物
-                  repeatBuyGood(npc,chosen,mutilSpend);
+                  Set<Object> objects = repeatBuyGood(npc, chosen, mutilSpend);
+                  if(objects!=null&&objects.size()>0){
+                      buyerNpc.addAll(objects);
+                  }
               }
               
-              return null;
+              return buyerNpc;
           }
     }
     

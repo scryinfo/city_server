@@ -100,8 +100,8 @@ public class JustVisit implements IAction {
                         .build();
                 GameServer.sendIncomeNotity(owner.id(), notify);
                 //矿工费记录
-                LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-                LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+                //LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
+                //LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             }
             owner.addMoney(income);
             npc.decMoney((int) pay);
@@ -122,9 +122,8 @@ public class JustVisit implements IAction {
                     chosen.id(), chosen.type(), chosen.metaId()); //不包含矿工费用
             LogDb.sellerBuildingIncome(chosen.id(),chosen.type(),owner.id(),1,chosen.cost(),0);
             chosen.updateTodayIncome(income);
-            GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
             npc.goFor(chosen);
-            return new HashSet<>(Arrays.asList(owner, npc, chosen));
+            return new HashSet<>(Arrays.asList(npc,owner, chosen));
         }
     }
 }
