@@ -5153,7 +5153,7 @@ public class GameSession {
         Gs.PlayerIncomePay.Builder build=Gs.PlayerIncomePay.newBuilder();
         build.setPlayerId(((Gs.PlayerIncomePay) message).getPlayerId()).setBType(((Gs.PlayerIncomePay) message).getBType()).setIsIncome(isIncome);
 
-        long yestodayStartTime=TimeUtil.todayStartTime();
+        long yestodayStartTime=DateUtil.todayStartTime();
         long todayStartTime=System.currentTimeMillis();
         List<Document> list=null;
         if(isIncome){//收入

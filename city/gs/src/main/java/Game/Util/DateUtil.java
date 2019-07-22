@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class DateUtil{
 	
@@ -89,5 +90,16 @@ public class DateUtil{
 		int seconds = calendar.get(Calendar.SECOND);
 		int todaySecond = (hour * 3600 + minute * 60 + seconds);
 		return todaySecond;
+	}
+	//今日的开始时间
+	public static Long todayStartTime(){
+		TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
+		Calendar calendar = Calendar.getInstance(timeZone);
+		calendar.setTime(new Date());
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
 	}
 }
