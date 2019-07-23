@@ -964,10 +964,9 @@ public class GameSession {
 
         int itemId = itemBuy.key.meta.id;
         int type = MetaItem.type(itemBuy.key.meta.id);
-        LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
-        LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+        LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                itemBuy.key.producerId, sellBuilding.id(), wid, freight, type, itemId);
+                itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId);
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
         //矿工费用日志记录(需调整)
@@ -1973,7 +1972,7 @@ public class GameSession {
         player.decMoney(charge);
         LogDb.playerPay(player.id(), charge);
         MoneyPool.instance().add(charge);
-        LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+        LogDb.payTransfer(player.id(), charge, srcId, dstId,item.key.meta.id,item.key.producerId, item.n);
         Storage.AvgPrice avg = src.consumeLock(item.key, item.n);
         dst.consumeReserve(item.key, item.n, (int) avg.avg);
         IShelf srcShelf = (IShelf)src;
@@ -3700,7 +3699,7 @@ public class GameSession {
         if(sellRenter==null&&buyRenter==null) {
             //记录商品品质及知名度
             double brand = BrandManager.instance().getGood(player.id(), itemId);
-            double quality = itemBuy.key.qty;LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);}else{
+            double quality = itemBuy.key.qty;LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);}else{
             Serializable srcId=bid;
             Serializable dstId=wid;
             if(sellRenter!=null)
@@ -3711,10 +3710,10 @@ public class GameSession {
         }
         //9.2记录货架收入与建筑收入信息(区分建筑还是租户仓库)
         //8.6记录交易日志
-        LogDb.payTransfer(player.id(), freight, bid, wid, itemBuy.key.producerId, itemBuy.n);
+        LogDb.payTransfer(player.id(), freight, bid, wid,itemBuy.key.meta.id, itemBuy.key.producerId, itemBuy.n);
         if(!inShelf.getGood().hasOrderid()) { //商品不在租的仓库
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, freight, type, itemId);
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId);
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
@@ -3970,7 +3969,7 @@ public class GameSession {
         //日志记录
         LogDb.playerPay(player.id(), charge);
         if(!t.hasSrcOrderId()&&!t.hasDstOrderId()) {
-            LogDb.payTransfer(player.id(), charge, srcId, dstId, item.key.producerId, item.n);
+            LogDb.payTransfer(player.id(), charge, srcId, dstId,item.key.meta.id,item.key.producerId, item.n);
         }else{
             Serializable srcId1=srcId;
             Serializable dstId1=dstId;
@@ -5160,10 +5159,10 @@ public class GameSession {
             if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
                 list = LogDb.daySummaryShelfIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
                 list.forEach(document -> {
-                    Building sellBuilding = City.instance().getBuilding(UUID.fromString(document.getString("b")));
+                    Building sellBuilding = City.instance().getBuilding(document.get("b",UUID.class));
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(document.getInteger("tpi"))
-                            .setPrice(document.getLong("p"))
+                            .setNum((int)(document.getLong("a")/document.getLong("p")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
                             .setName(sellBuilding.getName())
@@ -5171,12 +5170,12 @@ public class GameSession {
                     build.addIncomePay(incomePay.build());
                 });
             }else if(buildType==Gs.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
-                list = LogDb.daySummaryRetailShopIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),buildType,playerId);
+                list = LogDb.daySummaryRetailShopIncome(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf(),buildType,playerId);
                 list.forEach(document -> {
-                    Building sellBuilding = City.instance().getBuilding(UUID.fromString(document.getString("b")));
+                    Building sellBuilding = City.instance().getBuilding(document.get("b",UUID.class));
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(document.getInteger("tpi"))
-                            .setPrice(document.getLong("p"))
+                            .setNum((int)(document.getLong("a")/document.getLong("p")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
                             .setName(sellBuilding.getName())
@@ -5184,12 +5183,12 @@ public class GameSession {
                     build.addIncomePay(incomePay.build());
                 });
             }else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
-                list = LogDb.daySummaryApartmentIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),buildType,playerId);
+                list = LogDb.daySummaryApartmentIncome(yestodayStartTime, todayStartTime, LogDb.getNpcRentApartment(),buildType,playerId);
                 list.forEach(document -> {
-                    Building sellBuilding = City.instance().getBuilding(UUID.fromString(document.getString("b")));
+                    Building sellBuilding = City.instance().getBuilding(document.get("b",UUID.class));
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(2000)
-                            .setPrice(document.getLong("p"))
+                            .setNum((int)(document.getLong("a")/document.getLong("p")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
                             .setName(sellBuilding.getName())
@@ -5201,10 +5200,10 @@ public class GameSession {
                 list.forEach(document -> {
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(3000)
-                            .setPrice(document.getLong("s"))
+                            .setNum((int)(document.getLong("a")/document.getLong("s")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
-                            .setName(document.get("p").toString());
+                            .setName(LogDb.getPositionStr(document.get("p",List.class)));
                     build.addIncomePay(incomePay.build());
                 });
             }
@@ -5212,38 +5211,69 @@ public class GameSession {
             if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
                 list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
                 list.forEach(document -> {
-                    Building buyBuilding = City.instance().getBuilding(UUID.fromString(document.getString("w")));
+                    Building buyBuilding = City.instance().getBuilding(document.get("w",UUID.class));
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
-                    incomePay.setItemId(document.getInteger("tpi"))
-                            .setPrice(document.getLong("p"))
-                            .setAmount(document.getLong("a"))
-                            .setFreight(document.getLong("f"))
-                            .setTime(document.getLong("t"))
-                            .setName(buyBuilding.getName())
-                            .setMetaId(buyBuilding.metaId());
-                    build.addIncomePay(incomePay.build());
+                    if(buildType==MetaItem.type(buyBuilding.metaId())){
+                        incomePay.setItemId(document.getInteger("tpi"))
+                                .setNum((int)(document.getLong("a")/document.getLong("p")))
+                                .setAmount(document.getLong("a"))
+                                .setTime(document.getLong("t"))
+                                .setName(buyBuilding.getName())
+                                .setMetaId(buyBuilding.metaId());
+                        build.addIncomePay(incomePay.build());
+                    }
+                });
+                list = LogDb.daySummaryTransferPay(yestodayStartTime, todayStartTime, LogDb.getPayTransfer(),type,playerId);
+                list.forEach(document -> {
+                    Building buyBuilding = City.instance().getBuilding(document.get("d",UUID.class));
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    if(buildType==MetaItem.type(buyBuilding.metaId())){
+                        incomePay.setItemId(document.getInteger("tpi"))
+                                .setNum(document.getInteger("c"))
+                                .setAmount(0)
+                                .setFreight(document.getLong("a"))
+                                .setTime(document.getLong("t"))
+                                .setName(buyBuilding.getName())
+                                .setMetaId(buyBuilding.metaId());
+                        build.addIncomePay(incomePay.build());
+                    }
                 });
             }else if(buildType==Gs.PlayerIncomePay.BuildType.RETAILSHOP.getNumber()){
+                list = LogDb.daySummaryTransferPay(yestodayStartTime, todayStartTime, LogDb.getPayTransfer(),type,playerId);
+                list.forEach(document -> {
+                    Building buyBuilding = City.instance().getBuilding(document.get("d",UUID.class));
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    if(buildType==MetaItem.type(buyBuilding.metaId())){
+                        incomePay.setItemId(document.getInteger("tpi"))
+                                .setNum(document.getInteger("c"))
+                                .setAmount(0)
+                                .setFreight(document.getLong("a"))
+                                .setTime(document.getLong("t"))
+                                .setName(buyBuilding.getName())
+                                .setMetaId(buyBuilding.metaId());
+                        build.addIncomePay(incomePay.build());
+                    }
+                });
             }else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
             }else if(buildType==Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
-                list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getBuyGround(),buildType,playerId);
+                list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getBuyGround(), buildType, playerId);
                 list.forEach(document -> {
-                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay = Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(3000)
-                            .setPrice(document.getLong("s"))
+                            .setNum((int)(document.getLong("a")/document.getLong("s")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
-                            .setName(document.get("p").toString());
+                            .setName(LogDb.getPositionStr(document.get("p",List.class)));
                     build.addIncomePay(incomePay.build());
                 });
                 list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getLandAuction(),buildType,playerId);
                 list.forEach(document -> {
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
-                    incomePay.setItemId(3000)
-                            .setPrice(document.getLong("s"))
+                    incomePay.setItemId(4000)
+                            .setNum((int)(document.getLong("a")/document.getLong("s")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
-                            .setName(document.get("p").toString());
+                            .setName(LogDb.getPositionStr(document.get("p",List.class)));
                     build.addIncomePay(incomePay.build());
                 });
             }
@@ -5251,10 +5281,10 @@ public class GameSession {
             if(buildType!=Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
                 list = LogDb.daySummaryStaffSalaryPay(yestodayStartTime, todayStartTime, LogDb.getPaySalary(),buildType,playerId);
                 list.forEach(document ->{
-                    Building buyBuilding = City.instance().getBuilding(UUID.fromString(document.getString("b")));
+                    Building buyBuilding = City.instance().getBuilding(document.get("b",UUID.class));
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(1000)
-                            .setPrice(document.getLong("s"))
+                            .setNum((int)(document.getLong("a")/document.getLong("s")))
                             .setAmount(document.getLong("a"))
                             .setTime(document.getLong("t"))
                             .setName(buyBuilding.getName())
@@ -5262,7 +5292,8 @@ public class GameSession {
                     build.addIncomePay(incomePay.build());
                 });
             }
-        }
+           }
+
         this.write(Package.create(cmd,build.build()));
     }
 }
