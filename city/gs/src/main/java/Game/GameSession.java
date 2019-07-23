@@ -5281,5 +5281,9 @@ public class GameSession {
        }
     }
 
+    //自动补货
+    public void setScienceAutoReplenish(short cmd,Message message){
+
+    }
 
 }
