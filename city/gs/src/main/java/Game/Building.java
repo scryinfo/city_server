@@ -5,6 +5,7 @@ import Game.Contract.IBuildingContract;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Technology.Technology;
 import Game.Util.GlobalUtil;
 import Game.Util.NpcUtil;
 import Shared.LogDb;
@@ -96,6 +97,8 @@ public abstract class Building implements Ticker{
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
             case MetaBuilding.WAREHOUSE:
                 return new WareHouse(MetaData.getWarehouse(id), pos, ownerId);
+            case MetaBuilding.TECHNOLOGY:
+                return new Technology(MetaData.getTechnology(id), pos, ownerId);
         }
         return null;
     }

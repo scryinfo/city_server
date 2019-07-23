@@ -14,6 +14,8 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
+import Game.Technology.ScienceLine;
+import Game.Technology.Technology;
 import Game.Util.*;
 import Game.OffLineInfo.OffLineInformation;
 import Game.Util.BuildingUtil;
@@ -529,9 +531,9 @@ public class GameSession {
         if (b instanceof Apartment) { //住宅停业，清空入住人数
             Apartment apartment = (Apartment) b;
             apartment.deleteRenter();
-        } else if (b instanceof Laboratory) {
-            Laboratory laboratory = (Laboratory) b;
-            laboratory.clear();//清除研究队列
+        } else if (b instanceof Technology) {  //Todo
+            Technology technology = (Technology) b;
+           //technology.clear();//清除研究队列
         } else if (b instanceof PublicFacility) {
             if(b.type()==MetaBuilding.RETAIL){
                 RetailShop r = (RetailShop) b;
@@ -1200,6 +1202,17 @@ public class GameSession {
         Laboratory lab = (Laboratory) b;
         builder.addAllCompleted(lab.getOwnerLine(player.id()));
         this.write(Package.create(cmd, builder.build()));
+    }
+    //新版研究所 建筑详情
+    public void detailTechnology(short cmd, Message message){
+        Gs.Id c = (Gs.Id) message;
+        UUID id = Util.toUuid(c.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.type() != MetaBuilding.TECHNOLOGY)
+            return;
+        registBuildingDetail(b);
+        updateBuildingVisitor(b);
+        this.write(Package.create(cmd, b.detailProto()));
     }
     public void detailRetailShop(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
@@ -5153,4 +5166,120 @@ public class GameSession {
         });
         this.write(Package.create(cmd,builder.build()));
     }
+//=================新版研究所===================
+    /*添加生产线（新版研究所）*/
+    public void addScienceLine(short cmd,Message message){
+        Gs.AddLine newLine = (Gs.AddLine) message;
+        if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
+            return;
+        UUID id = Util.toUuid(newLine.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.outOfBusiness() || (b.type() != MetaBuilding.TECHNOLOGY) || !b.ownerId().equals(player.id()))
+            return;
+        MetaItem m = MetaData.getItem(newLine.getItemId());
+        if(m == null)
+            return;
+        Technology tec = (Technology) b;
+        ScienceLine line = tec.addLine(m, newLine.getWorkerNum(), newLine.getTargetNum());
+        if(line!=null)
+            GameDb.saveOrUpdate(tec);
+    }
+
+    //删除生产线
+    public void delScienceLine(short cmd,Message message){
+        Gs.DelLine c = (Gs.DelLine) message;
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if (b == null || b.outOfBusiness() ||b.type() != MetaBuilding.TECHNOLOGY|| !b.ownerId().equals(player.id()))
+            return;
+        UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+        Technology tec = (Technology) b;
+        if(tec.delLine(lineId)!=null) {
+            GameDb.saveOrUpdate(tec);
+            if(tec.line.size() > 0){
+                this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(tec.line.get(0).getId())).build()));
+            }else{
+                this.write(Package.create(cmd, c));
+            }
+        }
+    }
+
+    //调整生产线顺序
+    public void setScienceLineOrder(short cmd,Message message){
+        Gs.SetLineOrder c = (Gs.SetLineOrder) message;
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if (b == null || b.outOfBusiness() || (b.type() != MetaBuilding.TECHNOLOGY) || !b.ownerId().equals(player.id()))
+            return;
+        UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+        int pos = c.getLineOrder() - 1;
+        Technology f = (Technology) b;
+        if(pos >=0 && pos < f.line.size()){
+            for (int i = f.line.size() -1; i >= 0 ; i--) {
+                ScienceLine l = f.line.get(i);
+                if(l.getId().equals(lineId)){
+                    f.line.add(pos,f.line.remove(i));
+                    break;
+                }
+            }
+            this.write(Package.create(cmd, c));
+        }else{
+            this.write(Package.fail(cmd));
+        }
+    }
+
+    //开启宝箱
+    public void openScienceBox(short cmd,Message message){
+        Gs.OpenScienceBox box = (Gs.OpenScienceBox) message;
+        UUID bid = Util.toUuid(box.getBid().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof Technology)||box.getNum()<0){
+            System.err.println("建筑类型错误或数量错误！");
+            return;
+        }
+        MetaScienceItem item = MetaData.getScienceItem(box.getItemId());
+        ItemKey key = new ItemKey(item, building.ownerId());
+        Technology tec = (Technology) building;
+        if (!tec.hasEnoughBox(key, box.getNum())) {
+            System.err.println("宝箱数量不足！");
+            return;
+        }
+        //开始开启宝箱
+        int result = tec.useScienceBox(key, box.getNum());
+        Gs.ScienceBoxACK.Builder builder = Gs.ScienceBoxACK.newBuilder();
+        builder.setKey(key.toProto())
+                .setBuildingId(box.getBid())
+                .setResultPoint(result);
+        GameDb.saveOrUpdate(tec);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    //研究所上架
+    public void scienceShelfAdd(short cmd,Message message){
+        Gs.ShelfAdd c = (Gs.ShelfAdd)message;
+        Item item = null;
+        try {
+            item = new Item(c.getItem());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("转换错误");
+        }
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(id);
+        if(building == null || !(building instanceof IShelf) || !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        if(!(building instanceof Technology)||!(item.key.meta instanceof MetaScienceItem))
+            return;
+        Technology tec = (Technology) building;
+       if(tec.addshelf(item, c.getPrice(),c.getAutoRepOn())){
+           GameDb.saveOrUpdate(tec);
+           Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
+           this.write(Package.create(cmd, builder.build()));
+       }else{
+           this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+           System.err.println("数量不足");
+       }
+    }
+
+
 }
