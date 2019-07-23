@@ -42,9 +42,9 @@ public class ScienceShelf{
             this.autoReplenish = autoReplenish;
         }
         public int getCount(){return  n; }
-        int n;
-        int price;
-        boolean autoReplenish;
+        public int n;
+        public int price;
+        public boolean autoReplenish;
         protected Content() {}
 
         public int getN() {

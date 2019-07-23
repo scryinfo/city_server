@@ -15,6 +15,7 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.Technology.ScienceLine;
+import Game.Technology.ScienceShelf;
 import Game.Technology.Technology;
 import Game.Util.*;
 import Game.OffLineInfo.OffLineInformation;
@@ -5282,8 +5283,70 @@ public class GameSession {
     }
 
     //自动补货
-    public void setScienceAutoReplenish(short cmd,Message message){
-
+    public void setScienceAutoReplenish(short cmd,Message message) throws Exception {
+        Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
+        ItemKey itemKey = new ItemKey(c.getIKey());
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(id);
+        if(building == null || !(building instanceof Technology)|| !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        Technology tec = (Technology) building;
+        ScienceShelf.Content i = tec.getContent(itemKey);
+        if(tec.setAutoReplenish(itemKey,c.getAutoRepOn())) {
+            //处理自动补货
+            if(i != null && i.autoReplenish){
+                tec.updateAutoReplenish(itemKey);
+            }
+            GameDb.saveOrUpdate(tec);
+            this.write(Package.create(cmd, c));
+        }
+        else
+            this.write(Package.fail(cmd));
     }
 
+    //下架货架上的东西
+    public void scienceShelfDel(short cmd,Message message) throws Exception {
+        Gs.ShelfDel c = (Gs.ShelfDel)message;
+        Item item = new Item(c.getItem());
+        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building == null || !(building instanceof Technology) || !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        Technology tec = (Technology) message;
+        ScienceShelf.Content content = tec.getContent(item.key);
+        if(content!=null){
+            content.autoReplenish = false;//关闭自动补货
+            if(tec.delshelf(item.key, content.n, true)) {
+                GameDb.saveOrUpdate(tec);
+                this.write(Package.create(cmd, c));
+            }
+        }else{
+            this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
+        }
+    }
+
+    //修改货架上科技点信息
+    public void scienceShelfSet(short cmd,Message message) throws Exception {
+        Gs.ShelfSet c = (Gs.ShelfSet)message;
+        if(c.getPrice() <= 0)
+            return;
+        Item item = new Item(c.getItem());
+        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building == null || !(building instanceof Technology) || !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        Technology tec = (Technology) building;
+        if(tec.shelfSet(item, c.getPrice())){
+            GameDb.saveOrUpdate(tec);
+            this.write(Package.create(cmd, c));
+        } else {
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+        }
+    }
+
+    public void buySciencePoint(short cmd,Message message){
+        Gs.BuyInShelf c = (Gs.BuyInShelf)message;
+        if(c.getPrice() <= 0)
+            return;
+    }
 }

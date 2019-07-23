@@ -75,6 +75,40 @@ public class Technology extends Building {
         return null;
     }
 
+    public boolean setAutoReplenish(ItemKey key, boolean autoRepOn) {
+        ScienceShelf.Content i = this.shelf.getContent(key);
+        if(i == null)
+            return false;
+        this.shelf.add(new Item(key,0),i.price,autoRepOn);
+        return  true;
+    }
+
+    public boolean shelfSet(Item item, int price) {
+        ScienceShelf.Content content = this.shelf.getContent(item.getKey());
+        if(content == null)
+            return false;
+        //不需要在此处处理自动补货，自动补货是一个单独的协议
+        int updateNum = content.n - item.getN();//增加或减少：当前货架数量-现在货架数量
+        if(content.n==0&&item.getN()==0){//若非自动补货，切货架数量为0，直接删除
+            delshelf(item.getKey(), content.n, true);
+            return true;
+        }
+        boolean lock = false;
+        if (updateNum < 0) {
+            lock = this.store.lock(item.getKey(),Math.abs(updateNum));
+        } else {
+            lock = this.store.unLock(item.getKey(), updateNum);
+        }
+        if (lock) {
+            content.price = price;
+            content.n = item.getN();
+            //消息推送货物发生改变
+            this.sendToWatchers(id(),item.getKey().meta.id,item.getN(),price,content.autoReplenish,null);
+            return true;
+        } else
+            return false;
+    }
+
     @Entity
     public final static class Line extends ScienceLine {
         public Line(MetaMaterial item, int targetNum, int workerNum) {
@@ -230,7 +264,6 @@ public class Technology extends Building {
     protected boolean shelfAddable(ItemKey k) {
         return k.meta instanceof MetaScienceItem;
     }
-
     //广播
     private void broadcastLineInfo(ScienceLine line,ItemKey key) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
@@ -272,5 +305,13 @@ public class Technology extends Building {
         //4.添加到仓库已开启点数
         this.store.offset(key, totalPoint);
         return totalPoint;
+    }
+
+    public ScienceShelf.Content getContent(ItemKey key){
+        return  this.shelf.getContent(key);
+    }
+
+    public void updateAutoReplenish(ItemKey key){
+        this.shelf.updateAutoReplenish(this,key);
     }
 }

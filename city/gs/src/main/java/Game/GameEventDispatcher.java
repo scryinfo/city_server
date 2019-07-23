@@ -306,6 +306,9 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.openScienceBox_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScienceBox.PARSER,GameSession.class,"openScienceBox"));
 			table.put((short) GsCode.OpCode.scienceShelfAdd_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfAdd.PARSER,GameSession.class,"scienceShelfAdd"));
 			table.put((short) GsCode.OpCode.setScienceAutoReplenish_VALUE, Wrapper.newWithMessageAsync(Gs.setAutoReplenish.PARSER,GameSession.class,"setScienceAutoReplenish"));
+			table.put((short) GsCode.OpCode.scienceShelfDel_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfDel.PARSER,GameSession.class,"scienceShelfDel"));
+			table.put((short) GsCode.OpCode.scienceShelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfSet.PARSER,GameSession.class,"scienceShelfSet"));
+			table.put((short) GsCode.OpCode.buySciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.BuyInShelf.PARSER,GameSession.class,"buySciencePoint"));
 			if(GlobalConfig.debug()){
 
 			}
