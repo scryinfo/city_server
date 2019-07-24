@@ -22,7 +22,7 @@ public class NpcManager {
         return instance;
     }
     public void update(long diffNano) {
-        if (updateIdx == waitToUpdate.size()) // job is done, wait next time section coming
+        if (updateIdx >= waitToUpdate.size()) // job is done, wait next time section coming
             return;
         if(waitToUpdate.isEmpty())
             return;
@@ -172,7 +172,7 @@ public class NpcManager {
     private NpcManager() {
         int currentSectionHours = city.currentTimeSectionDuration();
         updateTimesAtCurrentTimeSection = (int) (TimeUnit.HOURS.toNanos(currentSectionHours) / City.UpdateIntervalNano);
-        updateIdx = (int) ((double)City.instance().leftMsToNextTimeSection() / TimeUnit.HOURS.toMillis(currentSectionHours) * updateTimesAtCurrentTimeSection);
+        updateIdx = updateTimesAtCurrentTimeSection - (int) ((double)City.instance().leftMsToNextTimeSection() / TimeUnit.HOURS.toMillis(currentSectionHours) * updateTimesAtCurrentTimeSection);
         for (int i = 0; i < updateTimesAtCurrentTimeSection; i++) {
             waitToUpdate.add(new HashSet<>());
         }
