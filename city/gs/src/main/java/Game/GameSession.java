@@ -3227,8 +3227,11 @@ public class GameSession {
             case MetaBuilding.APARTMENT:
                 buildingdata = MetaData.getApartment(tp);
                 break;
-            case MetaBuilding.LAB:
+           /* case MetaBuilding.LAB:
                 buildingdata = MetaData.getLaboratory(tp);
+                break;*/
+            case MetaBuilding.TECHNOLOGY:
+                buildingdata = MetaData.getTechnology(tp);
                 break;
             case MetaBuilding.PUBLIC:
                 buildingdata = MetaData.getPublicFacility(tp);
@@ -5181,7 +5184,6 @@ public class GameSession {
         if(line!=null)
             GameDb.saveOrUpdate(tec);
     }
-
     //删除生产线
     public void delScienceLine(short cmd,Message message){
         Gs.DelLine c = (Gs.DelLine) message;
@@ -5200,8 +5202,7 @@ public class GameSession {
             }
         }
     }
-
-    //调整生产线顺序
+    //调整研究所生产线顺序
     public void setScienceLineOrder(short cmd,Message message){
         Gs.SetLineOrder c = (Gs.SetLineOrder) message;
         UUID id = Util.toUuid(c.getBuildingId().toByteArray());
@@ -5224,7 +5225,6 @@ public class GameSession {
             this.write(Package.fail(cmd));
         }
     }
-
     //开启宝箱
     public void openScienceBox(short cmd,Message message){
         Gs.OpenScience box = (Gs.OpenScience) message;
@@ -5250,7 +5250,6 @@ public class GameSession {
         GameDb.saveOrUpdate(tec);
         this.write(Package.create(cmd, builder.build()));
     }
-
     //研究所上架
     public void scienceShelfAdd(short cmd,Message message){
         Gs.ShelfAdd c = (Gs.ShelfAdd)message;
@@ -5277,7 +5276,6 @@ public class GameSession {
            System.err.println("数量不足");
        }
     }
-
     //自动补货
     public void setScienceAutoReplenish(short cmd,Message message) throws Exception {
         Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
@@ -5299,7 +5297,6 @@ public class GameSession {
         else
             this.write(Package.fail(cmd));
     }
-
     //下架货架上的东西
     public void scienceShelfDel(short cmd,Message message) throws Exception {
         Gs.ShelfDel c = (Gs.ShelfDel)message;
@@ -5320,7 +5317,6 @@ public class GameSession {
             this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
         }
     }
-
     //修改货架上科技点信息
     public void scienceShelfSet(short cmd,Message message) throws Exception {
         Gs.ShelfSet c = (Gs.ShelfSet)message;
@@ -5339,8 +5335,7 @@ public class GameSession {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
         }
     }
-
-    /*购买科技资料*/
+    //购买科技资料
     public void buySciencePoint(short cmd,Message message) throws Exception {
         Gs.BuySciencePoint c = (Gs.BuySciencePoint)message;
         if(c.getPrice() <= 0)
@@ -5387,8 +5382,7 @@ public class GameSession {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
         }
     }
-
-    /*使用科技点数*/
+    //使用科技点数
     public void useSciencePoint(short cmd,Message message){
         Gs.OpenScience science = (Gs.OpenScience) message;
         UUID bid = Util.toUuid(science.getBid().toByteArray());
@@ -5411,5 +5405,58 @@ public class GameSession {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
             return;
         }
+    }
+    //获取研究所货架
+    public void getScienceShelfData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof Technology))
+            return;
+        Technology tec = (Technology) building;
+        Gs.ScienceShelfData.Builder shelfData = Gs.ScienceShelfData.newBuilder();
+        Gs.ScienceShelf scienceShelf = tec.getShelf().toProto();
+        shelfData.setShelf(scienceShelf).setBuildingId(id.getId());
+        this.write(Package.create(cmd,shelfData.build()));
+    }
+    //获取仓库数据
+    public void getScienceStorageData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof Technology))
+            return;
+        Technology tec = (Technology) building;
+        Gs.ScienceStorageData.Builder storeData = Gs.ScienceStorageData.newBuilder();
+        Gs.ScienceStore scienceStore = tec.getStore().toProto();
+        storeData.setBuildingId(id.getId()).setStore(scienceStore);
+        this.write(Package.create(cmd,scienceStore));
+    }
+    //获取生产线信息
+    public void getScienceLineData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof Technology))
+            return;
+        Technology tec = (Technology) building;
+        Gs.ScienceLineData.Builder builder = Gs.ScienceLineData.newBuilder();
+        tec.line.forEach(l->{
+            builder.addLine(l.toProto());
+        });
+        builder.setBuildingId(id.getId());
+        this.write(Package.create(cmd,builder.build()));
+    }
+    //获取未开启宝箱数据
+    public void getScienceBoxData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof Technology))
+            return;
+        Technology tec = (Technology) building;
+        Gs.ScienceBoxData.Builder builder = Gs.ScienceBoxData.newBuilder();
+        builder.addAllBox(tec.getBoxStore().toProto()).setBuildingId(id.getId());
+        this.write(Package.create(cmd,builder.build()));
     }
 }
