@@ -212,14 +212,14 @@ public class MetaData {
                 return retailShop.get(id);
             case MetaBuilding.APARTMENT:
                 return apartment.get(id);
-            case MetaBuilding.LAB:
-                return laboratory.get(id);
+            /*case MetaBuilding.LAB:
+                return laboratory.get(id);*/
+            case MetaBuilding.TECHNOLOGY:
+                return technology.get(id);
             case MetaBuilding.PUBLIC:
                 return publicFacility.get(id);
             case MetaBuilding.WAREHOUSE:
                 return warehouse.get(id);//集散中心（替换以前的人才中心）
-            case MetaBuilding.TECHNOLOGY:
-                return technology.get(id);
         }
         return null;
     }
@@ -462,10 +462,16 @@ public class MetaData {
             publicFacility.put(m.id, m);
             salaryMap.put(MetaBuilding.PUBLIC, m.salary);
         });
-        mongoClient.getDatabase(dbName).getCollection(laboratoryColName).find().forEach((Block<Document>) doc -> {
+        //旧版研究所
+       /* mongoClient.getDatabase(dbName).getCollection(laboratoryColName).find().forEach((Block<Document>) doc -> {
             MetaLaboratory m = new MetaLaboratory(doc);
             laboratory.put(m.id, m);
             salaryMap.put(MetaBuilding.LAB, m.salary);
+        });*/
+        //新版研究所
+        mongoClient.getDatabase(dbName).getCollection(technologyColName).find().forEach((Block<Document>) doc -> {
+            MetaTechnology m = new MetaTechnology(doc);
+            technology.put(m.id, m);
         });
         mongoClient.getDatabase(dbName).getCollection(initialBuildingColName).find().forEach((Block<Document>) doc -> {
             InitialBuildingInfo i = new InitialBuildingInfo(doc);
@@ -479,11 +485,6 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(warehouseColName).find().forEach((Block<Document>) doc -> {
             MetaWarehouse m = new MetaWarehouse(doc);
             warehouse.put(m.id, m);
-        });
-        //新版研究所
-        mongoClient.getDatabase(dbName).getCollection(technologyColName).find().forEach((Block<Document>) doc -> {
-            MetaTechnology m = new MetaTechnology(doc);
-            technology.put(m.id, m);
         });
 
     }

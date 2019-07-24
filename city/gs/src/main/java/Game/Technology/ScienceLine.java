@@ -103,7 +103,7 @@ public abstract class ScienceLine {
         this.pause = false;
     }
 
-    Gs.Line toProto() {
+    public Gs.Line toProto() {
         return Gs.Line.newBuilder()
                 .setId(Util.toByteString(id))
                 .setItemId(item.id)

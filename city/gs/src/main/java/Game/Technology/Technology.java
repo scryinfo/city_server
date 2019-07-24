@@ -128,6 +128,9 @@ public class Technology extends Building {
     public Technology(MetaTechnology meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
+        this.store = new ScienceStore();
+        this.shelf = new ScienceShelf();
+        this.boxStore = new SciencevBox();
     }
     @Override
     public int quality() {
@@ -338,5 +341,13 @@ public class Technology extends Building {
 
     public List<Line> getLine() {
         return line;
+    }
+
+    public SciencevBox getBoxStore() {
+        return boxStore;
+    }
+
+    public MetaTechnology getMeta() {
+        return meta;
     }
 }

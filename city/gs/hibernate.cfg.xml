@@ -24,7 +24,7 @@
 		<property name="hibernate.connection.password">
 			123456
 		</property>
-		<property name="hbm2ddl.auto">create</property>
+		<property name="hbm2ddl.auto">update</property>
 		<property name="hibernate.show_sql">true</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
 		<property name="hibernate.order_updates">true</property>
@@ -104,7 +104,6 @@
 		<mapping class="Game.Technology.Technology$Line"></mapping>
 		<mapping class="Game.Technology.SciencevBox"></mapping>
 		<mapping class="Game.Technology.ScienceStore"></mapping>
-		<mapping class="Game.Technology.ScienceItemKey"></mapping>
 		<mapping class="Game.Technology.ScienceShelf"></mapping>
 		<mapping class="Game.Technology.ScienceShelf$Content"></mapping>
 		<mapping class="Game.SciencePoint"></mapping>

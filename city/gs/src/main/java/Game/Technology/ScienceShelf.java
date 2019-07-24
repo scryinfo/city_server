@@ -60,8 +60,8 @@ public class ScienceShelf{
         }
     }
 
-    private Gs.Shelf.Content toProto(ItemKey k, Content content) {
-        return Gs.Shelf.Content.newBuilder()
+    private Gs.ScienceShelf.Content toProto(ItemKey k, Content content) {
+        return Gs.ScienceShelf.Content.newBuilder()
                 .setK(k.toProto())
                 .setN(content.n)
                 .setPrice(content.price)
@@ -69,8 +69,8 @@ public class ScienceShelf{
                 .build();
     }
 
-    public Gs.Shelf toProto(){
-        Gs.Shelf.Builder builder = Gs.Shelf.newBuilder();
+    public Gs.ScienceShelf toProto(){
+        Gs.ScienceShelf.Builder builder = Gs.ScienceShelf.newBuilder();
         slots.forEach((k,v)->builder.addGood(toProto(k, v)));
         return builder.build();
     }
