@@ -91,14 +91,15 @@ public abstract class Building implements Ticker{
                 return new RetailShop(MetaData.getRetailShop(id), pos, ownerId);
             case MetaBuilding.APARTMENT:
                 return new Apartment(MetaData.getApartment(id), pos, ownerId);
-            case MetaBuilding.LAB:
-                return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
+           /* case MetaBuilding.LAB:
+                return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);*/
+           //新版研究所
+            case MetaBuilding.TECHNOLOGY:
+                return new Technology(MetaData.getTechnology(id), pos, ownerId);
             case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
             case MetaBuilding.WAREHOUSE:
                 return new WareHouse(MetaData.getWarehouse(id), pos, ownerId);
-            case MetaBuilding.TECHNOLOGY:
-                return new Technology(MetaData.getTechnology(id), pos, ownerId);
         }
         return null;
     }
