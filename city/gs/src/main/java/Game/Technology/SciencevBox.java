@@ -46,7 +46,19 @@ public class SciencevBox {
         return allBox.getOrDefault(key, 0);
     }
 
-    public void offSet(ItemKey key,int num){
-        this.allBox.put(key, num);
+    public boolean offSet(ItemKey key,int num){
+        if(num == 0)
+            return true;
+        else if(num > 0) {
+            this.allBox.put(key, this.allBox.getOrDefault(key,0)+num);
+        }else if(num < 0) {
+            Integer c = this.allBox.get(key);
+            if(c == null || c < -num)
+                return false;
+            this.allBox.put(key,c+num);
+            if(this.allBox.get(key) == 0)
+                this.allBox.remove(key);
+        }
+        return true;
     }
 }

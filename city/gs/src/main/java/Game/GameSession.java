@@ -5459,4 +5459,20 @@ public class GameSession {
         builder.addAllBox(tec.getBoxStore().toProto()).setBuildingId(id.getId());
         this.write(Package.create(cmd,builder.build()));
     }
+
+    public static void   testAddLine( Gs.AddLine newLine,Player player){
+        if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
+            return;
+        UUID id = Util.toUuid(newLine.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.outOfBusiness() || (b.type() != MetaBuilding.TECHNOLOGY) || !b.ownerId().equals(player.id()))
+            return;
+        MetaItem m = MetaData.getItem(newLine.getItemId());
+        if(m == null)
+            return;
+        Technology tec = (Technology) b;
+        ScienceLine line = tec.addLine(m, newLine.getWorkerNum(), newLine.getTargetNum());
+        if(line!=null)
+            GameDb.saveOrUpdate(tec);
+    }
 }

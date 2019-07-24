@@ -41,6 +41,9 @@ public class Technology extends Building {
     @MapKeyColumn(name = "line_id")
     public List<Line> line= new ArrayList<>();
 
+    public Technology() {
+    }
+
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
 
@@ -48,7 +51,7 @@ public class Technology extends Building {
     public  ScienceLine addLine(MetaItem item, int workerNum, int targetNum){
         if(!(item instanceof MetaScienceItem) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
-        Line line = new Line((MetaMaterial)item, targetNum, workerNum);
+        Line line = new Line((MetaScienceItem)item, targetNum, workerNum);
         __addLine(line);
         this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).setTs(line.ts).build()));
         return line;
@@ -111,9 +114,13 @@ public class Technology extends Building {
 
     @Entity
     public final static class Line extends ScienceLine {
-        public Line(MetaMaterial item, int targetNum, int workerNum) {
+        public Line(MetaScienceItem item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
         }
+
+        public Line() {
+        }
+
         public ItemKey newItemKey(UUID pid) {
             return new ItemKey(item,pid);
         }
@@ -207,14 +214,14 @@ public class Technology extends Building {
                 int add = l.update(diffNano,this.ownerId()); //新增了玩家id，作为eva查询
                 if (add > 0) {
                    ItemKey key = l.newItemKey(ownerId());
-                    if (this.store.offset(key, add)) {
-                        ScienceShelf.Content content = this.shelf.getContent(key);
+                    if (this.boxStore.offSet(key, add)) {//添加到未开启宝箱中
                         broadcastLineInfo(l,key);//广播
-                        //处理自动补货
-                        if(content!= null &&content.autoReplenish){
+                        //处理自动补货(自动补货不在此处理)
+                        //ScienceShelf.Content content = this.shelf.getContent(key);
+                       /* if(content!= null &&content.autoReplenish){
                           //更新自动补货
                             this.shelf.updateAutoReplenish(this,key);
-                        }
+                        }*/
                     } else {
                         l.count -= add;
                         l.suspend(add);
@@ -274,7 +281,7 @@ public class Technology extends Building {
                 .setNowCount(line.count)
                 .setBuildingId(Util.toByteString(this.id()))
                 .setIKey(key.toProto())
-                .setNowCountInStore(this.store.getItemCount(key)+this.shelf.getContent(key).n)
+                .setNowCountInStore(this.boxStore.getTypeBoxNum(key))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
@@ -307,8 +314,7 @@ public class Technology extends Building {
             totalPoint+= Prob.random(min, max);
         }
         //3.扣减宝箱数量
-        boxNum -= num;
-        this.boxStore.offSet(key,boxNum);
+        this.boxStore.offSet(key,-num);
         //4.添加到仓库已开启点数
         this.store.offset(key, totalPoint);
         return totalPoint;

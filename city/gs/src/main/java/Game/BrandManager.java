@@ -34,6 +34,10 @@ public class BrandManager {
         instance = GameDb.getBrandManager();
         instance.refineCache();
         instance.getAllBuildingBrandOrQuality();
+    /*    Gs.AddLine.Builder builder = Gs.AddLine.newBuilder();
+        builder.setId(Util.toByteString(UUID.fromString("a761ac57-146e-4d02-b9f7-9d1ee19a7163"))).setTargetNum(100).setItemId(15).setWorkerNum(144);
+        Player player = GameDb.getPlayer(UUID.fromString("20687adb-86c4-414f-a3be-69e0c6632563"));
+        GameSession.testAddLine(builder.build(),player);*/
     }
 
     @Id
