@@ -48,7 +48,7 @@ public class MetaData {
     private static final String expColName = "Experiences";
     private static final String buildingTechName = "BuildingTech";
     private static final String warehouseColName = "WareHouse";//集散中心
-    private static final String technologyColName = "WareHouse";//新版研究所
+    private static final String technologyColName = "Technology";//新版研究所
     private static final String scienceItemColName = "ScienceItem";
     //global field
     private static SysPara sysPara;
@@ -257,6 +257,10 @@ public class MetaData {
 
     public static MetaScienceItem getScienceItem(int id) {
         return scienceItem.get(id);
+    }
+
+    public static TreeMap<Integer, MetaScienceItem> getScienceItem() {
+        return scienceItem;
     }
 
     //获取所有原料id
