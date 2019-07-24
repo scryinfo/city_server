@@ -285,6 +285,10 @@ public class Technology extends Building {
         }
     }
 
+    public boolean hasEnoughSciencePointInStore(ItemKey key,int num){
+       return this.store.has(key, num);
+    }
+
     /*参数1：宝箱类型，参数2：数量*/
     public int useScienceBox(ItemKey key,int num){
         Integer boxNum = this.boxStore.getAllBox().getOrDefault(key, 0);
@@ -313,5 +317,26 @@ public class Technology extends Building {
 
     public void updateAutoReplenish(ItemKey key){
         this.shelf.updateAutoReplenish(this,key);
+    }
+
+    public boolean checkBuyScience(ItemKey key,int num){
+        ScienceShelf.Content content = this.shelf.getContent(key);
+        if(content==null||content.n<num){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public ScienceStore getStore() {
+        return store;
+    }
+
+    public ScienceShelf getShelf() {
+        return shelf;
+    }
+
+    public List<Line> getLine() {
+        return line;
     }
 }

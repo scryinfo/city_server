@@ -107,6 +107,7 @@
 		<mapping class="Game.Technology.ScienceItemKey"></mapping>
 		<mapping class="Game.Technology.ScienceShelf"></mapping>
 		<mapping class="Game.Technology.ScienceShelf$Content"></mapping>
+		<mapping class="Game.SciencePoint"></mapping>
 
 	</session-factory>
 </hibernate-configuration> 

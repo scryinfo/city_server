@@ -81,6 +81,13 @@ public class ScienceStore{
         if(locked.get(m) == 0)
             locked.remove(m);
     }
+    public boolean consumeInHand(ItemKey m, int n){
+        if(!has(m,n)){
+            return false;
+        }
+        this.inHand.put(m, inHand.get(m) - n);
+        return true;
+    }
 
     public int getItemCount(ItemKey key) {
        return inHand.getOrDefault(key, 0);

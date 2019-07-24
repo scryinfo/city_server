@@ -154,7 +154,7 @@ public abstract class ScienceLine {
         int add = 0;
         if(this.timer.update(diffNano))
         {
-            accumulated += item.n * this.workerNum;
+            accumulated += item.n * this.workerNum;//Todo 未加入eva加成
             add = accumulated >= 1 ? left():0;
             if(add > 0) {
                 this.count += add;

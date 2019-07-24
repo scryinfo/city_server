@@ -14,15 +14,11 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
+import Game.OffLineInfo.OffLineInformation;
 import Game.Technology.ScienceLine;
 import Game.Technology.ScienceShelf;
 import Game.Technology.Technology;
 import Game.Util.*;
-import Game.OffLineInfo.OffLineInformation;
-import Game.Util.BuildingUtil;
-import Game.Util.CityUtil;
-import Game.Util.GlobalUtil;
-import Game.Util.WareHouseUtil;
 import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
@@ -41,7 +37,6 @@ import gs.Gs;
 import gs.Gs.BuildingInfo;
 import gscode.GsCode;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.util.concurrent.ScheduledFuture;
@@ -441,6 +436,7 @@ public class GameSession {
         }
         Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
         p.addMoney(999999999999999l);
+        p.setSciencePoints(p.initPlayerSciencePoint());  //初始化各种类型的科技点数
         LogDb.playerIncome(p.id(), 999999999999999l);
         if(!GameDb.createPlayer(p)) {
             this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
@@ -5231,7 +5227,7 @@ public class GameSession {
 
     //开启宝箱
     public void openScienceBox(short cmd,Message message){
-        Gs.OpenScienceBox box = (Gs.OpenScienceBox) message;
+        Gs.OpenScience box = (Gs.OpenScience) message;
         UUID bid = Util.toUuid(box.getBid().toByteArray());
         Building building = City.instance().getBuilding(bid);
         if(!(building instanceof Technology)||box.getNum()<0){
@@ -5344,9 +5340,76 @@ public class GameSession {
         }
     }
 
-    public void buySciencePoint(short cmd,Message message){
-        Gs.BuyInShelf c = (Gs.BuyInShelf)message;
+    /*购买科技资料*/
+    public void buySciencePoint(short cmd,Message message) throws Exception {
+        Gs.BuySciencePoint c = (Gs.BuySciencePoint)message;
         if(c.getPrice() <= 0)
             return;
+        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+        UUID buyerId = Util.toUuid(c.getBuyerId().toByteArray());//由于购买者就是当前玩家，所以不需要传递玩家id
+        Building sellBuilding = City.instance().getBuilding(bid);
+        if(sellBuilding == null || !(sellBuilding instanceof Technology)||sellBuilding.canUseBy(buyerId) || sellBuilding.outOfBusiness())
+            return;
+        Item item = new Item(c.getItem());
+        //1.检测购买的数量是否充足（不充足返回错误码）
+        //2.购买科技点数（建筑增加今日营收，以及日志记录）
+        //3.购买者增加对应的eva点数（需等eva改版完成）
+        //4.（玩家消费记录）、（建筑）以及（建筑主人）收入
+        Technology tec = (Technology) sellBuilding;
+        if(tec.checkBuyScience(item.key,item.n)){
+            ScienceShelf.Content content = tec.getContent(item.key);
+            //计算费用
+            int cost = item.n * content.price;
+            //消费货架数量
+            tec.delshelf(item.key, item.n, false);
+            sellBuilding.updateTodayIncome(cost);
+            //玩家支出和收入记录
+            Player seller = GameDb.getPlayer(tec.ownerId());
+            player.decMoney(cost);//消费者支出
+            seller.addMoney(cost);//卖家收入
+            int itemId = item.key.meta.id;
+            //增加玩家的科技点数
+            player.addSciencePoint(itemId,item.n);
+            //日志记录
+            LogDb.playerPay(player.id(),cost);
+            LogDb.playerIncome(seller.id(),cost);
+            LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
+                    item.key.producerId, sellBuilding.id(),0,itemId,null);
+            LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
+            LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),item.n,c.getPrice(),itemId);//离线通知统计
+            GameDb.saveOrUpdate(Arrays.asList(player, seller,sellBuilding));
+            //推送商品变化通知
+            content = tec.getContent(item.key);
+            sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
+            this.write(Package.create(cmd, c));
+        }else{
+            System.err.println("货架数量不足");
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+        }
+    }
+
+    /*使用科技点数*/
+    public void useSciencePoint(short cmd,Message message){
+        Gs.OpenScience science = (Gs.OpenScience) message;
+        UUID bid = Util.toUuid(science.getBid().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof  Technology)||!building.canUseBy(player.id()))
+            return;
+        Technology tec = (Technology) building;
+        MetaScienceItem item = MetaData.getScienceItem(science.getItemId());
+        ItemKey key = new ItemKey(item, building.ownerId());
+        if(!tec.hasEnoughSciencePointInStore(key, science.getNum())){
+           this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+           return;
+        }
+        //使用科技点数
+        if(tec.getStore().consumeInHand(key,science.getNum())){
+            player.addSciencePoint(key.meta.id,science.getNum());//增加玩家对应的点数
+            GameDb.saveOrUpdate(Arrays.asList(player,tec));
+            this.write(Package.create(cmd,science));
+        }else {
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+            return;
+        }
     }
 }
