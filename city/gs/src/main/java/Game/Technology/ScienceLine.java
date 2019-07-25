@@ -43,12 +43,6 @@ public abstract class ScienceLine {
 
     @Column(nullable = false)
     long ts = 0;      //生产开始时间
-    @ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
-    @JoinColumn(name="tecId")
-    Technology technology;
-
-    @Transient
-    boolean pause=false;//生产线状态
 
     protected ScienceLine() {
     }
@@ -92,17 +86,6 @@ public abstract class ScienceLine {
         this.suspend = false;
     }
 
-    public void pause(){
-        this.pause = true;
-    }
-    public boolean isPauseStatue(){
-        return pause;
-    }
-
-    public void start(){
-        this.pause = false;
-    }
-
     public Gs.Line toProto() {
         return Gs.Line.newBuilder()
                 .setId(Util.toByteString(id))
@@ -142,9 +125,9 @@ public abstract class ScienceLine {
         return ts;
     }
 
-    public Technology getTechnology() {
+/*    public Technology getTechnology() {
         return technology;
-    }
+    }*/
 
     public PeriodicTimer getTimer() {
         return timer;

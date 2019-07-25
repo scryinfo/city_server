@@ -34,9 +34,21 @@ public class BrandManager {
         instance = GameDb.getBrandManager();
         instance.refineCache();
         instance.getAllBuildingBrandOrQuality();
-    /*    Gs.AddLine.Builder builder = Gs.AddLine.newBuilder();
-        builder.setId(Util.toByteString(UUID.fromString("a761ac57-146e-4d02-b9f7-9d1ee19a7163"))).setTargetNum(100).setItemId(15).setWorkerNum(144);
-        Player player = GameDb.getPlayer(UUID.fromString("20687adb-86c4-414f-a3be-69e0c6632563"));
+        //创建玩家
+        /*Gs.CreateRole.Builder builder = Gs.CreateRole.newBuilder();
+        builder.setCompanyName("yty").setMale(false).setFaceId("1-6,10,1,1,2,15,4,4,10,3,3,1,8,9,7,1,5,2,")
+        .setName("yty");
+        GameSession.createRole(builder.build(),"18184799163");*/
+        //添加建筑
+       /* Gs.AddBuilding.Builder builder = Gs.AddBuilding.newBuilder();
+        Gs.MiniIndex miniIndex = new Coordinate(51, 43).toProto();
+        builder.setId(1500003).setPos(miniIndex);
+        Player player = GameDb.getPlayer(UUID.fromString("76f90c9b-5cf3-4537-b482-11e2d895640e"));
+        GameSession.addBuilding(builder.build(),player);*/
+       /*测试创建建筑*/
+ /*      Gs.AddLine.Builder builder = Gs.AddLine.newBuilder();
+        builder.setId(Util.toByteString(UUID.fromString("319fc7fe-7331-4b03-93f8-576288d2ba9e"))).setTargetNum(100).setItemId(15).setWorkerNum(144);
+        Player player = GameDb.getPlayer(UUID.fromString("76f90c9b-5cf3-4537-b482-11e2d895640e"));
         GameSession.testAddLine(builder.build(),player);*/
     }
 

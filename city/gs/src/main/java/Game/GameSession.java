@@ -5460,7 +5460,59 @@ public class GameSession {
         this.write(Package.create(cmd,builder.build()));
     }
 
-    public static void   testAddLine( Gs.AddLine newLine,Player player){
+    /*测试创建建筑*/
+/*    public static  void createRole( Gs.CreateRole c,String accountName){
+        if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN || c.getName().isEmpty() || c.getName().length() > MAX_PLAYER_NAME_LEN)
+            return;
+        //如果公司名存在，return
+        if(GameDb.companyNameIsInUsed(c.getCompanyName())){
+            return;
+        }
+        Player p = new Player(c.getName(),accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
+        p.addMoney(999999999999999l);
+        p.setSciencePoints(p.initPlayerSciencePoint());  //初始化各种类型的科技点数
+        LogDb.playerIncome(p.id(), 999999999999999l);
+        if(!GameDb.createPlayer(p)) {
+        }
+        else {
+            // this is fucking better, can keep the data consistency, however, it do update many times
+            MetaData.getAllDefaultToUseItemId().forEach(id->{
+                p.addItem(id, 0);
+                TechTradeCenter.instance().techCompleteAction(id, 0);
+            });
+            GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
+            LogDb.insertPlayerInfo(p.id(),c.getMale());
+            //复制eva元数据信息到数据库
+            List<Eva> evaList=new ArrayList<Eva>();
+            MetaData.getAllEva().forEach(m->{
+                evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
+            });
+            EvaManager.getInstance().addEvaList(evaList);
+        }
+    }
+
+    *//*测试创建建筑*//*
+    public static void addBuilding(Gs.AddBuilding c,Player player){
+        int mid = c.getId();
+        if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
+            return;
+        MetaBuilding m = MetaData.getBuilding(mid);
+        if(m == null)
+            return;
+        Coordinate ul = new Coordinate(c.getPos());
+        Building building = Building.create(mid, ul, player.id());
+        building.setName(player.getCompanyName());
+        boolean ok = City.instance().addBuilding(building);
+        if(!ok){
+        }
+        else{
+            building.postAddToWorld();
+        }
+    }
+
+
+    *//*测试添加生产线*//*
+    public static void  testAddLine( Gs.AddLine newLine,Player player){
         if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
             return;
         UUID id = Util.toUuid(newLine.getId().toByteArray());
@@ -5474,5 +5526,5 @@ public class GameSession {
         ScienceLine line = tec.addLine(m, newLine.getWorkerNum(), newLine.getTargetNum());
         if(line!=null)
             GameDb.saveOrUpdate(tec);
-    }
+    }*/
 }

@@ -46,6 +46,8 @@ public class Technology extends Building {
 
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
+    @Transient
+    ScienceLine delLine=null;
 
     /*添加生产线*/
     public  ScienceLine addLine(MetaItem item, int workerNum, int targetNum){
@@ -234,7 +236,8 @@ public class Technology extends Building {
             if(line.size() >= 2){
                 nextId = line.get(1).id; //第二条生产线
             }
-            ScienceLine l = __delLine(completedLines.get(0));
+            ScienceLine l= __delLine(completedLines.get(0));
+            delLine = l;
             if(nextId != null){
                 this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
             }else{
@@ -245,6 +248,10 @@ public class Technology extends Building {
         }
         if(this.dbTimer.update(diffNano)) {
             GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
+            if(delLine!=null){
+                 GameDb.delete(delLine);
+                delLine=null;
+            }
         }
     }
 
