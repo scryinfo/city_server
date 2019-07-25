@@ -251,6 +251,7 @@ public class City {
                 final long now = System.nanoTime();
                 this.update(now - lastTs);
                 lastTs = now;
+                logger.info("完成update----- millseconds = " + (System.nanoTime() - now) / 1000000);
             } catch (Exception e) {
                 logger.fatal(Throwables.getStackTraceAsString(e));
             }
@@ -259,30 +260,67 @@ public class City {
     private long lastTs;
     private int lastHour;
 
+
+    private long lastTT ;
+
+    private void doPastTime(String target)
+    {
+        long t2 = lastTT;
+        lastTT = System.nanoTime();
+        t2 = lastTT - t2;
+        if (t2 > 10000000)
+        {
+            logger.info(target + " ,consume(ms) " + t2 / 1000000);
+        }
+
+    }
     public void update(long diffNano) {
+        lastTT = System.nanoTime();
         GroundAuction.instance().update(diffNano);
+        doPastTime("GroundAuction.instance()");
         GroundManager.instance().update(diffNano);
+        doPastTime("GroundManager.instance()");
         Exchange.instance().update(diffNano);
-        allBuilding.forEach((k,v)->v.update(diffNano));
+        doPastTime("Exchange.instance()");
+        allBuilding.forEach((k, v) -> v.update(diffNano));
+        doPastTime("allBuilding.forEach");
         ContractManager.getInstance().update(diffNano);
+        doPastTime("ContractManager.getInstance()");
         NpcManager.instance().update(diffNano);
-        GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
+        doPastTime("NpcManager.instance()");
+        GameServer.allGameSessions.forEach((k, v) ->
+        {
+            v.update(diffNano);
+        });
+        doPastTime("GameServer.allGameSessions");
         MailBox.instance().update(diffNano);
+        doPastTime(" MailBox.instance()");
         FlightManager.instance().update(diffNano);
+        doPastTime("FlightManager.instance()");
         NpcManager.instance().countNpcNum(diffNano);
+        doPastTime("NpcManager.instance()");
         LeagueManager.getInstance().update(diffNano);
+        doPastTime("LeagueManager.getInstance()");
         WareHouseManager.instance().update(diffNano);
+        doPastTime("WareHouseManager.instance()");
         BrandManager.instance().update(diffNano);
+        doPastTime("BrandManager.instance(");
         // do this at last
         updateTimeSection(diffNano);
+        doPastTime("updateTimeSection");
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
+        doPastTime("TickManager.instance()");
         PromotionMgr.instance().update(diffNano);
+        doPastTime("PromotionMgr.instance()");
         //发放失业金
         updateInsurance(diffNano);
+        doPastTime("updateInsurance");
         //计算下周行业工资
         updateIndustryMoney(diffNano);
+        doPastTime("updateIndustryMoney");
         BuildingUtil.instance().update(diffNano);
+        doPastTime("BuildingUtil.instance()");
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

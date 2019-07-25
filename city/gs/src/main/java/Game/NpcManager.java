@@ -7,6 +7,7 @@ import Shared.LogDb;
 import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
+import org.apache.log4j.Logger;
 
 import java.sql.Time;
 import java.util.*;
@@ -17,18 +18,22 @@ public class NpcManager {
     static{
         nowTime = System.currentTimeMillis();
     }
+    private static final Logger logger = Logger.getLogger(NpcManager.class);
     private static NpcManager instance = new NpcManager();
     public static NpcManager instance() {
         return instance;
     }
     public void update(long diffNano) {
+
         if (updateIdx >= waitToUpdate.size()) // job is done, wait next time section coming
             return;
         if(waitToUpdate.isEmpty())
             return;
         Set updates = new HashSet();
+        long now = System.nanoTime();
         Map<GridIndexPair, Gs.MoneyChange> packs = new HashMap<>();
         Set<UUID> ids = waitToUpdate.get(updateIdx);
+        int consumeC = 0;
         Iterator<UUID> i = ids.iterator();
         while(i.hasNext()) {
             Npc npc = allNpc.get(i.next());
@@ -36,15 +41,22 @@ public class NpcManager {
                 i.remove();
             else {
                 Set u = npc.update(diffNano);
-                if(u != null)
+                if (u != null && u.size() != 0)
+                {
                     updates.addAll(u);
+                    consumeC++;
+                }
             }
         }
 
         packs.forEach((k,v)->{
             City.instance().send(k, Package.create(GsCode.OpCode.moneyChange_VALUE, v));
         });
+
         GameDb.saveOrUpdate(updates);
+        logger.info("updates size - " + updates.size()
+                + " ( all npc - " + ids.size() + " , consume npc - " + consumeC
+                + ") , nanoTime : " + (System.nanoTime() - now));
         if(reCalcuWaitToUpdate) {
             ids.forEach(id -> {
                 int idx = Math.abs(id.hashCode())%updateTimesAtNextTimeSection;
@@ -151,10 +163,7 @@ public class NpcManager {
             int nextIdx = Math.abs(npc.id().hashCode())%updateTimesAtNextTimeSection;
             waitToUpdateNext.get(nextIdx).add(npc.id());
         }
-        if(idx > updateIdx)
-            waitToUpdate.get(idx).add(npc.id());
-        else // don't have chance to act in this round
-            ;
+        waitToUpdate.get(idx).add(npc.id());
     }
     private Map<UUID, Npc> allNpc = new HashMap<>();  //工作npc
     private Map<UUID, Npc> unEmployeeNpc = new HashMap<>();//未工作npc
