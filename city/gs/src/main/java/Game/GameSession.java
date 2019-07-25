@@ -5243,6 +5243,8 @@ public class GameSession {
         }
         //开始开启宝箱
         int result = tec.useScienceBox(key, box.getNum());
+        /*更新自动补货*/
+        tec.updateAutoReplenish(key);
         Gs.ScienceBoxACK.Builder builder = Gs.ScienceBoxACK.newBuilder();
         builder.setKey(key.toProto())
                 .setBuildingId(box.getBid())
