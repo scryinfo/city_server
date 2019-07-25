@@ -5180,7 +5180,7 @@ public class GameSession {
         if(m == null)
             return;
         Technology tec = (Technology) b;
-        ScienceLine line = tec.addLine(m, newLine.getWorkerNum(), newLine.getTargetNum());
+        ScienceLine line = tec.addLine(m, tec.getWorkerNum(), newLine.getTargetNum());
         if(line!=null)
             GameDb.saveOrUpdate(tec);
     }
