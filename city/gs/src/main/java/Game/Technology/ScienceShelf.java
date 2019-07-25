@@ -26,11 +26,11 @@ public class ScienceShelf{
     public void updateAutoReplenish(Technology technology, ItemKey key) {
         //更新货架： 执行一次下架上架操作
         Content content = this.getContent(key);
-        if(content!= null){
+        if(content!=null&&content.autoReplenish){
             technology.delshelf(key,content.n, true);
+            Item itemInStore = new Item(key,technology.store.getItemCount(key));
+            technology.addshelf(itemInStore,content.price, content.autoReplenish);
         }
-        Item itemInStore = new Item(key,technology.store.getItemCount(key));
-        technology.addshelf(itemInStore,content.price, content.autoReplenish);
     }
 
 

@@ -493,8 +493,7 @@ public class Player {
     @CollectionTable(name = "player_blacklist", joinColumns = @JoinColumn(name = "player_id"))
     private Set<UUID> blacklist = new HashSet<>();
 
-     @OneToMany(cascade={CascadeType.ALL})
-     @ElementCollection(fetch = FetchType.EAGER)
+     @OneToMany(cascade={CascadeType.ALL},fetch = FetchType.EAGER)
      @JoinColumn(name="pid")
      private Set<SciencePoint> sciencePoints=new HashSet<SciencePoint>();
 

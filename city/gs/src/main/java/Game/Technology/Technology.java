@@ -22,7 +22,7 @@ public class Technology extends Building {
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     @Transient
     private MetaTechnology meta;
-    //资料库
+    //科技资料库
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "store_id")
     protected ScienceStore store;
@@ -30,7 +30,7 @@ public class Technology extends Building {
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "boxStore_id")
     protected SciencevBox boxStore;
-    //货架库
+    //科技资料出售
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "shelf_id")
     protected ScienceShelf shelf;
@@ -41,13 +41,13 @@ public class Technology extends Building {
     @MapKeyColumn(name = "line_id")
     public List<Line> line= new ArrayList<>();
 
-    public Technology() {
-    }
+    public Technology() { }
 
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
+
     @Transient
-    ScienceLine delLine=null;
+    ScienceLine delLine=null;//当前要删除的生产线
 
     /*添加生产线*/
     public  ScienceLine addLine(MetaItem item, int workerNum, int targetNum){
