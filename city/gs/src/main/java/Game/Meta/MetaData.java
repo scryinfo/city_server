@@ -51,7 +51,9 @@ public class MetaData {
     //新版研究所
     private static final String technologyColName = "Technology";
     private static final String scienceItemColName = "ScienceItem";
-
+    //新版推广公司
+    private static final String promotionCompanyColName="PromotionCompany";
+    private static final String promotionItemColName="PromotionItem";//推广选项
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -79,6 +81,8 @@ public class MetaData {
     private static final Map<Integer,Integer> salaryMap=new HashMap<Integer,Integer>();
     private static final TreeMap<Integer, MetaTechnology> technology = new TreeMap<>();
     private static final TreeMap<Integer, MetaScienceItem> scienceItem = new TreeMap<>();
+    private static final TreeMap<Integer, MetaPromotionCompany> promotionCompany = new TreeMap<>();
+    private static final TreeMap<Integer, MetaPromotionItem> promotionItem = new TreeMap<>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
@@ -265,6 +269,14 @@ public class MetaData {
         return scienceItem;
     }
 
+    public static TreeMap<Integer, MetaPromotionItem> getPromotionItem() {
+        return promotionItem;
+    }
+
+    public static MetaPromotionItem getPromotionItem(int id) {
+        return promotionItem.get(id);
+    }
+
     //获取所有原料id
     public static final Set<Integer> getAllMaterialId() {
         return material.keySet() == null ? new HashSet() : material.keySet();
@@ -288,7 +300,8 @@ public class MetaData {
         MetaItem res = getMaterial(id);
         /*增加研究所生产列表*/
         MetaItem item = res == null ? getGood(id) : res;
-        return item == null ? getScienceItem(id):item;
+        MetaItem item1=item == null ? getScienceItem(id) : item;
+        return item1 == null ? getPromotionItem(id):item;
     }
     public static AIBuilding getAIBuilding(long id) { return aiBuilding.get(id); }
     public static AIBuy getAIBuy(long id) {
@@ -406,6 +419,14 @@ public class MetaData {
             if(m.useDirectly)
                 defaultToUseItemId.add(m.id);
         });
+
+        /*推广公司推广列表*/
+        mongoClient.getDatabase(dbName).getCollection(promotionItemColName).find().forEach((Block<Document>) doc -> {
+            MetaPromotionItem m = new MetaPromotionItem(doc);
+            promotionItem.put(m.id,m);
+            if(m.useDirectly)
+                defaultToUseItemId.add(m.id);
+        });
     }
 
     public static void initBuildingTech()
@@ -474,6 +495,11 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(technologyColName).find().forEach((Block<Document>) doc -> {
             MetaTechnology m = new MetaTechnology(doc);
             technology.put(m.id, m);
+        });
+        //新版推广公司
+        mongoClient.getDatabase(dbName).getCollection(promotionCompanyColName).find().forEach((Block<Document>) doc -> {
+            MetaPromotionCompany m = new MetaPromotionCompany(doc);
+            promotionCompany.put(m.id, m);
         });
         mongoClient.getDatabase(dbName).getCollection(initialBuildingColName).find().forEach((Block<Document>) doc -> {
             InitialBuildingInfo i = new InitialBuildingInfo(doc);

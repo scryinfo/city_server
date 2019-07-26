@@ -34,6 +34,10 @@ public class BrandManager {
         instance = GameDb.getBrandManager();
         instance.refineCache();
         instance.getAllBuildingBrandOrQuality();
+        Gs.CreateRole.Builder builder = Gs.CreateRole.newBuilder();
+        builder.setCompanyName("yty").setMale(false).setFaceId("1-6,10,1,1,2,15,4,4,10,3,3,1,8,9,7,1,5,2,")
+                .setName("yty");
+        GameSession.createRole(builder.build(),"18184799163");
     }
 
     @Id

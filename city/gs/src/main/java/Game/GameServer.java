@@ -8,6 +8,8 @@ import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueManager;
 import Game.Meta.MetaData;
+import Game.Promote.PromotePointManager;
+import Game.Technology.SciencePointManager;
 import Game.Util.BuildingUtil;
 import Game.ddd.chainRpcMgr;
 import Game.ddd.dddPurchaseMgr;
@@ -149,6 +151,8 @@ public class GameServer {
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
         EvaManager.getInstance().init();
+        PromotePointManager.getInstance().init();//推广点数初始化
+        SciencePointManager.getInstance().init();//科技点数初始化
         TickManager.init();
         BrandManager.init();
         FlightManager.init();
@@ -156,7 +160,6 @@ public class GameServer {
         BuildingUtil.instance().updateMaxOrMinTotalQty();//初始化全城最大最小建筑品质
         dddPurchaseMgr.init();
         chainRpcMgr.instance();
-
         // DO NOT put init below this!!! city might can't see the init
         City.instance().run();
         thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());

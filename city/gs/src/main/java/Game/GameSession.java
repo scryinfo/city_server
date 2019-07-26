@@ -15,9 +15,9 @@ import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
 import Game.OffLineInfo.OffLineInformation;
-import Game.Technology.ScienceLine;
-import Game.Technology.ScienceShelf;
-import Game.Technology.Technology;
+import Game.Promote.PromotePoint;
+import Game.Promote.PromotePointManager;
+import Game.Technology.*;
 import Game.Util.*;
 import Game.ddd.*;
 import Shared.*;
@@ -436,7 +436,6 @@ public class GameSession {
         }
         Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
         p.addMoney(999999999999999l);
-        p.setSciencePoints(p.initPlayerSciencePoint());  //初始化各种类型的科技点数
         LogDb.playerIncome(p.id(), 999999999999999l);
         if(!GameDb.createPlayer(p)) {
             this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
@@ -456,6 +455,18 @@ public class GameSession {
                 evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
             });
             EvaManager.getInstance().addEvaList(evaList);
+            /*添加推广点数并初始化*/
+            List<PromotePoint> promotePoints=new ArrayList<>();
+            MetaData.getPromotionItem().values().forEach(pro->{
+                promotePoints.add(new PromotePoint(p.id(), pro.id,100));
+            });
+            PromotePointManager.getInstance().addPromotePointList(promotePoints);
+            /*添加科技点数分类并初始化*/
+            List<SciencePoint> sciencePoints = new ArrayList<>();
+            MetaData.getScienceItem().values().forEach(science->{
+                sciencePoints.add(new SciencePoint(p.id(), science.id, 100));
+            });
+            SciencePointManager.getInstance().addSciencePointList(sciencePoints);
         }
     }
 
@@ -5364,7 +5375,8 @@ public class GameSession {
             seller.addMoney(cost);//卖家收入
             int itemId = item.key.meta.id;
             //增加玩家的科技点数
-            player.addSciencePoint(itemId,item.n);
+            SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), itemId, item.n);
+            SciencePointManager.getInstance().updateSciencePoint(sciencePoint);
             //日志记录
             LogDb.playerPay(player.id(),cost);
             LogDb.playerIncome(seller.id(),cost);
@@ -5398,8 +5410,10 @@ public class GameSession {
         }
         //使用科技点数
         if(tec.getStore().consumeInHand(key,science.getNum())){
-            player.addSciencePoint(key.meta.id,science.getNum());//增加玩家对应的点数
-            GameDb.saveOrUpdate(Arrays.asList(player,tec));
+           //增加玩家对应的科技点数
+            SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), item.id,science.getNum());
+            SciencePointManager.getInstance().updateSciencePoint(sciencePoint);//更新缓存并同步数据库
+            GameDb.saveOrUpdate(tec);
             this.write(Package.create(cmd,science));
         }else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
@@ -5447,5 +5461,66 @@ public class GameSession {
         builder.addAllBox(tec.getBoxStore().toProto()).setBuildingId(id.getId());
         builder.setBuildingId(id.getId());
         this.write(Package.create(cmd,builder.build()));
+    }
+
+    /*获取研究所列表的生产速度*/
+    public void getScienceItemSpeed(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof Technology))
+            return;
+        Technology tec = (Technology) building;
+        Gs.ScienceItemSpeed.Builder builder = Gs.ScienceItemSpeed.newBuilder();
+        builder.setBuildingId(id.getId());
+        /*基础数据*/
+        /*暂时不能够查询生产速度加成（需等Eva改版完成）*/
+        for (MetaScienceItem item : MetaData.getScienceItem().values()) {
+            Eva eva = EvaManager.getInstance().getEva(player.id(), item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);//此处Eva可能会不对
+            builder.addItemSpeedBuilder().setType(item.id)
+                    .setSpeed(item.n*(1+EvaManager.getInstance().computePercent(eva)));//TODO 需加上eva加成
+        }
+        this.write(Package.create(cmd,builder.build()));
+    }
+
+    public static  void createRole( Gs.CreateRole c,String accountName){
+        if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN || c.getName().isEmpty() || c.getName().length() > MAX_PLAYER_NAME_LEN)
+            return;
+        //如果公司名存在，return
+        if(GameDb.companyNameIsInUsed(c.getCompanyName())){
+            return;
+        }
+        Player p = new Player(c.getName(),accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
+        p.addMoney(999999999999999l);
+        LogDb.playerIncome(p.id(), 999999999999999l);
+        if(!GameDb.createPlayer(p)) {
+        }
+        else {
+            // this is fucking better, can keep the data consistency, however, it do update many times
+            MetaData.getAllDefaultToUseItemId().forEach(id->{
+                p.addItem(id, 0);
+                TechTradeCenter.instance().techCompleteAction(id, 0);
+            });
+            GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
+            LogDb.insertPlayerInfo(p.id(),c.getMale());
+            //复制eva元数据信息到数据库
+            List<Eva> evaList=new ArrayList<Eva>();
+            MetaData.getAllEva().forEach(m->{
+                evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
+            });
+            EvaManager.getInstance().addEvaList(evaList);
+            /*添加推广点数并初始化*/
+            List<PromotePoint> promotePoints=new ArrayList<>();
+            MetaData.getPromotionItem().values().forEach(pro->{
+                promotePoints.add(new PromotePoint(p.id(), pro.id,100));
+            });
+            PromotePointManager.getInstance().addPromotePointList(promotePoints);
+            /*添加科技点数分类并初始化*/
+            List<SciencePoint> sciencePoints = new ArrayList<>();
+            MetaData.getScienceItem().values().forEach(science->{
+                sciencePoints.add(new SciencePoint(p.id(), science.id, 100));
+            });
+            SciencePointManager.getInstance().addSciencePointList(sciencePoints);
+        }
     }
 }

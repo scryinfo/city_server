@@ -1,5 +1,6 @@
-package Game;
+package Game.Technology;
 
+import Game.Player;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -12,7 +13,8 @@ public class SciencePoint {
     @GeneratedValue
     UUID id;
     public int  type;
-    public long sciencePoint;
+    public UUID pid;
+    public long point;
 
     public UUID getId() {
         return id;
@@ -22,17 +24,19 @@ public class SciencePoint {
         return type;
     }
 
-    public long getSciencePoint() {
-        return sciencePoint;
+
+    public UUID getPid() {
+        return pid;
     }
 
-
-    public SciencePoint(int type, long sciencePoint, Player player) {
+    public SciencePoint(UUID pid,int type, long sciencePoint) {
+        this.pid = pid;
         this.type = type;
-        this.sciencePoint = sciencePoint;
-        //this.player = player;
+        this.point = sciencePoint;
     }
 
     public SciencePoint() {
     }
+
+
 }

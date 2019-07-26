@@ -8,7 +8,6 @@ import Shared.Package;
 import Shared.Util;
 import gs.Gs;
 import gscode.GsCode;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
@@ -493,9 +492,9 @@ public class Player {
     @CollectionTable(name = "player_blacklist", joinColumns = @JoinColumn(name = "player_id"))
     private Set<UUID> blacklist = new HashSet<>();
 
-     @OneToMany(cascade={CascadeType.ALL},fetch = FetchType.EAGER)
+/*     @OneToMany(cascade={CascadeType.ALL},fetch = FetchType.EAGER)
      @JoinColumn(name="pid")
-     private Set<SciencePoint> sciencePoints=new HashSet<SciencePoint>();
+     private Set<SciencePoint> sciencePoints=new HashSet<SciencePoint>();*/
 
     @Column(nullable = true)
     private UUID societyId  = null;
@@ -585,11 +584,11 @@ public class Player {
         return onlineTs;
     }
 
-    public void setSciencePoints(Set<SciencePoint> sciencePoints) {
+  /*  public void setSciencePoints(Set<SciencePoint> sciencePoints) {
         this.sciencePoints = sciencePoints;
-    }
+    }*/
 
-    public Set<SciencePoint> initPlayerSciencePoint(){
+/*    public Set<SciencePoint> initPlayerSciencePoint(){
         Set<SciencePoint> sciencePoints = new HashSet<>();
         //以研究所的研究选项为基准，初始化玩家的科技资料信息
         Set<Integer> types = MetaData.getScienceItem().keySet();
@@ -598,14 +597,15 @@ public class Player {
             sciencePoints.add(sciencePoint);
         });
         return sciencePoints;
-    }
+        }
+   */
 
-    /*增加科技点数*/
+ /*   //增加科技点数
     public void addSciencePoint(int type, int n) {
         this.sciencePoints.forEach(s->{
             if(s.type==type){
                 s.sciencePoint += n;
             }
         });
-    }
+    }*/
 }
