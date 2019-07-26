@@ -5204,7 +5204,7 @@ public class GameSession {
             return;
         UUID lineId = Util.toUuid(c.getLineId().toByteArray());
         Technology tec = (Technology) b;
-        if(tec.delLine(lineId)!=null) {
+        if(tec.__delLine(lineId)!=null) {
             GameDb.saveOrUpdate(tec);
             if(tec.line.size() > 0){
                 this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(tec.line.get(0).getId())).build()));
