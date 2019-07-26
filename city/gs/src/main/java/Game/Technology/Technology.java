@@ -1,15 +1,15 @@
 package Game.Technology;
 
 import Game.*;
-import Game.Meta.*;
-import Game.Timers.PeriodicTimer;
+import Game.Meta.MetaItem;
+import Game.Meta.MetaScienceItem;
+import Game.Meta.MetaTechnology;
 import Shared.Package;
 import Shared.Util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import gs.Gs;
 import gscode.GsCode;
-import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -18,36 +18,15 @@ import java.util.UUID;
 
 /*新版本研究所*/
 @Entity
-public class Technology extends Building {
-    private static final int DB_UPDATE_INTERVAL_MS = 30000;
+public class Technology extends ScienceBase {
     @Transient
     private MetaTechnology meta;
-    //科技资料库
-    @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "store_id")
-    protected ScienceStore store;
     //宝箱库
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "boxStore_id")
-    protected SciencevBox boxStore;
-    //科技资料出售
-    @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "shelf_id")
-    protected ScienceShelf shelf;
-
-    //生产线(完成)
-    @OneToMany(fetch = FetchType.EAGER)
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    @MapKeyColumn(name = "line_id")
-    public List<Line> line= new ArrayList<>();
+    protected ScienceBox boxStore;
 
     public Technology() { }
-
-    @Transient
-    protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
-
-    @Transient
-    ScienceLine delLine=null;//当前要删除的生产线
 
     /*添加生产线*/
     public  ScienceLine addLine(MetaItem item, int workerNum, int targetNum){
@@ -59,67 +38,11 @@ public class Technology extends Building {
         return line;
     }
 
-    protected void __addLine(Line newLine){
-        if(line.indexOf(newLine.id) < 0){
-            line.add(newLine);
-        }
-    }
-
-    public ScienceLine delLine(UUID lineId) {
-        for (int i = line.size() - 1; i >= 0 ; i--) {
-            if (line.get(i).id.equals(lineId)){
-                ScienceLine remove = line.remove(i);
-                if(line.size() > 0){
-                    if(i==0) {//如果删除的就是当前生产线，第一条，则设置移除后的第一条为当前生产时间
-                        line.get(0).ts = System.currentTimeMillis();
-                    }
-                }
-                return remove;
-            }
-        }
-        return null;
-    }
-
-    public boolean setAutoReplenish(ItemKey key, boolean autoRepOn) {
-        ScienceShelf.Content i = this.shelf.getContent(key);
-        if(i == null)
-            return false;
-        this.shelf.add(new Item(key,0),i.price,autoRepOn);
-        return  true;
-    }
-
-    public boolean shelfSet(Item item, int price) {
-        ScienceShelf.Content content = this.shelf.getContent(item.getKey());
-        if(content == null)
-            return false;
-        //不需要在此处处理自动补货，自动补货是一个单独的协议
-        int updateNum = content.n - item.getN();//增加或减少：当前货架数量-现在货架数量
-        if(content.n==0&&item.getN()==0){//若非自动补货，切货架数量为0，直接删除
-            delshelf(item.getKey(), content.n, true);
-            return true;
-        }
-        boolean lock = false;
-        if (updateNum < 0) {
-            lock = this.store.lock(item.getKey(),Math.abs(updateNum));
-        } else {
-            lock = this.store.unLock(item.getKey(), updateNum);
-        }
-        if (lock) {
-            content.price = price;
-            content.n = item.getN();
-            //消息推送货物发生改变
-            this.sendToWatchers(id(),item.getKey().meta.id,item.getN(),price,content.autoReplenish,null);
-            return true;
-        } else
-            return false;
-    }
-
     @Entity
     public final static class Line extends ScienceLine {
         public Line(MetaScienceItem item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
         }
-
         public Line() {
         }
 
@@ -139,7 +62,7 @@ public class Technology extends Building {
         this.meta = meta;
         this.store = new ScienceStore();
         this.shelf = new ScienceShelf();
-        this.boxStore = new SciencevBox();
+        this.boxStore = new ScienceBox();
     }
     @Override
     public int quality() {
@@ -157,14 +80,10 @@ public class Technology extends Building {
         return null;
     }
 
-    protected  boolean __hasLineRemained(){
-        return line.size() > 0;
-    }
-
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
 
-    }
+    }//TODO
 
     @Override
     protected void enterImpl(Npc npc) {
@@ -175,21 +94,6 @@ public class Technology extends Building {
     protected void leaveImpl(Npc npc) {
 
     }
-    //删除生产线
-    protected  ScienceLine __delLine(UUID lineId){
-        for (int i = line.size() - 1; i >= 0 ; i--) {
-            if (line.get(i).id.equals(lineId)){
-                ScienceLine remove = line.remove(i);
-                if(line.size() > 0){
-                    if(i==0) {//如果删除的就是当前生产线，第一条，则设置移除后的第一条为当前生产时间
-                        line.get(0).ts = System.currentTimeMillis();
-                    }
-                }
-                return remove;
-            }
-        }
-        return null;
-    }
 
     /*生产线生产*/
     @Override
@@ -199,7 +103,7 @@ public class Technology extends Building {
         }
         List<UUID> completedLines = new ArrayList<>();
         if (__hasLineRemained()) {
-            Line l = this.line.get(0);
+            Line l = (Line) this.line.get(0);
             if (l.isPause()) {
                 if (l.isComplete()) {
                     completedLines.add(l.id);
@@ -218,12 +122,6 @@ public class Technology extends Building {
                    ItemKey key = l.newItemKey(ownerId());
                     if (this.boxStore.offSet(key, add)) {//添加到未开启宝箱中
                         broadcastLineInfo(l,key);//广播
-                        //处理自动补货(自动补货不在此处理)
-                        //ScienceShelf.Content content = this.shelf.getContent(key);
-                       /* if(content!= null &&content.autoReplenish){
-                          //更新自动补货
-                            this.shelf.updateAutoReplenish(this,key);
-                        }*/
                     } else {
                         l.count -= add;
                         l.suspend(add);
@@ -231,52 +129,10 @@ public class Technology extends Building {
                 }
             }
         }
-        if (completedLines.size() > 0){
-            UUID nextId = null;
-            if(line.size() >= 2){
-                nextId = line.get(1).id; //第二条生产线
-            }
-            ScienceLine l= __delLine(completedLines.get(0));
-            delLine = l;
-            if(nextId != null){
-                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
-            }else{
-                this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
-            }
-            //生产线完成通知
-            MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
-        }
-        if(this.dbTimer.update(diffNano)) {
-            GameDb.saveOrUpdate(this); // this will not ill-form other transaction due to all action are serialized
-            if(delLine!=null){
-                 GameDb.delete(delLine);
-                delLine=null;
-            }
-        }
+        delComplementLine(completedLines);//删除已完成线
+        saveAndUpdate(diffNano);//定时更新
     }
 
-    public boolean delshelf(ItemKey id, int n, boolean unLock) {
-        if(this.shelf.del(id, n)) {
-            if(unLock)
-                this.store.unLock(id, n);
-            else{//如果是消费，那么需要消费lock的数量
-                this.store.consumeLock(id, n);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public boolean addshelf(Item item, int price, boolean autoReplenish) {
-        if(!shelfAddable(item.getKey()) || !this.store.has(item.getKey(),item.getN()))
-            return false;
-        if(this.shelf.add(item, price,autoReplenish)) {
-            this.store.lock(item.getKey(), item.getN());
-            return true;
-        }
-        else
-            return false;
-    }
     /*商品适配*/
     protected boolean shelfAddable(ItemKey k) {
         return k.meta instanceof MetaScienceItem;
@@ -352,11 +208,7 @@ public class Technology extends Building {
         return shelf;
     }
 
-    public List<Line> getLine() {
-        return line;
-    }
-
-    public SciencevBox getBoxStore() {
+    public ScienceBox getBoxStore() {
         return boxStore;
     }
 

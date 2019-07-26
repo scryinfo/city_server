@@ -5483,44 +5483,40 @@ public class GameSession {
         this.write(Package.create(cmd,builder.build()));
     }
 
-    public static  void createRole( Gs.CreateRole c,String accountName){
-        if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN || c.getName().isEmpty() || c.getName().length() > MAX_PLAYER_NAME_LEN)
+/*    public static void  testAddLine( Gs.AddLine newLine,Player player){
+        if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
             return;
-        //如果公司名存在，return
-        if(GameDb.companyNameIsInUsed(c.getCompanyName())){
+        UUID id = Util.toUuid(newLine.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.outOfBusiness() || (b.type() != MetaBuilding.TECHNOLOGY) || !b.ownerId().equals(player.id()))
             return;
-        }
-        Player p = new Player(c.getName(),accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
-        p.addMoney(999999999999999l);
-        LogDb.playerIncome(p.id(), 999999999999999l);
-        if(!GameDb.createPlayer(p)) {
-        }
-        else {
-            // this is fucking better, can keep the data consistency, however, it do update many times
-            MetaData.getAllDefaultToUseItemId().forEach(id->{
-                p.addItem(id, 0);
-                TechTradeCenter.instance().techCompleteAction(id, 0);
-            });
-            GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
-            LogDb.insertPlayerInfo(p.id(),c.getMale());
-            //复制eva元数据信息到数据库
-            List<Eva> evaList=new ArrayList<Eva>();
-            MetaData.getAllEva().forEach(m->{
-                evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
-            });
-            EvaManager.getInstance().addEvaList(evaList);
-            /*添加推广点数并初始化*/
-            List<PromotePoint> promotePoints=new ArrayList<>();
-            MetaData.getPromotionItem().values().forEach(pro->{
-                promotePoints.add(new PromotePoint(p.id(), pro.id,100));
-            });
-            PromotePointManager.getInstance().addPromotePointList(promotePoints);
-            /*添加科技点数分类并初始化*/
-            List<SciencePoint> sciencePoints = new ArrayList<>();
-            MetaData.getScienceItem().values().forEach(science->{
-                sciencePoints.add(new SciencePoint(p.id(), science.id, 100));
-            });
-            SciencePointManager.getInstance().addSciencePointList(sciencePoints);
-        }
+        MetaItem m = MetaData.getItem(newLine.getItemId());
+        if(m == null)
+            return;
+        Technology tec = (Technology) b;
+        ScienceLine line = tec.addLine(m, newLine.getWorkerNum(), newLine.getTargetNum());
+        if(line!=null)
+            GameDb.saveOrUpdate(tec);
     }
+
+    public static void addBuilding(Gs.AddBuilding c,Player player){
+        int mid = c.getId();
+        if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
+            return;
+        MetaBuilding m = MetaData.getBuilding(mid);
+        if(m == null)
+            return;
+        Coordinate ul = new Coordinate(c.getPos());
+        Building building = Building.create(mid, ul, player.id());
+        building.setName(player.getCompanyName());
+        boolean ok = City.instance().addBuilding(building);
+        if(!ok){
+        }
+        else{
+            building.postAddToWorld();
+        }
+    }*/
+
+    /*THE NEW PromotionCompany================*/
+
 }

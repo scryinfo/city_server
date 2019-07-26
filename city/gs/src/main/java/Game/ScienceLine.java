@@ -1,4 +1,4 @@
-package Game.Technology;
+package Game;
 
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
@@ -20,31 +20,31 @@ import java.util.concurrent.TimeUnit;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class ScienceLine {
     @Id
-    UUID id;
+   public UUID id;
 
     @Column(name = "itemId")
     @Convert(converter = MetaItem.Converter.class)
-    MetaItem item;
+    public MetaItem item;
 
     @Column(nullable = false)
-    int count;
+    public int count;
 
     @Column(nullable = false)
-    int targetNum;
+    public int targetNum;
 
     @Column(nullable = false)
-    int workerNum;
+    public int workerNum;
 
     @Column(nullable = false)
-    double accumulated;
+    public double accumulated;
 
     @Column(nullable = false)
-    boolean suspend = false;
+    public boolean suspend = false;
 
     @Column(nullable = false)
-    long ts = 0;      //生产开始时间
+    public long ts = 0;      //生产开始时间
 
-    protected ScienceLine() {
+    public ScienceLine() {
     }
 
     public ItemKey newItemKey(UUID pid){
@@ -133,7 +133,7 @@ public abstract class ScienceLine {
         return timer;
     }
 
-    int update(long diffNano,UUID onwerId) {
+    public int update(long diffNano,UUID onwerId) {
         int add = 0;
         if(this.timer.update(diffNano))
         {

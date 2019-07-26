@@ -222,8 +222,10 @@ public class MetaData {
                 return laboratory.get(id);*/
             case MetaBuilding.TECHNOLOGY:
                 return technology.get(id);
-            case MetaBuilding.PUBLIC:
-                return publicFacility.get(id);
+            /*case MetaBuilding.PUBLIC:
+                return publicFacility.get(id);*/
+            case MetaBuilding.PROMOTE:
+                return promotionCompany.get(id);
             case MetaBuilding.WAREHOUSE:
                 return warehouse.get(id);//集散中心（替换以前的人才中心）
         }
@@ -273,6 +275,10 @@ public class MetaData {
         return promotionItem;
     }
 
+    public static MetaPromotionCompany getPromotionCompany(int id){
+        return promotionCompany.get(id);
+    }
+
     public static MetaPromotionItem getPromotionItem(int id) {
         return promotionItem.get(id);
     }
@@ -301,7 +307,7 @@ public class MetaData {
         /*增加研究所生产列表*/
         MetaItem item = res == null ? getGood(id) : res;
         MetaItem item1=item == null ? getScienceItem(id) : item;
-        return item1 == null ? getPromotionItem(id):item;
+        return item1 == null ? getPromotionItem(id):item1;
     }
     public static AIBuilding getAIBuilding(long id) { return aiBuilding.get(id); }
     public static AIBuy getAIBuy(long id) {

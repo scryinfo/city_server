@@ -1,4 +1,4 @@
-package Game.Technology;
+package Game;
 
 import Game.IStorage;
 import Game.ItemKey;

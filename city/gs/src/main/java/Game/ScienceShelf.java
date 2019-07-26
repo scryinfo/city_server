@@ -1,7 +1,6 @@
-package Game.Technology;
+package Game;
 
-import Game.Item;
-import Game.ItemKey;
+import Game.Technology.Technology;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.SelectBeforeUpdate;

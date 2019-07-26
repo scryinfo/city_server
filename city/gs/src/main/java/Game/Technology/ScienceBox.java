@@ -12,12 +12,12 @@ import java.util.*;
 /*存放未开启的资料*/
 @Entity
 @SelectBeforeUpdate(false)
-public class SciencevBox {
+public class ScienceBox {
     @Id
     @GeneratedValue
     private UUID id;
 
-    public SciencevBox() {
+    public ScienceBox() {
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
