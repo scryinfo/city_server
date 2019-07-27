@@ -106,4 +106,7 @@ public class ScienceShelf{
         return true;
     }
 
+    public void cleanData(){
+        this.slots.clear();
+    }
 }

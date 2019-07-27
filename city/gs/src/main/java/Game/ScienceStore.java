@@ -105,4 +105,9 @@ public class ScienceStore{
             this.inHand.remove(m);
         return true;
     }
+
+    public void cleanData(){
+        this.inHand.clear();
+        this.locked.clear();
+    }
 }

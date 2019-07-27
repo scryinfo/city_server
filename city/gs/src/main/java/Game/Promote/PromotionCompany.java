@@ -74,7 +74,13 @@ public class PromotionCompany extends ScienceBase {
 
     @Override
     public Message detailProto() {
-        return null;
+        Gs.PromotionCompany.Builder builder = Gs.PromotionCompany.newBuilder();
+        builder.setInfo(super.toProto())
+                .setStoreNum(this.store.getAllNum())
+                .setShelfNum(this.shelf.getAllNum());
+        if(!line.isEmpty())
+            builder.addLine(line.get(0).toProto());
+        return builder.build();
     }
 
     @Override

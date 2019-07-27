@@ -299,7 +299,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryTypeBuildingDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryTypeBuildingDetail.PARSER,GameSession.class,"queryTypeBuildingDetail"));
 
 			//新版研究所=======================================
-			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//建筑详情
+			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//研究所建筑详情
 			table.put((short) GsCode.OpCode.addScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.AddLine.PARSER,GameSession.class,"addScienceLine"));//添加生产线
 			table.put((short) GsCode.OpCode.delScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.DelLine.PARSER,GameSession.class,"delScienceLine"));//添加生产线
 			table.put((short) GsCode.OpCode.setScienceLineOrder_VALUE, Wrapper.newWithMessageAsync(Gs.SetLineOrder.PARSER,GameSession.class,"setScienceLineOrder"));//调整生产线顺序
@@ -314,6 +314,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getScienceStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceStorageData"));
 			table.put((short) GsCode.OpCode.getScienceLineData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceLineData"));
 			table.put((short) GsCode.OpCode.getScienceItemSpeed_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceItemSpeed"));
+			//新版广告公司
+			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//建筑详情
 			if(GlobalConfig.debug()){
 
 			}

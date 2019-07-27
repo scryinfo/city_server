@@ -161,4 +161,12 @@ public abstract class ScienceBase extends Building{
             }
         }
     }
+
+    public void cleanData(){
+        //删除生产线
+        GameDb.delete(line);
+        this.line.clear();
+        this.store.cleanData();
+        this.shelf.cleanData();
+    }
 }

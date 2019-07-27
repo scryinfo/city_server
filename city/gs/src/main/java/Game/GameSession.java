@@ -17,6 +17,7 @@ import Game.Meta.*;
 import Game.OffLineInfo.OffLineInformation;
 import Game.Promote.PromotePoint;
 import Game.Promote.PromotePointManager;
+import Game.Promote.PromotionCompany;
 import Game.Technology.*;
 import Game.Util.*;
 import Game.ddd.*;
@@ -539,9 +540,9 @@ public class GameSession {
         if (b instanceof Apartment) { //住宅停业，清空入住人数
             Apartment apartment = (Apartment) b;
             apartment.deleteRenter();
-        } else if (b instanceof Technology) {  //Todo
-            Technology technology = (Technology) b;
-           //technology.clear();//清除研究队列
+        } else if (b instanceof Technology||b instanceof PromotionCompany) {  //Todo
+            ScienceBase science = (ScienceBase) b;
+            science.cleanData();//清除建筑数据
         } else if (b instanceof PublicFacility) {
             if(b.type()==MetaBuilding.RETAIL){
                 RetailShop r = (RetailShop) b;
@@ -5185,29 +5186,29 @@ public class GameSession {
             return;
         UUID id = Util.toUuid(newLine.getId().toByteArray());
         Building b = City.instance().getBuilding(id);
-        if(b == null || b.outOfBusiness() || (b.type() != MetaBuilding.TECHNOLOGY) || !b.ownerId().equals(player.id()))
+        if(b == null||b.outOfBusiness() || !(b instanceof ScienceBase) || !b.ownerId().equals(player.id()))
             return;
         MetaItem m = MetaData.getItem(newLine.getItemId());
         if(m == null)
             return;
-        Technology tec = (Technology) b;
-        ScienceLine line = tec.addLine(m, tec.getWorkerNum(), newLine.getTargetNum());
+        ScienceBase science = (ScienceBase) b;
+        ScienceLine line = science.addLine(m, science.getWorkerNum(), newLine.getTargetNum());
         if(line!=null)
-            GameDb.saveOrUpdate(tec);
+            GameDb.saveOrUpdate(science);
     }
     //删除生产线
     public void delScienceLine(short cmd,Message message){
         Gs.DelLine c = (Gs.DelLine) message;
         UUID id = Util.toUuid(c.getBuildingId().toByteArray());
         Building b = City.instance().getBuilding(id);
-        if (b == null || b.outOfBusiness() ||b.type() != MetaBuilding.TECHNOLOGY|| !b.ownerId().equals(player.id()))
+        if (b == null || b.outOfBusiness() ||!(b instanceof ScienceBase)|| !b.ownerId().equals(player.id()))
             return;
         UUID lineId = Util.toUuid(c.getLineId().toByteArray());
-        Technology tec = (Technology) b;
-        if(tec.__delLine(lineId)!=null) {
-            GameDb.saveOrUpdate(tec);
-            if(tec.line.size() > 0){
-                this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(tec.line.get(0).getId())).build()));
+        ScienceBase science = (ScienceBase) b;
+        if(science.__delLine(lineId)!=null) {
+            GameDb.saveOrUpdate(science);
+            if(science.line.size() > 0){
+                this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(science.line.get(0).getId())).build()));
             }else{
                 this.write(Package.create(cmd, c));
             }
@@ -5518,5 +5519,18 @@ public class GameSession {
     }*/
 
     /*THE NEW PromotionCompany================*/
+
+    public void detailPromotionCompany(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bId = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bId);
+        if(building==null||!(building instanceof PromotionCompany))
+            return;
+        registBuildingDetail(building);
+        updateBuildingVisitor(building);
+        this.write(Package.create(cmd, building.detailProto()));
+    }
+
+
 
 }

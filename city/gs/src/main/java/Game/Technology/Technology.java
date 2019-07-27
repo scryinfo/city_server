@@ -215,4 +215,11 @@ public class Technology extends ScienceBase {
     public MetaTechnology getMeta() {
         return meta;
     }
+    /*清空建筑的所有的数据*/
+
+    @Override
+    public void cleanData() {
+        super.cleanData();
+        this.boxStore.cleanData();
+    }
 }

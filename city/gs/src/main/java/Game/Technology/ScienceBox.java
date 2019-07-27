@@ -61,4 +61,7 @@ public class ScienceBox {
         }
         return true;
     }
+    public void cleanData(){
+        this.allBox.clear();
+    }
 }
