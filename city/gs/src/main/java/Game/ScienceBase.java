@@ -185,4 +185,16 @@ public abstract class ScienceBase extends Building{
         this.store.cleanData();
         this.shelf.cleanData();
     }
+
+    public ScienceStore getStore() {
+        return store;
+    }
+
+    public ScienceShelf getShelf() {
+        return shelf;
+    }
+
+    public List<ScienceLine> getLine() {
+        return line;
+    }
 }

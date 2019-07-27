@@ -142,4 +142,8 @@ public class PromotionCompany extends ScienceBase {
         delComplementLine(completedLines);//删除已完成线
         saveAndUpdate(diffNano);//定时更新
     }
+
+    public boolean hasEnoughPromotionPointInStore(ItemKey key,int num){
+        return this.store.has(key, num);
+    }
 }

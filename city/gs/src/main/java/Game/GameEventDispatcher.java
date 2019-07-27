@@ -316,6 +316,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getScienceItemSpeed_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceItemSpeed"));
 			//新版广告公司
 			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//建筑详情
+			table.put((short) GsCode.OpCode.usePromotionPoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"usePromotionPoint"));//建筑详情
+
 			if(GlobalConfig.debug()){
 
 			}
