@@ -22,13 +22,13 @@ public class ScienceShelf{
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, ScienceShelf.Content> slots = new HashMap<>();//出售中科技
 
-    public void updateAutoReplenish(Technology technology, ItemKey key) {
+    public void updateAutoReplenish(ScienceBase scienceBase, ItemKey key) {
         //更新货架： 执行一次下架上架操作
         Content content = this.getContent(key);
         if(content!=null&&content.autoReplenish){
-            technology.delshelf(key,content.n, true);
-            Item itemInStore = new Item(key,technology.store.getItemCount(key));
-            technology.addshelf(itemInStore,content.price, content.autoReplenish);
+            scienceBase.delshelf(key,content.n, true);
+            Item itemInStore = new Item(key,scienceBase.store.getItemCount(key));
+            scienceBase.addshelf(itemInStore,content.price, content.autoReplenish);
         }
     }
 

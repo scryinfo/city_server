@@ -18,10 +18,14 @@ import java.util.UUID;
 /*新版推广公司*/
 @Entity
 public class PromotionCompany extends ScienceBase {
-    private static final int DB_UPDATE_INTERVAL_MS = 30000;
     @Transient
     private MetaPromotionCompany meta;
 
+    public PromotionCompany() {}
+    public PromotionCompany(MetaPromotionCompany meta, Coordinate pos, UUID ownerId) {
+        super(meta, pos, ownerId);
+        this.meta = meta;
+    }
 
     @Override
     protected ScienceLine addLine(MetaItem item, int workerNum, int targetNum) {

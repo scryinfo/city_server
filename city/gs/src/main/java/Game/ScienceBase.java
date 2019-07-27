@@ -41,8 +41,8 @@ public abstract class ScienceBase extends Building{
     }
     public ScienceBase(MetaBuilding meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        this.store = store;
-        this.shelf = shelf;
+        this.store = new ScienceStore();
+        this.shelf = new ScienceShelf();
     }
 
     @Transient
@@ -85,6 +85,10 @@ public abstract class ScienceBase extends Building{
         return  true;
     }
 
+    public void updateAutoReplenish(ItemKey key){
+        this.shelf.updateAutoReplenish(this,key);
+    }
+
     public boolean shelfSet(Item item, int price) {
         ScienceShelf.Content content = this.shelf.getContent(item.getKey());
         if(content == null)
@@ -109,6 +113,15 @@ public abstract class ScienceBase extends Building{
             return true;
         } else
             return false;
+    }
+
+    public boolean checkShelfSlots(ItemKey key,int num){
+        ScienceShelf.Content content = this.shelf.getContent(key);
+        if(content==null||content.n<num){
+            return false;
+        }else{
+            return true;
+        }
     }
 
     public boolean addshelf(Item item, int price, boolean autoReplenish) {
@@ -160,6 +173,9 @@ public abstract class ScienceBase extends Building{
                 delLine=null;
             }
         }
+    }
+    public ScienceShelf.Content getContent(ItemKey key){
+        return  this.shelf.getContent(key);
     }
 
     public void cleanData(){

@@ -27,6 +27,11 @@ public class Technology extends ScienceBase {
     protected ScienceBox boxStore;
 
     public Technology() { }
+    public Technology(MetaTechnology meta, Coordinate pos, UUID ownerId) {
+        super(meta, pos, ownerId);
+        this.meta = meta;
+        this.boxStore = new ScienceBox();
+    }
 
     /*添加生产线*/
     public  ScienceLine addLine(MetaItem item, int workerNum, int targetNum){
@@ -57,13 +62,6 @@ public class Technology extends ScienceBase {
         this.meta = (MetaTechnology) this.metaBuilding;
     }
 
-    public Technology(MetaTechnology meta, Coordinate pos, UUID ownerId) {
-        super(meta, pos, ownerId);
-        this.meta = meta;
-        this.store = new ScienceStore();
-        this.shelf = new ScienceShelf();
-        this.boxStore = new ScienceBox();
-    }
     @Override
     public int quality() {
         return 0;
@@ -183,22 +181,8 @@ public class Technology extends ScienceBase {
         return totalPoint;
     }
 
-    public ScienceShelf.Content getContent(ItemKey key){
-        return  this.shelf.getContent(key);
-    }
 
-    public void updateAutoReplenish(ItemKey key){
-        this.shelf.updateAutoReplenish(this,key);
-    }
 
-    public boolean checkBuyScience(ItemKey key,int num){
-        ScienceShelf.Content content = this.shelf.getContent(key);
-        if(content==null||content.n<num){
-            return false;
-        }else{
-            return true;
-        }
-    }
 
     public ScienceStore getStore() {
         return store;

@@ -109,6 +109,8 @@
 		<mapping class="Game.ScienceShelf$Content"></mapping>
 		<mapping class="Game.Technology.SciencePoint"></mapping>
 		<mapping class="Game.Promote.PromotePoint"></mapping>
+		<mapping class="Game.Promote.PromotionCompany"></mapping>
+		<mapping class="Game.Promote.PromotionCompany$Line"></mapping>
 
 	</session-factory>
 </hibernate-configuration> 
