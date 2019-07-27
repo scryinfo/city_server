@@ -34,36 +34,6 @@ public class BrandManager {
         instance = GameDb.getBrandManager();
         instance.refineCache();
         instance.getAllBuildingBrandOrQuality();
-        /*添加生产线测试*/
-      /*  Gs.AddLine.Builder builder = Gs.AddLine.newBuilder();
-        builder.setId(Util.toByteString(UUID.fromString("4964aeaf-4ffd-471d-a9d7-d97c0d221300"))).setTargetNum(100).setItemId(1500012).setWorkerNum(144);
-        Player player = GameDb.getPlayer(UUID.fromString("443888d0-3031-49da-839b-978a112fb6bb"));
-        GameSession.testAddLine(builder.build(),player);
-        builder.setId(Util.toByteString(UUID.fromString("4964aeaf-4ffd-471d-a9d7-d97c0d221300"))).setTargetNum(200).setItemId(1500013).setWorkerNum(144);
-        GameSession.testAddLine(builder.build(),player);*/
-        Player player = GameDb.getPlayer(UUID.fromString("443888d0-3031-49da-839b-978a112fb6bb"));
-      /*1.创建玩家*/
-       /* Gs.CreateRole.Builder builder1 = Gs.CreateRole.newBuilder();
-        builder1.setCompanyName("sakou").setMale(false).setFaceId("1-6,10,1,1,2,15,4,4,10,3,3,1,8,9,7,1,5,2,")
-                .setName("sakou");
-        GameSession.testCreateRole(builder1.build(),"15215000187");*/
-      /*2.添加建筑*/
-     /*
-        Gs.AddBuilding.Builder builder2 = Gs.AddBuilding.newBuilder();
-        Gs.MiniIndex miniIndex = new Coordinate(35,41).toProto();
-        builder2.setId(1600003).setPos(miniIndex);
-        GameSession.testAddBuilding(builder2.build(),player);*/
-        /*3.开业*/
-      /*  Gs.Id.Builder id = Gs.Id.newBuilder().setId(Util.toByteString(UUID.fromString("5342f5b5-4455-44a1-a524-9df1b624509f")));
-        GameSession.testStartBusiness(id.build(),player);*/
-        /*添加生产线3条*/
-        Gs.AddLine.Builder builder = Gs.AddLine.newBuilder();
-        builder.setId(Util.toByteString(UUID.fromString("5342f5b5-4455-44a1-a524-9df1b624509f"))).setTargetNum(100).setItemId(1600012).setWorkerNum(144);
-        for (int i = 1; i <=3 ; i++) {
-            builder.setItemId(builder.getItemId() + 1);
-            GameSession.testAddLine(builder.build(),player);
-        }
-
     }
 
     @Id

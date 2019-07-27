@@ -2,6 +2,8 @@ package Game.Promote;
 
 import Game.Eva.EvaManager;
 import Game.GameDb;
+import Game.Technology.SciencePoint;
+import Game.Technology.SciencePointManager;
 import Game.Timers.PeriodicTimer;
 
 import java.util.*;
@@ -45,7 +47,7 @@ public class PromotePointManager {
     }
 
     /*更新推广点数*/
-    public void updateEva(PromotePoint promote) {
+    public void updatePromotionPoint(PromotePoint promote) {
         Set<PromotePoint> s=promoteMap.get(promote.getPid());
         s.remove(getPromotePoint(promote.getPid(),promote.getType()));
         s.add(promote);
@@ -63,5 +65,14 @@ public class PromotePointManager {
 
     public Map<UUID, Set<PromotePoint>> getPromoteMap() {
         return promoteMap;
+    }
+
+    public PromotePoint updatePlayerPromotePoint(UUID pid, int type, int point){
+        PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(pid, type);//获取玩家的推广类型点数
+        if(point<0&&Math.abs(point)>promotePoint.promotePoint){/*如果是扣除，还需判断库存是否充足*/
+            return null;
+        }
+        promotePoint.promotePoint += point;
+        return promotePoint;
     }
 }

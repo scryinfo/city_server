@@ -10,6 +10,7 @@ import gs.Gs;
 import gscode.GsCode;
 
 import javax.persistence.Entity;
+import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,7 @@ public class PromotionCompany extends ScienceBase {
         return k.meta instanceof MetaPromotionItem;
     }
 
-    @Override
+    @PostLoad
     protected void _1() throws InvalidProtocolBufferException {
         this.meta = (MetaPromotionCompany) this.metaBuilding;
     }
@@ -112,6 +113,7 @@ public class PromotionCompany extends ScienceBase {
             Line l = (Line) this.line.get(0);
             if (l.isPause()) {
                 if (l.isComplete()) {
+                    System.err.println("生产线已完成");
                     completedLines.add(l.id);
                 }
             }
@@ -125,6 +127,8 @@ public class PromotionCompany extends ScienceBase {
             } else {
                 int add = l.update(diffNano, this.ownerId()); //新增了玩家id，作为eva查询
                 if (add > 0) {
+                    System.err.println("增加："+add);
+                    System.err.println("当前生产线："+l.item.id+"已生产："+l.count);
                     ItemKey key = l.newItemKey(ownerId());
                     if (this.store.offset(key, add)) {//添加到未开启宝箱中
                         broadcastLineInfo(l, key);//广播
@@ -134,8 +138,8 @@ public class PromotionCompany extends ScienceBase {
                     }
                 }
             }
-            delComplementLine(completedLines);//删除已完成线
-            saveAndUpdate(diffNano);//定时更新
         }
+        delComplementLine(completedLines);//删除已完成线
+        saveAndUpdate(diffNano);//定时更新
     }
 }

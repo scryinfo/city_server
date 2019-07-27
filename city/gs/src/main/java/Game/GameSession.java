@@ -18,7 +18,9 @@ import Game.OffLineInfo.OffLineInformation;
 import Game.Promote.PromotePoint;
 import Game.Promote.PromotePointManager;
 import Game.Promote.PromotionCompany;
-import Game.Technology.*;
+import Game.Technology.SciencePoint;
+import Game.Technology.SciencePointManager;
+import Game.Technology.Technology;
 import Game.Util.*;
 import Game.ddd.*;
 import Shared.*;
@@ -524,7 +526,7 @@ public class GameSession {
         b.createNpc();//产生npc
         if(b.startBusiness(player)){
             this.write(Package.create(cmd,c));
-            GameDb.saveOrUpdate(b);
+            //GameDb.saveOrUpdate(b);
             GameDb.saveOrUpdate(Arrays.asList(b,player));
         }
     }
@@ -547,10 +549,10 @@ public class GameSession {
             if(b.type()==MetaBuilding.RETAIL){
                 RetailShop r = (RetailShop) b;
                 r.cleanData();
-            }else {
+            }/*else {
                 PublicFacility facility = (PublicFacility) b;
                 facility.clear();//清除推广队列
-            }
+            }*/
         } else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
             FactoryBase f = (FactoryBase) b;
             f.cleanData();
@@ -5264,7 +5266,7 @@ public class GameSession {
         GameDb.saveOrUpdate(tec);
         this.write(Package.create(cmd, builder.build()));
     }
-    //研究所上架
+    //研究所或推广公司上架
     public void scienceShelfAdd(short cmd,Message message) throws Exception {
         Gs.ShelfAdd c = (Gs.ShelfAdd)message;
         Item item = null;
@@ -5310,7 +5312,7 @@ public class GameSession {
         Item item = new Item(c.getItem());
         UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
         Building building = City.instance().getBuilding(bid);
-        if(building == null || !(building instanceof Technology) || !building.canUseBy(player.id()) || building.outOfBusiness())
+        if(building == null || !(building instanceof ScienceBase)|| !building.canUseBy(player.id()) || building.outOfBusiness())
             return;
         Technology tec = (Technology) message;
         ScienceShelf.Content content = tec.getContent(item.key);
@@ -5371,8 +5373,13 @@ public class GameSession {
             seller.addMoney(cost);//卖家收入
             int itemId = item.key.meta.id;
             //增加玩家的科技点数
-            SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), itemId, item.n);
-            SciencePointManager.getInstance().updateSciencePoint(sciencePoint);
+            if(sellBuilding.type()==MetaBuilding.TECHNOLOGY) {
+                SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), itemId, item.n);
+                SciencePointManager.getInstance().updateSciencePoint(sciencePoint);
+            }else{
+                PromotePoint promotePoint = PromotePointManager.getInstance().updatePlayerPromotePoint(player.id(), itemId, item.n);
+                PromotePointManager.getInstance().updatePromotionPoint(promotePoint);
+            }
             //日志记录
             LogDb.playerPay(player.id(),cost);
             LogDb.playerIncome(seller.id(),cost);
@@ -5380,7 +5387,7 @@ public class GameSession {
                     item.key.producerId, sellBuilding.id(),0,itemId,null);
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),item.n,c.getPrice(),itemId);//离线通知统计
-            GameDb.saveOrUpdate(Arrays.asList(player, seller,sellBuilding));
+            GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
             content = science.getContent(item.key);
             sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
@@ -5478,196 +5485,7 @@ public class GameSession {
         }
         this.write(Package.create(cmd,builder.build()));
     }
-
-
-
-
-
-
-    public static void testCreateRole( Gs.CreateRole c,String accountName){
-        if(c.getFaceId().length() > Player.MAX_FACE_ID_LEN || c.getName().isEmpty() || c.getName().length() > MAX_PLAYER_NAME_LEN)
-            return;
-        //如果公司名存在，return
-        if(GameDb.companyNameIsInUsed(c.getCompanyName())){
-            return;
-        }
-        Player p = new Player(c.getName(),accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
-        p.addMoney(999999999999999l);
-        LogDb.playerIncome(p.id(), 999999999999999l);
-        if(!GameDb.createPlayer(p)) {
-        }
-        else {
-            // this is fucking better, can keep the data consistency, however, it do update many times
-            MetaData.getAllDefaultToUseItemId().forEach(id->{
-                p.addItem(id, 0);
-                TechTradeCenter.instance().techCompleteAction(id, 0);
-            });
-            GameDb.saveOrUpdate(Arrays.asList(p, TechTradeCenter.instance()));
-            LogDb.insertPlayerInfo(p.id(),c.getMale());
-            //复制eva元数据信息到数据库
-            List<Eva> evaList=new ArrayList<Eva>();
-            MetaData.getAllEva().forEach(m->{
-                evaList.add(new Eva(p.id(),m.at,m.bt,m.lv,m.cexp,m.b));
-            });
-            EvaManager.getInstance().addEvaList(evaList);
-            /*添加推广点数并初始化*/
-            List<PromotePoint> promotePoints=new ArrayList<>();
-            MetaData.getPromotionItem().values().forEach(pro->{
-                promotePoints.add(new PromotePoint(p.id(), pro.id,100));
-            });
-            PromotePointManager.getInstance().addPromotePointList(promotePoints);
-            /*添加科技点数分类并初始化*/
-            List<SciencePoint> sciencePoints = new ArrayList<>();
-            MetaData.getScienceItem().values().forEach(science->{
-                sciencePoints.add(new SciencePoint(p.id(), science.id, 100));
-            });
-            SciencePointManager.getInstance().addSciencePointList(sciencePoints);
-        }
-
-
-    }
-
-    //创建角色
-    public static void  testAddLine( Gs.AddLine newLine,Player player){
-        if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
-            return;
-        UUID id = Util.toUuid(newLine.getId().toByteArray());
-        Building b = City.instance().getBuilding(id);
-        if(b == null || b.outOfBusiness() ||!(b instanceof  ScienceBase)|| !b.ownerId().equals(player.id())){
-            return;
-        }
-        MetaItem m = MetaData.getItem(newLine.getItemId());
-        if(m == null)
-            return;
-        Technology tec = (Technology) b;
-        ScienceLine line = tec.addLine(m, newLine.getWorkerNum(), newLine.getTargetNum());
-        if(line!=null)
-            GameDb.saveOrUpdate(tec);
-    }//添加生产线
-    public static void testAddBuilding(Gs.AddBuilding c,Player player){
-        int mid = c.getId();
-        if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
-            return;
-        MetaBuilding m = MetaData.getBuilding(mid);
-        if(m == null)
-            return;
-        Coordinate ul = new Coordinate(c.getPos());
-        Building building = Building.create(mid, ul, player.id());
-        building.setName(player.getCompanyName());
-        boolean ok = City.instance().addBuilding(building);
-        if(!ok){
-        }
-        else{
-            building.postAddToWorld();
-        }
-    }//添加建筑
-    public static void testStartBusiness(Gs.Id c,Player player) {
-        UUID id = Util.toUuid(c.getId().toByteArray());
-        Building b = City.instance().getBuilding(id);
-        if(b == null || !b.ownerId().equals(player.id()))
-            return;
-        if(player.money() < b.allSalary()) {
-            return;
-        }
-        b.createNpc();//产生npc
-        if(b.startBusiness(player)){
-            GameDb.saveOrUpdate(b);
-            GameDb.saveOrUpdate(Arrays.asList(b,player));
-        }
-    }//开业
-
-    public static void testSetScienceAutoReplenish(Gs.setAutoReplenish c,Player player) throws Exception {
-        ItemKey itemKey = new ItemKey(c.getIKey());
-        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
-        Building building = City.instance().getBuilding(id);
-        if(building == null || !(building instanceof ScienceBase)|| !building.canUseBy(player.id()) || building.outOfBusiness())
-            return;
-        ScienceBase science = (ScienceBase) building;
-        ScienceShelf.Content i = science.getContent(itemKey);
-        if(science.setAutoReplenish(itemKey,c.getAutoRepOn())) {
-            //处理自动补货
-            if(i != null && i.autoReplenish){
-                science.updateAutoReplenish(itemKey);
-            }
-            GameDb.saveOrUpdate(science);
-        }
-    }//设置自动补货
-
-    public static void testShelfAdd( Gs.ShelfAdd c,Player player){
-        Item item = null;
-        try {
-            item = new Item(c.getItem());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("转换错误");
-        }
-        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
-        Building building = City.instance().getBuilding(id);
-        if(building == null|| !(building instanceof Technology)||!building.canUseBy(player.id())||!(item.key.meta instanceof MetaScienceItem))
-            return;
-        Technology tec = (Technology) building;
-        if(tec.addshelf(item, c.getPrice(),c.getAutoRepOn())){
-            GameDb.saveOrUpdate(tec);
-            Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
-        }else{
-            System.err.println("数量不足");
-        }
-    }  //测试上架
-    public static void testBuyInshelf(Gs.BuySciencePoint c,Player player) throws Exception {
-        if(c.getPrice() <= 0)
-            return;
-        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
-        UUID buyerId = Util.toUuid(c.getBuyerId().toByteArray());//由于购买者就是当前玩家，所以不需要传递玩家id
-        Building sellBuilding = City.instance().getBuilding(bid);
-        if(sellBuilding == null || !(sellBuilding instanceof ScienceBase)||sellBuilding.canUseBy(buyerId) || sellBuilding.outOfBusiness())
-            return;
-        Item item = new Item(c.getItem());
-        //1.检测购买的数量是否充足（不充足返回错误码）
-        //2.购买科技点数（建筑增加今日营收，以及日志记录）
-        //3.购买者增加对应的eva点数（需等eva改版完成）
-        //4.（玩家消费记录）、（建筑）以及（建筑主人）收入
-        ScienceBase science = (ScienceBase) sellBuilding;
-        if(science.checkShelfSlots(item.key,item.n)){
-            ScienceShelf.Content content = science.getContent(item.key);
-            //计算费用
-            int cost = item.n * content.price;
-            //消费货架数量
-            science.delshelf(item.key, item.n, false);
-            sellBuilding.updateTodayIncome(cost);
-            //玩家支出和收入记录
-            Player seller = GameDb.getPlayer(science.ownerId());
-            player.decMoney(cost);//消费者支出
-            seller.addMoney(cost);//卖家收入
-            int itemId = item.key.meta.id;
-            //增加玩家的科技点数
-            SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), itemId, item.n);
-            SciencePointManager.getInstance().updateSciencePoint(sciencePoint);
-            //日志记录
-            LogDb.playerPay(player.id(),cost);
-            LogDb.playerIncome(seller.id(),cost);
-            LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
-                    item.key.producerId, sellBuilding.id(),0,itemId,null);
-            LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
-            LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),item.n,c.getPrice(),itemId);//离线通知统计
-            GameDb.saveOrUpdate(Arrays.asList(player, seller,sellBuilding));
-            //推送商品变化通知
-            content = science.getContent(item.key);
-            sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
-        }else{
-            System.err.println("货架数量不足");
-        }
-
-    }
-
-
-
-
-
-
-
-
     /*THE NEW PromotionCompany================*/
-
     public void detailPromotionCompany(short cmd,Message message){
         Gs.Id id = (Gs.Id) message;
         UUID bId = Util.toUuid(id.getId().toByteArray());
