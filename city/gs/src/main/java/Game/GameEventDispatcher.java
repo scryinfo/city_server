@@ -298,26 +298,28 @@ public class GameEventDispatcher extends DispatcherBase {
 			//查询小地图建筑类别
 			table.put((short) GsCode.OpCode.queryTypeBuildingDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryTypeBuildingDetail.PARSER,GameSession.class,"queryTypeBuildingDetail"));
 
-			//新版研究所=======================================
+			//新版研究所===============================
 			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//研究所建筑详情
+			table.put((short) GsCode.OpCode.openScienceBox_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"openScienceBox"));
+			table.put((short) GsCode.OpCode.useSciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"useSciencePoint"));
+
+			//新版广告公司=============================
+			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//建筑详情
+			table.put((short) GsCode.OpCode.usePromotionPoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"usePromotionPoint"));//建筑详情
+
+			/*研究所、推广公司公用协议*/
 			table.put((short) GsCode.OpCode.addScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.AddLine.PARSER,GameSession.class,"addScienceLine"));//添加生产线
 			table.put((short) GsCode.OpCode.delScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.DelLine.PARSER,GameSession.class,"delScienceLine"));//添加生产线
 			table.put((short) GsCode.OpCode.setScienceLineOrder_VALUE, Wrapper.newWithMessageAsync(Gs.SetLineOrder.PARSER,GameSession.class,"setScienceLineOrder"));//调整生产线顺序
-			table.put((short) GsCode.OpCode.openScienceBox_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"openScienceBox"));
 			table.put((short) GsCode.OpCode.scienceShelfAdd_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfAdd.PARSER,GameSession.class,"scienceShelfAdd"));
 			table.put((short) GsCode.OpCode.setScienceAutoReplenish_VALUE, Wrapper.newWithMessageAsync(Gs.setAutoReplenish.PARSER,GameSession.class,"setScienceAutoReplenish"));
 			table.put((short) GsCode.OpCode.scienceShelfDel_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfDel.PARSER,GameSession.class,"scienceShelfDel"));
 			table.put((short) GsCode.OpCode.scienceShelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfSet.PARSER,GameSession.class,"scienceShelfSet"));
 			table.put((short) GsCode.OpCode.buySciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.BuySciencePoint.PARSER,GameSession.class,"buySciencePoint"));
-			table.put((short) GsCode.OpCode.useSciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"useSciencePoint"));
 			table.put((short) GsCode.OpCode.getScienceShelfData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceShelfData"));
 			table.put((short) GsCode.OpCode.getScienceStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceStorageData"));
 			table.put((short) GsCode.OpCode.getScienceLineData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceLineData"));
 			table.put((short) GsCode.OpCode.getScienceItemSpeed_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceItemSpeed"));
-			//新版广告公司
-			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//建筑详情
-			table.put((short) GsCode.OpCode.usePromotionPoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"usePromotionPoint"));//建筑详情
-
 			if(GlobalConfig.debug()){
 
 			}

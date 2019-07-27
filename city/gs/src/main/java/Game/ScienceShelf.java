@@ -1,6 +1,5 @@
 package Game;
 
-import Game.Technology.Technology;
 import gs.Gs;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.SelectBeforeUpdate;
@@ -22,13 +21,13 @@ public class ScienceShelf{
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, ScienceShelf.Content> slots = new HashMap<>();//出售中科技
 
-    public void updateAutoReplenish(ScienceBase scienceBase, ItemKey key) {
+    public void updateAutoReplenish(ScienceBuildingBase scienceBuildingBase, ItemKey key) {
         //更新货架： 执行一次下架上架操作
         Content content = this.getContent(key);
         if(content!=null&&content.autoReplenish){
-            scienceBase.delshelf(key,content.n, true);
-            Item itemInStore = new Item(key,scienceBase.store.getItemCount(key));
-            scienceBase.addshelf(itemInStore,content.price, content.autoReplenish);
+            scienceBuildingBase.delshelf(key,content.n, true);
+            Item itemInStore = new Item(key, scienceBuildingBase.store.getItemCount(key));
+            scienceBuildingBase.addshelf(itemInStore,content.price, content.autoReplenish);
         }
     }
 

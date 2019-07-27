@@ -17,7 +17,7 @@ import java.util.UUID;
 
 /*研究所与推广公司公用信息*/
 @Entity
-public abstract class ScienceBase extends Building{
+public abstract class ScienceBuildingBase extends Building{
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     //科技资料库
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
@@ -31,15 +31,15 @@ public abstract class ScienceBase extends Building{
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKeyColumn(name = "line_id")
-    public List<ScienceLine> line= new ArrayList<>();
+    public List<ScienceLineBase> line= new ArrayList<>();
 
 
     @Transient
-    protected ScienceLine delLine=null;//当前要删除的生产线
+    protected ScienceLineBase delLine=null;//当前要删除的生产线
 
-    public ScienceBase() {
+    public ScienceBuildingBase() {
     }
-    public ScienceBase(MetaBuilding meta, Coordinate pos, UUID ownerId) {
+    public ScienceBuildingBase(MetaBuilding meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.store = new ScienceStore();
         this.shelf = new ScienceShelf();
@@ -48,11 +48,11 @@ public abstract class ScienceBase extends Building{
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
 
-    protected abstract ScienceLine addLine(MetaItem item, int workerNum, int targetNum);
+    protected abstract ScienceLineBase addLine(MetaItem item, int workerNum, int targetNum);
     protected abstract boolean shelfAddable(ItemKey k);
     protected abstract void _1() throws InvalidProtocolBufferException;
 
-    protected void __addLine(ScienceLine newLine){
+    protected void __addLine(ScienceLineBase newLine){
         if(line.indexOf(newLine.getId()) < 0){
             line.add(newLine);
         }
@@ -62,10 +62,10 @@ public abstract class ScienceBase extends Building{
         return line.size() > 0;
     }
 
-    public ScienceLine __delLine(UUID lineId) {
+    public ScienceLineBase __delLine(UUID lineId) {
         for (int i = line.size() - 1; i >= 0 ; i--) {
             if (line.get(i).getId().equals(lineId)){
-                ScienceLine remove = line.remove(i);
+                ScienceLineBase remove = line.remove(i);
                 if(line.size() > 0){
                     if(i==0) {//如果删除的就是当前生产线，第一条，则设置移除后的第一条为当前生产时间
                         line.get(0).ts = System.currentTimeMillis();
@@ -153,7 +153,7 @@ public abstract class ScienceBase extends Building{
             if(line.size() >= 2){
                 nextId = line.get(1).id; //第二条生产线
             }
-            ScienceLine l= __delLine(completedLines.get(0));
+            ScienceLineBase l= __delLine(completedLines.get(0));
             delLine = l;
             if(nextId != null){
                 this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).setNextlineId(Util.toByteString(nextId)).build()));
@@ -194,7 +194,10 @@ public abstract class ScienceBase extends Building{
         return shelf;
     }
 
-    public List<ScienceLine> getLine() {
+    public List<ScienceLineBase> getLine() {
         return line;
+    }
+    public boolean hasEnoughPintInStore(ItemKey key,int num){
+        return this.store.has(key, num);
     }
 }

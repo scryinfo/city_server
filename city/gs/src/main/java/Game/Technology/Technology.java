@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /*新版本研究所*/
 @Entity
-public class Technology extends ScienceBase {
+public class Technology extends ScienceBuildingBase {
     @Transient
     private MetaTechnology meta;
     //宝箱库
@@ -34,7 +34,7 @@ public class Technology extends ScienceBase {
     }
 
     /*添加生产线*/
-    public  ScienceLine addLine(MetaItem item, int workerNum, int targetNum){
+    public ScienceLineBase addLine(MetaItem item, int workerNum, int targetNum){
         if(!(item instanceof MetaScienceItem) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaScienceItem)item, targetNum, workerNum);
@@ -44,7 +44,7 @@ public class Technology extends ScienceBase {
     }
 
     @Entity
-    public final static class Line extends ScienceLine {
+    public final static class Line extends ScienceLineBase {
         public Line(MetaScienceItem item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
         }
@@ -136,7 +136,7 @@ public class Technology extends ScienceBase {
         return k.meta instanceof MetaScienceItem;
     }
     //广播
-    private void broadcastLineInfo(ScienceLine line,ItemKey key) {
+    private void broadcastLineInfo(ScienceLineBase line, ItemKey key) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(line.id))
                 .setNowCount(line.count)
@@ -154,10 +154,6 @@ public class Technology extends ScienceBase {
         }else {
             return true;
         }
-    }
-
-    public boolean hasEnoughSciencePointInStore(ItemKey key,int num){
-       return this.store.has(key, num);
     }
 
     /*参数1：宝箱类型，参数2：数量*/

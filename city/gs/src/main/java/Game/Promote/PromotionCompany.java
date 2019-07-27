@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /*新版推广公司*/
 @Entity
-public class PromotionCompany extends ScienceBase {
+public class PromotionCompany extends ScienceBuildingBase {
     @Transient
     private MetaPromotionCompany meta;
 
@@ -29,7 +29,7 @@ public class PromotionCompany extends ScienceBase {
     }
 
     @Override
-    protected ScienceLine addLine(MetaItem item, int workerNum, int targetNum) {
+    protected ScienceLineBase addLine(MetaItem item, int workerNum, int targetNum) {
         if(!(item instanceof MetaPromotionItem) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
         Line line = new Line((MetaPromotionItem)item, targetNum, workerNum);
@@ -39,7 +39,7 @@ public class PromotionCompany extends ScienceBase {
     }
 
     @Entity
-    public final static class Line extends ScienceLine {
+    public final static class Line extends ScienceLineBase {
         public Line(MetaPromotionItem item, int targetNum, int workerNum) {
             super(item, targetNum, workerNum);
         }
@@ -61,7 +61,7 @@ public class PromotionCompany extends ScienceBase {
     }
 
     //广播
-    private void broadcastLineInfo(ScienceLine line,ItemKey key) {
+    private void broadcastLineInfo(ScienceLineBase line, ItemKey key) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(line.id))
                 .setNowCount(line.count)
@@ -141,9 +141,5 @@ public class PromotionCompany extends ScienceBase {
         }
         delComplementLine(completedLines);//删除已完成线
         saveAndUpdate(diffNano);//定时更新
-    }
-
-    public boolean hasEnoughPromotionPointInStore(ItemKey key,int num){
-        return this.store.has(key, num);
     }
 }

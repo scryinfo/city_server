@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /*研究所生产线*/
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class ScienceLine {
+public abstract class ScienceLineBase {
     @Id
    public UUID id;
 
@@ -38,7 +38,7 @@ public abstract class ScienceLine {
     @Column(nullable = false)
     public long ts = 0;      //生产开始时间
 
-    public ScienceLine() {
+    public ScienceLineBase() {
     }
 
     public ItemKey newItemKey(UUID pid){
@@ -54,7 +54,7 @@ public abstract class ScienceLine {
     @Transient
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
-    public ScienceLine(MetaItem item, int targetNum, int workerNum) {
+    public ScienceLineBase(MetaItem item, int targetNum, int workerNum) {
         this.id = UUID.randomUUID();
         this.item = item;
         this.count = 0;
