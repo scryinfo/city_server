@@ -5510,7 +5510,7 @@ public class GameSession {
         builder.setBuildingId(id.getId());
         this.write(Package.create(cmd,builder.build()));
     }
-    //获取科技加点建筑生产列表的生产速度（推广公司、研究所）
+    //获取科技加点类建筑生产列表的生产速度（推广公司、研究所）
     public void getScienceItemSpeed(short cmd,Message message){
         Gs.Id id = (Gs.Id) message;
         UUID bid = Util.toUuid(id.getId().toByteArray());

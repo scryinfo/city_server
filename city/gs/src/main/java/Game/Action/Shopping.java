@@ -239,8 +239,8 @@ public class Shopping implements IAction {
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
-            BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
-            String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
+              BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
+              String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
                       chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
