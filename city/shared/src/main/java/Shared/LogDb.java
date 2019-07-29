@@ -24,6 +24,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.excludeId;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -83,7 +86,7 @@ public class LogDb {
 	//收入通知
 	private static final String INCOME_NOTIFY = "incomeNotify";
 
-	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//建筑收入者货架收入
+	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//建筑收入者货架收入（用于离线收入）
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -105,7 +108,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
-	private static MongoCollection<Document> buildingPay;		//建筑支出
+	private static MongoCollection<Document> buildingPay;		//建筑支出（不含详细信息，用于建筑曲线图支出统计，非经营详情）
 	private static MongoCollection<Document> flightBet;
 	private static MongoCollection<Document> laboratoryRecord;
 	private static MongoCollection<Document> promotionRecord;
@@ -354,51 +357,112 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
-												 MongoCollection<Document> collection,boolean isIncomne,UUID playerId)
+	public static List<Document> daySummaryShelfIncome(long yestodayStartTime, long todayStartTime,
+												 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
 		List<Document> documentList = new ArrayList<>();
-		String groupStr = "$r";
-		if (isIncomne) {
-			groupStr = "$d";
-		}
-		Document groupObject = new Document("_id",
-				new Document("r", groupStr));
-		Document projectObject = new Document()
-				.append("id", "$_id._id.r")
-				.append("total","$total")
-				.append("_id",0);
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("id", playerId),
+								eq("tp", buildType),
+								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a")),
-						Aggregates.project(projectObject)
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	public static List<Document> daySummaryShelf(long yestodayStartTime, long todayStartTime,
-												 MongoCollection<Document> collection,UUID playerId)
+	public static List<Document> daySummaryShelfPay(long yestodayStartTime, long todayStartTime,
+														 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("t","$t")
-				.append("tpi","$tpi")
-				.append("a","$a")
-				.append("p","$p")
-				.append("_id","$_id");
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.match(or(
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b","f"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryRetailShopIncome(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("d", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("tpi","p","a","t","d","b"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryApartmentIncome(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("d", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("p","a","t","d","b","mid"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryGroundIncome(long yestodayStartTime, long todayStartTime,
+														   MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("d", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("s","a","p","t"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryGroundPay(long yestodayStartTime, long todayStartTime,
+														MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
 								eq("r", playerId),
-								eq("d", playerId))),
-						Aggregates.project(projectObject)
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("s","a","p","t"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryStaffSalaryPay(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
+								eq("r", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("s","a","t","r","b"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -619,7 +683,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-
+	//统计建筑1天的支出（yty）
 	public static List<Document> buildingDayPaySummary(long yestodayStartTime, long todayStartTime)		//统计玩家建筑一天的所有支出（不含详细信息）
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -639,7 +703,7 @@ public class LogDb {
 		return documentList;
 	}
 
-	/*统计所有货架建筑的经营详情(包括了零售店)的货物销售详情*/
+	/*统计所有货架建筑的经营详情(包括了零售店)的货物销售详情(yty)*/
 	public static Map<Integer,List<Document>> buildingDaySaleDetailIncomeSummary(long yestodayStartTime, long todayStartTime){
 		Map<Integer, List<Document>> map = new HashMap<>();
 		List<Document> factoryInshelf = new ArrayList<>();
@@ -682,7 +746,7 @@ public class LogDb {
 		return map;
 	}
 
-	/*统计货架上某一建筑在某一时间段内的收入记录(用于获取今日的经营详情)*/
+	/*统计建筑今日的经营详情)(yty)*/
 	public static List<Document> buildingDaySaleDetailByBuilding(long startTime,long endTime,UUID bid,MongoCollection<Document> collection){
 		List<Document> record = new ArrayList<>();
 		Document projectObject = new Document()
@@ -731,15 +795,17 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId,String brand)
+								  UUID producerId, UUID bid, UUID wid,long freight,int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
 				.append("d", sellId)
 				.append("b", bid)
-				.append("n",n)				//新增出售的个数
+				.append("w", wid)
+				.append("f", freight)
 				.append("p", price)
-				.append("brand",brand)
+				.append("n",n)				//yty  数量
+				.append("brand",brand)      //yty 品牌名
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
@@ -748,15 +814,15 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId,String brand)
+								  UUID producerId, UUID bid,int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
 				.append("d", sellId)
 				.append("b", bid)
 				.append("p", price)
-				.append("n",n)
-				.append("brand",brand)
+				.append("n",n)          //yty  数量
+				.append("brand",brand)  //yty 品牌名
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)

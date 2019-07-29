@@ -405,29 +405,6 @@ public class StatisticSession {
 						.build()));
 	}
 
-	public void queryPlayerWeekIncomePay(short cmd, Message message){
-		UUID playerId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
-		Ss.PlayerWeekIncomePay.Builder build=Ss.PlayerWeekIncomePay.newBuilder();
-		long yestodayStartTime=TimeUtil.beforeSixDay().getTime().getTime();
-		long todayStartTime=System.currentTimeMillis();
-		List<Document> incomeList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),true,playerId);
-		List<Document> payList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),false,playerId);
-
-		build.setIncome(incomeList.get(0).getLong("total"))
-				.setPay(payList.get(0).getLong("total"));
-		//列表
-		List<Document> summaryShelfList = LogDb.daySummaryShelf(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),playerId);
-		summaryShelfList.forEach(document ->{
-			Ss.PlayerWeekIncomePay.WeekIncomePay.Builder incomePay=Ss.PlayerWeekIncomePay.WeekIncomePay.newBuilder();
-			incomePay.setItemId(document.getInteger("tpi"))
-					.setTime(document.getLong("t"))
-					.setPrice(document.getLong("p"))
-					.setAmount(document.getLong("a"));
-			build.addWeekIncomePay(incomePay.build());
-		});
-		this.write(Package.create(cmd,build.build()));
-	}
-
 	/*查询今日的商品销售情况*/
 	public void queryBuildingGoodSaleDetail(short cmd, Message message){
 		Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
