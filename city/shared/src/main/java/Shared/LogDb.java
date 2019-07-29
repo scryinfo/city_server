@@ -357,6 +357,25 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document> daySummaryHistoryIncome(long yestodayStartTime, long todayStartTime,MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										gte("t", yestodayStartTime),
+										lt("t", todayStartTime))),
+										Aggregates.group("$tp", Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
 	public static List<Document> daySummaryShelfIncome(long yestodayStartTime, long todayStartTime,
 												 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
@@ -380,11 +399,25 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("tp", buildType),
 								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b","f"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> daySummaryTransferPay(long yestodayStartTime, long todayStartTime,
+													MongoCollection<Document> collection,int buildType, UUID playerId)
+	{
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("r", playerId),
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.project(fields(include("tpi","t","s","d","a","i","c"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -396,7 +429,6 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("tp", buildType),
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
@@ -795,14 +827,13 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, UUID wid,long freight,int type, int typeId,String brand)
+								  UUID producerId, UUID bid, UUID wid,int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
 				.append("d", sellId)
 				.append("b", bid)
 				.append("w", wid)
-				.append("f", freight)
 				.append("p", price)
 				.append("n",n)				//yty  数量
 				.append("brand",brand)      //yty 品牌名
@@ -853,12 +884,13 @@ public class LogDb {
 		paySalary.insertOne(document);
 	}
 
-	public static void payTransfer(UUID roleId, long charge, UUID srcId, UUID dstId, UUID producerId, int n)
+	public static void payTransfer(UUID roleId, long charge, UUID srcId, UUID dstId,int itemId, UUID producerId, int n)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("s", srcId)
 				.append("d", dstId)
+				.append("tpi", itemId)
 				.append("a", charge)
 				.append("i", producerId)
 				.append("c", n);
@@ -1254,7 +1286,18 @@ public class LogDb {
 			return new Document().append("x", x).append("y", y);
 		}
 	}
-
+    public static String getPositionStr(List<Document> list){
+		String str="";
+		if(list.size()==1){
+			Document positon=list.get(0);
+			str="("+ positon.getInteger("x")+","+positon.getInteger("y")+")";
+		}else{
+			Document startPosition=list.get(0);
+			Document endPosition=list.get(list.size()-1);
+			str="("+ startPosition.getInteger("x")+","+endPosition.getInteger("y")+")";
+		}
+		return str;
+	}
 	//--ly
 	public static List<Document> dayPlayerExchange1(long startTime, long endTime, MongoCollection<Document> collection,int id)
 	{

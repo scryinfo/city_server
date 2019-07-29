@@ -54,6 +54,7 @@ public class SummaryUtil
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
+    private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";
     private static final String DAY_BUILDING__GOOD_SOLD_DETAIL="dayBuildingGoodSoldDetail";
 
     //--ly
@@ -79,6 +80,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
+    private static MongoCollection<Document> dayIndustryIncome;
     private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
 
     //--ly
@@ -128,6 +130,8 @@ public class SummaryUtil
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayGoodsSoldDetail = database.getCollection(DAY_GOODS_SOLD_DETAIL)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayIndustryIncome = database.getCollection(DAY_INDUSTRY_INCOME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingGoodSoldDetail = database.getCollection(DAY_BUILDING__GOOD_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -645,6 +649,11 @@ public class SummaryUtil
         return dayGoodsSoldDetail;
     }
 
+    public static MongoCollection<Document> getDayIndustryIncome()
+    {
+        return dayIndustryIncome;
+    }
+
     public static MongoCollection<Document> getDayBuildingGoodSoldDetail() {
         return dayBuildingGoodSoldDetail;
     }
@@ -680,21 +689,6 @@ public class SummaryUtil
         });
     }
 
- /*   public static List<Ss.NodeIncome> getBuildDayIncomeById(UUID bid)
-    {
-        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
-        List<Ss.NodeIncome> list = new ArrayList<>();
-        dayBuildingIncome.find(and(eq(ID, bid),
-                gte(TIME, startTime)))
-                .sort(Sorts.ascending(TIME))
-                .forEach((Block<? super Document>) document ->
-                {
-                    list.add(Ss.NodeIncome.newBuilder()
-                            .setTime(TimeUtil.getTimeDayStartTime(document.getLong(TIME)))
-                            .setIncome(document.getLong(KEY_TOTAL)).build());
-                });
-        return list;
-    }*/
 
     public static Map<Long,Long> getBuildDayIncomeById(UUID bid)
     {
@@ -797,6 +791,20 @@ public class SummaryUtil
             return value;
         }
     }
+
+    public enum BuildingType {
+        MATERIAL(11),PRODUCE(12),RETAIL(13),APARTMENT(14), LAB(15), PUBLIC(16);
+        private int value;
+        BuildingType(int i)
+        {
+            this.value = i;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
+    }
     //--ly
     public static MongoCollection<Document> getPlayerExchangeAmount()
     {
@@ -814,7 +822,31 @@ public class SummaryUtil
             collection.insertMany(documentList);
         }
     }
-
+    public static void insertDayIndustryIncomeData(BuildingType buildingType,List<Document> documentList,
+                                                long time,MongoCollection<Document> collection)
+    {
+        //document already owned : id,total
+        List<Document> list=new ArrayList<Document>();
+        documentList.forEach(document ->{
+                    int type= document.getInteger("id");
+                    Document d=new Document();
+                    d.append("total",document.getLong("total"));
+                    if(buildingType==null){
+                        if(type==21){
+                            d.append(TIME, time).append(TYPE, SummaryUtil.BuildingType.MATERIAL.getValue());
+                        }else if(type==22){
+                            d.append(TIME, time).append(TYPE, SummaryUtil.BuildingType.PRODUCE.getValue());
+                        }
+                    }else{
+                        d.append(TIME, time).append(TYPE, buildingType.getValue());
+                    }
+                    list.add(d);
+                }
+             );
+        if (!list.isEmpty()) {
+            collection.insertMany(list);
+        }
+    }
     //玩家交易汇总表中查询开服截止当前时间玩家交易量。
     public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
     {
@@ -888,5 +920,19 @@ public class SummaryUtil
         }
         return map;
     }
-
+    public static List<Document> queryWeekData(MongoCollection<Document> collection)
+    {
+        List<Document> documentList = new ArrayList<>();
+        collection.find(and(
+                gte("time", TimeUtil.beforeSixDay()),
+                lt("time", TimeUtil.todayStartTime())
+        ))
+        .projection(fields(include("time","type","total"), excludeId()))
+        .sort(Sorts.descending("time"))
+        .forEach((Block<? super Document>) document ->
+        {
+            documentList.add(document);
+        });
+        return documentList;
+    }
 }
