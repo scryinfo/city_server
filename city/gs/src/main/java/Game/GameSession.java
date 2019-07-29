@@ -5170,6 +5170,9 @@ public class GameSession {
                                     .setRent(apartment.cost())
                                     .setRenter(apartment.getRenterNum());
                             summary.setApartmentSummary(apartSummary);
+                        }else if(b instanceof ScienceBuildingBase){/*研究所和推广公司*/
+                            ScienceBuildingBase science = (ScienceBuildingBase) b;
+                            summary.setShelfCount(science.getShelf().getAllNum());
                         }
                         typeBuilding.setBuildingInfo(summary);
                     }
