@@ -138,8 +138,8 @@ public class BuildingUtil {
         this.getProduceInfo();
         this.getRetailInfo();
         this.retailScore = GlobalUtil.getRetailInfo();
-        this.promotionAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
-        this.laboratoryAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.LAB);
+        /*this.promotionAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
+        this.laboratoryAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.LAB);*/
     }
 
     public void getRetailInfo() {

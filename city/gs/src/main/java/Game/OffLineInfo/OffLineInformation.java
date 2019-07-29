@@ -48,11 +48,11 @@ public class OffLineInformation {
         if(apartment!=null&&apartment.getUnLineIncomeList().size()>0){
             builder.setApartment(apartment);
         }
-        Gs.BuildingIncome publicFacility = resultMap.get(MetaBuilding.PUBLIC);
+        Gs.BuildingIncome publicFacility = resultMap.get(MetaBuilding.PROMOTE);
         if(publicFacility!=null&&publicFacility.getUnLineIncomeList().size()>0){
             builder.setPublicFacility(publicFacility);
         }
-        Gs.BuildingIncome lab = resultMap.get(MetaBuilding.LAB);
+        Gs.BuildingIncome lab = resultMap.get(MetaBuilding.TECHNOLOGY);
         if(lab!=null&&lab.getUnLineIncomeList().size()>0){
             builder.setLaboratory(lab);
         }

@@ -3442,8 +3442,8 @@ public class GameSession {
         List<Gs.MyBrands.Brand> goodBrand = BrandManager.instance().getBrandByType(MetaBuilding.PRODUCE, pid);//加工厂
         List<Gs.MyBrands.Brand> retailShopBrand = BrandManager.instance().getBrandByType(MetaBuilding.RETAIL, pid);//零售店
         List<Gs.MyBrands.Brand> apartmentBrand = BrandManager.instance().getBrandByType(MetaBuilding.APARTMENT, pid);//住宅
-        List<Gs.MyBrands.Brand> labBrand = BrandManager.instance().getBrandByType(MetaBuilding.LAB, pid);//研究所
-        List<Gs.MyBrands.Brand> promotionBrand = BrandManager.instance().getBrandByType(MetaBuilding.PUBLIC, pid);//推广
+        List<Gs.MyBrands.Brand> labBrand = BrandManager.instance().getBrandByType(MetaBuilding.TECHNOLOGY, pid);//研究所
+        List<Gs.MyBrands.Brand> promotionBrand = BrandManager.instance().getBrandByType(MetaBuilding.PROMOTE, pid);//推广
         list.addAllMaterialBrand(materialBrand)
                 .addAllGoodBrand(goodBrand)
                 .addAllRetailShopBrand(retailShopBrand)
