@@ -492,10 +492,6 @@ public class Player {
     @CollectionTable(name = "player_blacklist", joinColumns = @JoinColumn(name = "player_id"))
     private Set<UUID> blacklist = new HashSet<>();
 
-/*     @OneToMany(cascade={CascadeType.ALL},fetch = FetchType.EAGER)
-     @JoinColumn(name="pid")
-     private Set<SciencePoint> sciencePoints=new HashSet<SciencePoint>();*/
-
     @Column(nullable = true)
     private UUID societyId  = null;
 
@@ -583,29 +579,4 @@ public class Player {
     public long getOnlineTs() {
         return onlineTs;
     }
-
-  /*  public void setSciencePoints(Set<SciencePoint> sciencePoints) {
-        this.sciencePoints = sciencePoints;
-    }*/
-
-/*    public Set<SciencePoint> initPlayerSciencePoint(){
-        Set<SciencePoint> sciencePoints = new HashSet<>();
-        //以研究所的研究选项为基准，初始化玩家的科技资料信息
-        Set<Integer> types = MetaData.getScienceItem().keySet();
-        types.forEach(t->{
-            SciencePoint sciencePoint = new SciencePoint(t, 0, this);
-            sciencePoints.add(sciencePoint);
-        });
-        return sciencePoints;
-        }
-   */
-
- /*   //增加科技点数
-    public void addSciencePoint(int type, int n) {
-        this.sciencePoints.forEach(s->{
-            if(s.type==type){
-                s.sciencePoint += n;
-            }
-        });
-    }*/
 }

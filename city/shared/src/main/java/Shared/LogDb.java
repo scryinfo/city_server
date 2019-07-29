@@ -682,7 +682,7 @@ public class LogDb {
 		return map;
 	}
 
-	/*统计货架上某一建筑在某一时间段内的收入记录*/
+	/*统计货架上某一建筑在某一时间段内的收入记录(用于获取今日的经营详情)*/
 	public static List<Document> buildingDaySaleDetailByBuilding(long startTime,long endTime,UUID bid,MongoCollection<Document> collection){
 		List<Document> record = new ArrayList<>();
 		Document projectObject = new Document()
@@ -776,9 +776,10 @@ public class LogDb {
 		npcBuyInRetailCol.insertOne(document);
 	}
 
-	public static void paySalary(UUID roleId, UUID buildingId, long salary, long workers) {
+	public static void paySalary(UUID roleId,int type, UUID buildingId, long salary, long workers) {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
+				.append("tp", type)
 				.append("b", buildingId)
 				.append("s", salary)
 				.append("a", salary * workers)
@@ -1058,7 +1059,10 @@ public class LogDb {
 	{
 		return buyGround;
 	}
-
+	public static MongoCollection<Document> getLandAuction()
+	{
+		return landAuction;
+	}
 	public static MongoCollection<Document> getBuildingIncome()
 	{
 		return buildingIncome;

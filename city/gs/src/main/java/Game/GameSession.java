@@ -542,7 +542,7 @@ public class GameSession {
         if (b instanceof Apartment) { //住宅停业，清空入住人数
             Apartment apartment = (Apartment) b;
             apartment.deleteRenter();
-        } else if (b instanceof Technology||b instanceof PromotionCompany) {  //Todo
+        } else if (b instanceof Technology||b instanceof PromotionCompany) {
             ScienceBuildingBase science = (ScienceBuildingBase) b;
             science.cleanData();//清除建筑数据
         } else if (b instanceof PublicFacility) {
@@ -3247,8 +3247,8 @@ public class GameSession {
             case MetaBuilding.TECHNOLOGY:
                 buildingdata = MetaData.getTechnology(tp);
                 break;
-            case MetaBuilding.PUBLIC:
-                buildingdata = MetaData.getPublicFacility(tp);
+            case MetaBuilding.PROMOTE:
+                buildingdata = MetaData.getPromotionCompany(tp);
                 break;
             case MetaBuilding.TALENT:
                 buildingdata = MetaData.getTalentCenter(tp);
