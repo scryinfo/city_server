@@ -352,6 +352,25 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document> daySummaryHistoryIncome(long yestodayStartTime, long todayStartTime,MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										gte("t", yestodayStartTime),
+										lt("t", todayStartTime))),
+										Aggregates.group("$tp", Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
 	public static List<Document> daySummaryShelfIncome(long yestodayStartTime, long todayStartTime,
 												 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{

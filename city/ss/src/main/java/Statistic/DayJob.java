@@ -107,6 +107,17 @@ public class DayJob implements org.quartz.Job {
         documentList = LogDb.hourLaboratoryRecord(yestodayStartTime, todayStartTime, LogDb.getLaboratoryRecord());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.LABORATORY, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
 
+        //all types of buildings a day income
+        //material factory and  produce factory
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf());
+        SummaryUtil.insertDayIndustryIncomeData(null, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        //retailshop
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.BuildingType.RETAIL, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        //apartment
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getNpcRentApartment());
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.BuildingType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        //...研究所和广告公司
 
         //accept all client request
         StatisticSession.setIsReady(true);

@@ -13,10 +13,7 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 import ss.Ss;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
@@ -381,5 +378,66 @@ public class StatisticSession {
 						.setId(Util.toByteString(playerId))
 						.addAllNotifys(LogDb.getIncomeNotify(playerId, 30))
 						.build()));
+	}
+
+	public void queryIndustryDevelopment(short cmd, Message message){
+		Ss.IndustryDevelopment msg = (Ss.IndustryDevelopment)message;
+		int buildType=msg.getType().getNumber();
+
+		Ss.IndustryDevelopment.Builder b=Ss.IndustryDevelopment.newBuilder();
+		b.setType(msg.getType());
+		Map<Long,Long> singleMap=new TreeMap<Long,Long>();
+		Map<Long,Long> totalMap=new TreeMap<Long,Long>();
+		//前六天数据
+		List<Document> sixDaylist=SummaryUtil.queryWeekData(SummaryUtil.getDayIndustryIncome());
+		//前六天每天的行业总收入和每天指定类型建筑的总收入
+		getIndustryIncomeList(sixDaylist,buildType,totalMap,singleMap);
+		//今天不同行业的收入
+		long now=System.currentTimeMillis();
+		List<Document> documentList = LogDb.daySummaryHistoryIncome(TimeUtil.todayStartTime(), now, LogDb.getBuyInShelf());
+		getTodayIndustryIncomeList(documentList,now,0);
+		documentList = LogDb.daySummaryHistoryIncome(TimeUtil.todayStartTime(), now, LogDb.getNpcBuyInShelf());
+		getTodayIndustryIncomeList(documentList,now,Ss.BuildType.RETAILSHOP.getNumber());
+		documentList = LogDb.daySummaryHistoryIncome(TimeUtil.todayStartTime(), now, LogDb.getNpcRentApartment());
+		List<Document> todaylist=getTodayIndustryIncomeList(documentList,now,Ss.BuildType.APARTMENT.getNumber());
+		//...研究所和广告公司
+		//今天的总收入
+		getIndustryIncomeList(todaylist,buildType,totalMap,singleMap);
+        //一周的数据
+		totalMap.forEach((k,v)->{
+			Ss.IndustryDevelopment.IndustryInfo.Builder industryInfo=Ss.IndustryDevelopment.IndustryInfo.newBuilder();
+			industryInfo.setTime(k).setAmount(singleMap.get(k)).setTotalAmount(v).setPercent(singleMap.get(k)/v/1.d);
+			b.addIndustryInfo(industryInfo);
+		});
+		this.write(Package.create(cmd,b.build()));
+	}
+	private void getIndustryIncomeList(List<Document> list,int buildType,Map<Long,Long> totalMap,Map<Long,Long> singleMap){
+		list.forEach(document ->{
+			long time=document.getLong("time");
+			long total=document.getLong("total");
+			int type=document.getInteger("type");
+			totalMap.put(time,total+(totalMap.get(time)!=null?totalMap.get(time):0));
+			if(buildType==type){//每天指定的建筑类型的总收入
+				singleMap.put(time,total);
+			}
+		});
+	}
+	private List<Document> getTodayIndustryIncomeList(List<Document> documentList,long now,int buildType){
+		List<Document> todayIncomeList=new ArrayList<Document>();
+		documentList.forEach(document -> {
+			Document d=null;
+			int type= document.getInteger("id");
+			long total=document.getLong("total");
+			if(buildType==0){
+				if(type==21){//原料厂
+					d=new Document().append("time",now).append("total",total).append("type", Ss.BuildType.MATERIAL.getNumber());
+				}else{//加工厂
+					d=new Document().append("time",now).append("total",total).append("type",  Ss.BuildType.PRODUCE.getNumber());
+				}
+			}
+			d=new Document().append("time",now).append("total",total).append("type", buildType);
+			todayIncomeList.add(d);
+		});
+		return todayIncomeList;
 	}
 }
