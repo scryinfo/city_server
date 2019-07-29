@@ -5563,11 +5563,12 @@ public class GameSession {
                 PromotePoint promotePoint = PromotePointManager.getInstance().updatePlayerPromotePoint(player.id(), itemId, item.n);
                 PromotePointManager.getInstance().updatePromotionPoint(promotePoint);
             }
+            int type = MetaItem.scienceItemId(itemId);//获取商品类型
             //日志记录
             LogDb.playerPay(player.id(),cost);
             LogDb.playerIncome(seller.id(),cost);
             LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
-                    item.key.producerId, sellBuilding.id(),null,0,itemId,itemId,null);
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),item.n,c.getPrice(),itemId);//离线通知统计
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
