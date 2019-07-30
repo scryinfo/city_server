@@ -5394,7 +5394,7 @@ public class GameSession {
     //添加建筑生产线（推广公司、研究所）
     public void addScienceLine(short cmd,Message message){
         Gs.AddLine newLine = (Gs.AddLine) message;
-        if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
+        if(newLine.getTargetNum() <= 0)
             return;
         UUID id = Util.toUuid(newLine.getId().toByteArray());
         Building b = City.instance().getBuilding(id);
