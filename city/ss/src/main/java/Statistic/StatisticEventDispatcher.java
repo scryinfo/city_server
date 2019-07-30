@@ -32,6 +32,9 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryPlayerIncomePayCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryPlayerIncomePayCurve")); //查询玩家收入支出曲线图
             table.put((short) SsCode.OpCode.queryGoodsSoldDetailCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryGoodsSoldDetailCurve")); //查询商品销售详情曲线图
             table.put((short) SsCode.OpCode.queryIndustryDevelopment_VALUE, Wrapper.newWithMessage(Ss.IndustryDevelopment.PARSER,StatisticSession.class, "queryIndustryDevelopment")); //查询行业发展
+            /*建筑经营详情*/
+            table.put((short) SsCode.OpCode.queryTodayBuildingSaleDetail_VALUE, Wrapper.newWithMessage(Ss.QueryBuildingSaleDetail.PARSER,StatisticSession.class, "queryTodayBuildingSaleDetail")); //查询行业发展
+            table.put((short) SsCode.OpCode.queryHistoryBuildingSaleDetail_VALUE, Wrapper.newWithMessage(Ss.QueryHistoryBuildingSaleDetail.PARSER,StatisticSession.class, "queryHistoryBuildingSaleDetail")); //查询行业发展
         } catch (Exception e) {
             e.printStackTrace();
         }

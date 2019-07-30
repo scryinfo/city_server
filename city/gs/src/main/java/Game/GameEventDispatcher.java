@@ -300,7 +300,7 @@ public class GameEventDispatcher extends DispatcherBase {
             //查询玩家在原料厂、加工厂、零售店、住宅的收入支出
 			table.put((short) GsCode.OpCode.queryPlayerIncomePay_VALUE, Wrapper.newWithMessage(Gs.PlayerIncomePay.PARSER,GameSession.class, "queryPlayerIncomePay"));
 			//查询各行业信息-玩家收入排行榜
-			//table.put((short) GsCode.OpCode.queryPlayerIncomeRanking_VALUE, Wrapper.newWithMessage(Gs.PlayerIncomeRanking.PARSER,GameSession.class, "queryPlayerIncomeRanking"));
+			table.put((short) GsCode.OpCode.queryPlayerIncomeRanking_VALUE, Wrapper.newWithMessage(Gs.PlayerIncomeRanking.PARSER,GameSession.class, "queryPlayerIncomeRanking"));
 
 			//新版研究所===============================
 			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//研究所建筑详情

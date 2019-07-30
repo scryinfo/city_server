@@ -1212,17 +1212,7 @@ public class GameSession {
         builder.addAllCompleted(lab.getOwnerLine(player.id()));
         this.write(Package.create(cmd, builder.build()));
     }
-    //新版研究所 建筑详情
-    public void detailTechnology(short cmd, Message message){
-        Gs.Id c = (Gs.Id) message;
-        UUID id = Util.toUuid(c.getId().toByteArray());
-        Building b = City.instance().getBuilding(id);
-        if(b == null || b.type() != MetaBuilding.TECHNOLOGY)
-            return;
-        registBuildingDetail(b);
-        updateBuildingVisitor(b);
-        this.write(Package.create(cmd, b.detailProto()));
-    }
+
     public void detailRetailShop(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
         UUID id = Util.toUuid(c.getId().toByteArray());
@@ -5296,6 +5286,18 @@ public class GameSession {
 
 
     //=================新版研究所===================
+    //新版研究所 建筑详情
+    public void detailTechnology(short cmd, Message message){
+        Gs.Id c = (Gs.Id) message;
+        UUID id = Util.toUuid(c.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null || b.type() != MetaBuilding.TECHNOLOGY)
+            return;
+        registBuildingDetail(b);
+        updateBuildingVisitor(b);
+        this.write(Package.create(cmd, b.detailProto()));
+    }
+
     //开启宝箱
     public void openScienceBox(short cmd,Message message){
         Gs.OpenScience box = (Gs.OpenScience) message;

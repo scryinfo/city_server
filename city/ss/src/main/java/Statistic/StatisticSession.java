@@ -459,7 +459,7 @@ public class StatisticSession {
 			}
 
 			/*查询今日的商品销售情况(建筑经营详情,yty)*/
-			public void queryBuildingGoodSaleDetail(short cmd, Message message){
+			public void queryTodayBuildingSaleDetail(short cmd, Message message){
 				Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
 				UUID bid = Util.toUuid(saleDetail.getBid().toByteArray());
 				int buildingType = saleDetail.getType();
