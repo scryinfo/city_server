@@ -738,8 +738,8 @@ public class LogDb {
 	/*统计所有货架建筑的经营详情(包括了零售店)的货物销售详情(yty)*/
 	public static Map<Integer,List<Document>> buildingDaySaleDetailIncomeSummary(long yestodayStartTime, long todayStartTime){
 		Map<Integer, List<Document>> map = new HashMap<>();
-		List<Document> factoryInshelf = new ArrayList<>();
-		List<Document> retailInshelf = new ArrayList<>();
+		List<Document> factoryInshelf = new ArrayList<>();//工厂类（或者研究所、零售店）货架营收
+		List<Document> retailInshelf = new ArrayList<>();//零售店
 		Document projectObject = new Document()
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")

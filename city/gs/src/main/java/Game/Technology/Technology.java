@@ -75,7 +75,7 @@ public class Technology extends ScienceBuildingBase {
                 .setShelfNum(this.shelf.getAllNum());
         if(!line.isEmpty())
             builder.addLine(line.get(0).toProto());
-        return null;
+        return builder.build();
     }
 
     @Override
