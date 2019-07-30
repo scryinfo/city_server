@@ -268,7 +268,7 @@ public class GroundManager {
 
         Player owner = GameDb.getPlayer(ownerId);
         owner.addMoney(cost-minerCost);
-        LogDb.playerPay(renter.id(), cost+minerCost);
+        LogDb.playerPay(renter.id(), cost+minerCost,0);
         LogDb.playerIncome(owner.id(), cost-minerCost,0);
         //矿工费用日志记录
         LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
@@ -372,7 +372,7 @@ public class GroundManager {
         Player seller = GameDb.getPlayer(sellerId);
         seller.addMoney(cost-minerCost);
         buyer.decMoney(cost+minerCost);
-        LogDb.playerPay(buyer.id(), cost+minerCost);
+        LogDb.playerPay(buyer.id(), cost+minerCost,0);
 	    LogDb.playerIncome(seller.id(), cost-minerCost,0);
 	    //矿工费用记录
         LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);

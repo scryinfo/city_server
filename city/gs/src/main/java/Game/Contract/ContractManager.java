@@ -102,7 +102,7 @@ public class ContractManager
             Player seller = GameDb.getPlayer(building1.ownerId());
             player.decMoney(contract.getCost());
             seller.addMoney(contract.getCost());
-    		LogDb.playerPay(player.id(), contract.getCost());
+    		LogDb.playerPay(player.id(), contract.getCost(),0);
     	    LogDb.playerIncome(seller.id(), contract.getCost(),building1.type());
             updates.add(player);
             updates.add(seller);

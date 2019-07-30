@@ -303,7 +303,7 @@ public class Player {
         if(this.decMoney(100)) {
             this.bagCapacity += MetaData.getSysPara().bagCapacityDelta;
             LogDb.extendBag(id, cost, bagCapacity);
-        	LogDb.playerPay(id(), 100);
+        	LogDb.playerPay(id(), 100,0);
             return true;
         }
         return false;

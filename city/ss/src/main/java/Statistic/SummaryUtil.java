@@ -420,7 +420,7 @@ public class SummaryUtil
     public static void insertPlayerIncomeOrPay(List<Document> documentList,
     		long time,MongoCollection<Document> collection)
     {
-    	//document already owned : id,total
+    	//document already owned : id,tp,total
     	documentList.forEach(document ->
     	document.append(TIME, time));
     	if (!documentList.isEmpty()) {

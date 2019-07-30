@@ -257,7 +257,7 @@ public class LeagueManager
         Player seller = GameDb.getPlayer(leagueInfo.getUid().getPlayerId());
         player.decMoney(leagueInfo.getPrice());
         seller.addMoney(leagueInfo.getPrice());
-        LogDb.playerPay(player.id(), leagueInfo.getPrice());
+        LogDb.playerPay(player.id(), leagueInfo.getPrice(),0);
         LogDb.playerIncome(seller.id(), leagueInfo.getPrice(),building.type());
         LeagueInfo.Member member = new LeagueInfo.Member(building.id(), joinLeague.getHours());
         leagueInfo.addMember(member);
