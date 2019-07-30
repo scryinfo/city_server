@@ -5318,10 +5318,7 @@ public class GameSession {
         histList.forEach(document ->{
             Player player=GameDb.getPlayer(document.get("id",UUID.class));
             List<Building> buildings=City.instance().getPlayerBListByBtype(player.id(),buildType);
-            int sum=0;
-            buildings.forEach(b->{
-              sum+=b.getWorkerNum();
-            });
+            int sum = buildings.stream().mapToInt(Building::getWorkerNum).sum();
             Gs.PlayerIncomeRanking.IncomeRanking.Builder incomeRank=Gs.PlayerIncomeRanking.IncomeRanking.newBuilder();
             incomeRank.setPlayerName(player.getName())
                       .setCompanyName(player.getCompanyName())
