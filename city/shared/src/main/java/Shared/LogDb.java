@@ -593,6 +593,21 @@ public class LogDb {
 		return documentList;
 	}
 
+	public static List<Long> getTodayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection,UUID pid){
+        List<Long> incomeOrPay = new ArrayList<>();
+        collection.find(
+                and(
+                    eq("p",pid),
+                    gte("t", startTime),
+                    lt("t", endTime))
+        ).forEach((Block<? super Document>) d ->
+        {
+
+            incomeOrPay.add(d.getLong("a"));
+        });
+        return incomeOrPay;
+    }
+
 	public static List<Document> getDayGoodsSoldDetail(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();

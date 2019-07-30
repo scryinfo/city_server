@@ -68,7 +68,7 @@ public class StatisticServer {
         		.build());//统计昨天包括以前的数据，每天凌晨1点统计
         scheduler.scheduleJob(newJob(MinuteJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * * * ?"))
-                .build());//玩家收入和支出信息,每分钟计一次
+                .build());          //玩家收入和支出信息,每分钟计一次
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         List<ChannelFuture> fs = new ArrayList<>();

@@ -8,10 +8,7 @@ import Shared.Util;
 import Statistic.SummaryUtil.CountType;
 import Statistic.Util.TimeUtil;
 import Statistic.Util.TotalUtil;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.mongodb.client.MongoCollection;
-import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
@@ -315,21 +312,19 @@ public class StatisticSession {
     {
     	UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
 		Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();//用于统计收入和支出的合并数据
+		/*前29天的收入支出数据（按天统计）*/
     	Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
     	Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
-    	//统计整理数据
-		Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
-		Map<Long, Long> monthTotalpay = TotalUtil.getInstance().monthTotal(playerPayMap);
 		//1.处理收入信息
-    	monthTotalIncome.forEach((k,v)->{
+		playerIncomeMap.forEach((k,v)->{
     		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
     		b.setTime(k);
     		b.setIncome(v);
-    		b.setPay((monthTotalpay!=null&&monthTotalpay.get(k)!=null)?monthTotalpay.get(k):0);
+    		b.setPay((playerPayMap!=null&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
 			totalMap.put(k,b.build());
     	});
 		//2.处理支出信息
-		for (Map.Entry<Long, Long> pay : monthTotalpay.entrySet()) {
+		for (Map.Entry<Long, Long> pay : playerPayMap.entrySet()) {
 			//如果在收入中已经处理了，则跳过
 			Long time = pay.getKey();
 			if(totalMap.containsKey(time)){
@@ -340,13 +335,12 @@ public class StatisticSession {
 			b.setTime(pay.getKey());
 			b.setPay(pay.getValue());
 			//由于所有的收入在上面已经处理过了，所以，现在不可能存在收入的情况了，统一设置为0 ，一旦经过这里，都是有支出无收入的情况
-			//b.setIncome((monthTotalIncome!=null&&monthTotalIncome.get(pay.getKey())!=null)?monthTotalIncome.get(pay.getKey()):0);
 			b.setIncome(0);
 			totalMap.put(pay.getKey(),b.build());
 		}
-		//3.处理今日最新收入和支出信息
-		Long todayIncome = TotalUtil.getInstance().todayIncomeOrPay(playerIncomeMap);
-		Long todayPay = TotalUtil.getInstance().todayIncomeOrPay(playerPayMap);
+		//3.处理今日最新收入和支出信息（之恶杰从LogDb的玩家u收入支出中统计）
+		Long todayIncome =LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerPay(), id).stream().reduce(Long::sum).orElse(0L);
+		Long todayPay = LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerIncome(), id).stream().reduce(Long::sum).orElse(0L);
 		//返回数据
 		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
 		builder.setId(Util.toByteString(id));
