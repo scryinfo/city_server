@@ -150,7 +150,7 @@ public class WareHouseManager {
             wareHouseRenter.setOrderId(OrderCodeFactory.getOrderId(wareHouse.metaId()));//自动生成订单号
             LogDb.rentWarehouseIncome(wareHouseRenter.getOrderId(),bid, renterId,startTime + hourToRent * 3600000, hourToRent, rent, rentCapacity);
             LogDb.playerPay(player.id(), rent);
-            LogDb.playerIncome(owner, rent);
+            LogDb.playerIncome(owner, rent,building.type());
             List updateList = new ArrayList();
             updateList.addAll(Arrays.asList(player, wareHouse, bOwner));
             GameDb.saveOrUpdate(updateList);

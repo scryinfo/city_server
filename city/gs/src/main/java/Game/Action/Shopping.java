@@ -118,7 +118,7 @@ public class Shopping implements IAction {
             npc.decMoney((int) (chosen.price+minerCost));
             Player owner = GameDb.getPlayer(sellShop.ownerId());
             owner.addMoney(chosen.price-minerCost);
-            LogDb.playerIncome(owner.id(),chosen.price-minerCost);
+            LogDb.playerIncome(owner.id(),chosen.price-minerCost,sellShop.type());
             ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
             sellShop.updateTodayIncome(chosen.price-minerCost);
             //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
@@ -212,7 +212,7 @@ public class Shopping implements IAction {
               npc.decMoney((int) (chosen.price+minerCost));
               Player owner = GameDb.getPlayer(sellShop.ownerId());
               owner.addMoney(chosen.price-minerCost);
-              LogDb.playerIncome(owner.id(), chosen.price-minerCost);
+              LogDb.playerIncome(owner.id(), chosen.price-minerCost,sellShop.type());
               ((IShelf)sellShop).delshelf(chosen.getItemKey(), 1, false);
               sellShop.updateTodayIncome(chosen.price-minerCost);
               //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty

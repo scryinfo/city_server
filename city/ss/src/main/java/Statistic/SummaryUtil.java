@@ -17,7 +17,6 @@ import org.bson.Document;
 import ss.Ss;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static Shared.LogDb.KEY_TOTAL;
 import static Shared.LogDb.cityBroadcast;
