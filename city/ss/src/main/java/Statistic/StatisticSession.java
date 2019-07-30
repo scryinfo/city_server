@@ -454,8 +454,12 @@ public class StatisticSession {
 			b.addIndustryInfo(info);
 		});
 		//今天的数据
-
-
+        List<Document> todaylist=LogDb.playerBuildingBusiness(TimeUtil.todayStartTime(),System.currentTimeMillis(),LogDb.getPlayerBuildingBusiness(),buildType);
+        todaylist.forEach(d->{
+            Ss.IndustryCompetition.IndustryInfo.Builder info=Ss.IndustryCompetition.IndustryInfo.newBuilder();
+            info.setCompanyNum(d.getLong("n")).setStaffNum(d.getLong("total")).setTime(System.currentTimeMillis());
+            b.addIndustryInfo(info);
+        });
 		this.write(Package.create(cmd,b.build()));
     }
 }

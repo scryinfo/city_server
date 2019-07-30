@@ -1336,7 +1336,7 @@ public class LogDb {
 		});
 		return map;
 	}
-	public static List<Document> playerBuildingBusiness(long startTime, long endTime, MongoCollection<Document> collection)
+	public static List<Document> playerBuildingBusiness(long startTime, long endTime, MongoCollection<Document> collection,int buildType)
 	{
 		List<Document> documentList = new ArrayList<>();
 		Document groupObject = new Document("_id",
@@ -1348,15 +1348,28 @@ public class LogDb {
 				.append("n", "$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
 				.append("_id",0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group(groupObject,  Accumulators.sum(KEY_TOTAL, "$sn"),Accumulators.sum("n", 1l)),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
+		if(buildType>0){
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(and(
+                                    eq("tp",buildType),
+                                    gte("t", startTime),
+                                    lt("t", endTime))),
+                            Aggregates.group(groupObject,  Accumulators.sum(KEY_TOTAL, "$sn"),Accumulators.sum("n", 1l)),
+                            Aggregates.project(projectObject)
+                    )
+            ).forEach((Block<? super Document>) documentList::add);
+        }else{
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(and(
+                                    gte("t", startTime),
+                                    lt("t", endTime))),
+                            Aggregates.group(groupObject,  Accumulators.sum(KEY_TOTAL, "$sn"),Accumulators.sum("n", 1l)),
+                            Aggregates.project(projectObject)
+                    )
+            ).forEach((Block<? super Document>) documentList::add);
+        }
 		return documentList;
 	}
 }
