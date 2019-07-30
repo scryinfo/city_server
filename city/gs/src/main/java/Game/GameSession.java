@@ -956,7 +956,8 @@ public class GameSession {
                 .build();
         GameServer.sendIncomeNotity(seller.id(),notify);
         player.decMoney(pay);
-        LogDb.playerPay(player.id(),pay);
+        Building buyBuilding = City.instance().getBuilding(wid);
+        LogDb.playerPay(player.id(),pay,buyBuilding.type());
         LogDb.playerIncome(seller.id(),income,sellBuilding.type());
         if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
             GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
@@ -969,7 +970,7 @@ public class GameSession {
             LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
         }
         player.decMoney(freight);
-        LogDb.playerPay(player.id(), freight);
+        LogDb.playerPay(player.id(), freight,buyBuilding.type());
 
         GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                 .setBuildingId(Util.toByteString(bid))
@@ -1688,7 +1689,13 @@ public class GameSession {
         //结账
         buyer.decMoney(fee+minerCost);
         seller.addMoney(fee-minerCost);
-        LogDb.playerPay(buyer.id(), fee+minerCost);
+        int buildType=0;
+        if(newOrder.buildingType>0){
+            buildType=newOrder.buildingType%100;//零售店、住宅
+        }else{
+            buildType=12;//加工厂
+        }
+        LogDb.playerPay(buyer.id(), fee+minerCost, buildType);
         LogDb.playerIncome(seller.id(), fee-minerCost, sellerBuilding.type());
 
         GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
@@ -1921,7 +1928,7 @@ public class GameSession {
         Player owner = GameDb.getPlayer(building.ownerId());
         owner.addMoney(slot.rentPreDay);
         player.decMoney(slot.rentPreDay);
-        LogDb.playerPay(player.id(), slot.rentPreDay);
+        LogDb.playerPay(player.id(), slot.rentPreDay,0);
         LogDb.playerIncome(owner.id(), slot.rentPreDay,building.type());
         player.lockMoney(slot.id, slot.deposit);
         pf.buySlot(slotId, c.getDay(), player.id());
@@ -1992,7 +1999,8 @@ public class GameSession {
         }
 
         player.decMoney(charge);
-        LogDb.playerPay(player.id(), charge);
+        Building buyBuilding = City.instance().getBuilding(dstId);
+        LogDb.playerPay(player.id(), charge,buyBuilding.type());
         MoneyPool.instance().add(charge);
         LogDb.payTransfer(player.id(), charge, srcId, dstId,item.key.meta.id,item.key.producerId, item.n);
         LogDb.buildingPay(srcId,player.id(),charge);
@@ -2146,8 +2154,8 @@ public class GameSession {
             if (!player.decMoney(cost + minerCost))
                 return;
             seller.addMoney(cost - minerCost);
-            LogDb.playerPay(this.player.id(), cost + minerCost);
-            LogDb.playerIncome(seller.id(), cost - minerCost, lab.type());
+            LogDb.playerPay(this.player.id(), cost + minerCost,0);
+            LogDb.playerIncome(seller.id(), cost - minerCost, building.type());
 
             GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                     .setBuildingId(Util.toByteString(bid))
@@ -2367,7 +2375,7 @@ public class GameSession {
             return;
         Player seller = GameDb.getPlayer(sell.ownerId);
         seller.addMoney(sell.price);
-        LogDb.playerPay(player.id(), sell.price);
+        LogDb.playerPay(player.id(), sell.price,0);
         LogDb.playerIncome(seller.id(), sell.price,0);
         player.addItem(sell.metaId, sell.lv);
         TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
@@ -2437,7 +2445,7 @@ public class GameSession {
                 return;
             talent.addMoney(cost);
             player.decMoney(cost);
-            LogDb.playerPay(player.id(), cost);
+            LogDb.playerPay(player.id(), cost,0);
             LogDb.playerIncome(talent.id(), cost, b.type());
             updates = Arrays.asList(talent, player);
         }
@@ -3672,8 +3680,9 @@ public class GameSession {
         int itemId = itemBuy.key.meta.id;
         int type = MetaItem.type(itemBuy.key.meta.id);//获取商品类型
         LogDb.playerIncome(seller.id(), cost,sellBuilding.type());
-        LogDb.playerPay(player.id(), cost);
-        LogDb.playerPay(player.id(), freight);
+        Building buyBuilding = City.instance().getBuilding(wid);
+        LogDb.playerPay(player.id(), cost,buyBuilding.type());
+        LogDb.playerPay(player.id(), freight,buyBuilding.type());
         //9.1记录运输日志(区分建筑还是租户仓库)
         if(sellRenter==null&&buyRenter==null) {
             //记录商品品质及知名度
@@ -3952,7 +3961,8 @@ public class GameSession {
         player.decMoney(charge);
         MoneyPool.instance().add(charge);
         //日志记录
-        LogDb.playerPay(player.id(), charge);
+        Building buyBuilding = City.instance().getBuilding(dstId);
+        LogDb.playerPay(player.id(), charge,buyBuilding.type());
         if(!t.hasSrcOrderId()&&!t.hasDstOrderId()) {
             LogDb.payTransfer(player.id(), charge, srcId, dstId,item.key.meta.id,item.key.producerId, item.n);
         }else{
@@ -5284,6 +5294,29 @@ public class GameSession {
         this.write(Package.create(cmd,build.build()));
     }
 
+    public void queryPlayerIncomeRanking(short cmd,Message message){
+        Gs.PlayerIncomeRanking msg = (Gs.PlayerIncomeRanking) message;
+        int buildType=msg.getType().getNumber();
+        Gs.PlayerIncomeRanking.Builder b=Gs.PlayerIncomeRanking.newBuilder();
+        b.setType(msg.getType());
+        //历史总营收
+        List<Document> histList=LogDb.dayPlayerIncome(DateUtil.todayStartTime(),buildType,LogDb.getDayPlayerIncome());
+        //今日收入
+        Map<UUID,Long> todayMap=LogDb.todayPlayerIncome(DateUtil.todayStartTime(),System.currentTimeMillis(),LogDb.getPlayerIncome(),buildType);
+        histList.forEach(document ->{
+            Player player=GameDb.getPlayer(document.get("id",UUID.class));
+            List<Building> buildings=City.instance().getPlayerBListByBtype(player.id(),buildType);
+            int sum = buildings.stream().mapToInt(Building::getWorkerNum).sum();
+            Gs.PlayerIncomeRanking.IncomeRanking.Builder incomeRank=Gs.PlayerIncomeRanking.IncomeRanking.newBuilder();
+            incomeRank.setPlayerName(player.getName())
+                    .setCompanyName(player.getCompanyName())
+                    .setStaffNum(sum)
+                    .setHisTotal(document.getLong("total"))
+                    .setTodayTotal(todayMap.get(player.id()));
+            b.addIncomeRanking(incomeRank.build());
+        });
+        this.write(Package.create(cmd,b.build()));
+    }
 
     //=================新版研究所===================
     //新版研究所 建筑详情
@@ -5567,7 +5600,7 @@ public class GameSession {
             }
             int type = MetaItem.scienceItemId(itemId);//获取商品类型
             //日志记录
-            LogDb.playerPay(player.id(),cost);
+            LogDb.playerPay(player.id(),cost,sellBuilding.type());
             LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
                     item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName());

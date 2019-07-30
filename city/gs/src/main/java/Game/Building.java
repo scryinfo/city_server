@@ -784,7 +784,7 @@ public abstract class Building implements Ticker{
 
     private boolean payOff(Player p) {
         if (p.decMoney(this.allSalary())) {
-            LogDb.playerPay(p.id(), this.allSalary());
+            LogDb.playerPay(p.id(), this.allSalary(),type());
             calcuHappy();
             allStaff.forEach(npc -> {
                 npc.addMoney(this.singleSalary());

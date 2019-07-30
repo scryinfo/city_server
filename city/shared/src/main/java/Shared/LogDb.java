@@ -1,6 +1,5 @@
 package Shared;
 
-import ch.qos.logback.core.util.TimeUtil;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -8,7 +7,6 @@ import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -24,9 +22,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.excludeId;
-import static com.mongodb.client.model.Projections.fields;
-import static com.mongodb.client.model.Projections.include;
+import static com.mongodb.client.model.Projections.*;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -86,7 +82,8 @@ public class LogDb {
 	//收入通知
 	private static final String INCOME_NOTIFY = "incomeNotify";
 
-	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//建筑收入者货架收入（用于离线收入）
+	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//(离线收入)
+	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -131,6 +128,7 @@ public class LogDb {
 
 	/*用作离线通知*/
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
+	private static MongoCollection<Document> dayPlayerIncome;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -211,6 +209,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		/*离线通知统计使用*/
 		sellerBuildingIncome=database.getCollection(SELLER_BUILDING_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -577,8 +577,12 @@ public class LogDb {
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
+		Document groupObject = new Document("_id",
+				new Document("p", "$p")
+						.append("tp", "$tp"));
 		Document projectObject = new Document()
-				.append("id", "$_id")
+				.append("id", "$_id._id.p")
+				.append("tp", "$_id._id.tp")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
 				.append("_id",0);
 		collection.aggregate(
@@ -586,7 +590,7 @@ public class LogDb {
 						Aggregates.match(and(
 								gte("t", startTime),
 								lt("t", endTime))),
-						Aggregates.group("$p",  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.group(groupObject,  Accumulators.sum(KEY_TOTAL, "$a")),
 						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) documentList::add);
@@ -1075,10 +1079,11 @@ public class LogDb {
 		        .append("tp",buildType);
 		playerIncome.insertOne(document);
 	}
-	public static void playerPay(UUID playerId,long cost){
+	public static void playerPay(UUID playerId,long cost,int buildType){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("p", playerId)
-				.append("a", cost);
+				.append("a", cost)
+				.append("tp",buildType);
 		playerPay.insertOne(document);
 	}
 	//购买租户上架商品记录
@@ -1276,6 +1281,11 @@ public class LogDb {
 		return sellerBuildingIncome;
 	}
 
+	public static MongoCollection<Document> getDayPlayerIncome()
+	{
+		return dayPlayerIncome;
+	}
+
 	public static MongoCollection<Document> getFlightBet() {
 		return flightBet;
 	}
@@ -1411,7 +1421,7 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("type",buildType),
+								eq("tp",buildType),
 								lt("t", todayStartTime))),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
 						Aggregates.sort(Sorts.descending("total")),
@@ -1421,5 +1431,27 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-
+	public static Map<UUID,Long> todayPlayerIncome(long startTime, long endTime, MongoCollection<Document> collection,int buildType)
+	{
+		Map<UUID,Long> map=new HashMap<UUID,Long>();
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp",buildType),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$p",  Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) document ->
+		{
+			map.put(document.get("p",UUID.class), document.getLong(KEY_TOTAL));
+		});
+		return map;
+	}
 }
