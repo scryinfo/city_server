@@ -337,8 +337,8 @@ public class StatisticSession {
 			totalMap.put(pay.getKey(),b.build());
 		}
 		//3.处理今日最新收入和支出信息（之恶杰从LogDb的玩家u收入支出中统计）
-		Long todayIncome =LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerPay(), id).stream().reduce(Long::sum).orElse(0L);
-		Long todayPay = LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerIncome(), id).stream().reduce(Long::sum).orElse(0L);
+		Long todayIncome =LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerIncome(), id).stream().reduce(Long::sum).orElse(0L);
+		Long todayPay = LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerPay(), id).stream().reduce(Long::sum).orElse(0L);
 		//返回数据
 		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
 		builder.setId(Util.toByteString(id));
