@@ -573,7 +573,7 @@ public class LogDb {
 				).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-
+/*按天统计玩家收入支出（yty）*/
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -592,7 +592,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-
+//获取今日玩家收入支出（yty）
 	public static List<Long> getTodayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection,UUID pid){
         List<Long> incomeOrPay = new ArrayList<>();
         collection.find(
@@ -750,7 +750,7 @@ public class LogDb {
 		return documentList;
 	}
 
-	/*统计所有货架建筑的经营详情(包括了零售店)的货物销售详情(yty)*/
+	/*统计所有货架建筑的经营详情(包括了零售店)的货物经营详情(yty)*/
 	public static Map<Integer,List<Document>> buildingDaySaleDetailIncomeSummary(long yestodayStartTime, long todayStartTime){
 		Map<Integer, List<Document>> map = new HashMap<>();
 		List<Document> factoryInshelf = new ArrayList<>();//工厂类（或者研究所、零售店）货架营收
@@ -1401,6 +1401,25 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
         return documentList;
     }
-
+	public static List<Document> dayPlayerIncome(long todayStartTime,int buildType,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("type",buildType),
+								lt("t", todayStartTime))),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
 }

@@ -43,7 +43,7 @@ public abstract class MetaItem {
     public static boolean isItem(int id) {
         return id / MetaData.ID_RADIX >= MATERIAL;
     }
-    public static int scienceItemId(int id){/*获取加点商品类型id*/
+    public static int scienceItemId(int id){/*获取研究所、推广公司类型id*/
         return id % MetaData.ID_RADIX;
     }
 }

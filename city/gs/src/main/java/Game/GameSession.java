@@ -5407,7 +5407,6 @@ public class GameSession {
         ScienceLineBase line = science.addLine(m, science.getWorkerNum(), newLine.getTargetNum());
         if(line!=null)
             GameDb.saveOrUpdate(science);
-        this.write(Package.create(cmd,newLine));
     }
     //删除生产线（推广公司、研究所）
     public void delScienceLine(short cmd,Message message){

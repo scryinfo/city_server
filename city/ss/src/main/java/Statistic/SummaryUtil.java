@@ -688,7 +688,7 @@ public class SummaryUtil
         });
     }
 
-
+    /*获取建筑一个月的收入（yty）*/
     public static Map<Long,Long> getBuildDayIncomeById(UUID bid)
     {
         Map<Long, Long> income = new HashMap<>();
@@ -703,7 +703,8 @@ public class SummaryUtil
         return income;
     }
 
-    public static Map<Long,Long> getBuildDayPayById(UUID bid)         //获取建筑一个月的收入
+    //获取建筑一个月的支出(yty)
+    public static Map<Long,Long> getBuildDayPayById(UUID bid)
     {
         Map<Long, Long> pay = new HashMap<>();
         long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;

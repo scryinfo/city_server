@@ -458,7 +458,7 @@ public class StatisticSession {
 				return todayIncomeList;
 			}
 
-			/*查询今日的商品销售情况(建筑经营详情)*/
+			/*查询今日的商品销售情况(建筑经营详情,yty)*/
 			public void queryBuildingGoodSaleDetail(short cmd, Message message){
 				Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
 				UUID bid = Util.toUuid(saleDetail.getBid().toByteArray());
@@ -501,7 +501,7 @@ public class StatisticSession {
 				this.write(Package.create(cmd,builder.build()));
 			}
 
-			//获取商品历史统计（7天）(建筑经营详情)
+			//获取商品历史统计（7天）(建筑经营详情,yty)
 			public void queryHistoryBuildingSaleDetail(short cmd, Message message){
 				Ss.QueryHistoryBuildingSaleDetail itemInfo = (Ss.QueryHistoryBuildingSaleDetail) message;
 				UUID bid = Util.toUuid(itemInfo.getBid().toByteArray());
