@@ -13,63 +13,61 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import org.bson.Document;
-import ss.Ss;day
+import ss.Ss;
 
 import java.util.*;
 
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
-
 // this class contain only getXXX method, that means the only purpose this class or this server
 // is get data from db
-
 public class StatisticSession {
-    private ChannelHandlerContext ctx;
-    private static final Logger logger = Logger.getLogger(StatisticSession.class);
-    private ChannelId channelId;
-    public static volatile boolean isReady = true;
+	private ChannelHandlerContext ctx;
+	private static final Logger logger = Logger.getLogger(StatisticSession.class);
+	private ChannelId channelId;
+	public static volatile boolean isReady = true;
 
-    public static void setIsReady(boolean isReady)
-    {
-        StatisticSession.isReady = isReady;
-    }
+	public static void setIsReady(boolean isReady)
+	{
+		StatisticSession.isReady = isReady;
+	}
 
-    public StatisticSession(ChannelHandlerContext ctx){
-        this.ctx = ctx;
-        this.channelId = ctx.channel().id();
-    }
+	public StatisticSession(ChannelHandlerContext ctx){
+		this.ctx = ctx;
+		this.channelId = ctx.channel().id();
+	}
 
-    public void logout()
-    {
-        this.ctx.disconnect();
-    }
+	public void logout()
+	{
+		this.ctx.disconnect();
+	}
 
-    private void write(Package p)
-    {
-        this.ctx.channel().writeAndFlush(p);
-    }
+	private void write(Package p)
+	{
+		this.ctx.channel().writeAndFlush(p);
+	}
 
-    public void queryPlayerEconomy(short cmd, Message message)
-    {
-        UUID playerId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
-        if (!isReady)
-        {
-            this.write(Package.fail(cmd));
-            logger.info("data not ready,playerId = " + playerId);
-            return;
-        }
+	public void queryPlayerEconomy(short cmd, Message message)
+	{
+		UUID playerId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
+		if (!isReady)
+		{
+			this.write(Package.fail(cmd));
+			logger.info("data not ready,playerId = " + playerId);
+			return;
+		}
 
-        //for test
-        //playerId = UUID.fromString("228953c5-7da9-4563-8856-166c41dbb19c");
+		//for test
+		//playerId = UUID.fromString("228953c5-7da9-4563-8856-166c41dbb19c");
 
-        Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
-        this.write(Package.create(cmd, economyInfos));
-    }
+		Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
+		this.write(Package.create(cmd, economyInfos));
+	}
 
-    public void queryBuildingIncome(short cmd, Message message)
-    {
-        UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
-        Ss.BuildingIncome.Builder builder = Ss.BuildingIncome.newBuilder();
-        builder.setBuildingId(Util.toByteString(buildingId));
+	public void queryBuildingIncome(short cmd, Message message)
+	{
+		UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
+		Ss.BuildingIncome.Builder builder = Ss.BuildingIncome.newBuilder();
+		builder.setBuildingId(Util.toByteString(buildingId));
 		Map<Long, Long> income = SummaryUtil.getBuildDayIncomeById(buildingId);//建筑今日的营收
 		Map<Long, Long> pay = SummaryUtil.getBuildDayPayById(buildingId);//建筑今日的支出
 		//合并收入支出
@@ -91,8 +89,8 @@ public class StatisticSession {
 			}
 		});
 		builder.addAllNodes(nodes.values());
-        this.write(Package.create(cmd, builder.build()));
-    }
+		this.write(Package.create(cmd, builder.build()));
+	}
 
 	public void queryBuildingFlow(short cmd, Message message)
 	{
@@ -124,93 +122,93 @@ public class StatisticSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-    public void queryAllPlayerSex(short cmd)
-    {
-        Ss.SexInfo.Builder builder = Ss.SexInfo.newBuilder();
-        builder.setMale(SummaryUtil.getSexInfo(true));
-        builder.setFemale(SummaryUtil.getSexInfo(false));
-        this.write(Package.create(cmd, builder.build()));
-    }
-    
-    public void queryNpcNum(short cmd, Message message)
-    {
-    	Ss.QueryNpcNum m = (Ss.QueryNpcNum)message;
-    	long time=m.getTime();
-    	int type=m.getType().getNumber();
-    	Ss.NpcNums.Builder list = Ss.NpcNums.newBuilder();
-    	Ss.NpcNums.NpcNumInfo.Builder info = Ss.NpcNums.NpcNumInfo.newBuilder();
-    	List<Document> ls=null;
-    	if(Ss.QueryNpcNum.Type.GOODS.getNumber()==type){
-        	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
-    	}else if(Ss.QueryNpcNum.Type.APARTMENT.getNumber()==type){
-        	ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayApartmentNpcNum(),CountType.BYSECONDS,time);
-    	}
-    	if(ls!=null&&ls.size()>0){
-    	 	for (Document document : ls) {
-        		info.setId(document.getInteger("id")==null?0:document.getInteger("id"));
-        		info.setTotal(document.getLong("total"));
-        		info.setTime(document.getLong("time"));
-        		list.addNumInfo(info.build());
-    		}
-    	}
-    	list.setType(type);
-    	this.write(Package.create(cmd, list.build()));
-    }
-    
-    public void queryNpcExchangeAmount(short cmd)
-    {
-    	Ss.NpcExchangeAmount.Builder builder = Ss.NpcExchangeAmount.newBuilder();
-    	//npc购买商品的交易量
-    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
-    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
-    	//npc租房的交易量
-    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
-    	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
-    	
-    	builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
-    	this.write(Package.create(cmd, builder.build()));
-    }
-    
-    public void queryExchangeAmount(short cmd)
-    {
-    	Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
-    	//npc交易量
-    	long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
-    	long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
-    	long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
-      	long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
-      	long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
-    	//player交易量
-    	long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
-    	long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
-    	long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
-    	long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
-    	long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
-    	long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
+	public void queryAllPlayerSex(short cmd)
+	{
+		Ss.SexInfo.Builder builder = Ss.SexInfo.newBuilder();
+		builder.setMale(SummaryUtil.getSexInfo(true));
+		builder.setFemale(SummaryUtil.getSexInfo(false));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryNpcNum(short cmd, Message message)
+	{
+		Ss.QueryNpcNum m = (Ss.QueryNpcNum)message;
+		long time=m.getTime();
+		int type=m.getType().getNumber();
+		Ss.NpcNums.Builder list = Ss.NpcNums.newBuilder();
+		Ss.NpcNums.NpcNumInfo.Builder info = Ss.NpcNums.NpcNumInfo.newBuilder();
+		List<Document> ls=null;
+		if(Ss.QueryNpcNum.Type.GOODS.getNumber()==type){
+			ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayGoodsNpcNum(),CountType.BYSECONDS,time);
+		}else if(Ss.QueryNpcNum.Type.APARTMENT.getNumber()==type){
+			ls=SummaryUtil.getNpcHistoryData(SummaryUtil.getDayApartmentNpcNum(),CountType.BYSECONDS,time);
+		}
+		if(ls!=null&&ls.size()>0){
+			for (Document document : ls) {
+				info.setId(document.getInteger("id")==null?0:document.getInteger("id"));
+				info.setTotal(document.getLong("total"));
+				info.setTime(document.getLong("time"));
+				list.addNumInfo(info.build());
+			}
+		}
+		list.setType(type);
+		this.write(Package.create(cmd, list.build()));
+	}
+
+	public void queryNpcExchangeAmount(short cmd)
+	{
+		Ss.NpcExchangeAmount.Builder builder = Ss.NpcExchangeAmount.newBuilder();
+		//npc购买商品的交易量
+		long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+		long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+		//npc租房的交易量
+		long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+		long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+
+		builder.setNpcExchangeAmount(yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment);
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryExchangeAmount(short cmd)
+	{
+		Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
+		//npc交易量
+		long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
+		long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
+		long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
+		long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
+		long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
+		//player交易量
+		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
+		long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
+		long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
+		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+		long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
+		long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
 		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
 		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
 		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
 		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
-		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
-    	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
-    	this.write(Package.create(cmd, builder.build()));
-    }
-    
-    public void queryGoodsNpcNumCurve(short cmd, Message message)
-    {
-      	Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
-    	int id=g.getId();
+				+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+		builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryGoodsNpcNumCurve(short cmd, Message message)
+	{
+		Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
+		int id=g.getId();
 		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
 		Ss.NpcNumCurveMap.Builder bd=Ss.NpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
-	    map.forEach((k,v)->{
-	    	bd.setKey(k);
+		map.forEach((k,v)->{
+			bd.setKey(k);
 			bd.setValue(v);
 			list.addNpcNumCurveMap(bd.build());
-	    });
+		});
 		this.write(Package.create(cmd,list.build()));
-    }
+	}
 
 	public void queryApartmentNpcNumCurve(short cmd)
 	{
@@ -221,55 +219,55 @@ public class StatisticSession {
 			bd.setKey(k);
 			bd.setValue(v);
 			list.addNpcNumCurveMap(bd.build());
-	    });
+		});
 		this.write(Package.create(cmd,list.build()));
-    }
-    
-    public void queryCityBroadcast(short cmd)
-    {
-    	List<Document> listDocument=SummaryUtil.queryCityBroadcast(LogDb.getCityBroadcast());
-    	Ss.CityBroadcasts.Builder list = Ss.CityBroadcasts.newBuilder();
-    	Ss.CityBroadcast.Builder bd=Ss.CityBroadcast.newBuilder();
-    	for (Document document : listDocument) {
-    		if(document.get("s")!=null){
-    			bd.setSellerId(Util.toByteString(UUID.fromString(document.get("s").toString())));
-    		}
-            if(document.get("b")!=null){
-            	bd.setBuyerId(Util.toByteString(UUID.fromString(document.get("b").toString())));
-            }
-    		bd.setCost(document.getLong("c"));
-    		bd.setNum(document.getInteger("n"));
-    		bd.setType(document.getInteger("tp"));
-    		bd.setTs(document.getLong("t"));
-    		list.addCityBroadcast(bd.build());
-		}
-    	this.write(Package.create(cmd,list.build()));
-    }
+	}
 
-    public void queryNpcTypeNum(short cmd)
-    {
-    	Ss.NpcHourTypeNum.Builder list = Ss.NpcHourTypeNum.newBuilder();
-    	Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
-    	map.forEach((k,v)->{
-            Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
-     		info.setT(k);
-     		Map<Integer,Long> m=v;
-     		for(Map.Entry<Integer,Long> entry:m.entrySet()){
-                Ss.NpcTypeNumMap.Builder npcTypeNumMap=Ss.NpcTypeNumMap.newBuilder();
-                npcTypeNumMap.setTp(entry.getKey());
-                npcTypeNumMap.setN(entry.getValue());
-                info.addNpcTypeNumMap(npcTypeNumMap.build());
+	public void queryCityBroadcast(short cmd)
+	{
+		List<Document> listDocument=SummaryUtil.queryCityBroadcast(LogDb.getCityBroadcast());
+		Ss.CityBroadcasts.Builder list = Ss.CityBroadcasts.newBuilder();
+		Ss.CityBroadcast.Builder bd=Ss.CityBroadcast.newBuilder();
+		for (Document document : listDocument) {
+			if(document.get("s")!=null){
+				bd.setSellerId(Util.toByteString(UUID.fromString(document.get("s").toString())));
 			}
-	  		list.addNpcTypeNumInfo(info.build());
-    	});
+			if(document.get("b")!=null){
+				bd.setBuyerId(Util.toByteString(UUID.fromString(document.get("b").toString())));
+			}
+			bd.setCost(document.getLong("c"));
+			bd.setNum(document.getInteger("n"));
+			bd.setType(document.getInteger("tp"));
+			bd.setTs(document.getLong("t"));
+			list.addCityBroadcast(bd.build());
+		}
+		this.write(Package.create(cmd,list.build()));
+	}
 
-    	this.write(Package.create(cmd, list.build()));
-    }
+	public void queryNpcTypeNum(short cmd)
+	{
+		Ss.NpcHourTypeNum.Builder list = Ss.NpcHourTypeNum.newBuilder();
+		Map<Long, Map> map=SummaryUtil.getNpcTypeNumHistoryData(LogDb.getNpcTypeNum());
+		map.forEach((k,v)->{
+			Ss.NpcTypeNumInfo.Builder info = Ss.NpcTypeNumInfo.newBuilder();
+			info.setT(k);
+			Map<Integer,Long> m=v;
+			for(Map.Entry<Integer,Long> entry:m.entrySet()){
+				Ss.NpcTypeNumMap.Builder npcTypeNumMap=Ss.NpcTypeNumMap.newBuilder();
+				npcTypeNumMap.setTp(entry.getKey());
+				npcTypeNumMap.setN(entry.getValue());
+				info.addNpcTypeNumMap(npcTypeNumMap.build());
+			}
+			list.addNpcTypeNumInfo(info.build());
+		});
 
-    //---ly
+		this.write(Package.create(cmd, list.build()));
+	}
 
-    public void queryPlayerExchangeAmount(short cmd) {
-        Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
+	//---ly
+
+	public void queryPlayerExchangeAmount(short cmd) {
+		Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
 //        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
 		//player交易量
 		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
@@ -283,12 +281,12 @@ public class StatisticSession {
 		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
 		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
-		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
-        builder.setPlayExchangeAmount(playerExchangeAmount);
-        this.write(Package.create(cmd, builder.build()));
-    }
+				+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+		builder.setPlayExchangeAmount(playerExchangeAmount);
+		this.write(Package.create(cmd, builder.build()));
+	}
 
-    // 查询一周曲线图
+	// 查询一周曲线图
 	public void queryPlayerExchangeCurve(short cmd, Message message) {
 		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
 		long id = curve.getId();
@@ -307,22 +305,22 @@ public class StatisticSession {
 		});
 		this.write(Package.create(cmd,builder.build()));
 	}
-	
-    public void queryPlayerIncomePayCurve(short cmd, Message message)
-    {
-    	UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
+
+	public void queryPlayerIncomePayCurve(short cmd, Message message)
+	{
+		UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
 		Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();//用于统计收入和支出的合并数据
 		/*前29天的收入支出数据（按天统计）*/
-    	Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
-    	Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+		Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
+		Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
 		//1.处理收入信息
 		playerIncomeMap.forEach((k,v)->{
-    		Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
-    		b.setTime(k);
-    		b.setIncome(v);
-    		b.setPay((playerPayMap!=null&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
+			Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
+			b.setTime(k);
+			b.setIncome(v);
+			b.setPay((playerPayMap!=null&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
 			totalMap.put(k,b.build());
-    	});
+		});
 		//2.处理支出信息
 		for (Map.Entry<Long, Long> pay : playerPayMap.entrySet()) {
 			//如果在收入中已经处理了，则跳过
@@ -347,8 +345,8 @@ public class StatisticSession {
 		builder.setTodayIncome(todayIncome);
 		builder.setTodayPay(todayPay);
 		builder.addAllPlayerIncome(totalMap.values());
-    	this.write(Package.create(cmd,builder.build()));
-    }
+		this.write(Package.create(cmd,builder.build()));
+	}
 
 	public void queryGoodsSoldDetailCurve(short cmd, Message message)
 	{
@@ -422,7 +420,7 @@ public class StatisticSession {
 		//...研究所和广告公司
 		//今天的总收入
 		getIndustryIncomeList(todaylist,buildType,totalMap,singleMap);
-        //一周的数据
+		//一周的数据
 		totalMap.forEach((k,v)->{
 			Ss.IndustryDevelopment.IndustryInfo.Builder industryInfo=Ss.IndustryDevelopment.IndustryInfo.newBuilder();
 			industryInfo.setTime(k).setAmount(singleMap.get(k)).setTotalAmount(v).setPercent(singleMap.get(k)/v/1.d);
@@ -439,89 +437,90 @@ public class StatisticSession {
 			if(buildType==type){//每天指定的建筑类型的总收入
 				singleMap.put(time,total);
 			}
-
-	private List<Document> getTodayIndustryIncomeList(List<Document> documentList,long now,int buildType){
-		List<Document> todayIncomeList=new ArrayList<Document>();
-		documentList.forEach(document -> {
-			Document d=null;
-			int type= document.getInteger("id");
-			long total=document.getLong("total");
-			if(buildType==0){
-				if(type==21){//原料厂
-					d=new Document().append("time",now).append("total",total).append("type", Ss.BuildType.MATERIAL.getNumber());
-				}else{//加工厂
-					d=new Document().append("time",now).append("total",total).append("type",  Ss.BuildType.PRODUCE.getNumber());
-				}
+		});
+	}
+			private List<Document> getTodayIndustryIncomeList(List<Document> documentList,long now,int buildType){
+				List<Document> todayIncomeList=new ArrayList<Document>();
+				documentList.forEach(document -> {
+					Document d=null;
+					int type= document.getInteger("id");
+					long total=document.getLong("total");
+					if(buildType==0){
+						if(type==21){//原料厂
+							d=new Document().append("time",now).append("total",total).append("type", Ss.BuildType.MATERIAL.getNumber());
+						}else{//加工厂
+							d=new Document().append("time",now).append("total",total).append("type",  Ss.BuildType.PRODUCE.getNumber());
+						}
+					}
+					d=new Document().append("time",now).append("total",total).append("type", buildType);
+					todayIncomeList.add(d);
+				});
+				return todayIncomeList;
 			}
-			d=new Document().append("time",now).append("total",total).append("type", buildType);
-			todayIncomeList.add(d);
-		});
-		return todayIncomeList;
-		this.write(Package.create(cmd,builder.build()));
-	}
 
-    /*查询今日的商品销售情况*/
-    public void queryBuildingGoodSaleDetail(short cmd, Message message){
-        Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
-        UUID bid = Util.toUuid(saleDetail.getBid().toByteArray());
-        int buildingType = saleDetail.getType();
-        //返回数据
-        Ss.BuildingTodaySaleDetail.Builder builder = Ss.BuildingTodaySaleDetail.newBuilder();
-        builder.setBuildingId(saleDetail.getBid());
-        //1.查询并且获取到7天的销售(出现过的商品)信息
-        Map<Long, Map<ItemKey, Document>> historyDetail = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), bid);
-        /*2.查询今日的经营详情，直接从buyInshelf中统计（需要根据建筑类型来选择统计哪些）*/
-        List<Document> todaySale = new ArrayList<>();
-        Long todayStartTime = TimeUtil.todayStartTime();
-        Long now = System.currentTimeMillis();
-        if(buildingType==MetaBuilding.RETAIL||buildingType==MetaBuilding.MATERIAL){
-            todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
-        }else{
-            todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getNpcBuyInShelf());//统计今天的销售额
-        }
-        //获取今日收入的所有销售额度
-        List<ItemKey> todayAllItem = new ArrayList<>();
-        for (Document d : todaySale) {
-            ItemKey itemKey = new ItemKey(d.getInteger("itemId"), (UUID) d.get("p"));
-            todayAllItem.add(itemKey);
-            Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(d, buildingType, true);
-            builder.addTodaySaleDetail(saleDetail1);
-        }
-        Set<ItemKey> otherKeys = new HashSet<>();
-        //从7天内的历史记录获取是否有其他的销售shaping记录（有有则代表记录为0）
-        historyDetail.values().forEach(m->{
-            m.entrySet().forEach(entry->{
-                ItemKey key = entry.getKey();
-                if(!todayAllItem.contains(key)){
-                    todayAllItem.add(key);
-                    Document doc = entry.getValue();
-                    Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(doc, buildingType, false);//统计历史中的收入记录，但今日收益为0
-                    builder.addTodaySaleDetail(saleDetail1);
-                }
-            });
-        });
-    }
+			/*查询今日的商品销售情况(建筑经营详情)*/
+			public void queryBuildingGoodSaleDetail(short cmd, Message message){
+				Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
+				UUID bid = Util.toUuid(saleDetail.getBid().toByteArray());
+				int buildingType = saleDetail.getType();
+				//返回数据
+				Ss.BuildingTodaySaleDetail.Builder builder = Ss.BuildingTodaySaleDetail.newBuilder();
+				builder.setBuildingId(saleDetail.getBid());
+				//1.查询并且获取到7天的销售(出现过的商品)信息
+				Map<Long, Map<ItemKey, Document>> historyDetail = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), bid);
+				/*2.查询今日的经营详情，直接从buyInshelf中统计（需要根据建筑类型来选择统计哪些）*/
+				List<Document> todaySale = new ArrayList<>();
+				Long todayStartTime = TimeUtil.todayStartTime();
+				Long now = System.currentTimeMillis();
+				if(buildingType==MetaBuilding.RETAIL||buildingType==MetaBuilding.MATERIAL){
+					todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
+				}else{
+					todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getNpcBuyInShelf());//统计今天的销售额
+				}
+				//获取今日收入的所有销售额度
+				List<ItemKey> todayAllItem = new ArrayList<>();
+				for (Document d : todaySale) {
+					ItemKey itemKey = new ItemKey(d.getInteger("itemId"), (UUID) d.get("p"));
+					todayAllItem.add(itemKey);
+					Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(d, buildingType, true);
+					builder.addTodaySaleDetail(saleDetail1);
+				}
+				Set<ItemKey> otherKeys = new HashSet<>();
+				//从7天内的历史记录获取是否有其他的销售shaping记录（有有则代表记录为0）
+				historyDetail.values().forEach(m->{
+					m.entrySet().forEach(entry->{
+						ItemKey key = entry.getKey();
+						if(!todayAllItem.contains(key)){
+							todayAllItem.add(key);
+							Document doc = entry.getValue();
+							Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(doc, buildingType, false);//统计历史中的收入记录，但今日收益为0
+							builder.addTodaySaleDetail(saleDetail1);
+						}
+					});
+				});
+				this.write(Package.create(cmd,builder.build()));
+			}
 
-	//获取商品历史统计（7天）详情
-	public void queryHistoryBuildingSaleDetail(short cmd, Message message){
-		Ss.QueryHistoryBuildingSaleDetail itemInfo = (Ss.QueryHistoryBuildingSaleDetail) message;
-		UUID bid = Util.toUuid(itemInfo.getBid().toByteArray());
-		UUID producerId = Util.toUuid(itemInfo.getProducerId().toByteArray());
-		int itemId = itemInfo.getItemId();
-		int buildingType = itemInfo.getType();
-		Map<Long, Document> documentMap = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), itemId, bid, producerId);
-		Ss.BuildingHistorySaleDetail.Builder builder = Ss.BuildingHistorySaleDetail.newBuilder();
-		builder.setBuildingId(Util.toByteString(bid));
-		documentMap.forEach((k,doc)->{
-			Ss.BuildingHistorySaleDetail.HistorySaleDetail.Builder history = Ss.BuildingHistorySaleDetail.HistorySaleDetail.newBuilder();
-			history.setTime(k)
-					.setItemId(doc.getInteger("itemId"));
-			Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.Builder detail = Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.newBuilder();
-			detail.setIncome(doc.getLong("total"))
-					.setSaleNum(doc.getInteger("num"));
-			history.setSaleDetail(detail);
-			builder.addHistoryDetail(history);
-		});
-		this.write(Package.create(cmd,builder.build()));
-	}
-}
+			//获取商品历史统计（7天）(建筑经营详情)
+			public void queryHistoryBuildingSaleDetail(short cmd, Message message){
+				Ss.QueryHistoryBuildingSaleDetail itemInfo = (Ss.QueryHistoryBuildingSaleDetail) message;
+				UUID bid = Util.toUuid(itemInfo.getBid().toByteArray());
+				UUID producerId = Util.toUuid(itemInfo.getProducerId().toByteArray());
+				int itemId = itemInfo.getItemId();
+				int buildingType = itemInfo.getType();
+				Map<Long, Document> documentMap = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), itemId, bid, producerId);
+				Ss.BuildingHistorySaleDetail.Builder builder = Ss.BuildingHistorySaleDetail.newBuilder();
+				builder.setBuildingId(Util.toByteString(bid));
+				documentMap.forEach((k,doc)->{
+					Ss.BuildingHistorySaleDetail.HistorySaleDetail.Builder history = Ss.BuildingHistorySaleDetail.HistorySaleDetail.newBuilder();
+					history.setTime(k)
+							.setItemId(doc.getInteger("itemId"));
+					Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.Builder detail = Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.newBuilder();
+					detail.setIncome(doc.getLong("total"))
+							.setSaleNum(doc.getInteger("num"));
+					history.setSaleDetail(detail);
+					builder.addHistoryDetail(history);
+				});
+				this.write(Package.create(cmd,builder.build()));
+			}
+		}

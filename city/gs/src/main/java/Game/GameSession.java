@@ -5095,7 +5095,7 @@ public class GameSession {
     }
 
     /*查询小地图全城类别建筑类别详细信息*/
-    public void queryTypeBuildingDetail(short cmd,Message message){
+    public void queryMapTypeBuildingDetail(short cmd,Message message){
         Gs.QueryTypeBuildingDetail query = (Gs.QueryTypeBuildingDetail) message;
         int type = query.getType();
         GridIndex centerIdx = new GridIndex(query.getCenterIdx().getX(), query.getCenterIdx().getY());
@@ -5294,8 +5294,369 @@ public class GameSession {
 
         this.write(Package.create(cmd,build.build()));
     }
-    public void queryTypeBuildingDetail(short cmd,Message message){
+
+    public void queryPlayerIncomeRanking(short cmd,Message message){
         Gs.PlayerIncomeRanking.Builder build=Gs.PlayerIncomeRanking.newBuilder();
         this.write(Package.create(cmd,build.build()));
     }
+
+    //=================新版研究所===================
+    //开启宝箱
+    public void openScienceBox(short cmd,Message message){
+        Gs.OpenScience box = (Gs.OpenScience) message;
+        UUID bid = Util.toUuid(box.getBid().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof Technology)||box.getNum()<0){
+            System.err.println("建筑类型错误或数量错误！");
+            return;
+        }
+        MetaScienceItem item = MetaData.getScienceItem(box.getItemId());
+        ItemKey key = new ItemKey(item, building.ownerId());
+        Technology tec = (Technology) building;
+        if (!tec.hasEnoughBox(key, box.getNum())) {
+            System.err.println("宝箱数量不足！");
+            return;
+        }
+        //开始开启宝箱
+        int result = tec.useScienceBox(key, box.getNum());
+        /*更新自动补货*/
+        tec.updateAutoReplenish(key);
+        Gs.ScienceBoxACK.Builder builder = Gs.ScienceBoxACK.newBuilder();
+        builder.setKey(key.toProto())
+                .setBuildingId(box.getBid())
+                .setResultPoint(result);
+        GameDb.saveOrUpdate(tec);
+        this.write(Package.create(cmd, builder.build()));
+    }
+    //使用研究所科技点数
+    public void useSciencePoint(short cmd,Message message){
+        Gs.OpenScience science = (Gs.OpenScience) message;
+        UUID bid = Util.toUuid(science.getBid().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof  Technology)||!building.canUseBy(player.id()))
+            return;
+        Technology tec = (Technology) building;
+        MetaScienceItem item = MetaData.getScienceItem(science.getItemId());
+        ItemKey key = new ItemKey(item, building.ownerId());
+        if(!tec.hasEnoughPintInStore(key, science.getNum())){
+           this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+           return;
+        }
+        //使用科技点数
+        if(tec.getStore().consumeInHand(key,science.getNum())){
+           //增加玩家对应的科技点数
+            SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), item.id,science.getNum());
+            SciencePointManager.getInstance().updateSciencePoint(sciencePoint);//更新缓存并同步数据库
+            GameDb.saveOrUpdate(tec);
+            this.write(Package.create(cmd,science));
+        }else {
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+            return;
+        }
+    }
+
+
+    //=============新版推广公司==================
+    //推广公司建筑详情
+    public void detailPromotionCompany(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bId = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bId);
+        if(building==null||!(building instanceof PromotionCompany))
+            return;
+        registBuildingDetail(building);
+        updateBuildingVisitor(building);
+        this.write(Package.create(cmd, building.detailProto()));
+    }
+    //推广公司仓库使用推广点数
+    public void usePromotionPoint(short cmd,Message message){
+        Gs.OpenScience science = (Gs.OpenScience) message;
+        UUID bid = Util.toUuid(science.getBid().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof  PromotionCompany)||!building.canUseBy(player.id()))
+            return;
+        PromotionCompany promotion = (PromotionCompany) building;
+        MetaPromotionItem item = MetaData.getPromotionItem(science.getItemId());
+        ItemKey key = new ItemKey(item, building.ownerId());
+        if(!promotion.hasEnoughPintInStore(key, science.getNum())){
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+            return;
+        }
+        //使用科技点数
+        if(promotion.getStore().consumeInHand(key,science.getNum())){
+            //增加玩家对应的科技点数
+            PromotePoint promotePoint = PromotePointManager.getInstance().updatePlayerPromotePoint(player.id(), item.id, science.getNum());
+            PromotePointManager.getInstance().updatePromotionPoint(promotePoint);//更新缓存并同步数据库
+            GameDb.saveOrUpdate(promotion);
+            this.write(Package.create(cmd,science));
+        }else {
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+            return;
+        }
+    }
+
+    //=========推广公司研究所公用协议==========
+    //添加建筑生产线（推广公司、研究所）
+    public void addScienceLine(short cmd,Message message){
+        Gs.AddLine newLine = (Gs.AddLine) message;
+        if(newLine.getTargetNum() <= 0 || newLine.getWorkerNum() <= 0)
+            return;
+        UUID id = Util.toUuid(newLine.getId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if(b == null||b.outOfBusiness() || !(b instanceof ScienceBuildingBase) || !b.ownerId().equals(player.id()))
+            return;
+        MetaItem m = MetaData.getItem(newLine.getItemId());
+        if(m == null)
+            return;
+        ScienceBuildingBase science = (ScienceBuildingBase) b;
+        ScienceLineBase line = science.addLine(m, science.getWorkerNum(), newLine.getTargetNum());
+        if(line!=null)
+            GameDb.saveOrUpdate(science);
+    }
+    //删除生产线（推广公司、研究所）
+    public void delScienceLine(short cmd,Message message){
+        Gs.DelLine c = (Gs.DelLine) message;
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if (b == null || b.outOfBusiness() ||!(b instanceof ScienceBuildingBase)|| !b.ownerId().equals(player.id()))
+            return;
+        UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+        ScienceBuildingBase science = (ScienceBuildingBase) b;
+        if(science.__delLine(lineId)!=null) {
+            GameDb.saveOrUpdate(science);
+            if(science.line.size() > 0){
+                this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(science.line.get(0).getId())).build()));
+            }else{
+                this.write(Package.create(cmd, c));
+            }
+        }
+    }
+    //调整eva类加点建筑生产线顺序（推广公司、研究所）
+    public void setScienceLineOrder(short cmd,Message message){
+        Gs.SetLineOrder c = (Gs.SetLineOrder) message;
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building b = City.instance().getBuilding(id);
+        if (b == null || b.outOfBusiness() || !(b instanceof ScienceBuildingBase)|| !b.ownerId().equals(player.id()))
+            return;
+        UUID lineId = Util.toUuid(c.getLineId().toByteArray());
+        int pos = c.getLineOrder() - 1;
+        ScienceBuildingBase science = (ScienceBuildingBase) b;
+        if(pos >=0 && pos < science.line.size()){
+            for (int i = science.line.size() -1; i >= 0 ; i--) {
+                ScienceLineBase l = science.line.get(i);
+                if(l.getId().equals(lineId)){
+                    science.line.add(pos,science.line.remove(i));
+                    break;
+                }
+            }
+            this.write(Package.create(cmd, c));
+        }else{
+            this.write(Package.fail(cmd));
+        }
+    }
+    //研究所或推广公司上架（推广公司、研究所）
+    public void scienceShelfAdd(short cmd,Message message) throws Exception {
+        Gs.ShelfAdd c = (Gs.ShelfAdd)message;
+        Item item = null;
+        item = new Item(c.getItem());
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(id);
+        if(building == null|| !(building instanceof ScienceBuildingBase)||!building.canUseBy(player.id()))
+            return;
+        ScienceBuildingBase science = (ScienceBuildingBase) building;
+        if(science.addshelf(item, c.getPrice(),c.getAutoRepOn())){
+            GameDb.saveOrUpdate(science);
+            Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
+            this.write(Package.create(cmd, builder.build()));
+        }else{
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+            System.err.println("数量不足");
+        }
+    }
+    //eva类加点建筑自动补货（推广公司、研究所）
+    public void setScienceAutoReplenish(short cmd,Message message) throws Exception {
+        Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
+        ItemKey itemKey = new ItemKey(c.getIKey());
+        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(id);
+        if(building == null || !(building instanceof ScienceBuildingBase)|| !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        ScienceBuildingBase science = (ScienceBuildingBase) building;
+        ScienceShelf.Content i = science.getContent(itemKey);
+        if(science.setAutoReplenish(itemKey,c.getAutoRepOn())) {
+            //处理自动补货
+            if(i != null && i.autoReplenish){
+                science.updateAutoReplenish(itemKey);
+            }
+            GameDb.saveOrUpdate(science);
+            this.write(Package.create(cmd, c));
+        }
+        else
+            this.write(Package.fail(cmd));
+    }
+    //下架eva类加点建筑货架上的东西（推广公司、研究所）
+    public void scienceShelfDel(short cmd,Message message) throws Exception {
+        Gs.ShelfDel c = (Gs.ShelfDel)message;
+        Item item = new Item(c.getItem());
+        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building == null || !(building instanceof ScienceBuildingBase)|| !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        ScienceBuildingBase science = (ScienceBuildingBase) message;
+        ScienceShelf.Content content = science.getContent(item.key);
+        if(content!=null){
+            content.autoReplenish = false;//关闭自动补货
+            if(science.delshelf(item.key, content.n, true)) {
+                GameDb.saveOrUpdate(science);
+                this.write(Package.create(cmd, c));
+            }
+        }else{
+            this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
+        }
+    }
+    //修改eva类加点建筑货架上科技点信息（推广公司、研究所）
+    public void scienceShelfSet(short cmd,Message message) throws Exception {
+        Gs.ShelfSet c = (Gs.ShelfSet)message;
+        if(c.getPrice() <= 0)
+            return;
+        Item item = new Item(c.getItem());
+        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building == null || !(building instanceof ScienceBuildingBase) || !building.canUseBy(player.id()) || building.outOfBusiness())
+            return;
+        ScienceBuildingBase science = (ScienceBuildingBase) building;
+        if(science.shelfSet(item, c.getPrice())){
+            GameDb.saveOrUpdate(science);
+            this.write(Package.create(cmd, c));
+        } else {
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+        }
+    }
+    //购买科技资料（推广公司、研究所）
+    public void buySciencePoint(short cmd,Message message) throws Exception {
+        Gs.BuySciencePoint c = (Gs.BuySciencePoint)message;
+        if(c.getPrice() <= 0)
+            return;
+        UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
+        UUID buyerId = Util.toUuid(c.getBuyerId().toByteArray());//由于购买者就是当前玩家，所以不需要传递玩家id
+        Building sellBuilding = City.instance().getBuilding(bid);
+        if(sellBuilding == null || !(sellBuilding instanceof ScienceBuildingBase)||sellBuilding.canUseBy(buyerId) || sellBuilding.outOfBusiness())
+            return;
+        Item item = new Item(c.getItem());
+        //1.检测购买的数量是否充足（不充足返回错误码）
+        //2.购买科技点数（建筑增加今日营收，以及日志记录）
+        //3.购买者增加对应的eva点数（需等eva改版完成）
+        //4.（玩家消费记录）、（建筑）以及（建筑主人）收入
+        ScienceBuildingBase science = (ScienceBuildingBase) sellBuilding;
+        if(science.checkShelfSlots(item.key,item.n)){
+            ScienceShelf.Content content = science.getContent(item.key);
+            //计算费用
+            int cost = item.n * content.price;
+            //消费货架数量
+            science.delshelf(item.key, item.n, false);
+            sellBuilding.updateTodayIncome(cost);
+            //玩家支出和收入记录
+            Player seller = GameDb.getPlayer(science.ownerId());
+            player.decMoney(cost);//消费者支出
+            seller.addMoney(cost);//卖家收入
+            int itemId = item.key.meta.id;
+            //增加玩家的科技点数
+            if(sellBuilding.type()==MetaBuilding.TECHNOLOGY) {
+                SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), itemId, item.n);
+                SciencePointManager.getInstance().updateSciencePoint(sciencePoint);
+            }else{
+                PromotePoint promotePoint = PromotePointManager.getInstance().updatePlayerPromotePoint(player.id(), itemId, item.n);
+                PromotePointManager.getInstance().updatePromotionPoint(promotePoint);
+            }
+            int type = MetaItem.scienceItemId(itemId);//获取商品类型
+            //日志记录
+            LogDb.playerPay(player.id(),cost);
+            LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
+            LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName());
+            LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
+            LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),item.n,c.getPrice(),itemId);//离线通知统计
+            GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
+            //推送商品变化通知
+            content = science.getContent(item.key);
+            sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
+            this.write(Package.create(cmd, c));
+        }else{
+            System.err.println("货架数量不足");
+            this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
+        }
+    }
+    //获取科技加点建筑所货架（推广公司、研究所）
+    public void getScienceShelfData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof ScienceBuildingBase))
+            return;
+        ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
+        Gs.ScienceShelfData.Builder shelfData = Gs.ScienceShelfData.newBuilder();
+        Gs.ScienceShelf scienceShelf = scienceBuildingBase.getShelf().toProto();
+        shelfData.setShelf(scienceShelf).setBuildingId(id.getId());
+        this.write(Package.create(cmd,shelfData.build()));
+    }
+    //获取科技加点建筑仓库数据（推广公司、研究所）
+    public void getScienceStorageData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof ScienceBuildingBase))
+            return;
+        ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
+        Gs.ScienceStorageData.Builder storeData = Gs.ScienceStorageData.newBuilder();
+        Gs.ScienceStore scienceStore = scienceBuildingBase.getStore().toProto();
+        storeData.setBuildingId(id.getId()).setStore(scienceStore);
+        this.write(Package.create(cmd,scienceStore));
+    }
+    //获取科技加点建筑生产线信息（推广公司、研究所）
+    public void getScienceLineData(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof ScienceBuildingBase))
+            return;
+        ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
+        Gs.ScienceLineData.Builder builder = Gs.ScienceLineData.newBuilder();
+        scienceBuildingBase.line.forEach(l->{
+            builder.addLine(l.toProto());
+        });
+        if(scienceBuildingBase.type()==MetaBuilding.TECHNOLOGY){/*如果是研究所，生产线还包含了宝箱信息*/
+            Technology tec = (Technology) scienceBuildingBase;
+            builder.addAllBox(tec.getBoxStore().toProto()).setBuildingId(id.getId());
+        }
+        builder.setBuildingId(id.getId());
+        this.write(Package.create(cmd,builder.build()));
+    }
+    //获取科技加点类建筑生产列表的生产速度（推广公司、研究所）
+    public void getScienceItemSpeed(short cmd,Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID bid = Util.toUuid(id.getId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(building==null||!(building instanceof ScienceBuildingBase))
+            return;
+        ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
+        Gs.ScienceItemSpeed.Builder builder = Gs.ScienceItemSpeed.newBuilder();
+        builder.setBuildingId(id.getId());
+        /*基础数据*/
+        /*暂时不能够查询生产速度加成（需等Eva改版完成）*/
+        if(scienceBuildingBase.type()==MetaBuilding.TECHNOLOGY) {
+            for (MetaScienceItem item : MetaData.getScienceItem().values()) {
+                Eva eva = EvaManager.getInstance().getEva(player.id(), item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);//此处Eva可能会不对
+                builder.addItemSpeedBuilder().setType(item.id)
+                        .setSpeed(item.n * (1 + EvaManager.getInstance().computePercent(eva)));//TODO 需加上eva加成
+            }
+        }else if(scienceBuildingBase.type()==MetaBuilding.PROMOTE){
+            for (MetaPromotionItem item : MetaData.getPromotionItem().values()) {
+                Eva eva = EvaManager.getInstance().getEva(player.id(), item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);//此处Eva可能会不对
+                builder.addItemSpeedBuilder().setType(item.id)
+                        .setSpeed(item.n *scienceBuildingBase.getWorkerNum()*(1 + EvaManager.getInstance().computePercent(eva)));//TODO 需加上eva加成
+            }
+        }
+        this.write(Package.create(cmd,builder.build()));
+    }
+
 }
