@@ -36,16 +36,13 @@ public class TotalUtil {
         Map<Long, Long> total = new TreeMap<>();
         //1.处理29天以前的数据，以天数统计求和
         sourceMap.forEach((time,money)->{
-            //处理29天以前的数据
-            if(time<=TimeUtil.todayStartTime()-1&&time>=TimeUtil.monthStartTime()){
-                //获取当天开始时间
-                Long st = TimeUtil.getTimeDayStartTime(time);
-                if(total.containsKey(st)) {
-                    total.put(st, total.get(st) + money);
-                }
-                else {
-                    total.put(st, money);
-                }
+            //获取当天开始时间
+            Long st = TimeUtil.getTimeDayStartTime(time);
+            if(total.containsKey(st)) {
+                total.put(st, total.get(st) + money);
+            }
+            else {
+                total.put(st, money);
             }
         });
         return total;

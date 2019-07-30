@@ -313,16 +313,18 @@ public class StatisticSession {
 		/*前29天的收入支出数据（按天统计）*/
 		Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
 		Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
+		Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
+		Map<Long, Long> monthTotalPay = TotalUtil.getInstance().monthTotal(playerPayMap);
 		//1.处理收入信息
-		playerIncomeMap.forEach((k,v)->{
+		monthTotalIncome.forEach((k,v)->{
 			Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
 			b.setTime(k);
 			b.setIncome(v);
-			b.setPay((playerPayMap!=null&&playerPayMap.get(k)!=null)?playerPayMap.get(k):0);
+			b.setPay((monthTotalPay!=null&&monthTotalPay.get(k)!=null)?monthTotalPay.get(k):0);
 			totalMap.put(k,b.build());
 		});
 		//2.处理支出信息
-		for (Map.Entry<Long, Long> pay : playerPayMap.entrySet()) {
+		for (Map.Entry<Long, Long> pay : monthTotalPay.entrySet()) {
 			//如果在收入中已经处理了，则跳过
 			Long time = pay.getKey();
 			if(totalMap.containsKey(time)){

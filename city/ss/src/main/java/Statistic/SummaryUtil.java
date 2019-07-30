@@ -296,11 +296,8 @@ public class SummaryUtil
     }
     public static Map<Long, Long> queryPlayerIncomePayCurve(MongoCollection<Document> collection,UUID id)
     {
-    	Calendar calendar =TimeUtil.monthCalendar();
-        //开始时间（前29天）
-    	Date startDate = calendar.getTime();
-    	long startTime=startDate.getTime();
-    	calendar.setTime(new Date());
+        //开始时间（前30天）
+        long startTime = TimeUtil.monthStartTime();
     	//结束时间
         long endTime=TimeUtil.todayStartTime();
     	Map<Long, Long> map = new LinkedHashMap<>();
