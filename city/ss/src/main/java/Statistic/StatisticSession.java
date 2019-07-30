@@ -389,7 +389,7 @@ public class StatisticSession {
 		Map<Long,Long> singleMap=new TreeMap<Long,Long>();
 		Map<Long,Long> totalMap=new TreeMap<Long,Long>();
 		//前六天数据
-		List<Document> sixDaylist=SummaryUtil.queryWeekData(SummaryUtil.getDayIndustryIncome());
+		List<Document> sixDaylist=SummaryUtil.queryWeekIndustryDevelopment(SummaryUtil.getDayIndustryIncome());
 		//前六天每天的行业总收入和每天指定类型建筑的总收入
 		getIndustryIncomeList(sixDaylist,buildType,totalMap,singleMap);
 		//今天不同行业的收入
@@ -440,4 +440,22 @@ public class StatisticSession {
 		});
 		return todayIncomeList;
 	}
+	public void queryIndustryCompetition(short cmd, Message message){
+		Ss.IndustryCompetition msg = (Ss.IndustryCompetition)message;
+		int buildType=msg.getType().getNumber();
+
+		Ss.IndustryCompetition.Builder b=Ss.IndustryCompetition.newBuilder();
+		b.setType(msg.getType());
+		//前六天数据
+		List<Document> sixDaylist=SummaryUtil.queryWeekIndustryCompetition(SummaryUtil.getDayBuildingBusiness(),buildType);
+		sixDaylist.forEach(d->{
+			Ss.IndustryCompetition.IndustryInfo.Builder info=Ss.IndustryCompetition.IndustryInfo.newBuilder();
+			info.setCompanyNum(d.getLong("n")).setStaffNum(d.getLong("total")).setTime(d.getLong("time"));
+			b.addIndustryInfo(info);
+		});
+		//今天的数据
+
+
+		this.write(Package.create(cmd,b.build()));
+    }
 }

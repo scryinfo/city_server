@@ -50,6 +50,7 @@ public class SummaryUtil
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
     private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";
+    private static final String DAY_BUILDING_BUSINESS= "dayBuildingBusiness";
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
@@ -74,6 +75,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
     private static MongoCollection<Document> dayIndustryIncome;
+    private static MongoCollection<Document> dayBuildingBusiness;
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
@@ -122,6 +124,8 @@ public class SummaryUtil
         dayGoodsSoldDetail = database.getCollection(DAY_GOODS_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayIndustryIncome = database.getCollection(DAY_INDUSTRY_INCOME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayBuildingBusiness = database.getCollection(DAY_BUILDING_BUSINESS)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -642,6 +646,11 @@ public class SummaryUtil
         return dayIndustryIncome;
     }
 
+    public static MongoCollection<Document> getDayBuildingBusiness()
+    {
+        return dayBuildingBusiness;
+    }
+
     public static void insertBuildingDayIncome(List<Document> documentList,long time)
     {
         documentList.forEach(document -> {
@@ -842,7 +851,7 @@ public class SummaryUtil
 
         return map;
     }
-    public static List<Document> queryWeekData(MongoCollection<Document> collection)
+    public static List<Document> queryWeekIndustryDevelopment(MongoCollection<Document> collection)
     {
         List<Document> documentList = new ArrayList<>();
         collection.find(and(
@@ -855,6 +864,22 @@ public class SummaryUtil
         {
             documentList.add(document);
         });
+        return documentList;
+    }
+    public static List<Document> queryWeekIndustryCompetition(MongoCollection<Document> collection,int buildType)
+    {
+        List<Document> documentList = new ArrayList<>();
+        collection.find(and(
+                eq("tp",buildType),
+                gte("time", TimeUtil.beforeSixDay()),
+                lt("time", TimeUtil.todayStartTime())
+        ))
+                .projection(fields(include("time","tp","n","total"), excludeId()))
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) document ->
+                {
+                    documentList.add(document);
+                });
         return documentList;
     }
 }

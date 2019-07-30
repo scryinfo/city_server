@@ -512,6 +512,7 @@ public class GameSession {
         }
         b.createNpc();//产生npc
         if(b.startBusiness(player)){
+            LogDb.playerBuildingBusiness(player.id(),1,b.getWorkerNum(),b.type());
             this.write(Package.create(cmd,c));
             GameDb.saveOrUpdate(b);
             GameDb.saveOrUpdate(Arrays.asList(b,player));

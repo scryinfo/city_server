@@ -84,6 +84,8 @@ public class LogDb {
 
 	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//建筑收入者货架收入
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
+	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
+
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -128,6 +130,7 @@ public class LogDb {
 	/*用作离线通知*/
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 	private static MongoCollection<Document> dayPlayerIncome;
+	private static MongoCollection<Document> playerBuildingBusiness;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -209,6 +212,8 @@ public class LogDb {
 		sellerBuildingIncome=database.getCollection(SELLER_BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		playerBuildingBusiness = database.getCollection(PLAYER_BUILDING_BUSINESS)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -897,7 +902,6 @@ public class LogDb {
 				.append("tp", type);
 		cityBroadcast.insertOne(document);
 	}
-	
 	public static void  npcTypeNum(long time, int type, long n)
 	{
 		Document document = new Document("t", time);
@@ -1030,6 +1034,15 @@ public class LogDb {
 				.append("itemId",itemId);
 		sellerBuildingIncome.insertOne(document);
 	}
+	public static void  playerBuildingBusiness(UUID playerId,long n,long staffNum,int type)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("p", playerId)
+				.append("n", n)
+				.append("sn", staffNum)
+				.append("tp", type);
+		playerBuildingBusiness.insertOne(document);
+	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
 		return npcBuyInRetailCol;
@@ -1144,6 +1157,10 @@ public class LogDb {
 	/*用于离线通知，货架收入*/
 	public static MongoCollection<Document> getSellerBuildingIncome() {
 		return sellerBuildingIncome;
+	}
+
+	public static MongoCollection<Document> getPlayerBuildingBusiness() {
+		return playerBuildingBusiness;
 	}
 
 	public static MongoCollection<Document> getDayPlayerIncome()
@@ -1318,5 +1335,28 @@ public class LogDb {
 			map.put(document.get("p",UUID.class), document.getLong(KEY_TOTAL));
 		});
 		return map;
+	}
+	public static List<Document> playerBuildingBusiness(long startTime, long endTime, MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document groupObject = new Document("_id",
+				new Document("p", "$p")
+						.append("tp", "$tp"));
+		Document projectObject = new Document()
+				.append("id", "$_id._id.p")
+				.append("tp", "$_id._id.tp")
+				.append("n", "$n")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group(groupObject,  Accumulators.sum(KEY_TOTAL, "$sn"),Accumulators.sum("n", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
 	}
 }
