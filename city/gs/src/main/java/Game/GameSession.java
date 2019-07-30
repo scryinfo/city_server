@@ -5095,7 +5095,7 @@ public class GameSession {
     }
 
     /*查询小地图全城类别建筑类别详细信息*/
-    public void queryMapTypeBuildingDetail(short cmd,Message message){
+    public void queryTypeBuildingDetail(short cmd,Message message){
         Gs.QueryTypeBuildingDetail query = (Gs.QueryTypeBuildingDetail) message;
         int type = query.getType();
         GridIndex centerIdx = new GridIndex(query.getCenterIdx().getX(), query.getCenterIdx().getY());
@@ -5212,13 +5212,13 @@ public class GameSession {
                     Building buyBuilding = City.instance().getBuilding(document.get("w",UUID.class));
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     if(buildType==MetaItem.type(buyBuilding.metaId())){
-                        incomePay.setItemId(document.getInteger("tpi"))
-                                .setNum((int)(document.getLong("a")/document.getLong("p")))
-                                .setAmount(document.getLong("a"))
-                                .setTime(document.getLong("t"))
-                                .setName(buyBuilding.getName())
-                                .setMetaId(buyBuilding.metaId());
-                        build.addIncomePay(incomePay.build());
+                    incomePay.setItemId(document.getInteger("tpi"))
+                            .setNum((int)(document.getLong("a")/document.getLong("p")))
+                            .setAmount(document.getLong("a"))
+                            .setTime(document.getLong("t"))
+                            .setName(buyBuilding.getName())
+                            .setMetaId(buyBuilding.metaId());
+                    build.addIncomePay(incomePay.build());
                     }
                 });
                 list = LogDb.daySummaryTransferPay(yestodayStartTime, todayStartTime, LogDb.getPayTransfer(),type,playerId);
@@ -5254,9 +5254,9 @@ public class GameSession {
                 });
             }else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
             }else if(buildType==Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
-                list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getBuyGround(), buildType, playerId);
+                list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getBuyGround(),buildType,playerId);
                 list.forEach(document -> {
-                    Gs.PlayerIncomePay.IncomePay.Builder incomePay = Gs.PlayerIncomePay.IncomePay.newBuilder();
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(3000)
                             .setNum((int)(document.getLong("a")/document.getLong("s")))
                             .setAmount(document.getLong("a"))
@@ -5290,15 +5290,10 @@ public class GameSession {
                     build.addIncomePay(incomePay.build());
                 });
             }
-           }
-
+        }
         this.write(Package.create(cmd,build.build()));
     }
 
-    public void queryPlayerIncomeRanking(short cmd,Message message){
-        Gs.PlayerIncomeRanking.Builder build=Gs.PlayerIncomeRanking.newBuilder();
-        this.write(Package.create(cmd,build.build()));
-    }
 
     //=================新版研究所===================
     //开启宝箱
@@ -5412,6 +5407,7 @@ public class GameSession {
         ScienceLineBase line = science.addLine(m, science.getWorkerNum(), newLine.getTargetNum());
         if(line!=null)
             GameDb.saveOrUpdate(science);
+        this.write(Package.create(cmd,newLine));
     }
     //删除生产线（推广公司、研究所）
     public void delScienceLine(short cmd,Message message){

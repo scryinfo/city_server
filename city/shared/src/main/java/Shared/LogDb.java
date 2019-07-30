@@ -99,7 +99,6 @@ public class LogDb {
 	private static MongoCollection<Document> payTransfer;
 	private static MongoCollection<Document> rentGround;
 	private static MongoCollection<Document> buyGround;
-
 	private static MongoCollection<Document> landAuction;
 	private static MongoCollection<Document> extendBag;
 	//-----------------------------------------
@@ -347,8 +346,7 @@ public class LogDb {
 		}
 		//npc buy
         collection.aggregate(
-                Arrays.asList
-						(
+                Arrays.asList(
                         Aggregates.match(and(
                                 eq("tp", tp),
                                 gte("t", yestodayStartTime),
@@ -984,7 +982,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid,int type, int mId)
+			UUID ownerId, UUID bid, int type, int mId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1403,25 +1401,6 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
         return documentList;
     }
-	public static List<Document> dayPlayerIncome(long todayStartTime,int buildType,MongoCollection<Document> collection)
-	{
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("_id", 0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								eq("type",buildType),
-								lt("t", todayStartTime))),
-						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
-						Aggregates.sort(Sorts.descending("total")),
-						Aggregates.limit(10),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
+
 
 }
