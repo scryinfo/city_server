@@ -945,10 +945,11 @@ public class LogDb {
 				.append("c", rentCapacity);
 		rentWarehouseIncome.insertOne(document);
 	}
-	public static void playerIncome(UUID playerId,long cost){
+	public static void playerIncome(UUID playerId,long cost,int buildType){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("p", playerId)
-				.append("a", cost);
+				.append("a", cost)
+		        .append("tp",buildType);
 		playerIncome.insertOne(document);
 	}
 	public static void playerPay(UUID playerId,long cost){
@@ -1261,6 +1262,25 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
         return documentList;
     }
-
+	public static List<Document> dayPlayerIncome(long todayStartTime,int buildType,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("type",buildType),
+								lt("t", todayStartTime))),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
 }

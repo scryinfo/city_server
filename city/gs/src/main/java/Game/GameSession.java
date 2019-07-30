@@ -236,7 +236,7 @@ public class GameSession {
                 if(n <= 0)
                     return;
                 player.addMoney(n);
-                LogDb.playerIncome(player.id(), n);
+                LogDb.playerIncome(player.id(), n,0);
                 GameDb.saveOrUpdate(player);
                 break;
             }
@@ -438,7 +438,7 @@ public class GameSession {
         }
         Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
         p.addMoney(999999999999999l);
-        LogDb.playerIncome(p.id(), 999999999999999l);
+        LogDb.playerIncome(p.id(), 999999999999999l,0);
         if(!GameDb.createPlayer(p)) {
             this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
         }
@@ -940,7 +940,7 @@ public class GameSession {
         GameServer.sendIncomeNotity(seller.id(),notify);
         player.decMoney(pay);
         LogDb.playerPay(player.id(),pay);
-        LogDb.playerIncome(seller.id(),income);
+        LogDb.playerIncome(seller.id(),income,sellBuilding.type());
         if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
             GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
                     .setType(1)
@@ -1667,7 +1667,7 @@ public class GameSession {
         buyer.decMoney(fee+minerCost);
         seller.addMoney(fee-minerCost);
         LogDb.playerPay(buyer.id(), fee+minerCost);
-        LogDb.playerIncome(seller.id(), fee-minerCost);
+        LogDb.playerIncome(seller.id(), fee-minerCost, sellerBuilding.type());
 
         GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                 .setBuildingId(Util.toByteString(b.id()))
@@ -1900,7 +1900,7 @@ public class GameSession {
         owner.addMoney(slot.rentPreDay);
         player.decMoney(slot.rentPreDay);
         LogDb.playerPay(player.id(), slot.rentPreDay);
-        LogDb.playerIncome(owner.id(), slot.rentPreDay);
+        LogDb.playerIncome(owner.id(), slot.rentPreDay,building.type());
         player.lockMoney(slot.id, slot.deposit);
         pf.buySlot(slotId, c.getDay(), player.id());
         GameDb.saveOrUpdate(Arrays.asList(pf, player, owner));
@@ -2124,7 +2124,7 @@ public class GameSession {
                 return;
             seller.addMoney(cost - minerCost);
             LogDb.playerPay(this.player.id(), cost + minerCost);
-            LogDb.playerIncome(seller.id(), cost - minerCost);
+            LogDb.playerIncome(seller.id(), cost - minerCost, lab.type());
 
             GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                     .setBuildingId(Util.toByteString(bid))
@@ -2345,7 +2345,7 @@ public class GameSession {
         Player seller = GameDb.getPlayer(sell.ownerId);
         seller.addMoney(sell.price);
         LogDb.playerPay(player.id(), sell.price);
-        LogDb.playerIncome(seller.id(), sell.price);
+        LogDb.playerIncome(seller.id(), sell.price,0);
         player.addItem(sell.metaId, sell.lv);
         TechTradeCenter.instance().techCompleteAction(sell.metaId, sell.lv);
         GameDb.saveOrUpdate(Arrays.asList(seller, player, TechTradeCenter.instance()));
@@ -2415,7 +2415,7 @@ public class GameSession {
             talent.addMoney(cost);
             player.decMoney(cost);
             LogDb.playerPay(player.id(), cost);
-            LogDb.playerIncome(talent.id(), cost);
+            LogDb.playerIncome(talent.id(), cost, b.type());
             updates = Arrays.asList(talent, player);
         }
         else
@@ -3692,7 +3692,7 @@ public class GameSession {
         //9.日志记录
         int itemId = itemBuy.key.meta.id;
         int type = MetaItem.type(itemBuy.key.meta.id);//获取商品类型
-        LogDb.playerIncome(seller.id(), cost);
+        LogDb.playerIncome(seller.id(), cost,sellBuilding.type());
         LogDb.playerPay(player.id(), cost);
         LogDb.playerPay(player.id(), freight);
         //9.1记录运输日志(区分建筑还是租户仓库)
@@ -5294,6 +5294,10 @@ public class GameSession {
             }
            }
 
+        this.write(Package.create(cmd,build.build()));
+    }
+    public void queryTypeBuildingDetail(short cmd,Message message){
+        Gs.PlayerIncomeRanking.Builder build=Gs.PlayerIncomeRanking.newBuilder();
         this.write(Package.create(cmd,build.build()));
     }
 }

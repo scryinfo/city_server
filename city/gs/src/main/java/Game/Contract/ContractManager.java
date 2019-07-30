@@ -103,7 +103,7 @@ public class ContractManager
             player.decMoney(contract.getCost());
             seller.addMoney(contract.getCost());
     		LogDb.playerPay(player.id(), contract.getCost());
-    	    LogDb.playerIncome(seller.id(), contract.getCost());
+    	    LogDb.playerIncome(seller.id(), contract.getCost(),building1.type());
             updates.add(player);
             updates.add(seller);
         }

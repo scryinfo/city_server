@@ -293,7 +293,8 @@ public class Exchange {
         long cost = n*s.price;
         seller.addMoney(cost);
         buyer.spentLockMoney(b.id);
-        LogDb.playerIncome(seller.id(), cost);
+        Building building=City.instance().getBuilding(s.buildingId);
+        LogDb.playerIncome(seller.id(), cost,building.type());
         b.dealedPrice += cost;
         s.dealedPrice += cost;
 

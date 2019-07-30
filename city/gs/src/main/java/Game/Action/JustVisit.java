@@ -115,7 +115,7 @@ public class JustVisit implements IAction {
                     .build()
             ));
 
-            LogDb.playerIncome(owner.id(), income);
+            LogDb.playerIncome(owner.id(), income,chosen.type());
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
