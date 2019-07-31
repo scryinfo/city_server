@@ -5652,7 +5652,7 @@ public class GameSession {
         ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
         Gs.ScienceLineData.Builder builder = Gs.ScienceLineData.newBuilder();
         scienceBuildingBase.line.forEach(l->{
-            builder.addLine(l.toProto(building.id()));
+            builder.addLine(l.toProto(building.ownerId()));
         });
         if(scienceBuildingBase.type()==MetaBuilding.TECHNOLOGY){/*如果是研究所，生产线还包含了宝箱信息*/
             Technology tec = (Technology) scienceBuildingBase;

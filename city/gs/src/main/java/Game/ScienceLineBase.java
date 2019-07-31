@@ -156,5 +156,10 @@ public abstract class ScienceLineBase {
         return add;
     }
 
-
+    public double getItemSpeed(UUID producerId) {
+        Eva eva = EvaManager.getInstance().getEva(producerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
+        double v = EvaManager.getInstance().computePercent(eva);
+        double speed = item.n * workerNum * (1 + v);
+        return speed;
+    }
 }
