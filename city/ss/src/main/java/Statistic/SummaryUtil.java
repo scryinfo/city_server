@@ -825,16 +825,16 @@ public class SummaryUtil {
 
     }
 
-    public static long getTodayIncome(MongoCollection<Document> collection, UUID pid) {
+    public static long getTodayIncome(MongoCollection<Document> collection, UUID pid,int type) {
         final long[] todayIncome = {0};
         long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
         long currentTimeMillis = System.currentTimeMillis();
-        collection.find(and(eq("d", pid),
+        LogDb.getNpcRentApartment().find(and(eq("d", pid), eq("tp", type),
                 gte(TIME, startTime),
                 lte(TIME, currentTimeMillis)
         ))
 //                .sort(Sorts.ascending(TIME))
-                .projection(Aggregates.count("total"))
+//                .projection(Aggregates.group("$tp",Accumulators.sum("total", "$a")))
                 .forEach((Block<? super Document>) document ->
                 {
                     todayIncome[0] = document.getLong("total");
@@ -842,30 +842,28 @@ public class SummaryUtil {
         return todayIncome[0];
     }
 
-    public static Ss.TopInfo queryIndustryTop(UUID pid) {
+    public static Ss.TopInfo queryIndustryTop(UUID pid, int type) {
         Ss.TopInfo.Builder builder = Ss.TopInfo.newBuilder();
         Ss.TopInfo.TopMsg.Builder topMsg = Ss.TopInfo.TopMsg.newBuilder();
         Ss.TopInfo.IndustryMsg.Builder msg = Ss.TopInfo.IndustryMsg.newBuilder();
-        final int[] count = {0};
-        topInfo.find()
-                .projection(Aggregates.group("$tp"))
+        topMsg.setOwner(0);
+        AtomicInteger num = new AtomicInteger();
+        topInfo.find(and(eq("tp", type)))
                 .forEach((Block<? super Document>) document ->
                 {
-                    count[0]++;
-                    UUID id = (UUID) document.get("id");
+                    num.incrementAndGet();
+                    UUID id = document.get("id", UUID.class);
                     if (pid.equals(id)) {
-                        topMsg.setOwner(count[0]);
+                        topMsg.setOwner(num.get());
                     }
-                    long todayIncome = getTodayIncome(topInfo, id);
-                    msg.setTodayIncome(todayIncome);
+                    msg.setTodayIncome(getTodayIncome(topInfo, pid, type));
                     msg.setSumIncome(document.getLong("total"));
                     msg.setName(Gs.Str.newBuilder().setStr(document.getString("rn")).build());
                     msg.setCompanyName(Gs.Str.newBuilder().setStr(document.getString("cn")).build());
-                    topMsg.setOwner(0);
-                    topMsg.setIndustry(document.getInteger("tp"));
                     topMsg.addIndustryMsg(msg.build());
                 });
-        return builder.addMsg(topMsg.build()).build();
+        topMsg.setIndustry(type);
+        return builder.setMsg(topMsg.build()).build();
     }
 
 }

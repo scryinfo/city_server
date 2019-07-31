@@ -1,11 +1,15 @@
 package Game.RecommendPrice;
 
-import Game.Meta.MetaBuilding;
+import Game.Item;
+import Game.Meta.MetaData;
+import Game.Meta.MetaGood;
+import Game.Meta.MetaMaterial;
 import Game.Timers.PeriodicTimer;
+import Game.Util.GlobalUtil;
 import Shared.LogDb;
+import Shared.Util;
 import com.google.protobuf.ByteString;
 import gs.Gs;
-import org.bson.Document;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -13,12 +17,10 @@ import java.util.concurrent.TimeUnit;
 public class GuidePriceMgr {
     private static String AVG_PRICE = "price";
     private static String AVG_SCORE = "score";
-    private static String AVG_PROSPEROUS = "prosperous";
     private static GuidePriceMgr instance = new GuidePriceMgr();
 
     // 缓存全城均值
-    private Map<Integer, Map<String, Double>> avgInfomation = new HashMap<>();
-    private Map<Integer, Map<String, Double>> produceInfomation = new HashMap<>();
+    private static LogDb.HistoryRecord historyRecord = new LogDb.HistoryRecord();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
 
     private GuidePriceMgr() {
@@ -31,89 +33,121 @@ public class GuidePriceMgr {
     //params1.住宅评分,2.繁荣度
     public double getApartmentGuidePrice(double currScore, double currProsp) {
 //        推荐定价 = (全城均住宅成交价 * (玩家住宅总评分 /400 * 7 + 1) * (1 + 玩家住宅繁荣度)) / ((全城均住宅总评分 /400 * 7 + 1) * (1 + 全城均住宅繁荣度))
-        Map<String, Double> map = avgInfomation.get(MetaBuilding.APARTMENT);
-        if (null != map && map.size() > 0) {
-            Double price = map.get(AVG_PRICE);
-            Double score = map.get(AVG_SCORE);
-            Double prosp = map.get(AVG_PROSPEROUS);
-            return (price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp);
+        if (null != historyRecord) {
+            long price = historyRecord.price;
+            double score = historyRecord.score;
+            double prosp = historyRecord.prosp;
+            return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp));
         }
         return 0;
     }
 
-    public Gs.MaterialRecommendPrices getMaterialPrice(ByteString buildingId) {
+    public Gs.MaterialRecommendPrices getMaterialPrice(UUID buildingId) {
 //        推荐定价 = 全城均原料成交价
         Gs.MaterialRecommendPrices.Builder builder = Gs.MaterialRecommendPrices.newBuilder();
-        Map<String, Double> map = avgInfomation.get(MetaBuilding.MATERIAL);
-        if (null != map && map.size() > 0) {
-            map.forEach((k, v) -> {
-                builder.addMsg(Gs.MaterialRecommendPrices.MaterailMsg.newBuilder().setMid(Integer.parseInt(k)).setGuidePrice(v));
-            });
+        try {
+            Map<Integer, Double> materialPrice = historyRecord.material;
+            if (null != materialPrice && materialPrice.size() > 0) {
+                materialPrice.forEach((k, v) -> {
+                    builder.addMsg(Gs.MaterialRecommendPrices.MaterailMsg.newBuilder().setMid(k).setGuidePrice(v));
+                });
+            }
+            return builder.setBuildingId(Util.toByteString(buildingId)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return builder.build();
         }
-        return builder.setBuildingId(buildingId).build();
     }
 
-    public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, ByteString buildingId) {
+    // 根据itemID查询原料或id推荐定价
+    public double getMaterialOrGoodsPrice(Item item) {
+        if (item == null) {
+            return 0.0;
+        }
+        try {
+            final double[] guidePrice = {0.0};
+            if (MetaMaterial.isItem(item.getKey().meta.id)) {
+                this.historyRecord.material.forEach((k, v) -> {
+                    if (k == item.getKey().meta.id) {
+                        guidePrice[0] = v;
+                    }
+                });
+                return guidePrice[0];
+            } else if (MetaGood.isItem(item.getKey().meta.id)) {
+                this.historyRecord.produce.forEach((k, v) -> {
+                    if (item.getKey().meta.id == k && v != null && v.size() > 0) {
+                        double score = (GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.getKey().meta.id) + MetaData.getGoodQuality(item.getKey().meta.id)) / 2;
+                        guidePrice[0] = (v.getOrDefault(AVG_PRICE, 0.0) * (1 + (score - v.getOrDefault(AVG_SCORE, 0.0)) / 50));
+                    }
+                });
+            }
+            return guidePrice[0];
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
+    public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, UUID buildingId) {
 //        推荐定价 = 全城均商品成交价 * (1 + (玩家商品总评分 - 全城均商品总评分) / 50)
         Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
-        playerGoodsScore.forEach((a, b) -> {
-            produceInfomation.forEach((k, v) -> {
-                if (k.equals(a) && !v.isEmpty()) {
-                    double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
-                    builder.addMsg(Gs.ProduceDepRecommendPrice.ProduceMsg.newBuilder().setMid(k).setGuidePrice(guidePrice));
+        try {
+            Map<Integer, Map<String, Double>> produce = historyRecord.produce;
+            playerGoodsScore.forEach((a, b) -> {
+                if (null != produce && produce.size() > 0) {
+                    produce.forEach((k, v) -> {
+                        if (k.equals(a) && !v.isEmpty()) {
+                            double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
+                            builder.addMsg(Gs.ProduceDepRecommendPrice.ProduceMsg.newBuilder().setMid(k).setGuidePrice(guidePrice));
+                        }
+                    });
                 }
             });
-        });
-        return builder.setBuildingId(buildingId).build();
-    }
-
-    public void update(long diffNano) {
-        if (timer.update(diffNano)) {
-            System.err.println("这就很舒服了...");
-            _update();
+            return builder.setBuildingId(Util.toByteString(buildingId)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return builder.build();
         }
     }
 
-    private void queryApartmentAvg(long startTime, long endTime) {
-        Map<String, Double> map = new HashMap<>();
-        // 统计数据
-        List<Document> documents = LogDb.sumApartMent(startTime, endTime);
-        if (!documents.isEmpty()) {
-            documents.forEach((doc -> {
-                Long size = doc.getLong("size");
-                map.put(AVG_PRICE, (double) (doc.getLong("total") / size));
-                map.put(AVG_SCORE, (doc.getDouble("score") / size));
-                map.put(AVG_PROSPEROUS, ((doc.getDouble("prosp") / size)));
-            }));
+    public Gs.RetailShopRecommendPrice getRetailPrice(Map<Integer, Double> map, ByteString buildingId) {
+        //推荐定价 = 全城均商品零售店货架成交价 * (1 + (玩家商品零售店货架总评分 - 全城均商品零售店货架总评分) / 50)
+        Gs.RetailShopRecommendPrice.Builder builder = Gs.RetailShopRecommendPrice.newBuilder();
+        try {
+            Map<Integer, Map<String, Double>> retail = historyRecord.retail;
+            map.forEach((a, b) -> {
+                if (retail != null && retail.size() > 0) {
+                    retail.forEach((k, v) -> {
+                        if (k.equals(a) && !v.isEmpty() && v.size() > 0) {
+                            double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
+                            builder.addMsg(Gs.RetailShopRecommendPrice.RetailMsg.newBuilder().setMid(k).setGuidePrice(guidePrice));
+                        }
+                    });
+                }
+            });
+            return builder.setBuildingId(buildingId).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return builder.build();
         }
-        avgInfomation.put(MetaBuilding.APARTMENT, map);
     }
 
-    private void querymaterialAvg(long startTime, long endTime) {
-        Map<String, Double> map = new HashMap<>();
-        List<Document> documents = LogDb.sumMaterialOrGoods(startTime, endTime, false);
-        if (!documents.isEmpty()) {
-            documents.forEach(document -> {
-                Long size = document.getLong("size");
-                map.put(String.valueOf(document.getInteger("id")), (double) document.getLong("total") / size);
+    public Gs.GMRecommendPrice getLabOrProPrice(UUID buildingId, boolean islab) {
+        Gs.GMRecommendPrice.Builder builder = Gs.GMRecommendPrice.newBuilder();
+        if (islab) {
+            Map<Integer, Double> lab = historyRecord.laboratory;
+            lab.forEach((k, v) -> {
+                builder.addMsg(Gs.GMRecommendPrice.GMInfo.newBuilder().setTypeId(k).setGuidePrice(v));
+            });
+        } else {
+            Map<Integer, Double> promotion = historyRecord.promotion;
+            promotion.forEach((k,v)->{
+                builder.addMsg(Gs.GMRecommendPrice.GMInfo.newBuilder().setTypeId(k).setGuidePrice(v));
+
             });
         }
-        avgInfomation.put(MetaBuilding.MATERIAL, map);
+        return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
-
-    private void queryProduceAvg(long startTime, long endTime) {
-        List<Document> documents = LogDb.sumMaterialOrGoods(startTime, endTime, true);
-        if (!documents.isEmpty()) {
-            documents.forEach(document -> {
-                Map<String, Double> map = new HashMap<>();
-                Long size = document.getLong("size");
-                map.put(AVG_PRICE, (double) (document.getLong("total") / size));
-                map.put(AVG_SCORE, (double) (document.getInteger("score") / size));
-                produceInfomation.put((Integer) document.getInteger("id"), map);
-            });
-        }
-    }
-
     public void _update() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -124,11 +158,28 @@ public class GuidePriceMgr {
         Date endDate = calendar.getTime();
         long endTime = endDate.getTime();
 
-        calendar.add(Calendar.DATE, -30);
+        calendar.add(Calendar.DATE, -1);
         Date startDate = calendar.getTime();
         long startTime = startDate.getTime();
-        queryApartmentAvg(startTime, endTime);
-        querymaterialAvg(startTime, endTime);
-        queryProduceAvg(startTime, endTime);
+        //住宅
+        historyRecord = LogDb.getApartmentRecord(startTime, endTime);
+
+        //原料
+        historyRecord.material = LogDb.getMaterialsRecord(startTime, endTime);
+        // 加工厂
+        historyRecord.produce = LogDb.getGoodsRecord(startTime, endTime);
+        //零售店
+        historyRecord.retail = LogDb.getRetailRecord(startTime, endTime);
+        //研究所
+        historyRecord.laboratory = LogDb.getLabOrProRecord(startTime, endTime, true);
+        //数据公司
+        historyRecord.promotion = LogDb.getLabOrProRecord(startTime, endTime, false);
+    }
+
+    public void update(long diffNano) {
+        if (timer.update(diffNano)) {
+            System.err.println("这就很舒服了...");
+            _update();
+        }
     }
 }

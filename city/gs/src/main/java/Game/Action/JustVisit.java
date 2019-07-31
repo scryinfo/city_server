@@ -121,10 +121,10 @@ public class JustVisit implements IAction {
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
             // 建筑繁荣度 建筑评分
             Apartment apartment = (Apartment) chosen;
-            double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(chosen);
+            int prosperityScore = (int) ProsperityManager.instance().getBuildingProsperityScore(chosen);
             double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), chosen.type());
             double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
-            double curRetailScore = (brandScore + retailScore) / 2;
+            int curRetailScore = (int) ((brandScore + retailScore) / 2);
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
                     chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName()); //不包含矿工费用
             LogDb.sellerBuildingIncome(chosen.id(),chosen.type(),owner.id(),1,chosen.cost(),0);

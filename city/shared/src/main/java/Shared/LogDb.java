@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.excludeId;
 import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
@@ -646,7 +645,7 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, int type, int typeId)
+								  UUID producerId, UUID bid, int type, int typeId,double score)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -656,7 +655,8 @@ public class LogDb {
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
-				.append("tpi", typeId);
+				.append("tpi", typeId)
+				.append("score", score);
 		npcBuyInShelf.insertOne(document);
 	}
 
@@ -764,7 +764,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId,double score,double prosp,String roleName,String companyName)
+			UUID ownerId, UUID bid, int type, int mId,int score,int prosp,String roleName,String companyName)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1157,56 +1157,6 @@ public class LogDb {
         return documentList;
     }
 
-	public static List<Document> sumApartMent(long startTime, long endTime)
-	{
-		List<Document> documentList = new ArrayList<>();
-		Map<Integer, Double> map = new HashMap<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$"+KEY_TOTAL)
-				.append("size", "$size" )
-				.append("score", "$score" )
-				.append("prosp", "$prosp" )
-				.append("_id",0);
-		npcRentApartment.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime)
-						)),
-						Aggregates.group(null,Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)
-								,Accumulators.sum("score", "$score"),Accumulators.sum("prosp", "$prosp")),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
-
-	public static List<Document> sumMaterialOrGoods(long startTime, long endTime,boolean isGoods) {
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("score", "$score")
-				.append("size", "$size")
-				.append("_id",0);
-		int tp = TP_TYPE_GOODS;
-		if (!isGoods) {
-			tp = TP_TYPE_MATERIAL;
-		}
-		buyInShelf.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(
-								eq("tp", tp),
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("score", "$score"),Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
-				)
-		).forEach((Block<? super Document>) documentList::add);
-		return documentList;
-	}
-
 	public static List<Document> queryApartmentTop(MongoCollection<Document> collection) {
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
@@ -1251,5 +1201,186 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 
 		return documentList;
+	}
+
+	public static class HistoryRecord {
+		public long price;
+		public int score;
+		public int prosp;
+		public Map<Integer, Double> material;//原料
+		public Map<Integer, Map<String, Double>> produce; //加工厂
+		public Map<Integer, Map<String, Double>> retail;  //零售店
+		public Map<Integer, Double> laboratory;//研究所
+		public Map<Integer, Double> promotion; //数据公司
+
+		public HistoryRecord(long price, int score, int prosp) {
+			this.price = price;
+			this.score = score;
+			this.prosp = prosp;
+		}
+
+		public HistoryRecord() {
+		}
+	}
+
+	public static LogDb.HistoryRecord getApartmentRecord(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("size", "$size")
+				.append("score", "$score")
+				.append("prosp", "$prosp")
+				.append("_id", 0);
+		npcRentApartment.aggregate(
+				Arrays.asList(
+//						Aggregates.match(and(
+//								gte("t", startTime),
+//								lt("t", endTime)
+//						)),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)
+								, Accumulators.sum("score", "$score"), Accumulators.sum("prosp", "$prosp")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		LogDb.HistoryRecord history = new LogDb.HistoryRecord();
+		documentList.stream().filter(d->d!=null).forEach(d->{
+			long size = d.getLong("size");
+				history.price = d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size);
+				history.score = (int) (d.getInteger("score") / (size == 0 ? 1 : size));
+			history.prosp = (int) (d.getInteger("prosp") / (size == 0 ? 1 : size));
+		});
+		return history;
+	}
+
+
+	public static Map<Integer, Double> getMaterialsRecord(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("size", "$size")
+				.append("_id", 0);
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", TP_TYPE_MATERIAL),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		try {
+			Map<Integer, Double> map = new HashMap<>();
+			documentList.stream().filter(d -> d != null).forEach(d -> {
+				long size = d.getLong("size");
+				map.put(d.getInteger("id"), (double) (d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size)));
+			});
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Map<Integer, Map<String, Double>> getGoodsRecord(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("score", "$score")
+				.append("size", "$size")
+				.append("_id", 0);
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", TP_TYPE_GOODS),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("score", "$score"), Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		try {
+			Map<Integer, Map<String, Double>> map = new HashMap<>();
+			documentList.stream().filter(d -> d != null).forEach(d -> {
+				Map<String, Double> info = new HashMap<>();
+				long size = d.getLong("size");
+				info.put("price", (double) (d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size)));
+				info.put("score", (double) (d.getLong("score") / (size == 0 ? 1 : size)));
+				map.put(d.getInteger("id"), info);
+			});
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Map<Integer, Map<String, Double>> getRetailRecord(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("score", "$score")
+				.append("size", "$size")
+				.append("_id", 0);
+		npcBuyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("score", "$score"), Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		try {
+			Map<Integer, Map<String, Double>> map = new HashMap<>();
+			documentList.stream().filter(d -> d != null).forEach(d -> {
+				Map<String, Double> info = new HashMap<>();
+				long size = d.getLong("size");
+				info.put("price", (double) (d.getLong(KEY_TOTAL) / size == 0 ? 1 : size));
+				info.put("score", (double) (d.getLong("score") / size == 0 ? 1 : size));
+				map.put(d.getInteger("id"), info);
+			});
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Map<Integer, Double> getLabOrProRecord(long startTime, long endTime, boolean islab) {
+		MongoCollection<Document> collection = laboratoryRecord;
+		if (!islab) {
+			collection = promotionRecord;
+		}
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("size", "$size")
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		try {
+			Map<Integer, Double> map = new HashMap<>();
+			documentList.stream().filter(d -> d != null).forEach(d -> {
+				long size = d.getLong("size");
+				map.put(d.getInteger("id"), (double) (d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size)));
+			});
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

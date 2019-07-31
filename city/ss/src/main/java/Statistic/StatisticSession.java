@@ -407,7 +407,9 @@ public class StatisticSession {
 	}
 
 	public void queryIndustryTop(short cmd, Message message) {
-		UUID playerId = Util.toUuid(((Ss.Id) message).getId().toByteArray());
-		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(playerId)));
+		Ss.queryTop top = (Ss.queryTop) message;
+		UUID pid = Util.toUuid(top.getPid().toByteArray()); // 玩家id
+		int type = top.getIndustryType();  // 行业类型
+		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(pid,type)));
 	}
 }

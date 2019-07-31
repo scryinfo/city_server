@@ -1,7 +1,6 @@
 package Statistic;
 
 import Shared.LogDb;
-import io.opencensus.stats.Aggregation;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.quartz.JobExecutionContext;
@@ -16,11 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-
-import static Statistic.PerHourJob.BUYGROUND_ID;
-import static Statistic.PerHourJob.RENTGROUND_ID;
-import static Statistic.SummaryUtil.SECOND_MILLISECOND;
 
 public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
@@ -53,7 +47,7 @@ public class SecondJob implements org.quartz.Job {
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
 
         // 过滤排行榜
-        SummaryUtil.getTopInfo().drop();
+        SummaryUtil.getTopInfo().deleteMany(new Document());
         // 住宅
         documentList = LogDb.queryApartmentTop(LogDb.getNpcRentApartment());
         SummaryUtil.insertTopInfo(SummaryUtil.getTopInfo(), documentList, SummaryUtil.APARTMENT);
