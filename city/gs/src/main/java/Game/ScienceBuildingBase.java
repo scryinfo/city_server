@@ -65,7 +65,7 @@ public abstract class ScienceBuildingBase extends Building{
     public ScienceLineBase __delLine(UUID lineId) {
         for (int i = line.size() - 1; i >= 0 ; i--) {
             if (line.get(i).getId().equals(lineId)){
-                ScienceLineBase remove = line.remove(i);
+                ScienceLineBase remove = this.line.remove(i);
                 if(line.size() > 0){
                     if(i==0) {//如果删除的就是当前生产线，第一条，则设置移除后的第一条为当前生产时间
                         line.get(0).ts = System.currentTimeMillis();
@@ -199,5 +199,15 @@ public abstract class ScienceBuildingBase extends Building{
     }
     public boolean hasEnoughPintInStore(ItemKey key,int num){
         return this.store.has(key, num);
+    }
+
+    public int getIndex(UUID lineId){/*获取生产线对应的下标*/
+        for (ScienceLineBase l : line) {
+            if (l.id.equals(lineId)) {
+                int index = line.indexOf(l);
+                return index;
+            }
+        }
+        return -1;
     }
 }

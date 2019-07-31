@@ -5452,10 +5452,21 @@ public class GameSession {
             return;
         UUID lineId = Util.toUuid(c.getLineId().toByteArray());
         ScienceBuildingBase science = (ScienceBuildingBase) b;
-        if(science.__delLine(lineId)!=null) {
+        int delIndex = science.getIndex(lineId);
+        ScienceLineBase delLine = science.__delLine(lineId);
+        if(delLine!=null) {
             GameDb.saveOrUpdate(science);
+            GameDb.delete(delLine);
             if(science.line.size() > 0){
-                this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(science.line.get(0).getId())).build()));
+                /*获取下一条生产线*/
+                ScienceLineBase nextLine = science.line.get(delIndex);
+                UUID nextLineId=null;
+                if(nextLine!=null){
+                    nextLineId = nextLine.id;
+                }else{
+                    nextLineId=science.line.get(0).getId();
+                }
+                this.write(Package.create(cmd, c.toBuilder().setNextlineId(Util.toByteString(nextLineId)).build()));
             }else{
                 this.write(Package.create(cmd, c));
             }
