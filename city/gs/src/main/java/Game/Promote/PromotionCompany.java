@@ -70,6 +70,7 @@ public class PromotionCompany extends ScienceBuildingBase {
                 .setNowCountInStore(this.store.getItemCount(key))
                 .setSpeed(line.getItemSpeed(ownerId()))
                 .setStartTime(line.ts)
+                .setTargetCount(line.targetNum)
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
