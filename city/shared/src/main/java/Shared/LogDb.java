@@ -762,7 +762,7 @@ public class LogDb {
 		Document projectObject = new Document()
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")
-				.append("brand","$_id._id.brand")
+				.append("brand","$brand")
 				.append("p","$_id.i")
 				.append("num","$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
@@ -777,7 +777,8 @@ public class LogDb {
 					Aggregates.match(and(
 							gte("t", yestodayStartTime),
 							lt("t", todayStartTime))),
-						Aggregates.group(groupObject, Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
+					Aggregates.sort(Sorts.descending("t")),
+					Aggregates.group(groupObject,Accumulators.first("brand","$brand"),Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
 					Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) factoryInshelf::add);
@@ -788,7 +789,8 @@ public class LogDb {
 						Aggregates.match(and(
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.group(groupObject, Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
+						Aggregates.sort(Sorts.descending("t")),
+						Aggregates.group(groupObject,Accumulators.first("brand","$brand"), Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
 						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) retailInshelf::add);
@@ -803,8 +805,8 @@ public class LogDb {
 		Document projectObject = new Document()
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")
+				.append("brand","$brand")
 				.append("p","$_id.i")
-				.append("brand","$_id._id.brand")
 				.append("num","$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
 				.append("_id", 0);
@@ -815,13 +817,14 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("b","$b"),
+								eq("b",bid),
 								gte("t", startTime),
 								lt("t", endTime))),
-						Aggregates.group(groupObject, Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.sort(Sorts.descending("t")),
+						Aggregates.group(groupObject,Accumulators.first("brand","$brand"),Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
 						Aggregates.project(projectObject)
 				)
-		).forEach((Block<? super Document>) record::add);
+		).forEach((Block<? super Document>)record::add);
 		return record;
 	}
 
