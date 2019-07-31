@@ -5677,7 +5677,7 @@ public class GameSession {
             for (MetaScienceItem item : MetaData.getScienceItem().values()) {
                 Eva eva = EvaManager.getInstance().getEva(player.id(), item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);//此处Eva可能会不对
                 builder.addItemSpeedBuilder().setType(item.id)
-                        .setSpeed(item.n * (1 + EvaManager.getInstance().computePercent(eva)));//TODO 需加上eva加成
+                        .setSpeed(item.n*scienceBuildingBase.getWorkerNum()* (1 + EvaManager.getInstance().computePercent(eva)));//TODO 需加上eva加成
             }
         }else if(scienceBuildingBase.type()==MetaBuilding.PROMOTE){
             for (MetaPromotionItem item : MetaData.getPromotionItem().values()) {

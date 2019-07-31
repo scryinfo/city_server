@@ -21,8 +21,10 @@ public class StatisticEventHandler extends SimpleChannelInboundHandler<Package> 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Package msg) {
-        if(!StatisticEventDispatcher.getInstance().call(msg, session))
+        if(!StatisticEventDispatcher.getInstance().call(msg, session)) {
+            System.err.println("发生协议号不匹配，协议是:"+msg.opcode);
             ctx.close();
+        }
     }
 }
 
