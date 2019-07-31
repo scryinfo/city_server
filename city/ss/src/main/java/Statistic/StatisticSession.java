@@ -488,7 +488,7 @@ public class StatisticSession {
 					builder.addTodaySaleDetail(saleDetail1);
 				}
 				Set<ItemKey> otherKeys = new HashSet<>();
-				//从7天内的历史记录获取是否有其他的销售shaping记录（有有则代表记录为0）
+				//从7天内的历史记录获取是否有其他的销售记录（有则代表记录为0）
 				historyDetail.values().forEach(m->{
 					m.entrySet().forEach(entry->{
 						ItemKey key = entry.getKey();

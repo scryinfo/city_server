@@ -78,15 +78,19 @@ public class TotalUtil {
     public static Ss.BuildingTodaySaleDetail.TodaySaleDetail totalBuildingSaleDetail(Document document,int buildingType, boolean isTodayIncome){
         Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder saleInfo = Ss.BuildingTodaySaleDetail.TodaySaleDetail.newBuilder();
         /*设置通用信息*/
-        UUID producerId = (UUID) document.get("p");
+        int num=0;
+        long account=0;
+        UUID producerId = document.get("p",UUID.class);
         saleInfo.setItemId(document.getInteger("itemId"))
                 .setProducerId(Util.toByteString(producerId));
-        if(!isTodayIncome){
-            saleInfo.setSaleAccount(0).setNum(0);
-        }else{
-            saleInfo.setNum(document.getInteger("num"))
-                    .setSaleAccount(document.getLong("total"))
-                    .setBrandName(document.getString("brand"));
+        if(isTodayIncome){
+            num = document.getInteger("num");
+            account = document.getLong("total");
+        }
+        saleInfo.setNum(num)
+                .setSaleAccount(account);
+        if(buildingType==MetaBuilding.PRODUCE||buildingType==MetaBuilding.RETAIL){
+            saleInfo.setBrandName(document.getString("brand"));
         }
         return saleInfo.build();
     }
