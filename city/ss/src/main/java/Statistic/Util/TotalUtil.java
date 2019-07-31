@@ -82,10 +82,14 @@ public class TotalUtil {
         long account=0;
         UUID producerId = document.get("p",UUID.class);
         saleInfo.setItemId(document.getInteger("itemId"))
-                .setProducerId(Util.toByteString(producerId));
+                .setProducerId(Util.toByteString(producerId))
+                .setIncreasePercent(1);//设置默认的提升比例为100
+        System.err.println("商品的生产者Id是:"+producerId);
         if(isTodayIncome){
             num = document.getLong("num");
             account = document.getLong("total");
+        }else{
+            saleInfo.setIncreasePercent(0);//非今日收入销售则把提升比例设置为0
         }
         saleInfo.setNum((int) num)
                 .setSaleAccount(account);

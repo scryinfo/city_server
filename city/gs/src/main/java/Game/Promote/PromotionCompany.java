@@ -71,6 +71,7 @@ public class PromotionCompany extends ScienceBuildingBase {
                 .setSpeed(line.getItemSpeed(ownerId()))
                 .setStartTime(line.ts)
                 .setTargetCount(line.targetNum)
+                .setStoreAllNum(this.store.getAllNum())
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
@@ -116,7 +117,6 @@ public class PromotionCompany extends ScienceBuildingBase {
             Line l = (Line) this.line.get(0);
             if (l.isPause()) {
                 if (l.isComplete()) {
-                    System.err.println("生产线已完成");
                     completedLines.add(l.id);
                 }
             }
@@ -130,8 +130,6 @@ public class PromotionCompany extends ScienceBuildingBase {
             } else {
                 int add = l.update(diffNano, this.ownerId()); //新增了玩家id，作为eva查询
                 if (add > 0) {
-                    System.err.println("增加："+add);
-                    System.err.println("当前生产线："+l.item.id+"已生产："+l.count);
                     ItemKey key = l.newItemKey(ownerId());
                     if (this.store.offset(key, add)) {//添加到未开启宝箱中
                         broadcastLineInfo(l, key);//广播

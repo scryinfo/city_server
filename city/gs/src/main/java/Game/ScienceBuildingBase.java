@@ -22,11 +22,11 @@ public abstract class ScienceBuildingBase extends Building{
     //科技资料库
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "store_id")
-    protected ScienceStore store;
+    public ScienceStore store;
     //科技资料出售
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "shelf_id")
-    protected ScienceShelf shelf;
+    public ScienceShelf shelf;
     //生产线
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})

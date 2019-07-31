@@ -5639,8 +5639,8 @@ public class GameSession {
         ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
         Gs.ScienceStorageData.Builder storeData = Gs.ScienceStorageData.newBuilder();
         Gs.ScienceStore scienceStore = scienceBuildingBase.getStore().toProto();
-        storeData.setBuildingId(id.getId()).setStore(scienceStore);
-        this.write(Package.create(cmd,scienceStore));
+        Gs.ScienceStorageData.Builder builder = storeData.setBuildingId(id.getId()).setStore(scienceStore);
+        this.write(Package.create(cmd,builder.build()));
     }
     //获取科技加点建筑生产线信息（推广公司、研究所）
     public void getScienceLineData(short cmd,Message message){

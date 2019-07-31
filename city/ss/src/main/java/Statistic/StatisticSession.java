@@ -462,50 +462,59 @@ public class StatisticSession {
 	/*查询今日的商品销售情况(建筑经营详情,yty)*/
 	public void queryBuildingSaleDetail(short cmd, Message message){
 		Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
-		UUID bid = Util.toUuid(saleDetail.getBid().toByteArray());
+		UUID bid = Util.toUuid(saleDetail.getBuildingId().toByteArray());
 		int buildingType = saleDetail.getType();
 		//返回数据
 		Ss.BuildingTodaySaleDetail.Builder builder = Ss.BuildingTodaySaleDetail.newBuilder();
-		builder.setBuildingId(saleDetail.getBid());
+		builder.setBuildingId(saleDetail.getBuildingId());
 		//1.查询并且获取到7天的销售(出现过的商品)信息
 		Map<Long, Map<ItemKey, Document>> historyDetail = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), bid);
 		/*2.查询今日的经营详情，直接从buyInshelf中统计（需要根据建筑类型来选择统计哪些）*/
 		List<Document> todaySale = new ArrayList<>();
 		Long todayStartTime = TimeUtil.todayStartTime();
 		Long now = System.currentTimeMillis();
-		if(buildingType==MetaBuilding.RETAIL||buildingType==MetaBuilding.MATERIAL){
-			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
-		}else{
+		if(buildingType==MetaBuilding.RETAIL){/*只有零售店需要到npc购买统计表中统计数据*/
 			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getNpcBuyInShelf());//统计今天的销售额
+		}else{
+			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
 		}
-		//获取今日收入的所有销售额度
-		List<ItemKey> todayAllItem = new ArrayList<>();
+		//今日收入销售信息
+		List<ItemKey> todayAllItem = new ArrayList<>();//保存今日有哪些商品销售
 		for (Document d : todaySale) {
 			ItemKey itemKey = new ItemKey(d.getInteger("itemId"), (UUID) d.get("p"));
 			todayAllItem.add(itemKey);
 			Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(d, buildingType, true);
 			builder.addTodaySaleDetail(saleDetail1);
 		}
-		Set<ItemKey> otherKeys = new HashSet<>();
 		//从7天内的历史记录获取是否有其他的销售记录（有则代表记录为0）
-		historyDetail.values().forEach(m->{
-			m.entrySet().forEach(entry->{
-				ItemKey key = entry.getKey();
+		Map<ItemKey, Long> yesterdaySale = new HashMap<>();//昨日的销售额度
+		historyDetail.forEach((k,v)->{
+			v.forEach((key,doc)->{
+				if(doc.getLong("time")<TimeUtil.todayStartTime()&&doc.getLong("time")>=TimeUtil.getTimeDayStartTime(TimeUtil.todayStartTime()-1)){
+					yesterdaySale.put(key, doc.getLong("total"));
+				}
 				if(!todayAllItem.contains(key)){
 					todayAllItem.add(key);
-					Document doc = entry.getValue();
 					Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(doc, buildingType, false);//统计历史中的收入记录，但今日收益为0
 					builder.addTodaySaleDetail(saleDetail1);
 				}
 			});
 		});
+		/*求提升比例,如果昨天的销售记录中存在，就取出计算比例，没有就设置为1 提升100%,*/
+		for (Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder todaySaleInfo : builder.getTodaySaleDetailBuilderList()) {
+			ItemKey itemKey = new ItemKey(todaySaleInfo.getItemId(),Util.toUuid(todaySaleInfo.getProducerId().toByteArray()));
+			if(yesterdaySale.containsKey(itemKey))
+				todaySaleInfo.setIncreasePercent(todaySaleInfo.getSaleAccount() / yesterdaySale.get(itemKey));
+			else
+				todaySaleInfo.setIncreasePercent(1);
+		}
 		this.write(Package.create(cmd,builder.build()));
 	}
 
 	//获取商品历史统计（7天）(建筑经营详情,yty)
 	public void queryHistoryBuildingSaleDetail(short cmd, Message message){
 		Ss.QueryHistoryBuildingSaleDetail itemInfo = (Ss.QueryHistoryBuildingSaleDetail) message;
-		UUID bid = Util.toUuid(itemInfo.getBid().toByteArray());
+		UUID bid = Util.toUuid(itemInfo.getBuildingId().toByteArray());
 		UUID producerId = Util.toUuid(itemInfo.getProducerId().toByteArray());
 		int itemId = itemInfo.getItemId();
 		int buildingType = itemInfo.getType();
