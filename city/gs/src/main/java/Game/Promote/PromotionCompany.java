@@ -34,7 +34,7 @@ public class PromotionCompany extends ScienceBuildingBase {
             return null;
         Line line = new Line((MetaPromotionItem)item, targetNum, workerNum);
         __addLine(line);
-        this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).setTs(line.ts).build()));
+        this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto(id())).setTs(line.ts).build()));
         return line;
     }
 
@@ -84,7 +84,7 @@ public class PromotionCompany extends ScienceBuildingBase {
                 .setStoreNum(this.store.getAllNum())
                 .setShelfNum(this.shelf.getAllNum());
         if(!line.isEmpty())
-            builder.addLine(line.get(0).toProto());
+            builder.addLine(line.get(0).toProto(id()));
         return builder.build();
     }
 

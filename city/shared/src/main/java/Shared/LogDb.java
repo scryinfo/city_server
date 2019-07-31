@@ -762,7 +762,7 @@ public class LogDb {
 		Document projectObject = new Document()
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")
-				.append("brand","$_id._id.brandName")
+				.append("brand","$_id._id.brand")
 				.append("p","$_id.i")
 				.append("num","$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)

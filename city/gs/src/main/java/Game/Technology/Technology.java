@@ -39,7 +39,7 @@ public class Technology extends ScienceBuildingBase {
             return null;
         Line line = new Line((MetaScienceItem)item, targetNum, workerNum);
         __addLine(line);
-        this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto()).setTs(line.ts).build()));
+        this.sendToWatchers(Package.create(GsCode.OpCode.ftyLineAddInform_VALUE, Gs.FtyLineAddInform.newBuilder().setBuildingId(Util.toByteString(this.id())).setLine(line.toProto(id())).setTs(line.ts).build()));
         return line;
     }
 
@@ -74,7 +74,7 @@ public class Technology extends ScienceBuildingBase {
                 .setStoreNum(this.store.getAllNum())
                 .setShelfNum(this.shelf.getAllNum());
         if(!line.isEmpty())
-            builder.addLine(line.get(0).toProto());
+            builder.addLine(line.get(0).toProto(id()));
         return builder.build();
     }
 
@@ -142,7 +142,7 @@ public class Technology extends ScienceBuildingBase {
                 .setNowCount(line.count)
                 .setBuildingId(Util.toByteString(this.id()))
                 .setIKey(key.toProto())
-                .setNowCountInStore(this.boxStore.getTypeBoxNum(key))
+                .setNowCountInBox(this.boxStore.getTypeBoxNum(key))
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }

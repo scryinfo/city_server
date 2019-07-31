@@ -1,5 +1,7 @@
 package Game;
 
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
@@ -53,6 +55,8 @@ public abstract class ScienceLineBase {
     }
     @Transient
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
+    @Transient
+    public  double speed=0;
 
     public ScienceLineBase(MetaItem item, int targetNum, int workerNum) {
         this.id = UUID.randomUUID();
@@ -80,7 +84,11 @@ public abstract class ScienceLineBase {
         this.suspend = false;
     }
 
-    public Gs.Line toProto() {
+    public Gs.Line toProto(UUID producerId) {
+        /*获取生生产速度*/
+        Eva eva = EvaManager.getInstance().getEva(producerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
+        double v = EvaManager.getInstance().computePercent(eva);
+        double speed = item.n * workerNum * (1 + v);
         return Gs.Line.newBuilder()
                 .setId(Util.toByteString(id))
                 .setItemId(item.id)
@@ -88,6 +96,7 @@ public abstract class ScienceLineBase {
                 .setTargetCount(targetNum)
                 .setWorkerNum(workerNum)
                 .setTs(ts)
+                .setSpeed(speed)
                 .build();
     }
 
