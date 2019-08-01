@@ -51,7 +51,7 @@ public class ProsperityManager {
     int updateIndex=0;
 
     /*全城繁华值总和,1小时更新内根据地块位置逐步更新.*/
-    private void totalProsperity(long diffNano) {
+    public void totalProsperity(long diffNano) {
 
         /*一块一块的去更新地块，而不是一直去更新，直到完成,循环的去更新数据，从头开始更新*/
         if (timer.update(diffNano)) {
