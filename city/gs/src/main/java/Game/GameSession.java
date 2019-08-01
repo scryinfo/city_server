@@ -5457,7 +5457,7 @@ public class GameSession {
         if(delLine!=null) {
             GameDb.saveOrUpdate(science);
             GameDb.delete(delLine);
-            if(science.line.size() > 0){
+            if(science.line.size() >(delIndex+1)){
                 /*获取下一条生产线*/
                 ScienceLineBase nextLine = science.line.get(delIndex);
                 UUID nextLineId=null;
