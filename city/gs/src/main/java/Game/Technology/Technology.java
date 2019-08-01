@@ -59,7 +59,7 @@ public class Technology extends ScienceBuildingBase {
 
     @PostLoad
     protected void _1() throws InvalidProtocolBufferException {
-        this.meta = (MetaTechnology) this.metaBuilding;
+        this.meta = (MetaTechnology) super.metaBuilding;
     }
 
     @Override

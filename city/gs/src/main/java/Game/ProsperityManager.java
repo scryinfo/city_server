@@ -63,7 +63,6 @@ public class ProsperityManager {
             }else{
                 updateIndex=0;
             }
-
            /* this.allGround.forEach(ground->{
                 int groundProsperity = computeGroundProsperity(ground.x, ground.y);
                 groundProsperityMap.put(ground, groundProsperity);
