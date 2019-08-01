@@ -21,47 +21,47 @@ import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 // this class contain only getXXX method, that means the only purpose this class or this server
 // is get data from db
 public class StatisticSession {
-	private ChannelHandlerContext ctx;
-	private static final Logger logger = Logger.getLogger(StatisticSession.class);
-	private ChannelId channelId;
-	public static volatile boolean isReady = true;
+    private ChannelHandlerContext ctx;
+    private static final Logger logger = Logger.getLogger(StatisticSession.class);
+    private ChannelId channelId;
+    public static volatile boolean isReady = true;
 
-	public static void setIsReady(boolean isReady)
-	{
-		StatisticSession.isReady = isReady;
-	}
+    public static void setIsReady(boolean isReady)
+    {
+        StatisticSession.isReady = isReady;
+    }
 
-	public StatisticSession(ChannelHandlerContext ctx){
-		this.ctx = ctx;
-		this.channelId = ctx.channel().id();
-	}
+    public StatisticSession(ChannelHandlerContext ctx){
+        this.ctx = ctx;
+        this.channelId = ctx.channel().id();
+    }
 
-	public void logout()
-	{
-		this.ctx.disconnect();
-	}
+    public void logout()
+    {
+        this.ctx.disconnect();
+    }
 
-	private void write(Package p)
-	{
-		this.ctx.channel().writeAndFlush(p);
-	}
+    private void write(Package p)
+    {
+        this.ctx.channel().writeAndFlush(p);
+    }
 
-	public void queryPlayerEconomy(short cmd, Message message)
-	{
-		UUID playerId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
-		if (!isReady)
-		{
-			this.write(Package.fail(cmd));
-			logger.info("data not ready,playerId = " + playerId);
-			return;
-		}
+    public void queryPlayerEconomy(short cmd, Message message)
+    {
+        UUID playerId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
+        if (!isReady)
+        {
+            this.write(Package.fail(cmd));
+            logger.info("data not ready,playerId = " + playerId);
+            return;
+        }
 
-		//for test
-		//playerId = UUID.fromString("228953c5-7da9-4563-8856-166c41dbb19c");
+        //for test
+        //playerId = UUID.fromString("228953c5-7da9-4563-8856-166c41dbb19c");
 
-		Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
-		this.write(Package.create(cmd, economyInfos));
-	}
+        Ss.EconomyInfos economyInfos = SummaryUtil.getPlayerEconomy(playerId);
+        this.write(Package.create(cmd, economyInfos));
+    }
 
 	public void queryBuildingIncome(short cmd, Message message)
 	{
@@ -190,15 +190,15 @@ public class StatisticSession {
 		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
 		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
-				+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
-		builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
-		this.write(Package.create(cmd, builder.build()));
-	}
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+    	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
+    	this.write(Package.create(cmd, builder.build()));
+    }
 
-	public void queryGoodsNpcNumCurve(short cmd, Message message)
-	{
-		Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
-		int id=g.getId();
+    public void queryGoodsNpcNumCurve(short cmd, Message message)
+    {
+      	Ss.GoodsNpcNumCurve g = (Ss.GoodsNpcNumCurve)message;
+    	int id=g.getId();
 		Map<Long, Long> map=SummaryUtil.queryGoodsNpcNumCurve(SummaryUtil.getDayGoodsNpcNum(),id,CountType.BYHOUR);
 		Ss.NpcNumCurveMap.Builder bd=Ss.NpcNumCurveMap.newBuilder();
 		Ss.GoodsNpcNumCurve.Builder list = Ss.GoodsNpcNumCurve.newBuilder();
@@ -261,10 +261,10 @@ public class StatisticSession {
 			list.addNpcTypeNumInfo(info.build());
 		});
 
-		this.write(Package.create(cmd, list.build()));
-	}
+    	this.write(Package.create(cmd, list.build()));
+    }
 
-	//---ly
+    //---ly
 
 	public void queryPlayerExchangeAmount(short cmd) {
 		Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
@@ -281,10 +281,10 @@ public class StatisticSession {
 		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
 		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
-				+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
-		builder.setPlayExchangeAmount(playerExchangeAmount);
-		this.write(Package.create(cmd, builder.build()));
-	}
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+        builder.setPlayExchangeAmount(playerExchangeAmount);
+        this.write(Package.create(cmd, builder.build()));
+    }
 
 	// 查询一周曲线图
 	public void queryPlayerExchangeCurve(short cmd, Message message) {
@@ -408,7 +408,7 @@ public class StatisticSession {
 		Map<Long,Long> singleMap=new TreeMap<Long,Long>();
 		Map<Long,Long> totalMap=new TreeMap<Long,Long>();
 		//前六天数据
-		List<Document> sixDaylist=SummaryUtil.queryWeekData(SummaryUtil.getDayIndustryIncome());
+		List<Document> sixDaylist=SummaryUtil.queryWeekIndustryDevelopment(SummaryUtil.getDayIndustryIncome());
 		//前六天每天的行业总收入和每天指定类型建筑的总收入
 		getIndustryIncomeList(sixDaylist,buildType,totalMap,singleMap);
 		//今天不同行业的收入
@@ -459,6 +459,28 @@ public class StatisticSession {
 		});
 		return todayIncomeList;
 	}
+	public void queryIndustryCompetition(short cmd, Message message){
+		Ss.IndustryCompetition msg = (Ss.IndustryCompetition)message;
+		int buildType=msg.getType().getNumber();
+
+		Ss.IndustryCompetition.Builder b=Ss.IndustryCompetition.newBuilder();
+		b.setType(msg.getType());
+		//前六天数据
+		List<Document> sixDaylist=SummaryUtil.queryWeekIndustryCompetition(SummaryUtil.getDayBuildingBusiness(),buildType);
+		sixDaylist.forEach(d->{
+			Ss.IndustryCompetition.IndustryInfo.Builder info=Ss.IndustryCompetition.IndustryInfo.newBuilder();
+			info.setCompanyNum(d.getLong("n")).setStaffNum(d.getLong("total")).setTime(d.getLong("time"));
+			b.addIndustryInfo(info);
+		});
+		//今天的数据
+        List<Document> todaylist=LogDb.playerBuildingBusiness(TimeUtil.todayStartTime(),System.currentTimeMillis(),LogDb.getPlayerBuildingBusiness(),buildType);
+        todaylist.forEach(d->{
+            Ss.IndustryCompetition.IndustryInfo.Builder info=Ss.IndustryCompetition.IndustryInfo.newBuilder();
+            info.setCompanyNum(d.getLong("n")).setStaffNum(d.getLong("total")).setTime(System.currentTimeMillis());
+            b.addIndustryInfo(info);
+        });
+		this.write(Package.create(cmd,b.build()));
+    }
 	/*查询今日的商品销售情况(建筑经营详情,yty)*/
 	public void queryBuildingSaleDetail(short cmd, Message message){
 		Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;

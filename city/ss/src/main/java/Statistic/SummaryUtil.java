@@ -56,6 +56,7 @@ public class SummaryUtil
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
     private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";
     private static final String DAY_BUILDING__GOOD_SOLD_DETAIL="dayBuildingGoodSoldDetail";
+    private static final String DAY_BUILDING_BUSINESS= "dayBuildingBusiness";
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
@@ -81,6 +82,7 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
     private static MongoCollection<Document> dayIndustryIncome;
+    private static MongoCollection<Document> dayBuildingBusiness;
     private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
 
     //--ly
@@ -132,6 +134,8 @@ public class SummaryUtil
         dayGoodsSoldDetail = database.getCollection(DAY_GOODS_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayIndustryIncome = database.getCollection(DAY_INDUSTRY_INCOME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayBuildingBusiness = database.getCollection(DAY_BUILDING_BUSINESS)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingGoodSoldDetail = database.getCollection(DAY_BUILDING__GOOD_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -428,7 +432,7 @@ public class SummaryUtil
     public static void insertPlayerIncomeOrPay(List<Document> documentList,
     		long time,MongoCollection<Document> collection)
     {
-    	//document already owned : id,total
+    	//document already owned : id,tp,total
     	documentList.forEach(document ->
     	document.append(TIME, time));
     	if (!documentList.isEmpty()) {
@@ -650,11 +654,16 @@ public class SummaryUtil
         return dayIndustryIncome;
     }
 
+    public static MongoCollection<Document> getDayBuildingBusiness()
+    {
+        return dayBuildingBusiness;
+    }
+
     public static MongoCollection<Document> getDayBuildingGoodSoldDetail() {
         return dayBuildingGoodSoldDetail;
     }
 
-    public static void insertBuildingDayIncome(List<Document> documentList, long time)
+    public static void insertBuildingDayIncome(List<Document> documentList,long time)
     {
         documentList.forEach(document -> {
             document.append(TIME, time);
@@ -917,7 +926,7 @@ public class SummaryUtil
         }
         return map;
     }
-    public static List<Document> queryWeekData(MongoCollection<Document> collection)
+    public static List<Document> queryWeekIndustryDevelopment(MongoCollection<Document> collection)
     {
         List<Document> documentList = new ArrayList<>();
         collection.find(and(
@@ -930,6 +939,22 @@ public class SummaryUtil
         {
             documentList.add(document);
         });
+        return documentList;
+    }
+    public static List<Document> queryWeekIndustryCompetition(MongoCollection<Document> collection,int buildType)
+    {
+        List<Document> documentList = new ArrayList<>();
+        collection.find(and(
+                eq("tp",buildType),
+                gte("time", TimeUtil.beforeSixDay()),
+                lt("time", TimeUtil.todayStartTime())
+        ))
+                .projection(fields(include("time","tp","n","total"), excludeId()))
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) document ->
+                {
+                    documentList.add(document);
+                });
         return documentList;
     }
 }

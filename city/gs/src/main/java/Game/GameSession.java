@@ -525,6 +525,7 @@ public class GameSession {
         }
         b.createNpc();//产生npc
         if(b.startBusiness(player)){
+            LogDb.playerBuildingBusiness(player.id(),1,b.getWorkerNum(),b.type());
             this.write(Package.create(cmd,c));
             //GameDb.saveOrUpdate(b);
             GameDb.saveOrUpdate(Arrays.asList(b,player));
@@ -5293,7 +5294,6 @@ public class GameSession {
         }
         this.write(Package.create(cmd,build.build()));
     }
-
     public void queryPlayerIncomeRanking(short cmd,Message message){
         Gs.PlayerIncomeRanking msg = (Gs.PlayerIncomeRanking) message;
         int buildType=msg.getType().getNumber();
