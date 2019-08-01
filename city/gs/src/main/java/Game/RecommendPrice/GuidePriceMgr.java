@@ -18,6 +18,7 @@ public class GuidePriceMgr {
     private static String AVG_PRICE = "price";
     private static String AVG_SCORE = "score";
     private static GuidePriceMgr instance = new GuidePriceMgr();
+    private static Calendar calendar = Calendar.getInstance();
 
     // 缓存全城均值
     private static LogDb.HistoryRecord historyRecord = new LogDb.HistoryRecord();
@@ -34,7 +35,7 @@ public class GuidePriceMgr {
     public double getApartmentGuidePrice(double currScore, double currProsp) {
 //        推荐定价 = (全城均住宅成交价 * (玩家住宅总评分 /400 * 7 + 1) * (1 + 玩家住宅繁荣度)) / ((全城均住宅总评分 /400 * 7 + 1) * (1 + 全城均住宅繁荣度))
         if (null != historyRecord) {
-            long price = historyRecord.price;
+            double price = historyRecord.price;
             double score = historyRecord.score;
             double prosp = historyRecord.prosp;
             return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp));
@@ -148,8 +149,13 @@ public class GuidePriceMgr {
         }
         return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
+    // 土地交易
+    public double getGroundPrice() {
+//   推荐定价 = 全城均土地成交价
+        return historyRecord.groundPrice;
+    }
+
     public void _update() {
-        Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
         calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
@@ -163,7 +169,6 @@ public class GuidePriceMgr {
         long startTime = startDate.getTime();
         //住宅
         historyRecord = LogDb.getApartmentRecord(startTime, endTime);
-
         //原料
         historyRecord.material = LogDb.getMaterialsRecord(startTime, endTime);
         // 加工厂
@@ -174,6 +179,8 @@ public class GuidePriceMgr {
         historyRecord.laboratory = LogDb.getLabOrProRecord(startTime, endTime, true);
         //数据公司
         historyRecord.promotion = LogDb.getLabOrProRecord(startTime, endTime, false);
+        //土地交易
+        historyRecord.groundPrice = LogDb.getGroundRecord(startTime, endTime);
     }
 
     public void update(long diffNano) {

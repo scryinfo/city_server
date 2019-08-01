@@ -12,6 +12,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
 import gs.Gs;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.io.Serializable;
 import java.util.*;
@@ -1204,20 +1205,15 @@ public class LogDb {
 	}
 
 	public static class HistoryRecord {
-		public long price;
-		public int score;
-		public int prosp;
+		public double price;
+		public double score;
+		public double prosp;
 		public Map<Integer, Double> material;//原料
 		public Map<Integer, Map<String, Double>> produce; //加工厂
 		public Map<Integer, Map<String, Double>> retail;  //零售店
 		public Map<Integer, Double> laboratory;//研究所
 		public Map<Integer, Double> promotion; //数据公司
-
-		public HistoryRecord(long price, int score, int prosp) {
-			this.price = price;
-			this.score = score;
-			this.prosp = prosp;
-		}
+		public double groundPrice; // 土地交易均价
 
 		public HistoryRecord() {
 		}
@@ -1225,30 +1221,17 @@ public class LogDb {
 
 	public static LogDb.HistoryRecord getApartmentRecord(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("size", "$size")
-				.append("score", "$score")
-				.append("prosp", "$prosp")
-				.append("_id", 0);
+		LogDb.HistoryRecord history = new LogDb.HistoryRecord();
 		npcRentApartment.aggregate(
 				Arrays.asList(
-//						Aggregates.match(and(
-//								gte("t", startTime),
-//								lt("t", endTime)
-//						)),
-						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)
-								, Accumulators.sum("score", "$score"), Accumulators.sum("prosp", "$prosp")),
-						Aggregates.project(projectObject)
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null,Accumulators.avg("avg","$a"),Accumulators.avg("score","$score"),Accumulators.avg("prosp","$prosp"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
-		LogDb.HistoryRecord history = new LogDb.HistoryRecord();
-		documentList.stream().filter(d->d!=null).forEach(d->{
-			long size = d.getLong("size");
-				history.price = d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size);
-				history.score = (int) (d.getInteger("score") / (size == 0 ? 1 : size));
-			history.prosp = (int) (d.getInteger("prosp") / (size == 0 ? 1 : size));
+		documentList.stream().filter(o->o!=null).forEach(d->{
+			history.price = d.getDouble("avg");
+			history.score = d.getDouble("score")==null?1:d.getDouble("score");
+			history.prosp = d.getDouble("prosp")==null?1:d.getDouble("prosp");
 		});
 		return history;
 	}
@@ -1256,131 +1239,86 @@ public class LogDb {
 
 	public static Map<Integer, Double> getMaterialsRecord(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("size", "$size")
-				.append("_id", 0);
+		Map<Integer, Double> map = new HashMap<>();
 		buyInShelf.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(
-								eq("tp", TP_TYPE_MATERIAL),
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
+						Aggregates.match(and(eq("tp",TP_TYPE_MATERIAL),gte("t", startTime), lte("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.avg("avg", "$a"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
-		try {
-			Map<Integer, Double> map = new HashMap<>();
-			documentList.stream().filter(d -> d != null).forEach(d -> {
-				long size = d.getLong("size");
-				map.put(d.getInteger("id"), (double) (d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size)));
-			});
-			return map;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			map.put(d.getInteger("_id"), d.getDouble("avg"));
+		});
+		return map;
 	}
 
 	public static Map<Integer, Map<String, Double>> getGoodsRecord(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("score", "$score")
-				.append("size", "$size")
-				.append("_id", 0);
-		buyInShelf.aggregate(
+		Map<Integer, Map<String, Double>> map = new HashMap<>();
+		npcBuyInShelf.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(
-								eq("tp", TP_TYPE_GOODS),
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("score", "$score"), Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
+						Aggregates.match(and(eq("tp",TP_TYPE_GOODS))),
+						Aggregates.group("$tpi",Accumulators.avg("avg","$a"),Accumulators.avg("score","$score"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
-		try {
-			Map<Integer, Map<String, Double>> map = new HashMap<>();
-			documentList.stream().filter(d -> d != null).forEach(d -> {
-				Map<String, Double> info = new HashMap<>();
-				long size = d.getLong("size");
-				info.put("price", (double) (d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size)));
-				info.put("score", (double) (d.getLong("score") / (size == 0 ? 1 : size)));
-				map.put(d.getInteger("id"), info);
-			});
-			return map;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			HashMap<String, Double> hashMap = new HashMap<>();
+			hashMap.put("price", d.getDouble("avg"));
+			hashMap.put("score", d.getDouble("score"));
+			map.put(d.getInteger("_id"), hashMap);
+		});
+		return map;
 	}
 
 	public static Map<Integer, Map<String, Double>> getRetailRecord(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("score", "$score")
-				.append("size", "$size")
-				.append("_id", 0);
+		Map<Integer, Map<String, Double>> map = new HashMap<>();
 		npcBuyInShelf.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("score", "$score"), Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group("$tpi",Accumulators.avg("avg","$a"),Accumulators.avg("score","$score"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
-		try {
-			Map<Integer, Map<String, Double>> map = new HashMap<>();
-			documentList.stream().filter(d -> d != null).forEach(d -> {
-				Map<String, Double> info = new HashMap<>();
-				long size = d.getLong("size");
-				info.put("price", (double) (d.getLong(KEY_TOTAL) / size == 0 ? 1 : size));
-				info.put("score", (double) (d.getLong("score") / size == 0 ? 1 : size));
-				map.put(d.getInteger("id"), info);
-			});
-			return map;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			HashMap<String, Double> hashMap = new HashMap<>();
+			hashMap.put("price", d.getDouble("avg"));
+			hashMap.put("score", d.getDouble("score"));
+			map.put(d.getInteger("_id"), hashMap);
+		});
+		return map;
 	}
 
 	public static Map<Integer, Double> getLabOrProRecord(long startTime, long endTime, boolean islab) {
 		MongoCollection<Document> collection = laboratoryRecord;
+		Map<Integer, Double> map = new HashMap<>();
 		if (!islab) {
 			collection = promotionRecord;
 		}
 		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("size", "$size")
-				.append("_id", 0);
 		collection.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(
-								gte("t", startTime),
-								lt("t", endTime))),
-						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)),
-						Aggregates.project(projectObject)
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.avg("avg", "$a"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
-		try {
-			Map<Integer, Double> map = new HashMap<>();
-			documentList.stream().filter(d -> d != null).forEach(d -> {
-				long size = d.getLong("size");
-				map.put(d.getInteger("id"), (double) (d.getLong(KEY_TOTAL) / (size == 0 ? 1 : size)));
-			});
-			return map;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			map.put(d.getInteger("_id"), d.getDouble("avg"));
+		});
+		return map;
+	}
+
+	public static double getGroundRecord(long startTime, long endTime) {
+		final double[] avg = {0};
+		List<Document> documentList = new ArrayList<>();
+		buyGround.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null, Accumulators.avg("avg", "$a"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			avg[0] = d.getDouble("avg");
+		});
+		return avg[0];
 	}
 }

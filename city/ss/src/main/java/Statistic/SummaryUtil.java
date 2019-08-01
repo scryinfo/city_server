@@ -837,7 +837,9 @@ public class SummaryUtil {
 //                .projection(Aggregates.group("$tp",Accumulators.sum("total", "$a")))
                 .forEach((Block<? super Document>) document ->
                 {
-                    todayIncome[0] = document.getLong("total");
+                    if (document != null) {
+                        todayIncome[0] = document.getLong("total");
+                    }
                 });
         return todayIncome[0];
     }
@@ -849,6 +851,7 @@ public class SummaryUtil {
         topMsg.setOwner(0);
         AtomicInteger num = new AtomicInteger();
         topInfo.find(and(eq("tp", type)))
+                .sort(and(eq("total", -1)))
                 .forEach((Block<? super Document>) document ->
                 {
                     num.incrementAndGet();
@@ -856,6 +859,7 @@ public class SummaryUtil {
                     if (pid.equals(id)) {
                         topMsg.setOwner(num.get());
                     }
+                    msg.setPid(Util.toByteString(id));
                     msg.setTodayIncome(getTodayIncome(topInfo, pid, type));
                     msg.setSumIncome(document.getLong("total"));
                     msg.setName(Gs.Str.newBuilder().setStr(document.getString("rn")).build());

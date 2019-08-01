@@ -211,6 +211,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryLaboratoryRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryLaboratoryRecommendPrice"));
 			//获取推广推荐价格
 			table.put((short) GsCode.OpCode.queryPromotionRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryPromotionRecommendPrice"));
+			// 获取土地交易推荐价格
+			table.put((short) GsCode.OpCode.queryGroundRecommendPrice_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryGroundRecommendPrice"));
 			//old
 			table.put((short) GsCode.OpCode.materialGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.GoodSummary.PARSER, GameSession.class, "materialGuidePrice"));
 			table.put((short) GsCode.OpCode.apartmentGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.AartmentMsg.PARSER, GameSession.class, "apartmentGuidePrice"));

@@ -4156,6 +4156,12 @@ public class GameSession {
         this.write(Package.create(cmd,GuidePriceMgr.instance().getLabOrProPrice(buildingId,false)));
     }
 
+    // 土地交易推荐价格
+    public void queryGroundRecommendPrice(short cmd) {
+        this.write(Package.create(cmd, Gs.Num.newBuilder().setNum((int) GuidePriceMgr.instance().getGroundPrice()).build()));
+    }
+
+
 
     //原料竞争力
     public void materialGuidePrice(short cmd, Message message) {
