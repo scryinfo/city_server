@@ -121,8 +121,9 @@ public class DayJob implements org.quartz.Job {
 
 
         //玩家当天开业情况
-        documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness());
+        documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness(),0);
         SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayBuildingBusiness());
+
         //按天统计玩家收入支出
         //player income
         documentList=documentList = LogDb.dayPlayerIncomeOrPay(yestodayStartTime, todayStartTime, LogDb.getPlayerIncome());//统计天的收入量

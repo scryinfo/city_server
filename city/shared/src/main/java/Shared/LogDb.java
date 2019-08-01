@@ -82,7 +82,7 @@ public class LogDb {
 	//收入通知
 	private static final String INCOME_NOTIFY = "incomeNotify";
 
-	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//建筑收入者货架收入
+	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//(离线收入)
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
 

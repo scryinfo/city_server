@@ -390,8 +390,8 @@ public class BrandManager {
 		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(BASE_BRAND));
 		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
         //住宅和零售店初始品质 = qty * workerNum
-        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double(b.quality()*(1+EvaManager.getInstance().computePercent(qualityEva))));
-		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
+        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double((b.quality()*b.getWorkerNum())*(1+EvaManager.getInstance().computePercent(qualityEva))));
+		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()*b.getWorkerNum()));
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 
