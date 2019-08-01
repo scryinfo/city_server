@@ -119,6 +119,10 @@ public class DayJob implements org.quartz.Job {
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.BuildingType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //...研究所和广告公司
 
+
+        //玩家当天开业情况
+        documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness());
+        SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayBuildingBusiness());
         //accept all client request
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
