@@ -526,8 +526,9 @@ public class StatisticSession {
 			history.setTime(k)
 					.setItemId(doc.getInteger("itemId"));
 			Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.Builder detail = Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.newBuilder();
+			long num = doc.getLong("num");
 			detail.setIncome(doc.getLong("total"))
-					.setSaleNum(doc.getInteger("num"));
+					.setSaleNum((int)num);
 			history.setSaleDetail(detail);
 			builder.addHistoryDetail(history);
 		});

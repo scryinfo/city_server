@@ -67,12 +67,6 @@ public class ProsperityManager {
                 int groundProsperity = computeGroundProsperity(ground.x, ground.y);
                 groundProsperityMap.put(ground, groundProsperity);
             });*/
-            //统计全城所有土地地块的繁华度
-           /* City.instance().forEachBuilding(b->{
-                trafficTemp=0;
-                int prosperity = computeBuildingProsperity(b);
-                buildingProsperityMap.put(b, prosperity);
-            });*/
         }
     }
 
@@ -84,8 +78,8 @@ public class ProsperityManager {
             trafficTemp=0;//清空人流量
             double disTemp = 0;//位置关系
             int prosperity = 0;//土地繁华度值
-            for (int x = 1; x < cityLen; x++) {  //初始坐标从1开始 100次
-                for (int y = 1; y < cityLen; y++) {//100次
+            for (int x = 1; x < cityLen; x++) {
+                for (int y = 1; y < cityLen; y++) {
                     //1.位置关系
                     int absX = Math.abs(coordinate.x - x);
                     int absY = Math.abs(coordinate.y - y);
@@ -105,27 +99,27 @@ public class ProsperityManager {
 
     /*查询土地的繁荣度*/
     public int computeGroundProsperity(int beginX,int beginY){
-        int disTemp = 0;//距离
+        double disTemp = 0;//距离
         int prosperity = 0;//土地繁华度值
         trafficTemp=0;
         for (int x = 1; x < cityLen; x++) {     //初始坐标从1开始 100次
             for (int y = 1; y < cityLen; y++) {
-                int absX = Math.abs(beginX - x);
-                int absY = Math.abs(beginY - y);
-                disTemp = absX > absY ? absX : absY;
+                //1.位置关系
+                disTemp=Math.abs(beginX - x)>Math.abs(beginY - y)?Math.abs(beginX - x):Math.abs(beginY - y);
                 //2.offsetTemp 位置偏差比例
-                int offsetTemp = 1 - (disTemp / cityLen);
+                double offsetTemp = 1 - (disTemp / cityLen);
                 //3.统计获取当前位置的人流量(也就是获取这个土地上是否修建了建筑，获取这个建筑的人流量)
                 trafficTemp= City.instance().getTraffic(x, y);//获取位置人流量
                 //4.计算繁华值
                 prosperity += trafficTemp * offsetTemp;
             }
         }
+        System.err.println("计算的坐标"+beginX+","+beginY+"繁荣度为："+prosperity);
         return prosperity;
     }
 
     //获取土地繁荣度
-    public int  getgroundProsperity(Coordinate c){
+    public int  getGroundProsperity(Coordinate c){
         return groundProsperityMap.getOrDefault(c, 0);
     }
     //获取建筑繁华度
