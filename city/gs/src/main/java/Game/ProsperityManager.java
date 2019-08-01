@@ -51,7 +51,7 @@ public class ProsperityManager {
     int updateIndex=0;
 
     /*全城繁华值总和,1小时更新内根据地块位置逐步更新.*/
-    public void totalProsperity(long diffNano) {
+    private void totalProsperity(long diffNano) {
 
         /*一块一块的去更新地块，而不是一直去更新，直到完成,循环的去更新数据，从头开始更新*/
         if (timer.update(diffNano)) {
@@ -71,7 +71,7 @@ public class ProsperityManager {
     }
 
     /*计算建筑繁荣度，建筑繁荣度要把建筑包含的所有土地加起来(暂时不用)*/
-    public int computeBuildingProsperity(Building building) {  //获取坐标点的繁荣度
+    private int computeBuildingProsperity(Building building) {  //获取坐标点的繁荣度
         int buildingSumProsperity=0;
         ArrayList<Coordinate> coordinates = new ArrayList<>(building.area().toCoordinates());
         for (Coordinate coordinate : coordinates) {
@@ -97,8 +97,8 @@ public class ProsperityManager {
         return buildingSumProsperity;
     }
 
-    /*查询土地的繁荣度*/
-    public int computeGroundProsperity(int beginX,int beginY){
+    /*计算土地的繁荣度*/
+    private int computeGroundProsperity(int beginX,int beginY){
         double disTemp = 0;//距离
         int prosperity = 0;//土地繁华度值
         trafficTemp=0;
