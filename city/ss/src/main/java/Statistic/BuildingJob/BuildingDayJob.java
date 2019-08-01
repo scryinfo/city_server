@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 import static Statistic.SummaryUtil.DAY_MILLISECOND;
 
@@ -34,6 +35,14 @@ public class BuildingDayJob implements Job
 
         List<Document> documentList = LogDb.buildingDayIncomeSummary(yestodayStartTime, todayStartTime);
         SummaryUtil.insertBuildingDayIncome(documentList,yestodayStartTime);
+
+        /*建筑的支出*/
+        List<Document> documentListPay = LogDb.buildingDayPaySummary(yestodayStartTime, todayStartTime);
+        SummaryUtil.insertBuildingDayPay(documentListPay,yestodayStartTime);
+
+        //建筑经营详统计
+        Map<Integer, List<Document>> detailMap = LogDb.buildingDaySaleDetailIncomeSummary(yestodayStartTime, todayStartTime);
+        SummaryUtil.insertDayBuildingGoodSoldDetail(detailMap, yestodayStartTime);
 
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));

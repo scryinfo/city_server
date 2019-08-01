@@ -29,12 +29,11 @@ public class MinuteJob implements org.quartz.Job{
         LOGGER.debug("MinuteJob start execute,time = " + timeStr);
 
         //player income
-        List<Document> documentList=documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());//统计每分钟的收入量
+      /*  List<Document> documentList= LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());//统计每分钟的收入量
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerIncome());
         //player pay
         documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerPay());
-        SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerPay());
-
+        SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerPay());*/
 
         //统计耗时
         StatisticSession.setIsReady(true);

@@ -133,19 +133,19 @@ public class GlobalUtil {
         for (Building building : buildings) {
             if (!building.outOfBusiness()) {
                switch (type){
-                   case MetaBuilding.RETAIL:
+                  /* case MetaBuilding.RETAIL:
                        RetailShop retailShop = (RetailShop) building;
                        int retailPrice = retailShop.getCurPromPricePerHour();
                        sumPrice += retailPrice;
                        count++;
-                       break;
+                       break;*/
                    case MetaBuilding.APARTMENT:
                        Apartment apartment = (Apartment) building;
                        int aparPrice = apartment.cost();
                        sumPrice += aparPrice;
                        count++;
                        break;
-                   case MetaBuilding.LAB:
+                  /* case MetaBuilding.LAB:
                        Laboratory lab = (Laboratory) building;
                        int labPrice = lab.getPricePreTime();
                        sumPrice += labPrice;
@@ -156,7 +156,7 @@ public class GlobalUtil {
                        int facPrice = facility.getCurPromPricePerHour();
                        sumPrice += facPrice;
                        count++;
-                       break;
+                       break;*/
                }
             }
         }

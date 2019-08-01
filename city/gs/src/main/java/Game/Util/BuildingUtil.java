@@ -45,7 +45,7 @@ public class BuildingUtil {
         return maxQtyTotalMap.get(type);
     }
 
-    //更新的时机，建造建筑\拆除建筑和修改eva时更新
+    //更新最大最小品质：建造建筑\拆除建筑和修改eva时更新
     public void updateMaxOrMinTotalQty(){
         Set<Double> retailSet = new HashSet<>();
         Set<Double> apartmentSet = new HashSet<>();
@@ -138,8 +138,8 @@ public class BuildingUtil {
         this.getProduceInfo();
         this.getRetailInfo();
         this.retailScore = GlobalUtil.getRetailInfo();
-        this.promotionAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
-        this.laboratoryAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.LAB);
+        /*this.promotionAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.PUBLIC);
+        this.laboratoryAvg = GlobalUtil.getCityAvgPriceByType(MetaBuilding.LAB);*/
     }
 
     public void getRetailInfo() {

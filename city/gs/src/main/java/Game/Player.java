@@ -115,6 +115,7 @@ public class Player {
     public boolean canSetName() {
         return nameSetTs == 0 || nameSetTs <= System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
     }
+
 //    public void addTalent(Talent t) {
 //        talentIds.add(t.id());
 //        TalentManager.instance().add(t);

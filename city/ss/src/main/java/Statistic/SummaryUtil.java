@@ -1,5 +1,6 @@
 package Statistic;
 
+import Param.ItemKey;
 import Shared.LogDb;
 import Shared.Util;
 import Statistic.Util.TimeUtil;
@@ -11,12 +12,15 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
+import gs.Gs;
 import org.bson.Document;
 import ss.Ss;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static Shared.LogDb.KEY_TOTAL;
+import static Shared.LogDb.cityBroadcast;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -46,10 +50,12 @@ public class SummaryUtil
     private static final String DAY_PLAYER_RESEARCH = "dayPlayerResearch";
     private static final String DAY_PLAYER_PROMOTION = "dayPlayePromotion";
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
+    private static final String DAY_BUILDING_PAY = "dayBuildingPay";            //建筑每日收入统计
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
     private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";
+    private static final String DAY_BUILDING__GOOD_SOLD_DETAIL="dayBuildingGoodSoldDetail";
     private static final String DAY_BUILDING_BUSINESS= "dayBuildingBusiness";
 
     //--ly
@@ -71,11 +77,13 @@ public class SummaryUtil
     private static MongoCollection<Document> dayPlayerResearch;
     private static MongoCollection<Document> dayPlayerPromotion;
     private static MongoCollection<Document> dayBuildingIncome;
+    private static MongoCollection<Document> dayBuildingPay;        //建筑每日收入
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
     private static MongoCollection<Document> dayIndustryIncome;
     private static MongoCollection<Document> dayBuildingBusiness;
+    private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
@@ -117,6 +125,8 @@ public class SummaryUtil
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayBuildingPay = database.getCollection(DAY_BUILDING_PAY)           //建筑每日收入统计
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerPay = database.getCollection(DAY_PLAYER_PAY)
@@ -126,6 +136,8 @@ public class SummaryUtil
         dayIndustryIncome = database.getCollection(DAY_INDUSTRY_INCOME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingBusiness = database.getCollection(DAY_BUILDING_BUSINESS)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayBuildingGoodSoldDetail = database.getCollection(DAY_BUILDING__GOOD_SOLD_DETAIL)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -288,14 +300,10 @@ public class SummaryUtil
     }
     public static Map<Long, Long> queryPlayerIncomePayCurve(MongoCollection<Document> collection,UUID id)
     {
-    	Calendar calendar =TimeUtil.monthCalendar();
-        //开始时间
-    	Date startDate = calendar.getTime();
-    	long startTime=startDate.getTime();
-    	calendar.setTime(new Date());
-    	//结束时间（到现在时间点的统计）
-        Date endDate = calendar.getTime();
-        long endTime=endDate.getTime();
+        //开始时间（前30天）
+        long startTime = TimeUtil.monthStartTime();
+    	//结束时间
+        long endTime=TimeUtil.todayStartTime();
     	Map<Long, Long> map = new LinkedHashMap<>();
     	collection.find(and(
     			eq("id",id),
@@ -651,6 +659,10 @@ public class SummaryUtil
         return dayBuildingBusiness;
     }
 
+    public static MongoCollection<Document> getDayBuildingGoodSoldDetail() {
+        return dayBuildingGoodSoldDetail;
+    }
+
     public static void insertBuildingDayIncome(List<Document> documentList,long time)
     {
         documentList.forEach(document -> {
@@ -661,20 +673,84 @@ public class SummaryUtil
         }
     }
 
-    public static List<Ss.NodeIncome> getBuildDayIncomeById(UUID bid)
+    public static void insertBuildingDayPay(List<Document> documentList,long time)
     {
+        documentList.forEach(document -> {
+            document.append(TIME, time);
+        });
+        if (!documentList.isEmpty()) {
+            dayBuildingPay.insertMany(documentList);
+        }
+    }
+
+    public static void insertDayBuildingGoodSoldDetail(Map<Integer,List<Document>> detailMap, long time) {
+        detailMap.values().forEach(c->{
+            c.forEach(document -> {
+                document.append(TIME, time);
+            });
+            if (!c.isEmpty()) {
+                dayBuildingGoodSoldDetail.insertMany(c);
+            }
+        });
+    }
+
+    /*获取建筑一个月的收入（yty）*/
+    public static Map<Long,Long> getBuildDayIncomeById(UUID bid)
+    {
+        Map<Long, Long> income = new HashMap<>();
         long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
-        List<Ss.NodeIncome> list = new ArrayList<>();
         dayBuildingIncome.find(and(eq(ID, bid),
                 gte(TIME, startTime)))
                 .sort(Sorts.ascending(TIME))
                 .forEach((Block<? super Document>) document ->
                 {
-                    list.add(Ss.NodeIncome.newBuilder()
-                            .setTime(TimeUtil.getTimeDayStartTime(document.getLong(TIME)))
-                            .setIncome(document.getLong(KEY_TOTAL)).build());
+                    income.put(TimeUtil.getTimeDayStartTime(document.getLong(TIME)),document.getLong(KEY_TOTAL));
                 });
-        return list;
+        return income;
+    }
+
+    //获取建筑一个月的支出(yty)
+    public static Map<Long,Long> getBuildDayPayById(UUID bid)
+    {
+        Map<Long, Long> pay = new HashMap<>();
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 30;
+        dayBuildingPay.find(and(eq(ID, bid),
+                gte(TIME, startTime)))
+                .sort(Sorts.ascending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    pay.put(TimeUtil.getTimeDayStartTime(document.getLong(TIME)),document.getLong(KEY_TOTAL));
+                });
+        return pay;
+    }
+    /*查询建筑7天内收入统计*/
+    public static Map<Long, Map<ItemKey, Document>> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection, UUID bid) {
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        /*存储格式  key为时间，value存这人一天内出现过的销售商品*/
+        Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
+        collection.find(and(eq("bid", bid),
+                gte(TIME, startTime)))
+                .sort(Sorts.ascending(TIME))
+                .forEach((Block<? super Document>) d ->
+                {
+                    detail.computeIfAbsent(TimeUtil.getTimeDayStartTime(d.getLong(TIME)), k -> new HashMap<>()).put(new ItemKey(d.getInteger("itemId"),(UUID) d.get("p")),d);
+                });
+        return detail;
+    }
+
+    /*获取建筑中某一个商品的历史销售记录*/
+    public static Map<Long,Document> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection,int itemId,UUID bid,UUID producerId){
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        Map<Long, Document> map = new HashMap<>();
+        collection.find(and(eq("bid", bid),
+                eq("itemId",itemId),
+                eq("p",producerId),
+                gte(TIME, startTime)))
+                .forEach((Block<? super Document>) doc ->
+                {
+                    map.put(TimeUtil.getTimeDayStartTime(doc.getLong(TIME)),doc);
+                });
+        return map;
     }
 
 
@@ -848,7 +924,6 @@ public class SummaryUtil
                         map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
                     });
         }
-
         return map;
     }
     public static List<Document> queryWeekIndustryDevelopment(MongoCollection<Document> collection)

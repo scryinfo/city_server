@@ -5,6 +5,8 @@ import Game.Contract.IBuildingContract;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
+import Game.Promote.PromotionCompany;
+import Game.Technology.Technology;
 import Game.Util.GlobalUtil;
 import Game.Util.NpcUtil;
 import Shared.LogDb;
@@ -90,10 +92,16 @@ public abstract class Building implements Ticker{
                 return new RetailShop(MetaData.getRetailShop(id), pos, ownerId);
             case MetaBuilding.APARTMENT:
                 return new Apartment(MetaData.getApartment(id), pos, ownerId);
-            case MetaBuilding.LAB:
-                return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);
-            case MetaBuilding.PUBLIC:
-                return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);
+           /* case MetaBuilding.LAB:
+                return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);*/
+           //新版研究所
+            case MetaBuilding.TECHNOLOGY:
+                return new Technology(MetaData.getTechnology(id), pos, ownerId);
+           /* case MetaBuilding.PUBLIC:
+                return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);*/
+           //新版推广公司
+            case MetaBuilding.PROMOTE:
+                return new PromotionCompany(MetaData.getPromotionCompany(id),pos, ownerId);
             case MetaBuilding.WAREHOUSE:
                 return new WareHouse(MetaData.getWarehouse(id), pos, ownerId);
         }
@@ -342,11 +350,12 @@ public abstract class Building implements Ticker{
                 .setTime(now);
         if (now - todayIncomeTs >= DAY_MILLISECOND)
         {
-            builder.setTodayIncome(0);
+            builder.setTodayIncome(0).setTodayPay(LogDb.getTodayBuildingPay(id()));
         }
         else
         {
-            builder.setTodayIncome(todayIncome);
+            builder.setTodayIncome(todayIncome)
+                   .setTodayPay(LogDb.getTodayBuildingPay(id()));
         }
         return builder.build();
     }
@@ -787,6 +796,7 @@ public abstract class Building implements Ticker{
             updates.add(p);
             GameDb.saveOrUpdate(updates);
             LogDb.paySalary(p.id(),type(),id(),this.singleSalary(), this.allStaff.size());
+            LogDb.buildingPay(id(),p.id(),this.singleSalary()*this.allStaff.size());//记录建筑支出
             return true;
         } else {
             shutdownBusiness();

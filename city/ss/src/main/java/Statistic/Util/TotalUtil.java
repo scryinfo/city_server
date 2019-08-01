@@ -1,8 +1,11 @@
 package Statistic.Util;
 
+import Param.MetaBuilding;
+import Shared.Util;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
+import ss.Ss;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -33,16 +36,13 @@ public class TotalUtil {
         Map<Long, Long> total = new TreeMap<>();
         //1.处理29天以前的数据，以天数统计求和
         sourceMap.forEach((time,money)->{
-            //处理29天以前的数据
-            if(time<=TimeUtil.todayStartTime()-1&&time>=TimeUtil.monthStartTime()){
-                //获取当天开始时间
-                Long st = TimeUtil.getTimeDayStartTime(time);
-                if(total.containsKey(st)) {
-                    total.put(st, total.get(st) + money);
-                }
-                else {
-                    total.put(st, money);
-                }
+            //获取当天开始时间
+            Long st = TimeUtil.getTimeDayStartTime(time);
+            if(total.containsKey(st)) {
+                total.put(st, total.get(st) + money);
+            }
+            else {
+                total.put(st, money);
             }
         });
         return total;
@@ -72,5 +72,30 @@ public class TotalUtil {
             account = first.getLong("a");
         }
         return account;
+    }
+
+    /*参数1.要统计的销售详情,参数2.表示建筑类型，参数3.表示是否有今日收入统计（false 则直接设置收益为0）*/
+    public static Ss.BuildingTodaySaleDetail.TodaySaleDetail totalBuildingSaleDetail(Document document,int buildingType, boolean isTodayIncome){
+        Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder saleInfo = Ss.BuildingTodaySaleDetail.TodaySaleDetail.newBuilder();
+        /*设置通用信息*/
+        long num=0;
+        long account=0;
+        UUID producerId = document.get("p",UUID.class);
+        saleInfo.setItemId(document.getInteger("itemId"))
+                .setProducerId(Util.toByteString(producerId))
+                .setIncreasePercent(1);//设置默认的提升比例为100
+        System.err.println("商品的生产者Id是:"+producerId);
+        if(isTodayIncome){
+            num = document.getLong("num");
+            account = document.getLong("total");
+        }else{
+            saleInfo.setIncreasePercent(0);//非今日收入销售则把提升比例设置为0
+        }
+        saleInfo.setNum((int) num)
+                .setSaleAccount(account);
+        if(buildingType==MetaBuilding.PRODUCE||buildingType==MetaBuilding.RETAIL){
+            saleInfo.setBrandName(document.getString("brand"));
+        }
+        return saleInfo.build();
     }
 }

@@ -51,4 +51,8 @@ public class Item {
     public ItemKey getKey() {
         return this.key;
     }
+
+    public int getN() {
+        return n;
+    }
 }

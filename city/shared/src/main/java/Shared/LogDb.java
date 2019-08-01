@@ -7,6 +7,7 @@ import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
@@ -21,9 +22,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.excludeId;
-import static com.mongodb.client.model.Projections.fields;
-import static com.mongodb.client.model.Projections.include;
+import static com.mongodb.client.model.Projections.*;
 
 public class LogDb {
 	private static MongoClientURI connectionUrl;
@@ -53,6 +52,7 @@ public class LogDb {
 
 	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
+	private static final String BUILDING_PAY = "buildingPay";
 	//研究所日志记录
 	private static final String LABORATORY_RECORD = "laboratoryRecord";
 	// 推广公司日志记录
@@ -98,7 +98,6 @@ public class LogDb {
 	private static MongoCollection<Document> payTransfer;
 	private static MongoCollection<Document> rentGround;
 	private static MongoCollection<Document> buyGround;
-
 	private static MongoCollection<Document> landAuction;
 	private static MongoCollection<Document> extendBag;
 	//-----------------------------------------
@@ -108,6 +107,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
+	private static MongoCollection<Document> buildingPay;		//建筑支出（不含详细信息，用于建筑曲线图支出统计，非经营详情）
 	private static MongoCollection<Document> flightBet;
 	private static MongoCollection<Document> laboratoryRecord;
 	private static MongoCollection<Document> promotionRecord;
@@ -127,6 +127,7 @@ public class LogDb {
 	//npc and player pay Miner cost
 	private static MongoCollection<Document> minersCost;	//矿工费用
 	private static MongoCollection<Document> npcMinersCost;//矿工费用
+
 	/*用作离线通知*/
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 	private static MongoCollection<Document> dayPlayerIncome;
@@ -172,7 +173,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		buildingIncome = database.getCollection(BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-
+		buildingPay= database.getCollection(BUILDING_PAY)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		npcRentApartment = database.getCollection(NPC_RENT_APARTMENT)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityBroadcast = database.getCollection(CITY_BROADCAST)
@@ -349,8 +351,7 @@ public class LogDb {
 		}
 		//npc buy
         collection.aggregate(
-                Arrays.asList
-						(
+                Arrays.asList(
                         Aggregates.match(and(
                                 eq("tp", tp),
                                 gte("t", yestodayStartTime),
@@ -577,7 +578,7 @@ public class LogDb {
 				).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-
+/*按天统计玩家收入支出（yty）*/
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -600,6 +601,21 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+//获取今日玩家收入支出（yty）
+	public static List<Long> getTodayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection,UUID pid){
+        List<Long> incomeOrPay = new ArrayList<>();
+        collection.find(
+                and(
+                    eq("p",pid),
+                    gte("t", startTime),
+                    lt("t", endTime))
+        ).forEach((Block<? super Document>) d ->
+        {
+
+            incomeOrPay.add(d.getLong("a"));
+        });
+        return incomeOrPay;
+    }
 
 	public static List<Document> getDayGoodsSoldDetail(long startTime, long endTime, MongoCollection<Document> collection)
 	{
@@ -696,6 +712,15 @@ public class LogDb {
 		buildingIncome.insertOne(document);
 	}
 
+	public static void buildingPay(UUID bId,UUID payId,long cost)
+	{
+		Document document = new Document("t", System.currentTimeMillis());
+		document.append("b", bId)
+				.append("p", payId)
+				.append("a", cost);
+		buildingPay.insertOne(document);
+	}
+
 	public static List<Document> buildingDayIncomeSummary(long yestodayStartTime, long todayStartTime)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -713,6 +738,99 @@ public class LogDb {
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
+	}
+	//统计建筑1天的支出（yty）
+	public static List<Document> buildingDayPaySummary(long yestodayStartTime, long todayStartTime)		//统计玩家建筑一天的所有支出（不含详细信息）
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		buildingPay.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.group("$b", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	/*统计所有货架建筑的经营详情(包括了零售店)的货物经营详情(yty)*/
+	public static Map<Integer,List<Document>> buildingDaySaleDetailIncomeSummary(long yestodayStartTime, long todayStartTime){
+		Map<Integer, List<Document>> map = new HashMap<>();
+		List<Document> factoryInshelf = new ArrayList<>();//工厂类（或者研究所、零售店）货架营收
+		List<Document> retailInshelf = new ArrayList<>();//零售店
+		Document projectObject = new Document()
+				.append("bid","$_id._id.b")
+				.append("itemId","$_id._id.tpi")
+				.append("brand","$brand")
+				.append("p","$_id.i")
+				.append("num","$n")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		//分组id(根据生产者id、建筑id、商品id分组)
+		Document groupObject = new Document("_id",
+				new Document("b", "$b")
+						.append("tpi", "$tpi"))
+						.append("i","$i");
+		buyInShelf.aggregate(
+				Arrays.asList(
+					Aggregates.match(and(
+							gte("t", yestodayStartTime),
+							lt("t", todayStartTime))),
+					Aggregates.sort(Sorts.descending("t")),
+					Aggregates.group(groupObject,Accumulators.first("brand","$brand"),Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
+					Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) factoryInshelf::add);
+
+		//再统计零售店建筑的每日经营详情
+		npcBuyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", yestodayStartTime),
+								lt("t", todayStartTime))),
+						Aggregates.sort(Sorts.descending("t")),
+						Aggregates.group(groupObject,Accumulators.first("brand","$brand"), Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) retailInshelf::add);
+		map.put(1,factoryInshelf);
+		map.put(2,retailInshelf);
+		return map;
+	}
+
+	/*统计建筑今日的经营详情)(yty)*/
+	public static List<Document> buildingDaySaleDetailByBuilding(long startTime,long endTime,UUID bid,MongoCollection<Document> collection){
+		List<Document> record = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("bid","$_id._id.b")
+				.append("itemId","$_id._id.tpi")
+				.append("brand","$brand")
+				.append("p","$_id.i")
+				.append("num","$n")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		Document groupObject = new Document("_id",
+				new Document("b", "$b")
+						.append("tpi", "$tpi"))
+						.append("i","$i");
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("b",bid),
+								gte("t", startTime),
+								lt("t", endTime))),
+						Aggregates.sort(Sorts.descending("t")),
+						Aggregates.group(groupObject,Accumulators.first("brand","$brand"),Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>)record::add);
+		return record;
 	}
 
 	public static List<Document> queryBuildingFlowAndLift(long startTime,UUID buildingId)
@@ -736,7 +854,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, UUID wid,int type, int typeId)
+								  UUID producerId, UUID bid, UUID wid,int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -744,6 +862,8 @@ public class LogDb {
 				.append("b", bid)
 				.append("w", wid)
 				.append("p", price)
+				.append("n",n)				//yty  数量
+				.append("brand",brand)      //yty 品牌名
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
@@ -752,13 +872,15 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,int type, int typeId)
+								  UUID producerId, UUID bid,int type, int typeId,String brand)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
 				.append("d", sellId)
 				.append("b", bid)
 				.append("p", price)
+				.append("n",n)          //yty  数量
+				.append("brand",brand)  //yty 品牌名
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
@@ -872,7 +994,7 @@ public class LogDb {
 	}
 	
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid,int type, int mId)
+			UUID ownerId, UUID bid, int type, int mId)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1079,6 +1201,22 @@ public class LogDb {
 	public static MongoCollection<Document> getBuildingIncome()
 	{
 		return buildingIncome;
+	}
+
+	public static MongoCollection<Document> getBuildingPay() {
+		return buildingPay;
+	}
+	public static Long getTodayBuildingPay(UUID buildingId){
+		Long sum=0L;
+		//获取今日建筑的支出金额
+		FindIterable<Document> documents = buildingPay.find(and(
+				eq("b", buildingId),
+				gte("t", Util.getTodayStartTs())
+		));
+		for (Document document : documents) {
+			sum+= document.getLong("a");
+		}
+		return sum;
 	}
 
 	public static MongoCollection<Document> getNpcBuyInShelf()
@@ -1336,19 +1474,19 @@ public class LogDb {
 		});
 		return map;
 	}
-	public static List<Document> playerBuildingBusiness(long startTime, long endTime, MongoCollection<Document> collection,int buildType)
-	{
-		List<Document> documentList = new ArrayList<>();
-		Document groupObject = new Document("_id",
-				new Document("p", "$p")
-						.append("tp", "$tp"));
-		Document projectObject = new Document()
-				.append("id", "$_id._id.p")
-				.append("tp", "$_id._id.tp")
-				.append("n", "$n")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("_id",0);
-		if(buildType>0){
+    public static List<Document> playerBuildingBusiness(long startTime, long endTime, MongoCollection<Document> collection,int buildType)
+    {
+        List<Document> documentList = new ArrayList<>();
+        Document groupObject = new Document("_id",
+                new Document("p", "$p")
+                        .append("tp", "$tp"));
+        Document projectObject = new Document()
+                .append("id", "$_id._id.p")
+                .append("tp", "$_id._id.tp")
+                .append("n", "$n")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        if(buildType>0){
             collection.aggregate(
                     Arrays.asList(
                             Aggregates.match(and(
@@ -1370,6 +1508,6 @@ public class LogDb {
                     )
             ).forEach((Block<? super Document>) documentList::add);
         }
-		return documentList;
-	}
+        return documentList;
+    }
 }

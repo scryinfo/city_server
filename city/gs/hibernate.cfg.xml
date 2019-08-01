@@ -15,7 +15,8 @@
 		</property>
 		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">
-			jdbc:postgresql://192.168.0.51/189
+			<!--jdbc:postgresql://127.0.0.1/117-->
+			jdbc:postgresql://127.0.0.1/189
 		</property>
 		<property name="hibernate.connection.username">
 			postgres
@@ -98,5 +99,18 @@
 		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>
 		<mapping class="Game.ddd.ddd_purchase"></mapping>
 		<mapping class="Game.ddd.dddPurchaseMgr"></mapping>
+		<!--新版研究所-->
+		<mapping class="Game.Technology.Technology"></mapping>
+		<mapping class="Game.Technology.Technology$Line"></mapping>
+		<mapping class="Game.Technology.ScienceBox"></mapping>
+		<mapping class="Game.ScienceLineBase"></mapping>
+		<mapping class="Game.ScienceStore"></mapping>
+		<mapping class="Game.ScienceShelf"></mapping>
+		<mapping class="Game.ScienceShelf$Content"></mapping>
+		<mapping class="Game.Technology.SciencePoint"></mapping>
+		<mapping class="Game.Promote.PromotePoint"></mapping>
+		<mapping class="Game.Promote.PromotionCompany"></mapping>
+		<mapping class="Game.Promote.PromotionCompany$Line"></mapping>
+
 	</session-factory>
 </hibernate-configuration> 

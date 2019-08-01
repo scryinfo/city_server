@@ -17,6 +17,7 @@ public class Shopping implements IAction {
     private int aiId;
     @Override
     public Set<Object> act(Npc npc) {
+        Set<Object> buyerNpc = new HashSet<>();//用于一次性批量更新数据库
         logger.info("npc " + npc.id().toString() + " type " + npc.type() + " begin to shopping who located at: " + npc.buildingLocated().coordinate());
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(MetaBuilding.RETAIL);
         if(buildings.isEmpty())
@@ -147,17 +148,20 @@ public class Shopping implements IAction {
 
             LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
+            //获取品牌名
+            BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
+            String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
-                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
+                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
             LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
             LogDb.sellerBuildingIncome(chosen.bId,sellShop.type(),owner.id(),1,chosen.price,chosen.meta.id);//记录建筑收益详细信息
             //矿工费用记录
             LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             //db操作 从外部挪进来
-            Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
-            GameDb.saveOrUpdate(u);
-            
+            //Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
+            //GameDb.saveOrUpdate(u);
+            buyerNpc.addAll(Arrays.asList(npc,owner, sellShop));
             //再次购物
             double spend=MetaData.getGoodSpendMoneyRatio(chosen.meta.id);
             //工资区分失业与否
@@ -175,15 +179,19 @@ public class Shopping implements IAction {
             saleCount=((IShelf) sellShop).getSaleCount(chosenGoodMetaId);
             if(num/100.d<repeatBuyRetio&&saleCount>0){
             	//选出满足条件的商品后，走再次购物逻辑
-                repeatBuyGood(npc,chosen,mutilSpend);
+                Set<Object> objects = repeatBuyGood(npc, chosen, mutilSpend);
+                if(objects!=null&&objects.size()>0){
+                    buyerNpc.addAll(objects);
+                }
             }
-            return null;
+            return buyerNpc;
         }
     }
     private Set<Object> repeatBuyGood(Npc npc,WeightInfo chosen,double mutilSpend){
-          Building sellShop = City.instance().getBuilding(chosen.bId);
-          sellShop.addFlowCount();
-          logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
+        Set<Object> buyerNpc = new HashSet<>();
+        Building sellShop = City.instance().getBuilding(chosen.bId);
+        sellShop.addFlowCount();
+        logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
         double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
@@ -231,18 +239,20 @@ public class Shopping implements IAction {
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
+              BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
+              String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
-                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id);
+                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
               LogDb.sellerBuildingIncome(chosen.bId,sellShop.type(),owner.id(),1,chosen.price,chosen.meta.id);//记录建筑收益详细信息
               //矿工费用记录
               LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               //db操作 从外部挪进来
-              Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
-              GameDb.saveOrUpdate(u);
-//              City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
-
+             /* Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
+              GameDb.saveOrUpdate(u);*/
+//            City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
+              buyerNpc.addAll(Arrays.asList(npc,owner, sellShop));
             //再次购物
               double spend=MetaData.getGoodSpendMoneyRatio(chosen.meta.id);
               //工资区分失业与否
@@ -259,13 +269,16 @@ public class Shopping implements IAction {
               saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//刷新货架上的数量
               if(num/100.d<repeatBuyRetio&&saleCount>0){
                   //递归购物
-                  repeatBuyGood(npc,chosen,mutilSpend);
+                  Set<Object> objects = repeatBuyGood(npc, chosen, mutilSpend);
+                  if(objects!=null&&objects.size()>0){
+                      buyerNpc.addAll(objects);
+                  }
               }
-              
-              return null;
+
+              return buyerNpc;
           }
     }
-    
+
     private static final class WeightInfo {
         public WeightInfo(UUID bId, UUID producerId, int qty, int w, int price, MetaGood meta, int buildingBrand, int buildingQty) {
             this.bId = bId;
