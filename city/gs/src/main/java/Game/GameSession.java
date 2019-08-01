@@ -5076,7 +5076,7 @@ public class GameSession {
 
 
     /*查询小地图建筑类别摘要信息*/
-    public void queryBuildingSummary(short cmd,Message message){
+    public void queryTypeBuildingSummary(short cmd,Message message){
         Gs.Num num = (Gs.Num) message;
         int type = num.getNum();
         Gs.BuildingGridSummary.Builder builder = Gs.BuildingGridSummary.newBuilder();
@@ -5457,7 +5457,7 @@ public class GameSession {
         if(delLine!=null) {
             GameDb.saveOrUpdate(science);
             GameDb.delete(delLine);
-            if(science.line.size() >(delIndex+1)){
+            if(science.line.size() >=(delIndex+1)){
                 /*获取下一条生产线*/
                 ScienceLineBase nextLine = science.line.get(delIndex);
                 UUID nextLineId=null;
