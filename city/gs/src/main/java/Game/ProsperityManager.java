@@ -114,7 +114,6 @@ public class ProsperityManager {
                 prosperity += trafficTemp * offsetTemp;
             }
         }
-        System.err.println("计算的坐标"+beginX+","+beginY+"繁荣度为："+prosperity);
         return prosperity;
     }
 
