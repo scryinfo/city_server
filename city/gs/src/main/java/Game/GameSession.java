@@ -652,22 +652,6 @@ public class GameSession {
             gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
             grid.forAllBuilding(building->{
                 if(building instanceof IShelf && !building.outOfBusiness()&&building instanceof FactoryBase) {
-					/*if(building instanceof  WareHouse&&((WareHouse) building).getRenters().size()>0){
-						((WareHouse)building).getRenters().forEach(r->{
-							if(r.getRenterId()!=player.id()){//排除玩家自己的数据信息
-								IShelf s = (IShelf)building;
-								Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
-								bb.setId(Util.toByteString(building.id()));
-								bb.setPos(building.coordinate().toProto());
-								s.getSaleDetail(c.getItemId()).forEach((k,v)->{
-									bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setRenterId(Util.toByteString(r.getRenterId()));
-								});
-								bb.setOwnerId(Util.toByteString(building.ownerId()));
-								bb.setName(building.getName());
-								bb.setMetaId(building.metaId());//建筑类型id
-							}
-						});
-					}*/
                     IShelf s = (IShelf) building;
                     if(s.getSaleCount(c.getItemId())>0){
                         Gs.MarketDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
@@ -5698,6 +5682,60 @@ public class GameSession {
             }
         }
         this.write(Package.create(cmd,builder.build()));
+    }
+
+    // 获取1*1地图
+    public void queryMapProsperity(short cmd) {
+        Gs.MapProsperity.Builder builder = Gs.MapProsperity.newBuilder();
+        List<Gs.MapProsperity.ProspInfo> list = new ArrayList<>();
+        ProsperityManager.instance().allGround.stream().filter(o -> o != null).forEach(g -> {
+            //繁荣度
+            int prosperity = ProsperityManager.instance().getGroundProsperity(g);
+            list.add(Gs.MapProsperity.ProspInfo.newBuilder().setProsperity(prosperity).setIndex(g.toProto()).build());
+        });
+        this.write(Package.create(cmd, builder.addAllInfo(list).build()));
+    }
+
+    public void queryMapBuidlingSummary(short cmd, Message message) {
+        Gs.MiniIndex index = (Gs.MiniIndex) message;
+        Gs.MapBuildingSummary.Builder builder = Gs.MapBuildingSummary.newBuilder();
+        Coordinate coordinate = new Coordinate(index.getX(), index.getY());
+        GroundInfo info = GroundManager.instance().getGroundInfo(coordinate);
+        if (info == null) {
+            if (GlobalConfig.DEBUGLOG) {
+                GlobalConfig.cityError("queryMapBuidlingSummary: groundInfo is entity!");
+            }
+            return;
+        }
+        // 如果是出售中的土地
+        if (info.inSelling()) {
+            int prosperity = ProsperityManager.instance().getGroundProsperity(coordinate);
+            Player player = GameDb.getPlayer(info.ownerId);
+            builder.setIdx(Gs.MiniIndexCollection.newBuilder().addCoord(coordinate.toProto())).setStatus(Gs.MapBuildingSummary.Status.Selling).setProsperity(prosperity).setRoleName(player.getName()).setCompanyName(player.getCompanyName());
+        } else if (info.inStateless()) {
+            // 如果是闲置状态
+            int prosperity = ProsperityManager.instance().getGroundProsperity(coordinate);
+            Player player = GameDb.getPlayer(info.ownerId);
+            builder.setIdx(Gs.MiniIndexCollection.newBuilder().addCoord(coordinate.toProto())).setStatus(Gs.MapBuildingSummary.Status.Idle).setProsperity(prosperity).setRoleName(player.getName()).setCompanyName(player.getCompanyName());
+        } else if (info.inRenting()) {
+            // 如果是出租
+            int prosperity = ProsperityManager.instance().getGroundProsperity(coordinate);
+            Player player = GameDb.getPlayer(info.ownerId);
+            builder.setIdx(Gs.MiniIndexCollection.newBuilder().addCoord(coordinate.toProto())).setStatus(Gs.MapBuildingSummary.Status.Renting).setProsperity(prosperity).setRoleName(player.getName()).setCompanyName(player.getCompanyName());
+        } else {
+            // 如果已经修建
+            City.instance().forEachBuilding(coordinate.toGridIndex(), b -> {
+                if (!b.outOfBusiness() || b == null) {
+                    GlobalConfig.cityError("queryMapBuidlingSummary: building is not business or not exist!");
+                }
+                int prosperity = ProsperityManager.instance().getBuildingProsperity(b);
+                List<Gs.MiniIndex> list = new ArrayList<>();
+                b.area().toCoordinates().stream().filter(o -> o != null).forEach(c -> list.add(c.toProto()));
+                Player owner = GameDb.getPlayer(info.ownerId);
+                builder.setIdx(Gs.MiniIndexCollection.newBuilder().addAllCoord(list)).setStatus(Gs.MapBuildingSummary.Status.Used).setProsperity(prosperity).setRoleName(owner.getName()).setCompanyName(owner.getCompanyName()).setTypeId(b.metaId());
+            });
+        }
+        this.write(Package.create(cmd, builder.build()));
     }
 
 }

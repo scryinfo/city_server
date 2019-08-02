@@ -458,6 +458,10 @@ public class GroundManager {
         this.broadcast(gis);
     }
 
+    public GroundInfo getGroundInfo(Coordinate coordinate) {
+        return info.getOrDefault(coordinate, null);
+    }
+
     public boolean cancelSell(UUID id, Set<Coordinate> coordinates) {
         List<GroundInfo> gis = new ArrayList<>();
         for(Coordinate c : coordinates) {

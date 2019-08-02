@@ -219,6 +219,10 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.laboratoryGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.LaboratoryMsg.PARSER, GameSession.class, "laboratoryGuidePrice"));
 			table.put((short) GsCode.OpCode.queryBuildingName_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryBuildingName"));
 
+			//小地图繁荣度
+			table.put((short) GsCode.OpCode.queryMapProsperity_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryMapProsperity"));
+			//小地图建筑摘要
+			table.put((short) GsCode.OpCode.queryMapBuidlingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndex.PARSER, GameSession.class, "queryMapBuidlingSummary"));
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));
 			//设置仓库出租信息

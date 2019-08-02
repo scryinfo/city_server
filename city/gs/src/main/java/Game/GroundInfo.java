@@ -69,6 +69,9 @@ public class GroundInfo implements Serializable {
     public boolean inSelling() {
         return status == GroundStatus.SELLING;
     }
+    public boolean inStateless() {
+        return status == GroundStatus.STATELESS;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
