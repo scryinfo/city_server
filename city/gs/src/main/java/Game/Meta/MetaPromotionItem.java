@@ -7,4 +7,8 @@ public class MetaPromotionItem extends MetaItem{
         super(d);
     }
 
+    public static boolean isItem(int id) {
+        return id / MetaData.ID_RADIX ==MetaItem.PROMOTE ;
+    }
+
 }

@@ -294,7 +294,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			//查询建筑繁荣度（1小时更新）
 			table.put((short) GsCode.OpCode.queryBuildingProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"queryBuildingProsperity"));
 			//查询建筑摘要
-			table.put((short) GsCode.OpCode.queryTypeBuildingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER,GameSession.class,"queryBuildingSummary"));
+			table.put((short) GsCode.OpCode.queryTypeBuildingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER,GameSession.class,"queryTypeBuildingSummary"));
 			//查询小地图建筑类别
 			table.put((short) GsCode.OpCode.queryTypeBuildingDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryTypeBuildingDetail.PARSER,GameSession.class,"queryTypeBuildingDetail"));
             //查询玩家在原料厂、加工厂、零售店、住宅的收入支出

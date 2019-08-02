@@ -46,6 +46,6 @@ public final class MetaGood extends MetaItem
         return mapping.keySet().contains(category);
     }
     public static boolean isItem(int id) {
-        return id / MetaData.ID_RADIX >= GOOD;
+        return id / MetaData.ID_RADIX >= GOOD&&id / MetaData.ID_RADIX<SCIENCE;
     }
 }

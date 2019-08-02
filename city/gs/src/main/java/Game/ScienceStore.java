@@ -3,13 +3,12 @@ package Game;
 import Game.IStorage;
 import Game.ItemKey;
 import gs.Gs;
+import org.checkerframework.checker.units.qual.A;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /*资料库（已开启的资料，等同于以前的仓库）*/
 @Entity
@@ -29,7 +28,7 @@ public class ScienceStore{
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Integer> locked = new HashMap<>();      //出售中的科技
 
-    public Gs.ScienceStore toProto(){
+   /* public Gs.ScienceStore toProto(){
         Gs.ScienceStore.Builder builder = Gs.ScienceStore.newBuilder();
         this.inHand.forEach((k, v)->{
             builder.addInHand(Gs.Item.newBuilder().setKey(k.toProto()).setN(v));
@@ -38,6 +37,26 @@ public class ScienceStore{
             builder.addLocked(Gs.Item.newBuilder().setKey(k.toProto()).setN(v));
         });
         return builder.build();
+    }*/
+
+    public List<Gs.ScienceStoreItem> toProto(){
+        /*合并2张表*/
+        List<Gs.ScienceStoreItem> list = new ArrayList<>();
+        List<ItemKey> totalKey = new ArrayList<>();
+        this.inHand.forEach((k,v)->{
+            Gs.ScienceStoreItem.Builder builder = Gs.ScienceStoreItem.newBuilder();
+            builder.setItemKey(k.toProto()).setStoreNum(v).setLockedNum(this.locked.getOrDefault(k, 0));
+            totalKey.add(k);
+            list.add(builder.build());
+        });
+        for (Map.Entry<ItemKey, Integer> lock : this.locked.entrySet()) {
+            if(totalKey.contains(lock.getKey()))
+                continue;
+            Gs.ScienceStoreItem.Builder builder = Gs.ScienceStoreItem.newBuilder();
+            builder.setItemKey(lock.getKey().toProto()).setStoreNum(0).setLockedNum(lock.getValue());
+            list.add(builder.build());
+        }
+        return list;
     }
 
     public int getAllNum(){/*返回仓库的库存所有数量*/

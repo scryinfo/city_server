@@ -7,6 +7,8 @@ import javax.persistence.AttributeConverter;
 public abstract class MetaItem {
     public static final int MATERIAL = 21;
     public static final int GOOD = 22;
+    public static final int SCIENCE = 15;//科技点数类型
+    public static final int PROMOTE = 16;//市场数据类型
     public static int level(int id) {
         return id % 1000;
     }
