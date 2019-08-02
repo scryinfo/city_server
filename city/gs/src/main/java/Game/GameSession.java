@@ -5577,27 +5577,6 @@ public class GameSession {
             System.err.println("数量不足");
         }
     }
-    //eva类加点建筑自动补货（推广公司、研究所）
-    public void setScienceAutoReplenish(short cmd,Message message) throws Exception {
-        Gs.setAutoReplenish c = (Gs.setAutoReplenish)message;
-        ItemKey itemKey = new ItemKey(c.getIKey());
-        UUID id = Util.toUuid(c.getBuildingId().toByteArray());
-        Building building = City.instance().getBuilding(id);
-        if(building == null || !(building instanceof ScienceBuildingBase)|| !building.canUseBy(player.id()) || building.outOfBusiness())
-            return;
-        ScienceBuildingBase science = (ScienceBuildingBase) building;
-        ScienceShelf.Content i = science.getContent(itemKey);
-        if(science.setAutoReplenish(itemKey,c.getAutoRepOn())) {
-            //处理自动补货
-            if(i != null && i.autoReplenish){
-                science.updateAutoReplenish(itemKey);
-            }
-            GameDb.saveOrUpdate(science);
-            this.write(Package.create(cmd, c));
-        }
-        else
-            this.write(Package.fail(cmd));
-    }
     //下架eva类加点建筑货架上的东西（推广公司、研究所）
     public void scienceShelfDel(short cmd,Message message) throws Exception {
         Gs.ShelfDel c = (Gs.ShelfDel)message;

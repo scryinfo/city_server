@@ -96,6 +96,7 @@ public abstract class ScienceBuildingBase extends Building{
         if(!autoRepOn) {
             int updateNum = content.n - item.getN();//增加或减少：当前货架数量-现在货架数量
             if (content.n == 0 && item.getN() == 0) {//若非自动补货，且货架数量为0，直接删除
+                content.autoReplenish=autoRepOn;
                 delshelf(item.getKey(), content.n, true);
                 return true;
             }
