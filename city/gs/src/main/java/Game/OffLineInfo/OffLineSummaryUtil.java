@@ -43,13 +43,13 @@ public class OffLineSummaryUtil {
      * arg2:玩家在线时间（做i为统计条件的结束时间）
      * arg3:玩家id
      */
-    public static Map<Integer,List<OffLineBuildingRecord>> getOffLineBuildingIncome(long unlineTime, long onlineTime, UUID playerId){
+    public static Map<Integer,List<OffLineBuildingRecord>> getOffLineBuildingIncome(long unLineTime, long onlineTime, UUID playerId){
         Map<Integer,List<OffLineBuildingRecord>> incomeMap=new HashMap<>();
         //首先筛选出玩家离线期间的所有数据
         //原料厂的货架收入
         LogDb.getSellerBuildingIncome().find(and(
                 eq("pid", playerId),
-                gte("t", unlineTime),
+                gte("t", unLineTime),
                 lte("t", onlineTime)
         )).forEach((Block<? super Document>) document ->{
             UUID bid= (UUID) document.get("bid");
@@ -60,5 +60,15 @@ public class OffLineSummaryUtil {
             incomeMap.computeIfAbsent(document.getInteger("bt"), k -> new ArrayList<>()).add(record);
         });
         return incomeMap;
+    }
+
+    /*删除离线统计过的数据*/
+    public static long delUnLineData(long unLineTime,long onlineTime,UUID playerId){
+       LogDb.getSellerBuildingIncome().deleteMany(and(
+                eq("pid", playerId),
+                gte("t", unLineTime),
+                lte("t", onlineTime)
+        ));
+        return 0;
     }
 }

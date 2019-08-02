@@ -991,7 +991,10 @@ public class GameSession {
                 itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId,goodName);
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
-        LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),itemBuy.n,c.getPrice(),itemId);//记录建筑收益详细信息
+        /*离线收益，只在玩家离线期间统计*/
+        if(!GameServer.isOnline(seller.id())) {
+            LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), itemBuy.n, c.getPrice(), itemId);//记录建筑收益详细信息
+        }
         //矿工费用日志记录(需调整)
         LogDb .minersCost(player.id(),minerCost,minersRatio);
         LogDb.minersCost(seller.id(),minerCost,minersRatio);
@@ -1721,8 +1724,9 @@ public class GameSession {
         //如果是在自己公司推广不发通知
         if (!selfPromo) {
             //增加玩家建筑收入记录
-            LogDb.sellerBuildingIncome(sellerBuildingId,fcySeller.type(),seller.id(), (int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000),fcySeller.getCurPromPricePerHour(),0);//暂时推广内容没有记录，以后可以加上
-
+            if(!GameServer.isOnline(seller.id())) {
+                LogDb.sellerBuildingIncome(sellerBuildingId, fcySeller.type(), seller.id(), (int) (gs_AdAddNewPromoOrder.getPromDuration() / 3600000), fcySeller.getCurPromPricePerHour(), 0);//暂时推广内容没有记录，以后可以加上
+            }
             //推广公司预约通知
             long newPromoStartTs = newOrder.promStartTs; //预计开始时间
             long promDuration = newOrder.promDuration; //广告时长
@@ -2178,8 +2182,9 @@ public class GameSession {
             LogDb.buildingIncome(lab.id(), this.player.id(), cost, 0, 0);//不包含矿工费用
 
             int itemId = c.hasGoodCategory() ? c.getGoodCategory() : 0;//用于统计研究的是什么
-            LogDb.sellerBuildingIncome(lab.id(),lab.type(),lab.ownerId(),c.getTimes(),lab.getPricePreTime(),itemId);
-
+            if(!GameServer.isOnline(seller.id())) {
+                LogDb.sellerBuildingIncome(lab.id(), lab.type(), lab.ownerId(), c.getTimes(), lab.getPricePreTime(), itemId);
+            }
             Gs.IncomeNotify incomeNotify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                     .setBuyerId(Util.toByteString(player.id()))
@@ -3386,7 +3391,8 @@ public class GameSession {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         List<Gs.Eva> updateEvas = new ArrayList<>();
         UUID playerId=null;
-        boolean retailOrApartmentQtyIsChange = false;
+        boolean retailOrApartmentQtyIsChange = false;//是否更新最大最小建筑品质标志
+        //批量修改Evas加点科技
         List<PromotePoint> playerPromotePoints = new ArrayList<>();
         List<SciencePoint> playerSciencePoint = new ArrayList<>();
         for (Gs.Eva eva : evas.getEvaList()) {
@@ -3404,7 +3410,7 @@ public class GameSession {
                     /*进行加点*/
                     Eva newEva = EvaManager.getInstance().updateMyEva(eva);
                     /*扣减点数*/
-                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, (int) -eva.getDecEva()));
+                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType,-eva.getDecEva()));
                     EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                     updateEvas.add(newEva.toProto());
                 }
@@ -3421,7 +3427,7 @@ public class GameSession {
                     /*进行加点*/
                     Eva newEva = EvaManager.getInstance().updateMyEva(eva);
                     /*扣减点数*/
-                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, (int) -eva.getDecEva()));
+                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType,-eva.getDecEva()));
                     EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                     updateEvas.add(newEva.toProto());
                 }
@@ -5623,7 +5629,7 @@ public class GameSession {
         if(building == null || !(building instanceof ScienceBuildingBase) || !building.canUseBy(player.id()) || building.outOfBusiness())
             return;
         ScienceBuildingBase science = (ScienceBuildingBase) building;
-        if(science.shelfSet(item, c.getPrice())){
+        if(science.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
             this.write(Package.create(cmd, c));
         } else {
@@ -5673,7 +5679,9 @@ public class GameSession {
             LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
                     item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
-            LogDb.sellerBuildingIncome(sellBuilding.id(),sellBuilding.type(),seller.id(),item.n,c.getPrice(),itemId);//离线通知统计
+            if(!GameServer.isOnline(seller.id())) {
+                LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
+            }
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
             content = science.getContent(item.key);
