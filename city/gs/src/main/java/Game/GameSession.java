@@ -3389,7 +3389,6 @@ public class GameSession {
         boolean retailOrApartmentQtyIsChange = false;
         List<PromotePoint> playerPromotePoints = new ArrayList<>();
         List<SciencePoint> playerSciencePoint = new ArrayList<>();
-        /**/
         for (Gs.Eva eva : evas.getEvaList()) {
             if(playerId==null){
                 playerId = Util.toUuid(eva.getPid().toByteArray());
@@ -3405,7 +3404,8 @@ public class GameSession {
                     /*进行加点*/
                     Eva newEva = EvaManager.getInstance().updateMyEva(eva);
                     /*扣减点数*/
-                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, (int) -eva.getCexp()));
+                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, (int) -eva.getDecEva()));
+                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                     updateEvas.add(newEva.toProto());
                 }
             }else{                                                              //科技点数类型加成
@@ -3421,7 +3421,8 @@ public class GameSession {
                     /*进行加点*/
                     Eva newEva = EvaManager.getInstance().updateMyEva(eva);
                     /*扣减点数*/
-                    SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, (int) -eva.getCexp());
+                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, (int) -eva.getDecEva()));
+                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                     updateEvas.add(newEva.toProto());
                 }
             }
@@ -3429,6 +3430,8 @@ public class GameSession {
         if(retailOrApartmentQtyIsChange){
             BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
         }
+        playerSciencePoint.forEach(p->SciencePointManager.getInstance().updateSciencePoint(p));
+        playerPromotePoints.forEach(p->PromotePointManager.getInstance().updatePromotionPoint(p));
         Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
         this.write(Package.create(cmd,builder.build()));
     }

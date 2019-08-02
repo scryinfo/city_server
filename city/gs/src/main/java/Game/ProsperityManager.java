@@ -58,15 +58,11 @@ public class ProsperityManager {
             Coordinate coordinate = allGround.get(updateIndex);
             int value = computeGroundProsperity(coordinate.x, coordinate.y);
             groundProsperityMap.put(coordinate, value);
-            if(updateIndex<allGround.size()-1){
+            if(updateIndex<allGround.size()){
                 updateIndex++;
             }else{
                 updateIndex=0;
             }
-           /* this.allGround.forEach(ground->{
-                int groundProsperity = computeGroundProsperity(ground.x, ground.y);
-                groundProsperityMap.put(ground, groundProsperity);
-            });*/
         }
     }
 

@@ -16,7 +16,7 @@
 		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">
 			<!--jdbc:postgresql://127.0.0.1/117-->
-			jdbc:postgresql://127.0.0.1/192
+			jdbc:postgresql://127.0.0.1/189
 		</property>
 		<property name="hibernate.connection.username">
 			postgres
@@ -24,7 +24,7 @@
 		<property name="hibernate.connection.password">
 			123456
 		</property>
-		<property name="hbm2ddl.auto">create</property>
+		<property name="hbm2ddl.auto">update</property>
 		<property name="hibernate.show_sql">true</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
 		<property name="hibernate.order_updates">true</property>
