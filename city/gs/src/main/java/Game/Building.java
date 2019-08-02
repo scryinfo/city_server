@@ -2,6 +2,7 @@ package Game;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
+import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
@@ -376,7 +377,7 @@ public abstract class Building implements Ticker{
         return singleSalary() * metaBuilding.workerNum;
     }
     public int singleSalary() {
-        return (int) (salaryRatio / 100.d * City.instance().getAvgIndustrySalary());
+        return (int) (salaryRatio / 100.d * EvaManager.getInstance().getSalaryStandard());
     }
     public int allTax() {
     	return singleTax() * metaBuilding.workerNum;

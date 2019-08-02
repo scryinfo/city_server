@@ -6,6 +6,7 @@ import Game.Meta.MetaExperiences;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
 import gs.Gs;
+import org.bson.Document;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,7 @@ public class EvaManager
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
     public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息
+    private Map<UUID, EvaSalary> evaSalaryMap = new HashMap<UUID, EvaSalary>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
     public void init()
@@ -32,7 +34,12 @@ public class EvaManager
                 	evaMap.computeIfAbsent(eva.getPid(),
                             k -> new HashSet<>()).add(eva);
                 } );
+        GameDb.getAllFromOneEntity(EvaSalary.class).forEach(
+                es ->{
+                    evaSalaryMap.put(es.getId(),es);
+                } );
         initTypeEvaMap();
+        initEvaSalaryMap();
     }
     //分类eva
     public void initTypeEvaMap(){
@@ -41,6 +48,13 @@ public class EvaManager
         for (Eva eva : evas) {
             key = new EvaKey(eva.getAt(),eva.getBt());
             typeEvaMap.computeIfAbsent(key, k -> new HashSet<>()).add(eva);
+        }
+    }
+    public void initEvaSalaryMap(){
+        if(evaSalaryMap==null||evaSalaryMap.size()==0){
+            EvaSalary es=new EvaSalary(0);
+            evaSalaryMap.put(es.getId(),es);
+            GameDb.saveOrUpdate(es);
         }
     }
     public void updateTypeEvaMap(Eva eva){
@@ -146,5 +160,34 @@ public class EvaManager
         e.setCexp(cexp);
         e.setB(-1);
         return e;
+    }
+
+    public void updateEvaSalary(int point){
+        evaSalaryMap.forEach((k,v)->{
+            v.addPoit(point);
+            evaSalaryMap.put(k,v);
+            GameDb.saveOrUpdate(v);
+        });
+    }
+
+    public Map<UUID, EvaSalary> getEvaSalary(){
+        return evaSalaryMap;
+    }
+
+    public int getSalaryStandard(){
+        List<org.bson.Document> documentList=MetaData.initSalaryStandard();
+        Map<UUID, EvaSalary> map=EvaManager.getInstance().getEvaSalary();
+        for (Map.Entry<UUID, EvaSalary> entry : map.entrySet()) {
+            int point=entry.getValue().getPoint();
+            for(Document d:documentList){
+                int min=d.getInteger("minPoint");
+                int max=d.getInteger("maxPoint");
+                int s=d.getInteger("salary");
+                if((min<=point)&&(point<=max)){
+                    return s;
+                }
+            }
+        }
+        return 0;
     }
 }

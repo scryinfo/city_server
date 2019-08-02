@@ -54,6 +54,8 @@ public class MetaData {
     //新版推广公司
     private static final String promotionCompanyColName="PromotionCompany";
     private static final String promotionItemColName="PromotionItem";//推广选项
+    private static final String salaryStandardColName="SalaryStandard";//工资标准
+
     //global field
     private static SysPara sysPara;
 	private static MetaCity city;
@@ -444,6 +446,13 @@ public class MetaData {
 
     }
 
+    public static List<Document> initSalaryStandard()
+    {
+        List<Document> documentList = new ArrayList<>();
+        mongoClient.getDatabase(dbName).getCollection(salaryStandardColName).find().forEach((Block<? super Document>) documentList::add);
+        return documentList;
+    }
+
     public static Set<Integer> getTechsByBuilding(Building building)
     {
         return buildingTech.get(building.type());
@@ -586,5 +595,6 @@ public class MetaData {
         initExperiences();
 
         initBuildingTech();
+        initSalaryStandard();
 	}
 }
