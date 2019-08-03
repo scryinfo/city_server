@@ -5611,7 +5611,9 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
-            this.write(Package.create(cmd, c));
+            Gs.ShelfSet.Builder builder = c.toBuilder().setStoreNum(science.getStore().getItemCount(item.getKey()))
+                                                       .setCurCount(science.getShelf().getSaleNum(item.getKey().meta.id));
+            this.write(Package.create(cmd, builder.build()));
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
         }
