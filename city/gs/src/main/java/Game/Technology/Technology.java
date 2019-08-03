@@ -143,6 +143,8 @@ public class Technology extends ScienceBuildingBase {
                 .setBuildingId(Util.toByteString(this.id()))
                 .setIKey(key.toProto())
                 .setNowCountInBox(this.boxStore.getTypeBoxNum(key))
+                .setTargetCount(line.targetNum)
+                .setStartTime(line.ts)
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }

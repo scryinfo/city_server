@@ -5571,7 +5571,12 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.addshelf(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
-            Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
+            /*如果是自动补货，重新设置n的数量*/
+            Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
+            Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto())
+                    .setCurCount(science.getShelf().getAllNum())                /*设置货架上的总数量*/
+                    .setStoreNum(science.getStore().getItemCount(item.getKey()))/*设置仓库中的当前商品的可用数量*/
+                    .setItem(itemBuilder);
             this.write(Package.create(cmd, builder.build()));
         }else{
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
@@ -5592,7 +5597,8 @@ public class GameSession {
             content.autoReplenish = false;//关闭自动补货
             if(science.delshelf(item.key, content.n, true)) {
                 GameDb.saveOrUpdate(science);
-                this.write(Package.create(cmd, c));
+                Gs.ShelfDel.Builder builder = c.toBuilder().setCurCount(science.getShelf().getAllNum());
+                this.write(Package.create(cmd, builder.build()));
             }
         }else{
             this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
@@ -5611,8 +5617,10 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
-            Gs.ShelfSet.Builder builder = c.toBuilder().setStoreNum(science.getStore().getItemCount(item.getKey()))
-                                                       .setCurCount(science.getShelf().getSaleNum(item.getKey().meta.id));
+            Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
+            Gs.ShelfSet.Builder builder = c.toBuilder();
+            builder.setStoreNum(science.getStore().getItemCount(item.getKey()))
+                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder);
             this.write(Package.create(cmd, builder.build()));
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));

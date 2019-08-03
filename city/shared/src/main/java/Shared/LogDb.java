@@ -67,7 +67,7 @@ public class LogDb {
 
 	//集散中心租用仓库的收入记录
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
-	
+
 	private static final String PLAYER_INCOME = "playerIncome";
 	private static final String PLAYER_PAY = "playerPay";
 	//购买租户上架的商品记录
@@ -541,7 +541,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayYesterdayExchangeAmount(long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -559,7 +559,7 @@ public class LogDb {
 				).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	
+
 	public static List<Document> dayTodayNpcExchangeAmount(long startTime,long endTime,MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -992,7 +992,7 @@ public class LogDb {
 				.append("tp",buildType);
 		incomeVisit.insertOne(document);
 	}
-	
+
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
 			UUID ownerId, UUID bid, int type, int mId)
 	{
@@ -1238,17 +1238,17 @@ public class LogDb {
 	{
 		return playerInfo;
 	}
-	
+
 	public static MongoCollection<Document> getNpcRentApartment()
 	{
 		return npcRentApartment;
 	}
-	
+
 	public static MongoCollection<Document> getCityBroadcast()
 	{
 		return cityBroadcast;
 	}
-	
+
 	public static MongoCollection<Document> getNpcTypeNum()
 	{
 		return npcTypeNum;
