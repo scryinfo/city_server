@@ -3372,7 +3372,7 @@ public class GameSession {
     }
     /*新版Eva修改*/
     public void updateEvas(short cmd, Message message){
-        Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
+        Gs.Evas evas = (Gs.Evas)message;
         List<Gs.Eva> updateEvas = new ArrayList<>();
         UUID playerId=null;
         boolean retailOrApartmentQtyIsChange = false;//是否更新最大最小建筑品质标志

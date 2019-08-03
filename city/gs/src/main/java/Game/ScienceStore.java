@@ -28,16 +28,7 @@ public class ScienceStore{
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Map<ItemKey, Integer> locked = new HashMap<>();      //出售中的科技
 
-   /* public Gs.ScienceStore toProto(){
-        Gs.ScienceStore.Builder builder = Gs.ScienceStore.newBuilder();
-        this.inHand.forEach((k, v)->{
-            builder.addInHand(Gs.Item.newBuilder().setKey(k.toProto()).setN(v));
-        });
-        this.locked.forEach((k, v)->{
-            builder.addLocked(Gs.Item.newBuilder().setKey(k.toProto()).setN(v));
-        });
-        return builder.build();
-    }*/
+
 
     public List<Gs.ScienceStoreItem> toProto(){
         /*合并2张表*/
