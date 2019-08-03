@@ -4129,7 +4129,7 @@ public class GameSession {
 
         }
 
-        this.write(Package.create(cmd,GuidePriceMgr.instance().getRetailPrice(map, msg.getBuildingId())));
+        this.write(Package.create(cmd,GuidePriceMgr.instance().getRetailPrice(map, buildingId)));
     }
 
     // 研究所推荐定价

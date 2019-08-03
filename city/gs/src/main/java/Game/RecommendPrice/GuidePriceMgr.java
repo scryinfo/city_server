@@ -46,18 +46,22 @@ public class GuidePriceMgr {
     public Gs.MaterialRecommendPrices getMaterialPrice(UUID buildingId) {
 //        推荐定价 = 全城均原料成交价
         Gs.MaterialRecommendPrices.Builder builder = Gs.MaterialRecommendPrices.newBuilder();
-        try {
-            Map<Integer, Double> materialPrice = historyRecord.material;
+        Map<Integer, Double> materialPrice = historyRecord.material;
+        MetaData.getAllMaterialId().forEach(i -> {
+            Gs.MaterialRecommendPrices.MaterailMsg.Builder msg = Gs.MaterialRecommendPrices.MaterailMsg.newBuilder();
+            msg.setMid(i);
+            msg.setGuidePrice(0);
             if (null != materialPrice && materialPrice.size() > 0) {
                 materialPrice.forEach((k, v) -> {
-                    builder.addMsg(Gs.MaterialRecommendPrices.MaterailMsg.newBuilder().setMid(k).setGuidePrice(v));
+                    if (k.equals(i)) {
+                        msg.setGuidePrice(v);
+                    }
                 });
             }
-            return builder.setBuildingId(Util.toByteString(buildingId)).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return builder.build();
-        }
+            builder.addMsg(msg);
+
+        });
+        return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
 
     // 根据itemID查询原料或id推荐定价
@@ -92,45 +96,55 @@ public class GuidePriceMgr {
     public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, UUID buildingId) {
 //        推荐定价 = 全城均商品成交价 * (1 + (玩家商品总评分 - 全城均商品总评分) / 50)
         Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
-        try {
-            Map<Integer, Map<String, Double>> produce = historyRecord.produce;
-            playerGoodsScore.forEach((a, b) -> {
-                if (null != produce && produce.size() > 0) {
-                    produce.forEach((k, v) -> {
-                        if (k.equals(a) && !v.isEmpty()) {
-                            double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
-                            builder.addMsg(Gs.ProduceDepRecommendPrice.ProduceMsg.newBuilder().setMid(k).setGuidePrice(guidePrice));
-                        }
-                    });
-                }
-            });
-            return builder.setBuildingId(Util.toByteString(buildingId)).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return builder.build();
-        }
+        Map<Integer, Map<String, Double>> produce = historyRecord.produce;
+        MetaData.getAllGoodId().forEach(i -> {
+            Gs.ProduceDepRecommendPrice.ProduceMsg.Builder msg = Gs.ProduceDepRecommendPrice.ProduceMsg.newBuilder();
+            msg.setMid(i);
+            msg.setGuidePrice(0);
+            try {
+                playerGoodsScore.forEach((a, b) -> {
+                    if (null != produce && produce.size() > 0) {
+                        produce.forEach((k, v) -> {
+                            if (k.equals(a) && !v.isEmpty()) {
+                                double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
+                                msg.setGuidePrice(guidePrice);
+                            }
+                        });
+                    }
+                });
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+            builder.addMsg(msg);
+        });
+        return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
 
-    public Gs.RetailShopRecommendPrice getRetailPrice(Map<Integer, Double> map, ByteString buildingId) {
+    public Gs.RetailShopRecommendPrice getRetailPrice(Map<Integer, Double> map, UUID buildingId) {
         //推荐定价 = 全城均商品零售店货架成交价 * (1 + (玩家商品零售店货架总评分 - 全城均商品零售店货架总评分) / 50)
         Gs.RetailShopRecommendPrice.Builder builder = Gs.RetailShopRecommendPrice.newBuilder();
-        try {
-            Map<Integer, Map<String, Double>> retail = historyRecord.retail;
-            map.forEach((a, b) -> {
-                if (retail != null && retail.size() > 0) {
-                    retail.forEach((k, v) -> {
-                        if (k.equals(a) && !v.isEmpty() && v.size() > 0) {
-                            double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
-                            builder.addMsg(Gs.RetailShopRecommendPrice.RetailMsg.newBuilder().setMid(k).setGuidePrice(guidePrice));
-                        }
-                    });
-                }
-            });
-            return builder.setBuildingId(buildingId).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return builder.build();
-        }
+        Map<Integer, Map<String, Double>> retail = historyRecord.retail;
+        MetaData.getAllGoodId().forEach(i -> {
+            Gs.RetailShopRecommendPrice.RetailMsg.Builder msg = Gs.RetailShopRecommendPrice.RetailMsg.newBuilder();
+            msg.setMid(i);
+            msg.setGuidePrice(0);
+            try {
+                map.forEach((a, b) -> {
+                    if (retail != null && retail.size() > 0) {
+                        retail.forEach((k, v) -> {
+                            if (k.equals(a) && !v.isEmpty() && v.size() > 0) {
+                                double guidePrice = v.getOrDefault(AVG_PRICE, 0.0) * (1 + (b - v.getOrDefault(AVG_SCORE, 0.0)) / 50);
+                                msg.setGuidePrice(guidePrice);
+                            }
+                        });
+                    }
+                });
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+            builder.addMsg(msg);
+        });
+        return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
 
     public Gs.GMRecommendPrice getLabOrProPrice(UUID buildingId, boolean islab) {
