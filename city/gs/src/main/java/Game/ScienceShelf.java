@@ -108,4 +108,14 @@ public class ScienceShelf{
     public void cleanData(){
         this.slots.clear();
     }
+
+    public int getSaleNum(int itemid) {
+        int res = 0;
+        for (Map.Entry<ItemKey, Content> entry : slots.entrySet()) {
+            if (entry.getKey().meta.id == itemid) {
+                res += entry.getValue().n;
+            }
+        }
+        return res;
+    }
 }

@@ -4967,34 +4967,51 @@ public class GameSession {
         Gs.Id id = (Gs.Id) message;
         UUID buildingId = Util.toUuid(id.getId().toByteArray());
         Building building = City.instance().getBuilding(buildingId);
-        if(null==building||!(building instanceof FactoryBase)){
-            System.err.println("建筑为空或不属于工厂建筑");
-            return;
-        }
-        FactoryBase factory = (FactoryBase) building;
-        List<LineBase> lines = factory.lines;
         Gs.BuildingProduceStatue.Builder builder = Gs.BuildingProduceStatue.newBuilder();
-        if(building.getState()==Gs.BuildingState.SHUTDOWN_VALUE){  //停业状态
-            builder.setStatue(Gs.BuildingProduceStatue.Statue.StopBusiness);
-        }else{
-            //1.没有生产线，生产线空闲
-            if(lines.size()==0){
-                builder.setStatue(Gs.BuildingProduceStatue.Statue.LineUnUsed);
-            }else {//有生产线
-                //2.空间是否充足，获取第一条生产线状态,并设置生产商品id
-                LineBase lineBase = lines.get(0);
-                builder.setItemId(lineBase.item.id);
-                if(lineBase.pause) {//如果生产线状态是暂停
-                    if (!factory.hasEnoughMaterial(lineBase, factory.ownerId())) {	//3.原材料不足
-                        builder.setStatue(Gs.BuildingProduceStatue.Statue.MaterialNotEnough);
-                    }else if(factory.store.availableSize()<=0){	//4.空间不足
-                        builder.setStatue(Gs.BuildingProduceStatue.Statue.StoreCapacityFull);
+        if(null!=building&&building instanceof FactoryBase){
+            FactoryBase factory = (FactoryBase) building;
+            List<LineBase> lines = factory.lines;
+            if(building.getState()==Gs.BuildingState.SHUTDOWN_VALUE){  //停业状态
+                builder.setStatue(Gs.BuildingProduceStatue.Statue.StopBusiness);
+            }else{
+                //1.没有生产线，生产线空闲
+                if(lines.size()==0){
+                    builder.setStatue(Gs.BuildingProduceStatue.Statue.LineUnUsed);
+                }else {//有生产线
+                    //2.空间是否充足，获取第一条生产线状态,并设置生产商品id
+                    LineBase lineBase = lines.get(0);
+                    builder.setItemId(lineBase.item.id);
+                    if(lineBase.pause) {//如果生产线状态是暂停
+                        if (!factory.hasEnoughMaterial(lineBase, factory.ownerId())) {	//3.原材料不足
+                            builder.setStatue(Gs.BuildingProduceStatue.Statue.MaterialNotEnough);
+                        }else if(factory.store.availableSize()<=0){	//4.空间不足
+                            builder.setStatue(Gs.BuildingProduceStatue.Statue.StoreCapacityFull);
+                        }
+                    }else{//5.生产中
+                        builder.setStatue(Gs.BuildingProduceStatue.Statue.InProduction);
                     }
-                }else{//5.生产中
+                }
+            }
+        } else if (null!=building&&building instanceof ScienceBuildingBase) {
+            ScienceBuildingBase buildingBase = (ScienceBuildingBase) building;
+            List<ScienceLineBase> line = buildingBase.line;
+            if (buildingBase.getState() == Gs.BuildingState.SHUTDOWN_VALUE) {  // 停业
+                builder.setStatue(Gs.BuildingProduceStatue.Statue.StopBusiness);
+            } else {
+                if (line == null && line.size() == 0) {
+                    builder.setStatue(Gs.BuildingProduceStatue.Statue.LineUnUsed);
+                } else {
+                    ScienceLineBase l = line.get(0);
+                    builder.setItemId(l.item.id);
                     builder.setStatue(Gs.BuildingProduceStatue.Statue.InProduction);
                 }
             }
+
+        } else {
+            System.err.println("建筑为空或不属于工厂建筑");
+            return;
         }
+
         this.write(Package.create(cmd,builder.build()));
     }
 
@@ -5725,8 +5742,9 @@ public class GameSession {
         } else {
             // 如果已经修建
             City.instance().forEachBuilding(coordinate.toGridIndex(), b -> {
-                if (!b.outOfBusiness() || b == null) {
+                if (b.outOfBusiness() || b == null) {
                     GlobalConfig.cityError("queryMapBuidlingSummary: building is not business or not exist!");
+                    return;
                 }
                 int prosperity = ProsperityManager.instance().getBuildingProsperity(b);
                 List<Gs.MiniIndex> list = new ArrayList<>();
@@ -5736,6 +5754,56 @@ public class GameSession {
             });
         }
         this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void queryTechnologySummary(short cmd, Message message) {
+        Gs.Num n = (Gs.Num) message;
+        MetaScienceItem item = MetaData.getScienceItem(n.getNum());
+        if (item == null){
+            GlobalConfig.cityError("queryTechnologySummary: MetaScienceItem is not exist!");
+            return;
+        }
+        Gs.TechOrPromSummary.Builder builder = Gs.TechOrPromSummary.newBuilder();
+        City.instance().forAllGrid((grid -> {
+            AtomicInteger num = new AtomicInteger(0);
+            grid.forAllBuilding(b->{
+                if (!(b.outOfBusiness()) && b instanceof ScienceBuildingBase) {
+                    Technology tech = (Technology) b;
+                    if (tech.shelf.getSaleNum(item.id) > 0) {
+                        num.addAndGet(1);
+                    }
+                }
+            });
+            builder.addInfoBuilder()
+                    .setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
+                    .setCount(num.intValue());
+        }));
+        this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
+    }
+
+    public void queryPromotionSummary(short cmd, Message message) {
+        Gs.Num n = (Gs.Num) message;
+        MetaPromotionItem item = MetaData.getPromotionItem(n.getNum());
+        if (item == null){
+            GlobalConfig.cityError("queryPromotionSummary: MetaPromotionItem is not exist!");
+            return;
+        }
+        Gs.TechOrPromSummary.Builder builder = Gs.TechOrPromSummary.newBuilder();
+        City.instance().forAllGrid((grid -> {
+            AtomicInteger num = new AtomicInteger(0);
+            grid.forAllBuilding(b->{
+                if (!(b.outOfBusiness()) && b instanceof ScienceBuildingBase) {
+                    PromotionCompany tech = (PromotionCompany) b;
+                    if (tech.shelf.getSaleNum(item.id) > 0) {
+                        num.addAndGet(1);
+                    }
+                }
+            });
+            builder.addInfoBuilder()
+                    .setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
+                    .setCount(num.intValue());
+        }));
+        this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
     }
 
 }
