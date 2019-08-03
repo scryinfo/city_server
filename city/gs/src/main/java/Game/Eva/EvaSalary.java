@@ -12,7 +12,10 @@ public class EvaSalary {
     @Id
     private UUID id;
 
-    @Column(name = "point")
+	public EvaSalary() {
+	}
+
+	@Column(name = "point")
     private int point=0;
 
 	public EvaSalary(int point) {

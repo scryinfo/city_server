@@ -61,6 +61,8 @@ public class OffLineInformation {
             Gs.ForecastIncome forecastIncome = forecastIncomeToProto(playerFlightForecast);
             builder.setForecast(forecastIncome);
         }
+        /*删除统计过的离线数据*/
+        OffLineSummaryUtil.delUnLineData(player.getOfflineTs(), player.getOnlineTs(), playerId);
         return builder.build();
     }
 
@@ -70,10 +72,10 @@ public class OffLineInformation {
         /*1.统计所有有收入记录的建筑*/
         Map<Integer, Map<UUID, Gs.BuildingIncome.UnLineIncome>> unLineIncomeMap = new HashMap<>();
 
-        for (Map.Entry<Integer, List<OffLineBuildingRecord>> entry : recordMap.entrySet()) {
-            Map<UUID, Gs.BuildingIncome.UnLineIncome> info = getBuildingIncomeInfo(entry.getValue(), buildingMap.get(entry.getKey()));
+        for (Map.Entry<Integer, List<OffLineBuildingRecord>> record : recordMap.entrySet()) {
+            Map<UUID, Gs.BuildingIncome.UnLineIncome> info = getBuildingIncomeInfo(record.getValue(), buildingMap.get(record.getKey()));
             if(!info.isEmpty()){
-                unLineIncomeMap.put(entry.getKey(),info);
+                unLineIncomeMap.put(record.getKey(),info);
             }
         }
         Map<Integer,Gs.BuildingIncome> resultMap=new HashMap<>();

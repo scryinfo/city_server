@@ -89,30 +89,41 @@ public abstract class ScienceBuildingBase extends Building{
         this.shelf.updateAutoReplenish(this,key);
     }
 
-    public boolean shelfSet(Item item, int price) {
+    public boolean shelfSet(Item item, int price,boolean autoRepOn) {
         ScienceShelf.Content content = this.shelf.getContent(item.getKey());
         if(content == null)
             return false;
-        //不需要在此处处理自动补货，自动补货是一个单独的协议
-        int updateNum = content.n - item.getN();//增加或减少：当前货架数量-现在货架数量
-        if(content.n==0&&item.getN()==0){//若非自动补货，切货架数量为0，直接删除
-            delshelf(item.getKey(), content.n, true);
-            return true;
-        }
-        boolean lock = false;
-        if (updateNum < 0) {
-            lock = this.store.lock(item.getKey(),Math.abs(updateNum));
-        } else {
-            lock = this.store.unLock(item.getKey(), updateNum);
-        }
-        if (lock) {
+        if(!autoRepOn) {
+            int updateNum = content.n - item.getN();//增加或减少：当前货架数量-现在货架数量
+            if (content.n == 0 && item.getN() == 0) {//若非自动补货，且货架数量为0，直接删除
+                content.autoReplenish=autoRepOn;
+                delshelf(item.getKey(), content.n, true);
+                return true;
+            }
+            boolean lock = false;
+            if (updateNum < 0) {
+                lock = this.store.lock(item.getKey(), Math.abs(updateNum));
+            } else {
+                lock = this.store.unLock(item.getKey(), updateNum);
+            }
+            if (lock) {
+                content.price = price;
+                content.n = item.getN();
+                content.autoReplenish=autoRepOn;
+                //消息推送货物发生改变
+                this.sendToWatchers(id(), item.getKey().meta.id, item.getN(), price, content.autoReplenish, null);
+                return true;
+            } else
+                return false;
+        }else{
+            //1.设置价格
             content.price = price;
-            content.n = item.getN();
-            //消息推送货物发生改变
-            this.sendToWatchers(id(),item.getKey().meta.id,item.getN(),price,content.autoReplenish,null);
+            content.autoReplenish = autoRepOn;
+            updateAutoReplenish(item.getKey());//更新自动补货
+            //推送
+            this.sendToWatchers(id(),item.key.meta.id,content.n,price,content.autoReplenish,null);//推送消息
             return true;
-        } else
-            return false;
+        }
     }
 
     public boolean checkShelfSlots(ItemKey key,int num){
@@ -125,6 +136,9 @@ public abstract class ScienceBuildingBase extends Building{
     }
 
     public boolean addshelf(Item item, int price, boolean autoReplenish) {
+        if(autoReplenish){/*如果是自动补货，设置数量为仓库该商品的最大数量*/
+            item.n = this.store.getItemCount(item.getKey());
+        }
         if(!shelfAddable(item.getKey()) || !this.store.has(item.getKey(),item.getN()))
             return false;
         if(this.shelf.add(item, price,autoReplenish)) {

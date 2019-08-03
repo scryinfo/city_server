@@ -55,10 +55,8 @@ public class CompeteAndExpectUtil {
         int at = eva.getAt();
         int bt = eva.getBt();
         int length = buildings.size();
-        Gs.Promote.Builder promote =null;
         for (int i = 0 ; i < length; i++) {
             Building b=buildings.get(i);
-            promote=Gs.Promote.newBuilder();
             ProduceDepartment pro = (ProduceDepartment) b;
             //1.1判断是否该有该上架的商品
             if (!pro.getShelf().has(at)||b.outOfBusiness())
