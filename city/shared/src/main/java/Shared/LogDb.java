@@ -857,8 +857,7 @@ public class LogDb {
 	}
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid, UUID wid,int type, int typeId,String brand)
-								  UUID producerId, UUID bid, int type, int typeId,double score,String roleName,String companyName)
+								  UUID producerId, UUID bid, UUID wid,int type, int typeId,String brand,double score,String roleName,String companyName)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -879,8 +878,7 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,int type, int typeId,String brand)
-								  UUID producerId, UUID bid, int type, int typeId,double score)
+								  UUID producerId, UUID bid,int type, int typeId,String brand,double score)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
