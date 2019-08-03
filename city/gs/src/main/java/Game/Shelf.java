@@ -1,10 +1,6 @@
 package Game;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.ElementCollection;
@@ -189,5 +185,12 @@ public class Shelf {
     public Integer getTotalContentNum(){
         int sum = this.slots.values().stream().mapToInt(c -> c.n).sum();
         return sum;
+    }
+    public List<Item> getAllSaleDetail() {
+        List<Item> res = new ArrayList<>();
+        this.slots.forEach((k,v)->{
+                res.add(new Item(k, v.n));
+        });
+        return res;
     }
 }

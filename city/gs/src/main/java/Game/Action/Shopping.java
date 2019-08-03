@@ -2,6 +2,7 @@ package Game.Action;
 
 import Game.*;
 import Game.Meta.*;
+import Game.Util.GlobalUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
@@ -151,8 +152,12 @@ public class Shopping implements IAction {
             //获取品牌名
             BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
             String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
+            // 记录商品评分
+            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalQty(), chosen.meta.id);
+            double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
+            double score = ((brandScore + goodQtyScore) / 2);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
-                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
+                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score);
             LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.bId, sellShop.type(), owner.id(), 1, chosen.price, chosen.meta.id);//记录建筑收益详细信息
@@ -241,10 +246,13 @@ public class Shopping implements IAction {
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
+            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalQty(), chosen.meta.id);
+            double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
+            double score = ((brandScore + goodQtyScore) / 2);
               BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
               String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
-                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName);
+                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score);
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
               if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.bId, sellShop.type(), owner.id(), 1, chosen.price, chosen.meta.id);//记录建筑收益详细信息
