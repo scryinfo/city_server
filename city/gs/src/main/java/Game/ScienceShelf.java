@@ -58,18 +58,19 @@ public class ScienceShelf{
         }
     }
 
-    private Gs.ScienceShelf.Content toProto(ItemKey k, Content content) {
+    private Gs.ScienceShelf.Content toProto(ItemKey k, Content content,ScienceBuildingBase scienceBuildingBase) {
         return Gs.ScienceShelf.Content.newBuilder()
                 .setK(k.toProto())
                 .setN(content.n)
                 .setPrice(content.price)
+                .setStoreNum(scienceBuildingBase.getStore().getItemCount(k))
                 .setAutoReplenish(content.autoReplenish)
                 .build();
     }
 
-    public Gs.ScienceShelf toProto(){
+    public Gs.ScienceShelf toProto(ScienceBuildingBase scienceBuildingBase){
         Gs.ScienceShelf.Builder builder = Gs.ScienceShelf.newBuilder();
-        slots.forEach((k,v)->builder.addGood(toProto(k, v)));
+        slots.forEach((k,v)->builder.addGood(toProto(k, v,scienceBuildingBase)));
         return builder.build();
     }
 

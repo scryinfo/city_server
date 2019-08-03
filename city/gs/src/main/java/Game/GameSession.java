@@ -5585,7 +5585,7 @@ public class GameSession {
         Building building = City.instance().getBuilding(bid);
         if(building == null || !(building instanceof ScienceBuildingBase)|| !building.canUseBy(player.id()) || building.outOfBusiness())
             return;
-        ScienceBuildingBase science = (ScienceBuildingBase) message;
+        ScienceBuildingBase science = (ScienceBuildingBase) building;
         ScienceShelf.Content content = science.getContent(item.key);
         if(content!=null){
             content.autoReplenish = false;//关闭自动补货
@@ -5680,7 +5680,7 @@ public class GameSession {
             return;
         ScienceBuildingBase scienceBuildingBase = (ScienceBuildingBase) building;
         Gs.ScienceShelfData.Builder shelfData = Gs.ScienceShelfData.newBuilder();
-        Gs.ScienceShelf scienceShelf = scienceBuildingBase.getShelf().toProto();
+        Gs.ScienceShelf scienceShelf = scienceBuildingBase.getShelf().toProto(scienceBuildingBase);
         shelfData.setShelf(scienceShelf).setBuildingId(id.getId());
         this.write(Package.create(cmd,shelfData.build()));
     }
