@@ -18,7 +18,7 @@ public class OffLineSummaryUtil {
     public static List<OffLineFlightRecord> getPlayerFlightForecast(UUID playerId, Long startTime, Long endTime){
         List<OffLineFlightRecord> records = new ArrayList<>();
         LogDb.getFlightBet().find(and(
-                eq("i", playerId),
+                eq("pid", playerId),
                 gte("t",startTime),
                 lte("t",endTime)
         )).forEach((Block<? super Document>) d ->{

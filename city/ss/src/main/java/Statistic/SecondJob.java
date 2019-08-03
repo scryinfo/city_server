@@ -16,10 +16,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static Statistic.PerHourJob.BUYGROUND_ID;
-import static Statistic.PerHourJob.RENTGROUND_ID;
-import static Statistic.SummaryUtil.SECOND_MILLISECOND;
-
 public class SecondJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(SecondJob.class);
 
@@ -50,6 +46,18 @@ public class SecondJob implements org.quartz.Job {
         documentList = LogDb.dayApartmentNpcNum(startTime, endTime, LogDb.getNpcRentApartment());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
 
+        // 过滤排行榜
+        SummaryUtil.getTopInfo().deleteMany(new Document());
+        // 住宅
+        documentList = LogDb.queryApartmentTop(LogDb.getNpcRentApartment());
+        SummaryUtil.insertTopInfo(SummaryUtil.getTopInfo(), documentList, SummaryUtil.APARTMENT);
+        // 原料
+        documentList = LogDb.queryMaterilOrGoodTop(LogDb.getBuyInShelf(), false);
+        SummaryUtil.insertTopInfo(SummaryUtil.getTopInfo(), documentList, SummaryUtil.MATERIAL);
+        // 加工厂
+        documentList = LogDb.queryMaterilOrGoodTop(LogDb.getBuyInShelf(), true);
+        SummaryUtil.insertTopInfo(SummaryUtil.getTopInfo(), documentList, SummaryUtil.PRODUCE);
+
         //统计耗时
         StatisticSession.setIsReady(true);
         long nowcurrTime = System.currentTimeMillis();
@@ -59,7 +67,9 @@ public class SecondJob implements org.quartz.Job {
     }
 
     public static void main(String[] args) {
-        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(1561021200000l));
-        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(1560949200000l));
+        long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis();
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTimeMillis));
     }
 }

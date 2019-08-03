@@ -8,6 +8,7 @@ import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
+import Game.RecommendPrice.GuidePriceMgr;
 import Game.Timers.PeriodicTimer;
 import Game.Util.BuildingUtil;
 import Game.Util.DateUtil;
@@ -288,6 +289,8 @@ public class City {
         BuildingUtil.instance().update(diffNano);
         //繁荣度统计
         ProsperityManager.instance().totalProsperity(diffNano);
+        // 历史成交
+        GuidePriceMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
