@@ -110,16 +110,16 @@ public class Technology extends ScienceBuildingBase {
             if (l.isSuspend()) {
                 assert l.left() > 0;
                 ItemKey key = l.newItemKey(ownerId());
-                if (this.store.offset(key, l.left())) {
+                if (this.boxStore.offSet(key, l.left())) {
                     l.resume();
-                    broadcastLineInfo(l,key);//广播
+                    broadcastLineInfo(l,key,0);//广播
                 }
             } else {
                 int add = l.update(diffNano,this.ownerId()); //新增了玩家id，作为eva查询
                 if (add > 0) {
                    ItemKey key = l.newItemKey(ownerId());
                     if (this.boxStore.offSet(key, add)) {//添加到未开启宝箱中
-                        broadcastLineInfo(l,key);//广播
+                        broadcastLineInfo(l,key,add);//广播
                     } else {
                         l.count -= add;
                         l.suspend(add);
@@ -136,7 +136,7 @@ public class Technology extends ScienceBuildingBase {
         return k.meta instanceof MetaScienceItem;
     }
     //广播
-    private void broadcastLineInfo(ScienceLineBase line, ItemKey key) {
+    private void broadcastLineInfo(ScienceLineBase line, ItemKey key,int add) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(line.id))
                 .setNowCount(line.count)
@@ -145,6 +145,7 @@ public class Technology extends ScienceBuildingBase {
                 .setNowCountInBox(this.boxStore.getTypeBoxNum(key))
                 .setTargetCount(line.targetNum)
                 .setStartTime(line.ts)
+                .setProduceNum(add)
                 .build();
         sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
