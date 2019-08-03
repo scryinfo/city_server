@@ -5634,7 +5634,7 @@ public class GameSession {
         UUID bid = Util.toUuid(c.getBuildingId().toByteArray());
         UUID buyerId = Util.toUuid(c.getBuyerId().toByteArray());//由于购买者就是当前玩家，所以不需要传递玩家id
         Building sellBuilding = City.instance().getBuilding(bid);
-        if(sellBuilding == null || !(sellBuilding instanceof ScienceBuildingBase)||sellBuilding.canUseBy(buyerId) || sellBuilding.outOfBusiness())
+        if(sellBuilding == null || !(sellBuilding instanceof ScienceBuildingBase)||sellBuilding.canUseBy(buyerId)|| sellBuilding.outOfBusiness())
             return;
         Item item = new Item(c.getItem());
         //1.检测购买的数量是否充足（不充足返回错误码）
