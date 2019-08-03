@@ -556,4 +556,11 @@ public class StatisticSession {
 		});
 		this.write(Package.create(cmd,builder.build()));
 	}
+
+	public void queryIndustryTop(short cmd, Message message) {
+		Ss.queryTop top = (Ss.queryTop) message;
+		UUID pid = Util.toUuid(top.getPid().toByteArray()); // 玩家id
+		int type = top.getIndustryType();  // 行业类型
+		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(pid,type)));
+	}
 }

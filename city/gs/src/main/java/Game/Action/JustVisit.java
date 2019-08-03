@@ -5,6 +5,7 @@ import Game.*;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.ProbBase;
+import Game.Util.GlobalUtil;
 import Shared.LogDb;
 import Shared.Package;
 import Shared.Util;
@@ -118,11 +119,18 @@ public class JustVisit implements IAction {
             LogDb.playerIncome(owner.id(), income,chosen.type());
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
+            // 建筑繁荣度 建筑评分
+            Apartment apartment = (Apartment) chosen;
+            int prosperityScore = (int) ProsperityManager.instance().getBuildingProsperityScore(chosen);
+            double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), chosen.type());
+            double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
+            int curRetailScore = (int) ((brandScore + retailScore) / 2);
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
-                    chosen.id(), chosen.type(), chosen.metaId()); //不包含矿工费用
+                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName()); //不包含矿工费用
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
             }
+            LogDb.sellerBuildingIncome(chosen.id(),chosen.type(),owner.id(),1,chosen.cost(),0);
             chosen.updateTodayIncome(income);
            // GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
             npc.goFor(chosen);

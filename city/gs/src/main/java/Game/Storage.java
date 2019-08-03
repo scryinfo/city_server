@@ -276,6 +276,13 @@ public class Storage implements IStorage {
         });
         return res;
     }
+    public List<Item> getAllItem() {
+        List<Item> res = new ArrayList<>();
+        this.inHand.forEach((k,v)->{
+                res.add(new Item(k, v));
+        });
+        return res;
+    }
 
     public  int getItemCount(ItemKey key){
         return inHand.getOrDefault(key, 0);
