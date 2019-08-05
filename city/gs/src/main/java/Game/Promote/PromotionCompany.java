@@ -132,6 +132,8 @@ public class PromotionCompany extends ScienceBuildingBase {
                 if (add > 0) {
                     ItemKey key = l.newItemKey(ownerId());
                     if (this.store.offset(key, add)) {//添加到未开启宝箱中
+                        /*更新自动补货*/
+                        updateAutoReplenish(key);
                         broadcastLineInfo(l, key);//广播
                     } else {
                         l.count -= add;
