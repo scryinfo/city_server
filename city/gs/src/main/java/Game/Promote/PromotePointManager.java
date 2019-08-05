@@ -75,4 +75,13 @@ public class PromotePointManager {
         promotePoint.promotePoint += point;
         return promotePoint;
     }
+
+    /*根据建筑大类型，查找玩家的的点数资料*/
+    public PromotePoint getPromotePointByBuildingType(UUID pId,int buildingType){
+        //拼接类型
+        StringBuffer sb = new StringBuffer("16000");
+        int pointType = Integer.parseInt(sb.append(buildingType).toString());
+        PromotePoint promotePoint = getPromotePoint(pId, pointType);
+        return promotePoint;
+    }
 }

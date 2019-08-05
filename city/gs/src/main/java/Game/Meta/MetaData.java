@@ -301,6 +301,11 @@ public class MetaData {
     public static final Set<Integer> getAllBuildingTech(int id) {
         return buildingTech.get(id) == null ? new HashSet<>() : buildingTech.get(id);
     }
+
+   public static Set<Integer> getAllBuildingType() {  /*获取所有的建筑类型*/
+        return buildingTech.keySet();
+    }
+
     public static final MetaGood getGood(int id) {
         return good.get(id);
     }

@@ -71,4 +71,12 @@ public class SciencePointManager {
         sciencePoint.point += point;
         return sciencePoint;
     }
+    /*根据建筑大类型，查找玩家的的点数资料*/
+    public SciencePoint getSciencePointByBuildingType(UUID pId,int buildingType){
+        //拼接类型
+        StringBuffer sb = new StringBuffer("15000");
+        int pointType = Integer.parseInt(sb.append(buildingType).toString());
+        SciencePoint sciencePoint = getSciencePoint(pId, pointType);
+        return sciencePoint;
+    }
 }

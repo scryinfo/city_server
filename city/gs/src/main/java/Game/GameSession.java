@@ -3305,41 +3305,6 @@ public class GameSession {
         });
         this.write(Package.create(cmd, list.build()));
     }
-    public void updateMyEva(short cmd, Message message)
-    {
-        Gs.Eva eva = (Gs.Eva)message;
-        int level=eva.getLv();
-        long cexp=eva.getCexp();
-        Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-
-        if(level>=1){//计算等级
-            long exp=0l;
-            do{
-                MetaExperiences obj=map.get(level);
-                exp=obj.exp;
-                if(cexp>=exp){
-                    cexp=cexp-exp; //减去升级需要的经验
-                    level++;
-                }
-            }while(cexp>=exp);
-        }
-
-        Eva e=new Eva();
-        e.setId(Util.toUuid(eva.getId().toByteArray()));
-        e.setPid(Util.toUuid(eva.getPid().toByteArray()));
-        e.setAt(eva.getAt());
-        e.setBt(eva.getBt().getNumber());
-        e.setLv(level);
-        e.setCexp(cexp);
-        e.setB(-1);
-        EvaManager.getInstance().updateEva(e);
-
-        Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
-        player.decEva(eva.getDecEva());
-        GameDb.saveOrUpdate(player);
-
-        this.write(Package.create(cmd, eva.toBuilder().setCexp(cexp).setLv(level).setDecEva(eva.getDecEva()).build()));
-    }
 
     public void updateMyEvas(short cmd, Message message)
     {
@@ -5861,6 +5826,14 @@ public class GameSession {
                     .setCount(num.intValue());
         }));
         this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
+    }
+
+    /*查询玩家evaj加点的不同类型*/
+    public void queryPlayerEvaPointType(short cmd, Message message){
+        Gs.Id id = (Gs.Id) message;
+        UUID playerId = Util.toUuid(id.getId().toByteArray());
+        Gs.PlayerEvaPointType evaPointType = EvaTypeUtil.classifyBuildingTypePoint(playerId);
+        this.write(Package.create(cmd, evaPointType));
     }
 
 }

@@ -185,7 +185,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryIndustryWages_VALUE, Wrapper.newWithMessage(Gs.QueryIndustryWages.PARSER,GameSession.class, "QueryIndustryWages"));
 			table.put((short) GsCode.OpCode.queryMyBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBuildings.PARSER, GameSession.class,"queryMyBuildings"));
 			table.put((short) GsCode.OpCode.queryMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryMyEva"));
-			table.put((short) GsCode.OpCode.updateMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.Eva.PARSER, GameSession.class,"updateMyEva"));
 			//todo：eva改版
 			table.put((short) GsCode.OpCode.updateMyEvas_VALUE, Wrapper.newWithMessageAsync(Gs.Evas.PARSER, GameSession.class,"updateMyEvas"));
 			table.put((short) GsCode.OpCode.queryBrand_VALUE, Wrapper.newWithMessageAsync(Gs.queryBrand.PARSER, GameSession.class,"queryBrand"));
@@ -335,6 +334,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getScienceStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceStorageData"));
 			table.put((short) GsCode.OpCode.getScienceLineData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceLineData"));
 			table.put((short) GsCode.OpCode.getScienceItemSpeed_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceItemSpeed"));
+			table.put((short) GsCode.OpCode.queryPlayerEvaPointType_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"queryPlayerEvaPointType"));
 			if(GlobalConfig.debug()){
 
 			}
