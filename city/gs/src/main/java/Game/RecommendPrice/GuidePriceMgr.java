@@ -199,7 +199,6 @@ public class GuidePriceMgr {
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
-            System.err.println("这就很舒服了...");
             _update();
         }
     }
