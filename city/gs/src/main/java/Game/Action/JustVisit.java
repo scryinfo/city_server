@@ -130,7 +130,6 @@ public class JustVisit implements IAction {
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
             }
-            LogDb.sellerBuildingIncome(chosen.id(),chosen.type(),owner.id(),1,chosen.cost(),0);
             chosen.updateTodayIncome(income);
            // GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
             npc.goFor(chosen);

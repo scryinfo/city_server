@@ -5575,7 +5575,6 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.addshelf(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
-            /*如果是自动补货，重新设置n的数量*/
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
             Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto())
                     .setCurCount(science.getShelf().getAllNum())                /*设置货架上的总数量*/
