@@ -4146,7 +4146,7 @@ public class GameSession {
         UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
         Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.LAB || building.outOfBusiness()) {
+        if (building == null || building.type() != MetaBuilding.TECHNOLOGY || building.outOfBusiness()) {
             return;
         }
         this.write(Package.create(cmd,GuidePriceMgr.instance().getLabOrProPrice(buildingId,true)));
@@ -4158,7 +4158,7 @@ public class GameSession {
         UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
         Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.PUBLIC || building.outOfBusiness()) {
+        if (building == null || building.type() != MetaBuilding.PROMOTE || building.outOfBusiness()) {
             return;
         }
         this.write(Package.create(cmd,GuidePriceMgr.instance().getLabOrProPrice(buildingId,false)));

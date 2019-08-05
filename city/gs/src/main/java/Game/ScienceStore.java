@@ -96,6 +96,8 @@ public class ScienceStore{
             return false;
         }
         this.inHand.put(m, inHand.get(m) - n);
+        if(inHand.get(m)==0)
+            inHand.remove(m);
         return true;
     }
 
