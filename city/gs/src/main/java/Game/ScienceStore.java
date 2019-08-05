@@ -120,4 +120,8 @@ public class ScienceStore{
         this.inHand.clear();
         this.locked.clear();
     }
+
+    public long getLockedNum(ItemKey key){
+        return this.locked.getOrDefault(key, 0);
+    }
 }
