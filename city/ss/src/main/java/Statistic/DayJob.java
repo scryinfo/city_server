@@ -101,10 +101,10 @@ public class DayJob implements org.quartz.Job {
         documentList = LogDb.dayPlayerExchange2(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), false);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.MATERIAL, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
         // PublicFacility Promotion buildingOrGoods
-        documentList = LogDb.hourPromotionRecord(yestodayStartTime, todayStartTime, LogDb.getPromotionRecord());
+        documentList = LogDb.hourPromotionRecord(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.PUBLICITY, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
         // Laboratory  research EvapointOrinvent
-        documentList = LogDb.hourLaboratoryRecord(yestodayStartTime, todayStartTime, LogDb.getLaboratoryRecord());
+        documentList = LogDb.hourLaboratoryRecord(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.LABORATORY, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
 
         //all types of buildings a day income

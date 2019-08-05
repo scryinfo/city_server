@@ -149,16 +149,40 @@ public class GuidePriceMgr {
 
     public Gs.GMRecommendPrice getLabOrProPrice(UUID buildingId, boolean islab) {
         Gs.GMRecommendPrice.Builder builder = Gs.GMRecommendPrice.newBuilder();
+        List<Integer> ids = MetaData.getAllScienCeId();
+        Gs.GMRecommendPrice.GMInfo.Builder msg = Gs.GMRecommendPrice.GMInfo.newBuilder();
         if (islab) {
             Map<Integer, Double> lab = historyRecord.laboratory;
-            lab.forEach((k, v) -> {
-                builder.addMsg(Gs.GMRecommendPrice.GMInfo.newBuilder().setTypeId(k).setGuidePrice(v));
+            ids.stream().filter(i -> i != null).forEach(o -> {
+                msg.setTypeId(o);
+                msg.setGuidePrice(0);
+                try {
+                    lab.forEach((k, v) -> {
+                        if (k.equals(o)) {
+                            msg.setGuidePrice(v);
+                        }
+                    });
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
+                builder.addMsg(msg);
             });
         } else {
             Map<Integer, Double> promotion = historyRecord.promotion;
-            promotion.forEach((k,v)->{
-                builder.addMsg(Gs.GMRecommendPrice.GMInfo.newBuilder().setTypeId(k).setGuidePrice(v));
-
+            ids.stream().filter(i -> i != null).forEach(o -> {
+                msg.setTypeId(o);
+                msg.setGuidePrice(0);
+                try {
+                    promotion.forEach((k, v) -> {
+                        if (k.equals(o)) {
+                            msg.setGuidePrice(v);
+                            return;
+                        }
+                    });
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
+                builder.addMsg(msg);
             });
         }
         return builder.setBuildingId(Util.toByteString(buildingId)).build();

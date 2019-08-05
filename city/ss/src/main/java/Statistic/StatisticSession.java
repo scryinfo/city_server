@@ -182,15 +182,11 @@ public class StatisticSession {
 		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
 		long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
 		long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
-		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf()); // 新版研究所、广告公司也包含在内
 		long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
 		long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
-		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
-		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
-		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
-		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
-		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround;
     	builder.setExchangeAmount(npcExchangeAmount+playerExchangeAmount);
     	this.write(Package.create(cmd, builder.build()));
     }
@@ -273,21 +269,17 @@ public class StatisticSession {
 		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
 		long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
 		long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
-		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf());
+		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf()); // 新版研究所、数据公司也包含在内
 		long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
 		long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
-		long yesterdayPlayerResearch = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerResearch(), CountType.BYDAY);
-		long todayPlayerResearch = SummaryUtil.getTodayData(LogDb.getLaboratoryRecord());
-		long yesterdayPlayerPromotion = SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerPromotion(), CountType.BYDAY);
-		long todayPlayerPromotion = SummaryUtil.getTodayData(LogDb.getPromotionRecord());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
-		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround + yesterdayPlayerResearch + todayPlayerResearch + yesterdayPlayerPromotion + todayPlayerPromotion;
+		+ todayPlayerBuyInShelf + yesterdayPlayerRentGround + todayPlayerRentGround;
         builder.setPlayExchangeAmount(playerExchangeAmount);
         this.write(Package.create(cmd, builder.build()));
     }
 
 	// 查询一周曲线图
-	public void queryPlayerExchangeCurve(short cmd, Message message) {
+	public void queryPlayerGoodsCurve(short cmd, Message message) {
 		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
 		long id = curve.getId();
 		int exchangeType = curve.getExchangeType();

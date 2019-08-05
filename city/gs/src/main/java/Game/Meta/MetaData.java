@@ -273,6 +273,9 @@ public class MetaData {
         return scienceItem;
     }
 
+    public static List<Integer> getAllScienCeId() {
+        return new ArrayList<>(scienceItem.keySet());
+    }
     public static TreeMap<Integer, MetaPromotionItem> getPromotionItem() {
         return promotionItem;
     }
