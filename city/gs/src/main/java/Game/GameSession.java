@@ -3278,30 +3278,13 @@ public class GameSession {
 
         this.write(Package.create(cmd, list.build()));
     }
+
     public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-
         Gs.Evas.Builder list = Gs.Evas.newBuilder();
         EvaManager.getInstance().getEvaList(pid).forEach(eva->{
-            Gs.Eva evaData = eva.toProto();
-            //重新设置品牌值
-            if(evaData.getBt().getNumber()==(Gs.Eva.Btype.Brand_VALUE)){
-                //判断是建筑还是商品
-                int brandType=eva.getAt();
-                if(MetaGood.isItem(eva.getAt())) {
-                    brandType = eva.getAt();
-                }else{//否则是建筑
-                    brandType = eva.getAt() % 100 * 100;
-                }
-                int addBrand = BrandManager.instance().getBrand(pid,brandType).getV();
-                long totalBrand = eva.getB()+addBrand;
-                Gs.Eva.Builder builder = evaData.toBuilder().setB(totalBrand);
-                list.addEva(builder.build());
-            }else{
-                list.addEva(evaData);
-            }
-
+            list.addEva(eva.toProto());
         });
         this.write(Package.create(cmd, list.build()));
     }
