@@ -13,7 +13,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
 import gs.Gs;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import java.io.Serializable;
 import java.util.*;
@@ -28,6 +27,8 @@ import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
 public class LogDb {
+	public static final int TECHNOLOGY=15;//新版研究所
+	public static final int PROMOTE=16;//新版推广公司
 	private static MongoClientURI connectionUrl;
 	private static MongoClient mongoClient;
 	private static MongoDatabase database;
@@ -1412,16 +1413,17 @@ public class LogDb {
                 .append(KEY_TOTAL, "$"+KEY_TOTAL)
                 .append("size", "$size" )
                 .append("_id",0);
-        collection.aggregate(
-                Arrays.asList(
-                        Aggregates.match(and(
-                                gte("t", startTime),
-                                lt("t", endTime)
-                        )),
-                        Aggregates.group("$ct",Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)),
-                        Aggregates.project(projectObject)
-                )
-        ).forEach((Block<? super Document>) documentList::add);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("bt",PROMOTE),
+								gte("t", startTime),
+								lt("t", endTime)
+						)),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
         return documentList;
     }
 
@@ -1432,16 +1434,17 @@ public class LogDb {
                 .append(KEY_TOTAL, "$"+KEY_TOTAL)
                 .append("size", "$size" )
                 .append("_id",0);
-        collection.aggregate(
-                Arrays.asList(
-                        Aggregates.match(and(
-                                gte("t", startTime),
-                                lt("t", endTime)
-                        )),
-                        Aggregates.group("$tp",Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("size", 1l)),
-                        Aggregates.project(projectObject)
-                )
-        ).forEach((Block<? super Document>) documentList::add);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("bt", TECHNOLOGY),
+								gte("t", startTime),
+								lt("t", endTime)
+						)),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.sum("size", 1l)),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
         return documentList;
     }
 	public static List<Document> dayPlayerIncome(long todayStartTime,int buildType,MongoCollection<Document> collection)
@@ -1655,15 +1658,15 @@ public class LogDb {
 	}
 
 	public static Map<Integer, Double> getLabOrProRecord(long startTime, long endTime, boolean islab) {
-		MongoCollection<Document> collection = laboratoryRecord;
+		int bt = LogDb.TECHNOLOGY;
 		Map<Integer, Double> map = new HashMap<>();
 		if (!islab) {
-			collection = promotionRecord;
+			bt = LogDb.PROMOTE;
 		}
 		List<Document> documentList = new ArrayList<>();
-		collection.aggregate(
+		buyInShelf.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.match(and(eq("bt", bt), gte("t", startTime), lte("t", endTime))),
 						Aggregates.group("$tpi", Accumulators.avg("avg", "$a"))
 				)
 		).forEach((Block<? super Document>) documentList::add);

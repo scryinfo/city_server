@@ -52,11 +52,11 @@ public class PerHourJob implements org.quartz.Job {
         //buy material in Shelf
         documentList = LogDb.dayPlayerExchange2(startTime, endTime, LogDb.getBuyInShelf(), false);
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.MATERIAL, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
-        // PublicFacility Promotion buildingOrGoods
-        documentList = LogDb.hourPromotionRecord(startTime, endTime, LogDb.getPromotionRecord());
+        // PublicFacility
+        documentList = LogDb.hourPromotionRecord(startTime, endTime, LogDb.getBuyInShelf());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.PUBLICITY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
-        // Laboratory  research EvapointOrinvent
-        documentList = LogDb.hourLaboratoryRecord(startTime, endTime, LogDb.getLaboratoryRecord());
+        // Laboratory
+        documentList = LogDb.hourLaboratoryRecord(startTime, endTime, LogDb.getBuyInShelf());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.LABORATORY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
 
