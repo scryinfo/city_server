@@ -979,8 +979,8 @@ public class GameSession {
         double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalQty(), itemId);
         double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
         double score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
-            LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, seller.getName(), seller.getCompanyName());
+        LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, seller.getName(), seller.getCompanyName(),sellBuilding.type());
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
         /*离线收益，只在玩家离线期间统计*/
@@ -3759,7 +3759,7 @@ public class GameSession {
             BrandManager.BrandName brandName = BrandManager.instance().getBrand(seller.id(), itemId).brandName;
             String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, 0, seller.getName(), seller.getCompanyName());
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, 0, seller.getName(), seller.getCompanyName(),sellBuilding.type());
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
@@ -5670,7 +5670,7 @@ public class GameSession {
             LogDb.playerPay(player.id(),cost,sellBuilding.type());
             LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
-                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName());
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
