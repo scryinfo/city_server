@@ -3289,7 +3289,7 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-    public void updateMyEvas(short cmd, Message message)
+/*    public void updateMyEvas(short cmd, Message message)
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
@@ -3325,11 +3325,13 @@ public class GameSession {
         }
         //BrandManager.instance().getAllBuildingBrandOrQuality();
         this.write(Package.create(cmd, results.build()));
-    }
+    }*/
+
     /*新版Eva修改*/
-    public void updateEvas(short cmd, Message message){
+    public void updateMyEvas(short cmd, Message message){
         Gs.Evas evas = (Gs.Evas)message;
-        List<Gs.Eva> updateEvas = new ArrayList<>();
+        List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
+        List<Gs.Eva> failedEvas = new ArrayList<>();//加点失败的eva
         UUID playerId=null;
         boolean retailOrApartmentQtyIsChange = false;//是否更新最大最小建筑品质标志
         //批量修改Evas加点科技
@@ -3346,6 +3348,7 @@ public class GameSession {
                 PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(playerId, pointType);
                 if(promotePoint.promotePoint<eva.getCexp()){
                     System.err.println("点数不足");
+                    failedEvas.add(eva);
                 }else{
                     /*进行加点*/
                     Eva newEva = EvaManager.getInstance().updateMyEva(eva);
@@ -3360,6 +3363,7 @@ public class GameSession {
                 SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(playerId, pointType);
                 if(sciencePoint.point<eva.getCexp()){
                     System.err.println("点数不足");
+                    failedEvas.add(eva);
                 }else{
                     if((eva.getAt()==MetaBuilding.APARTMENT||eva.getAt()==MetaBuilding.RETAIL)&&eva.getBt().equals(Gs.Eva.Btype.Quality)){
                         retailOrApartmentQtyIsChange = true;
@@ -3378,7 +3382,7 @@ public class GameSession {
         }
         playerSciencePoint.forEach(p->SciencePointManager.getInstance().updateSciencePoint(p));
         playerPromotePoints.forEach(p->PromotePointManager.getInstance().updatePromotionPoint(p));
-        Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+        Gs.EvaResult.Builder builder = Gs.EvaResult.newBuilder().addAllSuccessEvas(updateEvas).addAllFailedEvas(failedEvas);
         this.write(Package.create(cmd,builder.build()));
     }
 
@@ -5609,9 +5613,11 @@ public class GameSession {
             if(sellBuilding.type()==MetaBuilding.TECHNOLOGY) {
                 SciencePoint sciencePoint = SciencePointManager.getInstance().updateSciencePoint(player.id(), itemId, item.n);
                 SciencePointManager.getInstance().updateSciencePoint(sciencePoint);
+                c=c.toBuilder().setTypePointAllNum(sciencePoint.point).build();
             }else{
                 PromotePoint promotePoint = PromotePointManager.getInstance().updatePlayerPromotePoint(player.id(), itemId, item.n);
                 PromotePointManager.getInstance().updatePromotionPoint(promotePoint);
+                c=c.toBuilder().setTypePointAllNum(promotePoint.promotePoint).build();
             }
             int type = MetaItem.scienceItemId(itemId);//获取商品类型
             //日志记录
