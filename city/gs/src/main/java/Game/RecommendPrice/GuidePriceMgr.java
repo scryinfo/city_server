@@ -34,7 +34,7 @@ public class GuidePriceMgr {
     //params1.住宅评分,2.繁荣度
     public double getApartmentGuidePrice(double currScore, double currProsp) {
 //        推荐定价 = (全城均住宅成交价 * (玩家住宅总评分 /400 * 7 + 1) * (1 + 玩家住宅繁荣度)) / ((全城均住宅总评分 /400 * 7 + 1) * (1 + 全城均住宅繁荣度))
-        if (null != historyRecord) {
+        if (null != historyRecord&&historyRecord.score!=0) {
             double price = historyRecord.price;
             double score = historyRecord.score;
             double prosp = historyRecord.prosp;
