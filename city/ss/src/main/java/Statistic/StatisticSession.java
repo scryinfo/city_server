@@ -514,13 +514,18 @@ public class StatisticSession {
 				}
 			});
 		});
-		/*求提升比例,如果昨天的销售记录中存在，就取出计算比例，没有就设置为1 提升100%,*/
+		/*求提升比例,如果昨天的销售记录中存在，就取出计算比例，只有今天的就设置为1，今天和昨天都没有设置为0 */
 		for (Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder todaySaleInfo : builder.getTodaySaleDetailBuilderList()) {
 			ItemKey itemKey = new ItemKey(todaySaleInfo.getItemId(),Util.toUuid(todaySaleInfo.getProducerId().toByteArray()));
 			if(yesterdaySale.containsKey(itemKey))
 				todaySaleInfo.setIncreasePercent(todaySaleInfo.getSaleAccount() / yesterdaySale.get(itemKey));
-			else
-				todaySaleInfo.setIncreasePercent(1);
+			else {
+				if (todaySaleInfo.getSaleAccount() > 0) {
+					todaySaleInfo.setIncreasePercent(1);
+				} else {
+					todaySaleInfo.setIncreasePercent(0);
+				}
+			}
 		}
 		this.write(Package.create(cmd,builder.build()));
 	}
