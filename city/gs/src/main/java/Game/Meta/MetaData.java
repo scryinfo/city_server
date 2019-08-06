@@ -287,7 +287,9 @@ public class MetaData {
     public static MetaPromotionItem getPromotionItem(int id) {
         return promotionItem.get(id);
     }
-
+    public static List<Integer> getPromotionItemId() {
+        return new ArrayList<>(promotionItem.keySet());
+    }
     //获取所有原料id
     public static final Set<Integer> getAllMaterialId() {
         return material.keySet() == null ? new HashSet() : material.keySet();

@@ -149,9 +149,9 @@ public class GuidePriceMgr {
 
     public Gs.GMRecommendPrice getLabOrProPrice(UUID buildingId, boolean islab) {
         Gs.GMRecommendPrice.Builder builder = Gs.GMRecommendPrice.newBuilder();
-        List<Integer> ids = MetaData.getAllScienCeId();
         Gs.GMRecommendPrice.GMInfo.Builder msg = Gs.GMRecommendPrice.GMInfo.newBuilder();
         if (islab) {
+            List<Integer> ids = MetaData.getAllScienCeId();
             Map<Integer, Double> lab = historyRecord.laboratory;
             ids.stream().filter(i -> i != null).forEach(o -> {
                 msg.setTypeId(o);
@@ -168,6 +168,7 @@ public class GuidePriceMgr {
                 builder.addMsg(msg);
             });
         } else {
+            List<Integer> ids = MetaData.getPromotionItemId();
             Map<Integer, Double> promotion = historyRecord.promotion;
             ids.stream().filter(i -> i != null).forEach(o -> {
                 msg.setTypeId(o);
