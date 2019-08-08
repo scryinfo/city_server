@@ -7,6 +7,8 @@ import Game.Technology.SciencePoint;
 import Game.Technology.SciencePointManager;
 import gs.Gs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,26 +49,26 @@ public class EvaTypeUtil {
     }
 
     /*获取当前所有建筑类型的点数信息*/
-    public static Gs.PlayerEvaPointType classifyBuildingTypePoint(UUID pId){/*分类玩家各种建筑类型的Eva加点*/
+    public static List<Gs.BuildingPoint> classifyBuildingTypePoint(UUID pId){/*分类玩家各种建筑类型的Eva加点*/
+        List<Gs.BuildingPoint> list = new ArrayList<>();
         Set<Integer> allBuildingType = MetaData.getAllBuildingType();/*所有的建筑类型*/
-        Gs.PlayerEvaPointType.Builder builder = Gs.PlayerEvaPointType.newBuilder();
         allBuildingType.forEach(bt->{
             SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePointByBuildingType(pId, bt);
             PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePointByBuildingType(pId, bt);
-            Gs.PlayerEvaPointType.BuildingPoint.Builder buildingPoint = Gs.PlayerEvaPointType.BuildingPoint.newBuilder();
+            Gs.BuildingPoint.Builder buildingPoint = Gs.BuildingPoint.newBuilder();
             buildingPoint.setBuildingType(bt);
             if(sciencePoint!=null){
-                Gs.PlayerEvaPointType.PointInfo.Builder pointInfo = Gs.PlayerEvaPointType.PointInfo.newBuilder();
+                Gs.BuildingPoint.PointInfo.Builder pointInfo = Gs.BuildingPoint.PointInfo.newBuilder();
                 pointInfo.setPointId(sciencePoint.getType()).setPointNum(sciencePoint.point);
                 buildingPoint.setSciencePoint(pointInfo);
             }
             if(promotePoint!=null){
-                Gs.PlayerEvaPointType.PointInfo.Builder pointInfo = Gs.PlayerEvaPointType.PointInfo.newBuilder();
+                Gs.BuildingPoint.PointInfo.Builder pointInfo = Gs.BuildingPoint.PointInfo.newBuilder();
                 pointInfo.setPointId(promotePoint.getType()).setPointNum(promotePoint.promotePoint);
                 buildingPoint.setPromotionPoint(pointInfo);
             }
-            builder.addBuildingPoint(buildingPoint);
+            list.add(buildingPoint.build());
         });
-        return builder.build();
+        return list;
     }
 }

@@ -3286,10 +3286,12 @@ public class GameSession {
         EvaManager.getInstance().getEvaList(pid).forEach(eva->{
             list.addEva(eva.toProto());
         });
+        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
+        list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
     }
 
-/*    public void updateMyEvas(short cmd, Message message)
+    public void updateMyEvas(short cmd, Message message)
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
@@ -3325,10 +3327,10 @@ public class GameSession {
         }
         //BrandManager.instance().getAllBuildingBrandOrQuality();
         this.write(Package.create(cmd, results.build()));
-    }*/
+    }
 
     /*新版Eva修改*/
-    public void updateMyEvas(short cmd, Message message){
+    public void updateEvas(short cmd, Message message){
         Gs.Evas evas = (Gs.Evas)message;
         List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
         List<Gs.Eva> failedEvas = new ArrayList<>();//加点失败的eva
@@ -5821,12 +5823,13 @@ public class GameSession {
         this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
     }
 
-    /*查询玩家evaj加点的不同类型*/
-    public void queryPlayerEvaPointType(short cmd, Message message){
-        Gs.Id id = (Gs.Id) message;
-        UUID playerId = Util.toUuid(id.getId().toByteArray());
-        Gs.PlayerEvaPointType evaPointType = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-        this.write(Package.create(cmd, evaPointType));
+    /*查询土地繁荣度*/
+    public void queryGroundProsperity(short cmd, Message message){
+        Gs.MiniIndex index= (Gs.MiniIndex) message;
+        Coordinate coordinate = new Coordinate(index);
+        int groundProsperity = ProsperityManager.instance().getGroundProsperity(coordinate);
+        Gs.Num.Builder builder = Gs.Num.newBuilder().setNum(groundProsperity);
+        this.write(Package.create(cmd, builder.build()));
     }
 
 }
