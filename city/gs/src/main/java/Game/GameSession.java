@@ -5528,10 +5528,11 @@ public class GameSession {
         if(science.addshelf(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
+            ScienceShelf.Content content = science.getContent(item.key);
             Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto())
                     .setCurCount(science.getShelf().getAllNum())                /*设置货架上的总数量*/
                     .setStoreNum(science.getStore().getItemCount(item.getKey()))/*设置仓库中的当前商品的可用数量*/
-                    .setItem(itemBuilder);
+                    .setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
             this.write(Package.create(cmd, builder.build()));
         }else{
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
@@ -5572,10 +5573,11 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
+            ScienceShelf.Content content = science.getContent(item.key);
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
             Gs.ShelfSet.Builder builder = c.toBuilder();
             builder.setStoreNum(science.getStore().getItemCount(item.getKey()))
-                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder);
+                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
             this.write(Package.create(cmd, builder.build()));
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
