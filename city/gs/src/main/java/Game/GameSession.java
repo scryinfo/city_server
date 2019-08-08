@@ -4509,12 +4509,12 @@ public class GameSession {
         this.write(Package.create(cmd, builder.build()));
     }
     //推广公司信息(修改版)
-    public void queryPromotionCompanyInfo(short cmd,Message message){
+    public void queryPromotionCompanyInfo(short cmd,Message message){  //TODO
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    /*    UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
         Building building = City.instance().getBuilding(buildingId);
-        PublicFacility fcySeller = (PublicFacility) building ;
+        PromotionCompany promotion = (PromotionCompany) building ;
         Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
         builder.setSalary(building.salaryRatio);
         builder.setStaffNum(building.getWorkerNum());
@@ -4530,8 +4530,8 @@ public class GameSession {
             b.setAddAbility(EvaManager.getInstance().computePercent(promotionEva))//基础推广能力加成
                     .setTypeId(type)
                     .setAbility(value);//推广能力值（单项推广能力，也就是的总能力）
-        });
-        this.write(Package.create(cmd, builder.build()));
+        });*/
+        this.write(Package.create(cmd, msg));
     }
 
     //查询仓库信息
@@ -4557,7 +4557,7 @@ public class GameSession {
     //查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+        /*UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
         Building building = City.instance().getBuilding(buildingId);
         Laboratory lab = (Laboratory) building ;
@@ -4578,8 +4578,8 @@ public class GameSession {
             Eva eva = EvaManager.getInstance().getEva(playerId, item).get(0);
             b.setTypeId(eva.getBt());
             b.setAbility(EvaManager.getInstance().computePercent(eva));
-        });
-        this.write(Package.create(cmd, builder.build()));
+        });*/
+        this.write(Package.create(cmd, msg));
     }
     /*查询品牌信息*/
     public void queryBrand(short cmd, Message message) {
@@ -5632,9 +5632,7 @@ public class GameSession {
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
             content = science.getContent(item.key);
-            if(content!=null) {
             sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
-            }
             this.write(Package.create(cmd, c));
         }else{
             System.err.println("货架数量不足");
