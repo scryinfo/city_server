@@ -4509,12 +4509,12 @@ public class GameSession {
         this.write(Package.create(cmd, builder.build()));
     }
     //推广公司信息(修改版)
-    public void queryPromotionCompanyInfo(short cmd,Message message){
+    public void queryPromotionCompanyInfo(short cmd,Message message){  //TODO
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+    /*    UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
         Building building = City.instance().getBuilding(buildingId);
-        PublicFacility fcySeller = (PublicFacility) building ;
+        PromotionCompany promotion = (PromotionCompany) building ;
         Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
         builder.setSalary(building.salaryRatio);
         builder.setStaffNum(building.getWorkerNum());
@@ -4530,8 +4530,8 @@ public class GameSession {
             b.setAddAbility(EvaManager.getInstance().computePercent(promotionEva))//基础推广能力加成
                     .setTypeId(type)
                     .setAbility(value);//推广能力值（单项推广能力，也就是的总能力）
-        });
-        this.write(Package.create(cmd, builder.build()));
+        });*/
+        this.write(Package.create(cmd, msg));
     }
 
     //查询仓库信息
@@ -4557,7 +4557,7 @@ public class GameSession {
     //查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
+        /*UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
         UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
         Building building = City.instance().getBuilding(buildingId);
         Laboratory lab = (Laboratory) building ;
@@ -4578,8 +4578,8 @@ public class GameSession {
             Eva eva = EvaManager.getInstance().getEva(playerId, item).get(0);
             b.setTypeId(eva.getBt());
             b.setAbility(EvaManager.getInstance().computePercent(eva));
-        });
-        this.write(Package.create(cmd, builder.build()));
+        });*/
+        this.write(Package.create(cmd, msg));
     }
     /*查询品牌信息*/
     public void queryBrand(short cmd, Message message) {
@@ -5528,10 +5528,11 @@ public class GameSession {
         if(science.addshelf(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
+            ScienceShelf.Content content = science.getContent(item.key);
             Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto())
                     .setCurCount(science.getShelf().getAllNum())                /*设置货架上的总数量*/
                     .setStoreNum(science.getStore().getItemCount(item.getKey()))/*设置仓库中的当前商品的可用数量*/
-                    .setItem(itemBuilder);
+                    .setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
             this.write(Package.create(cmd, builder.build()));
         }else{
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
@@ -5572,10 +5573,11 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
+            ScienceShelf.Content content = science.getContent(item.key);
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
             Gs.ShelfSet.Builder builder = c.toBuilder();
             builder.setStoreNum(science.getStore().getItemCount(item.getKey()))
-                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder);
+                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
             this.write(Package.create(cmd, builder.build()));
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));

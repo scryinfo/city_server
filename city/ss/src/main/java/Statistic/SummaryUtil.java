@@ -742,7 +742,8 @@ public class SummaryUtil {
         /*存储格式  key为时间，value存这人一天内出现过的销售商品*/
         Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
         collection.find(and(eq("bid", bid),
-                gte(TIME, startTime)))
+                gte(TIME, startTime),
+                lt(TIME,TimeUtil.todayStartTime())))
                 .sort(Sorts.ascending(TIME))
                 .forEach((Block<? super Document>) d ->
                 {
@@ -758,7 +759,8 @@ public class SummaryUtil {
         collection.find(and(eq("bid", bid),
                 eq("itemId",itemId),
                 eq("p",producerId),
-                gte(TIME, startTime)))
+                gte(TIME, startTime),
+                lt(TIME,TimeUtil.todayStartTime())))
                 .forEach((Block<? super Document>) doc ->
                 {
                     map.put(TimeUtil.getTimeDayStartTime(doc.getLong(TIME)),doc);
