@@ -113,12 +113,19 @@ public class DayJob implements org.quartz.Job {
         SummaryUtil.insertDayIndustryIncomeData(null, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //retailshop
         documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.BuildingType.RETAIL, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.RETAIL, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //apartment
         documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getNpcRentApartment());
-        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.BuildingType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
-        //...研究所和广告公司
-
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        //promote
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),true); // 只会产生一条 document
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.PROMOTE, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        // technology
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),false);
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.TECHNOLOGY, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        // sellerGround
+        documentList = LogDb.daySummaryGroundHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyGround());
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.GROUND, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
 
         //玩家当天开业情况
         documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness(),0);

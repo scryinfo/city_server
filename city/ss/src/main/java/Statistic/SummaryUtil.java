@@ -4,6 +4,7 @@ import Param.ItemKey;
 import Shared.LogDb;
 import Shared.Util;
 import Statistic.Util.TimeUtil;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.WriteConcern;
@@ -13,16 +14,14 @@ import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
 import gs.Gs;
-import io.opencensus.stats.Aggregation;
 import org.bson.Document;
 import ss.Ss;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static Shared.LogDb.KEY_TOTAL;
-import static Shared.LogDb.cityBroadcast;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -811,10 +810,10 @@ public class SummaryUtil {
         }
     }
 
-    public enum BuildingType {
-        MATERIAL(11),PRODUCE(12),RETAIL(13),APARTMENT(14), LAB(15), PUBLIC(16);
+    public enum IndustryType {
+        MATERIAL(11),PRODUCE(12),RETAIL(13),APARTMENT(14), TECHNOLOGY(15), PROMOTE(16), GROUND(17);
         private int value;
-        BuildingType(int i)
+        IndustryType(int i)
         {
             this.value = i;
         }
@@ -841,20 +840,20 @@ public class SummaryUtil {
             collection.insertMany(documentList);
         }
     }
-    public static void insertDayIndustryIncomeData(BuildingType buildingType,List<Document> documentList,
+    public static void insertDayIndustryIncomeData(IndustryType buildingType,List<Document> documentList,
                                                 long time,MongoCollection<Document> collection)
     {
         //document already owned : id,total
         List<Document> list=new ArrayList<Document>();
         documentList.forEach(document ->{
-                    int type= document.getInteger("id");
                     Document d=new Document();
                     d.append("total",document.getLong("total"));
                     if(buildingType==null){
+                        int type= document.getInteger("id");
                         if(type==21){
-                            d.append(TIME, time).append(TYPE, SummaryUtil.BuildingType.MATERIAL.getValue());
+                            d.append(TIME, time).append(TYPE, SummaryUtil.IndustryType.MATERIAL.getValue());
                         }else if(type==22){
-                            d.append(TIME, time).append(TYPE, SummaryUtil.BuildingType.PRODUCE.getValue());
+                            d.append(TIME, time).append(TYPE, SummaryUtil.IndustryType.PRODUCE.getValue());
                         }
                     }else{
                         d.append(TIME, time).append(TYPE, buildingType.getValue());
@@ -1030,4 +1029,65 @@ public class SummaryUtil {
         return builder.setMsg(topMsg.build()).build();
     }
 
+
+    public static List<IndustryInfo> queryIndustryIncom() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND,0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+        List<Document> documentList = new ArrayList<>();
+        dayIndustryIncome.find(and(
+                gte("time", startTime),
+                lt("time", endTime)
+        ))
+                .projection(fields(include("time", "type", "total"), excludeId()))
+                .sort(Sorts.descending("time"))
+                .forEach((Block<? super Document>) documentList::add);
+        return documentList.stream().map(o-> {
+            try {
+                return new IndustryInfo(
+                        o.getInteger("type"),
+                        o.getLong("total"),
+                        o.getLong("time"));
+            } catch (Exception e) {
+                return null;
+            }
+        }).filter(o -> o != null).collect(Collectors.toList());
+
+    }
+
+    public static Map<Long, Map<Integer, Long>> queryInfo(List<IndustryInfo> infos) {
+        Map<Long, Map<Integer, Long>> map = infos.stream().collect(Collectors.groupingBy(IndustryInfo::getTime, Collectors.toMap(IndustryInfo::getType, IndustryInfo::getTotal)));
+        return map;
+    }
+
+    public static Ss.IndustryIncome tests(List<IndustryInfo> infos) {
+        Map<Long, Map<Integer, Long>> map = SummaryUtil.queryInfo(infos);
+        Ss.IndustryIncome.Builder builder = Ss.IndustryIncome.newBuilder();
+        if (!map.isEmpty() && map.size() > 0) {
+            map.forEach((k,v)->{
+                Ss.IndustryIncome.IncomeInfo.Builder info = Ss.IndustryIncome.IncomeInfo.newBuilder();
+                info.setTime(k);
+                if (!v.isEmpty() && v.size() > 0) {
+                    v.forEach((x,y)->{
+                        Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
+                        msg.setType(x).setIncome(y);
+                        info.addMsg(msg);
+                    });
+                }
+
+                builder.addInfo(info);
+            });
+
+        }
+        return builder.build();
+    }
 }

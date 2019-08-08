@@ -38,9 +38,6 @@ public class LogDb {
 
 	private static final int TYPE_BUILDING = 1;
 	private static final int TYPE_GOODS = 2;
-	private static final int TYPE_INVENT = 3;
-	private static final int TYPE_EVAPOINT = 4;
-
 	private static final String PAY_SALARY = "paySalary";
 	private static final String PAY_TRANSFER = "payTransfer";
 
@@ -384,7 +381,48 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document> daySummaryHistoryIncome(long yestodayStartTime, long todayStartTime,MongoCollection<Document> collection,boolean isPromote) {
+		int buildingType = TECHNOLOGY;
+		if (!isPromote) {
+			buildingType = PROMOTE;
+		}
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("bt", buildingType),
+										gte("t", yestodayStartTime),
+										lt("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
+	public static List<Document> daySummaryGroundHistoryIncome(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+//								Aggregates.match(and(
+//										gte("t", yestodayStartTime),
+//										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document> daySummaryShelfIncome(long yestodayStartTime, long todayStartTime,
 												 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
@@ -1065,7 +1103,7 @@ public class LogDb {
 
 	//记录研究所成交记录
 	public static void laboratoryRecord(UUID sellerId, UUID buyerId,UUID bid,int price,long cost, int typeId,boolean isInvent) {
-		int type = TYPE_INVENT;
+/*		int type = TYPE_INVENT;
 		if (!isInvent) {
 			type = TYPE_EVAPOINT;
 		}
@@ -1077,7 +1115,7 @@ public class LogDb {
 		document.append("bid", bid);
 		document.append("tpi", typeId);
 		document.append("tp", type);
-		laboratoryRecord.insertOne(document);
+		laboratoryRecord.insertOne(document);*/
 	}
 
 

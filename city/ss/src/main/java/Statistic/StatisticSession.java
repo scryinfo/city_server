@@ -13,6 +13,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import org.bson.Document;
+import org.spongycastle.asn1.cms.MetaData;
 import ss.Ss;
 
 import java.util.*;
@@ -559,5 +560,28 @@ public class StatisticSession {
 		UUID pid = Util.toUuid(top.getPid().toByteArray()); // 玩家id
 		int type = top.getIndustryType();  // 行业类型
 		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(pid,type)));
+	}
+
+	public void queryIndustryIncome(short cmd) {
+		List<IndustryInfo> infos = SummaryUtil.queryIndustryIncom();
+		Map<Long, Map<Integer, Long>> map = SummaryUtil.queryInfo(infos);
+		Ss.IndustryIncome.Builder builder = Ss.IndustryIncome.newBuilder();
+		if (!map.isEmpty() && map.size() > 0) {
+			map.forEach((k,v)->{
+				Ss.IndustryIncome.IncomeInfo.Builder info = Ss.IndustryIncome.IncomeInfo.newBuilder();
+				info.setTime(k);
+				if (!v.isEmpty() && v.size() > 0) {
+					v.forEach((x,y)->{
+						Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
+						msg.setType(x).setIncome(y);
+						info.addMsg(msg);
+					});
+				}
+				builder.addInfo(info);
+			});
+
+		}
+		this.write(Package.create(cmd,builder.build()));
+
 	}
 }
