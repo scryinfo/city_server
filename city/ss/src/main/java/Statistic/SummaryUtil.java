@@ -738,7 +738,7 @@ public class SummaryUtil {
     }
     /*查询建筑7天内收入统计*/
     public static Map<Long, Map<ItemKey, Document>> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection, UUID bid) {
-        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
         /*存储格式  key为时间，value存这人一天内出现过的销售商品*/
         Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
         collection.find(and(eq("bid", bid),
@@ -753,7 +753,7 @@ public class SummaryUtil {
 
     /*获取建筑中某一个商品的历史销售记录*/
     public static Map<Long,Document> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection,int itemId,UUID bid,UUID producerId){
-        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
         Map<Long, Document> map = new HashMap<>();
         collection.find(and(eq("bid", bid),
                 eq("itemId",itemId),

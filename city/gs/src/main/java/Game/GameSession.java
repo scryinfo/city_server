@@ -5632,7 +5632,9 @@ public class GameSession {
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
             content = science.getContent(item.key);
-            sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
+            if(content!=null) {
+                sellBuilding.sendToWatchers(sellBuilding.id(), itemId, content.n, content.price, content.autoReplenish, null);
+            }
             this.write(Package.create(cmd, c));
         }else{
             System.err.println("货架数量不足");
