@@ -16,7 +16,7 @@
 		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">
 			<!--jdbc:postgresql://127.0.0.1/117-->
-			jdbc:postgresql://127.0.0.1/189
+			jdbc:postgresql://127.0.0.1/105
 		</property>
 		<property name="hibernate.connection.username">
 			postgres

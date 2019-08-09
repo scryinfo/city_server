@@ -395,6 +395,7 @@ public class GameSession {
         }
         Validator.getInstance().unRegist(accountName, token);
         this.valid = false;
+        /*t统计晚间*/
     }
     public void roleLogin(short cmd, Message message) {
         // in city thread

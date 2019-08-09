@@ -90,6 +90,9 @@ public class LogDb {
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
 
+	/*玩家登陆时长统计(玩家每侧上线、下线时间统计)*/
+	private static final String PLAYER_LOGINTIME = "playerLoginTime";
+
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -136,6 +139,8 @@ public class LogDb {
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 	private static MongoCollection<Document> dayPlayerIncome;
 	private static MongoCollection<Document> playerBuildingBusiness;
+
+	private static MongoCollection<Document> playerLoginTime;
 
 	public static final String KEY_TOTAL = "total";
 
@@ -220,6 +225,9 @@ public class LogDb {
 		dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerBuildingBusiness = database.getCollection(PLAYER_BUILDING_BUSINESS)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		/*玩家登陆时长统计*/
+		playerLoginTime=database.getCollection(PLAYER_LOGINTIME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -1178,6 +1186,14 @@ public class LogDb {
 				.append("sn", staffNum)
 				.append("tp", type);
 		playerBuildingBusiness.insertOne(document);
+	}
+
+	/*玩家登陆时长记录(arg1:玩家id agr2: 登陆时长  arg3:记录的登录时间)*/
+	public void playerLoginTime(UUID playerId,Long loginTime,Long recordTime){
+		Document document = new Document("t",System.currentTimeMillis());
+		document.append("p", playerId)
+				.append("lgt", loginTime)
+				.append("rt", recordTime);
 	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
