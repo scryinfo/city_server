@@ -52,7 +52,7 @@ public class NpcManager {
         packs.forEach((k,v)->{
             City.instance().send(k, Package.create(GsCode.OpCode.moneyChange_VALUE, v));
         });
-
+        logger.info("before updates consume nanoTime : " +(System.nanoTime() - now));
         GameDb.saveOrUpdate(updates);
         logger.info("updates size - " + updates.size()
                 + " ( all npc - " + ids.size() + " , consume npc - " + consumeC
