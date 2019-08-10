@@ -386,6 +386,9 @@ public class GameSession {
 
             //Notify friends
             FriendManager.getInstance().broadcastStatue(player.id(),false);
+            /*统计玩家的在线时间*/
+            long loginTimes = player.getOfflineTs() - player.getOnlineTs();
+            LogDb.playerLoginTime(player.id(),loginTimes,DateUtil.getTimeDayStartTime(player.getOnlineTs()));
         }
         GameServer.allGameSessions.remove(id());
         if (player.getSocietyId() != null)
@@ -395,7 +398,6 @@ public class GameSession {
         }
         Validator.getInstance().unRegist(accountName, token);
         this.valid = false;
-        /*t统计晚间*/
     }
     public void roleLogin(short cmd, Message message) {
         // in city thread
@@ -3292,7 +3294,7 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-    public void updateMyEvas(short cmd, Message message)
+/*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
@@ -3328,65 +3330,58 @@ public class GameSession {
         }
         //BrandManager.instance().getAllBuildingBrandOrQuality();
         this.write(Package.create(cmd, results.build()));
-    }
+    }*/
 
     /*新版Eva修改*/
-    public void updateEvas(short cmd, Message message){
+    public void updateMyEvas(short cmd, Message message){
         Gs.Evas evas = (Gs.Evas)message;
         List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
-        List<Gs.Eva> failedEvas = new ArrayList<>();//加点失败的eva
+        List<Eva> evaData = new ArrayList<>();   /*批量同步到数据库*/
         UUID playerId=null;
         boolean retailOrApartmentQtyIsChange = false;//是否更新最大最小建筑品质标志
         //批量修改Evas加点科技
         List<PromotePoint> playerPromotePoints = new ArrayList<>();
         List<SciencePoint> playerSciencePoint = new ArrayList<>();
-        for (Gs.Eva eva : evas.getEvaList()) {
-            if(playerId==null){
-                playerId = Util.toUuid(eva.getPid().toByteArray());
-            }
-            /*1.确定是哪种科技加点  ，判断Bt类型*/
-            if(EvaTypeUtil.judgeScienceType(eva)==EvaTypeUtil.PROMOTE_TYPE){    //推广类型
-                /*确定具体加点建筑类型*/
-                int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.PROMOTE_TYPE, eva.getAt());
-                PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(playerId, pointType);
-                if(promotePoint.promotePoint<eva.getCexp()){
-                    System.err.println("点数不足");
-                    failedEvas.add(eva);
-                }else{
-                    /*进行加点*/
-                    Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-                    /*扣减点数*/
-                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType,-eva.getDecEva()));
-                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
-                    updateEvas.add(newEva.toProto());
-                }
-            }else{                                                              //科技点数类型加成
-                /*确定具体加点建筑类型*/
-                int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt());
-                SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(playerId, pointType);
-                if(sciencePoint.point<eva.getCexp()){
-                    System.err.println("点数不足");
-                    failedEvas.add(eva);
-                }else{
-                    if((eva.getAt()==MetaBuilding.APARTMENT||eva.getAt()==MetaBuilding.RETAIL)&&eva.getBt().equals(Gs.Eva.Btype.Quality)){
-                        retailOrApartmentQtyIsChange = true;
-                    }
-                    /*进行加点*/
-                    Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-                    /*扣减点数*/
-                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType,-eva.getDecEva()));
-                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
-                    updateEvas.add(newEva.toProto());
-                }
-            }
-        }
-        if(retailOrApartmentQtyIsChange){
-            BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
-        }
-        playerSciencePoint.forEach(p->SciencePointManager.getInstance().updateSciencePoint(p));
-        playerPromotePoints.forEach(p->PromotePointManager.getInstance().updatePromotionPoint(p));
-        Gs.EvaResult.Builder builder = Gs.EvaResult.newBuilder().addAllSuccessEvas(updateEvas).addAllFailedEvas(failedEvas);
-        this.write(Package.create(cmd,builder.build()));
+        /*1.首先一次性判断，所有Eva是否能够加点成功*/
+       if(!EvaTypeUtil.hasEnoughPoint(evas)){
+           this.write(Package.fail(cmd, Common.Fail.Reason.evaPointNotEnough));
+           return;
+       }else {
+           for (Gs.Eva eva : evas.getEvaList()) {
+               if (playerId == null) {
+                   playerId = Util.toUuid(eva.getPid().toByteArray());
+               }
+               /*1.确定是哪种科技加点  ，判断Bt类型*/
+               if (EvaTypeUtil.judgeScienceType(eva) == EvaTypeUtil.PROMOTE_TYPE) {    //推广类型
+                   /*确定具体加点建筑类型*/
+                   int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.PROMOTE_TYPE, eva.getAt());
+                   PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(playerId, pointType);
+                   Eva newEva = EvaManager.getInstance().updateMyEva(eva); /*进行加点*/
+                   playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
+                   EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
+                   updateEvas.add(newEva.toProto());
+                   evaData.add(newEva);
+               } else {                                                              //科技点数类型加成
+                   int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt()); /*确定具体加点建筑类型*/
+                   SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(playerId, pointType);
+                   if ((eva.getAt() == MetaBuilding.APARTMENT || eva.getAt() == MetaBuilding.RETAIL) && eva.getBt().equals(Gs.Eva.Btype.Quality))
+                       retailOrApartmentQtyIsChange = true;
+                   Eva newEva = EvaManager.getInstance().updateMyEva(eva);/*进行加点*/
+                   playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
+                   EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
+                   updateEvas.add(newEva.toProto());
+                   evaData.add(newEva);
+               }
+           }
+           if (retailOrApartmentQtyIsChange) {
+               BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
+           }
+           playerSciencePoint.forEach(p -> SciencePointManager.getInstance().updateSciencePoint(p));
+           playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
+           evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
+           Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+           this.write(Package.create(cmd, builder.build()));
+       }
     }
 
     public void queryMyBrands(short cmd, Message message){
@@ -5830,6 +5825,23 @@ public class GameSession {
         Coordinate coordinate = new Coordinate(index);
         int groundProsperity = ProsperityManager.instance().getGroundProsperity(coordinate);
         Gs.Num.Builder builder = Gs.Num.newBuilder().setNum(groundProsperity);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void queryAuctionProsperity(short cmd, Message message){
+        Gs.Num auctionId= (Gs.Num) message;
+        MetaGroundAuction groundAuction = MetaData.getGroundAuction(auctionId.getNum());
+        if(groundAuction==null){
+            System.err.println("拍卖地块id不存在");
+            return;
+        }
+        List<Coordinate> area = groundAuction.area;
+        int sum=0;
+        for (Coordinate coordinate : area) {
+            sum+=ProsperityManager.instance().getGroundProsperity(coordinate);
+        }
+        Gs.AuctionProsperity.Builder builder = Gs.AuctionProsperity.newBuilder();
+        builder.setGroundId(auctionId.getNum()).setProsperity(sum);
         this.write(Package.create(cmd, builder.build()));
     }
 

@@ -336,6 +336,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getScienceItemSpeed_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceItemSpeed"));
 
 			table.put((short) GsCode.OpCode.queryGroundProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndex.PARSER,GameSession.class,"queryGroundProsperity"));
+			table.put((short) GsCode.OpCode.queryAuctionProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER,GameSession.class,"queryAuctionProsperity"));
 			if(GlobalConfig.debug()){
 
 			}

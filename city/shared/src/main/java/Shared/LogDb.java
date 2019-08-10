@@ -90,7 +90,7 @@ public class LogDb {
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
 
-	/*玩家登陆时长统计(玩家每侧上线、下线时间统计)*/
+	/*玩家登陆时长统计(玩家登陆时间统计) yty*/
 	private static final String PLAYER_LOGINTIME = "playerLoginTime";
 
 	//---------------------------------------------------
@@ -140,7 +140,7 @@ public class LogDb {
 	private static MongoCollection<Document> dayPlayerIncome;
 	private static MongoCollection<Document> playerBuildingBusiness;
 
-	private static MongoCollection<Document> playerLoginTime;
+	private static MongoCollection<Document> playerLoginTime; //玩家登录时间统计 Yty
 
 	public static final String KEY_TOTAL = "total";
 
@@ -1189,11 +1189,12 @@ public class LogDb {
 	}
 
 	/*玩家登陆时长记录(arg1:玩家id agr2: 登陆时长  arg3:记录的登录时间)*/
-	public void playerLoginTime(UUID playerId,Long loginTime,Long recordTime){
+	public static void playerLoginTime(UUID playerId,Long loginTime,Long recordTime){
 		Document document = new Document("t",System.currentTimeMillis());
 		document.append("p", playerId)
 				.append("lgt", loginTime)
 				.append("rt", recordTime);
+		playerLoginTime.insertOne(document);
 	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
 	{
@@ -1338,6 +1339,10 @@ public class LogDb {
 
 	public static MongoCollection<Document> getFlightBet() {
 		return flightBet;
+	}
+
+	public static MongoCollection<Document> getPlayerLoginTime() {
+		return playerLoginTime;
 	}
 
 	public static class Positon
@@ -1705,5 +1710,25 @@ public class LogDb {
 			avg[0] = d.getDouble("avg");
 		});
 		return avg[0];
+	}
+/*统计一天玩家的登陆时长*/
+	public static List<Document> dayPlayerLoginTime(long startTime, long endTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document groupObject = new Document("_id",
+				new Document("p", "$p"));
+		Document projectObject = new Document()
+				.append("id", "$_id._id.p")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("rt", startTime),
+								lt("rt", endTime))),
+						Aggregates.group(groupObject,  Accumulators.sum(KEY_TOTAL, "$lgt")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
 	}
 }

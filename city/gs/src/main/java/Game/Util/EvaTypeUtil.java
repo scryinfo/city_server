@@ -5,6 +5,7 @@ import Game.Promote.PromotePoint;
 import Game.Promote.PromotePointManager;
 import Game.Technology.SciencePoint;
 import Game.Technology.SciencePointManager;
+import Shared.Util;
 import gs.Gs;
 
 import java.util.ArrayList;
@@ -70,5 +71,30 @@ public class EvaTypeUtil {
             list.add(buildingPoint.build());
         });
         return list;
+    }
+
+    /*判断是否有足够的点数*/
+    public static boolean hasEnoughPoint(Gs.Evas evas){
+        UUID playerId=null;
+        for (Gs.Eva eva : evas.getEvaList()) {
+            if (playerId == null) {
+                playerId = Util.toUuid(eva.getPid().toByteArray());
+            }
+            if(EvaTypeUtil.judgeScienceType(eva)==EvaTypeUtil.PROMOTE_TYPE){
+                int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.PROMOTE_TYPE, eva.getAt());
+                PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(playerId, pointType);
+                if(promotePoint.promotePoint<eva.getCexp()){
+                    return false;
+                }
+            }
+            else {
+                int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt());
+                SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(playerId, pointType);
+                if (sciencePoint.point < eva.getCexp()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
