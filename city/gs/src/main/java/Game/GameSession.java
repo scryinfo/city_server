@@ -3294,7 +3294,7 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-/*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
+    public void updateMyEvas(short cmd, Message message)  //TODO:删除
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
@@ -3330,10 +3330,9 @@ public class GameSession {
         }
         //BrandManager.instance().getAllBuildingBrandOrQuality();
         this.write(Package.create(cmd, results.build()));
-    }*/
-
+    }
     /*新版Eva修改*/
-    public void updateMyEvas(short cmd, Message message){
+    public void updateEvas(short cmd, Message message){
         Gs.Evas evas = (Gs.Evas)message;
         List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
         List<Eva> evaData = new ArrayList<>();   /*批量同步到数据库*/
@@ -4509,27 +4508,12 @@ public class GameSession {
     //推广公司信息(修改版)
     public void queryPromotionCompanyInfo(short cmd,Message message){  //TODO
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-    /*    UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-        Building building = City.instance().getBuilding(buildingId);
-        PromotionCompany promotion = (PromotionCompany) building ;
-        Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
-        builder.setSalary(building.salaryRatio);
-        builder.setStaffNum(building.getWorkerNum());
-        builder.setBaseAbility(fcySeller.getBaseAbility());
-        //建筑基本信息
-        Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-        builder.setBuildingInfo(buildingInfo);
-        Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.PUBLIC);
-        buildingTech.forEach(type->{
-            Gs.PromotionCompanyInfo.PromoAbility.Builder b=builder.addAbilitysBuilder();
-            Integer value = (int)fcySeller.getAllPromoTypeAbility(type);//推广能力加成需要由eva来获取
-            Eva promotionEva = EvaManager.getInstance().getEva(playerId, type, Gs.Eva.Btype.PromotionAbility_VALUE);
-            b.setAddAbility(EvaManager.getInstance().computePercent(promotionEva))//基础推广能力加成
-                    .setTypeId(type)
-                    .setAbility(value);//推广能力值（单项推广能力，也就是的总能力）
-        });*/
-        this.write(Package.create(cmd, msg));
+        UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof PromotionCompany)){
+            return;
+        }
+        this.write(Package.create(cmd, building.toProto()));
     }
 
     //查询仓库信息
@@ -4555,29 +4539,12 @@ public class GameSession {
     //查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        /*UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-        Building building = City.instance().getBuilding(buildingId);
-        Laboratory lab = (Laboratory) building ;
-
-        Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-        builder.setSalary(lab.salaryRatio);
-        builder.setStaffNum(lab.getWorkerNum());
-        builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-        builder.setGoodProb(lab.getGoodProb());
-        //建筑基本信息
-        Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-        builder.setBuildingInfo(buildingInfo);
-        Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.LAB);
-        //现在可以得到研究所的所有at和研究所的所有bt，
-        buildingTech.forEach(item->{
-            Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-            //因为研究所一个atype只对应一个eva，所以获取第一个。
-            Eva eva = EvaManager.getInstance().getEva(playerId, item).get(0);
-            b.setTypeId(eva.getBt());
-            b.setAbility(EvaManager.getInstance().computePercent(eva));
-        });*/
-        this.write(Package.create(cmd, msg));
+        UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof Technology)){
+            return;
+        }
+        this.write(Package.create(cmd, building.toProto()));
     }
     /*查询品牌信息*/
     public void queryBrand(short cmd, Message message) {
