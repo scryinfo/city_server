@@ -4,7 +4,6 @@ import Param.ItemKey;
 import Shared.LogDb;
 import Shared.Util;
 import Statistic.Util.TimeUtil;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.WriteConcern;
@@ -19,6 +18,7 @@ import ss.Ss;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static Shared.LogDb.KEY_TOTAL;
@@ -31,8 +31,8 @@ public class SummaryUtil {
     public static final int PRODUCE = 12;
     public static final int RETAIL = 13;
     public static final int APARTMENT = 14;
-    public static final int LAB = 15;
-    public static final int PUBLIC = 16;
+    public static final int TECHNOLOGY=15;//新版研究所
+    public static final int PROMOTE=16;//新版推广公司
     public static final int TALENT = 17;
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     public static final long HOUR_MILLISECOND = 1000 * 3600;
@@ -182,7 +182,7 @@ public class SummaryUtil {
     }*/
 
 
-    
+
     public static List<Document> getNpcHistoryData(MongoCollection<Document> collection,CountType countType,long time)
     {
     	List<Document> documentList = new ArrayList<>();
@@ -192,12 +192,12 @@ public class SummaryUtil {
     					))
         			.projection(fields(include("time", "total", "id"), excludeId()))
     		        .forEach((Block<? super Document>) document ->
-                    {   
+                    {
                     	documentList.add(document);
                     });
     	return documentList;
     }
-    
+
     public static Map<Long, Map> getNpcTypeNumHistoryData(MongoCollection<Document> collection)
     {
     	Map<Long, Map> countMap= new TreeMap<Long, Map>();
@@ -208,7 +208,7 @@ public class SummaryUtil {
         calendar.set(Calendar.SECOND, 0);
         Date endDate = calendar.getTime();
         long endTime=endDate.getTime();
-        
+
         calendar.add(Calendar.DATE, -7);
         Date startDate = calendar.getTime();
         long startTime=startDate.getTime();
@@ -218,7 +218,7 @@ public class SummaryUtil {
     			))
     	.projection(fields(include("t", "tp", "n"), excludeId()))
     	.forEach((Block<? super Document>) document ->
-    	{ 
+    	{
     	  long t=document.getLong("t");
 		  int tp=document.getInteger("tp");
 		  long n=document.getLong("n");
@@ -226,15 +226,15 @@ public class SummaryUtil {
 			  Map<Integer,Long> m=new HashMap<Integer,Long>();
 			  m.put(tp, n);
 			  countMap.put(t, m);
-		  }else{ 
+		  }else{
 			  Map<Integer,Long> mm=countMap.get(t);
 			  mm.put(tp,n);
-			  countMap.put(t,mm); 
+			  countMap.put(t,mm);
 		  }
     	});
     	return countMap;
     }
-    
+
     public static long getHistoryData(MongoCollection<Document> collection,CountType countType)
     {
     	long a=0;
@@ -246,7 +246,7 @@ public class SummaryUtil {
     	.sort(Sorts.descending("time"))
     	.limit(1)
     	.forEach((Block<? super Document>) document ->
-    	{   
+    	{
     		map.put(document.getLong("time"), document.getLong("total"));
     	});
     	for (Map.Entry<Long, Long> entry : map.entrySet()) {
@@ -254,7 +254,7 @@ public class SummaryUtil {
     	}
     	return a;
     }
-    
+
     public static Map<Long, Long> queryGoodsNpcNumCurve(MongoCollection<Document> collection,int id,CountType countType)
     {
         Calendar calendar = Calendar.getInstance();
@@ -264,7 +264,7 @@ public class SummaryUtil {
         calendar.set(Calendar.SECOND, 0);
         Date endDate = calendar.getTime();
         long endTime=endDate.getTime();
-        
+
         calendar.add(Calendar.DATE, -7);
         Date startDate = calendar.getTime();
         long startTime=startDate.getTime();
@@ -278,7 +278,7 @@ public class SummaryUtil {
     	.projection(fields(include("time", "total"), excludeId()))
     	.sort(Sorts.descending("time"))
     	.forEach((Block<? super Document>) document ->
-    	{   
+    	{
     		map.put(document.getLong("time"), document.getLong("total"));
     	});
     	return map;
@@ -325,7 +325,7 @@ public class SummaryUtil {
     	.projection(fields(include("time", "total"), excludeId()))
     	.sort(Sorts.descending("time"))
     	.forEach((Block<? super Document>) document ->
-    	{   
+    	{
     		map.put(document.getLong("time"), document.getLong("total"));
     	});
     	return map;
@@ -367,7 +367,7 @@ public class SummaryUtil {
         });
     	return documentList;
     }
-    
+
     public static long getTodayData(MongoCollection<Document> collection)
     {
     	long a=0;
@@ -376,7 +376,7 @@ public class SummaryUtil {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        
+
         Date endDate = calendar.getTime();
         long startTime=endDate.getTime();
         long endTime = System.currentTimeMillis();
@@ -386,7 +386,7 @@ public class SummaryUtil {
 		}
     	return a;
     }
-    
+
     public static long getLastFullTime(long currentTime)
     {
         return currentTime - (currentTime % HOUR_MILLISECOND);
@@ -462,7 +462,7 @@ public class SummaryUtil {
             collection.insertMany(documentList);
         }
     }
-    
+
     public static Ss.EconomyInfos getPlayerEconomy(UUID playerId)
     {
         Ss.EconomyInfos.Builder builder = Ss.EconomyInfos.newBuilder();
@@ -602,37 +602,37 @@ public class SummaryUtil {
     {
         return dayRentRoom;
     }
-    
+
     public static MongoCollection<Document> getDayGoodsNpcNum()
     {
     	return dayGoodsNpcNum;
     }
-    
+
     public static MongoCollection<Document> getDayApartmentNpcNum()
     {
     	return dayApartmentNpcNum;
     }
-    
+
     public static MongoCollection<Document> getDayNpcBuyInShelf()
     {
     	return dayNpcBuyInShelf;
     }
-    
+
     public static MongoCollection<Document> getDayNpcRentApartment()
     {
     	return dayNpcRentApartment;
     }
-    
+
     public static MongoCollection<Document> getDayPlayerBuyGround()
     {
     	return dayPlayerBuyGround;
     }
-    
+
     public static MongoCollection<Document> getDayPlayerBuyInShelf()
     {
     	return dayPlayerBuyInShelf;
     }
-    
+
     public static MongoCollection<Document> getDayPlayerRentGround()
     {
     	return dayPlayerRentGround;
@@ -650,7 +650,7 @@ public class SummaryUtil {
     {
     	return dayPlayerIncome;
     }
-    
+
     public static MongoCollection<Document> getDayPlayerPay()
     {
     	return dayPlayerPay;
@@ -788,7 +788,7 @@ public class SummaryUtil {
     	{
     		this.value = i;
     	}
-    	
+
     	public int getValue()
     	{
     		return value;
@@ -1069,25 +1069,97 @@ public class SummaryUtil {
         return map;
     }
 
-    public static Ss.IndustryIncome tests(List<IndustryInfo> infos) {
-        Map<Long, Map<Integer, Long>> map = SummaryUtil.queryInfo(infos);
-        Ss.IndustryIncome.Builder builder = Ss.IndustryIncome.newBuilder();
-        if (!map.isEmpty() && map.size() > 0) {
-            map.forEach((k,v)->{
-                Ss.IndustryIncome.IncomeInfo.Builder info = Ss.IndustryIncome.IncomeInfo.newBuilder();
-                info.setTime(k);
-                if (!v.isEmpty() && v.size() > 0) {
-                    v.forEach((x,y)->{
-                        Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
-                        msg.setType(x).setIncome(y);
-                        info.addMsg(msg);
-                    });
-                }
-
-                builder.addInfo(info);
-            });
-
+    public static long queryTodayIncome(long start, long endTime,int type) {
+        AtomicLong total = new AtomicLong(0);
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        LogDb.getBuyInShelf().aggregate(
+                Arrays.asList
+                        (
+                                Aggregates.match(and(
+                                        eq("bt", type),
+                                        gte("t", start),
+                                        lt("t", endTime))),
+                                Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+                                Aggregates.project(projectObject)
+                        )
+        ).forEach((Block<? super Document>) documentList::add);
+        documentList.stream().forEach(d->{
+            total.set(d.getLong(KEY_TOTAL));
+        });
+        return total.longValue();
+    }
+    public static long queryTodayRetailIncome(long start, long endTime) {
+        AtomicLong total = new AtomicLong(0);
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        LogDb.getNpcBuyInShelf().aggregate(
+                Arrays.asList
+                        (
+                                Aggregates.match(and(
+                                        gte("t", start),
+                                        lt("t", endTime))),
+                                Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+                                Aggregates.project(projectObject)
+                        )
+        ).forEach((Block<? super Document>) documentList::add);
+        documentList.stream().forEach(d->{
+            total.set(d.getLong(KEY_TOTAL));
+        });
+        return total.longValue();
+    }
+    public static long queryTodayIncome(long start, long endTime,boolean isApartment) {
+        MongoCollection<Document> collection = LogDb.getNpcRentApartment();
+        if (!isApartment) {
+            collection = LogDb.getBuyGround();
         }
+        AtomicLong total = new AtomicLong(0);
+        List<Document> documentList = new ArrayList<>();
+        Document projectObject = new Document()
+                .append("id", "$_id")
+                .append(KEY_TOTAL, "$" + KEY_TOTAL)
+                .append("_id",0);
+        collection.aggregate(
+                Arrays.asList
+                        (
+                                Aggregates.match(and(
+                                        gte("t", start),
+                                        lt("t", endTime))),
+                                Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+                                Aggregates.project(projectObject)
+                        )
+        ).forEach((Block<? super Document>) documentList::add);
+        documentList.stream().forEach(d->{
+            total.set(d.getLong(KEY_TOTAL));
+        });
+        return total.longValue();
+    }
+
+    public static Ss.IndustryIncome.IncomeInfo queryTodayIncome() {
+        // 当日0点-当前时间
+        Map<Integer, Long> map = new HashMap<>();
+        long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+        map.put(SummaryUtil.MATERIAL, queryTodayIncome(startTime, endTime, SummaryUtil.MATERIAL));
+        map.put(SummaryUtil.PRODUCE, queryTodayIncome(startTime, endTime, SummaryUtil.PRODUCE));
+        map.put(SummaryUtil.RETAIL, queryTodayRetailIncome(startTime, endTime));
+        map.put(SummaryUtil.TECHNOLOGY, queryTodayIncome(startTime, endTime, SummaryUtil.TECHNOLOGY));
+        map.put(SummaryUtil.PROMOTE, queryTodayIncome(startTime, endTime, SummaryUtil.PROMOTE));
+        map.put(SummaryUtil.APARTMENT, queryTodayIncome(startTime, endTime, true));
+        map.put(Gs.SupplyAndDemand.IndustryType.GROUND_VALUE, queryTodayIncome(startTime, endTime,false));
+        Ss.IndustryIncome.IncomeInfo.Builder builder = Ss.IndustryIncome.IncomeInfo.newBuilder();
+        builder.setTime(System.currentTimeMillis());
+        map.forEach((k,v)->{
+            Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
+            msg.setType(k).setIncome(v);
+            builder.addMsg(msg);
+        });
         return builder.build();
     }
 }

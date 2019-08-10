@@ -11,6 +11,7 @@ import Game.FriendManager.*;
 import Game.Gambling.Flight;
 import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
+import Game.IndustryInfo.IndustryMgr;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -5823,6 +5824,28 @@ public class GameSession {
         UUID playerId = Util.toUuid(id.getId().toByteArray());
         Gs.PlayerEvaPointType evaPointType = EvaTypeUtil.classifyBuildingTypePoint(playerId);
         this.write(Package.create(cmd, evaPointType));
+    }
+
+    public void querySupplyAndDemand(short cmd,Message message) {
+        Gs.SupplyAndDemand msg = (Gs.SupplyAndDemand) message;
+        int type = msg.getType().getNumber();
+        List<Document> list = LogDb.querySupplyAndDemand(type);
+        Gs.SupplyAndDemand.Builder builder = Gs.SupplyAndDemand.newBuilder();
+        builder.setType(msg.getType());
+        int demand = IndustryMgr.getTodayDemand(type); // 行业今日成交数量
+        int supply = IndustryMgr.getTodaySupply(type);  // 行业剩余数量
+        // 供： 交易总量+剩余数量
+        builder.setTodayS(demand+supply);
+        builder.setTodayD(demand);
+        list.stream().forEach(d->{
+            Gs.SupplyAndDemand.Info.Builder info = Gs.SupplyAndDemand.Info.newBuilder();
+            info.setTime(d.getLong("time"));
+            info.setDemand(d.getLong("demand"));
+            info.setSupply(d.getLong("supply"));
+            builder.addInfo(info);
+        });
+        this.write(Package.create(cmd, builder.build()));
+
     }
 
 }

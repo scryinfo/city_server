@@ -4,6 +4,7 @@ import Game.Contract.ContractManager;
 import Game.Eva.EvaManager;
 import Game.Eva.EvaSalary;
 import Game.Gambling.FlightManager;
+import Game.IndustryInfo.IndustryMgr;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -291,6 +292,7 @@ public class City {
         ProsperityManager.instance().totalProsperity(diffNano);
         // 历史成交
         GuidePriceMgr.instance().update(diffNano);
+        IndustryMgr.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

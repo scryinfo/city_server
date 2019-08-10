@@ -22,7 +22,7 @@ public class GuidePriceMgr {
 
     // 缓存全城均值
     private static LogDb.HistoryRecord historyRecord = new LogDb.HistoryRecord();
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(5));
 
     private GuidePriceMgr() {
     }

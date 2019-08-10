@@ -862,4 +862,5 @@ public abstract class Building implements Ticker{
         Gs.MiniIndex miniIndex = this.coordinate().toProto();
         return miniIndex;
     }
+    public abstract int getTotalSaleCount();
 }

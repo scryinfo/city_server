@@ -87,6 +87,8 @@ public class LogDb {
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
 
+	private static final String INDUSTRY_SUPPLYANDDEMAND = "industrySupplyAndDemand"; // 行业供需
+
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
 
@@ -133,6 +135,9 @@ public class LogDb {
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 	private static MongoCollection<Document> dayPlayerIncome;
 	private static MongoCollection<Document> playerBuildingBusiness;
+	// 行业供需
+	private static MongoCollection<Document> industrySupplyAndDemand;
+
 
 	public static final String KEY_TOTAL = "total";
 
@@ -217,6 +222,8 @@ public class LogDb {
 		dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerBuildingBusiness = database.getCollection(PLAYER_BUILDING_BUSINESS)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		industrySupplyAndDemand = database.getCollection(INDUSTRY_SUPPLYANDDEMAND)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -1727,5 +1734,64 @@ public class LogDb {
 			avg[0] = d.getDouble("avg");
 		});
 		return avg[0];
+	}
+
+	public static int queryIndestrySum(int buidingType,long startTime,long endTime) {
+		final int[] count = {0};
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("bt", buidingType),gte("t", startTime), lte("t", endTime))),
+						Aggregates.count()
+				)
+		).forEach((Block<? super Document>) d->{
+			count[0] =d.getInteger("count");
+		});
+		return count[0];
+	}
+
+	public static int queryIndestrySum(long startTime, long endTime,MongoCollection<Document> collection) {
+		final int[] count = {0};
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.count()
+				)
+		).forEach((Block<? super Document>) d->{
+			count[0] =d.getInteger("count");
+		});
+		return count[0];
+
+	}
+
+
+	public static void insertIndustrySupplyAndDemand(List<Document> source) {
+		if (!source.isEmpty()) {
+			industrySupplyAndDemand.insertMany(source);
+		}
+	}
+
+	public static List<Document> querySupplyAndDemand(int type) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.set(Calendar.HOUR_OF_DAY,0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND,0);
+		Date endDate = calendar.getTime();
+		long endTime=endDate.getTime();
+
+		calendar.add(Calendar.DATE, -7);
+		Date startDate = calendar.getTime();
+		long startTime=startDate.getTime();
+		List<Document> documentList = new ArrayList<>();
+		industrySupplyAndDemand.find(and(
+				eq("type",type),
+				gte("time", startTime),
+				lt("time", endTime)
+		))
+				.projection(fields(include("time", "supply","demand"), excludeId()))
+				.sort(Sorts.descending("time"))
+				.forEach((Block<? super Document>) documentList::add);
+		return documentList;
 	}
 }

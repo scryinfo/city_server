@@ -581,6 +581,8 @@ public class StatisticSession {
 			});
 
 		}
+		// 今日行业收入
+        builder.addInfo(SummaryUtil.queryTodayIncome());
 		this.write(Package.create(cmd,builder.build()));
 
 	}
