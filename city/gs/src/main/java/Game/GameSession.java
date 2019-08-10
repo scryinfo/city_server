@@ -5498,7 +5498,8 @@ public class GameSession {
                     .setCurCount(science.getShelf().getAllNum())                /*设置货架上的总数量*/
                     .setStoreNum(science.getStore().getItemCount(item.getKey()))/*设置仓库中的当前商品的可用数量*/
                     .setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
-            this.write(Package.create(cmd, builder.build()));
+           /* this.write(Package.create(cmd, builder.build()));*/
+            science.sendToAllWatchers(Package.create(cmd, builder.build()));
         }else{
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
             System.err.println("数量不足");
@@ -5519,7 +5520,8 @@ public class GameSession {
             if(science.delshelf(item.key, content.n, true)) {
                 GameDb.saveOrUpdate(science);
                 Gs.ShelfDel.Builder builder = c.toBuilder().setCurCount(science.getShelf().getAllNum());
-                this.write(Package.create(cmd, builder.build()));
+                /*this.write(Package.create(cmd, builder.build()));*/
+                science.sendToAllWatchers(Package.create(cmd, builder.build()));
             }
         }else{
             this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
@@ -5543,7 +5545,8 @@ public class GameSession {
             Gs.ShelfSet.Builder builder = c.toBuilder();
             builder.setStoreNum(science.getStore().getItemCount(item.getKey()))
                     .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
-            this.write(Package.create(cmd, builder.build()));
+           /*this.write(Package.create(cmd, builder.build()));*/
+            science.sendToAllWatchers(Package.create(cmd, builder.build()));
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
         }
@@ -5598,11 +5601,8 @@ public class GameSession {
             }
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
-            content = science.getContent(item.key);
-            if(content!=null) {
-                sellBuilding.sendToWatchers(sellBuilding.id(), itemId, content.n, content.price, content.autoReplenish, null);
-            }
-            this.write(Package.create(cmd, c));
+            sellBuilding.sendToAllWatchers(Package.create(cmd, c));
+           /* this.write(Package.create(cmd, c));*/
         }else{
             System.err.println("货架数量不足");
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));

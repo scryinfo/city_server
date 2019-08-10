@@ -155,6 +155,10 @@ public abstract class Building implements Ticker{
         }
         GameServer.sendTo(this.detailWatchers, Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build()));
     }
+    /*发送给所有在建筑中的人*/
+    public void sendToAllWatchers(Shared.Package p){
+        GameServer.sendTo(this.detailWatchers, p);
+    }
     public List<Building> getAllBuildingInEffectRange() {
         List<Building> res = new ArrayList<>();
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();

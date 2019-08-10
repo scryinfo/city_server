@@ -74,7 +74,7 @@ public class PromotionCompany extends ScienceBuildingBase {
                 .setStoreAllNum(this.store.getAllNum())
                 .setNowCountInLocked(this.store.getLockedNum(key))
                 .build();
-        sendToWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
+        sendToAllWatchers(Shared.Package.create(GsCode.OpCode.ftyLineChangeInform_VALUE, i));
     }
 
     @Override
