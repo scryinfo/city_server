@@ -27,6 +27,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+class GoodInfo{
+    UUID insId;
+    //预先生成的确定的结果值
+    int knownValue;
+    //不确定的部分需要npc消费时，实时计算
+    int posX;
+    int posY;
+}
+
+
 public class City {
     public static final UUID SysRoleId = UUID.nameUUIDFromBytes(new byte[16]);
     private static final Logger logger = Logger.getLogger(City.class);
@@ -40,6 +50,10 @@ public class City {
     private TreeMap<Integer, Integer> topGoodQty;
     private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
+
+    //所有货架上的商品缓存
+    private Map<Integer,Map<Integer, GoodInfo>> _goodCache = new HashMap<>();
+
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
     private boolean taskIsRunning = false;
@@ -123,6 +137,7 @@ public class City {
     private HashMap<UUID, HashMap<UUID, Building>> playerBuilding = new HashMap<>();
     public HashMap<UUID, Ground> playerGround = new HashMap<>();
     public HashMap<Integer, Set<Building>> typeBuilding = new HashMap<>();
+
     public static void init(MetaCity meta) {
         instance = new City(meta);
         instance.initAllBuildings();
@@ -197,6 +212,15 @@ public class City {
             this.calcuTerrain(b);
             // b is useless, discard it
         }
+    }
+    private void cacheGoodsInShelf(){
+        _goodCache
+        Set<Building> retailShops = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
+        //Set<Building> apartments = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>());
+        retailShops.forEach(b->{
+            RetailShop r =  (RetailShop)b;
+
+        });
     }
     private void loadPlayerBuildings() {
         for(Building b : GameDb.getAllBuilding()) {

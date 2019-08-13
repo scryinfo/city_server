@@ -1140,12 +1140,17 @@ public class GameDb {
 		return res;
 	}
 	public static List<Npc> getAllNpcByStatus(int status){
+		System.out.println("[getAllNpcByStatus] invoked start");
+		long begin = System.currentTimeMillis();
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		List<Npc> list = session.createQuery("From NPC where status =:x", Npc.class)
+				.setMaxResults(1000000) //临时处理，提高加载速度
 				.setParameter("x", status).list();
 		transaction.commit();
 		session.close();
+		long end = System.currentTimeMillis();
+		System.out.println("[getAllNpcByStatus] invoked end, spend time ="+ (end-begin));
 		return list;
 	}
 	public static Npc getNpc(UUID id) {

@@ -77,6 +77,9 @@ public class Shelf {
             return s;
         }).collect(Collectors.toList());
     }
+    public void initGoodCache(Map<Integer,Map<Integer, GoodInfo>> cache){
+        this.slots.forEach();
+    }
     public Collection<Integer> getMetaIds(MetaGood.Type type, int lux) {
         return this.slots.entrySet().stream().filter(e-> {
             if(e.getKey().meta instanceof MetaGood) {

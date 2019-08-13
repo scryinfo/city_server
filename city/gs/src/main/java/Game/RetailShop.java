@@ -108,6 +108,11 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
 
     }
 
+    public void initGoodCache(Map<Integer,Map<Integer, GoodInfo>> cache){
+        if( npcSelectable() && !outOfBusiness() ){
+            this.shelf.initGoodCache(cache);
+        }
+    }
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) {
         if(!this.store.has(mi.key, mi.n))
