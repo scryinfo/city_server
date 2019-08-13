@@ -290,7 +290,8 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     }
     //获取总知名度
     public double getTotalBrand(){
-        return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();
+        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Brand_VALUE);
+        return BrandManager.BASE_BRAND *(1 + EvaManager.getInstance().computePercent(eva));
     }
 
     public void cleanData(){

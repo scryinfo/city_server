@@ -112,7 +112,9 @@ public class ItemKey implements Serializable {
     public double getTotalBrand(){
         if(MetaGood.isItem(this.meta.id)){
             MetaGood good = MetaData.getGood(meta.id);
-            return good.brand+BrandManager.instance().getBrand(this.producerId,meta.id).getV();
+            /*获取Eva加成信息*/
+            Eva eva = EvaManager.getInstance().getEva(this.producerId, this.meta.id, Gs.Eva.Btype.Brand_VALUE);
+            return good.brand*(1 + EvaManager.getInstance().computePercent(eva));
         }
         return 0;
     }

@@ -3294,7 +3294,7 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-    public void updateMyEvas(short cmd, Message message)  //TODO:删除
+/*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
@@ -3330,9 +3330,9 @@ public class GameSession {
         }
         //BrandManager.instance().getAllBuildingBrandOrQuality();
         this.write(Package.create(cmd, results.build()));
-    }
+    }*/
     /*新版Eva修改*/
-    public void updateEvas(short cmd, Message message){
+    public void updateMyEvas(short cmd, Message message){
         Gs.Evas evas = (Gs.Evas)message;
         List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
         List<Eva> evaData = new ArrayList<>();   /*批量同步到数据库*/
@@ -3379,6 +3379,9 @@ public class GameSession {
            playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
            evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
            Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+           /*重新查询玩家的所有点数信息*/
+           List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
+           builder.addAllBuildingPoint(buildingPoints);
            this.write(Package.create(cmd, builder.build()));
        }
     }
