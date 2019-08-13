@@ -24,6 +24,7 @@ public class EvaManager
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
     public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息
+    private Map<UUID, Eva> evas = new HashMap<>();  /*key是Eva的Id  */
     private Map<UUID, EvaSalary> evaSalaryMap = new HashMap<UUID, EvaSalary>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
@@ -40,7 +41,10 @@ public class EvaManager
                 } );
         initTypeEvaMap();
         initEvaSalaryMap();
+        initEvas();
     }
+
+
     //分类eva
     public void initTypeEvaMap(){
         EvaKey key=null;
@@ -56,6 +60,13 @@ public class EvaManager
             evaSalaryMap.put(es.getId(),es);
             GameDb.saveOrUpdate(es);
         }
+    }
+    /*缓存Eva*/
+    public void initEvas(){
+        Set<Eva> allEvas = getAllEvas();
+        allEvas.forEach(eva->{
+            evas.put(eva.getId(), eva);
+        });
     }
     public void updateTypeEvaMap(Eva eva){
         UUID id = eva.getId();
@@ -93,11 +104,12 @@ public class EvaManager
     	s.remove(getEva(eva.getPid(),eva.getAt(),eva.getBt()));
     	s.add(eva);
 		evaMap.put(eva.getPid(), s);
+        evas.put(eva.getId(), eva);/*更新Eva缓存*/
 		//同步Eva类型map
         updateTypeEvaMap(eva);
      	GameDb.saveOrUpdate(eva);
     }
-    
+
     public void addEvaList(List<Eva> evaList){
     	evaList.forEach(e->{
     	   	evaMap.computeIfAbsent(e.getPid(),
@@ -105,6 +117,7 @@ public class EvaManager
             //同步Eva类型map
     	   	typeEvaMap.computeIfAbsent(new EvaKey(e.getAt(),e.getBt()),
                     k->new HashSet<>()).add(e);
+            evas.put(e.getId(),e);
     	});
 		GameDb.saveOrUpdate(evaList);
     }
@@ -137,9 +150,8 @@ public class EvaManager
 
     public  Eva updateMyEva(Gs.Eva eva){
         int level=eva.getLv();
-        long cexp=eva.getCexp();
+        long cexp=eva.getCexp()+eva.getDecEva();
         Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-
         if(level>=1){//计算等级
             long exp=0l;
             do{
@@ -189,5 +201,26 @@ public class EvaManager
             }
         }
         return 0;
+    }
+
+    /*根据EvaId获取Eva*/
+    public Eva getEvaById(UUID id){
+        return evas.get(id);
+    }
+
+    /*根据要修改eva的摘要，获取eva信息*/
+    public Gs.Evas getAllUpdateEvas(Gs.UpdateMyEvas updateMyEvas){
+        List<Gs.Eva> evaList = new ArrayList<>();
+        List<Gs.UpdateMyEvas.EvaSummary> list = updateMyEvas.getEvaSummarysList();
+        for (Gs.UpdateMyEvas.EvaSummary summary : list) {
+            UUID evaId = Util.toUuid(summary.getId().toByteArray());
+            Eva eva = evas.get(evaId);
+            if(eva==null)
+                return null;
+            Gs.Eva.Builder builder = eva.toProto().toBuilder().setDecEva(summary.getPointNum());
+            evaList.add(builder.build());
+        }
+        Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(evaList);
+        return builder.build();
     }
 }

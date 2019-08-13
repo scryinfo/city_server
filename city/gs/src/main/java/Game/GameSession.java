@@ -3333,7 +3333,9 @@ public class GameSession {
     }*/
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
-        Gs.Evas evas = (Gs.Evas)message;
+        Gs.UpdateMyEvas evaSummary = (Gs.UpdateMyEvas)message;
+        /*首先获取到所有的Eva信息并且设置好加点点数*/
+        Gs.Evas evas = EvaManager.getInstance().getAllUpdateEvas(evaSummary);
         List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
         List<Eva> evaData = new ArrayList<>();   /*批量同步到数据库*/
         UUID playerId=null;
@@ -5088,7 +5090,8 @@ public class GameSession {
                     Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
                     //通用信息设置
                     summary.setOwnerId(Util.toByteString(b.ownerId()))
-                            .setPos(b.coordinate().toProto());
+                            .setPos(b.coordinate().toProto()).setName(b.getName())
+                            .setMetaId(b.metaId());
                     if (b instanceof IShelf) {       //货架建筑的出售信息
                         IShelf shelf = (IShelf) b;
                         summary.setShelfCount(shelf.getTotalSaleCount());
