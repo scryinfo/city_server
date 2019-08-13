@@ -1,14 +1,15 @@
 package Game.Util;
 
-import Game.Apartment;
-import Game.Building;
-import Game.City;
+import Game.*;
+import Game.Eva.Eva;
+import Game.Eva.EvaKey;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
-import Game.RetailShop;
 import Game.Timers.PeriodicTimer;
+import gs.Gs;
 import io.grpc.Metadata;
 
 import java.text.SimpleDateFormat;
@@ -85,17 +86,19 @@ public class BuildingUtil {
     /*获取最大最小知名度值*/
     public Map<Integer,Integer> getMaxAndMinBrand(int item){
         Map<Integer, Integer> map = new HashMap<>();
-        Map<String, Integer> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//如果没有推广过品牌，返回的最大最小值都是0，没有包含基础值
-        int minBrand=cityBrandMap.get("min");
-        int maxBrand=cityBrandMap.get("max");
+        Map<String, Double> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//查询的是Eva最大最小的提升比例
+        double minRatio=cityBrandMap.get("min");
+        double maxRatio=cityBrandMap.get("max");
         //如果是商品(使用商品的默认知名度)
+        int maxBrand;
+        int minBrand;
         if(MetaGood.isItem(item)){
             MetaGood good = MetaData.getGood(item);
-            minBrand += good.brand;
-            maxBrand += good.brand;
+            maxBrand = (int) (good.brand*(1+maxRatio));
+            minBrand = (int) (good.brand*(1+minRatio));
         }else{
-            minBrand +=100;// 添加默认值
-            maxBrand +=100;// 添加基础值
+            maxBrand = (int) (BrandManager.BASE_BRAND * (1 + maxRatio));
+            minBrand = (int) (BrandManager.BASE_BRAND * (1 + minRatio));
         }
         map.put(MAX, maxBrand);
         map.put(MIN, minBrand);

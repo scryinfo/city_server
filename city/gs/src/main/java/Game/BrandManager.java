@@ -382,16 +382,17 @@ public class BrandManager {
     	if(bl!=null){//优先查询加盟玩家技术
     		playerId=bl.getPlayerId();
     	}
-        int buildingBrand=BASE_BRAND+BrandManager.instance().getBrand(playerId, b.type()*100).getV();//建筑类型需要乘以100，才能查找到品牌
+
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
+        int buildingBrand= (int) (BASE_BRAND *(1+EvaManager.getInstance().computePercent(brandEva)));//品牌值，也通过Eva加点提升
 
 		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand));
 		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(BASE_BRAND));
 		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
-        //住宅和零售店初始品质 = qty * workerNum(yty)
-        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double((b.quality()*b.getWorkerNum())*(1+EvaManager.getInstance().computePercent(qualityEva))));
-		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()*b.getWorkerNum()));
+        //住宅和零售店初始品质 = qty(yty)
+        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double((b.quality())*(1+EvaManager.getInstance().computePercent(qualityEva))));
+		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 

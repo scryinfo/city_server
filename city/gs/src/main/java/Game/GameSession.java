@@ -5078,7 +5078,7 @@ public class GameSession {
         Gs.TypeBuildingDetail.Builder builder = Gs.TypeBuildingDetail.newBuilder();
         City.instance().forEachGrid(centerIdx.toSyncRange(), (grid) -> {
             Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
-            gridInfo.getIdxBuilder().setX(grid.getX()).setX(grid.getY());
+            gridInfo.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
             grid.forAllBuilding(b -> {
                 if (b.type() == type && !b.outOfBusiness()) {
                     Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
@@ -5122,6 +5122,7 @@ public class GameSession {
         });
         this.write(Package.create(cmd, builder.build()));
     }
+
     public void queryPlayerIncomePay(short cmd, Message message){
         UUID playerId = Util.toUuid(((Gs.PlayerIncomePay) message).getPlayerId().toByteArray());
         int buildType = ((Gs.PlayerIncomePay) message).getBType().getNumber();
