@@ -5117,9 +5117,8 @@ public class GameSession {
                 gridInfo.addTypeInfo(typeBuilding);
             }
         });
-        builder.setInfo(gridInfo);
-        builder.setType(type);
-        this.write(Package.create(cmd, builder.build()));
+        Gs.TypeBuildingDetail.Builder typeBuildings = builder.setInfo(gridInfo).setType(type);
+        this.write(Package.create(cmd, typeBuildings.build()));
     }
 
     public void queryPlayerIncomePay(short cmd, Message message){
