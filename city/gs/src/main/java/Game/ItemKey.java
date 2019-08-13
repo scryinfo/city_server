@@ -80,7 +80,7 @@ public class ItemKey implements Serializable {
             MetaGood goods=MetaData.getGood(meta.id);
             double b=EvaManager.getInstance().computePercent(brandEva);
             double q=EvaManager.getInstance().computePercent(qualityEva);
-            double totalBrand=goods.brand+BrandManager.instance().getBrand(producerId,meta.id).getV();
+            double totalBrand=goods.brand*(1+b);
             double totalQuality=goods.quality*(1+q);
             //品牌评分
             double brandScore = GlobalUtil.getBrandScore(totalBrand, meta.id);
