@@ -1145,7 +1145,7 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		List<Npc> list = session.createQuery("From NPC where status =:x", Npc.class)
-				.setMaxResults(4000000) //临时处理，提高加载速度
+				.setMaxResults(5000000) //临时处理，提高加载速度
 				.setParameter("x", status).list();
 		transaction.commit();
 		session.close();
