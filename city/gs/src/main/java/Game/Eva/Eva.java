@@ -37,6 +37,8 @@ public class Eva {
     
     @Column(name = "b")
     private long b;
+    @Column(name = "p")
+    private long p;
     
 	public Eva() {
 		super();
@@ -51,6 +53,17 @@ public class Eva {
 		this.lv = lv;
 		this.cexp = cexp;
 		this.b = b;
+	}
+	public Eva(UUID pid, int at, int bt, int lv, long cexp, long b,long p) {
+		super();
+	    this.id = UUID.randomUUID();
+		this.pid = pid;
+		this.at = at;
+		this.bt = bt;
+		this.lv = lv;
+		this.cexp = cexp;
+		this.b = b;
+		this.p = p;
 	}
 
     public Gs.Eva toProto() {

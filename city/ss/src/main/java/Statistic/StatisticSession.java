@@ -9,6 +9,7 @@ import Statistic.SummaryUtil.CountType;
 import Statistic.Util.TimeUtil;
 import Statistic.Util.TotalUtil;
 import com.google.protobuf.Message;
+import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
@@ -17,6 +18,7 @@ import org.spongycastle.asn1.cms.MetaData;
 import ss.Ss;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 // this class contain only getXXX method, that means the only purpose this class or this server
@@ -392,7 +394,7 @@ public class StatisticSession {
 						.build()));
 	}
 
-	public void queryIndustryDevelopment(short cmd, Message message){
+/*	public void queryIndustryDevelopment(short cmd, Message message){
 		Ss.IndustryDevelopment msg = (Ss.IndustryDevelopment)message;
 		int buildType=msg.getType().getNumber();
 
@@ -422,7 +424,7 @@ public class StatisticSession {
 			b.addIndustryInfo(industryInfo);
 		});
 		this.write(Package.create(cmd,b.build()));
-	}
+	}*/
 	private void getIndustryIncomeList(List<Document> list,int buildType,Map<Long,Long> totalMap,Map<Long,Long> singleMap){
 		list.forEach(document ->{
 			long time=document.getLong("time");
@@ -555,12 +557,6 @@ public class StatisticSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	public void queryIndustryTop(short cmd, Message message) {
-		Ss.queryTop top = (Ss.queryTop) message;
-		UUID pid = Util.toUuid(top.getPid().toByteArray()); // 玩家id
-		int type = top.getIndustryType();  // 行业类型
-		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(pid,type)));
-	}
 
 	public void queryIndustryIncome(short cmd) {
 		List<IndustryInfo> infos = SummaryUtil.queryIndustryIncom();
@@ -585,5 +581,20 @@ public class StatisticSession {
         builder.addInfo(SummaryUtil.queryTodayIncome());
 		this.write(Package.create(cmd,builder.build()));
 
+	}
+
+	// 土地或住宅
+	public void queryGroundOrApartmentAvgPrice(short cmd, Message message) {
+		Gs.Bool bool = (Gs.Bool) message;
+		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(bool.getB()); // t 为住宅 f为土地
+		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
+		if (!map.isEmpty() && map.size() > 0) {
+			map.forEach((k, v) -> {
+				Ss.AverageTransactionprice.AvgPrice.Builder avg = Ss.AverageTransactionprice.AvgPrice.newBuilder();
+				avg.setTime(k).setPrice(v);
+				builder.addAvg(avg);
+			});
+		}
+		this.write(Package.create(cmd, builder.build()));
 	}
 }

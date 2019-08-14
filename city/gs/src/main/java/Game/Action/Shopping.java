@@ -153,7 +153,7 @@ public class Shopping implements IAction {
             BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
             String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
             // 记录商品评分
-            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalQty(), chosen.meta.id);
+            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalBrand(), chosen.meta.id);
             double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
             double score = ((brandScore + goodQtyScore) / 2);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
@@ -246,7 +246,7 @@ public class Shopping implements IAction {
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
-            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalQty(), chosen.meta.id);
+            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalBrand(), chosen.meta.id);
             double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
             double score = ((brandScore + goodQtyScore) / 2);
               BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;

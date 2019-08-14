@@ -107,29 +107,41 @@ public class DayJob implements org.quartz.Job {
         documentList = LogDb.hourLaboratoryRecord(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf());
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYDAY, SummaryUtil.ExchangeType.LABORATORY, documentList, yestodayStartTime, SummaryUtil.getPlayerExchangeAmount());
 
-        //all types of buildings a day income
-        //material factory and  produce factory
-        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf());
-        SummaryUtil.insertDayIndustryIncomeData(null, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        // all industry income
+        //material factory
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,SummaryUtil.MATERIAL);
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.MATERIAL, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
+        // produce factory
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,SummaryUtil.PRODUCE);
+        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.PRODUCE, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //retailshop
-        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, false);
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.RETAIL, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //apartment
-        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getNpcRentApartment());
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, true);
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //promote
-        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),true); // 只会产生一条 document
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,LogDb.PROMOTE); // 只会产生一条 document
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.PROMOTE, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         // technology
-        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),false);
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,LogDb.TECHNOLOGY);
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.TECHNOLOGY, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         // sellerGround
         documentList = LogDb.daySummaryGroundHistoryIncome(yestodayStartTime, todayStartTime, LogDb.getBuyGround());
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.GROUND, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
 
+        //Average transaction price
+        // ground
+        documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getBuyGround());
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.GROUND, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+        // apartment
+        documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getNpcRentApartment());
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+
         //玩家当天开业情况
         documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness(),0);
         SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayBuildingBusiness());
+
 
         //按天统计玩家收入支出
         //player income

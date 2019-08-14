@@ -16,24 +16,25 @@ import gs.Gs;
 import org.bson.Document;
 import ss.Ss;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static Shared.LogDb.KEY_AVG;
 import static Shared.LogDb.KEY_TOTAL;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
 public class SummaryUtil {
-    public static final int TRIVIAL = 10;
     public static final int MATERIAL = 11;
     public static final int PRODUCE = 12;
     public static final int RETAIL = 13;
     public static final int APARTMENT = 14;
     public static final int TECHNOLOGY=15;//新版研究所
     public static final int PROMOTE=16;//新版推广公司
-    public static final int TALENT = 17;
+    public static final int GROUND = 20; // 土地相关
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     public static final long HOUR_MILLISECOND = 1000 * 3600;
     public static final long SECOND_MILLISECOND = 1000 * 10;
@@ -68,6 +69,7 @@ public class SummaryUtil {
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
+    public static final String AVERAGE_TRANSACTION_PRICE = "averageTransactionPrice";
     public static final String TOP_INFO = "topInfo";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
@@ -93,10 +95,10 @@ public class SummaryUtil {
     private static MongoCollection<Document> dayIndustryIncome;
     private static MongoCollection<Document> dayBuildingBusiness;
     private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
+    private static MongoCollection<Document> averageTransactionPrice; // 平均交易价格
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
-    private static MongoCollection<Document> topInfo;
 
     public static void init()
     {
@@ -151,7 +153,7 @@ public class SummaryUtil {
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        topInfo = database.getCollection(TOP_INFO)
+        averageTransactionPrice = database.getCollection(AVERAGE_TRANSACTION_PRICE)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -665,6 +667,10 @@ public class SummaryUtil {
     {
         return dayIndustryIncome;
     }
+    public static MongoCollection<Document> getAverageTransactionPrice()
+    {
+        return averageTransactionPrice;
+    }
 
     public static MongoCollection<Document> getDayBuildingBusiness()
     {
@@ -811,7 +817,7 @@ public class SummaryUtil {
     }
 
     public enum IndustryType {
-        MATERIAL(11),PRODUCE(12),RETAIL(13),APARTMENT(14), TECHNOLOGY(15), PROMOTE(16), GROUND(17);
+        MATERIAL(11),PRODUCE(12),RETAIL(13),APARTMENT(14), TECHNOLOGY(15), PROMOTE(16), GROUND(20);
         private int value;
         IndustryType(int i)
         {
@@ -843,21 +849,27 @@ public class SummaryUtil {
     public static void insertDayIndustryIncomeData(IndustryType buildingType,List<Document> documentList,
                                                 long time,MongoCollection<Document> collection)
     {
-        //document already owned : id,total
         List<Document> list=new ArrayList<Document>();
         documentList.forEach(document ->{
                     Document d=new Document();
                     d.append("total",document.getLong("total"));
-                    if(buildingType==null){
-                        int type= document.getInteger("id");
-                        if(type==21){
-                            d.append(TIME, time).append(TYPE, SummaryUtil.IndustryType.MATERIAL.getValue());
-                        }else if(type==22){
-                            d.append(TIME, time).append(TYPE, SummaryUtil.IndustryType.PRODUCE.getValue());
-                        }
-                    }else{
-                        d.append(TIME, time).append(TYPE, buildingType.getValue());
-                    }
+                    d.append(TIME, time).append(TYPE, buildingType.getValue());
+                    list.add(d);
+                }
+             );
+        if (!list.isEmpty()) {
+            collection.insertMany(list);
+        }
+    }
+
+    public static void insertAverageTransactionprice(IndustryType buildingType,List<Document> documentList,
+                                                     long time,MongoCollection<Document> collection)
+    {
+        List<Document> list=new ArrayList<Document>();
+        documentList.forEach(document ->{
+                    Document d=new Document();
+                    d.append(KEY_AVG,document.getDouble(KEY_AVG));
+                    d.append(TIME, time).append(TYPE, buildingType.getValue());
                     list.add(d);
                 }
              );
@@ -970,19 +982,6 @@ public class SummaryUtil {
         return documentList;
     }
 
-    public static MongoCollection<Document> getTopInfo() {
-        return topInfo;
-    }
-
-    public static void insertTopInfo(MongoCollection<Document> collection, List<Document> documentList, int type) {
-        documentList.forEach(document -> {
-            document.append("tp", type);
-        });
-        if (!documentList.isEmpty()) {
-            collection.insertMany(documentList);
-        }
-
-    }
 
     public static long getTodayIncome(MongoCollection<Document> collection, UUID pid,int type) {
         final long[] todayIncome = {0};
@@ -1003,31 +1002,6 @@ public class SummaryUtil {
         return todayIncome[0];
     }
 
-    public static Ss.TopInfo queryIndustryTop(UUID pid, int type) {
-        Ss.TopInfo.Builder builder = Ss.TopInfo.newBuilder();
-        Ss.TopInfo.TopMsg.Builder topMsg = Ss.TopInfo.TopMsg.newBuilder();
-        Ss.TopInfo.IndustryMsg.Builder msg = Ss.TopInfo.IndustryMsg.newBuilder();
-        topMsg.setOwner(0);
-        AtomicInteger num = new AtomicInteger();
-        topInfo.find(and(eq("tp", type)))
-                .sort(and(eq("total", -1)))
-                .forEach((Block<? super Document>) document ->
-                {
-                    num.incrementAndGet();
-                    UUID id = document.get("id", UUID.class);
-                    if (pid.equals(id)) {
-                        topMsg.setOwner(num.get());
-                    }
-                    msg.setPid(Util.toByteString(id));
-                    msg.setTodayIncome(getTodayIncome(topInfo, pid, type));
-                    msg.setSumIncome(document.getLong("total"));
-                    msg.setName(Gs.Str.newBuilder().setStr(document.getString("rn")).build());
-                    msg.setCompanyName(Gs.Str.newBuilder().setStr(document.getString("cn")).build());
-                    topMsg.addIndustryMsg(msg.build());
-                });
-        topMsg.setIndustry(type);
-        return builder.setMsg(topMsg.build()).build();
-    }
 
 
     public static List<IndustryInfo> queryIndustryIncom() {
@@ -1154,12 +1128,44 @@ public class SummaryUtil {
         map.put(SummaryUtil.APARTMENT, queryTodayIncome(startTime, endTime, true));
         map.put(Gs.SupplyAndDemand.IndustryType.GROUND_VALUE, queryTodayIncome(startTime, endTime,false));
         Ss.IndustryIncome.IncomeInfo.Builder builder = Ss.IndustryIncome.IncomeInfo.newBuilder();
-        builder.setTime(System.currentTimeMillis());
+        builder.setTime(todayStartTime(System.currentTimeMillis()));
         map.forEach((k,v)->{
             Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
             msg.setType(k).setIncome(v);
             builder.addMsg(msg);
         });
         return builder.build();
+    }
+
+    public static Map<Long, Double> queryAverageTransactionprice(boolean isApartment) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND,0);
+        Date endDate = calendar.getTime();
+        long endTime=endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime=startDate.getTime();
+        Map<Long, Double> map = new LinkedHashMap<>();
+        int type = APARTMENT;
+        if (!isApartment) {
+            type = GROUND;
+        }
+        averageTransactionPrice.find(and(
+                eq(TYPE, type),
+                gte(TIME, startTime),
+                lte(TIME, endTime)
+        ))
+                .projection(fields(include(TIME, KEY_AVG), excludeId()))
+                .sort(Sorts.descending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    map.put(document.getLong(TIME), document.getDouble(KEY_AVG));
+                });
+        return map;
     }
 }
