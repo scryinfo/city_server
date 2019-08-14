@@ -184,7 +184,7 @@ public class GameServer {
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
+                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,2048, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder(GaCode.OpCode.class));
                                 ch.pipeline().addLast(businessLogicExecutor, new AccountServerEventHandler());
@@ -202,7 +202,7 @@ public class GameServer {
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
+                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,2048, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder(GsCode.OpCode.class));
                                 //ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));

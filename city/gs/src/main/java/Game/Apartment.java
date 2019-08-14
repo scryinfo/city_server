@@ -118,7 +118,7 @@ public class Apartment extends Building implements IBuildingContract
 
     public double getTotalQty(){ //yty
         Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
-        double qty = (meta.qty * this.getWorkerNum()) * (1 + EvaManager.getInstance().computePercent(eva));
+        double qty = (meta.qty) * (1 + EvaManager.getInstance().computePercent(eva));
         return qty;
     }
     public int getRenterNum(){
@@ -128,8 +128,10 @@ public class Apartment extends Building implements IBuildingContract
     public int getCapacity(){
         return this.meta.npc;
     }
-    //获取总知名度
+    //获取总知名度(基础品牌*（1+eva加成比例）)
     public double getTotalBrand(){
-        return BrandManager.BASE_BRAND+BrandManager.instance().getBrand(ownerId(),type()*100).getV();
+        /*获取Eva加成信息*/
+        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Brand_VALUE);
+        return BrandManager.BASE_BRAND *(1 + EvaManager.getInstance().computePercent(eva));
     }
 }

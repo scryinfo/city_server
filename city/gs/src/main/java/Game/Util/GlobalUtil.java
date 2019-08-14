@@ -72,36 +72,25 @@ public class GlobalUtil {
             return null;
     }
 
-    //获取最大最小的知名度
-    public static Map<String,Integer> getMaxOrMinBrandValue(int item){
-        HashMap<String,Integer> map=new HashMap<>();
+    //获取最大最小的知名度（就是帅选全程最高最低等级）
+    public static Map<String,Double> getMaxOrMinBrandValue(int item){
+        HashMap<String,Double> map=new HashMap<>();
         //统计玩家人数
-        long playerAmount = GameDb.getPlayerAmount();
-        //如果是建筑，需要再item基础上*100
-        if(MetaBuilding.isBuildingByBaseType(item)){
-            item *= 100;
+        /*获取全城最高和最低的Eva品牌加成信息*/
+        EvaKey key = new EvaKey(item,Gs.Eva.Btype.Brand_VALUE);
+        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.get(key);
+        // 筛选出等级最大的
+        List<Integer> evaLv = new ArrayList<>();
+        for (Eva eva : evas) {
+            evaLv.add(eva.getLv());
         }
-        List<BrandManager.BrandInfo> brandInfos = BrandManager.instance().getAllBrandInfoByItem(item);
-        int maxBrand=0;
-        int minBrand=0;
-        //初始化
-        if(!brandInfos.isEmpty()){
-            maxBrand = brandInfos.get(0).getV();
-            minBrand = brandInfos.get(0).getV();
-            for (BrandManager.BrandInfo brandInfo : brandInfos) {
-                if(brandInfo.getV()>maxBrand){
-                    maxBrand = brandInfo.getV();
-                }
-                if(brandInfo.getV()<minBrand){
-                    minBrand = brandInfo.getV();
-                }
-            }
-        }
-        if(brandInfos.size()<playerAmount){//如果查询的知名度个数小于玩家数量，则设置0为最小知名度就是说没有推广过，此处不加基础默认值
-            minBrand=0;
-        }
-        map.put("max", maxBrand);
-        map.put("min", minBrand);
+        Integer maxLv = Collections.max(evaLv);/*最高等级*/
+        double maxRation = maxLv > 0 ? MetaData.getAllExperiences().get(maxLv).p / 100000d : 0;
+        // 转换为提升比例
+        Integer minLv = Collections.min(evaLv);/*最低等级*/
+        double minRation = minLv > 0 ? MetaData.getAllExperiences().get(minLv).p / 100000d : 0;
+        map.put("max", maxRation);
+        map.put("min", minRation);
         return map;
     }
 

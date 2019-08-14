@@ -388,6 +388,9 @@ public class GameSession {
 
             //Notify friends
             FriendManager.getInstance().broadcastStatue(player.id(),false);
+            /*统计玩家的在线时间*/
+            long loginTimes = player.getOfflineTs() - player.getOnlineTs();
+            LogDb.playerLoginTime(player.id(),loginTimes,DateUtil.getTimeDayStartTime(player.getOnlineTs()));
         }
         GameServer.allGameSessions.remove(id());
         if (player.getSocietyId() != null)
@@ -3288,10 +3291,12 @@ public class GameSession {
         EvaManager.getInstance().getEvaList(pid).forEach(eva->{
             list.addEva(eva.toProto());
         });
+        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
+        list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
     }
 
-/*    public void updateMyEvas(short cmd, Message message)
+/*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
@@ -3328,64 +3333,61 @@ public class GameSession {
         //BrandManager.instance().getAllBuildingBrandOrQuality();
         this.write(Package.create(cmd, results.build()));
     }*/
-
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
-        Gs.Evas evas = (Gs.Evas)message;
+        Gs.UpdateMyEvas evaSummary = (Gs.UpdateMyEvas)message;
+        /*首先获取到所有的Eva信息并且设置好加点点数*/
+        Gs.Evas evas = EvaManager.getInstance().getAllUpdateEvas(evaSummary);
         List<Gs.Eva> updateEvas = new ArrayList<>();//加点成功的eva
-        List<Gs.Eva> failedEvas = new ArrayList<>();//加点失败的eva
+        List<Eva> evaData = new ArrayList<>();   /*批量同步到数据库*/
         UUID playerId=null;
         boolean retailOrApartmentQtyIsChange = false;//是否更新最大最小建筑品质标志
         //批量修改Evas加点科技
         List<PromotePoint> playerPromotePoints = new ArrayList<>();
         List<SciencePoint> playerSciencePoint = new ArrayList<>();
-        for (Gs.Eva eva : evas.getEvaList()) {
-            if(playerId==null){
-                playerId = Util.toUuid(eva.getPid().toByteArray());
-            }
-            /*1.确定是哪种科技加点  ，判断Bt类型*/
-            if(EvaTypeUtil.judgeScienceType(eva)==EvaTypeUtil.PROMOTE_TYPE){    //推广类型
-                /*确定具体加点建筑类型*/
-                int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.PROMOTE_TYPE, eva.getAt());
-                PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(playerId, pointType);
-                if(promotePoint.promotePoint<eva.getCexp()){
-                    System.err.println("点数不足");
-                    failedEvas.add(eva);
-                }else{
-                    /*进行加点*/
-                    Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-                    /*扣减点数*/
-                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType,-eva.getDecEva()));
-                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
-                    updateEvas.add(newEva.toProto());
-                }
-            }else{                                                              //科技点数类型加成
-                /*确定具体加点建筑类型*/
-                int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt());
-                SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(playerId, pointType);
-                if(sciencePoint.point<eva.getCexp()){
-                    System.err.println("点数不足");
-                    failedEvas.add(eva);
-                }else{
-                    if((eva.getAt()==MetaBuilding.APARTMENT||eva.getAt()==MetaBuilding.RETAIL)&&eva.getBt().equals(Gs.Eva.Btype.Quality)){
-                        retailOrApartmentQtyIsChange = true;
-                    }
-                    /*进行加点*/
-                    Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-                    /*扣减点数*/
-                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType,-eva.getDecEva()));
-                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
-                    updateEvas.add(newEva.toProto());
-                }
-            }
-        }
-        if(retailOrApartmentQtyIsChange){
-            BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
-        }
-        playerSciencePoint.forEach(p->SciencePointManager.getInstance().updateSciencePoint(p));
-        playerPromotePoints.forEach(p->PromotePointManager.getInstance().updatePromotionPoint(p));
-        Gs.EvaResult.Builder builder = Gs.EvaResult.newBuilder().addAllSuccessEvas(updateEvas).addAllFailedEvas(failedEvas);
-        this.write(Package.create(cmd,builder.build()));
+        /*1.首先一次性判断，所有Eva是否能够加点成功*/
+       if(!EvaTypeUtil.hasEnoughPoint(evas)){
+           this.write(Package.fail(cmd, Common.Fail.Reason.evaPointNotEnough));
+           return;
+       }else {
+           for (Gs.Eva eva : evas.getEvaList()) {
+               if (playerId == null) {
+                   playerId = Util.toUuid(eva.getPid().toByteArray());
+               }
+               /*1.确定是哪种科技加点  ，判断Bt类型*/
+               if (EvaTypeUtil.judgeScienceType(eva) == EvaTypeUtil.PROMOTE_TYPE) {    //推广类型
+                   /*确定具体加点建筑类型*/
+                   int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.PROMOTE_TYPE, eva.getAt());
+                   PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(playerId, pointType);
+                   Eva newEva = EvaManager.getInstance().updateMyEva(eva); /*进行加点*/
+                   playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
+                   EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
+                   updateEvas.add(newEva.toProto());
+                   evaData.add(newEva);
+               } else {                                                              //科技点数类型加成
+                   int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt()); /*确定具体加点建筑类型*/
+                   SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(playerId, pointType);
+                   if ((eva.getAt() == MetaBuilding.APARTMENT || eva.getAt() == MetaBuilding.RETAIL) && eva.getBt().equals(Gs.Eva.Btype.Quality))
+                       retailOrApartmentQtyIsChange = true;
+                   Eva newEva = EvaManager.getInstance().updateMyEva(eva);/*进行加点*/
+                   playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
+                   EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
+                   updateEvas.add(newEva.toProto());
+                   evaData.add(newEva);
+               }
+           }
+           if (retailOrApartmentQtyIsChange) {
+               BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
+           }
+           playerSciencePoint.forEach(p -> SciencePointManager.getInstance().updateSciencePoint(p));
+           playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
+           evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
+           Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+           /*重新查询玩家的所有点数信息*/
+           List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
+           builder.addAllBuildingPoint(buildingPoints);
+           this.write(Package.create(cmd, builder.build()));
+       }
     }
 
     public void queryMyBrands(short cmd, Message message){
@@ -4511,29 +4513,14 @@ public class GameSession {
         this.write(Package.create(cmd, builder.build()));
     }
     //推广公司信息(修改版)
-    public void queryPromotionCompanyInfo(short cmd,Message message){
+    public void queryPromotionCompanyInfo(short cmd,Message message){  //TODO
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-        Building building = City.instance().getBuilding(buildingId);
-        PublicFacility fcySeller = (PublicFacility) building ;
-        Gs.PromotionCompanyInfo.Builder builder=Gs.PromotionCompanyInfo.newBuilder();
-        builder.setSalary(building.salaryRatio);
-        builder.setStaffNum(building.getWorkerNum());
-        builder.setBaseAbility(fcySeller.getBaseAbility());
-        //建筑基本信息
-        Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-        builder.setBuildingInfo(buildingInfo);
-        Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.PUBLIC);
-        buildingTech.forEach(type->{
-            Gs.PromotionCompanyInfo.PromoAbility.Builder b=builder.addAbilitysBuilder();
-            Integer value = (int)fcySeller.getAllPromoTypeAbility(type);//推广能力加成需要由eva来获取
-            Eva promotionEva = EvaManager.getInstance().getEva(playerId, type, Gs.Eva.Btype.PromotionAbility_VALUE);
-            b.setAddAbility(EvaManager.getInstance().computePercent(promotionEva))//基础推广能力加成
-                    .setTypeId(type)
-                    .setAbility(value);//推广能力值（单项推广能力，也就是的总能力）
-        });
-        this.write(Package.create(cmd, builder.build()));
+        UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof PromotionCompany)){
+            return;
+        }
+        this.write(Package.create(cmd, building.toProto()));
     }
 
     //查询仓库信息
@@ -4559,29 +4546,12 @@ public class GameSession {
     //查询研究所信息
     public void queryLaboratoryInfo(short cmd,Message message){
         Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray());
-        Building building = City.instance().getBuilding(buildingId);
-        Laboratory lab = (Laboratory) building ;
-
-        Gs.LaboratoryInfo.Builder builder=Gs.LaboratoryInfo.newBuilder();
-        builder.setSalary(lab.salaryRatio);
-        builder.setStaffNum(lab.getWorkerNum());
-        builder.setEvaProb(lab.getEvaProb());//已经乘以员工人数和薪资
-        builder.setGoodProb(lab.getGoodProb());
-        //建筑基本信息
-        Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
-        builder.setBuildingInfo(buildingInfo);
-        Set<Integer> buildingTech = MetaData.getBuildingTech(MetaBuilding.LAB);
-        //现在可以得到研究所的所有at和研究所的所有bt，
-        buildingTech.forEach(item->{
-            Gs.LaboratoryInfo.LabAbility.Builder b=builder.addAbilitysBuilder();
-            //因为研究所一个atype只对应一个eva，所以获取第一个。
-            Eva eva = EvaManager.getInstance().getEva(playerId, item).get(0);
-            b.setTypeId(eva.getBt());
-            b.setAbility(EvaManager.getInstance().computePercent(eva));
-        });
-        this.write(Package.create(cmd, builder.build()));
+        UUID bid = Util.toUuid(msg.getBuildingId().toByteArray());
+        Building building = City.instance().getBuilding(bid);
+        if(!(building instanceof Technology)){
+            return;
+        }
+        this.write(Package.create(cmd, building.toProto()));
     }
     /*查询品牌信息*/
     public void queryBrand(short cmd, Message message) {
@@ -5092,7 +5062,7 @@ public class GameSession {
         City.instance().forAllGrid((grid)->{
             AtomicInteger n = new AtomicInteger(0);
             grid.forAllBuilding(building -> {
-                if(building.type()==type&& !building.outOfBusiness()) {
+                if(building.type()==type) {
                         n.addAndGet(1);
                 }
             });
@@ -5110,52 +5080,52 @@ public class GameSession {
         int type = query.getType();
         GridIndex centerIdx = new GridIndex(query.getCenterIdx().getX(), query.getCenterIdx().getY());
         Gs.TypeBuildingDetail.Builder builder = Gs.TypeBuildingDetail.newBuilder();
-        City.instance().forEachGrid(centerIdx.toSyncRange(), (grid) -> {
-            Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
-            gridInfo.getIdxBuilder().setX(grid.getX()).setX(grid.getY());
-            grid.forAllBuilding(b -> {
-                if (b.type() == type && !b.outOfBusiness()) {
-                    Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
-                    if (b.state == Gs.BuildingState.SHUTDOWN_VALUE) {//未开业,不添加其他建筑数据
-                        typeBuilding.setIsopen(false);
-                    } else {
-                        typeBuilding.setIsopen(true);
-                        Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
-                        //通用信息设置
-                        summary.setOwnerId(Util.toByteString(b.ownerId()))
-                                .setPos(b.coordinate().toProto());
-                        if (b instanceof IShelf) {       //货架建筑的出售信息
-                            IShelf shelf = (IShelf) b;
-                            summary.setShelfCount(shelf.getTotalSaleCount());
-                        } else if (b instanceof Apartment) {//住宅类型信息
-                            Apartment apartment = (Apartment) b;
-                            // 玩家住宅评分
-                            double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
-                            double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
-                            double curRetailScore = (brandScore + retailScore) / 2;
-                            // 玩家住宅繁荣度
-                            double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(b);
-                            double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore, prosperityScore);
-                            Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.newBuilder();
-                            apartSummary.setCapacity(apartment.getCapacity())
-                                    .setRent(apartment.cost())
-                                    //计算总评分及推荐定价
-                                    .setGuidePrice((int) guidePrice)
-                                    .setRenter(apartment.getRenterNum());
-                            summary.setApartmentSummary(apartSummary);
-                        }else if(b instanceof ScienceBuildingBase){/*研究所和推广公司*/
-                            ScienceBuildingBase science = (ScienceBuildingBase) b;
-                            summary.setShelfCount(science.getShelf().getAllNum());
-                        }
-                        typeBuilding.setBuildingInfo(summary);
+        Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
+        gridInfo.getIdxBuilder().setX(centerIdx.x).setY(centerIdx.y);
+        City.instance().forEachBuilding(centerIdx, (b) -> {
+            if (b.type() == type) {
+                Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
+                if (b.state == Gs.BuildingState.SHUTDOWN_VALUE) {//未开业,不添加其他建筑数据
+                    typeBuilding.setIsopen(false);
+                } else {
+                    typeBuilding.setIsopen(true);
+                    Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
+                    //通用信息设置
+                    summary.setOwnerId(Util.toByteString(b.ownerId()))
+                            .setPos(b.coordinate().toProto()).setName(b.getName())
+                            .setMetaId(b.metaId());
+                    if (b instanceof IShelf) {       //货架建筑的出售信息
+                        IShelf shelf = (IShelf) b;
+                        summary.setShelfCount(shelf.getTotalSaleCount());
+                    } else if (b instanceof Apartment) {//住宅类型信息
+                        Apartment apartment = (Apartment) b;
+                        // 玩家住宅评分
+                        double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
+                        double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
+                        double curRetailScore = (brandScore + retailScore) / 2;
+                        // 玩家住宅繁荣度
+                        double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(b);
+                        double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore, prosperityScore);
+                        Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.newBuilder();
+                        apartSummary.setCapacity(apartment.getCapacity())
+                                .setRent(apartment.cost())
+                                //计算总评分及推荐定价
+                                .setGuidePrice((int) guidePrice)
+                                .setRenter(apartment.getRenterNum());
+                        summary.setApartmentSummary(apartSummary);
+                    }else if(b instanceof ScienceBuildingBase){/*研究所和推广公司*/
+                        ScienceBuildingBase science = (ScienceBuildingBase) b;
+                        summary.setShelfCount(science.getShelf().getAllNum());
                     }
-                    gridInfo.addTypeInfo(typeBuilding);
+                    typeBuilding.setBuildingInfo(summary);
                 }
-            });
-            builder.addInfo(gridInfo);
+                gridInfo.addTypeInfo(typeBuilding);
+            }
         });
-        this.write(Package.create(cmd, builder.build()));
+        Gs.TypeBuildingDetail.Builder typeBuildings = builder.setInfo(gridInfo).setType(type);
+        this.write(Package.create(cmd, typeBuildings.build()));
     }
+
     public void queryPlayerIncomePay(short cmd, Message message){
         UUID playerId = Util.toUuid(((Gs.PlayerIncomePay) message).getPlayerId().toByteArray());
         int buildType = ((Gs.PlayerIncomePay) message).getBType().getNumber();
@@ -5530,11 +5500,13 @@ public class GameSession {
         if(science.addshelf(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
+            ScienceShelf.Content content = science.getContent(item.key);
             Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto())
                     .setCurCount(science.getShelf().getAllNum())                /*设置货架上的总数量*/
                     .setStoreNum(science.getStore().getItemCount(item.getKey()))/*设置仓库中的当前商品的可用数量*/
-                    .setItem(itemBuilder);
-            this.write(Package.create(cmd, builder.build()));
+                    .setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
+           /* this.write(Package.create(cmd, builder.build()));*/
+            science.sendToAllWatchers(Package.create(cmd, builder.build()));
         }else{
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
             System.err.println("数量不足");
@@ -5555,7 +5527,8 @@ public class GameSession {
             if(science.delshelf(item.key, content.n, true)) {
                 GameDb.saveOrUpdate(science);
                 Gs.ShelfDel.Builder builder = c.toBuilder().setCurCount(science.getShelf().getAllNum());
-                this.write(Package.create(cmd, builder.build()));
+                /*this.write(Package.create(cmd, builder.build()));*/
+                science.sendToAllWatchers(Package.create(cmd, builder.build()));
             }
         }else{
             this.write(Package.fail(cmd,Common.Fail.Reason.numberNotEnough));
@@ -5574,11 +5547,13 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) building;
         if(science.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(science);
+            ScienceShelf.Content content = science.getContent(item.key);
             Gs.Item.Builder itemBuilder = c.getItem().toBuilder().setN(science.getShelf().getSaleNum(item.key.meta.id));
             Gs.ShelfSet.Builder builder = c.toBuilder();
             builder.setStoreNum(science.getStore().getItemCount(item.getKey()))
-                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder);
-            this.write(Package.create(cmd, builder.build()));
+                    .setCurCount(science.getShelf().getAllNum()).setItem(itemBuilder).setAutoRepOn(content.autoReplenish);
+           /*this.write(Package.create(cmd, builder.build()));*/
+            science.sendToAllWatchers(Package.create(cmd, builder.build()));
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
         }
@@ -5625,17 +5600,16 @@ public class GameSession {
             //日志记录
             LogDb.playerPay(player.id(),cost,sellBuilding.type());
             LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
-            LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
-                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,sellBuilding.type());
+            LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
             }
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
-            content = science.getContent(item.key);
-            sellBuilding.sendToWatchers(sellBuilding.id(),itemId,content.n,content.price,content.autoReplenish,null);
-            this.write(Package.create(cmd, c));
+            sellBuilding.sendToAllWatchers(Package.create(cmd, c));
+           /* this.write(Package.create(cmd, c));*/
         }else{
             System.err.println("货架数量不足");
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
@@ -5819,12 +5793,30 @@ public class GameSession {
         this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
     }
 
-    /*查询玩家evaj加点的不同类型*/
-    public void queryPlayerEvaPointType(short cmd, Message message){
-        Gs.Id id = (Gs.Id) message;
-        UUID playerId = Util.toUuid(id.getId().toByteArray());
-        Gs.PlayerEvaPointType evaPointType = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-        this.write(Package.create(cmd, evaPointType));
+    /*查询土地繁荣度*/
+    public void queryGroundProsperity(short cmd, Message message){
+        Gs.MiniIndex index= (Gs.MiniIndex) message;
+        Coordinate coordinate = new Coordinate(index);
+        int groundProsperity = ProsperityManager.instance().getGroundProsperity(coordinate);
+        Gs.Num.Builder builder = Gs.Num.newBuilder().setNum(groundProsperity);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void queryAuctionProsperity(short cmd, Message message){
+        Gs.Num auctionId= (Gs.Num) message;
+        MetaGroundAuction groundAuction = MetaData.getGroundAuction(auctionId.getNum());
+        if(groundAuction==null){
+            System.err.println("拍卖地块id不存在");
+            return;
+        }
+        List<Coordinate> area = groundAuction.area;
+        int sum=0;
+        for (Coordinate coordinate : area) {
+            sum+=ProsperityManager.instance().getGroundProsperity(coordinate);
+        }
+        Gs.AuctionProsperity.Builder builder = Gs.AuctionProsperity.newBuilder();
+        builder.setGroundId(auctionId.getNum()).setProsperity(sum);
+        this.write(Package.create(cmd, builder.build()));
     }
 
     public void querySupplyAndDemand(short cmd,Message message) {

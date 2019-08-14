@@ -66,6 +66,7 @@ public class SummaryUtil {
     private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";
     private static final String DAY_BUILDING__GOOD_SOLD_DETAIL="dayBuildingGoodSoldDetail";
     private static final String DAY_BUILDING_BUSINESS= "dayBuildingBusiness";
+    private static final String DAY_PLAYER_LOGINTIME= "dayPlayerLoginTime";
 
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
@@ -99,6 +100,9 @@ public class SummaryUtil {
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
+
+    //yty
+    private static MongoCollection<Document> dayPlayerLoginTime;
 
     public static void init()
     {
@@ -154,6 +158,9 @@ public class SummaryUtil {
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         averageTransactionPrice = database.getCollection(AVERAGE_TRANSACTION_PRICE)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+
+        dayPlayerLoginTime = database.getCollection(DAY_PLAYER_LOGINTIME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -465,6 +472,16 @@ public class SummaryUtil {
         }
     }
 
+    /*玩家每天的登陆时长*/
+    public static void insertDayPlayerLoginTime(List<Document> documentList,
+                                                long time,MongoCollection<Document> collection){
+        documentList.forEach(document ->
+                document.append(TIME, time));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
+
     public static Ss.EconomyInfos getPlayerEconomy(UUID playerId)
     {
         Ss.EconomyInfos.Builder builder = Ss.EconomyInfos.newBuilder();
@@ -681,7 +698,11 @@ public class SummaryUtil {
         return dayBuildingGoodSoldDetail;
     }
 
-    public static void insertBuildingDayIncome(List<Document> documentList,long time)
+    public static MongoCollection<Document> getDayPlayerLoginTime() {
+        return dayPlayerLoginTime;
+    }
+
+    public static void insertBuildingDayIncome(List<Document> documentList, long time)
     {
         documentList.forEach(document -> {
             document.append(TIME, time);
@@ -743,11 +764,12 @@ public class SummaryUtil {
     }
     /*查询建筑7天内收入统计*/
     public static Map<Long, Map<ItemKey, Document>> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection, UUID bid) {
-        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
         /*存储格式  key为时间，value存这人一天内出现过的销售商品*/
         Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
         collection.find(and(eq("bid", bid),
-                gte(TIME, startTime)))
+                gte(TIME, startTime),
+                lt(TIME,TimeUtil.todayStartTime())))
                 .sort(Sorts.ascending(TIME))
                 .forEach((Block<? super Document>) d ->
                 {
@@ -758,12 +780,13 @@ public class SummaryUtil {
 
     /*获取建筑中某一个商品的历史销售记录*/
     public static Map<Long,Document> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection,int itemId,UUID bid,UUID producerId){
-        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 7;
+        long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
         Map<Long, Document> map = new HashMap<>();
         collection.find(and(eq("bid", bid),
                 eq("itemId",itemId),
                 eq("p",producerId),
-                gte(TIME, startTime)))
+                gte(TIME, startTime),
+                lt(TIME,TimeUtil.todayStartTime())))
                 .forEach((Block<? super Document>) doc ->
                 {
                     map.put(TimeUtil.getTimeDayStartTime(doc.getLong(TIME)),doc);

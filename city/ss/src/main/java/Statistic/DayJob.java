@@ -150,6 +150,11 @@ public class DayJob implements org.quartz.Job {
         //player pay
         documentList = LogDb.dayPlayerIncomeOrPay(yestodayStartTime, todayStartTime, LogDb.getPlayerPay());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayPlayerPay());
+
+        /*PlayerLoginTime(玩家每日登录时间统计)  YTY*/
+        documentList=LogDb.dayPlayerLoginTime(yestodayStartTime, todayStartTime, LogDb.getPlayerLoginTime());
+        SummaryUtil.insertDayPlayerLoginTime(documentList,yestodayStartTime,SummaryUtil.getDayPlayerLoginTime());
+
         //accept all client request
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
