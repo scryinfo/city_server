@@ -44,6 +44,14 @@ public class Eva {
 		super();
 	}
 
+	public long getP() {
+		return p;
+	}
+
+	public void setP(long p) {
+		this.p += p;
+	}
+
 	public Eva(UUID pid, int at, int bt, int lv, long cexp, long b) {
 		super();
 	    this.id = UUID.randomUUID();
@@ -71,7 +79,7 @@ public class Eva {
         builder.setId(Util.toByteString(id))
 				.setPid(Util.toByteString(pid))
 				.setAt(at)
-				.setBt(Gs.Eva.Btype.valueOf(bt)) 
+				.setBt(Gs.Eva.Btype.valueOf(bt))
 				.setLv(lv)
 				.setCexp(cexp)
 				.setB(b);

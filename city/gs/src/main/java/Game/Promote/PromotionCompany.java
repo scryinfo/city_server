@@ -149,6 +149,6 @@ public class PromotionCompany extends ScienceBuildingBase {
 
     @Override
     public int getTotalSaleCount() {
-        return 0;
+        return this.shelf.getTotalContentNum();
     }
 }

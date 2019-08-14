@@ -3363,6 +3363,7 @@ public class GameSession {
                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                    updateEvas.add(newEva.toProto());
+                   newEva.setP(promotePoint.promotePoint); // 记录科技点数
                    evaData.add(newEva);
                } else {                                                              //科技点数类型加成
                    int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt()); /*确定具体加点建筑类型*/
@@ -3373,6 +3374,7 @@ public class GameSession {
                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                    updateEvas.add(newEva.toProto());
+                   newEva.setP(sciencePoint.point); // 记录研究点数
                    evaData.add(newEva);
                }
            }
@@ -5601,7 +5603,7 @@ public class GameSession {
             LogDb.playerPay(player.id(),cost,sellBuilding.type());
             LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
-                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,sellBuilding.type());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
