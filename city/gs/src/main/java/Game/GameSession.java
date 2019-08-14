@@ -5598,7 +5598,7 @@ public class GameSession {
             //日志记录
             LogDb.playerPay(player.id(),cost,sellBuilding.type());
             LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
-            LogDb.buyInShelf(player.id(), seller.id(), item.n, c.getPrice(),
+            LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
                     item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
