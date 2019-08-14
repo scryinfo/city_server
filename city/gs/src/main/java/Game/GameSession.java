@@ -14,12 +14,11 @@ import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
-import Game.RecommendPrice.GuidePriceMgr;
-import Game.Util.*;
 import Game.OffLineInfo.OffLineInformation;
 import Game.Promote.PromotePoint;
 import Game.Promote.PromotePointManager;
 import Game.Promote.PromotionCompany;
+import Game.RecommendPrice.GuidePriceMgr;
 import Game.Technology.SciencePoint;
 import Game.Technology.SciencePointManager;
 import Game.Technology.Technology;
@@ -48,7 +47,6 @@ import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.ethereum.crypto.ECKey;
-import org.spongycastle.util.Pack;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
@@ -979,9 +977,13 @@ public class GameSession {
         String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
         LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);
         // 记录商品评分
-        double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalQty(), itemId);
-        double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
-        double score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
+        double score = 0;
+        if(MetaGood.isItem(itemId)){
+            double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalBrand(), itemId);
+            double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+            score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
+        }
+
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
                     itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, seller.getName(), seller.getCompanyName(),sellBuilding.type());
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
