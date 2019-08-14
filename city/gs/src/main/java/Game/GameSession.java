@@ -5060,7 +5060,7 @@ public class GameSession {
         City.instance().forAllGrid((grid)->{
             AtomicInteger n = new AtomicInteger(0);
             grid.forAllBuilding(building -> {
-                if(building.type()==type&& !building.outOfBusiness()) {
+                if(building.type()==type) {
                         n.addAndGet(1);
                 }
             });
@@ -5081,7 +5081,7 @@ public class GameSession {
         Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
         gridInfo.getIdxBuilder().setX(centerIdx.x).setY(centerIdx.y);
         City.instance().forEachBuilding(centerIdx, (b) -> {
-            if (b.type() == type && !b.outOfBusiness()) {
+            if (b.type() == type) {
                 Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
                 if (b.state == Gs.BuildingState.SHUTDOWN_VALUE) {//未开业,不添加其他建筑数据
                     typeBuilding.setIsopen(false);
