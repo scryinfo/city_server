@@ -1,10 +1,6 @@
 package Game;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.ElementCollection;
@@ -67,27 +63,104 @@ public class Shelf {
         public int price;
         public MetaItem meta;
     }
+
+    public List<SellInfo> getSellInfoCache() {
+        return sellInfoCache;
+    }
+
+    @Transient
+    public List<SellInfo> sellInfoCache = new ArrayList<>();
+
+    public void initSellInfoCache(){
+        slots.forEach((k,v)->{
+            SellInfo s = new SellInfo();
+            s.producerId = k.producerId;
+            s.qty = k.qty;
+            s.price = v.price;
+            s.meta = k.meta;
+            sellInfoCache.add(s);
+        });
+    }
+
+    public void updateSellInfoToCache(ItemKey k){
+        //TODO 生产线发送改变时更新
+    }
+
+
     public List<SellInfo> getSellInfo(int metaId) {
-        return slots.entrySet().stream().filter(e->e.getKey().meta.id==metaId).map(e->{
+        return getSellInfoCache();
+        /*return slots.entrySet().stream().filter(e->e.getKey().meta.id==metaId).map(e->{
             SellInfo s = new SellInfo();
             s.producerId = e.getKey().producerId;
             s.qty = e.getKey().qty;
             s.price = e.getValue().price;
             s.meta = e.getKey().meta;
             return s;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList());*/
     }
-    public void initGoodCache(Map<Integer,Map<Integer, GoodInfo>> cache){
-        this.slots.forEach();
+
+    class luxCache{
+        Map<Integer,ArrayList<Integer>> _cache = new HashMap<Integer,ArrayList<Integer>>();
     }
+
+    @Transient
+    private Map<Integer,luxCache>  MetaIdsCache = new HashMap<Integer,luxCache>();
+    @Transient
+    private ArrayList<Integer> temp = new ArrayList<>();
+
+    public void initMetaIdCache(){
+        slots.forEach((k,v)->{
+            if(k.meta instanceof MetaGood) {
+                MetaGood mg = (MetaGood)k.meta;
+                addMetaIdtoCache(MetaGood.goodType(mg.id),mg.lux,mg.id);
+            }
+        });
+    }
+    private void addMetaIdtoCache(MetaGood.Type type, int lux, int id){
+
+        if(MetaIdsCache.containsKey(type.ordinal()) == false){
+            MetaIdsCache.put(type.ordinal(),new luxCache());
+        }
+        if(MetaIdsCache.get(type.ordinal())._cache.containsKey(lux)){
+            //已经有的，不管
+            MetaIdsCache.get(type.ordinal())._cache.get(lux).add(id);
+        }else{
+            ArrayList<Integer> list = new ArrayList<>();
+            list.add(id);
+            MetaIdsCache.get(type.ordinal())._cache.put(lux,list);
+        }
+    }
+
+    private void delMetaIdfromCache(MetaGood.Type type, int lux){
+        if(MetaIdsCache.containsKey(type.ordinal()) == false){
+            return;
+        }
+        if(MetaIdsCache.get(type.ordinal())._cache.containsKey(lux)){
+            MetaIdsCache.get(type.ordinal())._cache.get(lux).remove(lux);
+            if(MetaIdsCache.get(type.ordinal())._cache.get(lux).size() == 0){
+                MetaIdsCache.get(type.ordinal())._cache.remove(lux);
+            }
+        }
+    }
+
     public Collection<Integer> getMetaIds(MetaGood.Type type, int lux) {
-        return this.slots.entrySet().stream().filter(e-> {
+        if(MetaIdsCache.containsKey(type.ordinal())){
+            if(MetaIdsCache.get(type.ordinal())._cache.containsKey(lux)){
+                return  MetaIdsCache.get(type.ordinal())._cache.get(lux);
+            }else{
+                return temp;
+            }
+        }else{
+            return temp;
+        }
+
+        /*return this.slots.entrySet().stream().filter(e-> {
             if(e.getKey().meta instanceof MetaGood) {
                 MetaGood mg = (MetaGood)e.getKey().meta;
                 return mg.lux == lux && MetaGood.goodType(mg.id) == type;
             }
             return false;
-        }).map(e->e.getKey().meta.id).collect(Collectors.toList());
+        }).map(e->e.getKey().meta.id).collect(Collectors.toList());*/
         // .mapToInt(e->e.getKey().meta.id).boxed().collect(Collectors.toList());
         // .mapToInt(e->e.getKey().meta.id).toArray();
         // .mapToInt(e->e.getKey().meta.id).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
@@ -144,6 +217,10 @@ public class Shelf {
         else {
             content = new Content(item.n, price, autoReplenish);
             slots.put(item.key, content);
+            if(item.key.meta instanceof MetaGood) {
+                MetaGood mg = (MetaGood)item.key.meta;
+                addMetaIdtoCache(MetaGood.goodType(mg.id),mg.lux,mg.id);
+            }
         }
         return true;
     }
@@ -161,28 +238,49 @@ public class Shelf {
         if(i == null || i.n < n)
             return false;
         i.n -= n;
-        if(i.n == 0 && i.autoReplenish == false)
+        if(i.n == 0 && i.autoReplenish == false){
             slots.remove(k);
+            if(k.meta instanceof MetaGood) {
+                MetaGood mg = (MetaGood)k.meta;
+                delMetaIdfromCache(MetaGood.goodType(mg.id),mg.lux);
+            }
+        }
         return true;
     }
     public boolean full() {
         return slots.size() >= capacity;
     }
     public boolean has(int mId) {
-        return this.slots.keySet().stream().anyMatch(k->k.meta.id == mId);
+        //return this.slots.keySet().stream().anyMatch(k->k.meta.id == mId);
+        return SaleNumCache.containsKey(mId);
     }
     public Gs.Shelf toProto() {
         Gs.Shelf.Builder builder = Gs.Shelf.newBuilder();
         slots.forEach((k,v)->builder.addGood(toProto(k, v)));
         return builder.build();
     }
+    @Transient
+    HashMap<Integer, Integer> SaleNumCache = new HashMap<Integer, Integer>();
+
+    public void initSaleNumCache(){
+        SaleNumCache.clear();
+        slots.forEach((k,v)->{
+           if(SaleNumCache.containsKey(k.meta.id)){
+               SaleNumCache.put(k.meta.id,SaleNumCache.get(k.meta.id)+v.n);
+           }else{
+               SaleNumCache.put(k.meta.id,v.n);
+           }
+        });
+    }
+
     public int getSaleNum(int itemid) {
-        int res = 0;
+        return SaleNumCache.getOrDefault(itemid,0);
+        /*int res = 0;
         for (Map.Entry<ItemKey, Content> e : slots.entrySet()) {
             if(e.getKey().meta.id == itemid)
                 res += e.getValue().n;
         }
-        return res;
+        return res;*/
     }
 
     public void clearData(){//清除货架数据

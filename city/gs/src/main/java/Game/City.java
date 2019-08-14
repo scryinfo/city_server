@@ -120,8 +120,22 @@ public class City {
         return 0;
     }
 
+    public int getSumFlowCache() {
+        return SumFlowCache;
+    }
+
+    public void initSumFlowCache() {
+        SumFlowCache = 0;
+        allBuilding.forEach((k,v)->{
+            SumFlowCache += v.getFlow();
+        });
+    }
+
+    private int SumFlowCache = 0;
+
     public int getSumFlow() {
-        return allBuilding.values().stream().mapToInt(b->b.getFlow()).reduce(Integer::sum).orElse(0);
+        //return allBuilding.values().stream().mapToInt(b->b.getFlow()).reduce(Integer::sum).orElse(0);
+        return getSumFlowCache();
     }
 
 
@@ -192,6 +206,7 @@ public class City {
         loadSysBuildings();
         // load all player buildings, cache them into maps
         loadPlayerBuildings();
+        initSumFlowCache();
         this.topGoodQty = GameDb.getTopGoodQuality();
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
 
@@ -213,15 +228,7 @@ public class City {
             // b is useless, discard it
         }
     }
-    private void cacheGoodsInShelf(){
-        _goodCache
-        Set<Building> retailShops = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
-        //Set<Building> apartments = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>());
-        retailShops.forEach(b->{
-            RetailShop r =  (RetailShop)b;
 
-        });
-    }
     private void loadPlayerBuildings() {
         for(Building b : GameDb.getAllBuilding()) {
             this.take(b);
@@ -651,6 +658,10 @@ public class City {
                 return building.quality();
             return oldV;
         });
+        if( building.type() == MetaBuilding.RETAIL){
+            RetailShop r = (RetailShop) building;
+            r.initGoodCache();
+        }
     }
 
     private void calcuTerrain(Building building) {
