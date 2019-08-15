@@ -119,4 +119,12 @@ public class ScienceShelf{
         }
         return res;
     }
+    public Map<Item, Integer> getSaleDetail(int itemId) {
+        Map<Item, Integer> res = new HashMap<>();
+        this.slots.forEach((k,v)->{
+            if(k.meta.id == itemId)
+                res.put(new Item(k, v.n), v.price);
+        });
+        return res;
+    }
 }

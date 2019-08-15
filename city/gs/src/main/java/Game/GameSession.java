@@ -48,7 +48,6 @@ import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.ethereum.crypto.ECKey;
-import org.spongycastle.util.Pack;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
@@ -5752,7 +5751,7 @@ public class GameSession {
         City.instance().forAllGrid((grid -> {
             AtomicInteger num = new AtomicInteger(0);
             grid.forAllBuilding(b->{
-                if (!(b.outOfBusiness()) && b instanceof ScienceBuildingBase) {
+                if (!(b.outOfBusiness()) && b instanceof ScienceBuildingBase&&b.type()==MetaBuilding.TECHNOLOGY) {
                     Technology tech = (Technology) b;
                     if (tech.shelf.getSaleNum(item.id) > 0) {
                         num.addAndGet(1);
@@ -5760,10 +5759,11 @@ public class GameSession {
                 }
             });
             builder.addInfoBuilder()
+                    .setItemId(item.id)
                     .setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
                     .setCount(num.intValue());
         }));
-        this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
+        this.write(Package.create(cmd, builder.build()));
     }
 
     public void queryPromotionSummary(short cmd, Message message) {
@@ -5777,7 +5777,7 @@ public class GameSession {
         City.instance().forAllGrid((grid -> {
             AtomicInteger num = new AtomicInteger(0);
             grid.forAllBuilding(b->{
-                if (!(b.outOfBusiness()) && b instanceof ScienceBuildingBase) {
+                if (!(b.outOfBusiness()) && b instanceof ScienceBuildingBase&&b.type()==MetaBuilding.PROMOTE) {
                     PromotionCompany tech = (PromotionCompany) b;
                     if (tech.shelf.getSaleNum(item.id) > 0) {
                         num.addAndGet(1);
@@ -5785,10 +5785,11 @@ public class GameSession {
                 }
             });
             builder.addInfoBuilder()
+                    .setItemId(item.id)
                     .setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
                     .setCount(num.intValue());
         }));
-        this.write(Package.create(cmd, builder.setTypeId(item.id).build()));
+        this.write(Package.create(cmd, builder.build()));
     }
 
     /*查询土地繁荣度*/
@@ -5814,6 +5815,63 @@ public class GameSession {
         }
         Gs.AuctionProsperity.Builder builder = Gs.AuctionProsperity.newBuilder();
         builder.setGroundId(auctionId.getNum()).setProsperity(sum);
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+
+    public void queryTechnologyDetail(short cmd, Message message) {
+        Gs.queryTechnologyDetail c = (Gs.queryTechnologyDetail) message;
+        GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+        Gs.TechnologyDetail.Builder builder = Gs.TechnologyDetail.newBuilder();
+        builder.setItemId(c.getItemId());
+        City.instance().forEachGrid(center.toSyncRange(), (grid) -> {
+            Gs.TechnologyDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+            gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+            grid.forAllBuilding(building -> {
+                if (building instanceof ScienceBuildingBase && !building.outOfBusiness()) {
+                    Technology base = (Technology) building;
+                    ScienceShelf shelf = base.getShelf();
+                    if (shelf.getSaleNum(c.getItemId()) > 0) {
+                        Gs.TechnologyDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+                        bb.setId(Util.toByteString(building.id()));
+                        bb.setPos(building.coordinate().toProto());
+                        shelf.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+                            bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setGuidePrice(GuidePriceMgr.instance().getTechOrPromGuidePrice(c.getItemId(), true));
+                        });
+                        bb.setOwnerId(Util.toByteString(building.ownerId()));
+                        bb.setName(building.getName());
+                    }
+                }
+            });
+        });
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void queryPromotionsDetail(short cmd, Message message) {
+        Gs.queryPromotionsDetail c = (Gs.queryPromotionsDetail) message;
+        GridIndex center = new GridIndex(c.getCenterIdx().getX(), c.getCenterIdx().getY());
+        Gs.PromotionsDetail.Builder builder = Gs.PromotionsDetail.newBuilder();
+        builder.setItemId(c.getItemId());
+        City.instance().forEachGrid(center.toSyncRange(), (grid) -> {
+            Gs.PromotionsDetail.GridInfo.Builder gb = builder.addInfoBuilder();
+            gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+            grid.forAllBuilding(building -> {
+                if (building instanceof ScienceBuildingBase && !building.outOfBusiness()) {
+                    PromotionCompany promotion = (PromotionCompany) building;
+                    ScienceShelf shelf = promotion.getShelf();
+                    if (shelf.getSaleNum(c.getItemId()) > 0) {
+                        Gs.PromotionsDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+                        bb.setId(Util.toByteString(building.id()));
+                        bb.setPos(building.coordinate().toProto());
+                        shelf.getSaleDetail(c.getItemId()).forEach((k, v) -> {
+                            bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setGuidePrice(GuidePriceMgr.instance().getTechOrPromGuidePrice(c.getItemId(), false));
+                        });
+                        bb.setOwnerId(Util.toByteString(building.ownerId()));
+                        bb.setName(building.getName());
+                    }
+                }
+            });
+        });
         this.write(Package.create(cmd, builder.build()));
     }
 

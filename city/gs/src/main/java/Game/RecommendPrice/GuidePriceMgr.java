@@ -8,10 +8,14 @@ import Game.Timers.PeriodicTimer;
 import Game.Util.GlobalUtil;
 import Shared.LogDb;
 import Shared.Util;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.ByteString;
 import gs.Gs;
+import org.checkerframework.checker.units.qual.A;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class GuidePriceMgr {
@@ -93,6 +97,31 @@ public class GuidePriceMgr {
         }
     }
 
+    // 查询研究所或推广公司
+    public double getTechOrPromGuidePrice(int itemId, boolean isTechnology) {
+        AtomicDouble guidePrice = new AtomicDouble(0);
+        try {
+            if (isTechnology) {
+                Map<Integer, Double> map = historyRecord.laboratory;
+                map.forEach((k, v) -> {
+                    if (k == itemId) {
+                        guidePrice.set(v);
+                    }
+                });
+            } else {
+                Map<Integer, Double> map = historyRecord.promotion;
+                map.forEach((k, v) -> {
+                    if (k == itemId) {
+                        guidePrice.set(v);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            return 0.0;
+        }
+
+        return guidePrice.doubleValue();
+    }
     public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, UUID buildingId) {
 //        推荐定价 = 全城均商品成交价 * (1 + (玩家商品总评分 - 全城均商品总评分) / 50)
         Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
