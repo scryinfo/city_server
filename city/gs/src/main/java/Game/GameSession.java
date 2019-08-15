@@ -5828,18 +5828,21 @@ public class GameSession {
             Gs.TechnologyDetail.GridInfo.Builder gb = builder.addInfoBuilder();
             gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
             grid.forAllBuilding(building -> {
-                if (building instanceof ScienceBuildingBase && !building.outOfBusiness()) {
+                if (building instanceof ScienceBuildingBase && !building.outOfBusiness()&&building.type()==MetaBuilding.TECHNOLOGY) {
                     Technology base = (Technology) building;
                     ScienceShelf shelf = base.getShelf();
                     if (shelf.getSaleNum(c.getItemId()) > 0) {
-                        Gs.TechnologyDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+                        Gs.TechnologyDetail.GridInfo.Building.Builder bb = gb.addBuildingInfoBuilder();
                         bb.setId(Util.toByteString(building.id()));
                         bb.setPos(building.coordinate().toProto());
                         shelf.getSaleDetail(c.getItemId()).forEach((k, v) -> {
-                            bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setGuidePrice(GuidePriceMgr.instance().getTechOrPromGuidePrice(c.getItemId(), true));
+                            Gs.TechnologyDetail.GridInfo.Building.Sale.Builder sale = Gs.TechnologyDetail.GridInfo.Building.Sale.newBuilder();
+                            sale.setCount(k.n).setPrice(v).setGuidePrice(GuidePriceMgr.instance().getTechOrPromGuidePrice(c.getItemId(), true));
+                            bb.setSale(sale.build());
                         });
                         bb.setOwnerId(Util.toByteString(building.ownerId()));
                         bb.setName(building.getName());
+                        bb.setMetaId(base.metaBuilding.id);
                     }
                 }
             });
@@ -5856,18 +5859,21 @@ public class GameSession {
             Gs.PromotionsDetail.GridInfo.Builder gb = builder.addInfoBuilder();
             gb.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
             grid.forAllBuilding(building -> {
-                if (building instanceof ScienceBuildingBase && !building.outOfBusiness()) {
+                if (building instanceof ScienceBuildingBase && !building.outOfBusiness()&&building.type()==MetaBuilding.PROMOTE) {
                     PromotionCompany promotion = (PromotionCompany) building;
                     ScienceShelf shelf = promotion.getShelf();
                     if (shelf.getSaleNum(c.getItemId()) > 0) {
-                        Gs.PromotionsDetail.GridInfo.Building.Builder bb = gb.addBBuilder();
+                        Gs.PromotionsDetail.GridInfo.Building.Builder bb = gb.addBuildingInfoBuilder();
                         bb.setId(Util.toByteString(building.id()));
                         bb.setPos(building.coordinate().toProto());
                         shelf.getSaleDetail(c.getItemId()).forEach((k, v) -> {
-                            bb.addSaleBuilder().setItem(k.toProto()).setPrice(v).setGuidePrice(GuidePriceMgr.instance().getTechOrPromGuidePrice(c.getItemId(), false));
+                            Gs.PromotionsDetail.GridInfo.Building.Sale.Builder sale = Gs.PromotionsDetail.GridInfo.Building.Sale.newBuilder();
+                            sale.setCount(k.n).setPrice(v).setGuidePrice(GuidePriceMgr.instance().getTechOrPromGuidePrice(c.getItemId(), false));
+                            bb.setSale(sale.build());
                         });
                         bb.setOwnerId(Util.toByteString(building.ownerId()));
                         bb.setName(building.getName());
+                        bb.setMetaId(promotion.metaBuilding.id);
                     }
                 }
             });

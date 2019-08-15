@@ -68,7 +68,7 @@ public class Technology extends ScienceBuildingBase {
     }
 
     @Override
-    public Message detailProto() {
+    public Gs.Technology detailProto() {
         Gs.Technology.Builder builder = Gs.Technology.newBuilder();
         builder.setInfo(super.toProto())
                 .setStoreNum(this.store.getAllNum())
@@ -80,7 +80,7 @@ public class Technology extends ScienceBuildingBase {
 
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
-
+        builder.addTechnology(this.detailProto());
     }//TODO
 
     @Override

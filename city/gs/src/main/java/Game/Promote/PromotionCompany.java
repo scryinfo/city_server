@@ -83,7 +83,7 @@ public class PromotionCompany extends ScienceBuildingBase {
     }
 
     @Override
-    public Message detailProto() {
+    public Gs.PromotionCompany detailProto() {
         Gs.PromotionCompany.Builder builder = Gs.PromotionCompany.newBuilder();
         builder.setInfo(super.toProto())
                 .setStoreNum(this.store.getAllNum())
@@ -95,6 +95,7 @@ public class PromotionCompany extends ScienceBuildingBase {
 
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+        builder.addPromotionCompany(this.detailProto());
 
     }//TODO
 
