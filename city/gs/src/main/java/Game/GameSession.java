@@ -3363,7 +3363,6 @@ public class GameSession {
                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                    updateEvas.add(newEva.toProto());
-                   newEva.setP(promotePoint.promotePoint); // 记录科技点数
                    evaData.add(newEva);
                } else {                                                              //科技点数类型加成
                    int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt()); /*确定具体加点建筑类型*/
@@ -3374,7 +3373,6 @@ public class GameSession {
                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
                    updateEvas.add(newEva.toProto());
-                   newEva.setP(sciencePoint.point); // 记录研究点数
                    evaData.add(newEva);
                }
            }
@@ -5851,6 +5849,7 @@ public class GameSession {
         long industryStaffNum = IndustryMgr.instance().getIndustryStaffNum(type); // 行业总员工
         long industrySumIncome = IndustryMgr.instance().getIndustrySumIncome(type); // 行业总营收
         Gs.IndustryTopInfo.Builder builder = Gs.IndustryTopInfo.newBuilder();
+        builder.setTotal(industrySumIncome).setStaffNum(industryStaffNum).setType(type);
         AtomicInteger owner = new AtomicInteger(0);
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             List<TopInfo> infos = IndustryMgr.instance().queryTop();
@@ -5872,14 +5871,14 @@ public class GameSession {
             infos.stream().filter(o -> o != null).forEach(d -> {
                 owner.incrementAndGet();
                 Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
-                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion);
+                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum);
                 if (d.pid.equals(id)) {
                     builder.setOwner(owner.intValue());
                 }
                 builder.addTopInfo(info);
             });
             TopInfo myself = IndustryMgr.instance().queryMyself(id, type);
-            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(myself.pid)).setIncome(myself.yesterdayIncome).setName(myself.name).setScience(myself.science).setPromotion(myself.promotion).setMyself(true).build());
+            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(myself.pid)).setIncome(myself.yesterdayIncome).setName(myself.name).setWoker(myself.workerNum).setScience(myself.science).setPromotion(myself.promotion).setMyself(true).build());
         }
         this.write(Package.create(cmd, builder.build()));
     }

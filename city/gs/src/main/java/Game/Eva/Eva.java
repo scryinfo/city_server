@@ -37,19 +37,20 @@ public class Eva {
     
     @Column(name = "b")
     private long b;
-    @Column(name = "p")
-    private long p;
+    // 记录累加点数
+    @Column(name = "sumValue")
+    private long sumValue;
     
 	public Eva() {
 		super();
 	}
 
-	public long getP() {
-		return p;
+	public long getSumValue() {
+		return sumValue;
 	}
 
-	public void setP(long p) {
-		this.p += p;
+	public void setSumValue(long sumValue) {
+		this.sumValue = sumValue;  // 累加
 	}
 
 	public Eva(UUID pid, int at, int bt, int lv, long cexp, long b) {
@@ -71,18 +72,19 @@ public class Eva {
 		this.lv = lv;
 		this.cexp = cexp;
 		this.b = b;
-		this.p = p;
+		this.sumValue = sumValue;
 	}
 
     public Gs.Eva toProto() {
         Gs.Eva.Builder builder = Gs.Eva.newBuilder();
-        builder.setId(Util.toByteString(id))
+		builder.setId(Util.toByteString(id))
 				.setPid(Util.toByteString(pid))
 				.setAt(at)
 				.setBt(Gs.Eva.Btype.valueOf(bt))
 				.setLv(lv)
 				.setCexp(cexp)
-				.setB(b);
+				.setB(b)
+				.setSumValue(sumValue); // 累计点数
         return builder.build();
     }
     

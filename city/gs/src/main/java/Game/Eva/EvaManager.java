@@ -171,6 +171,7 @@ public class EvaManager
         e.setLv(level);
         e.setCexp(cexp);
         e.setB(-1);
+        e.setSumValue(eva.getSumValue()+eva.getDecEva());
         return e;
     }
 
