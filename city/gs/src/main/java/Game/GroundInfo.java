@@ -40,6 +40,7 @@ public class GroundInfo implements Serializable {
     long payTs;
     int auctionPrice;   //拍地价格
     long auctionTs;     //拍地的时间戳
+    int groundNum;      //拍卖土地1x1数量
     @Column(nullable = false)
     private GroundStatus status = GroundStatus.STATELESS;
     public GroundInfo(int x, int y) {
@@ -92,7 +93,8 @@ public class GroundInfo implements Serializable {
                 .setX(x)
                 .setY(y)
                 .setAuctionPrice(auctionPrice)
-                .setAuctionTs(auctionTs);
+                .setAuctionTs(auctionTs)
+                .setGroundNum(groundNum);
         if(inRenting()) {
             Gs.GroundInfo.Rent.Builder giBuilder = Gs.GroundInfo.Rent.newBuilder();
             giBuilder.setRentDaysMin(rentDaysMin);

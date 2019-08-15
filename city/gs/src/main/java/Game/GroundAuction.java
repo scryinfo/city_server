@@ -3,6 +3,7 @@ package Game;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGroundAuction;
+import Game.Meta.SysPara;
 import Game.Timers.DateTimeTracker;
 import Shared.LogDb;
 import Shared.Package;
@@ -150,6 +151,11 @@ public class GroundAuction {
 
                 Player bider = GameDb.getPlayer(a.biderId());
                 long p = bider.spentLockMoney(a.transactionId);
+                /*扣除矿工费用,TODO*/
+                double minersRatio = MetaData.getSysPara().minersCostRatio;
+                long minerCost = (long) Math.floor(p * minersRatio);
+                bider.decMoney(minerCost);
+                LogDb.minersCost(bider.id(),minerCost,minersRatio);
                 try {
                     GroundManager.instance().addGround(bider.id(), a.meta.area, (int)p);
                 } catch (GroundAlreadySoldException e) {
@@ -213,6 +219,12 @@ public class GroundAuction {
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
+        }
+        /*如果算上矿工费，玩家没有那么多钱，拍卖失败*/
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
+        long minerCost = (long) Math.floor(price * minersRatio);
+        if(bider.money()<minerCost+price){
+            return Optional.of(Common.Fail.Reason.moneyNotEnough);/*返回钱不足错误码*/
         }
         a.bid(bider.id(), price, now);
         bider.lockMoney(a.transactionId, price);
