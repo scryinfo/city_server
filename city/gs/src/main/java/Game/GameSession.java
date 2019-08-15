@@ -5576,6 +5576,10 @@ public class GameSession {
         ScienceBuildingBase science = (ScienceBuildingBase) sellBuilding;
         if(science.checkShelfSlots(item.key,item.n)){
             ScienceShelf.Content content = science.getContent(item.key);
+            if(content.price!=c.getPrice()){
+                this.write(Package.fail(cmd, Common.Fail.Reason.noReason));
+                return;
+            }
             //计算费用
             int cost = item.n * content.price;
             //消费货架数量
