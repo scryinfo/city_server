@@ -88,7 +88,7 @@ public class JustVisit implements IAction {
             if (chosen.type() == MetaBuilding.APARTMENT) {//需要多扣除矿工费用
 
                 //TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
-                double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+                double minersRatio = MetaData.getSysPara().minersCostRatio;
                 long minerCost = (long) Math.floor(chosen.cost() * minersRatio);
                 income -= minerCost;
                 pay += minerCost;
@@ -118,7 +118,7 @@ public class JustVisit implements IAction {
 
             LogDb.playerIncome(owner.id(), income,chosen.type());
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
-            LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
+            LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);//不含旷工费扣除
             // 建筑繁荣度 建筑评分
             Apartment apartment = (Apartment) chosen;
             int prosperityScore = (int) ProsperityManager.instance().getBuildingProsperityScore(chosen);
@@ -128,7 +128,7 @@ public class JustVisit implements IAction {
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
                     chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName()); //不包含矿工费用
             if(!GameServer.isOnline(owner.id())) {
-                LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
+                LogDb.sellerBuildingIncome(chosen.id(), chosen.type(),owner.id(), 1,chosen.cost(), 0);
             }
             chosen.updateTodayIncome(income);
            // GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
