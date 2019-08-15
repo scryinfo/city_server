@@ -5080,50 +5080,53 @@ public class GameSession {
         int type = query.getType();
         GridIndex centerIdx = new GridIndex(query.getCenterIdx().getX(), query.getCenterIdx().getY());
         Gs.TypeBuildingDetail.Builder builder = Gs.TypeBuildingDetail.newBuilder();
-        Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
-        gridInfo.getIdxBuilder().setX(centerIdx.x).setY(centerIdx.y);
-        City.instance().forEachBuilding(centerIdx, (b) -> {
-            if (b.type() == type) {
-                Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
-                if (b.state == Gs.BuildingState.SHUTDOWN_VALUE) {//未开业,不添加其他建筑数据
-                    typeBuilding.setIsopen(false);
-                } else {
-                    typeBuilding.setIsopen(true);
-                    Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
-                    //通用信息设置
-                    summary.setOwnerId(Util.toByteString(b.ownerId()))
-                            .setPos(b.coordinate().toProto()).setName(b.getName())
-                            .setMetaId(b.metaId());
-                    if (b instanceof IShelf) {       //货架建筑的出售信息
-                        IShelf shelf = (IShelf) b;
-                        summary.setShelfCount(shelf.getTotalSaleCount());
-                    } else if (b instanceof Apartment) {//住宅类型信息
-                        Apartment apartment = (Apartment) b;
-                        // 玩家住宅评分
-                        double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
-                        double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
-                        double curRetailScore = (brandScore + retailScore) / 2;
-                        // 玩家住宅繁荣度
-                        double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(b);
-                        double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore, prosperityScore);
-                        Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.newBuilder();
-                        apartSummary.setCapacity(apartment.getCapacity())
-                                .setRent(apartment.cost())
-                                //计算总评分及推荐定价
-                                .setGuidePrice((int) guidePrice)
-                                .setRenter(apartment.getRenterNum());
-                        summary.setApartmentSummary(apartSummary);
-                    }else if(b instanceof ScienceBuildingBase){/*研究所和推广公司*/
-                        ScienceBuildingBase science = (ScienceBuildingBase) b;
-                        summary.setShelfCount(science.getShelf().getAllNum());
+        City.instance().forEachGrid(centerIdx.toSyncRange(), (grid)->{
+            Gs.TypeBuildingDetail.GridInfo.Builder gridInfo = Gs.TypeBuildingDetail.GridInfo.newBuilder();
+            gridInfo.getIdxBuilder().setX(grid.getX()).setY(grid.getY());
+            grid.forAllBuilding(b-> {
+                if (b.type() == type) {
+                    Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.Builder typeBuilding = Gs.TypeBuildingDetail.GridInfo.TypeBuildingInfo.newBuilder();
+                    if (b.state == Gs.BuildingState.SHUTDOWN_VALUE) {//未开业,不添加其他建筑数据
+                        typeBuilding.setIsopen(false);
+                    } else {
+                        typeBuilding.setIsopen(true);
+                        Gs.TypeBuildingDetail.GridInfo.BuildingSummary.Builder summary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.newBuilder();
+                        //通用信息设置
+                        summary.setOwnerId(Util.toByteString(b.ownerId()))
+                                .setPos(b.coordinate().toProto()).setName(b.getName())
+                                .setMetaId(b.metaId());
+                        if (b instanceof IShelf) {       //货架建筑的出售信息
+                            IShelf shelf = (IShelf) b;
+                            summary.setShelfCount(shelf.getTotalSaleCount());
+                        } else if (b instanceof Apartment) {//住宅类型信息
+                            Apartment apartment = (Apartment) b;
+                            // 玩家住宅评分
+                            double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
+                            double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
+                            double curRetailScore = (brandScore + retailScore) / 2;
+                            // 玩家住宅繁荣度
+                            double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(b);
+                            double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore, prosperityScore);
+                            Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.Builder apartSummary = Gs.TypeBuildingDetail.GridInfo.BuildingSummary.ApartmentSummary.newBuilder();
+                            apartSummary.setCapacity(apartment.getCapacity())
+                                    .setRent(apartment.cost())
+                                    //计算总评分及推荐定价
+                                    .setGuidePrice((int) guidePrice)
+                                    .setRenter(apartment.getRenterNum());
+                            summary.setApartmentSummary(apartSummary);
+                        } else if (b instanceof ScienceBuildingBase) {/*研究所和推广公司*/
+                            ScienceBuildingBase science = (ScienceBuildingBase) b;
+                            summary.setShelfCount(science.getShelf().getAllNum());
+                        }
+                        typeBuilding.setBuildingInfo(summary);
                     }
-                    typeBuilding.setBuildingInfo(summary);
+                    gridInfo.addTypeInfo(typeBuilding);
                 }
-                gridInfo.addTypeInfo(typeBuilding);
-            }
+            });
+            builder.addInfo(gridInfo);
         });
-        Gs.TypeBuildingDetail.Builder typeBuildings = builder.setInfo(gridInfo).setType(type);
-        this.write(Package.create(cmd, typeBuildings.build()));
+        builder.setType(type);
+        this.write(Package.create(cmd, builder.build()));
     }
 
     public void queryPlayerIncomePay(short cmd, Message message){
