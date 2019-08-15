@@ -1,8 +1,11 @@
 package Game.IndustryInfo;
 
 import Game.*;
+import Game.Eva.Eva;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Timers.PeriodicTimer;
+import Game.Util.DateUtil;
 import Shared.LogDb;
 import gs.Gs;
 import org.bson.Document;
@@ -18,15 +21,11 @@ public class IndustryMgr {
     public static IndustryMgr instance() {
         return instance;
     }
-
-    static long nowTime = 0;
-
-    static {
+    static long nowTime=0;
+    static{
         nowTime = System.currentTimeMillis();
     }
-
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.DAYS.toMillis(1));
-
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
@@ -148,14 +147,17 @@ public class IndustryMgr {
             // 玩家行业总工人数
             int staffNum = getPlayerIndustryStaffNum(pid, buildingType);
             // 玩家名称
-            String playerName = GameDb.getPlayer(pid) == null ? "" : GameDb.getPlayer(pid).getName();
+            Player player = GameDb.getPlayer(pid);
+            String playerName =  player == null ? "" : player.getName();
+            //faceId
+            String faceId = player.getFaceId();
             // 玩家昨日收入
             long total = d.getLong("total");
             // 玩家科技点数投入
             long science = 0;
             //
             long promotion = 0;
-            tops.add(new TopInfo(pid,playerName, total, staffNum, science, promotion));
+            tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
         });
         return tops;
     }
@@ -182,27 +184,29 @@ public class IndustryMgr {
         calendar.set(Calendar.SECOND, 0);
 
         Date endDate = calendar.getTime();
-        long endTime=endDate.getTime();
+        long endTime = endDate.getTime();
 
         calendar.add(Calendar.DATE, -1);
         Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
+        long startTime = startDate.getTime();
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, Gs.SupplyAndDemand.IndustryType.GROUND_VALUE, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
-        list.stream().filter(o->o.getInteger("id")!=null).forEach(d->{
+        list.stream().filter(o -> o.getInteger("id") != null).forEach(d -> {
             UUID pid = d.get("id", UUID.class);
+            Player player = GameDb.getPlayer(pid);
             // 玩家名称
-            String playerName = GameDb.getPlayer(pid).getName();
+            String playerName = player == null ? "" : player.getName();
+            String faceId = player.getFaceId();
             // 玩家昨日收入
             long total = d.getLong("total");
             // 成交量
-            int count = LogDb.groundSum(startTime,endTime,pid); // 查询土地成交量
-            tops.add(new TopInfo(pid, playerName, total, count));
+            int count = LogDb.groundSum(startTime, endTime, pid); // 查询土地成交量
+            tops.add(new TopInfo(pid, faceId, playerName, total, count));
         });
         return tops;
     }
 
-    public TopInfo queryMyself(UUID owner,int type) {
+    public TopInfo queryMyself(UUID owner, int type) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -210,25 +214,29 @@ public class IndustryMgr {
         calendar.set(Calendar.SECOND, 0);
 
         Date endDate = calendar.getTime();
-        long endTime=endDate.getTime();
+        long endTime = endDate.getTime();
 
         calendar.add(Calendar.DATE, -1);
         Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
+        long startTime = startDate.getTime();
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             long ground = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
-            String name = GameDb.getPlayer(owner)== null ? "" : GameDb.getPlayer(owner).getName();
-            int count = LogDb.groundSum(startTime,endTime,owner); // 查询土地成交量
-            return new TopInfo(owner, name, ground, count);
+            Player player = GameDb.getPlayer(owner);
+            String name = player == null ? "" : player.getName();
+            String faceId = player.getFaceId();
+            int count = LogDb.groundSum(startTime, endTime, owner); // 查询土地成交量
+            return new TopInfo(owner, faceId, name, ground, count);
         } else {
             long myself = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
-            String name = GameDb.getPlayer(owner)== null ? "" : GameDb.getPlayer(owner).getName();
+            Player player = GameDb.getPlayer(owner);
+            String name = player == null ? "" : player.getName();
+            String faceId = player.getFaceId();
             int staffNum = getPlayerIndustryStaffNum(owner, type);
             // 玩家科技点数投入
             long science = 0;
             //
             long promotion = 0;
-            return new TopInfo(owner, name, myself, staffNum, science, promotion);
+            return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
         }
     }
 

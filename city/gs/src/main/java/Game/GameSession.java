@@ -5849,21 +5849,21 @@ public class GameSession {
         long industryStaffNum = IndustryMgr.instance().getIndustryStaffNum(type); // 行业总员工
         long industrySumIncome = IndustryMgr.instance().getIndustrySumIncome(type); // 行业总营收
         Gs.IndustryTopInfo.Builder builder = Gs.IndustryTopInfo.newBuilder();
-        builder.setTotal(industrySumIncome).setStaffNum(industryStaffNum).setType(type);
+        builder.setTotal(industrySumIncome).setStaffNum(industryStaffNum).setType(type).setOwner(0);
         AtomicInteger owner = new AtomicInteger(0);
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             List<TopInfo> infos = IndustryMgr.instance().queryTop();
             infos.stream().filter(o -> o != null).forEach(d -> {
                 owner.incrementAndGet();
                 Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
-                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setCount(d.count);
+                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setCount(d.count).setFaceId(d.faceId);
                 if (d.pid.equals(id)) {
                     builder.setOwner(owner.intValue());
                 }
                 builder.addTopInfo(info);
             });
             TopInfo top = IndustryMgr.instance().queryMyself(id, type);
-            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count));
+            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count).setFaceId(top.faceId));
 
         } else {
             builder.setStaffNum(industryStaffNum).setTotal(industrySumIncome).setOwner(0);
@@ -5871,14 +5871,22 @@ public class GameSession {
             infos.stream().filter(o -> o != null).forEach(d -> {
                 owner.incrementAndGet();
                 Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
-                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum);
+                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum).setFaceId(d.faceId);
                 if (d.pid.equals(id)) {
                     builder.setOwner(owner.intValue());
                 }
                 builder.addTopInfo(info);
             });
             TopInfo myself = IndustryMgr.instance().queryMyself(id, type);
-            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(myself.pid)).setIncome(myself.yesterdayIncome).setName(myself.name).setWoker(myself.workerNum).setScience(myself.science).setPromotion(myself.promotion).setMyself(true).build());
+            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder()
+                    .setPid(Util.toByteString(myself.pid))
+                    .setIncome(myself.yesterdayIncome)
+                    .setName(myself.name)
+                    .setWoker(myself.workerNum)
+                    .setScience(myself.science)
+                    .setPromotion(myself.promotion)
+                    .setFaceId(myself.faceId)
+                    .setMyself(true).build());
         }
         this.write(Package.create(cmd, builder.build()));
     }

@@ -10,6 +10,8 @@ import org.bson.Document;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class EvaManager
 {
@@ -97,6 +99,28 @@ public class EvaManager
 			}
 		}
 		return null;
+    }
+
+    public long getScience(UUID playerId)
+    {
+        AtomicLong science = new AtomicLong(0);
+        List<Integer> scienCeId = MetaData.getAllScienCeId();
+        scienCeId.stream().filter(i -> i != null).forEach(d->{
+            Eva eva = getEva(playerId, d, 1);
+            science.addAndGet(eva.getSumValue());
+        });
+        return science.longValue();
+    }
+
+    public long getPromotion(UUID playerId)
+    {
+        AtomicLong science = new AtomicLong(0);
+        List<Integer> promotionId = MetaData.getPromotionItemId();
+        promotionId.stream().filter(i -> i != null).forEach(d->{
+            Eva eva = getEva(playerId, d, 1);
+            science.addAndGet(eva.getSumValue());
+        });
+        return science.longValue();
     }
     
     public void updateEva(Eva eva) {
