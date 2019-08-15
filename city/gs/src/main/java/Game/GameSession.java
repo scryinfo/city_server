@@ -5588,18 +5588,20 @@ public class GameSession {
             /*TODO 计算旷工费*/
             double minersRatio = MetaData.getSysPara().minersCostRatio;
             long minerCost = (long) Math.floor(cost * minersRatio);
+            long totalIncome =cost-minerCost;
+            long totalPay = cost+minerCost;
             /*扣除买方金额*/
-            if(!player.decMoney(minerCost+cost)){
+            if(!player.decMoney(totalPay)){
                 this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
                 return;
             }
             //消费货架数量
             science.delshelf(item.key, item.n, false);
-            sellBuilding.updateTodayIncome(cost);
+            sellBuilding.updateTodayIncome(totalIncome);
             //玩家支出和收入记录
             Player seller = GameDb.getPlayer(science.ownerId());
             /*增加卖方金额*/
-            seller.addMoney(cost-minerCost);//卖家收入（扣除旷工费）
+            seller.addMoney(totalIncome);//卖家收入（扣除旷工费）
             int itemId = item.key.meta.id;
             //增加玩家的科技点数
             if(sellBuilding.type()==MetaBuilding.TECHNOLOGY) {
@@ -5615,11 +5617,11 @@ public class GameSession {
             //日志记录
             LogDb.minersCost(this.player.id(),minerCost, MetaData.getSysPara().minersCostRatio);
             LogDb.minersCost(seller.id(),minerCost, MetaData.getSysPara().minersCostRatio);
-            LogDb.playerPay(player.id(),cost+minerCost,sellBuilding.type());
-            LogDb.playerIncome(seller.id(),cost-minerCost,sellBuilding.type());
+            LogDb.playerPay(player.id(),totalPay,sellBuilding.type());
+            LogDb.playerIncome(seller.id(),totalIncome,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
                     item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
-            LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
+            LogDb.buildingIncome(bid,player.id(),totalIncome,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
             }
