@@ -3,6 +3,7 @@ package Statistic;
 import Shared.DispatcherBase;
 import Shared.GlobalConfig;
 import Shared.Package;
+import gs.Gs;
 import org.apache.log4j.Logger;
 import ss.Ss;
 import sscode.SsCode;
@@ -31,12 +32,16 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryPlayerGoodsCurve_VALUE, Wrapper.newWithMessage(Ss.PlayerGoodsCurve.PARSER,StatisticSession.class, "queryPlayerGoodsCurve"));// 查询玩家交易曲线图
             table.put((short) SsCode.OpCode.queryPlayerIncomePayCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryPlayerIncomePayCurve")); //查询玩家收入支出曲线图
             table.put((short) SsCode.OpCode.queryGoodsSoldDetailCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryGoodsSoldDetailCurve")); //查询商品销售详情曲线图
-            table.put((short) SsCode.OpCode.queryIndustryDevelopment_VALUE, Wrapper.newWithMessage(Ss.IndustryDevelopment.PARSER,StatisticSession.class, "queryIndustryDevelopment")); //各行业信息-行业发展
+//            table.put((short) SsCode.OpCode.queryIndustryDevelopment_VALUE, Wrapper.newWithMessage(Ss.IndustryDevelopment.PARSER,StatisticSession.class, "queryIndustryDevelopment")); //各行业信息-行业发展
             table.put((short) SsCode.OpCode.queryIndustryCompetition_VALUE, Wrapper.newWithMessage(Ss.IndustryCompetition.PARSER,StatisticSession.class, "queryIndustryCompetition")); //各行业信息-行业竞争
             /*建筑经营详情*/
             table.put((short) SsCode.OpCode.queryTodayBuildingSaleDetail_VALUE,Wrapper.newWithMessage(Ss.QueryBuildingSaleDetail.PARSER,StatisticSession.class, "queryBuildingSaleDetail"));
             table.put((short) SsCode.OpCode.queryHistoryBuildingSaleDetail_VALUE,Wrapper.newWithMessage(Ss.QueryHistoryBuildingSaleDetail.PARSER,StatisticSession.class, "queryHistoryBuildingSaleDetail")); //查询一周经营详情
-            table.put((short) SsCode.OpCode.queryIndustryTop_VALUE, Wrapper.newWithMessage(Ss.queryTop.PARSER,StatisticSession.class, "queryIndustryTop")); //查询行业大佬
+
+            // 城市信息.行业收入
+            table.put((short) SsCode.OpCode.queryIndustryIncome_VALUE, Wrapper.newOnlyOpcodeAsync(StatisticSession.class, "queryIndustryIncome")); //行业收入
+            table.put((short) SsCode.OpCode.queryGroundOrApartmentAvgPrice_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryGroundOrApartmentAvgPrice")); //土地或住宅平均交易价格
+
         } catch (Exception e) {
             e.printStackTrace();
         }

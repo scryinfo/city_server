@@ -131,6 +131,11 @@ public class Technology extends ScienceBuildingBase {
         saveAndUpdate(diffNano);//定时更新
     }
 
+    @Override
+    public int getTotalSaleCount() {
+        return this.shelf.getTotalContentNum();
+    }
+
     /*商品适配*/
     protected boolean shelfAddable(ItemKey k) {
         return k.meta instanceof MetaScienceItem;

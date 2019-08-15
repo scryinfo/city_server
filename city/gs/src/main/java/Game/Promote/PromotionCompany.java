@@ -147,4 +147,9 @@ public class PromotionCompany extends ScienceBuildingBase {
         delComplementLine(completedLines);//删除已完成线
         saveAndUpdate(diffNano);//定时更新
     }
+
+    @Override
+    public int getTotalSaleCount() {
+        return this.shelf.getTotalContentNum();
+    }
 }

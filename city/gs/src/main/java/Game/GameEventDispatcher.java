@@ -233,6 +233,10 @@ public class GameEventDispatcher extends DispatcherBase {
             table.put((short) GsCode.OpCode.queryPromotionSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryPromotionSummary"));
 			// 数据公司详情
 			table.put((short) GsCode.OpCode.queryPromotionsDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryPromotionsDetail.PARSER, GameSession.class, "queryPromotionsDetail"));
+            // 行业供需
+			table.put((short) GsCode.OpCode.querySupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.SupplyAndDemand.PARSER, GameSession.class, "querySupplyAndDemand"));
+			// 行业排行
+			table.put((short) GsCode.OpCode.queryIndustryTopInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryIndustry.PARSER, GameSession.class, "queryIndustryTopInfo"));
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));

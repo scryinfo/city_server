@@ -49,6 +49,16 @@ public class TimeUtil {
         calendar.add(Calendar.DATE, -6);
         return calendar;
     }
+    //前7天
+    public static Calendar beforeSevenDay(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.DATE, -7);
+        return calendar;
+    }
     //获取指定时间的起始时间
     public static Long getTimeDayStartTime(Long time){
         //获取东八区的时间

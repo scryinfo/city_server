@@ -11,6 +11,8 @@ import Game.FriendManager.*;
 import Game.Gambling.Flight;
 import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
+import Game.IndustryInfo.IndustryMgr;
+import Game.IndustryInfo.TopInfo;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -978,11 +980,11 @@ public class GameSession {
         String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
         LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);
         // 记录商品评分
-        double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalQty(), itemId);
+        double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalBrand(), itemId);
         double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
         double score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, seller.getName(), seller.getCompanyName(),sellBuilding.type());
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, sellBuilding.type());
         LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
         LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
         /*离线收益，只在玩家离线期间统计*/
@@ -3712,7 +3714,7 @@ public class GameSession {
             BrandManager.BrandName brandName = BrandManager.instance().getBrand(seller.id(), itemId).brandName;
             String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, 0, seller.getName(), seller.getCompanyName(),sellBuilding.type());
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, 0, sellBuilding.type());
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
@@ -4092,7 +4094,7 @@ public class GameSession {
         if (!itemList.isEmpty() && itemList.size() > 0) {
             itemList.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -4100,7 +4102,7 @@ public class GameSession {
             List<Item> items = department.getShelf().getAllSaleDetail();
             items.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -4124,7 +4126,7 @@ public class GameSession {
         if (!items.isEmpty() && items.size() > 0) {
             items.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -4132,7 +4134,7 @@ public class GameSession {
             List<Item> itemList = retailShop.getShelf().getAllSaleDetail();
             items.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -5598,7 +5600,7 @@ public class GameSession {
             LogDb.playerPay(player.id(),cost,sellBuilding.type());
             LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
-                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,sellBuilding.type());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
@@ -5878,6 +5880,78 @@ public class GameSession {
                 }
             });
         });
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void querySupplyAndDemand(short cmd,Message message) {
+        Gs.SupplyAndDemand msg = (Gs.SupplyAndDemand) message;
+        int type = msg.getType().getNumber();
+        List<Document> list = LogDb.querySupplyAndDemand(type);
+        Gs.SupplyAndDemand.Builder builder = Gs.SupplyAndDemand.newBuilder();
+        builder.setType(msg.getType());
+        long demand = IndustryMgr.instance().getTodayDemand(type); // 行业今日成交数量
+        int supply = IndustryMgr.instance().getTodaySupply(type);  // 行业剩余数量
+        // 供： 交易总量+剩余数量
+        builder.setTodayS(demand+supply);
+        builder.setTodayD(demand);
+        list.stream().forEach(d->{
+            Gs.SupplyAndDemand.Info.Builder info = Gs.SupplyAndDemand.Info.newBuilder();
+            info.setTime(d.getLong("time"));
+            info.setDemand(d.getLong("demand"));
+            info.setSupply(d.getLong("supply"));
+            builder.addInfo(info);
+        });
+        this.write(Package.create(cmd, builder.build()));
+
+    }
+
+    // 行业排行
+    public void queryIndustryTopInfo(short cmd, Message message) {
+        Gs.QueryIndustry m = (Gs.QueryIndustry) message;
+        int type = m.getType();  // 行业类型id
+        UUID id = Util.toUuid(m.getPid().toByteArray()); // 玩家id
+        long industryStaffNum = IndustryMgr.instance().getIndustryStaffNum(type); // 行业总员工
+        long industrySumIncome = IndustryMgr.instance().getIndustrySumIncome(type); // 行业总营收
+        Gs.IndustryTopInfo.Builder builder = Gs.IndustryTopInfo.newBuilder();
+        builder.setTotal(industrySumIncome).setStaffNum(industryStaffNum).setType(type).setOwner(0);
+        AtomicInteger owner = new AtomicInteger(0);
+        if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
+            List<TopInfo> infos = IndustryMgr.instance().queryTop();
+            infos.stream().filter(o -> o != null).forEach(d -> {
+                owner.incrementAndGet();
+                Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
+                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setCount(d.count).setFaceId(d.faceId);
+                if (d.pid.equals(id)) {
+                    builder.setOwner(owner.intValue());
+                }
+                builder.addTopInfo(info);
+            });
+            TopInfo top = IndustryMgr.instance().queryMyself(id, type);
+            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count).setFaceId(top.faceId));
+
+        } else {
+            builder.setStaffNum(industryStaffNum).setTotal(industrySumIncome).setOwner(0);
+            List<TopInfo> infos = IndustryMgr.instance().queryTop(type);
+            infos.stream().filter(o -> o != null).forEach(d -> {
+                owner.incrementAndGet();
+                Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
+                info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum).setFaceId(d.faceId);
+                if (d.pid.equals(id)) {
+                    builder.setOwner(owner.intValue());
+                }
+                builder.addTopInfo(info);
+            });
+            TopInfo myself = IndustryMgr.instance().queryMyself(id, type);
+            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder()
+                    .setPid(Util.toByteString(myself.pid))
+                    .setIncome(myself.yesterdayIncome)
+                    .setName(myself.name)
+                    .setWoker(myself.workerNum)
+                    .setScience(myself.science)
+                    .setPromotion(myself.promotion)
+                    .setFaceId(myself.faceId)
+                    .setMyself(true).build());
+        }
         this.write(Package.create(cmd, builder.build()));
     }
 

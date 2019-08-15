@@ -97,6 +97,11 @@ public class Apartment extends Building implements IBuildingContract
     }
 
     @Override
+    public int getTotalSaleCount() {
+        return getCapacity() - getRenterNum();
+    }
+
+    @Override
     public boolean npcSelectable() {
         return meta.npc > this.renters.size();
     }

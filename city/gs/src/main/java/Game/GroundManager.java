@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -153,6 +154,16 @@ public class GroundManager {
         int rentingCount;
     }
 
+    public int getAllSellingCount() {
+        AtomicInteger count = new AtomicInteger(0);
+        this.summaryInfo.forEach((k,v)->{
+            if (v.rentingCount == 0 && v.sellingCount == 0) {
+                return;
+            }
+            count.addAndGet(v.sellingCount);
+        });
+        return count.intValue();
+    }
     @Transient
     private Map<GridIndex, SummaryInfo> summaryInfo = new HashMap<>();
 

@@ -737,7 +737,12 @@ public class GameDb {
 	}
 
 	public static Player getPlayer(UUID id) {
-		return playerCache.getUnchecked(id);
+
+		try {
+			return playerCache.getUnchecked(id);
+		} catch (Throwable t) {
+			return null;
+		}
 	}
 	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
 		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);

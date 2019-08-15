@@ -127,4 +127,9 @@ public class ScienceShelf{
         });
         return res;
     }
+    // 获取货架上所有数量
+    public Integer getTotalContentNum(){
+        int sum = this.slots.values().stream().mapToInt(c -> c.n).sum();
+        return sum;
+    }
 }

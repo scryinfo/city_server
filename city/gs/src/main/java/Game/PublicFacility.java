@@ -646,6 +646,11 @@ public class PublicFacility extends Building{
         }
     }
 
+    @Override
+    public int getTotalSaleCount() {
+        return 0;
+    }
+
     //基础能力加成
     public double getBaseAbility(){
         //基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
