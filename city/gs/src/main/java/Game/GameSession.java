@@ -918,7 +918,7 @@ public class GameSession {
         int freight = (int) (MetaData.getSysPara().transferChargeRatio * IStorage.distance(buyStore, (IStorage) sellBuilding));
 
         //TODO:矿工费用（商品基本费用*矿工费用比例）(向下取整),
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost * minersRatio);
         long income =cost - minerCost;//收入（扣除矿工费后）
         long pay=cost+minerCost;
@@ -975,7 +975,7 @@ public class GameSession {
         //获取品牌名
         BrandManager.BrandName brandName = BrandManager.instance().getBrand(seller.id(), itemId).brandName;
         String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
-        LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);
+        //LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);
         // 记录商品评分
         double score = 0;
         if(MetaGood.isItem(itemId)){
@@ -990,9 +990,9 @@ public class GameSession {
         LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
         /*离线收益，只在玩家离线期间统计*/
         if(!GameServer.isOnline(seller.id())) {
-            LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), itemBuy.n, c.getPrice(), itemId);//记录建筑收益详细信息
+            LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), itemBuy.n,i.getPrice(), itemId);//记录建筑收益详细信息
         }
-        //矿工费用日志记录(需调整)
+        //矿工费用日志记录
         LogDb .minersCost(player.id(),minerCost,minersRatio);
         LogDb.minersCost(seller.id(),minerCost,minersRatio);
         sellShelf.delshelf(itemBuy.key, itemBuy.n, false);
@@ -1576,7 +1576,7 @@ public class GameSession {
         //判断买家资金是否足够，如果够，扣取对应资金，否则返回资金不足的错误
         int fee = selfPromo? 0 : (fcySeller.getCurPromPricePerHour()) * ((int)gs_AdAddNewPromoOrder.getPromDuration()/3600000);
         //TODO:矿工费用(向下取整)
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(fee * minersRatio);
         if(buyer.money() < fee+minerCost){
             if(GlobalConfig.DEBUGLOG){
@@ -2151,7 +2151,7 @@ public class GameSession {
             lab.useTime(c.getTimes());
             cost = c.getTimes() * lab.getPricePreTime();
             //TODO:矿工费用
-            double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+            double minersRatio = MetaData.getSysPara().minersCostRatio;
             long minerCost = (long) Math.floor(cost * minersRatio);
             if (!player.decMoney(cost + minerCost))
                 return;
@@ -5582,13 +5582,21 @@ public class GameSession {
             }
             //计算费用
             int cost = item.n * content.price;
+            /*TODO 计算旷工费*/
+            double minersRatio = MetaData.getSysPara().minersCostRatio;
+            long minerCost = (long) Math.floor(cost * minersRatio);
+            /*扣除买方金额*/
+            if(!player.decMoney(minerCost+cost)){
+                this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
+                return;
+            }
             //消费货架数量
             science.delshelf(item.key, item.n, false);
             sellBuilding.updateTodayIncome(cost);
             //玩家支出和收入记录
             Player seller = GameDb.getPlayer(science.ownerId());
-            player.decMoney(cost);//消费者支出
-            seller.addMoney(cost);//卖家收入
+            /*增加卖方金额*/
+            seller.addMoney(cost-minerCost);//卖家收入（扣除旷工费）
             int itemId = item.key.meta.id;
             //增加玩家的科技点数
             if(sellBuilding.type()==MetaBuilding.TECHNOLOGY) {
@@ -5602,8 +5610,10 @@ public class GameSession {
             }
             int type = MetaItem.scienceItemId(itemId);//获取商品类型
             //日志记录
-            LogDb.playerPay(player.id(),cost,sellBuilding.type());
-            LogDb.playerIncome(seller.id(),cost,sellBuilding.type());
+            LogDb.minersCost(this.player.id(),minerCost, MetaData.getSysPara().minersCostRatio);
+            LogDb.minersCost(seller.id(),minerCost, MetaData.getSysPara().minersCostRatio);
+            LogDb.playerPay(player.id(),cost+minerCost,sellBuilding.type());
+            LogDb.playerIncome(seller.id(),cost-minerCost,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
                     item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,seller.getName(),seller.getCompanyName(),sellBuilding.type());
             LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
