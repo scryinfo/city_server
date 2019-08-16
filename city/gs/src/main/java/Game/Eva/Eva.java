@@ -62,6 +62,7 @@ public class Eva {
 		this.lv = lv;
 		this.cexp = cexp;
 		this.b = b;
+        sumValue=0;
 	}
 	public Eva(UUID pid, int at, int bt, int lv, long cexp, long b,long p) {
 		super();
@@ -72,7 +73,7 @@ public class Eva {
 		this.lv = lv;
 		this.cexp = cexp;
 		this.b = b;
-		this.sumValue = sumValue;
+		this.sumValue = 0;
 	}
 
     public Gs.Eva toProto() {
