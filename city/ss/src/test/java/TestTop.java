@@ -12,7 +12,7 @@ public class TestTop {
     public void test1() {
 //        LogDb.init("mongodb://192.168.0.191:27017","cityLiuyi");
 //        SummaryUtil.init();
-        long millis = System.currentTimeMillis();
+        /*long millis = System.currentTimeMillis();
         long low = millis - 3600000 * 24;
         List<IndustryInfo> list = new ArrayList<>();
         list.add(new IndustryInfo(1,100l,555l));
@@ -30,7 +30,7 @@ public class TestTop {
         list.add(new IndustryInfo(3,1000l,999l));
         list.add(new IndustryInfo(4,1100l,999l));
         Ss.IndustryIncome income = SummaryUtil.tests(list);
-        System.err.println(income);
+        System.err.println(income);*/
     }
 
     @org.junit.Test
