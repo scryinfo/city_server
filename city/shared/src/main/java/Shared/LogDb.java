@@ -89,7 +89,7 @@ public class LogDb {
 
 	private static final String INDUSTRY_SUPPLYANDDEMAND = "industrySupplyAndDemand"; // 行业供需
 	private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";     // 行业收入表
-
+	private static final String CITY_MONEY_POOL= "cityMoneyPool";
 	/*玩家登陆时长统计(玩家登陆时间统计) yty*/
 	private static final String PLAYER_LOGINTIME = "playerLoginTime";
 
@@ -143,6 +143,7 @@ public class LogDb {
 	private static MongoCollection<Document> industrySupplyAndDemand;
 	// 行业收入--
 	private static MongoCollection<Document> dayIndustryIncome;
+	private static MongoCollection<Document> cityMoneyPool;
 
 
 	private static MongoCollection<Document> playerLoginTime; //玩家登录时间统计 Yty
@@ -238,6 +239,8 @@ public class LogDb {
 		industrySupplyAndDemand = database.getCollection(INDUSTRY_SUPPLYANDDEMAND)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		dayIndustryIncome = database.getCollection(DAY_INDUSTRY_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		cityMoneyPool = database.getCollection(CITY_MONEY_POOL)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -453,9 +456,9 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList
 						(
-//								Aggregates.match(and(
-//										gte("t", yestodayStartTime),
-//										lte("t", todayStartTime))),
+								Aggregates.match(and(
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
 								Aggregates.group(null, Accumulators.avg(KEY_AVG, "$a")),
 								Aggregates.project(projectObject)
 						)
@@ -1412,6 +1415,9 @@ public class LogDb {
 	public static MongoCollection<Document> getPlayerLoginTime() {
 		return playerLoginTime;
 	}
+	public static MongoCollection<Document> getCityMoneyPool() {
+		return cityMoneyPool;
+	}
 
 	public static class Positon
 	{
@@ -1848,6 +1854,9 @@ public class LogDb {
 			industrySupplyAndDemand.insertMany(source);
 		}
 	}
+	public static void insertCityMoneyPool(long total,long time) {
+			cityMoneyPool.insertOne(new Document().append(KEY_TOTAL,total).append("time",time));
+	}
 
 	public static List<Document> querySupplyAndDemand(int type) {
 		Calendar calendar = Calendar.getInstance();
@@ -1890,6 +1899,17 @@ public class LogDb {
 		});
 
 		return count[0];
+	}
+
+	public static List<Document> queryCityTransactionAmount(long startTime, long endTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
 	}
 
 }

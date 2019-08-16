@@ -1,10 +1,8 @@
 package Game;
 
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
-import Game.Eva.EvaSalary;
 import Game.Gambling.FlightManager;
-import Game.IndustryInfo.IndustryMgr;
+import Game.CityInfo.IndustryMgr;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -21,7 +19,6 @@ import com.google.common.collect.Sets;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
-import org.bson.Document;
 
 import java.time.Duration;
 import java.time.LocalTime;

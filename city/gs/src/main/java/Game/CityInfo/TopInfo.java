@@ -1,4 +1,4 @@
-package Game.IndustryInfo;
+package Game.CityInfo;
 
 
 import java.util.UUID;

@@ -1,7 +1,6 @@
-package Game.IndustryInfo;
+package Game.CityInfo;
 
 import Game.*;
-import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Timers.PeriodicTimer;
@@ -21,18 +20,17 @@ public class IndustryMgr {
     public static IndustryMgr instance() {
         return instance;
     }
-    static long nowTime=System.currentTimeMillis();
-    static{
-        nowTime = System.currentTimeMillis();
-    }
-    PeriodicTimer timer= new PeriodicTimer((int) TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-System.currentTimeMillis())/1000));//每天0点开始更新数据
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-System.currentTimeMillis())/1000));//每天0点开始更新数据
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
+            // ss获取不到 暂时先放在gs统计
             long endTime = getEndTime(System.currentTimeMillis());
             long startTime = endTime - DAY_MILLISECOND;
             List<Document> source = source(startTime, endTime);
             LogDb.insertIndustrySupplyAndDemand(source);
+            long sum = MoneyPool.instance().getN();
+            LogDb.insertCityMoneyPool(sum, endTime);
         }
     }
 
@@ -42,11 +40,9 @@ public class IndustryMgr {
 
     public static void main(String[] args) {
         long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND-DAY_MILLISECOND;
-        System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(1565747991504l));
-        System.err.println(endTime);
+        long startTime = endTime - DAY_MILLISECOND;
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
-        System.err.println(startTime);
+        System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
 
     }
 
@@ -128,21 +124,11 @@ public class IndustryMgr {
     }
 
     public List<TopInfo> queryTop(int buildingType) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long endTime=endDate.getTime();
-
-        calendar.add(Calendar.DATE, -1);
-        Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, buildingType, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
-        list.stream().filter(o->o.getInteger("id")!=null).forEach(d->{
+        list.stream().filter(o->o!=null).forEach(d->{
             UUID pid = d.get("id", UUID.class);
             // 玩家行业总工人数
             int staffNum = getPlayerIndustryStaffNum(pid, buildingType);
@@ -153,10 +139,11 @@ public class IndustryMgr {
             String faceId = player.getFaceId();
             // 玩家昨日收入
             long total = d.getLong("total");
-            // 玩家科技点数投入
-            long science = 0;
-            //
-            long promotion = 0;
+            Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
+            // 玩家推广点数投入
+            long promotion = map.getOrDefault(1, 0l);
+            // 玩家研究点数
+            long science = map.getOrDefault(2, 0l);
             tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
         });
         return tops;
@@ -177,18 +164,8 @@ public class IndustryMgr {
     }
     // 土地排行信息
     public List<TopInfo> queryTop() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long endTime = endDate.getTime();
-
-        calendar.add(Calendar.DATE, -1);
-        Date startDate = calendar.getTime();
-        long startTime = startDate.getTime();
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, Gs.SupplyAndDemand.IndustryType.GROUND_VALUE, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
         list.stream().filter(o -> o.getInteger("id") != null).forEach(d -> {
@@ -207,18 +184,8 @@ public class IndustryMgr {
     }
 
     public TopInfo queryMyself(UUID owner, int type) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long endTime = endDate.getTime();
-
-        calendar.add(Calendar.DATE, -1);
-        Date startDate = calendar.getTime();
-        long startTime = startDate.getTime();
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             long ground = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
             Player player = GameDb.getPlayer(owner);
@@ -232,10 +199,11 @@ public class IndustryMgr {
             String name = player == null ? "" : player.getName();
             String faceId = player.getFaceId();
             int staffNum = getPlayerIndustryStaffNum(owner, type);
-            // 玩家科技点数投入
-            long science = 0;
-            //
-            long promotion = 0;
+            Map<Integer, Long> map = EvaManager.getInstance().getScience(owner, type);
+            // 玩家推广点数投入
+            long promotion = map.getOrDefault(1, 0l);
+            // 玩家研究点数
+            long science = map.getOrDefault(2, 0l);
             return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
         }
     }

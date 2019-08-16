@@ -18,7 +18,6 @@ import ss.Ss;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -71,6 +70,7 @@ public class SummaryUtil {
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
     public static final String AVERAGE_TRANSACTION_PRICE = "averageTransactionPrice";
+    public static final String CITY_TRANSACTION_AMOUNT = "cityTransactionAmount";
     public static final String TOP_INFO = "topInfo";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
@@ -100,6 +100,7 @@ public class SummaryUtil {
 
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
+    private static MongoCollection<Document> cityTransactionAmount;
 
     //yty
     private static MongoCollection<Document> dayPlayerLoginTime;
@@ -161,6 +162,8 @@ public class SummaryUtil {
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
         dayPlayerLoginTime = database.getCollection(DAY_PLAYER_LOGINTIME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        cityTransactionAmount = database.getCollection(CITY_TRANSACTION_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -701,6 +704,9 @@ public class SummaryUtil {
     public static MongoCollection<Document> getDayPlayerLoginTime() {
         return dayPlayerLoginTime;
     }
+    public static MongoCollection<Document> getCityTransactionAmount() {
+        return cityTransactionAmount;
+    }
 
     public static void insertBuildingDayIncome(List<Document> documentList, long time)
     {
@@ -1189,6 +1195,99 @@ public class SummaryUtil {
                 {
                     map.put(document.getLong(TIME), document.getDouble(KEY_AVG));
                 });
+        return map;
+    }
+
+    public static Ss.AverageTransactionprice.AvgPrice getCurrenttransactionPrice(boolean isApartment) {
+        long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+        Ss.AverageTransactionprice.AvgPrice.Builder builder = Ss.AverageTransactionprice.AvgPrice.newBuilder();
+        if (isApartment) {
+            builder.setPrice(0);
+            List<Document> list = LogDb.transactionPrice(startTime, endTime, LogDb.getNpcRentApartment());
+            list.stream().filter(o->o!=null).forEach(d->{
+                builder.setPrice(d.getDouble(KEY_AVG));
+            });
+            builder.setTime(todayStartTime(System.currentTimeMillis()));
+        } else {
+            builder.setPrice(0);
+            List<Document> list = LogDb.transactionPrice(startTime, endTime, LogDb.getBuyGround());
+            list.stream().filter(o->o!=null).forEach(d->{
+                builder.setPrice(d.getDouble(KEY_AVG));
+            });
+            builder.setTime(todayStartTime(System.currentTimeMillis()));
+        }
+        return builder.build();
+    }
+
+    public static void insertCityTransactionAmount(List<Document> documentList,
+                                                   long time, MongoCollection<Document> collection) {
+        documentList.forEach(document ->
+                document.append(TIME, time));
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
+
+    public static Map<Long, Long> queryCityTransactionAmount(MongoCollection<Document> collection) {
+        Calendar calendar = TimeUtil.beforeSevenDay();
+        Date endDate = calendar.getTime();
+        long endTime = endDate.getTime();
+        Date startDate = calendar.getTime();
+        long startTime = startDate.getTime();
+        Map<Long, Long> map = new LinkedHashMap<>();
+
+        collection.find(and(
+                gte(TIME, startTime),
+                lte(TIME, endTime)
+        ))
+
+                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+                .sort(Sorts.descending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                });
+
+        return map;
+    }
+    public static Map<Long, Long> queryCurrCityTransactionAmount(MongoCollection<Document> collection) {
+        Map<Long, Long> map = new HashMap<>();
+        long nowTime = System.currentTimeMillis();
+        long startTime = SummaryUtil.todayStartTime(nowTime);
+        List<Document> documentList = new ArrayList<>();
+        collection.aggregate(
+                Arrays.asList(
+                        Aggregates.match(and(gte("t", startTime), lte("t", nowTime))),
+                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total"))
+                )
+        ).forEach((Block<? super Document>) documentList::add);
+        documentList.stream().filter(o->o!=null).forEach(d->{
+            map.put(startTime, d.getLong(KEY_TOTAL));
+        });
+        return map;
+    }
+
+    public static Map<Long, Long> queryCityMoneyPoolLog(MongoCollection<Document> collection) {
+        Calendar calendar = TimeUtil.beforeSevenDay();
+        Date endDate = calendar.getTime();
+        long endTime = endDate.getTime();
+        Date startDate = calendar.getTime();
+        long startTime = startDate.getTime();
+        Map<Long, Long> map = new LinkedHashMap<>();
+
+        collection.find(and(
+                gte(TIME, startTime),
+                lte(TIME, endTime)
+        ))
+
+                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+                .sort(Sorts.descending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                });
+
         return map;
     }
 }

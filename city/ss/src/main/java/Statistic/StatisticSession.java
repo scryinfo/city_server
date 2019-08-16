@@ -419,7 +419,7 @@ public class StatisticSession {
 		getIndustryIncomeList(todaylist,buildType,totalMap,singleMap);
 		//一周的数据
 		totalMap.forEach((k,v)->{
-			Ss.IndustryDevelopment.IndustryInfo.Builder industryInfo=Ss.IndustryDevelopment.IndustryInfo.newBuilder();
+			Ss.IndustryDevelopment.CityInfo.Builder industryInfo=Ss.IndustryDevelopment.CityInfo.newBuilder();
 			industryInfo.setTime(k).setAmount(singleMap.get(k)).setTotalAmount(v).setPercent(singleMap.get(k)/v/1.d);
 			b.addIndustryInfo(industryInfo);
 		});
@@ -566,7 +566,7 @@ public class StatisticSession {
 			map.forEach((k,v)->{
 				Ss.IndustryIncome.IncomeInfo.Builder info = Ss.IndustryIncome.IncomeInfo.newBuilder();
 				info.setTime(k);
-				if (!v.isEmpty() && v.size() > 0) {
+				if (!v.isEmpty() && v!=null) {
 					v.forEach((x,y)->{
 						Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
 						msg.setType(x).setIncome(y);
@@ -588,11 +588,46 @@ public class StatisticSession {
 		Gs.Bool bool = (Gs.Bool) message;
 		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(bool.getB()); // t 为住宅 f为土地
 		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
-		if (!map.isEmpty() && map.size() > 0) {
+		if (!map.isEmpty() && map!=null) {
 			map.forEach((k, v) -> {
 				Ss.AverageTransactionprice.AvgPrice.Builder avg = Ss.AverageTransactionprice.AvgPrice.newBuilder();
 				avg.setTime(k).setPrice(v);
 				builder.addAvg(avg);
+			});
+		}
+		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(bool.getB()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	// 城市信息-全城销售额
+    public void queryCityTransactionAmount(short cmd, Message message) {
+        Gs.Bool bool = (Gs.Bool) message;
+        Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
+        if (bool.getB()) { // 历史记录
+            Map<Long, Long> map = SummaryUtil.queryCityTransactionAmount(SummaryUtil.getCityTransactionAmount());
+            map.forEach((k, v) -> {
+                Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
+                amountBuilder.setTime(k).setSum(v);
+            });
+        } else { // 今日记录
+            Map<Long, Long> map = SummaryUtil.queryCurrCityTransactionAmount(LogDb.getPlayerIncome());
+            if (map != null && !map.isEmpty()) {
+                map.forEach((k, v) -> {
+                    Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
+                    amountBuilder.setTime(k).setSum(v);
+                });
+            }
+        }
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+	public void queryCityMoneyPool(short cmd) {
+		Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
+		Map<Long, Long> map = SummaryUtil.queryCityMoneyPoolLog(LogDb.getCityMoneyPool());
+		if (map != null && !map.isEmpty()) {
+			map.forEach((k, v) -> {
+				Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
+				amountBuilder.setTime(k).setSum(v);
 			});
 		}
 		this.write(Package.create(cmd, builder.build()));
