@@ -95,7 +95,7 @@ public class JustVisit implements IAction {
                 Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                         .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                         .setBuyerId(Util.toByteString(npc.id()))
-                        .setCost(chosen.cost())
+                        .setCost(pay)
                         .setType(Gs.IncomeNotify.Type.RENT_ROOM)
                         .setBid(chosen.metaId())
                         .build();
@@ -118,7 +118,7 @@ public class JustVisit implements IAction {
 
             LogDb.playerIncome(owner.id(), income,chosen.type());
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
-            LogDb.buildingIncome(chosen.id(),npc.id(),chosen.cost(),0,0);//不含旷工费扣除
+            LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);//含旷工费扣除
             // 建筑繁荣度 建筑评分
             Apartment apartment = (Apartment) chosen;
             int prosperityScore = (int) ProsperityManager.instance().getBuildingProsperityScore(chosen);
@@ -126,7 +126,7 @@ public class JustVisit implements IAction {
             double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
             int curRetailScore = (int) ((brandScore + retailScore) / 2);
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
-                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName()); //不包含矿工费用
+                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName());
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(),owner.id(), 1,chosen.cost(), 0);
             }

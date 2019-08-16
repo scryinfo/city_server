@@ -939,7 +939,7 @@ public class GameSession {
                 .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
                 .setBuyerId(Util.toByteString(player.id()))
                 .setFaceId(player.getFaceId())
-                .setCost(cost)
+                .setCost(income)
                 .setType(Gs.IncomeNotify.Type.INSHELF)
                 .setBid(sellBuilding.metaBuilding.id)
                 .setItemId(itemBuy.key.meta.id)
@@ -955,17 +955,17 @@ public class GameSession {
                     .setType(1)
                     .setSellerId(Util.toByteString(seller.id()))
                     .setBuyerId(Util.toByteString(player.id()))
-                    .setCost(cost)
+                    .setCost(income)
                     .setTs(System.currentTimeMillis())
                     .build()));
-            LogDb.cityBroadcast(seller.id(),player.id(),cost,0,1);
+            LogDb.cityBroadcast(seller.id(),player.id(),pay,0,1);
         }
         player.decMoney(freight);
         LogDb.playerPay(player.id(), freight,buyBuilding.type());
 
         GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                 .setBuildingId(Util.toByteString(bid))
-                .setMoney(cost)
+                .setMoney(income)
                 .setPos(sellBuilding.toProto().getPos())
                 .setItemId(itemBuy.key.meta.id)
                 .build()
@@ -979,15 +979,15 @@ public class GameSession {
         String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
         //LogDb.payTransfer(player.id(), freight, bid, wid,itemId,itemBuy.key.producerId, itemBuy.n);
         // 记录商品评分
-            double score = 0;
-            if (MetaGood.isItem(itemId)) {
-                double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalBrand(), itemId);
-                double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
-                score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
-            }
+        double score = 0;
+        if (MetaGood.isItem(itemId)) {
+            double brandScore = GlobalUtil.getBrandScore(itemBuy.key.getTotalBrand(), itemId);
+            double goodQtyScore = GlobalUtil.getGoodQtyScore(itemBuy.key.getTotalQty(), itemId, MetaData.getGoodQuality(itemId));
+            score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
+        }
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
                     itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, sellBuilding.type());
-        LogDb.buildingIncome(bid,player.id(),cost,type,itemId);//商品支出记录不包含运费
+        LogDb.buildingIncome(bid,player.id(),income,type,itemId);//商品支出记录不包含运费
         LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
         /*离线收益，只在玩家离线期间统计*/
         if(!GameServer.isOnline(seller.id())) {
@@ -5622,7 +5622,7 @@ public class GameSession {
             LogDb.playerIncome(seller.id(),totalIncome,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
                     item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,sellBuilding.type());
-            LogDb.buildingIncome(bid,player.id(),cost,0,itemId);
+            LogDb.buildingIncome(bid,player.id(),totalIncome,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计
             }

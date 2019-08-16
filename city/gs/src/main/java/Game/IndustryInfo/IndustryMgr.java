@@ -21,11 +21,11 @@ public class IndustryMgr {
     public static IndustryMgr instance() {
         return instance;
     }
-    static long nowTime=0;
+    static long nowTime=System.currentTimeMillis();
     static{
         nowTime = System.currentTimeMillis();
     }
-    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
+    PeriodicTimer timer= new PeriodicTimer((int) TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-System.currentTimeMillis())/1000));//每天0点开始更新数据
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {

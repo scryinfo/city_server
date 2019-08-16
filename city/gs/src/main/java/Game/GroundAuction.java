@@ -147,8 +147,6 @@ public class GroundAuction {
             {
                 iter.remove();
                 assert (a.biderId() != null);
-
-
                 Player bider = GameDb.getPlayer(a.biderId());
                 long p = bider.spentLockMoney(a.transactionId);
                 /*扣除矿工费用,TODO*/
@@ -169,9 +167,9 @@ public class GroundAuction {
                     plist1.add(new LogDb.Positon(c.x, c.y));
                 }
                 // 现在分开记录在landAuction日志中
-                LogDb.landAuction(bider.id(), null,   p, plist1);
+                LogDb.landAuction(bider.id(), null,   p+minerCost, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
-                LogDb.playerPay(bider.id(),p,0);//增加了土地拍卖  记录玩家的支出
+                LogDb.playerPay(bider.id(),p+minerCost,0);//增加了土地拍卖  记录玩家的支出
                 bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(p).build()));
                 //土地拍卖通知
                 List<Coordinate> areas = a.meta.area;
