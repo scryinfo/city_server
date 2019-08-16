@@ -1,6 +1,7 @@
 package Game.CityInfo;
 
 import Game.*;
+import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Timers.PeriodicTimer;
 import Game.Util.DateUtil;
@@ -23,11 +24,11 @@ public class IndustryMgr {
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
+            // ss获取不到 暂时先放在gs统计
             long endTime = getEndTime(System.currentTimeMillis());
             long startTime = endTime - DAY_MILLISECOND;
             List<Document> source = source(startTime, endTime);
             LogDb.insertIndustrySupplyAndDemand(source);
-            // ss获取不到 暂时先放在gs统计
             long sum = MoneyPool.instance().getN();
             LogDb.insertCityMoneyPool(sum, endTime);
         }
@@ -127,7 +128,7 @@ public class IndustryMgr {
         long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, buildingType, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
-        list.stream().filter(o->o.getInteger("id")!=null).forEach(d->{
+        list.stream().filter(o->o!=null).forEach(d->{
             UUID pid = d.get("id", UUID.class);
             // 玩家行业总工人数
             int staffNum = getPlayerIndustryStaffNum(pid, buildingType);
@@ -138,10 +139,11 @@ public class IndustryMgr {
             String faceId = player.getFaceId();
             // 玩家昨日收入
             long total = d.getLong("total");
-            // 玩家科技点数投入
-            long science = 0;
-            //
-            long promotion = 0;
+            Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
+            // 玩家推广点数投入
+            long promotion = map.getOrDefault(1, 0l);
+            // 玩家研究点数
+            long science = map.getOrDefault(2, 0l);
             tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
         });
         return tops;
@@ -197,10 +199,11 @@ public class IndustryMgr {
             String name = player == null ? "" : player.getName();
             String faceId = player.getFaceId();
             int staffNum = getPlayerIndustryStaffNum(owner, type);
-            // 玩家科技点数投入
-            long science = 0;
-            //
-            long promotion = 0;
+            Map<Integer, Long> map = EvaManager.getInstance().getScience(owner, type);
+            // 玩家推广点数投入
+            long promotion = map.getOrDefault(1, 0l);
+            // 玩家研究点数
+            long science = map.getOrDefault(2, 0l);
             return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
         }
     }

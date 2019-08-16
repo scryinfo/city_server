@@ -101,27 +101,20 @@ public class EvaManager
 		return null;
     }
 
-    public long getScience(UUID playerId)
-    {
-        AtomicLong science = new AtomicLong(0);
-        List<Integer> scienCeId = MetaData.getAllScienCeId();
-        scienCeId.stream().filter(i -> i != null).forEach(d->{
-            Eva eva = getEva(playerId, d, 1);
-            science.addAndGet(eva.getSumValue());
+    public Map<Integer, Long> getScience(UUID playerId, int buildingTech) {
+        final long[] sum = {0,0};
+        Map<Integer, Long> map = new HashMap<>();
+        Set<Integer> tech = MetaData.getBuildingTech(buildingTech);
+        tech.stream().forEach(i -> {
+            List<Eva> eva = getEva(playerId, i);
+            sum[0] += eva.stream().filter(o -> o.getBt() == 2).mapToLong(Eva::getSumValue).sum();
+            sum[1] += eva.stream().filter(o -> o.getBt() != 2).mapToLong(Eva::getSumValue).sum();
         });
-        return science.longValue();
+        map.put(1, sum[0]);
+        map.put(2, sum[1]);
+        return map;
     }
 
-    public long getPromotion(UUID playerId)
-    {
-        AtomicLong science = new AtomicLong(0);
-        List<Integer> promotionId = MetaData.getPromotionItemId();
-        promotionId.stream().filter(i -> i != null).forEach(d->{
-            Eva eva = getEva(playerId, d, 1);
-            science.addAndGet(eva.getSumValue());
-        });
-        return science.longValue();
-    }
     
     public void updateEva(Eva eva) {
     	Set<Eva> s=evaMap.get(eva.getPid());
