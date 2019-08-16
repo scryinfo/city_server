@@ -1,8 +1,6 @@
-package Game.IndustryInfo;
+package Game.CityInfo;
 
 import Game.*;
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Timers.PeriodicTimer;
 import Game.Util.DateUtil;
@@ -21,11 +19,7 @@ public class IndustryMgr {
     public static IndustryMgr instance() {
         return instance;
     }
-    static long nowTime=System.currentTimeMillis();
-    static{
-        nowTime = System.currentTimeMillis();
-    }
-    PeriodicTimer timer= new PeriodicTimer((int) TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-System.currentTimeMillis())/1000));//每天0点开始更新数据
+    PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-System.currentTimeMillis())/1000));//每天0点开始更新数据
 
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
@@ -33,6 +27,9 @@ public class IndustryMgr {
             long startTime = endTime - DAY_MILLISECOND;
             List<Document> source = source(startTime, endTime);
             LogDb.insertIndustrySupplyAndDemand(source);
+            // ss获取不到 暂时先放在gs统计
+            long sum = MoneyPool.instance().getN();
+            LogDb.insertCityMoneyPool(sum, endTime);
         }
     }
 
@@ -42,11 +39,9 @@ public class IndustryMgr {
 
     public static void main(String[] args) {
         long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND-DAY_MILLISECOND;
-        System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(1565747991504l));
-        System.err.println(endTime);
+        long startTime = endTime - DAY_MILLISECOND;
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
-        System.err.println(startTime);
+        System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
 
     }
 
@@ -128,18 +123,8 @@ public class IndustryMgr {
     }
 
     public List<TopInfo> queryTop(int buildingType) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long endTime=endDate.getTime();
-
-        calendar.add(Calendar.DATE, -1);
-        Date startDate = calendar.getTime();
-        long startTime=startDate.getTime();
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, buildingType, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
         list.stream().filter(o->o.getInteger("id")!=null).forEach(d->{
@@ -177,18 +162,8 @@ public class IndustryMgr {
     }
     // 土地排行信息
     public List<TopInfo> queryTop() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long endTime = endDate.getTime();
-
-        calendar.add(Calendar.DATE, -1);
-        Date startDate = calendar.getTime();
-        long startTime = startDate.getTime();
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, Gs.SupplyAndDemand.IndustryType.GROUND_VALUE, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
         list.stream().filter(o -> o.getInteger("id") != null).forEach(d -> {
@@ -207,18 +182,8 @@ public class IndustryMgr {
     }
 
     public TopInfo queryMyself(UUID owner, int type) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        Date endDate = calendar.getTime();
-        long endTime = endDate.getTime();
-
-        calendar.add(Calendar.DATE, -1);
-        Date startDate = calendar.getTime();
-        long startTime = startDate.getTime();
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             long ground = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
             Player player = GameDb.getPlayer(owner);
