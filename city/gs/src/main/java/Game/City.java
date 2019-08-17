@@ -1,5 +1,6 @@
 package Game;
 
+import Game.CityInfo.CityLevel;
 import Game.Contract.ContractManager;
 import Game.Gambling.FlightManager;
 import Game.CityInfo.IndustryMgr;
@@ -148,6 +149,15 @@ public class City {
         }
         return 0;
     }
+    // 获取玩家所有的建筑工人
+    public  long getPlayerStaffNum(UUID playerId)
+    {
+        try {
+            return playerBuilding.get(playerId).values().stream().filter(b -> b != null && !b.outOfBusiness()).mapToLong(Building::getWorkerNum).sum();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 
     public List<Building> getPlayerBListByBtype(UUID playerId, int btype)
     {
@@ -290,6 +300,7 @@ public class City {
         // 历史成交
         GuidePriceMgr.instance().update(diffNano);
         IndustryMgr.instance().update(diffNano);
+        CityLevel.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

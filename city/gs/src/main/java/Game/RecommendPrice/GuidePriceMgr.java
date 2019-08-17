@@ -220,7 +220,11 @@ public class GuidePriceMgr {
     // 土地交易
     public double getGroundPrice() {
 //   推荐定价 = 全城均土地成交价
-        return historyRecord.groundPrice;
+        double price = historyRecord.groundPrice;
+        if (0.0 == price) {
+            price = LogDb.queryLandAuctionAvg();
+        }
+        return price;
     }
 
     public void _update() {
