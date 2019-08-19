@@ -590,9 +590,8 @@ public class StatisticSession {
 		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
 		if (!map.isEmpty() && map!=null) {
 			map.forEach((k, v) -> {
-				Ss.AverageTransactionprice.AvgPrice.Builder avg = Ss.AverageTransactionprice.AvgPrice.newBuilder();
+				Ss.AverageTransactionprice.AvgPrice.Builder avg = builder.addAvgBuilder();
 				avg.setTime(k).setPrice(v);
-				builder.addAvg(avg);
 			});
 		}
 		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(bool.getB()));
@@ -632,6 +631,38 @@ public class StatisticSession {
 				amountBuilder.setTime(k).setSum(v);
 			});
 		}
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryItemAvgPrice(short cmd, Message message) {
+		Ss.queryItemAvgPrice s = (Ss.queryItemAvgPrice) message;
+		int industryType = s.getIndustryId();
+		int itemId = s.getItemId();
+		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
+		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(industryType, itemId);
+		if (!map.isEmpty() && map != null) {
+			map.forEach((k,v)->{
+				Ss.AverageTransactionprice.AvgPrice.Builder avg = builder.addAvgBuilder();
+				avg.setTime(k).setPrice(v);
+			});
+		}
+		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(industryType, itemId));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryItemSales(short cmd, Message message) {
+		Ss.queryItemSales s = (Ss.queryItemSales) message;
+		int industryType = s.getIndustryId();
+		int itemId = s.getItemId();
+		Ss.ItemSales.Builder builder = Ss.ItemSales.newBuilder();
+		Map<Long, Long> map = SummaryUtil.queryItemSales(industryType, itemId);
+		if (map != null && !map.isEmpty()) {
+			map.forEach((k, v) -> {
+				Ss.ItemSales.Sales.Builder sales = builder.addSalesBuilder();
+				sales.setTime(k).setSum(v);
+			});
+		}
+		builder.addSales(SummaryUtil.getCurrentItemSales(industryType, itemId));
 		this.write(Package.create(cmd, builder.build()));
 	}
 }

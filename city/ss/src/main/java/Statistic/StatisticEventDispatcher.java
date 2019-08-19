@@ -43,7 +43,8 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryGroundOrApartmentAvgPrice_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryGroundOrApartmentAvgPrice")); //土地或住宅平均交易价格
             table.put((short) SsCode.OpCode.queryCityTransactionAmount_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryCityTransactionAmount")); //全城销售额
             table.put((short) SsCode.OpCode.queryCityMoneyPool_VALUE, Wrapper.newOnlyOpcodeAsync(StatisticSession.class, "queryCityMoneyPool")); //城市信息-奖金池
-
+            table.put((short) SsCode.OpCode.queryItemAvgPrice_VALUE, Wrapper.newWithMessage(Ss.queryItemAvgPrice.PARSER,StatisticSession.class, "queryItemAvgPrice")); //查询商品交易均价折线图
+            table.put((short) SsCode.OpCode.queryItemSales_VALUE, Wrapper.newWithMessage(Ss.queryItemSales.PARSER,StatisticSession.class, "queryItemSales")); //查询商品营业额
         } catch (Exception e) {
             e.printStackTrace();
         }
