@@ -40,6 +40,7 @@ public class MetaData {
     private static final String dayColName = "Holiday";
     private static final String buildingSpendColName = "BuildingSpendRatio";
     private static final String goodSpendColName = "GoodSpendRatio";
+    private static final String costSpendRatioColName = "CostSpendRatio";
     private static final String formulaColName = "Formular";
     private static final String goodFormulaColName = "GoodFormular";
     private static final String talentColName = "Talent";
@@ -74,6 +75,7 @@ public class MetaData {
     private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
+    private static final TreeMap<Integer, Double> costSpendRatio = new TreeMap<>();
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
     private static final HashMap<Integer, MetaGood> good = new HashMap<>();
     private static final HashMap<Formula.Key, Formula> formula = new HashMap<>();
@@ -142,6 +144,14 @@ public class MetaData {
         return goodSpendRatio.get(mId);
     }
 
+    public static double getCostSpendRatio(int id) {
+        return costSpendRatio.get(id);
+    }
+
+    public static double getAllCostSpendRatio(){
+        return costSpendRatio.values().stream().reduce(0d, Double::sum);
+    }
+
     public static MetaTalentCenter getTalentCenter(int id) {
         return talentCenter.get(id);
     }
@@ -206,6 +216,9 @@ public class MetaData {
         });
         mongoClient.getDatabase(dbName).getCollection(buildingSpendColName).find().forEach((Block<Document>) doc -> {
             buildingSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
+        });
+       mongoClient.getDatabase(dbName).getCollection(costSpendRatioColName).find().forEach((Block<Document>) doc -> {
+           costSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
         });
     }
     public static MetaBuilding getBuilding(int id) {

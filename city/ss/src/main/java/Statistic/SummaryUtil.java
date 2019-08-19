@@ -41,6 +41,8 @@ public class SummaryUtil {
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String TIME = "time";
+    private static final String BRAND = "brand";
+    private static final String QUALITY = "quality";
     private static final String COUNTTYPE = "countType";
     private static final String DAY_SELLGROUND = "daySellGround";
     private static final String DAY_RENTGROUND = "dayRentGround";
@@ -67,10 +69,10 @@ public class SummaryUtil {
     private static final String DAY_BUILDING__GOOD_SOLD_DETAIL="dayBuildingGoodSoldDetail";
     private static final String DAY_BUILDING_BUSINESS= "dayBuildingBusiness";
     private static final String DAY_PLAYER_LOGINTIME= "dayPlayerLoginTime";
-
     //--ly
     public static final String PLAYER_EXCHANGE_AMOUNT = "playerExchangeAmount";
     public static final String TOP_INFO = "topInfo";
+    private static final String DAY_AI_BASE_AVG= "dayAiBaseAvg";
     private static MongoCollection<Document> daySellGround;
     private static MongoCollection<Document> dayRentGround;
     private static MongoCollection<Document> dayTransfer;
@@ -95,7 +97,7 @@ public class SummaryUtil {
     private static MongoCollection<Document> dayIndustryIncome;
     private static MongoCollection<Document> dayBuildingBusiness;
     private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
-
+    private static MongoCollection<Document> dayAiBaseAvg;
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
     private static MongoCollection<Document> topInfo;
@@ -160,6 +162,8 @@ public class SummaryUtil {
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
         dayPlayerLoginTime = database.getCollection(DAY_PLAYER_LOGINTIME)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        dayAiBaseAvg = database.getCollection(DAY_AI_BASE_AVG)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
@@ -695,6 +699,9 @@ public class SummaryUtil {
     public static MongoCollection<Document> getDayPlayerLoginTime() {
         return dayPlayerLoginTime;
     }
+    public static MongoCollection<Document> getDayAiBaseAvg() {
+        return dayAiBaseAvg;
+    }
 
     public static void insertBuildingDayIncome(List<Document> documentList, long time)
     {
@@ -1051,5 +1058,49 @@ public class SummaryUtil {
         topMsg.setIndustry(type);
         return builder.setMsg(topMsg.build()).build();
     }
-
+    private static void insertAiBaseAvgData(List<Document> documentList,long yestodayStartTime,MongoCollection<Document> collection){
+        documentList.forEach(document ->{
+            document.append(TIME, yestodayStartTime)
+                    .append(TYPE,document.getInteger("_id"))
+                    .append(BRAND,document.getDouble("gbrd"))
+                    .append(QUALITY,document.getDouble("gqty"));
+        });
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
+    public static void insertAiBaseAvg(long yestodayStartTime,long todayStartTime,MongoCollection<Document> collection)
+    {
+        //零售店知名度和品质均值
+        List<Document> documentList = LogDb.getNpcBuyInShelfAvg1(yestodayStartTime, todayStartTime);
+        documentList.forEach(document ->{
+            document.append(TIME, yestodayStartTime)
+                    .append(TYPE,BuildingType.RETAIL.getValue())
+                    .append(BRAND,document.getDouble("rbrd"))
+                    .append(QUALITY,document.getDouble("rqty"));
+        });
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+        //商品知名度和品质均值
+        documentList = LogDb.getNpcBuyInShelfAvg2(yestodayStartTime, todayStartTime);
+        insertAiBaseAvgData(documentList,yestodayStartTime,collection);
+/*        //商品大类知名度和品质均值
+        documentList = LogDb.getNpcBuyInShelfAvg3(yestodayStartTime, todayStartTime);
+        insertAiBaseAvgData(documentList,yestodayStartTime,collection);
+        //商品奢侈度知名度和品质均值
+        documentList = LogDb.getNpcBuyInShelfAvg4(yestodayStartTime, todayStartTime);
+        insertAiBaseAvgData(documentList,yestodayStartTime,collection);*/
+        //住宅知名度和品质均值
+        documentList = LogDb.getNpcRentApartmentAvg1(yestodayStartTime, todayStartTime);
+        documentList.forEach(document ->{
+            document.append(TIME, yestodayStartTime)
+                    .append(TYPE,BuildingType.APARTMENT.getValue())
+                    .append(BRAND,document.getDouble("abrd"))
+                    .append(QUALITY,document.getDouble("aqty"));
+        });
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
+        }
+    }
 }

@@ -36,6 +36,9 @@ public class DayJob implements org.quartz.Job {
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("DayJob start execute,time = " + timeStr);
 
+        //统计AI均值  零售店、商品、商品大类、奢侈度、住宅
+        SummaryUtil.insertAiBaseAvg(yestodayStartTime,todayStartTime, SummaryUtil.getDayAiBaseAvg());
+
         //summary info to special collection once a day
         //save sell ground income
         List<Document> documentList = LogDb.daySummary1(yestodayStartTime, todayStartTime,LogDb.getBuyGround(),true);

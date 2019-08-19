@@ -15,15 +15,15 @@ import gscode.GsCode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class JustVisit implements IAction {
-    public JustVisit(int buildingType) {
+public class GoApartment implements IAction {
+    public GoApartment(int buildingType) {
         this.buildingType = buildingType;
     }
 
     private int buildingType;
     @Override
     public Set<Object> act(Npc npc) {
-        logger.info("npc " + npc.id().toString() + " type " + npc.type() + " just visit building type " + buildingType + " located at: " + npc.buildingLocated().coordinate());
+        logger.info("GoApartment buildingType" + buildingType + " npc id " + npc.id().toString() + " npc type " + npc.type() + " npc located at: " + npc.buildingLocated().coordinate());
         //NPC成功购买住宅后,住宅状态保存24小时,在此期间不允许再次购买住宅
         if(npc.hasApartment()){
             if(System.currentTimeMillis()-npc.getBuyApartmentTs()<TimeUnit.HOURS.toMillis(24)){
@@ -43,16 +43,30 @@ public class JustVisit implements IAction {
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
             return null;
-        for (Building building : buildings) {
-            logger.info("chosen building " + building.id().toString() + " located at: " + building.coordinate());
-        }
-        logger.info("building num: " + buildings.size());
-        int[] buildingWeights = new int[buildings.size()];
-        final int cost = (int) (npc.salary() * BrandManager.instance().spendMoneyRatioBuilding(buildingType));
+        logger.info("GoApartment buildings num: " + buildings.size());
+
+        //实际住宅购物预期 = 住宅购物预期 * (1 + 全城住宅知名度均值 / 全城知名度均值) * (1 + 全城住宅品质均值 / 全城品质均值)
+        double realApartmentSpend=MetaData.getCostSpendRatio(buildingType)* (1 +  AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT) /AiBaseAvgManager.getInstance().getAllBrandAvg()) * (1 +  AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT) / AiBaseAvgManager.getInstance().getAllQualityAvg());
+        //实际总购物预期 = 实际住宅购物预期 + 所有 实际某种商品购物预期(已发明)
+        double allCostSpend=MetaData.getAllCostSpendRatio();
+        //NPC住宅预期消费 = 城市工资标准 * (实际住宅购物预期 / 实际总购物预期)
+        final int cost = (int) (npc.salary() * (realApartmentSpend/allCostSpend));
         logger.info("cost: " + cost);
+
+        Double[] moveKnownValue=City.instance().getApartmentMoveKnownArray();
+        int i=Util.randomIdx(moveKnownValue);  //随机一个
+
+//        Random generator = new Random();
+//        int randomIndex = generator.nextInt(myArray.length);
+//        myArray[randomIndex];
+        moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
+         City.instance().get
+        //buyKnownValue = NPC住宅预期消费 / 售价 * 10000
+
+        int[] buildingWeights = new int[buildings.size()];
         int i = 0;
-        Iterator<Building> iterator = buildings.iterator();
         List<Building> newBuildings=new ArrayList<Building>();
+     /*   Iterator<Building> iterator = buildings.iterator();
         while(iterator.hasNext()) {
             Building building = iterator.next();
 //          double c = ((1.d + BrandManager.instance().buildingBrandScore(buildingType)/ 100.d) + (1.d + City.instance().buildingQtyScore(building.type(), building.quality()) / 100.d) + (1.d + 0)) /3*cost;
@@ -69,13 +83,37 @@ public class JustVisit implements IAction {
             }
             newBuildings.add(building);
             buildingWeights[i++] = r<0?0:r;
-        }
+        }*/
+
+        buildings.forEach(building -> {
+            //	售价 > 住宅花费预期 的住宅剔除选择区间
+            if(building.cost()>cost){
+                continue;
+            }
+            newBuildings.add(building);
+            Apartment apartment = (Apartment) building;
+            // 单个住宅吸引力权重 = 繁荣度 * (1 + 单个住宅品质 / 全城住宅品质均值) * (1 + 单个住宅知名度 / 全城住宅知名度均值) * (1 + (160 - (ABS(NPC当前所在位置.x - 住宅坐标.x) + ABS(NPC当前所在位置.y - 住宅坐标.y))) / 160)
+            int r=(int)(ProsperityManager.instance().getBuildingProsperity(building)*(1 + (apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT))
+                    * (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))
+                    * (1 + (160 - Building.distance(building, npc.buildingLocated())) / 160));
+            if(r<=0){
+                continue;
+            }
+            newBuildings.add(building);
+            buildingWeights[i++] = r;
+
+        });
         int idx = ProbBase.randomIdx(buildingWeights);
         if(newBuildings==null||newBuildings.size()==0){
             return null;
         }
         Building chosen = newBuildings.get(idx);
-        logger.info("chosen building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
+        logger.info("chosen apartment building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
+        double price=0;
+        if(chosen.cost()==0){
+            price=0.00001
+        }
+
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
             chosen.addFlowCount();
@@ -126,7 +164,7 @@ public class JustVisit implements IAction {
             double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
             int curRetailScore = (int) ((brandScore + retailScore) / 2);
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
-                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName()); //不包含矿工费用
+                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,owner.getName(),owner.getCompanyName(),apartment.getTotalBrand(),apartment.getTotalQty()); //不包含矿工费用
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
             }

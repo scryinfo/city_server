@@ -22,6 +22,7 @@ import gscode.GsCode;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
+import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
@@ -44,6 +45,8 @@ public class City {
     private TreeMap<Integer, Integer> topGoodQty;
     private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
+    private Map<UUID,Double> apartmentMoveKnownMap=new HashMap<UUID,Double>();
+    private Map<UUID,Double> retailMoveKnownMap=new HashMap<UUID,Double>();
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
     private boolean taskIsRunning = false;
@@ -187,7 +190,7 @@ public class City {
         this.lastHour = this.localTime().getHour();
 
         //行业涨薪指数
-        loadIndustryIncrease();
+        //loadIndustryIncrease();
     }
 	private void loadSysBuildings() {
         for(MetaData.InitialBuildingInfo i : MetaData.getAllInitialBuilding())
@@ -269,6 +272,7 @@ public class City {
         Exchange.instance().update(diffNano);
         allBuilding.forEach((k,v)->v.update(diffNano));
         ContractManager.getInstance().update(diffNano);
+        AiBaseAvgManager.getInstance().update(diffNano);
         NpcManager.instance().update(diffNano);
         GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
         MailBox.instance().update(diffNano);
@@ -523,6 +527,7 @@ public class City {
         buildings.remove(building.id());
        //类型建筑中也要删除
         this.typeBuilding.get(building.type()).remove(building);
+        apartmentMoveKnownMap.remove(building.id());
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
         //重置土地建筑
@@ -597,6 +602,8 @@ public class City {
                 return building.quality();
             return oldV;
         });
+        //购买住宅 moveKnownValue
+        buildApartmentMoveKnownValue();
     }
 
     private void calcuTerrain(Building building) {
@@ -688,5 +695,22 @@ public class City {
             }
         });
         return sum.stream().reduce(Integer::sum).orElse(0);
+    }
+    //购买住宅moveKnownValue   启动时
+    public void buildApartmentMoveKnownValue(){
+        Set<Building> apartmentLit=typeBuilding.get(MetaBuilding.APARTMENT);
+        apartmentLit.forEach(b->{
+            updateApartmentMoveKnown(b);
+        });
+    }
+    //变化时更新(修改定价 修改住宅相关eva改变到升级程度 繁荣度变化 时)
+    public void updateApartmentMoveKnown(Building b){
+        Apartment apartment=(Apartment)b;
+        //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
+        double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        apartmentMoveKnownMap.put(b.id(),moveKnownValue);
+    }
+    public Double[] getApartmentMoveKnownArray(){
+        return (Double[])apartmentMoveKnownMap.values().toArray();
     }
 }

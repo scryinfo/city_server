@@ -140,6 +140,7 @@ public class GameServer {
     }
     public void run() throws Exception {
         FriendManager.getInstance().init();
+        AiBaseAvgManager.getInstance().init();//初始化AI基础数据
         City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
@@ -184,7 +185,7 @@ public class GameServer {
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
+                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,2048, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder(GaCode.OpCode.class));
                                 ch.pipeline().addLast(businessLogicExecutor, new AccountServerEventHandler());
@@ -202,7 +203,7 @@ public class GameServer {
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
+                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,2048, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder(GsCode.OpCode.class));
                                 //ch.pipeline().addLast(new IdleStateHandler(10, 10, 0));

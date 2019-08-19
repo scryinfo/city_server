@@ -1,6 +1,7 @@
 package Game;
 
 import Game.Action.IAction;
+import Game.Gambling.ThirdPartyDataSource;
 import Game.Meta.AIBuilding;
 import Game.Meta.MetaData;
 import Shared.GlobalConfig;
@@ -166,17 +167,7 @@ public class Npc {
         if(aiBuilding == null)
            return null;
 
-
-        double idleRatio = 1.d;
-        double sumFlow = City.instance().getSumFlow();
-        if(sumFlow > 0)
-           idleRatio = 1.d - (double)this.buildingLocated().getFlow() / sumFlow;
-        IAction.logger.info("sumFlow " + sumFlow + " idle " + idleRatio);
-
-        BrandManager.BuildingRatio r = BrandManager.instance().getBuildingRatio();
-        if(this.hasApartment())
-            r.apartment = 0;
-        IAction action = aiBuilding.random(idleRatio, r, id);
+        IAction action = aiBuilding.random(aiBuilding,id);
         if(action == null) {
             logger.fatal("flow error, this building pos" + this.buildingLocated().coordinate() + " flow " + this.buildingLocated().getFlow());
             return null;
@@ -188,11 +179,10 @@ public class Npc {
         return type;
     }
     public int chooseId() {
-        int id = type*100000000;
-        id += City.instance().currentHour()*1000000;
-        id += City.instance().weather()*10000;
+        int id = type*10000000;
+        id += City.instance().currentHour()*100000;
+        id += Integer.parseInt(ThirdPartyDataSource.instance().getWeather().getPrefixIcon())*10000;
         id += MetaData.getDayId()*10;
-   //   id += this.born.onStrike()?1:0;
         id += status;
         return id;
     }
