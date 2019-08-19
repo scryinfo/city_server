@@ -57,7 +57,7 @@ public class GoApartment implements IAction {
         //随机选择3个住宅加入备选列表
         Map<Building,Double> moveKnownBak=getRandomN(moveKnownMap,3);
         moveKnownBak.forEach((k,v)->{
-            double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160);
+            double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160;
             moveKnownBak.put(k,r);
         });
         //随机选中其中一个并移动到该住宅
@@ -76,7 +76,7 @@ public class GoApartment implements IAction {
         //随机选择3个住宅加入备选列表
         Map<Building,Double> buyKnownBak=getRandomN(moveKnownMap,3);
         buyKnownBak.forEach((k,v)->{
-            double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160);
+            double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160;
             buyKnownBak.put(k,r);
         });
         //随机选中其中一个
@@ -150,8 +150,9 @@ public class GoApartment implements IAction {
         Map<Building,Double> newMap=new HashMap<>();
         List<Building> keyList=new ArrayList<>(map.keySet());
         Double[] val=(Double[])map.values().toArray();
+        double[] doubles=Util.toDoubleArray(val);
         for (int i=0;i<=n;i++){
-            int j=Util.randomIdx(val);
+            int j=Util.randomIdx(doubles);
             newMap.put(keyList.get(j),val[j]);
         }
         return newMap;
