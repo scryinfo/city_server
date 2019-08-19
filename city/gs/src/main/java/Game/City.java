@@ -55,7 +55,7 @@ public class City {
     private TreeMap<Integer, Integer> topGoodQty;
     private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
-    private Map<UUID,Double> apartmentMoveKnownMap=new HashMap<UUID,Double>();
+    private Map<Building,Double> moveKnownApartmentMap=new HashMap<Building,Double>();
     private Map<UUID,Double> retailMoveKnownMap=new HashMap<UUID,Double>();
 
     //所有货架上的商品缓存,
@@ -596,7 +596,7 @@ public class City {
         buildings.remove(building.id());
        //类型建筑中也要删除
         this.typeBuilding.get(building.type()).remove(building);
-        apartmentMoveKnownMap.remove(building.id());
+        moveKnownApartmentMap.remove(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
         //重置土地建筑
@@ -672,12 +672,13 @@ public class City {
             return oldV;
         });
         //购买住宅 moveKnownValue
-        buildApartmentMoveKnownValue();
 
         //零售店缓存--解决某些数据实时计算时申请内存导致GC频繁的问题
         if( building.type() == MetaBuilding.RETAIL){
             RetailShop r = (RetailShop) building;
             r.initGoodCache();
+        if(building.type()== MetaBuilding.APARTMENT){
+            buildApartmentMoveKnownValue(building);
         }
     }
 
@@ -772,20 +773,17 @@ public class City {
         return sum.stream().reduce(Integer::sum).orElse(0);
     }
     //购买住宅moveKnownValue   启动时
-    public void buildApartmentMoveKnownValue(){
-        Set<Building> apartmentLit=typeBuilding.get(MetaBuilding.APARTMENT);
-        apartmentLit.forEach(b->{
-            updateApartmentMoveKnown(b);
-        });
+    public void buildApartmentMoveKnownValue(Building b){
+        moveKnownApartmentMap(b);
     }
     //变化时更新(修改定价 修改住宅相关eva改变到升级程度 繁荣度变化 时)
-    public void updateApartmentMoveKnown(Building b){
+    public void moveKnownApartmentMap(Building b){
         Apartment apartment=(Apartment)b;
         //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
         double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
-        apartmentMoveKnownMap.put(b.id(),moveKnownValue);
+        moveKnownApartmentMap.put(b,moveKnownValue);
     }
-    public Double[] getApartmentMoveKnownArray(){
-        return (Double[])apartmentMoveKnownMap.values().toArray();
+    public Map<Building,Double> getMoveKnownaApartmentMap(){
+        return moveKnownApartmentMap;
     }
 }
