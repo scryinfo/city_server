@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import Game.CityInfo.CityLevel;
 import Game.Gambling.FlightManager;
 import Game.ddd.ddd_purchase;
 import org.apache.log4j.Logger;
@@ -797,6 +798,14 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
+	public static void initCityLevel() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(CityLevel.class, CityLevel.ID) == null)
+			statelessSession.insert(new CityLevel());
+		transaction.commit();
+		statelessSession.close();
+	}
 	public static void initGroundAuction() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -869,6 +878,14 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		MoneyPool res = session.get(MoneyPool.class, MoneyPool.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
+	public static CityLevel getCityLevel() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		CityLevel res = session.get(CityLevel.class, CityLevel.ID);
 		transaction.commit();
 		session.close();
 		return res;

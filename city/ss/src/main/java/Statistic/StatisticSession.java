@@ -603,6 +603,7 @@ public class StatisticSession {
     public void queryCityTransactionAmount(short cmd, Message message) {
         Gs.Bool bool = (Gs.Bool) message;
         Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
+		builder.setFlag(bool.getB());
         if (bool.getB()) { // 历史记录
             Map<Long, Long> map = SummaryUtil.queryCityTransactionAmount(SummaryUtil.getCityTransactionAmount());
             map.forEach((k, v) -> {
@@ -623,6 +624,7 @@ public class StatisticSession {
 
 	public void queryCityMoneyPool(short cmd) {
 		Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
+		builder.setFlag(true);
 		Map<Long, Long> map = SummaryUtil.queryCityMoneyPoolLog(LogDb.getCityMoneyPool());
 		if (map != null && !map.isEmpty()) {
 			map.forEach((k, v) -> {

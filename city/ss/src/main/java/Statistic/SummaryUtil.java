@@ -897,8 +897,8 @@ public class SummaryUtil {
         List<Document> list=new ArrayList<Document>();
         documentList.forEach(document ->{
                     Document d=new Document();
-                    d.append(KEY_AVG,document.getDouble(KEY_AVG));
-                    d.append(TIME, time).append(TYPE, buildingType.getValue());
+                    d.append(KEY_AVG,document.getDouble(KEY_AVG))
+                    .append(TIME, time).append(TYPE, buildingType.getValue());
                     list.add(d);
                 }
              );
@@ -1230,11 +1230,18 @@ public class SummaryUtil {
     }
 
     public static Map<Long, Long> queryCityTransactionAmount(MongoCollection<Document> collection) {
-        Calendar calendar = TimeUtil.beforeSevenDay();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY,0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND,0);
         Date endDate = calendar.getTime();
-        long endTime = endDate.getTime();
+        long endTime=endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
         Date startDate = calendar.getTime();
-        long startTime = startDate.getTime();
+        long startTime=startDate.getTime();
         Map<Long, Long> map = new LinkedHashMap<>();
 
         collection.find(and(
@@ -1246,7 +1253,11 @@ public class SummaryUtil {
                 .sort(Sorts.descending(TIME))
                 .forEach((Block<? super Document>) document ->
                 {
-                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                    try {
+                        map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                    } catch (Exception e) {
+                        map.put(document.getLong(TIME), 0l);
+                    }
                 });
 
         return map;
@@ -1259,7 +1270,7 @@ public class SummaryUtil {
         collection.aggregate(
                 Arrays.asList(
                         Aggregates.match(and(gte("t", startTime), lte("t", nowTime))),
-                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total"))
+                        Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a"))
                 )
         ).forEach((Block<? super Document>) documentList::add);
         documentList.stream().filter(o->o!=null).forEach(d->{
@@ -1269,11 +1280,18 @@ public class SummaryUtil {
     }
 
     public static Map<Long, Long> queryCityMoneyPoolLog(MongoCollection<Document> collection) {
-        Calendar calendar = TimeUtil.beforeSevenDay();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY,0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND,0);
         Date endDate = calendar.getTime();
-        long endTime = endDate.getTime();
+        long endTime=endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
         Date startDate = calendar.getTime();
-        long startTime = startDate.getTime();
+        long startTime=startDate.getTime();
         Map<Long, Long> map = new LinkedHashMap<>();
 
         collection.find(and(

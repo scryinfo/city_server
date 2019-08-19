@@ -136,7 +136,7 @@ public class IndustryMgr {
             Player player = GameDb.getPlayer(pid);
             String playerName =  player == null ? "" : player.getName();
             //faceId
-            String faceId = player.getFaceId();
+            String faceId = player == null ? "" : player.getFaceId();
             // 玩家昨日收入
             long total = d.getLong("total");
             Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
@@ -173,7 +173,7 @@ public class IndustryMgr {
             Player player = GameDb.getPlayer(pid);
             // 玩家名称
             String playerName = player == null ? "" : player.getName();
-            String faceId = player.getFaceId();
+            String faceId = player == null ? "" : player.getFaceId();
             // 玩家昨日收入
             long total = d.getLong("total");
             // 成交量
@@ -208,5 +208,46 @@ public class IndustryMgr {
         }
     }
 
+    public List<TopInfo> queryRegalRanking() {
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
+        List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, LogDb.getDayPlayerIncome());
+        ArrayList<TopInfo> tops = new ArrayList<>();
+        list.stream().filter(o->o!=null).forEach(d->{
+            UUID pid = d.get("id", UUID.class);
+            // 玩家总工人数
+            long staffNum = City.instance().getPlayerStaffNum(pid);
+            // 玩家名称
+            Player player = GameDb.getPlayer(pid);
+            String playerName =  player == null ? "" : player.getName();
+            //faceId
+            String faceId = player == null ? "" : player.getFaceId();
+            // 玩家昨日收入
+            long total = d.getLong("total");
+            Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(pid);
+            // 玩家推广点数投入
+            long promotion = map.getOrDefault(1, 0l);
+            // 玩家研究点数
+            long science = map.getOrDefault(2, 0l);
+            tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
+        });
+        return tops;
+    }
 
+    public TopInfo queryMyself(UUID owner) {
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
+        long myself = LogDb.queryMyself(startTime, endTime, owner, LogDb.getDayPlayerIncome());
+        ArrayList<TopInfo> tops = new ArrayList<>();
+        Player player = GameDb.getPlayer(owner);
+        long staffNum = City.instance().getPlayerStaffNum(owner);
+        String name = player == null ? "" : player.getName();
+        String faceId =player == null ? "" :  player.getFaceId();
+        Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(owner);
+        // 玩家推广点数投入
+        long promotion = map.getOrDefault(1, 0l);
+        // 玩家研究点数
+        long science = map.getOrDefault(2, 0l);
+        return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
+    }
 }

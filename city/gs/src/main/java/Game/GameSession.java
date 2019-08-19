@@ -1,5 +1,6 @@
 package Game;
 
+import Game.CityInfo.CityLevel;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -5771,6 +5772,7 @@ public class GameSession {
             return;
         }
         Gs.TechOrPromSummary.Builder builder = Gs.TechOrPromSummary.newBuilder();
+        builder.setTypeId(n.getNum());
         City.instance().forAllGrid((grid -> {
             AtomicInteger num = new AtomicInteger(0);
             grid.forAllBuilding(b->{
@@ -5797,6 +5799,7 @@ public class GameSession {
             return;
         }
         Gs.TechOrPromSummary.Builder builder = Gs.TechOrPromSummary.newBuilder();
+        builder.setTypeId(n.getNum());
         City.instance().forAllGrid((grid -> {
             AtomicInteger num = new AtomicInteger(0);
             grid.forAllBuilding(b->{
@@ -5948,8 +5951,7 @@ public class GameSession {
                 builder.addTopInfo(info);
             });
             TopInfo top = IndustryMgr.instance().queryMyself(id, type);
-            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count).setFaceId(top.faceId));
-
+            builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count).setFaceId(top.faceId).setMyself(true));
         } else {
             builder.setStaffNum(industryStaffNum).setTotal(industrySumIncome).setOwner(0);
             List<TopInfo> infos = IndustryMgr.instance().queryTop(type);
@@ -5974,6 +5976,40 @@ public class GameSession {
                     .setMyself(true).build());
         }
         this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void queryRegalRanking(short cmd, Message message) {
+        Gs.Id id = (Gs.Id) message;
+        UUID pid = Util.toUuid(id.getId().toByteArray());
+        Gs.RegalRanking.Builder builder = Gs.RegalRanking.newBuilder();
+        AtomicInteger owner = new AtomicInteger(0);
+        builder.setOwner(0);
+        List<TopInfo> infos = IndustryMgr.instance().queryRegalRanking();
+        infos.stream().filter(o -> o != null).forEach(d -> {
+            owner.incrementAndGet();
+            Gs.RegalRanking.RankingInfo.Builder info = builder.addInfoBuilder();
+            if (d.pid.equals(id.getId())) {
+                builder.setOwner(owner.intValue());
+            }
+            info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum).setFaceId(d.faceId);
+        });
+        TopInfo myself = IndustryMgr.instance().queryMyself(pid);
+        builder.addInfo(Gs.RegalRanking.RankingInfo.newBuilder()
+                .setPid(Util.toByteString(myself.pid))
+                .setName(myself.name)
+                .setIncome(myself.yesterdayIncome)
+                .setScience(myself.science)
+                .setPromotion(myself.promotion)
+                .setWoker(myself.workerNum)
+                .setFaceId(myself.faceId)
+                .setMyself(true).build()
+
+        );
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+    public void queryCityLevel(short cmd) {
+        this.write(Package.create(cmd,CityLevel.instance().toProto()));
     }
 
 }

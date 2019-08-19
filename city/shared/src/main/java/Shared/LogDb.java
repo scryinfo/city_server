@@ -1,5 +1,6 @@
 package Shared;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -18,6 +19,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -1046,6 +1048,7 @@ public class LogDb {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", ownerId)
+				.append("n", plist1.size())  // ly
 				.append("s", price)
 				.append("a", all)
 				.append("p", positionToDoc(plist1));
@@ -1584,13 +1587,43 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document>  dayYesterdayPlayerIncome(long strartTime,long endTime,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", strartTime),
+								lte("t", endTime)
+						)),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
 	public static long queryMyself(long strartTime, long endTime, UUID pid, int buildType, MongoCollection<Document> collection) {
 		List<Document> documentList = new ArrayList<>();
 		collection.find(and(eq("id", pid), eq("tp", buildType), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
 		final long[] income = {0};
 		documentList.stream().filter(o -> o != null).forEach(d -> {
-			income[0] = d.getLong(KEY_TOTAL);
+			income[0] += d.getLong(KEY_TOTAL);
+		});
+		return income[0];
+	}
+	public static long queryMyself(long strartTime, long endTime, UUID pid, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.find(and(eq("id", pid), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		final long[] income = {0};
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			income[0] += d.getLong(KEY_TOTAL);
 		});
 		return income[0];
 	}
@@ -1716,6 +1749,25 @@ public class LogDb {
 			map.put(d.getInteger("_id"), d.getDouble("avg"));
 		});
 		return map;
+	}
+	public static double queryLandAuctionAvg() {
+		List<Document> documentList = new ArrayList<>();
+		AtomicDouble price = new AtomicDouble(0);
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("n", "$n")
+				.append("_id",0);
+		landAuction.aggregate(
+				Arrays.asList(
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			price.set(d.getLong(KEY_TOTAL) / d.getInteger("n"));
+		});
+		return price.doubleValue();
 	}
 
 	public static Map<Integer, Map<String, Double>> getGoodsRecord(long startTime, long endTime) {
