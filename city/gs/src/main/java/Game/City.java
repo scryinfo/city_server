@@ -603,7 +603,9 @@ public class City {
             return oldV;
         });
         //购买住宅 moveKnownValue
-        buildApartmentMoveKnownValue();
+        if(building.type()== MetaBuilding.APARTMENT){
+            buildApartmentMoveKnownValue(building);
+        }
     }
 
     private void calcuTerrain(Building building) {
@@ -697,11 +699,8 @@ public class City {
         return sum.stream().reduce(Integer::sum).orElse(0);
     }
     //购买住宅moveKnownValue   启动时
-    public void buildApartmentMoveKnownValue(){
-        Set<Building> apartmentLit=typeBuilding.get(MetaBuilding.APARTMENT);
-        apartmentLit.forEach(b->{
-            updateApartmentMoveKnown(b);
-        });
+    public void buildApartmentMoveKnownValue(Building b){
+        updateApartmentMoveKnown(b);
     }
     //变化时更新(修改定价 修改住宅相关eva改变到升级程度 繁荣度变化 时)
     public void updateApartmentMoveKnown(Building b){
