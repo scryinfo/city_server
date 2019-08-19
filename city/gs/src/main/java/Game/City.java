@@ -527,7 +527,7 @@ public class City {
         buildings.remove(building.id());
        //类型建筑中也要删除
         this.typeBuilding.get(building.type()).remove(building);
-        apartmentMoveKnownMap.remove(building);
+        moveKnownApartmentMap.remove(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
         //重置土地建筑
