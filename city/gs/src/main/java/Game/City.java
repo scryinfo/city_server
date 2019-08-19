@@ -674,9 +674,10 @@ public class City {
         //购买住宅 moveKnownValue
 
         //零售店缓存--解决某些数据实时计算时申请内存导致GC频繁的问题
-        if( building.type() == MetaBuilding.RETAIL){
+        if( building.type() == MetaBuilding.RETAIL) {
             RetailShop r = (RetailShop) building;
             r.initGoodCache();
+        }
         if(building.type()== MetaBuilding.APARTMENT){
             buildApartmentMoveKnownValue(building);
         }
