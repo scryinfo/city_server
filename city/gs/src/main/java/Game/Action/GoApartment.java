@@ -150,8 +150,9 @@ public class GoApartment implements IAction {
         Map<Building,Double> newMap=new HashMap<>();
         List<Building> keyList=new ArrayList<>(map.keySet());
         Double[] val=(Double[])map.values().toArray();
+        double[] doubles=Util.toDoubleArray(val);
         for (int i=0;i<=n;i++){
-            int j=Util.randomIdx(val);
+            int j=Util.randomIdx(doubles);
             newMap.put(keyList.get(j),val[j]);
         }
         return newMap;
