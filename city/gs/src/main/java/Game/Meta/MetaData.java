@@ -55,6 +55,8 @@ public class MetaData {
     private static final String promotionCompanyColName="PromotionCompany";
     private static final String promotionItemColName="PromotionItem";//推广选项
     private static final String salaryStandardColName="SalaryStandard";//工资标准
+    /*城市等级发明表*/
+    private static final String cityLevelColName = "CityLevel";
 
     //global field
     private static SysPara sysPara;
@@ -85,6 +87,7 @@ public class MetaData {
     private static final TreeMap<Integer, MetaScienceItem> scienceItem = new TreeMap<>();
     private static final TreeMap<Integer, MetaPromotionCompany> promotionCompany = new TreeMap<>();
     private static final TreeMap<Integer, MetaPromotionItem> promotionItem = new TreeMap<>();
+    private static final Map<Integer,MetaCityLevel> cityLevel = new HashMap<>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
         return trivial.get(id);
@@ -338,6 +341,10 @@ public class MetaData {
     	return experiences;
     }
 
+    public static Map<Integer, MetaCityLevel> getCityLevel() {
+        return cityLevel;
+    }
+
     public static HashMap<Integer, MetaGroundAuction> getGroundAuction() {
         return groundAuction;
     }
@@ -574,6 +581,13 @@ public class MetaData {
     		experiences.put(m.lv,m);
     	});
     }
+
+    public static void initCityLevel(){
+        mongoClient.getDatabase(dbName).getCollection(cityLevelColName).find().forEach((Block<Document>) doc -> {
+            MetaCityLevel m = new MetaCityLevel(doc);
+            cityLevel.put(m.lv,m);
+        });
+    }
 	public static MetaNpc getNpc(int id) {
 		return npc.get(id);
 	}
@@ -606,5 +620,6 @@ public class MetaData {
 
         initBuildingTech();
         initSalaryStandard();
+        initCityLevel();
 	}
 }

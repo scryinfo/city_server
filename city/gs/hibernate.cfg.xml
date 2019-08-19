@@ -112,5 +112,6 @@
 		<mapping class="Game.Promote.PromotionCompany"></mapping>
 		<mapping class="Game.Promote.PromotionCompany$Line"></mapping>
 		<mapping class="Game.Eva.EvaSalary"></mapping>
+		<mapping class="Game.CityInfo.CityLevel"></mapping>
 	</session-factory>
 </hibernate-configuration> 

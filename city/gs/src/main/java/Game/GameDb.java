@@ -1460,6 +1460,19 @@ public class GameDb {
 		return res;
 	}
 
+	public static Player queryPlayerForOne(){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		Query<Player> player = session.createQuery("From Player", Player.class).setMaxResults(1);
+		List<Player> players = player.list();
+		transaction.commit();
+		session.close();
+		if(players==null||players.isEmpty()){
+			return null;
+		}
+		return players.get(0);
+	}
+
 	//游戏币/ddd的交换比率， 这里应该是访问数据库ddd与游戏币的交换比率
 	static public double getExchangeRate(){
 		return 1000000.00; //暂定1
