@@ -32,6 +32,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+class GoodInfo{
+    UUID insId;
+    //预先生成的确定的结果值
+    int knownValue;
+    //不确定的部分需要npc消费时，实时计算
+    int posX;
+    int posY;
+}
+
+
 public class City {
     public static final UUID SysRoleId = UUID.nameUUIDFromBytes(new byte[16]);
     private static final Logger logger = Logger.getLogger(City.class);
@@ -47,6 +57,10 @@ public class City {
     private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
     private Map<UUID,Double> apartmentMoveKnownMap=new HashMap<UUID,Double>();
     private Map<UUID,Double> retailMoveKnownMap=new HashMap<UUID,Double>();
+
+    //所有货架上的商品缓存,
+    //private Map<Integer,Map<Integer, GoodInfo>> _goodCache = new HashMap<>();
+
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
     private boolean taskIsRunning = false;
@@ -113,8 +127,22 @@ public class City {
         return 0;
     }
 
+    public int getSumFlowCache() {
+        return SumFlowCache;
+    }
+
+    public void initSumFlowCache() {
+        SumFlowCache = 0;
+        allBuilding.forEach((k,v)->{
+            SumFlowCache += v.getFlow();
+        });
+    }
+
+    private int SumFlowCache = 0;
+
     public int getSumFlow() {
-        return allBuilding.values().stream().mapToInt(b->b.getFlow()).reduce(Integer::sum).orElse(0);
+        //return allBuilding.values().stream().mapToInt(b->b.getFlow()).reduce(Integer::sum).orElse(0);
+        return getSumFlowCache();
     }
 
 
@@ -130,6 +158,7 @@ public class City {
     private HashMap<UUID, HashMap<UUID, Building>> playerBuilding = new HashMap<>();
     public HashMap<UUID, Ground> playerGround = new HashMap<>();
     public HashMap<Integer, Set<Building>> typeBuilding = new HashMap<>();
+
     public static void init(MetaCity meta) {
         instance = new City(meta);
         instance.initAllBuildings();
@@ -184,6 +213,7 @@ public class City {
         loadSysBuildings();
         // load all player buildings, cache them into maps
         loadPlayerBuildings();
+        initSumFlowCache();
         this.topGoodQty = GameDb.getTopGoodQuality();
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
 
@@ -205,6 +235,7 @@ public class City {
             // b is useless, discard it
         }
     }
+
     private void loadPlayerBuildings() {
         for(Building b : GameDb.getAllBuilding()) {
             this.take(b);
@@ -258,6 +289,7 @@ public class City {
                 final long now = System.nanoTime();
                 this.update(now - lastTs);
                 lastTs = now;
+                logger.info("完成update----- millseconds = " + (System.nanoTime() - now) / 1000000);
             } catch (Exception e) {
                 logger.fatal(Throwables.getStackTraceAsString(e));
             }
@@ -266,35 +298,72 @@ public class City {
     private long lastTs;
     private int lastHour;
 
+
+    private long lastTT ;
+
+    private void doPastTime(String target)
+    {
+        long t2 = lastTT;
+        lastTT = System.nanoTime();
+        t2 = lastTT - t2;
+        if (t2 > 10000000)
+        {
+            logger.info(target + " ,consume(ms) " + t2 / 1000000);
+        }
+
+    }
     public void update(long diffNano) {
+        lastTT = System.nanoTime();
         GroundAuction.instance().update(diffNano);
+        doPastTime("GroundAuction.instance()");
         GroundManager.instance().update(diffNano);
+        doPastTime("GroundManager.instance()");
         Exchange.instance().update(diffNano);
-        allBuilding.forEach((k,v)->v.update(diffNano));
+        doPastTime("Exchange.instance()");
+        allBuilding.forEach((k, v) -> v.update(diffNano));
+        doPastTime("allBuilding.forEach");
         ContractManager.getInstance().update(diffNano);
         AiBaseAvgManager.getInstance().update(diffNano);
+        doPastTime("ContractManager.getInstance()");
         NpcManager.instance().update(diffNano);
-        GameServer.allGameSessions.forEach((k,v)->{v.update(diffNano);});
+        doPastTime("NpcManager.instance()");
+        GameServer.allGameSessions.forEach((k, v) ->
+        {
+            v.update(diffNano);
+        });
+        doPastTime("GameServer.allGameSessions");
         MailBox.instance().update(diffNano);
+        doPastTime(" MailBox.instance()");
         FlightManager.instance().update(diffNano);
+        doPastTime("FlightManager.instance()");
         NpcManager.instance().countNpcNum(diffNano);
+        doPastTime("NpcManager.instance()");
         LeagueManager.getInstance().update(diffNano);
+        doPastTime("LeagueManager.getInstance()");
         WareHouseManager.instance().update(diffNano);
+        doPastTime("WareHouseManager.instance()");
         BrandManager.instance().update(diffNano);
+        doPastTime("BrandManager.instance(");
         // do this at last
         updateTimeSection(diffNano);
+        doPastTime("updateTimeSection");
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
+        doPastTime("TickManager.instance()");
         PromotionMgr.instance().update(diffNano);
+        doPastTime("PromotionMgr.instance()");
         //发放失业金
         updateInsurance(diffNano);
+        doPastTime("updateInsurance");
         //计算下周行业工资
         updateIndustryMoney(diffNano);
+        doPastTime("updateIndustryMoney");
         BuildingUtil.instance().update(diffNano);
         //繁荣度统计
         ProsperityManager.instance().totalProsperity(diffNano);
         // 历史成交
         GuidePriceMgr.instance().update(diffNano);
+        doPastTime("BuildingUtil.instance()");
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
@@ -604,6 +673,12 @@ public class City {
         });
         //购买住宅 moveKnownValue
         buildApartmentMoveKnownValue();
+
+        //零售店缓存--解决某些数据实时计算时申请内存导致GC频繁的问题
+        if( building.type() == MetaBuilding.RETAIL){
+            RetailShop r = (RetailShop) building;
+            r.initGoodCache();
+        }
     }
 
     private void calcuTerrain(Building building) {

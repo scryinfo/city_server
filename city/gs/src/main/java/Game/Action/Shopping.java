@@ -124,9 +124,9 @@ public class Shopping implements IAction {
             sellShop.updateTodayIncome(chosen.price-minerCost);
             //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
             sendShelfNotice(sellShop,chosen);
-            GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+            //GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));  ===============下面已经保存过了
 
-//            City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
+            City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.makeMoneyInform_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
 
             Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
@@ -139,13 +139,13 @@ public class Shopping implements IAction {
                     .build();
             GameServer.sendIncomeNotity(owner.id(),notify);
 
-            GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+            /*GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                     .setBuildingId(Util.toByteString(chosen.bId))
                     .setMoney(chosen.price)
                     .setPos(sellShop.toProto().getPos())
                     .setItemId(chosen.meta.id)
                     .build()
-            ));
+            ));*/
 
             LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
@@ -165,9 +165,6 @@ public class Shopping implements IAction {
             //矿工费用记录
             LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-            //db操作 从外部挪进来
-            //Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
-            //GameDb.saveOrUpdate(u);
             buyerNpc.addAll(Arrays.asList(npc,owner, sellShop));
             //再次购物
             double spend=MetaData.getGoodSpendMoneyRatio(chosen.meta.id);
@@ -224,7 +221,7 @@ public class Shopping implements IAction {
               sellShop.updateTodayIncome(chosen.price-minerCost);
               //零售店货架数量改变，推送(只有货架上还有东西的时候推送)========yty
               sendShelfNotice(sellShop,chosen);
-              GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
+              //GameDb.saveOrUpdate(Arrays.asList(npc, owner, sellShop));
               Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                       .setBuyerId(Util.toByteString(npc.id()))
@@ -236,13 +233,13 @@ public class Shopping implements IAction {
                       .build();
               GameServer.sendIncomeNotity(owner.id(),notify);
 
-              GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
+              /*GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                     .setBuildingId(Util.toByteString(chosen.bId))
                     .setMoney(chosen.price)
                     .setPos(sellShop.toProto().getPos())
                     .setItemId(chosen.meta.id)
                     .build()
-              ));
+              ));*/
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
@@ -261,10 +258,10 @@ public class Shopping implements IAction {
               LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);
               //db操作 从外部挪进来
-             /* Set u = new HashSet(Arrays.asList(npc, owner, sellShop));
-              GameDb.saveOrUpdate(u);*/
-//            City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.moneyChange_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
+
               buyerNpc.addAll(Arrays.asList(npc,owner, sellShop));
+              City.instance().send(sellShop.coordinate().toGridIndex().toSyncRange(), Package.create(GsCode.OpCode.makeMoneyInform_VALUE, Gs.MakeMoney.newBuilder().setBuildingId(Util.toByteString(sellShop.id())).setPos(sellShop.coordinate().toProto()).setItemId(chosen.meta.id).setMoney((int) (chosen.price-minerCost)).build()));
+
             //再次购物
               double spend=MetaData.getGoodSpendMoneyRatio(chosen.meta.id);
               //工资区分失业与否
@@ -286,7 +283,6 @@ public class Shopping implements IAction {
                       buyerNpc.addAll(objects);
                   }
               }
-
               return buyerNpc;
           }
     }

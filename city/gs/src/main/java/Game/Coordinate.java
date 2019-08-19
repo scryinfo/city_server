@@ -35,7 +35,9 @@ public class Coordinate {
 
     public Coordinate() {}
     public static double distance(Coordinate a, Coordinate b) {
-        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        //return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2);
+        //return  (Math.abs(a.x - b.x) + Math.abs(a.y - b.y))*0.5;
     }
     public GridIndex toGridIndex() {
         return new GridIndex(x/City.GridX, y/City.GridY);

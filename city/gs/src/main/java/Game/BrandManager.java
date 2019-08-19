@@ -34,6 +34,7 @@ public class BrandManager {
         instance = GameDb.getBrandManager();
         instance.refineCache();
         instance.getAllBuildingBrandOrQuality();
+        instance.initItemAllBrandCache();
     }
 
     @Id
@@ -456,13 +457,35 @@ public class BrandManager {
         });
         return brands;
     }
+    @Transient
+    private HashMap<Integer, ArrayList<BrandInfo>> ItemAllBrandCache = new HashMap<>();
+
+    @Transient
+    private  ArrayList<BrandInfo> temp = new ArrayList<>();
+
+    public void initItemAllBrandCache(){
+        allBrandInfo.values().forEach(b->{
+            if(ItemAllBrandCache.containsKey(b.key.mid)){
+                ItemAllBrandCache.get(b.key.mid).add(b);
+            }else{
+                ArrayList<BrandInfo> bs = new ArrayList<>();
+                bs.add(b);
+                ItemAllBrandCache.put(b.key.mid,bs);
+            }
+        });
+    }
     public List<BrandInfo> getAllBrandInfoByItem(int item){
-        ArrayList<BrandInfo> infos = new ArrayList<>();
+        if(ItemAllBrandCache.containsKey(item)){
+            return  ItemAllBrandCache.get(item);
+        }else{
+            return temp;
+        }
+        /*ArrayList<BrandInfo> infos = new ArrayList<>();
         allBrandInfo.values().forEach(b->{
             if(b.key.mid==item)
                 infos.add(b);
         });
-        return infos;
+        return infos;*/
     }
 
     public boolean brandIsExist(UUID pid, int typeId){//查询是否存在该品牌信息

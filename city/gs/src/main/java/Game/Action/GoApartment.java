@@ -171,7 +171,7 @@ public class GoApartment implements IAction {
             chosen.updateTodayIncome(income);
            // GameDb.saveOrUpdate(Arrays.asList(npc, owner, chosen));
             npc.goFor(chosen);
-            return new HashSet<>(Arrays.asList(owner, npc, chosen));
+            return new HashSet<>(Arrays.asList(npc,owner, chosen));
         }
     }
 }

@@ -1,9 +1,6 @@
 package Game;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -108,6 +105,13 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
 
     }
 
+    public void initGoodCache(){
+        if( npcSelectable() && !outOfBusiness() ){
+            this.shelf.initMetaIdCache();
+            this.shelf.initSellInfoCache();
+            this.shelf.initSaleNumCache();
+        }
+    }
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) {
         if(!this.store.has(mi.key, mi.n))
