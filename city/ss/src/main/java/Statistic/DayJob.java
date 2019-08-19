@@ -137,6 +137,21 @@ public class DayJob implements org.quartz.Job {
         // apartment
         documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getNpcRentApartment());
         SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+        // material
+        documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), SummaryUtil.MATERIAL);
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.MATERIAL, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+        // produce
+        documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), SummaryUtil.PRODUCE);
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.PRODUCE, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+        //promote
+        documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), SummaryUtil.PROMOTE);
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.PROMOTE, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+        // technology
+        documentList = LogDb.transactionPrice(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(), SummaryUtil.TECHNOLOGY);
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.TECHNOLOGY, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
+        // retailshop
+        documentList = LogDb.retailshopTransactionPrice(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.RETAIL, documentList, todayStartTime, SummaryUtil.getAverageTransactionPrice());
 
         //玩家当天开业情况
         documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness(),0);
@@ -156,9 +171,25 @@ public class DayJob implements org.quartz.Job {
         SummaryUtil.insertDayPlayerLoginTime(documentList,yestodayStartTime,SummaryUtil.getDayPlayerLoginTime());
 
 
-        // 城市交易量
-        documentList = LogDb.queryCityTransactionAmount(yestodayStartTime,todayStartTime,LogDb.getPlayerIncome());
-        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount());
+        // 城市交易量+商品销售额 (没有土地和住宅)
+        documentList = LogDb.queryCityAllTransactionAmount(yestodayStartTime,todayStartTime,LogDb.getPlayerIncome());
+        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), 0,SummaryUtil.AllTurnover);
+        // material
+        documentList = LogDb.queryCityTransactionAmount(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),SummaryUtil.MATERIAL);
+        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), SummaryUtil.MATERIAL, SummaryUtil.ItemSales);
+        // produce
+        documentList = LogDb.queryCityTransactionAmount(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),SummaryUtil.PRODUCE);
+        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), SummaryUtil.PRODUCE, SummaryUtil.ItemSales);
+        //promote
+        documentList = LogDb.queryCityTransactionAmount(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),SummaryUtil.PROMOTE);
+        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), SummaryUtil.PROMOTE, SummaryUtil.ItemSales);
+        //technology
+        documentList = LogDb.queryCityTransactionAmount(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),SummaryUtil.TECHNOLOGY);
+        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), SummaryUtil.TECHNOLOGY, SummaryUtil.ItemSales);
+        // retailshop
+        documentList = LogDb.queryCityTransactionAmount(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
+        SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), SummaryUtil.RETAIL, SummaryUtil.ItemSales);
+
 
         //accept all client request
         StatisticSession.setIsReady(true);

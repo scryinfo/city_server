@@ -1,6 +1,7 @@
 package Statistic;
 
 import Param.ItemKey;
+import Param.MetaBuilding;
 import Shared.LogDb;
 import Shared.Util;
 import Statistic.Util.TimeUtil;
@@ -16,7 +17,6 @@ import gs.Gs;
 import org.bson.Document;
 import ss.Ss;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -27,6 +27,8 @@ import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
 public class SummaryUtil {
+    public static final int AllTurnover = 1;
+    public static final int ItemSales = 2;
     public static final int MATERIAL = 11;
     public static final int PRODUCE = 12;
     public static final int RETAIL = 13;
@@ -891,19 +893,14 @@ public class SummaryUtil {
         }
     }
 
-    public static void insertAverageTransactionprice(IndustryType buildingType,List<Document> documentList,
-                                                     long time,MongoCollection<Document> collection)
-    {
-        List<Document> list=new ArrayList<Document>();
-        documentList.forEach(document ->{
-                    Document d=new Document();
-                    d.append(KEY_AVG,document.getDouble(KEY_AVG))
-                    .append(TIME, time).append(TYPE, buildingType.getValue());
-                    list.add(d);
+    public static void insertAverageTransactionprice(IndustryType buildingType, List<Document> documentList,
+                                                     long time, MongoCollection<Document> collection) {
+        documentList.forEach(document -> {
+                    document.append(TIME, time).append(TYPE, buildingType.getValue());
                 }
-             );
-        if (!list.isEmpty()) {
-            collection.insertMany(list);
+        );
+        if (!documentList.isEmpty()) {
+            collection.insertMany(documentList);
         }
     }
     //玩家交易汇总表中查询开服截止当前时间玩家交易量。
@@ -1198,6 +1195,64 @@ public class SummaryUtil {
         return map;
     }
 
+    public static Map<Long, Double> queryAverageTransactionprice(int industryType, int itemId) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime = endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime = startDate.getTime();
+        Map<Long, Double> map = new LinkedHashMap<>();
+        averageTransactionPrice.find(and(
+                eq(ID, itemId),
+                eq(TYPE, industryType),
+                gte(TIME, startTime),
+                lte(TIME, endTime)
+        ))
+                .projection(fields(include(TIME, KEY_AVG), excludeId()))
+                .sort(Sorts.descending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    map.put(document.getLong(TIME), document.getDouble(KEY_AVG));
+                });
+        return map;
+    }
+    public static Map<Long, Long> queryItemSales(int industryType, int itemId) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date endDate = calendar.getTime();
+        long endTime = endDate.getTime();
+
+        calendar.add(Calendar.DATE, -7);
+        Date startDate = calendar.getTime();
+        long startTime = startDate.getTime();
+        Map<Long, Long> map = new LinkedHashMap<>();
+        cityTransactionAmount.find(and(
+                eq("_id", itemId),
+                eq(TYPE, SummaryUtil.ItemSales),
+                eq("bt", industryType),
+                gte(TIME, startTime),
+                lte(TIME, endTime)
+        ))
+                .projection(fields(include(TIME, KEY_TOTAL), excludeId()))
+                .sort(Sorts.descending(TIME))
+                .forEach((Block<? super Document>) document ->
+                {
+                    map.put(document.getLong(TIME), document.getLong(KEY_TOTAL));
+                });
+        return map;
+    }
+
     public static Ss.AverageTransactionprice.AvgPrice getCurrenttransactionPrice(boolean isApartment) {
         long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
         long endTime = System.currentTimeMillis();
@@ -1220,10 +1275,110 @@ public class SummaryUtil {
         return builder.build();
     }
 
+    public static Ss.AverageTransactionprice.AvgPrice getCurrenttransactionPrice(int industryType, int itemId) {
+        long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+        Ss.AverageTransactionprice.AvgPrice.Builder builder = Ss.AverageTransactionprice.AvgPrice.newBuilder();
+        switch (industryType) {
+            case SummaryUtil.MATERIAL:
+                builder.setPrice(0);
+                List<Document> material = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                material.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setPrice(d.getDouble(KEY_AVG));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case SummaryUtil.PRODUCE:
+                builder.setPrice(0);
+                List<Document> produce = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                produce.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setPrice(d.getDouble(KEY_AVG));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case SummaryUtil.TECHNOLOGY:
+                builder.setPrice(0);
+                List<Document> technology = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                technology.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setPrice(d.getDouble(KEY_AVG));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case SummaryUtil.PROMOTE:
+                builder.setPrice(0);
+                List<Document> promote = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                promote.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setPrice(d.getDouble(KEY_AVG));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case MetaBuilding.RETAIL:
+                builder.setPrice(0);
+                List<Document> retail = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getNpcBuyInShelf(), itemId);
+                retail.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setPrice(d.getDouble(KEY_AVG));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            default:
+                return builder.build();
+        }
+    }
+    public static Ss.ItemSales.Sales getCurrentItemSales(int industryType, int itemId) {
+        long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+        Ss.ItemSales.Sales.Builder builder = Ss.ItemSales.Sales.newBuilder();
+        switch (industryType) {
+            case SummaryUtil.MATERIAL:
+                builder.setSum(0);
+                List<Document> material = LogDb.todayItemSales(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                material.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setSum(d.getLong(KEY_TOTAL));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case SummaryUtil.PRODUCE:
+                builder.setSum(0);
+                List<Document> produce = LogDb.todayItemSales(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                produce.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setSum(d.getLong(KEY_TOTAL));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case SummaryUtil.TECHNOLOGY:
+                builder.setSum(0);
+                List<Document> technology = LogDb.todayItemSales(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                technology.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setSum(d.getLong(KEY_TOTAL));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case SummaryUtil.PROMOTE:
+                builder.setSum(0);
+                List<Document> promote = LogDb.todayItemSales(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
+                promote.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setSum(d.getLong(KEY_TOTAL));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            case MetaBuilding.RETAIL:
+                builder.setSum(0);
+                List<Document> retail = LogDb.todayItemSales(startTime, endTime, LogDb.getNpcBuyInShelf(), itemId);
+                retail.stream().filter(o -> o != null).forEach(d -> {
+                    builder.setSum(d.getLong(KEY_TOTAL));
+                });
+                builder.setTime(todayStartTime(System.currentTimeMillis()));
+                return builder.build();
+            default:
+                return builder.build();
+        }
+    }
+
     public static void insertCityTransactionAmount(List<Document> documentList,
-                                                   long time, MongoCollection<Document> collection) {
+                                                   long time, MongoCollection<Document> collection,int buildingType,int type) {
         documentList.forEach(document ->
-                document.append(TIME, time));
+                document.append(TIME, time).append("bt", buildingType).append(TYPE, type)
+        );
         if (!documentList.isEmpty()) {
             collection.insertMany(documentList);
         }
@@ -1245,6 +1400,7 @@ public class SummaryUtil {
         Map<Long, Long> map = new LinkedHashMap<>();
 
         collection.find(and(
+                eq(TYPE, SummaryUtil.AllTurnover),
                 gte(TIME, startTime),
                 lte(TIME, endTime)
         ))
