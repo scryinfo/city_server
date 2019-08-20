@@ -165,10 +165,10 @@ public class SummaryUtil {
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         averageTransactionPrice = database.getCollection(AVERAGE_TRANSACTION_PRICE)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-
         dayPlayerLoginTime = database.getCollection(DAY_PLAYER_LOGINTIME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayAiBaseAvg = database.getCollection(DAY_AI_BASE_AVG)
+                .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         cityTransactionAmount = database.getCollection(CITY_TRANSACTION_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
@@ -712,6 +712,7 @@ public class SummaryUtil {
     }
     public static MongoCollection<Document> getDayAiBaseAvg() {
         return dayAiBaseAvg;
+    }
     public static MongoCollection<Document> getCityTransactionAmount() {
         return cityTransactionAmount;
     }
@@ -843,6 +844,20 @@ public class SummaryUtil {
         MATERIAL(1),GOODS(2),GROUND(3),PUBLICITY(4), LABORATORY(5), STORAGE(6);
         private int value;
         ExchangeType(int i)
+        {
+            this.value = i;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
+    }
+
+    public enum BuildingType {
+        MATERIAL(11),PRODUCE(12),RETAIL(13),APARTMENT(14), LAB(15), PUBLIC(16);
+        private int value;
+        BuildingType(int i)
         {
             this.value = i;
         }
