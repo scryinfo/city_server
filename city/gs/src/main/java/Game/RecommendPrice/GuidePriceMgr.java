@@ -42,7 +42,8 @@ public class GuidePriceMgr {
             double price = historyRecord.price;
             double score = historyRecord.score;
             double prosp = historyRecord.prosp;
-            return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp));
+            //(score / 400 * 7)  会出现Nan 现在改为(score / 400 * 7+0.1)
+            return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7+0.1) * (1 + prosp));
         }
         return 0;
     }
