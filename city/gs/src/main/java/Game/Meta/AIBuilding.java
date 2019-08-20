@@ -40,4 +40,19 @@ public class AIBuilding extends ProbBase {
         }
         return null;
     }
+    public IAction randomAgain(AIBuilding aiBuilding, int aiId) {
+        int[] d = Arrays.copyOf(weight, weight.length);
+        d[Type.GOTO_WORK.ordinal()] = weight[2];
+        d[Type.GOTO_HOME.ordinal()] = weight[3];
+        d[Type.IDLE.ordinal()] = weight[4];
+        switch (Type.values()[super.randomIdx(d)]) {
+            case IDLE:
+                return new Idle();
+            case GOTO_HOME:
+                return new GoHome();
+            case GOTO_WORK:
+                return new GoWork();
+        }
+        return null;
+    }
 }

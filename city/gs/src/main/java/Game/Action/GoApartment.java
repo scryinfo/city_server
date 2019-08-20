@@ -2,6 +2,7 @@ package Game.Action;
 
 
 import Game.*;
+import Game.Meta.AIBuilding;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.ProbBase;
@@ -39,6 +40,7 @@ public class GoApartment implements IAction {
                     npc.goWork();
                 }
             }
+            return null;
         }
         List<Building> buildings = npc.buildingLocated().getAllBuildingEffectMe(buildingType);
         if(buildings.isEmpty())
@@ -62,9 +64,9 @@ public class GoApartment implements IAction {
         });
         //随机选中其中一个并移动到该住宅
         Map<Building,Double> moveKnownSelect=getRandomN(moveKnownBak,1);
-        moveKnownSelect.forEach((k,v)->{
-            npc.goFor(k);
-        });
+        List<Building> moveKnownList=new ArrayList<>(moveKnownSelect.keySet());
+        Building moveKnownChosen=moveKnownList.get(0);
+        npc.goFor(moveKnownChosen);
 
         //住宅购买选择
         Map<Building,Double> buyKnownValueMap=new HashMap<Building,Double>();
@@ -74,19 +76,26 @@ public class GoApartment implements IAction {
             buyKnownValueMap.put(k,buyKnownValue);
         });
         //随机选择3个住宅加入备选列表
-        Map<Building,Double> buyKnownBak=getRandomN(moveKnownMap,3);
+        Map<Building,Double> buyKnownBak=getRandomNN(moveKnownMap,3,cost,10);
+        //如果没有备选,则原地不动
+        if(buyKnownBak==null||buyKnownBak.size()==0){
+            return null;
+        }
         buyKnownBak.forEach((k,v)->{
             double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160;
             buyKnownBak.put(k,r);
         });
-        //随机选中其中一个
+        //否则，随机选中其中一个
         Map<Building,Double> buyKnownSelect=getRandomN(buyKnownBak,1);
-        if(buyKnownSelect==null||buyKnownSelect.size()==0){
-            return null;
-        }
+
         List<Building> chosenList=new ArrayList<>(buyKnownSelect.keySet());
         Building chosen = chosenList.get(0);
         logger.info("chosen apartment building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
+
+        //如果NPC选择的不是当前位置的住宅 则NPC当前所在位置变动,移动到该住宅
+        if(!chosen.id().equals(moveKnownChosen.id())){
+            npc.goFor(chosen);
+        }
 
         if(npc.money() < chosen.cost()){
             npc.hangOut(chosen);
@@ -141,19 +150,47 @@ public class GoApartment implements IAction {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
             }
             chosen.updateTodayIncome(income);
-            npc.goFor(chosen);
+
+            //支付后的行为,根据 w3 w4 w5 的权重进行随机选择
+            int id = npc.chooseId();
+            AIBuilding aiBuilding = MetaData.getAIBuilding(id);
+            if(aiBuilding == null)
+                return null;
+            IAction action = aiBuilding.randomAgain(aiBuilding,id);
+            action.act(npc);
+
             return new HashSet<>(Arrays.asList(owner, npc, chosen));
         }
     }
     //随机选择n个住宅加入备选列表
-    public Map<Building,Double> getRandomN(Map<Building,Double> map,int n){
+    private Map<Building,Double> getRandomN(Map<Building,Double> map,int n){
         Map<Building,Double> newMap=new HashMap<>();
         List<Building> keyList=new ArrayList<>(map.keySet());
         Double[] val=(Double[])map.values().toArray();
         double[] doubles=Util.toDoubleArray(val);
-        for (int i=0;i<=n;i++){
+        for (int i=0;i<n;i++){
             int j=Util.randomIdx(doubles);
             newMap.put(keyList.get(j),val[j]);
+        }
+        return newMap;
+    }
+    private Map<Building,Double> getRandomNN(Map<Building,Double> map,int n,int cost,int limit){
+        Map<Building,Double> newMap=new HashMap<>();
+        List<Building> keyList=new ArrayList<>(map.keySet());
+        Double[] val=(Double[])map.values().toArray();
+        double[] doubles=Util.toDoubleArray(val);
+        for (int i=0;i<limit;i++){
+            int j=Util.randomIdx(doubles);
+            //随机到的住宅满足有空位且 售价 <= NPC住宅预期消费,则加入备选,最多进行10次随机选择.
+            Building b=keyList.get(j);
+            Apartment apartment=(Apartment)b;
+            if((apartment.getRenterNum()<apartment.getCapacity())&&(apartment.cost()<=cost)){
+                n--;
+                if(n<0){
+                    break;
+                }
+                newMap.put(keyList.get(j),val[j]);
+            }
         }
         return newMap;
     }
