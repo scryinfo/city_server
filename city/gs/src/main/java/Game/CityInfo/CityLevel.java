@@ -59,8 +59,8 @@ public class CityLevel {
             if(lv>1){
                 MetaCityLevel metaCityLevel = MetaData.getCityLevel().get(lv-1);
                 historyPoint = (int) (metaCityLevel.exp + cexp);
-            }else{
-                historyPoint =cexp;
+            }else {
+                historyPoint = cexp;
             }
             updateCityLevel(sumValue-historyPoint);
         }
