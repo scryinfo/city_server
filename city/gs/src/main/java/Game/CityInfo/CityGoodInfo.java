@@ -16,7 +16,8 @@ public class CityGoodInfo {
     public static Set<Integer> getCityInventGoodByType(List<Integer> types){
         Set<Integer> inventGoodList = new HashSet<>();
         /*1.全城所有商品*/
-        Set<Integer> allGoodId = MetaData.getAllGoodId();
+        Set<Integer> allGoodId = new HashSet<>();
+        allGoodId.addAll(MetaData.getAllGoodId());
         /*2.获取其中一个玩家的所有可用商品（并移除掉）*/
         Player player = GameDb.queryPlayerForOne();
         if(player==null){
@@ -24,19 +25,17 @@ public class CityGoodInfo {
         }
         Set<Integer> ids = player.itemIds();
         allGoodId.removeAll(ids);
-        /*剩余的都是没有被发明出来的*/
-        types.forEach(tp->{
+        for (Integer type : types) {
             /*tp都是5位*/
             for (Integer itemId : allGoodId) {
                 int itemType = itemId /100;
-                if(itemType==tp) {
+                if(itemType==type) {
                     inventGoodList.add(itemId);
                 }
             }
-        });
+        }
         return inventGoodList;
     }
-
     /*获取新发明商品产生的新原料*/
     public static Set<Integer> getNewMaterialId(int newGoodId){
         Set<Integer> requiredMaterial = new HashSet<>();
@@ -53,7 +52,6 @@ public class CityGoodInfo {
         requiredMaterial.removeAll(player.itemIds());
         return requiredMaterial;
     }
-
     /*随机从发明的商品列表中筛选一个*/
     public static Integer  randomGood(Set<Integer> itemIds) {
         List<Integer> candicate = new ArrayList<>();
@@ -62,7 +60,6 @@ public class CityGoodInfo {
             return null;
         return candicate.get(Prob.random(0, candicate.size()));
     }
-
     /*更新玩家的商品列表*/
     public static void updatePlayerGoodList(List<Player> players,Set<Integer> goodIds){
         players.forEach(p->{

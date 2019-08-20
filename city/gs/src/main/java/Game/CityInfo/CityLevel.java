@@ -2,10 +2,8 @@ package Game.CityInfo;
 
 import Game.Eva.EvaManager;
 import Game.GameDb;
-import Game.MailBox;
 import Game.Meta.MetaCityLevel;
 import Game.Meta.MetaData;
-import Game.Meta.MetaExperiences;
 import Game.Player;
 import Game.Timers.PeriodicTimer;
 import gs.Gs;
@@ -25,7 +23,10 @@ public class CityLevel {
     public static CityLevel instance() {
         return instance;
     }
-    public CityLevel() {}
+    public CityLevel() {
+        lv=1;
+        cexp=0;
+    }
     @Id
     public final int id = ID;
     public int lv;
@@ -63,6 +64,7 @@ public class CityLevel {
                 historyPoint = cexp;
             }
             updateCityLevel(sumValue-historyPoint);
+            GameDb.saveOrUpdate(this);
         }
     }
     public Gs.CityLevel toProto() {
@@ -72,7 +74,6 @@ public class CityLevel {
     /*修改更新城市等级或经验值*/
     public void updateCityLevel(long addPoint){
         long cexp = addPoint + this.cexp;//当前的新增点数+城市的经验值
-        //2.获取城市当前等级所需的经验值
         Map<Integer, MetaCityLevel> cityLevel = MetaData.getCityLevel();
         if(this.lv>=1){//计算等级
             long exp=0l;
