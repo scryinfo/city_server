@@ -1666,7 +1666,7 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("tp",buildType),
+								eq("bt",buildType),
 								lt("t", todayStartTime))),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
 						Aggregates.sort(Sorts.descending("total")),
@@ -1686,7 +1686,52 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("tp", buildType),
+								eq("bt", buildType),
+								gte("t", strartTime),
+								lte("t", endTime)
+						)),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document>  dayYesterdayProductIncome(long strartTime,long endTime,int itemId,int buildType,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("bt", buildType),
+								eq("tpi", itemId),
+								gte("t", strartTime),
+								lte("t", endTime)
+						)),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document>  dayYesterdayRetailProductIncome(long strartTime,long endTime,int itemId,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tpi", itemId),
 								gte("t", strartTime),
 								lte("t", endTime)
 						)),
@@ -1722,7 +1767,25 @@ public class LogDb {
 
 	public static long queryMyself(long strartTime, long endTime, UUID pid, int buildType, MongoCollection<Document> collection) {
 		List<Document> documentList = new ArrayList<>();
-		collection.find(and(eq("id", pid), eq("tp", buildType), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		collection.find(and(eq("id", pid), eq("bt", buildType), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		final long[] income = {0};
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			income[0] += d.getLong(KEY_TOTAL);
+		});
+		return income[0];
+	}
+	public static long queryMyself(long strartTime, long endTime, UUID pid, int buildType,int itemId, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.find(and(eq("d", pid), eq("bt", buildType),eq("tpi",itemId), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		final long[] income = {0};
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			income[0] += d.getLong(KEY_TOTAL);
+		});
+		return income[0];
+	}
+	public static long queryMyselfRetail(long strartTime, long endTime, UUID pid,int itemId, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.find(and(eq("d", pid),eq("tpi",itemId), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
 		final long[] income = {0};
 		documentList.stream().filter(o -> o != null).forEach(d -> {
 			income[0] += d.getLong(KEY_TOTAL);
@@ -1744,7 +1807,7 @@ public class LogDb {
 		final int[] count = {0};
 		buyGround.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(eq("d", pid)/*,gte("t", strartTime), lte("t", endTime)*/)),
+						Aggregates.match(and(eq("d", pid),gte("t", strartTime), lte("t", endTime))),
 						Aggregates.count()
 				)
 		).forEach((Block<? super Document>) d->{

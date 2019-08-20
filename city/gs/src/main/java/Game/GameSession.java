@@ -5978,6 +5978,7 @@ public class GameSession {
         this.write(Package.create(cmd, builder.build()));
     }
 
+    // 富豪排行榜
     public void queryRegalRanking(short cmd, Message message) {
         Gs.Id id = (Gs.Id) message;
         UUID pid = Util.toUuid(id.getId().toByteArray());
@@ -6012,4 +6013,36 @@ public class GameSession {
         this.write(Package.create(cmd,CityLevel.instance().toProto()));
     }
 
+    // 商品排行榜
+    public void queryProductRanking(short cmd, Message message) {
+        Gs.queryProductRanking q = (Gs.queryProductRanking) message;
+        int industryId = q.getIndustryId();
+        int itemId = q.getItemId();
+        UUID pid = Util.toUuid(q.getPlayerId().toByteArray());
+        Gs.ProductRanking.Builder builder = Gs.ProductRanking.newBuilder();
+        builder.setItemId(itemId);
+        builder.setOwner(0);
+        AtomicInteger owner = new AtomicInteger(0);
+        List<TopInfo> list = IndustryMgr.instance().queryProductRanking(industryId, itemId);
+        list.stream().filter(o -> o != null).forEach(d -> {
+            owner.incrementAndGet();
+            Gs.ProductRanking.TopInfo.Builder top = builder.addTopInfoBuilder();
+            top.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum).setFaceId(d.faceId);
+            if (pid.equals(d.pid)) {
+                builder.setOwner(owner.intValue());
+            }
+        });
+        TopInfo myself = IndustryMgr.instance().queryMyself(pid, industryId, itemId);
+        builder.addTopInfo(Gs.ProductRanking.TopInfo.newBuilder()
+                .setPid(Util.toByteString(myself.pid))
+                .setName(myself.name)
+                .setIncome(myself.yesterdayIncome)
+                .setScience(myself.science)
+                .setPromotion(myself.promotion)
+                .setWoker(myself.workerNum)
+                .setFaceId(myself.faceId)
+                .setMyself(true).build()
+        );
+        this.write(Package.create(cmd, builder.build()));
+    }
 }
