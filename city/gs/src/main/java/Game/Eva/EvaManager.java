@@ -261,4 +261,16 @@ public class EvaManager
         map.put(2, sum[1]);
         return map;
     }
+
+    public Map<Integer, Long> getItemPoint(UUID playerId,int itemId) {
+        final long[] sum = {0,0};
+        Map<Integer, Long> map = new HashMap<>();
+        List<Eva> playerAllEvas = getEva(playerId, itemId);
+        sum[0] = playerAllEvas.stream().filter(e -> e.getBt() == 2).mapToLong(Eva::getSumValue).sum();
+        sum[1] = playerAllEvas.stream().filter(e -> e.getBt() != 2).mapToLong(Eva::getSumValue).sum();
+        map.put(1, sum[0]);
+        map.put(2, sum[1]);
+        return map;
+    }
+
 }

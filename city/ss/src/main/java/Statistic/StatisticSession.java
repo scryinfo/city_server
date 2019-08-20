@@ -496,7 +496,7 @@ public class StatisticSession {
 			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
 		}
 		//今日收入销售信息
-		List<ItemKey> todayAllItem = new ArrayList<>();//保存今日有哪些商品销售
+		Set<ItemKey> todayAllItem = new HashSet<>();//保存今日有哪些商品销售
 		for (Document d : todaySale) {
 			ItemKey itemKey = new ItemKey(d.getInteger("itemId"), (UUID) d.get("p"));
 			todayAllItem.add(itemKey);
@@ -507,7 +507,7 @@ public class StatisticSession {
 		Map<ItemKey, Long> yesterdaySale = new HashMap<>();//昨日的销售额度
 		historyDetail.forEach((k,v)->{
 			v.forEach((key,doc)->{
-				if(doc.getLong("time")<TimeUtil.todayStartTime()&&doc.getLong("time")>=TimeUtil.getTimeDayStartTime(TimeUtil.todayStartTime()-1)){
+				if(doc.getLong("time")<TimeUtil.todayStartTime()&&doc.getLong("time")>=TimeUtil.getYesterdayStartTime()){
 					yesterdaySale.put(key, doc.getLong("total"));
 				}
 				if(!todayAllItem.contains(key)){
