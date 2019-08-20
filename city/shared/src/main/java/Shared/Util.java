@@ -143,7 +143,7 @@ public class Util {
     public static  double[] toDoubleArray(Double[] val){
         double[] doubles=new double[val.length];
         for (int i=0;i<val.length;i++){
-            doubles[i++]=val[i];
+            doubles[i]=val[i];
         }
         return doubles;
     }
