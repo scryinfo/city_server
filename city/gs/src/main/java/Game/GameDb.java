@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import Game.CityInfo.CityLevel;
 import Game.Gambling.FlightManager;
 import Game.ddd.ddd_purchase;
 import org.apache.log4j.Logger;
@@ -737,7 +738,12 @@ public class GameDb {
 	}
 
 	public static Player getPlayer(UUID id) {
-		return playerCache.getUnchecked(id);
+
+		try {
+			return playerCache.getUnchecked(id);
+		} catch (Throwable t) {
+			return null;
+		}
 	}
 	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
 		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);
@@ -789,6 +795,14 @@ public class GameDb {
 		Transaction transaction = statelessSession.beginTransaction();
 		if(statelessSession.get(MoneyPool.class, MoneyPool.ID) == null)
 			statelessSession.insert(new MoneyPool());
+		transaction.commit();
+		statelessSession.close();
+	}
+	public static void initCityLevel() {
+		StatelessSession statelessSession = sessionFactory.openStatelessSession();
+		Transaction transaction = statelessSession.beginTransaction();
+		if(statelessSession.get(CityLevel.class, CityLevel.ID) == null)
+			statelessSession.insert(new CityLevel());
 		transaction.commit();
 		statelessSession.close();
 	}
@@ -864,6 +878,14 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		MoneyPool res = session.get(MoneyPool.class, MoneyPool.ID);
+		transaction.commit();
+		session.close();
+		return res;
+	}
+	public static CityLevel getCityLevel() {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		CityLevel res = session.get(CityLevel.class, CityLevel.ID);
 		transaction.commit();
 		session.close();
 		return res;
@@ -1441,6 +1463,19 @@ public class GameDb {
 		transaction.commit();
 		session.close();
 		return res;
+	}
+
+	public static Player queryPlayerForOne(){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		Query<Player> player = session.createQuery("From Player", Player.class).setMaxResults(1);
+		List<Player> players = player.list();
+		transaction.commit();
+		session.close();
+		if(players==null||players.isEmpty()){
+			return null;
+		}
+		return players.get(0);
 	}
 
 	//游戏币/ddd的交换比率， 这里应该是访问数据库ddd与游戏币的交换比率

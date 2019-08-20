@@ -13,6 +13,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /*研究所与推广公司公用信息*/
@@ -223,5 +224,8 @@ public abstract class ScienceBuildingBase extends Building{
             }
         }
         return -1;
+    }
+    public Map<Item, Integer> getSaleDetail(int itemId) {
+        return this.shelf.getSaleDetail(itemId);
     }
 }

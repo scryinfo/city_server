@@ -56,10 +56,12 @@ public class GoApartment implements IAction {
         Map<Building,Double> moveKnownMap=City.instance().getMoveKnownaApartmentMap();
         //随机选择3个住宅加入备选列表
         Map<Building,Double> moveKnownBak=getRandomN(moveKnownMap,3);
+
         moveKnownBak.forEach((k,v)->{
             double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160;
             moveKnownBak.put(k,r);
         });
+
         //随机选中其中一个并移动到该住宅
         Map<Building,Double> moveKnownSelect=getRandomN(moveKnownBak,1);
         moveKnownSelect.forEach((k,v)->{

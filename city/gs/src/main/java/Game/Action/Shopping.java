@@ -131,7 +131,7 @@ public class Shopping implements IAction {
             Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                     .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                     .setBuyerId(Util.toByteString(npc.id()))
-                    .setCost(chosen.price)
+                    .setCost(chosen.price+minerCost)
                     .setCount(1)
                     .setType(Gs.IncomeNotify.Type.INSHELF)
                     .setBid(sellShop.metaId())
@@ -141,7 +141,7 @@ public class Shopping implements IAction {
 
             /*GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                     .setBuildingId(Util.toByteString(chosen.bId))
-                    .setMoney(chosen.price)
+                    .setMoney(chosen.price-minerCost)
                     .setPos(sellShop.toProto().getPos())
                     .setItemId(chosen.meta.id)
                     .build()
@@ -153,7 +153,7 @@ public class Shopping implements IAction {
             BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
             String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
             // 记录商品评分
-            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalQty(), chosen.meta.id);
+            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalBrand(), chosen.meta.id);
             double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
             double score = ((brandScore + goodQtyScore) / 2);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
@@ -225,7 +225,7 @@ public class Shopping implements IAction {
               Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
                       .setBuyer(Gs.IncomeNotify.Buyer.NPC)
                       .setBuyerId(Util.toByteString(npc.id()))
-                      .setCost(chosen.price)
+                      .setCost(chosen.price+minerCost)
                       .setCount(1)
                       .setType(Gs.IncomeNotify.Type.INSHELF)
                       .setBid(sellShop.metaId())
@@ -235,7 +235,7 @@ public class Shopping implements IAction {
 
               /*GameServer.sendToAll(Package.create(GsCode.OpCode.makeMoneyInform_VALUE,Gs.MakeMoney.newBuilder()
                     .setBuildingId(Util.toByteString(chosen.bId))
-                    .setMoney(chosen.price)
+                    .setMoney(chosen.price-minerCost)
                     .setPos(sellShop.toProto().getPos())
                     .setItemId(chosen.meta.id)
                     .build()
@@ -243,7 +243,7 @@ public class Shopping implements IAction {
 
               LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId, //不包含旷工费
                       chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
-            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalQty(), chosen.meta.id);
+            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalBrand(), chosen.meta.id);
             double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
             double score = ((brandScore + goodQtyScore) / 2);
               BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;

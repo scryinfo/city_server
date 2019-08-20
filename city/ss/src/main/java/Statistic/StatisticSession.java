@@ -9,13 +9,16 @@ import Statistic.SummaryUtil.CountType;
 import Statistic.Util.TimeUtil;
 import Statistic.Util.TotalUtil;
 import com.google.protobuf.Message;
+import gs.Gs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import org.apache.log4j.Logger;
 import org.bson.Document;
+import org.spongycastle.asn1.cms.MetaData;
 import ss.Ss;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 // this class contain only getXXX method, that means the only purpose this class or this server
@@ -391,7 +394,7 @@ public class StatisticSession {
 						.build()));
 	}
 
-	public void queryIndustryDevelopment(short cmd, Message message){
+/*	public void queryIndustryDevelopment(short cmd, Message message){
 		Ss.IndustryDevelopment msg = (Ss.IndustryDevelopment)message;
 		int buildType=msg.getType().getNumber();
 
@@ -416,12 +419,12 @@ public class StatisticSession {
 		getIndustryIncomeList(todaylist,buildType,totalMap,singleMap);
 		//一周的数据
 		totalMap.forEach((k,v)->{
-			Ss.IndustryDevelopment.IndustryInfo.Builder industryInfo=Ss.IndustryDevelopment.IndustryInfo.newBuilder();
+			Ss.IndustryDevelopment.CityInfo.Builder industryInfo=Ss.IndustryDevelopment.CityInfo.newBuilder();
 			industryInfo.setTime(k).setAmount(singleMap.get(k)).setTotalAmount(v).setPercent(singleMap.get(k)/v/1.d);
 			b.addIndustryInfo(industryInfo);
 		});
 		this.write(Package.create(cmd,b.build()));
-	}
+	}*/
 	private void getIndustryIncomeList(List<Document> list,int buildType,Map<Long,Long> totalMap,Map<Long,Long> singleMap){
 		list.forEach(document ->{
 			long time=document.getLong("time");
@@ -554,10 +557,112 @@ public class StatisticSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	public void queryIndustryTop(short cmd, Message message) {
-		Ss.queryTop top = (Ss.queryTop) message;
-		UUID pid = Util.toUuid(top.getPid().toByteArray()); // 玩家id
-		int type = top.getIndustryType();  // 行业类型
-		this.write(Package.create(cmd, SummaryUtil.queryIndustryTop(pid,type)));
+
+	public void queryIndustryIncome(short cmd) {
+		List<IndustryInfo> infos = SummaryUtil.queryIndustryIncom();
+		Map<Long, Map<Integer, Long>> map = SummaryUtil.queryInfo(infos);
+		Ss.IndustryIncome.Builder builder = Ss.IndustryIncome.newBuilder();
+		if (!map.isEmpty() && map.size() > 0) {
+			map.forEach((k,v)->{
+				Ss.IndustryIncome.IncomeInfo.Builder info = Ss.IndustryIncome.IncomeInfo.newBuilder();
+				info.setTime(k);
+				if (!v.isEmpty() && v!=null) {
+					v.forEach((x,y)->{
+						Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
+						msg.setType(x).setIncome(y);
+						info.addMsg(msg);
+					});
+				}
+				builder.addInfo(info);
+			});
+
+		}
+		// 今日行业收入
+        builder.addInfo(SummaryUtil.queryTodayIncome());
+		this.write(Package.create(cmd,builder.build()));
+
+	}
+
+	// 土地或住宅
+	public void queryGroundOrApartmentAvgPrice(short cmd, Message message) {
+		Gs.Bool bool = (Gs.Bool) message;
+		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(bool.getB()); // t 为住宅 f为土地
+		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
+		if (!map.isEmpty() && map!=null) {
+			map.forEach((k, v) -> {
+				Ss.AverageTransactionprice.AvgPrice.Builder avg = builder.addAvgBuilder();
+				avg.setTime(k).setPrice(v);
+			});
+		}
+		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(bool.getB()));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	// 城市信息-全城销售额
+    public void queryCityTransactionAmount(short cmd, Message message) {
+        Gs.Bool bool = (Gs.Bool) message;
+        Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
+		builder.setFlag(bool.getB());
+        if (bool.getB()) { // 历史记录
+            Map<Long, Long> map = SummaryUtil.queryCityTransactionAmount(SummaryUtil.getCityTransactionAmount());
+            map.forEach((k, v) -> {
+                Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
+                amountBuilder.setTime(k).setSum(v);
+            });
+        } else { // 今日记录
+            Map<Long, Long> map = SummaryUtil.queryCurrCityTransactionAmount(LogDb.getPlayerIncome());
+            if (map != null && !map.isEmpty()) {
+                map.forEach((k, v) -> {
+                    Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
+                    amountBuilder.setTime(k).setSum(v);
+                });
+            }
+        }
+        this.write(Package.create(cmd, builder.build()));
+    }
+
+	public void queryCityMoneyPool(short cmd) {
+		Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
+		builder.setFlag(true);
+		Map<Long, Long> map = SummaryUtil.queryCityMoneyPoolLog(LogDb.getCityMoneyPool());
+		if (map != null && !map.isEmpty()) {
+			map.forEach((k, v) -> {
+				Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
+				amountBuilder.setTime(k).setSum(v);
+			});
+		}
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryItemAvgPrice(short cmd, Message message) {
+		Ss.queryItemAvgPrice s = (Ss.queryItemAvgPrice) message;
+		int industryType = s.getIndustryId();
+		int itemId = s.getItemId();
+		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
+		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(industryType, itemId);
+		if (!map.isEmpty() && map != null) {
+			map.forEach((k,v)->{
+				Ss.AverageTransactionprice.AvgPrice.Builder avg = builder.addAvgBuilder();
+				avg.setTime(k).setPrice(v);
+			});
+		}
+		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(industryType, itemId));
+		this.write(Package.create(cmd, builder.build()));
+	}
+
+	public void queryItemSales(short cmd, Message message) {
+		Ss.queryItemSales s = (Ss.queryItemSales) message;
+		int industryType = s.getIndustryId();
+		int itemId = s.getItemId();
+		Ss.ItemSales.Builder builder = Ss.ItemSales.newBuilder();
+		Map<Long, Long> map = SummaryUtil.queryItemSales(industryType, itemId);
+		if (map != null && !map.isEmpty()) {
+			map.forEach((k, v) -> {
+				Ss.ItemSales.Sales.Builder sales = builder.addSalesBuilder();
+				sales.setTime(k).setSum(v);
+			});
+		}
+		builder.addSales(SummaryUtil.getCurrentItemSales(industryType, itemId));
+		this.write(Package.create(cmd, builder.build()));
 	}
 }

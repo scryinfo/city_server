@@ -83,7 +83,7 @@ public class PromotionCompany extends ScienceBuildingBase {
     }
 
     @Override
-    public Message detailProto() {
+    public Gs.PromotionCompany detailProto() {
         Gs.PromotionCompany.Builder builder = Gs.PromotionCompany.newBuilder();
         builder.setInfo(super.toProto())
                 .setStoreNum(this.store.getAllNum())
@@ -95,6 +95,7 @@ public class PromotionCompany extends ScienceBuildingBase {
 
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+        builder.addPromotionCompany(this.detailProto());
 
     }//TODO
 
@@ -145,5 +146,10 @@ public class PromotionCompany extends ScienceBuildingBase {
         }
         delComplementLine(completedLines);//删除已完成线
         saveAndUpdate(diffNano);//定时更新
+    }
+
+    @Override
+    public int getTotalSaleCount() {
+        return this.shelf.getTotalContentNum();
     }
 }

@@ -52,4 +52,8 @@ public class MoneyPool {
     public Gs.MoneyPool toProto() {
         return Gs.MoneyPool.newBuilder().setMoney(this.n).build();
     }
+
+    public long getN() {
+        return n;
+    }
 }

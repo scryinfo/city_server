@@ -1,5 +1,6 @@
 package Game;
 
+import Game.CityInfo.CityLevel;
 import Game.Contract.ContractManager;
 import Game.Eva.EvaManager;
 import Game.FriendManager.FriendManager;
@@ -160,6 +161,7 @@ public class GameServer {
         FlightManager.init();
         SocietyManager.init();
         BuildingUtil.instance().updateMaxOrMinTotalQty();//初始化全城最大最小建筑品质
+        CityLevel.init();
         dddPurchaseMgr.init();
         chainRpcMgr.instance();
         // DO NOT put init below this!!! city might can't see the init

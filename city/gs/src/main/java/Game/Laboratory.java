@@ -33,6 +33,11 @@ public class Laboratory extends Building {
         calcuProb();
     }
 
+    @Override
+    public int getTotalSaleCount() {
+        return 0;
+    }
+
     private void calcuProb() {
         /*this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
         this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());*/

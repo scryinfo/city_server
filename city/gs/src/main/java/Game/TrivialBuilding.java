@@ -43,4 +43,9 @@ public class TrivialBuilding extends Building {
     protected void _update(long diffNano) {
 
     }
+
+    @Override
+    public int getTotalSaleCount() {
+        return 0;
+    }
 }

@@ -1,5 +1,6 @@
 package Shared;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -18,6 +19,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -38,9 +40,6 @@ public class LogDb {
 
 	private static final int TYPE_BUILDING = 1;
 	private static final int TYPE_GOODS = 2;
-	private static final int TYPE_INVENT = 3;
-	private static final int TYPE_EVAPOINT = 4;
-
 	private static final String PAY_SALARY = "paySalary";
 	private static final String PAY_TRANSFER = "payTransfer";
 
@@ -90,6 +89,9 @@ public class LogDb {
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
 
+	private static final String INDUSTRY_SUPPLYANDDEMAND = "industrySupplyAndDemand"; // 行业供需
+	private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";     // 行业收入表
+	private static final String CITY_MONEY_POOL= "cityMoneyPool";
 	/*玩家登陆时长统计(玩家登陆时间统计) yty*/
 	private static final String PLAYER_LOGINTIME = "playerLoginTime";
 	//AI购物基础数据
@@ -141,10 +143,17 @@ public class LogDb {
 	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
 	private static MongoCollection<Document> dayPlayerIncome;
 	private static MongoCollection<Document> playerBuildingBusiness;
+	// 行业供需
+	private static MongoCollection<Document> industrySupplyAndDemand;
+	// 行业收入--
+	private static MongoCollection<Document> dayIndustryIncome;
+	private static MongoCollection<Document> cityMoneyPool;
+
 
 	private static MongoCollection<Document> playerLoginTime; //玩家登录时间统计 Yty
 
 	public static final String KEY_TOTAL = "total";
+	public static final String KEY_AVG = "avg";
 
 	private static MongoCollection<Document> incomeNotify;
 	private static MongoCollection<Document> dayAiBaseAvg;
@@ -234,6 +243,12 @@ public class LogDb {
 		playerLoginTime=database.getCollection(PLAYER_LOGINTIME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		dayAiBaseAvg=database.getCollection(DAY_AI_BASE_AVG)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		industrySupplyAndDemand = database.getCollection(INDUSTRY_SUPPLYANDDEMAND)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		dayIndustryIncome = database.getCollection(DAY_INDUSTRY_INCOME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		cityMoneyPool = database.getCollection(CITY_MONEY_POOL)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -380,7 +395,11 @@ public class LogDb {
         ).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	public static List<Document> daySummaryHistoryIncome(long yestodayStartTime, long todayStartTime,MongoCollection<Document> collection) {
+	public static List<Document> daySummaryHistoryIncome(long yestodayStartTime, long todayStartTime,boolean isApartment) {
+		MongoCollection<Document> collection = npcRentApartment;
+		if (!isApartment) {
+			collection = npcBuyInShelf;
+		}
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
 				.append("id", "$_id")
@@ -398,7 +417,177 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document> daySummaryHistoryIncome(long yestodayStartTime, long todayStartTime,int buildingType) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		buyInShelf.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("bt", buildingType),
+										gte("t", yestodayStartTime),
+										lt("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 
+	public static List<Document> daySummaryGroundHistoryIncome(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> transactionPrice(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_AVG, "$" + KEY_AVG)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.avg(KEY_AVG, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> todayTransactionPrice(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection,int industryType,int itemId) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_AVG, "$" + KEY_AVG)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("bt",industryType),
+										eq("tpi",itemId),
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.avg(KEY_AVG, "$p")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> todayItemSales(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection,int industryType,int itemId) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("bt",industryType),
+										eq("tpi",itemId),
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> todayItemSales(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection,int itemId) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("tpi",itemId),
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> todayTransactionPrice(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection, int itemId) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_AVG, "$" + KEY_AVG)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("tpi", itemId),
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group(null, Accumulators.avg(KEY_AVG, "$p")),
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> transactionPrice(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection,int type) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_AVG, "$" + KEY_AVG)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										eq("bt", type),
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group("$tpi", Accumulators.avg(KEY_AVG, "$p")),  // 单价
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}	public static List<Document> retailshopTransactionPrice(long yestodayStartTime, long todayStartTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_AVG, "$" + KEY_AVG)
+				.append("_id",0);
+		collection.aggregate(
+				Arrays.asList
+						(
+								Aggregates.match(and(
+										gte("t", yestodayStartTime),
+										lte("t", todayStartTime))),
+								Aggregates.group("$tpi", Accumulators.avg(KEY_AVG, "$p")),  // 单价
+								Aggregates.project(projectObject)
+						)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document> daySummaryShelfIncome(long yestodayStartTime, long todayStartTime,
 												 MongoCollection<Document> collection,int buildType, UUID playerId)
 	{
@@ -873,7 +1062,7 @@ public class LogDb {
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
 								  UUID producerId, UUID bid, UUID wid,int type,
-								  int typeId,String brand,double score,String roleName,String companyName,int buildingType)
+								  int typeId,String brand,double score,int buildingType)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -888,8 +1077,6 @@ public class LogDb {
 				.append("tp", type)
 				.append("tpi", typeId)
 				.append("score", score)
-				.append("rn", roleName)
-				.append("cn", companyName)
 				.append("bt",buildingType);
 		buyInShelf.insertOne(document);
 	}
@@ -972,21 +1159,19 @@ public class LogDb {
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("s", price)
+				.append("n", plist1.size())  // 地块数量
 				.append("a", all)
 				.append("p", positionToDoc(plist1));
 		buyGround.insertOne(document);
 	}
 	public static void landAuction(UUID roleId, UUID ownerId, long price, List<Positon> plist1)
 	{
-		long all = price;
-		if (ownerId != null) {
-			all = price * plist1.size();
-		}
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
 				.append("d", ownerId)
+				.append("n", plist1.size())  // ly
 				.append("s", price)
-				.append("a", all)
+				.append("a", price*plist1.size())
 				.append("p", positionToDoc(plist1));
 		landAuction.insertOne(document);
 	}
@@ -1085,7 +1270,7 @@ public class LogDb {
 
 	//记录研究所成交记录
 	public static void laboratoryRecord(UUID sellerId, UUID buyerId,UUID bid,int price,long cost, int typeId,boolean isInvent) {
-		int type = TYPE_INVENT;
+/*		int type = TYPE_INVENT;
 		if (!isInvent) {
 			type = TYPE_EVAPOINT;
 		}
@@ -1097,7 +1282,7 @@ public class LogDb {
 		document.append("bid", bid);
 		document.append("tpi", typeId);
 		document.append("tp", type);
-		laboratoryRecord.insertOne(document);
+		laboratoryRecord.insertOne(document);*/
 	}
 
 
@@ -1356,6 +1541,9 @@ public class LogDb {
 	public static MongoCollection<Document> getPlayerLoginTime() {
 		return playerLoginTime;
 	}
+	public static MongoCollection<Document> getCityMoneyPool() {
+		return cityMoneyPool;
+	}
 
 	public static class Positon
 	{
@@ -1500,6 +1688,82 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document>  dayYesterdayPlayerIncome(long strartTime,long endTime,int buildType,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								eq("tp", buildType),
+								gte("t", strartTime),
+								lte("t", endTime)
+						)),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document>  dayYesterdayPlayerIncome(long strartTime,long endTime,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("t", strartTime),
+								lte("t", endTime)
+						)),
+						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
+						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static long queryMyself(long strartTime, long endTime, UUID pid, int buildType, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.find(and(eq("id", pid), eq("tp", buildType), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		final long[] income = {0};
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			income[0] += d.getLong(KEY_TOTAL);
+		});
+		return income[0];
+	}
+	public static long queryMyself(long strartTime, long endTime, UUID pid, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.find(and(eq("id", pid), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		final long[] income = {0};
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			income[0] += d.getLong(KEY_TOTAL);
+		});
+		return income[0];
+	}
+
+	public static int groundSum(long strartTime,long endTime,UUID pid)
+	{
+		final int[] count = {0};
+		buyGround.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("d", pid)/*,gte("t", strartTime), lte("t", endTime)*/)),
+						Aggregates.count()
+				)
+		).forEach((Block<? super Document>) d->{
+			count[0] =d.getInteger("count");
+		});
+		return count[0];
+	}
 	public static Map<UUID,Long> todayPlayerIncome(long startTime, long endTime, MongoCollection<Document> collection,int buildType)
 	{
 		Map<UUID,Long> map=new HashMap<UUID,Long>();
@@ -1560,56 +1824,12 @@ public class LogDb {
         return documentList;
     }
 
-	public static List<Document> queryApartmentTop(MongoCollection<Document> collection) {
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("rn", "$rn")
-				.append("cn", "$cn")
-				.append("_id", 0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.group("$d", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.first("rn", "$rn")
-								, Accumulators.first("cn", "$cn")),
-						Aggregates.sort(and(eq(KEY_TOTAL, -1))),
-						Aggregates.project(projectObject),
-						Aggregates.limit(50)// 暂时过滤前50条
-				)
-		).forEach((Block<? super Document>) documentList::add);
 
-		return documentList;
-	}
-	public static List<Document> queryMaterilOrGoodTop(MongoCollection<Document> collection,boolean isGoods) {
-		int tp = TP_TYPE_GOODS;
-		if (!isGoods) {
-			tp = TP_TYPE_MATERIAL;
-		}
-		List<Document> documentList = new ArrayList<>();
-		Document projectObject = new Document()
-				.append("id", "$_id")
-				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("rn", "$rn")
-				.append("cn", "$cn")
-				.append("_id", 0);
-		collection.aggregate(
-				Arrays.asList(
-						Aggregates.match(and(eq("tp", tp))),
-						Aggregates.group("$d", Accumulators.sum(KEY_TOTAL, "$a"), Accumulators.first("rn", "$rn")
-								, Accumulators.first("cn", "$cn")),
-						Aggregates.sort(and(eq(KEY_TOTAL, -1))),
-						Aggregates.project(projectObject),
-						Aggregates.limit(50)// 暂时过滤前50条
-				)
-		).forEach((Block<? super Document>) documentList::add);
-
-		return documentList;
-	}
 
 	public static class HistoryRecord {
-		public double price;
-		public double score;
-		public double prosp;
+		public double price;  // 全城住宅均价
+		public double score;  // 全城住宅均品质
+		public double prosp;  // 全城住宅均繁荣度
 		public Map<Integer, Double> material;//原料
 		public Map<Integer, Map<String, Double>> produce; //加工厂
 		public Map<Integer, Map<String, Double>> retail;  //零售店
@@ -1652,6 +1872,19 @@ public class LogDb {
 			map.put(d.getInteger("_id"), d.getDouble("avg"));
 		});
 		return map;
+	}
+	public static double queryLandAuctionAvg() {
+		List<Document> documentList = new ArrayList<>();
+		AtomicDouble price = new AtomicDouble(0);
+		landAuction.aggregate(
+				Arrays.asList(
+						Aggregates.group(null, Accumulators.avg(KEY_AVG, "$s"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		documentList.stream().filter(o -> o != null).forEach(d -> {
+			price.set(d.getDouble(KEY_AVG));
+		});
+		return price.doubleValue();
 	}
 
 	public static Map<Integer, Map<String, Double>> getGoodsRecord(long startTime, long endTime) {
@@ -1743,6 +1976,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+
 	//零售店知名度和品质均值
 	public static List<Document> getNpcBuyInShelfAvg1(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
@@ -1761,6 +1995,110 @@ public class LogDb {
 				Arrays.asList(
 						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
 						Aggregates.group("$tpi",Accumulators.avg("gbrd","$gbrd"),Accumulators.avg("gqty","$gqty"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static long queryIndestrySum(int buidingType,long startTime,long endTime) {
+		final long[] count = {0};
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("bt", buidingType),gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null,Accumulators.sum(KEY_TOTAL,"$n"))
+				)
+		).forEach((Block<? super Document>) d->{
+			count[0] =d.getLong(KEY_TOTAL);
+		});
+		return count[0];
+	}
+
+	public static long queryIndestrySum(long startTime, long endTime,MongoCollection<Document> collection) {
+		final long[] count = {0};
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$n"))
+				)
+		).forEach((Block<? super Document>) d -> {
+			count[0] = d.getInteger(KEY_TOTAL);
+		});
+		return count[0];
+
+	}
+	public static long queryApartmentIndestrySum(long startTime, long endTime,MongoCollection<Document> collection) {
+		final long[] count = {0};
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.count()
+				)
+		).forEach((Block<? super Document>) d -> {
+			count[0] = d.getLong("count");
+		});
+
+		return count[0];
+
+	}
+
+	public static void insertIndustrySupplyAndDemand(List<Document> source) {
+		if (!source.isEmpty()) {
+			industrySupplyAndDemand.insertMany(source);
+		}
+	}
+	public static void insertCityMoneyPool(long total,long time) {
+			cityMoneyPool.insertOne(new Document().append(KEY_TOTAL,total).append("time",time));
+	}
+
+	public static List<Document> querySupplyAndDemand(int type) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.set(Calendar.HOUR_OF_DAY,0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND,0);
+		Date endDate = calendar.getTime();
+		long endTime=endDate.getTime();
+
+		calendar.add(Calendar.DATE, -7);
+		Date startDate = calendar.getTime();
+		long startTime=startDate.getTime();
+		List<Document> documentList = new ArrayList<>();
+		industrySupplyAndDemand.find(and(
+				eq("type",type),
+				gte("time", startTime),
+				lt("time", endTime)
+		))
+				.projection(fields(include("time", "supply","demand"), excludeId()))
+				.sort(Sorts.descending("time"))
+				.forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static MongoCollection<Document> getDayIndustryIncome()
+	{
+		return dayIndustryIncome;
+	}
+
+	public static long  queryIndustrySumIncome(int buildingType) {
+		final long[] count = {0};
+		dayIndustryIncome.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("type", buildingType))),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total"))
+				)
+		).forEach((Block<? super Document>) d -> {
+			count[0] = d.getLong(KEY_TOTAL);
+		});
+
+		return count[0];
+	}
+
+	public static List<Document> queryCityAllTransactionAmount(long startTime, long endTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -1798,12 +2136,35 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+
 	public static List<Document> getDayAiBaseAvg(long time) {
 		List<Document> documentList = new ArrayList<>();
 		dayAiBaseAvg.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(eq("t", time))),
 						Aggregates.project(fields(include("time","type","brand","quality"), excludeId()))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> queryCityTransactionAmount(long startTime, long endTime, MongoCollection<Document> collection,int buildingType) {
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime),eq("bt",buildingType))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+
+	public static List<Document> queryCityTransactionAmount(long startTime, long endTime, MongoCollection<Document> collection) {
+		List<Document> documentList = new ArrayList<>();
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
