@@ -2,10 +2,9 @@ package Game.Eva;
 
 import Game.CityInfo.CityManager;
 import Game.GameDb;
-import Game.Meta.MetaBuilding;
-import Game.Meta.MetaData;
-import Game.Meta.MetaExperiences;
+import Game.Meta.*;
 import Game.Timers.PeriodicTimer;
+import Game.Util.EvaTypeUtil;
 import Shared.Util;
 import gs.Gs;
 import org.bson.Document;
@@ -296,6 +295,7 @@ public class EvaManager
             aTypes.addAll(MetaData.getBuildingTech(type));
         }
         Gs.EvaInfo.BuildingEvaInfo.Builder buildingEvaInfo = Gs.EvaInfo.BuildingEvaInfo.newBuilder();
+        buildingEvaInfo.setType(type);
         /*获取与原料厂相关的Eva信息*/
         aTypes.forEach(itemId->{
             Gs.EvaInfo.BuildingEvaInfo.TypeEva.Builder typeEva = Gs.EvaInfo.BuildingEvaInfo.TypeEva.newBuilder();
@@ -306,5 +306,47 @@ public class EvaManager
             buildingEvaInfo.addTypeEva(typeEva);
         });
         return buildingEvaInfo.build();
+    }
+
+    /*为修改的Eva归类（分类到具体的某一个建筑）*/
+    public Gs.EvaInfo classifyEvaType(List<Gs.Eva> evas,UUID playerId){
+        Map<Integer, Set<Gs.Eva>> evaMap = new HashMap<>();
+        Gs.EvaInfo.Builder evaInfo = Gs.EvaInfo.newBuilder();
+        evas.forEach(e->{
+            int at = e.getAt();
+            evaMap.computeIfAbsent(at, k -> new HashSet<Gs.Eva>()).add(e);
+        });
+        Gs.EvaInfo.BuildingEvaInfo.Builder materialEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.MATERIAL);
+        Gs.EvaInfo.BuildingEvaInfo.Builder produceEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PRODUCE);
+        Gs.EvaInfo.BuildingEvaInfo.Builder apartmentEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.APARTMENT);
+        Gs.EvaInfo.BuildingEvaInfo.Builder retailEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.RETAIL);
+        Gs.EvaInfo.BuildingEvaInfo.Builder technologyEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.TECHNOLOGY);
+        Gs.EvaInfo.BuildingEvaInfo.Builder promoteEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PROMOTE);
+        evaMap.forEach((k,v)->{
+            Gs.EvaInfo.BuildingEvaInfo.TypeEva.Builder typeEva = Gs.EvaInfo.BuildingEvaInfo.TypeEva.newBuilder();
+            typeEva.setAtype(k).addAllEva(v);
+            if(MetaGood.isItem(k)){
+                materialEva.addTypeEva(typeEva);
+            }else if(MetaMaterial.isItem(k)){
+                produceEva.addTypeEva(typeEva);
+            }else if(MetaBuilding.APARTMENT==k){
+                apartmentEva.addTypeEva(typeEva);
+            }else if(MetaBuilding.RETAIL==k){
+                retailEva.addTypeEva(typeEva);
+            }else if(MetaPromotionItem.isItem(k)){
+                promoteEva.addTypeEva(typeEva);
+            }else if(MetaScienceItem.isItem(k)){
+                technologyEva.addTypeEva(typeEva);
+            }
+        });
+        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
+        evaInfo.setMaterial(materialEva)
+                .setProduce(produceEva)
+                .setApartment(apartmentEva)
+                .setRetailShop(retailEva)
+                .setTechnology(technologyEva)
+                .setPromotionCompany(promoteEva)
+                .addAllBuildingPoint(buildingPoints);;
+        return evaInfo.build();
     }
 }

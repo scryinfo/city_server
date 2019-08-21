@@ -89,7 +89,7 @@ public class Eva {
 				.setCexp(cexp)
 				.setB(b)
 				.setSumValue(sumValue); // 累计点数
-		if(b==Gs.Eva.Btype.ProduceSpeed_VALUE){
+		if(bt==Gs.Eva.Btype.ProduceSpeed_VALUE){
 			MetaItem item = MetaData.getItem(at);
 			builder.setBasevalue(item.n);
 		}

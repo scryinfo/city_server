@@ -3319,51 +3319,11 @@ public class GameSession {
                 .setApartment(apartment)
                 .setRetailShop(retail)
                 .setTechnology(technology)
-                .setProduce(produce)
+                .setPromotionCompany(promote)
                 .addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd,builder.build()));
     }
 
-
-
-
-    /*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
-    {
-        Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
-        Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
-        Gs.EvaResultInfo.Builder result =null;
-        Eva oldEva=null;//修改前的Eva信息
-        boolean retailOrApartmentQtyIsChange = false;//（标志）确定是否更新了零售店或者住宅的品质，以便于更新全城最大最小的建筑品质值
-        for (Gs.Eva eva : evas.getEvaList()) {
-            result=Gs.EvaResultInfo.newBuilder();
-            //修改后eva信息
-            Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-            //修改前的eva
-            oldEva= new Eva();
-            oldEva.setLv(eva.getLv());
-            oldEva.setAt(eva.getAt());
-            oldEva.setBt(eva.getBt().getNumber());
-            oldEva.setB(eva.getB());
-            Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
-            player.decEva(eva.getDecEva());
-            GameDb.saveOrUpdate(player);
-            //基础信息(加点前、加点后)
-            Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
-            result.setEvasInfo(evaInfo);
-            //判断最大最小建筑品质是否要更新标志
-            if((eva.getAt()==MetaBuilding.APARTMENT||eva.getAt()==MetaBuilding.RETAIL)&&eva.getBt().equals(Gs.Eva.Btype.Quality)){
-                retailOrApartmentQtyIsChange = true;
-            }
-            EvaManager.getInstance().updateEva(newEva);//同步保存eva
-            results.addResultInfo(result);
-        }
-        if(retailOrApartmentQtyIsChange) {
-            //更新建筑最大最小品质
-            BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
-        }
-        //BrandManager.instance().getAllBuildingBrandOrQuality();
-        this.write(Package.create(cmd, results.build()));
-    }*/
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
         Gs.UpdateMyEvas evaSummary = (Gs.UpdateMyEvas)message;
@@ -3413,11 +3373,12 @@ public class GameSession {
            playerSciencePoint.forEach(p -> SciencePointManager.getInstance().updateSciencePoint(p));
            playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
            evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
-           Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+           //Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+           Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);
            /*重新查询玩家的所有点数信息*/
-           List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-           builder.addAllBuildingPoint(buildingPoints);
-           this.write(Package.create(cmd, builder.build()));
+           //List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
+           //builder.addAllBuildingPoint(buildingPoints);
+           this.write(Package.create(cmd, evaInfo));
        }
     }
 
