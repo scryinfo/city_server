@@ -42,7 +42,9 @@ public class CityGoodInfo {
         GoodFormula formula = MetaData.getFormula(newGoodId);
         /*获取新商品需要的原料*/
         for (GoodFormula.Info info : formula.material) {
-            requiredMaterial.add(info.item.id);
+            if(info.item!=null) {
+                requiredMaterial.add(info.item.id);
+            }
         }
         /*移除已有的原料*/
         Player player = GameDb.queryPlayerForOne();

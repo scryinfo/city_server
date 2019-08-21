@@ -1,6 +1,9 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
+import Game.CityInfo.CityManager;
+import Game.CityInfo.IndustryMgr;
+import Game.CityInfo.TopInfo;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -12,8 +15,6 @@ import Game.FriendManager.*;
 import Game.Gambling.Flight;
 import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
-import Game.CityInfo.IndustryMgr;
-import Game.CityInfo.TopInfo;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -423,7 +424,7 @@ public class GameSession {
         logger.debug("account: " + this.accountName + " login");
         //添加矿工费用（系统参数）
         Gs.Role.Builder role = this.player.toProto().toBuilder();
-        role.setMinersCostRatio(MetaData.getSysPara().minersCostRatio);
+        role.setMinersCostRatio(MetaData.getSysPara().minersCostRatio).setCityGoodInfo(CityManager.instance().toProto());
         this.write(Package.create(cmd, role.build()));
         City.instance().add(this.player); // will send UnitCreate
         this.player.online();
@@ -3288,53 +3289,24 @@ public class GameSession {
 
     public void queryMyEva(short cmd, Message message)
     {
+        /*查询eva的时候，也需要筛选全城已有的商品*/
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         Gs.Evas.Builder list = Gs.Evas.newBuilder();
         EvaManager.getInstance().getEvaList(pid).forEach(eva->{
-            list.addEva(eva.toProto());
+            if(MetaItem.isItem(eva.getAt())){
+                if(CityManager.instance().usable(eva.getAt())){
+                    list.addEva(eva.toProto());
+                }
+            }
+            else{
+                list.addEva(eva.toProto());
+            }
         });
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
         list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
     }
 
-/*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
-    {
-        Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
-        Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值
-        Gs.EvaResultInfo.Builder result =null;
-        Eva oldEva=null;//修改前的Eva信息
-        boolean retailOrApartmentQtyIsChange = false;//（标志）确定是否更新了零售店或者住宅的品质，以便于更新全城最大最小的建筑品质值
-        for (Gs.Eva eva : evas.getEvaList()) {
-            result=Gs.EvaResultInfo.newBuilder();
-            //修改后eva信息
-            Eva newEva = EvaManager.getInstance().updateMyEva(eva);
-            //修改前的eva
-            oldEva= new Eva();
-            oldEva.setLv(eva.getLv());
-            oldEva.setAt(eva.getAt());
-            oldEva.setBt(eva.getBt().getNumber());
-            oldEva.setB(eva.getB());
-            Player player=GameDb.getPlayer(Util.toUuid(eva.getPid().toByteArray()));
-            player.decEva(eva.getDecEva());
-            GameDb.saveOrUpdate(player);
-            //基础信息(加点前、加点后)
-            Gs.EvasInfo.Builder evaInfo = Gs.EvasInfo.newBuilder().setOldEva(eva).setNewEva(newEva.toProto());
-            result.setEvasInfo(evaInfo);
-            //判断最大最小建筑品质是否要更新标志
-            if((eva.getAt()==MetaBuilding.APARTMENT||eva.getAt()==MetaBuilding.RETAIL)&&eva.getBt().equals(Gs.Eva.Btype.Quality)){
-                retailOrApartmentQtyIsChange = true;
-            }
-            EvaManager.getInstance().updateEva(newEva);//同步保存eva
-            results.addResultInfo(result);
-        }
-        if(retailOrApartmentQtyIsChange) {
-            //更新建筑最大最小品质
-            BuildingUtil.instance().updateMaxOrMinTotalQty();//更新全城建筑的最高最低品质
-        }
-        //BrandManager.instance().getAllBuildingBrandOrQuality();
-        this.write(Package.create(cmd, results.build()));
-    }*/
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
         Gs.UpdateMyEvas evaSummary = (Gs.UpdateMyEvas)message;
@@ -4427,7 +4399,7 @@ public class GameSession {
         //建筑基本信息
         Gs.BuildingGeneral.Builder buildingInfo = buildingToBuildingGeneral(building);
         builder.setBuildingInfo(buildingInfo);
-        MetaData.getBuildingTech(MetaBuilding.MATERIAL).forEach(itemId->{
+        CityManager.instance().cityMaterial.forEach(itemId->{
             Gs.MaterialInfo.Material.Builder b=builder.addMaterialBuilder();
             MetaMaterial material=MetaData.getMaterial(itemId);
             Eva e=EvaManager.getInstance().getEva(playerId, itemId, Gs.Eva.Btype.ProduceSpeed.getNumber());
@@ -4453,7 +4425,7 @@ public class GameSession {
         builder.setBuildingInfo(buildingInfo);builder.setBuildingInfo(buildingInfo);
         double totalBrand=0;
         double totalQuality=0;
-        Set<Integer> set=MetaData.getBuildingTech(MetaBuilding.PRODUCE);
+        Set<Integer> set=CityManager.instance().cityGood;
         for (Integer itemId : set) {
             Eva SpeedEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.ProduceSpeed_VALUE);
             Eva brandEva=EvaManager.getInstance().getEva(playerId, itemId,Gs.Eva.Btype.Brand_VALUE);
@@ -4781,7 +4753,8 @@ public class GameSession {
         int workerNum = building.getWorkerNum();
         Gs.BuildingMaterialInfo.Builder materialInfo = Gs.BuildingMaterialInfo.newBuilder();
         materialInfo.setBuildingId(id.getId());
-        for (Integer materialId : MetaData.getBuildingTech(building.type())) {
+        /*   for (Integer materialId : MetaData.getBuildingTech(building.type()))*/
+        for (Integer materialId : CityManager.instance().cityMaterial) {
             Gs.BuildingMaterialInfo.ItemInfo.Builder itemInfo = Gs.BuildingMaterialInfo.ItemInfo.newBuilder();
             MetaMaterial item = MetaData.getMaterial(materialId);
             //查询eva信息
@@ -4807,7 +4780,7 @@ public class GameSession {
         Gs.BuildingGoodInfo.Builder goodInfo = Gs.BuildingGoodInfo.newBuilder();
         goodInfo.setBuildingId(id.getId());
         Player player = GameDb.getPlayer(playerId);
-        for (Integer goodId : MetaData.getBuildingTech(building.type())) {
+        for (Integer goodId : CityManager.instance().cityGood) {
             MetaGood good = MetaData.getGood(goodId);
             //查询eva信息
             Eva speedEva = EvaManager.getInstance().getEva(playerId, goodId, Gs.Eva.Btype.ProduceSpeed_VALUE);
