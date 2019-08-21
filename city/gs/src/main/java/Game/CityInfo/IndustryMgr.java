@@ -9,7 +9,6 @@ import Shared.LogDb;
 import gs.Gs;
 import org.bson.Document;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -34,17 +33,17 @@ public class IndustryMgr {
         }
     }
 
-    public static long getEndTime(long nowTime) {
+    public  long getEndTime(long nowTime) {
         return nowTime - (nowTime + TimeZone.getDefault().getRawOffset()) % DAY_MILLISECOND;
     }
 
-    public static void main(String[] args) {
+ /*   public static void main(String[] args) {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
 
-    }
+    }*/
 
     public List<Document> source(long startTime, long endTime) {
         List<Document> list = new ArrayList<>();
@@ -250,4 +249,57 @@ public class IndustryMgr {
         long science = map.getOrDefault(2, 0l);
         return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
     }
+
+    public List<TopInfo> queryProductRanking(int bt, int itemId) {
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
+        ArrayList<TopInfo> tops = new ArrayList<>();
+        List<Document> list = null;
+        if (bt == MetaBuilding.RETAIL) {
+            list = LogDb.dayYesterdayRetailProductIncome(startTime, endTime, itemId, LogDb.getNpcBuyInShelf());
+        } else {
+            list = LogDb.dayYesterdayProductIncome(startTime, endTime, itemId, bt, LogDb.getBuyInShelf());
+        }
+        list.stream().filter(o -> o != null).forEach(d -> {
+            UUID pid = d.get("id", UUID.class);
+            int staffNum = getPlayerIndustryStaffNum(pid, bt);
+            // 玩家名称
+            Player player = GameDb.getPlayer(pid);
+            String playerName = player == null ? "" : player.getName();
+            //faceId
+            String faceId = player == null ? "" : player.getFaceId();
+            long total = d.getLong("total");
+            // 具体商品投入的点数
+            Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(pid, itemId);
+            // 玩家推广点数投入
+            long promotion = map.getOrDefault(1, 0l);
+            // 玩家研究点数
+            long science = map.getOrDefault(2, 0l);
+            tops.add(new TopInfo(pid, faceId, playerName, total, staffNum, science, promotion));
+        });
+        return tops;
+    }
+
+    public TopInfo queryMyself(UUID owner, int bt, int itemId) {
+        long endTime = getEndTime(System.currentTimeMillis());
+        long startTime = endTime - DAY_MILLISECOND;
+        long income = 0;
+        if (bt == MetaBuilding.RETAIL) {
+            income = LogDb.queryMyselfRetail(startTime, endTime, owner, itemId, LogDb.getNpcBuyInShelf());
+        } else {
+            income = LogDb.queryMyself(startTime, endTime, owner, bt, itemId, LogDb.getBuyInShelf());
+        }
+        Player player = GameDb.getPlayer(owner);
+        String name = player == null ? "" : player.getName();
+        String faceId = player == null ? "" : player.getFaceId();
+        int staffNum = getPlayerIndustryStaffNum(owner, bt);
+        Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(owner, itemId);
+        // 玩家推广点数投入
+        long promotion = map.getOrDefault(1, 0l);
+        // 玩家研究点数
+        long science = map.getOrDefault(2, 0l);
+
+        return new TopInfo(owner, faceId, name, income, staffNum, science, promotion);
+    }
+
 }

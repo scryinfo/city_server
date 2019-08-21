@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class EvaManager
 {
@@ -261,5 +262,25 @@ public class EvaManager
         map.put(2, sum[1]);
         return map;
     }
+    public Map<Integer, Long> getItemPoint(UUID playerId,int itemId) {
+        final long[] sum = {0,0};
+        Map<Integer, Long> map = new HashMap<>();
+        List<Eva> playerAllEvas = getEva(playerId, itemId);
+        sum[0] = playerAllEvas.stream().filter(e -> e.getBt() == 2).mapToLong(Eva::getSumValue).sum();
+        sum[1] = playerAllEvas.stream().filter(e -> e.getBt() != 2).mapToLong(Eva::getSumValue).sum();
+        map.put(1, sum[0]);
+        map.put(2, sum[1]);
+        return map;
+    }
 
+    public Map<Integer, Long> getGrade(int at, int bt) {
+        Set<Eva> allEvas = getAllEvas();
+        List<Eva> list = new ArrayList<>();
+        for (Eva eva : allEvas) {
+            if (at == eva.getAt()) {
+                list.add(eva);
+            }
+        }
+        return list.stream().filter(e -> e.getBt() == bt).collect(Collectors.groupingBy(Eva::getLv, Collectors.counting()));
+    }
 }

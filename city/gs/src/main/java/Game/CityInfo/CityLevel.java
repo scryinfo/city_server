@@ -31,6 +31,8 @@ public class CityLevel {
     public final int id = ID;
     public int lv;
     public int cexp;
+    public int salary;
+    public int inventCount;
     private long sumValue;
     public static void init() {
         GameDb.initCityLevel();
@@ -54,7 +56,6 @@ public class CityLevel {
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
             sumValue = EvaManager.getInstance().getAllSumValue();
-            GameDb.saveOrUpdate(this);
             int historyPoint=0;
             /*减去已经使用过的点数*/
             if(lv>1){
@@ -68,9 +69,7 @@ public class CityLevel {
         }
     }
     public Gs.CityLevel toProto() {
-        return Gs.CityLevel.newBuilder().setSumValue(this.sumValue).build();
-    }
-
+        return Gs.CityLevel.newBuilder().setLv(lv).setExp(cexp).setSalary(salary).setInventCount(inventCount).build();}
     /*修改更新城市等级或经验值*/
     public void updateCityLevel(long addPoint){
         long cexp = addPoint + this.cexp;//当前的新增点数+城市的经验值
@@ -100,6 +99,8 @@ public class CityLevel {
                         }
                     }
                 }
+                this.salary = obj.getBaseSalary();
+                this.inventCount = obj.getInventCount();
             }while(cexp>=exp);
             this.cexp = (int) cexp;
         }
