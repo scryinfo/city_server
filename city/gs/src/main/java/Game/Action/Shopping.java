@@ -100,7 +100,7 @@ public class Shopping implements IAction {
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
         int saleCount = ((IShelf) sellShop).getSaleCount(chosenGoodMetaId);//货架上的数量
         if(chosen.price+minerCost > npc.money()) {
@@ -200,7 +200,7 @@ public class Shopping implements IAction {
         sellShop.addFlowCount();
         logger.info("chosen shop: " + sellShop.metaId() + " at: " + sellShop.coordinate());
         //TODO:计算旷工费
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(chosen.price* minersRatio);
         //获取货架商品数量
         int saleCount = ((IShelf) sellShop).getSaleCount(chosen.meta.id);//货架上的数量
