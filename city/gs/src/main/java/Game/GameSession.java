@@ -3290,7 +3290,7 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-    public void queryMyEva(short cmd, Message message)
+    /*public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         Gs.Evas.Builder list = Gs.Evas.newBuilder();
@@ -3300,9 +3300,34 @@ public class GameSession {
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
         list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
+    }*/
+
+    public void queryMyEva(short cmd, Message message)
+    {
+        UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+        //区分建筑去查询Eva
+        Gs.EvaInfo.BuildingEvaInfo material = EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.MATERIAL);
+        Gs.EvaInfo.BuildingEvaInfo produce = EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.PRODUCE);
+        Gs.EvaInfo.BuildingEvaInfo apartment =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.APARTMENT);
+        Gs.EvaInfo.BuildingEvaInfo retail =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.RETAIL);
+        Gs.EvaInfo.BuildingEvaInfo technology =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.TECHNOLOGY);
+        Gs.EvaInfo.BuildingEvaInfo promote =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.PROMOTE);
+        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
+        Gs.EvaInfo.Builder builder = Gs.EvaInfo.newBuilder();
+        builder.setMaterial(material)
+                .setProduce(produce)
+                .setApartment(apartment)
+                .setRetailShop(retail)
+                .setTechnology(technology)
+                .setProduce(produce)
+                .addAllBuildingPoint(buildingPoints);
+        this.write(Package.create(cmd,builder.build()));
     }
 
-/*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
+
+
+
+    /*    public void updateMyEvas(short cmd, Message message)  //TODO:删除
     {
         Gs.Evas evas = (Gs.Evas)message;//传过来的Evas
         Gs.EvaResultInfos.Builder results = Gs.EvaResultInfos.newBuilder();//要返回的值

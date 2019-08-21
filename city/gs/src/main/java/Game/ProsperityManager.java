@@ -34,10 +34,10 @@ public class ProsperityManager {
     }
 
     //1.城市最大范围
-    int cityLen;
+    private int cityLen;
 
     //2.城市人流量，可以先算出所有地块的的人流量
-    int trafficTemp = 0;
+    private int trafficTemp = 0;
 
     private Map<Coordinate, Integer> groundProsperityMap = new HashMap<>();//全城所有土地的繁华度
 
@@ -50,7 +50,6 @@ public class ProsperityManager {
 
     /*全城繁华值总和,1小时更新内根据地块位置逐步更新.*/
     public void totalProsperity(long diffNano) {
-
         /*一块一块的去更新地块，而不是一直去更新，直到完成,循环的去更新数据，从头开始更新*/
         if (timer.update(diffNano)) {
             if(updateIndex==allGround.size()){

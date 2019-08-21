@@ -8,10 +8,13 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import Game.Meta.MetaData;
+import Game.Meta.MetaItem;
 import org.apache.log4j.Logger;
 
 import Shared.Util;
 import gs.Gs;
+import org.hibernate.boot.Metadata;
 
 @Entity(name = "Eva")
 @Table(name = "Eva",indexes = {@Index(columnList = "pid")})
@@ -86,6 +89,10 @@ public class Eva {
 				.setCexp(cexp)
 				.setB(b)
 				.setSumValue(sumValue); // 累计点数
+		if(b==Gs.Eva.Btype.ProduceSpeed_VALUE){
+			MetaItem item = MetaData.getItem(at);
+			builder.setBasevalue(item.n);
+		}
         return builder.build();
     }
     

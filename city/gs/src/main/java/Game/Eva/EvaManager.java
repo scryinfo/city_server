@@ -1,6 +1,8 @@
 package Game.Eva;
 
+import Game.CityInfo.CityManager;
 import Game.GameDb;
+import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaExperiences;
 import Game.Timers.PeriodicTimer;
@@ -282,5 +284,27 @@ public class EvaManager
             }
         }
         return list.stream().filter(e -> e.getBt() == bt).collect(Collectors.groupingBy(Eva::getLv, Collectors.counting()));
+    }
+
+    public Gs.EvaInfo.BuildingEvaInfo queryTypeBuildingEvaInfo(UUID pid,int type){
+        List<Integer> aTypes = new ArrayList<>();
+        if(type==MetaBuilding.MATERIAL){
+            aTypes.addAll(CityManager.instance().cityMaterial);
+        }else if(type==MetaBuilding.PRODUCE){
+            aTypes.addAll(CityManager.instance().cityGood);
+        }else{
+            aTypes.addAll(MetaData.getBuildingTech(type));
+        }
+        Gs.EvaInfo.BuildingEvaInfo.Builder buildingEvaInfo = Gs.EvaInfo.BuildingEvaInfo.newBuilder();
+        /*获取与原料厂相关的Eva信息*/
+        aTypes.forEach(itemId->{
+            Gs.EvaInfo.BuildingEvaInfo.TypeEva.Builder typeEva = Gs.EvaInfo.BuildingEvaInfo.TypeEva.newBuilder();
+            typeEva.setAtype(itemId);
+            List<Eva> evas = EvaManager.getInstance().getEva(pid, itemId);
+            /*统统封装在同一个数组中*/
+            evas.forEach(eva->typeEva.addEva(eva.toProto()));
+            buildingEvaInfo.addTypeEva(typeEva);
+        });
+        return buildingEvaInfo.build();
     }
 }
