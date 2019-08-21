@@ -1,7 +1,9 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
+import Game.CityInfo.TopInfo;
 import Game.Contract.ContractManager;
+import Game.Eva.EvaManager;
 import Game.Gambling.FlightManager;
 import Game.CityInfo.IndustryMgr;
 import Game.League.LeagueManager;

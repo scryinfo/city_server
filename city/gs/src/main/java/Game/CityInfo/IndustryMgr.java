@@ -9,7 +9,6 @@ import Shared.LogDb;
 import gs.Gs;
 import org.bson.Document;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -34,17 +33,17 @@ public class IndustryMgr {
         }
     }
 
-    public static long getEndTime(long nowTime) {
+    public  long getEndTime(long nowTime) {
         return nowTime - (nowTime + TimeZone.getDefault().getRawOffset()) % DAY_MILLISECOND;
     }
 
-    public static void main(String[] args) {
+ /*   public static void main(String[] args) {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
 
-    }
+    }*/
 
     public List<Document> source(long startTime, long endTime) {
         List<Document> list = new ArrayList<>();

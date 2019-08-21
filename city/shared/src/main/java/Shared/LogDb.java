@@ -1160,8 +1160,8 @@ public class LogDb {
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("n", plist1.size())  // ly
-				.append("s", price)
-				.append("a", price*plist1.size())
+				.append("s", price/plist1.size()) // ly 单价
+				.append("a", price)
 				.append("p", positionToDoc(plist1));
 		landAuction.insertOne(document);
 	}
@@ -1669,7 +1669,7 @@ public class LogDb {
 								eq("bt",buildType),
 								lt("t", todayStartTime))),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
-						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.sort(Sorts.descending(KEY_TOTAL)),
 						Aggregates.limit(10),
 						Aggregates.project(projectObject)
 				)
@@ -1686,12 +1686,12 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								eq("bt", buildType),
-								gte("t", strartTime),
-								lte("t", endTime)
+								eq("tp", buildType),
+								gte("time", strartTime),
+								lte("time", endTime)
 						)),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
-						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.sort(Sorts.descending(KEY_TOTAL)),
 						Aggregates.limit(10),
 						Aggregates.project(projectObject)
 				)
@@ -1767,7 +1767,7 @@ public class LogDb {
 
 	public static long queryMyself(long strartTime, long endTime, UUID pid, int buildType, MongoCollection<Document> collection) {
 		List<Document> documentList = new ArrayList<>();
-		collection.find(and(eq("id", pid), eq("bt", buildType), gte("t", strartTime), lte("t", endTime))).forEach((Block<? super Document>) documentList::add);
+		collection.find(and(eq("id", pid), eq("tp", buildType), gte("time", strartTime), lte("time", endTime))).forEach((Block<? super Document>) documentList::add);
 		final long[] income = {0};
 		documentList.stream().filter(o -> o != null).forEach(d -> {
 			income[0] += d.getLong(KEY_TOTAL);

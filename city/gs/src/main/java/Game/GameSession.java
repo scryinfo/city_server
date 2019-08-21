@@ -1,6 +1,7 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
+import Game.CityInfo.EvaGradeMgr;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -4094,10 +4095,10 @@ public class GameSession {
         ProduceDepartment department = (ProduceDepartment) building;
         List<Item> itemList = department.store.getAllItem();
         Map<Integer, Double> map = new HashMap<>();
-        if (!itemList.isEmpty() && itemList.size() > 0) {
+        if (!itemList.isEmpty() && itemList!=null) {
             itemList.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id)+GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), item.key.meta.id, MetaData.getGoodQuality(item.key.meta.id));
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -4105,7 +4106,7 @@ public class GameSession {
             List<Item> items = department.getShelf().getAllSaleDetail();
             items.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id)+GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), item.key.meta.id, MetaData.getGoodQuality(item.key.meta.id));
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -4126,10 +4127,10 @@ public class GameSession {
         RetailShop retailShop = (RetailShop) building;
         List<Item> items = retailShop.getStore().getAllItem();
         Map<Integer, Double> map = new HashMap<>();
-        if (!items.isEmpty() && items.size() > 0) {
+        if (!items.isEmpty() && items!=null) {
             items.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id)+GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), item.key.meta.id, MetaData.getGoodQuality(item.key.meta.id));
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -4137,7 +4138,7 @@ public class GameSession {
             List<Item> itemList = retailShop.getShelf().getAllSaleDetail();
             items.stream().forEach(item ->
             {
-                double score = GlobalUtil.getBrandScore(item.getKey().getTotalBrand(), item.key.meta.id) + MetaData.getGoodQuality(item.key.meta.id);
+                double score = GlobalUtil.getBrandScore(item.getKey().getTotalQty(), item.key.meta.id)+GlobalUtil.getGoodQtyScore(item.getKey().getTotalQty(), item.key.meta.id, MetaData.getGoodQuality(item.key.meta.id));
                 map.put(item.key.meta.id, score / 2);
             });
 
@@ -5934,10 +5935,9 @@ public class GameSession {
         Gs.QueryIndustry m = (Gs.QueryIndustry) message;
         int type = m.getType();  // 行业类型id
         UUID id = Util.toUuid(m.getPid().toByteArray()); // 玩家id
-        long industryStaffNum = IndustryMgr.instance().getIndustryStaffNum(type); // 行业总员工
         long industrySumIncome = IndustryMgr.instance().getIndustrySumIncome(type); // 行业总营收
         Gs.IndustryTopInfo.Builder builder = Gs.IndustryTopInfo.newBuilder();
-        builder.setTotal(industrySumIncome).setStaffNum(industryStaffNum).setType(type).setOwner(0);
+        builder.setTotal(industrySumIncome).setType(type).setOwner(0);
         AtomicInteger owner = new AtomicInteger(0);
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             List<TopInfo> infos = IndustryMgr.instance().queryTop();
@@ -5953,6 +5953,7 @@ public class GameSession {
             TopInfo top = IndustryMgr.instance().queryMyself(id, type);
             builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count).setFaceId(top.faceId).setMyself(true));
         } else {
+            long industryStaffNum = IndustryMgr.instance().getIndustryStaffNum(type); // 行业总员工
             builder.setStaffNum(industryStaffNum).setTotal(industrySumIncome).setOwner(0);
             List<TopInfo> infos = IndustryMgr.instance().queryTop(type);
             infos.stream().filter(o -> o != null).forEach(d -> {
@@ -6044,5 +6045,22 @@ public class GameSession {
                 .setMyself(true).build()
         );
         this.write(Package.create(cmd, builder.build()));
+    }
+
+    // Eva等级分布
+    public void queryEvaGrade(short cmd, Message message) {
+        Gs.queryEvaGrade q = (Gs.queryEvaGrade) message;
+        int industryId = q.getIndustryId();
+        int itemId = q.getItemId();
+        int type = q.getType();   //类型
+        Gs.EvaGrade.Builder builder = Gs.EvaGrade.newBuilder();
+        Map<Integer, Long> map = EvaGradeMgr.instance().queryEvaGrade(industryId, itemId, type);
+        builder.setItemId(itemId);
+        if (map != null && !map.isEmpty()) {
+            map.forEach((k,v)->{
+                Gs.EvaGrade.Grade.Builder grade = builder.addGradeBuilder();
+                grade.setLv(k).setNum(v);
+            });
+        }
     }
 }
