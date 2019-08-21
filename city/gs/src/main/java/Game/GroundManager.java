@@ -265,7 +265,7 @@ public class GroundManager {
         }
         long cost = rentPara.requiredPay() * coordinates.size();
         //TODO:矿工费用
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost * minersRatio);
         if(!renter.decMoney(cost+minerCost))
             return false;
