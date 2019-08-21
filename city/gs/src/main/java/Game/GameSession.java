@@ -1,6 +1,9 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
+import Game.CityInfo.CityManager;
+import Game.CityInfo.IndustryMgr;
+import Game.CityInfo.TopInfo;
 import Game.CityInfo.EvaGradeMgr;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;

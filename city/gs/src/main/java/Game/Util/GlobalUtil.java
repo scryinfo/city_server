@@ -38,7 +38,7 @@ public class GlobalUtil {
         }
         minOrMaxEva.put("max", maxEva);
         minOrMaxEva.put("min", minEva);
-        return minOrMaxEva==null||maxEva==null?null: minOrMaxEva;
+        return minOrMaxEva;
     }
 
     //2.获取指定选项知名度的最大最小信息
