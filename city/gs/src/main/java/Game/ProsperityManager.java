@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class ProsperityManager {
 
     private ProsperityManager() {
-        cityLen = City.instance().getMeta().x > City.instance().getMeta().y ? City.instance().getMeta().x : City.instance().getMeta().y;
         //获取土地拍卖的所有有地块
         Collection<MetaGroundAuction> values = MetaData.getGroundAuction().values();
         values.forEach(g->{
@@ -34,7 +33,7 @@ public class ProsperityManager {
     }
 
     //1.城市最大范围
-    private int cityLen;
+    private int  cityLen = City.instance().getMeta().x > City.instance().getMeta().y ? City.instance().getMeta().x : City.instance().getMeta().y;
 
     //2.城市人流量，可以先算出所有地块的的人流量
     private int trafficTemp = 0;
