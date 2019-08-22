@@ -1,10 +1,9 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
-import Game.CityInfo.CityManager;
+import Game.CityInfo.EvaGradeMgr;
 import Game.CityInfo.IndustryMgr;
 import Game.CityInfo.TopInfo;
-import Game.CityInfo.EvaGradeMgr;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -16,8 +15,6 @@ import Game.FriendManager.*;
 import Game.Gambling.Flight;
 import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
-import Game.CityInfo.IndustryMgr;
-import Game.CityInfo.TopInfo;
 import Game.League.LeagueInfo;
 import Game.League.LeagueManager;
 import Game.Meta.*;
@@ -561,10 +558,7 @@ public class GameSession {
             if(b.type()==MetaBuilding.RETAIL){
                 RetailShop r = (RetailShop) b;
                 r.cleanData();
-            }/*else {
-                PublicFacility facility = (PublicFacility) b;
-                facility.clear();//清除推广队列
-            }*/
+            }
         } else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
             FactoryBase f = (FactoryBase) b;
             f.cleanData();
@@ -3290,7 +3284,8 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-    /*public void queryMyEva(short cmd, Message message)
+    /*Todo*/
+    public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         Gs.Evas.Builder list = Gs.Evas.newBuilder();
@@ -3300,9 +3295,9 @@ public class GameSession {
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
         list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
-    }*/
-
-    public void queryMyEva(short cmd, Message message)
+    }
+    /*新版Eva分类查询*/
+    /*public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         //区分建筑去查询Eva
@@ -3322,7 +3317,7 @@ public class GameSession {
                 .setPromotionCompany(promote)
                 .addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd,builder.build()));
-    }
+    }*/
 
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
@@ -3373,12 +3368,12 @@ public class GameSession {
            playerSciencePoint.forEach(p -> SciencePointManager.getInstance().updateSciencePoint(p));
            playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
            evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
-           //Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
-           Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);
+           Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
+           //Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);
            /*重新查询玩家的所有点数信息*/
-           //List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-           //builder.addAllBuildingPoint(buildingPoints);
-           this.write(Package.create(cmd, evaInfo));
+           List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
+           builder.addAllBuildingPoint(buildingPoints);
+           this.write(Package.create(cmd, builder.build()));
        }
     }
 

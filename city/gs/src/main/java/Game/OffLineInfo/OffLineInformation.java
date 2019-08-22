@@ -1,7 +1,10 @@
 package Game.OffLineInfo;
 
-import Game.*;
+import Game.Building;
+import Game.City;
+import Game.GameDb;
 import Game.Meta.MetaBuilding;
+import Game.Player;
 import Shared.Util;
 import gs.Gs;
 
@@ -71,7 +74,6 @@ public class OffLineInformation {
     public  Map<Integer,Gs.BuildingIncome> totalUnLineBuildingIncome(Map<Integer,List<OffLineBuildingRecord>> recordMap, Map<Integer,Set<Building>> buildingMap){
         /*1.统计所有有收入记录的建筑*/
         Map<Integer, Map<UUID, Gs.BuildingIncome.UnLineIncome>> unLineIncomeMap = new HashMap<>();
-
         for (Map.Entry<Integer, List<OffLineBuildingRecord>> record : recordMap.entrySet()) {
             Map<UUID, Gs.BuildingIncome.UnLineIncome> info = getBuildingIncomeInfo(record.getValue(), buildingMap.get(record.getKey()));
             if(!info.isEmpty()){
@@ -87,14 +89,14 @@ public class OffLineInformation {
         Map<Integer, Set<Building>> noIncomeBuild = removeRecordBuilding(recordBId, buildingMap);
 
         //3.统计没有收入记录的建筑
-        Map<Integer,List<Gs.BuildingIncome.UnLineIncome> > allIncomeMap =new HashMap<>();
+        Map<Integer,List<Gs.BuildingIncome.UnLineIncome>> allIncomeMap =new HashMap<>();
         for (Map.Entry<Integer, Set<Building>> noIncomeEntry : noIncomeBuild.entrySet()) {
             List<Gs.BuildingIncome.UnLineIncome> info = getNoIncomeBuildingInfo(noIncomeEntry.getValue());
             allIncomeMap.put(noIncomeEntry.getKey(),info);
         }
         /*4.完成所有的建筑的统计数据合并*/
         for (Map.Entry<Integer, Map<UUID, Gs.BuildingIncome.UnLineIncome>> mapEntry : unLineIncomeMap.entrySet()) {
-            allIncomeMap.getOrDefault(mapEntry.getKey(), new ArrayList<>()).addAll(mapEntry.getValue().values());
+            allIncomeMap.computeIfAbsent(mapEntry.getKey(),k-> new ArrayList<>()).addAll(mapEntry.getValue().values());
         }
         //5.完成统计后加入总收入
         for (Map.Entry<Integer, List<Gs.BuildingIncome.UnLineIncome>> totalEntry : allIncomeMap.entrySet()) {
@@ -180,6 +182,7 @@ public class OffLineInformation {
                 .setBuildingName(info.getName());
         return builder.build();
     }
+
     //收益建筑Proto
     public Gs.BuildingIncome.UnLineIncome recordToProto(OffLineBuildingRecord record, int mid, Gs.MiniIndex miniIndex, String bName){//交易记录转proto
         Gs.BuildingIncome.UnLineIncome.Builder builder = Gs.BuildingIncome.UnLineIncome.newBuilder();
@@ -190,9 +193,6 @@ public class OffLineInformation {
                 .setBuildingName(bName);
         return builder.build();
     }
-
-
-
 
     /*航班预测结果proto*/
     public Gs.ForecastIncome forecastIncomeToProto( List<OffLineFlightRecord> playerFlightForecast){
