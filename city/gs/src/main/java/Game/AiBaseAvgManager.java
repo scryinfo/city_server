@@ -58,9 +58,9 @@ public class AiBaseAvgManager
         return qualityMap.get(key)==null?1.d:qualityMap.get(key);
     }
     public Double getAllBrandAvg(){
-        return allBrandAvg;
+        return allBrandAvg==0.0?1d:allBrandAvg;
     }
     public Double getAllQualityAvg(){
-        return allQualityAvg;
+        return allQualityAvg==0.0?1d:allQualityAvg;
     }
 }

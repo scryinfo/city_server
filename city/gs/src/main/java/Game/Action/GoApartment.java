@@ -50,7 +50,7 @@ public class GoApartment implements IAction {
         //实际住宅购物预期 = 住宅购物预期 * (1 + 全城住宅知名度均值 / 全城知名度均值) * (1 + 全城住宅品质均值 / 全城品质均值)
         double realApartmentSpend=MetaData.getCostSpendRatio(buildingType)* (1 +  AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT) /AiBaseAvgManager.getInstance().getAllBrandAvg()) * (1 +  AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT) / AiBaseAvgManager.getInstance().getAllQualityAvg());
         //实际总购物预期 = 实际住宅购物预期 + 所有 实际某种商品购物预期(已发明)
-        double allCostSpend=MetaData.getAllCostSpendRatio();
+        int allCostSpend=MetaData.getAllCostSpendRatio();
         //NPC住宅预期消费 = 城市工资标准 * (实际住宅购物预期 / 实际总购物预期)
         final int cost = (int) (npc.salary() * (realApartmentSpend/allCostSpend));
 
@@ -166,30 +166,31 @@ public class GoApartment implements IAction {
     private Map<Building,Double> getRandomN(Map<Building,Double> map,int n){
         Map<Building,Double> newMap=new HashMap<>();
         List<Building> keyList=new ArrayList<>(map.keySet());
-        Double[] val=(Double[])map.values().toArray();
-        double[] doubles=Util.toDoubleArray(val);
+        List<Double> list= new ArrayList<>(map.values());
+        double[] doubles=Util.toDoubleArray(list);
         for (int i=0;i<n;i++){
             int j=Util.randomIdx(doubles);
-            newMap.put(keyList.get(j),val[j]);
+            newMap.put(keyList.get(j),list.get(j));
         }
         return newMap;
     }
     private Map<Building,Double> getRandomNN(Map<Building,Double> map,int n,int cost,int limit){
         Map<Building,Double> newMap=new HashMap<>();
         List<Building> keyList=new ArrayList<>(map.keySet());
-        Double[] val=(Double[])map.values().toArray();
-        double[] doubles=Util.toDoubleArray(val);
+        List<Double> list= new ArrayList<>(map.values());
+        double[] doubles=Util.toDoubleArray(list);
         for (int i=0;i<limit;i++){
             int j=Util.randomIdx(doubles);
             //随机到的住宅满足有空位且 售价 <= NPC住宅预期消费,则加入备选,最多进行10次随机选择.
             Building b=keyList.get(j);
             Apartment apartment=(Apartment)b;
+            logger.info("chosen apartment building: " + b.id().toString() + " renters: " + apartment.getRenterNum() + " capacity: " + apartment.getCapacity()+ " apartment.cost: " + apartment.cost() + " cost: " + cost);
             if((apartment.getRenterNum()<apartment.getCapacity())&&(apartment.cost()<=cost)){
                 n--;
                 if(n<0){
                     break;
                 }
-                newMap.put(keyList.get(j),val[j]);
+                newMap.put(keyList.get(j),list.get(j));
             }
         }
         return newMap;

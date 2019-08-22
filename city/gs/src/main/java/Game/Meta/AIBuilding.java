@@ -41,16 +41,16 @@ public class AIBuilding extends ProbBase {
         return null;
     }
     public IAction randomAgain(AIBuilding aiBuilding, int aiId) {
-        int[] d = Arrays.copyOf(weight, weight.length);
-        d[Type.GOTO_WORK.ordinal()] = weight[2];
-        d[Type.GOTO_HOME.ordinal()] = weight[3];
-        d[Type.IDLE.ordinal()] = weight[4];
-        switch (Type.values()[super.randomIdx(d)]) {
-            case IDLE:
+        int[] d=new int[3];
+        d[0]=weight[2];
+        d[1]=weight[3];
+        d[2]=weight[4];
+        switch (super.randomIdx(d)) {
+            case 2:
                 return new Idle();
-            case GOTO_HOME:
+            case 1:
                 return new GoHome();
-            case GOTO_WORK:
+            case 0:
                 return new GoWork();
         }
         return null;

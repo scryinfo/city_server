@@ -140,10 +140,10 @@ public class Util {
         BsonBinaryReader bsonReader = new BsonBinaryReader(ByteBuffer.wrap(input));
         return codec.decode(bsonReader, DecoderContext.builder().build());
     }
-    public static  double[] toDoubleArray(Double[] val){
-        double[] doubles=new double[val.length];
-        for (int i=0;i<val.length;i++){
-            doubles[i]=val[i];
+    public static  double[] toDoubleArray(List<Double> list){
+        double[] doubles=new double[list.size()];
+        for (int i=0;i<list.size();i++){
+            doubles[i]=list.get(i);
         }
         return doubles;
     }

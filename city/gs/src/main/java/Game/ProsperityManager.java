@@ -3,9 +3,7 @@ package Game;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGroundAuction;
 import Game.Timers.PeriodicTimer;
-import org.checkerframework.checker.units.qual.A;
 
-import java.time.Year;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 public class ProsperityManager {
 
     private ProsperityManager() {
+
+        cityLen = MetaData.getCity().x > MetaData.getCity().y ? MetaData.getCity().x : MetaData.getCity().y;
         //获取土地拍卖的所有有地块
         Collection<MetaGroundAuction> values = MetaData.getGroundAuction().values();
         values.forEach(g->{
@@ -27,25 +27,22 @@ public class ProsperityManager {
 
     List<Coordinate> allGround = new ArrayList<>();//全城所有的地块
 
+
     public static ProsperityManager instance(){
         return instance;
     }
 
     //1.城市最大范围
-    int cityLen = City.instance().getMeta().x > City.instance().getMeta().y ? City.instance().getMeta().x : City.instance().getMeta().y;
+    int cityLen;
 
     //2.城市人流量，可以先算出所有地块的的人流量
     int trafficTemp = 0;
-
-    //3.缓存全城建筑的繁华度
-    private Map<Building, Integer> buildingProsperityMap = new LinkedHashMap<>();//全城所有的繁荣度
 
     private Map<Coordinate, Integer> groundProsperityMap = new HashMap<>();//全城所有土地的繁华度
 
     List<Building> indexs = new ArrayList<>();
 
-    //定时器（1小时统计一次）
-    /*new PeriodicTimer((int) TimeUnit.HOURS.toMillis(1),0)*/
+    //定时器（每小时更新）
     PeriodicTimer timer;
 
     int updateIndex=0;

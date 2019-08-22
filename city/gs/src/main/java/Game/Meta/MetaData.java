@@ -75,7 +75,7 @@ public class MetaData {
     private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
-    private static final TreeMap<Integer, Double> costSpendRatio = new TreeMap<>();
+    private static final TreeMap<Integer, Integer> costSpendRatio = new TreeMap<>();
     private static final HashMap<Integer, MetaMaterial> material = new HashMap<>();
     private static final HashMap<Integer, MetaGood> good = new HashMap<>();
     private static final HashMap<Formula.Key, Formula> formula = new HashMap<>();
@@ -144,12 +144,12 @@ public class MetaData {
         return goodSpendRatio.get(mId);
     }
 
-    public static double getCostSpendRatio(int id) {
+    public static int getCostSpendRatio(int id) {
         return costSpendRatio.get(id);
     }
 
-    public static double getAllCostSpendRatio(){
-        return costSpendRatio.values().stream().reduce(0d, Double::sum);
+    public static int getAllCostSpendRatio(){
+        return costSpendRatio.values().stream().reduce(0, Integer::sum);
     }
 
     public static MetaTalentCenter getTalentCenter(int id) {
@@ -218,7 +218,7 @@ public class MetaData {
             buildingSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
         });
        mongoClient.getDatabase(dbName).getCollection(costSpendRatioColName).find().forEach((Block<Document>) doc -> {
-           costSpendRatio.put(doc.getInteger("_id"), doc.getDouble("ratio"));
+           costSpendRatio.put(doc.getInteger("_id"), doc.getInteger("ratio"));
         });
     }
     public static MetaBuilding getBuilding(int id) {

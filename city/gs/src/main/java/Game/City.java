@@ -706,7 +706,19 @@ public class City {
     public void moveKnownApartmentMap(Building b){
         Apartment apartment=(Apartment)b;
         //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
+        double qty=apartment.getTotalQty();
+        logger.info("moveKnownApartmentMap qty: " + qty);
+        double getQualityMapVal=AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT);
+        logger.info("moveKnownApartmentMap getQualityMapVal: " + getQualityMapVal);
+        double brand=apartment.getTotalBrand();
+        logger.info("moveKnownApartmentMap brand: " + brand);
+        double getBrandMapVal=AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT);
+        logger.info("moveKnownApartmentMap getBrandMapVal: " + getBrandMapVal);
+        int p=ProsperityManager.instance().getBuildingProsperity(b);
+        logger.info("moveKnownApartmentMap p: " + p);
+
         double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        logger.info("moveKnownApartmentMap moveKnownValue: " + moveKnownValue);
         moveKnownApartmentMap.put(b,moveKnownValue);
     }
     public Map<Building,Double> getMoveKnownaApartmentMap(){

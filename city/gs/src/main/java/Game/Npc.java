@@ -179,9 +179,9 @@ public class Npc {
         return type;
     }
     public int chooseId() {
-        int id = type*10000000;
-        id += City.instance().currentHour()*100000;
-        id += Integer.parseInt(ThirdPartyDataSource.instance().getWeather().getPrefixIcon())*10000;
+        int id = type*100000000;
+        id += City.instance().currentHour()*1000000;
+        id += Integer.parseInt(ThirdPartyDataSource.instance().getWeather().getPrefixIcon())*1000;
         id += MetaData.getDayId()*10;
         id += status;
         return id;

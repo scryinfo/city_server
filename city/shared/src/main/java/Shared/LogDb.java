@@ -1802,7 +1802,7 @@ public class LogDb {
 		List<Document> documentList = new ArrayList<>();
 		dayAiBaseAvg.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(eq("t", time))),
+						Aggregates.match(and(eq("time", time))),
 						Aggregates.project(fields(include("time","type","brand","quality"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
