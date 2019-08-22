@@ -1441,7 +1441,7 @@ public class SummaryUtil {
         List<Document> documentList = LogDb.getNpcBuyInShelfAvg1(yestodayStartTime, todayStartTime);
         documentList.forEach(document -> {
             document.append(TIME, yestodayStartTime)
-                    .append(TYPE, BuildingType.RETAIL.getValue())
+                    .append(TYPE, IndustryType.RETAIL.getValue())
                     .append(BRAND, document.getDouble("rbrd"))
                     .append(QUALITY, document.getDouble("rqty"));
         });
@@ -1461,7 +1461,7 @@ public class SummaryUtil {
         documentList = LogDb.getNpcRentApartmentAvg1(yestodayStartTime, todayStartTime);
         documentList.forEach(document -> {
             document.append(TIME, yestodayStartTime)
-                    .append(TYPE, BuildingType.APARTMENT.getValue())
+                    .append(TYPE, IndustryType.APARTMENT.getValue())
                     .append(BRAND, document.getDouble("abrd"))
                     .append(QUALITY, document.getDouble("aqty"));
         });
