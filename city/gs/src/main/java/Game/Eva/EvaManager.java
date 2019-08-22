@@ -28,7 +28,7 @@ public class EvaManager
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
     public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息
-    private Map<UUID, Eva> evas = new HashMap<>();  /*key是Eva的Id  */
+    private Map<UUID, Eva> evas = new HashMap<>();  /*key是Eva的Id*/
     private Map<UUID, EvaSalary> evaSalaryMap = new HashMap<UUID, EvaSalary>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
@@ -275,14 +275,9 @@ public class EvaManager
     }
 
     public Map<Integer, Long> getGrade(int at, int bt) {
-        Set<Eva> allEvas = getAllEvas();
-        List<Eva> list = new ArrayList<>();
-        for (Eva eva : allEvas) {
-            if (at == eva.getAt()) {
-                list.add(eva);
-            }
-        }
-        return list.stream().filter(e -> e.getBt() == bt).collect(Collectors.groupingBy(Eva::getLv, Collectors.counting()));
+        EvaKey evaKey = new EvaKey(at, bt);
+        Set<Eva> evas = typeEvaMap.get(evaKey);
+        return evas.stream().filter(e -> e.getBt() == bt).collect(Collectors.groupingBy(Eva::getLv, Collectors.counting()));
     }
 
     public Gs.EvaInfo.BuildingEvaInfo queryTypeBuildingEvaInfo(UUID pid,int type){
