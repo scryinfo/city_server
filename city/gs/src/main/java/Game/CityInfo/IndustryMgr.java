@@ -3,6 +3,7 @@ package Game.CityInfo;
 import Game.*;
 import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
+import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
 import Game.Util.DateUtil;
 import Shared.LogDb;
@@ -11,6 +12,7 @@ import org.bson.Document;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IndustryMgr {
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
@@ -26,10 +28,22 @@ public class IndustryMgr {
             // ss获取不到 暂时先放在gs统计
             long endTime = getEndTime(System.currentTimeMillis());
             long startTime = endTime - DAY_MILLISECOND;
-            List<Document> source = source(startTime, endTime);
+            List<Document> source = industrySource(startTime, endTime);
             LogDb.insertIndustrySupplyAndDemand(source);
             long sum = MoneyPool.instance().getN();
             LogDb.insertCityMoneyPool(sum, endTime);
+            List<Document> all = new ArrayList<>();
+            List<Document> material = materialSource(startTime, endTime);
+            List<Document> produce = produceSource(startTime, endTime);
+            List<Document> promote = promoteSource(startTime, endTime);
+            List<Document> technology = technologySource(startTime, endTime);
+            List<Document> retail = retailSource(startTime, endTime);
+            all.addAll(material);
+            all.addAll(produce);
+            all.addAll(promote);
+            all.addAll(technology);
+            all.addAll(retail);
+            LogDb.insertIndustrySupplyAndDemand(all);
         }
     }
 
@@ -47,38 +61,104 @@ public class IndustryMgr {
 
     }*/
 
-    public List<Document> source(long startTime, long endTime) {
+    public List<Document> industrySource(long startTime, long endTime) {
         List<Document> list = new ArrayList<>();
         // material
         int sumM = City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandM = LogDb.queryIndestrySum(MetaBuilding.MATERIAL, startTime, endTime);
-        list.add(new Document().append("type", MetaBuilding.MATERIAL).append("supply", (sumM + demandM)).append("demand", demandM).append("time", endTime));
+        list.add(new Document().append("bt", MetaBuilding.MATERIAL).append("supply", (sumM + demandM)).append("demand", demandM).append("time", endTime).append("type", 1));
         // produce
         int sumP = City.instance().typeBuilding.getOrDefault(MetaBuilding.PRODUCE, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandP = LogDb.queryIndestrySum(MetaBuilding.PRODUCE, startTime, endTime);
-        list.add(new Document().append("type", MetaBuilding.PRODUCE).append("supply", (sumP + demandP)).append("demand", demandP).append("time", endTime));
+        list.add(new Document().append("bt", MetaBuilding.PRODUCE).append("supply", (sumP + demandP)).append("demand", demandP).append("time", endTime).append("type", 1));
         // technology
         int sumT = City.instance().typeBuilding.getOrDefault(MetaBuilding.TECHNOLOGY, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandT = LogDb.queryIndestrySum(MetaBuilding.TECHNOLOGY, startTime, endTime);
-        list.add(new Document().append("type", MetaBuilding.TECHNOLOGY).append("supply", (sumT + demandT)).append("demand", demandT).append("time", endTime));
+        list.add(new Document().append("bt", MetaBuilding.TECHNOLOGY).append("supply", (sumT + demandT)).append("demand", demandT).append("time", endTime).append("type", 1));
         // promote
         int sumPro = City.instance().typeBuilding.getOrDefault(MetaBuilding.PROMOTE, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandPro = LogDb.queryIndestrySum(MetaBuilding.PROMOTE, startTime, endTime);
-        list.add(new Document().append("type", MetaBuilding.PROMOTE).append("supply", (sumPro + demandPro)).append("demand", demandPro).append("time", endTime));
+        list.add(new Document().append("bt", MetaBuilding.PROMOTE).append("supply", (sumPro + demandPro)).append("demand", demandPro).append("time", endTime).append("type", 1));
         // apartment
         int sumA = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandA = LogDb.queryApartmentIndestrySum(startTime, endTime,LogDb.getNpcRentApartment());
-        list.add(new Document().append("type", MetaBuilding.APARTMENT).append("supply", (sumA + demandA)).append("demand", demandA).append("time", endTime));
+        list.add(new Document().append("bt", MetaBuilding.APARTMENT).append("supply", (sumA + demandA)).append("demand", demandA).append("time", endTime).append("type", 1));
         // retailShop
         int sumR = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
-        long demadnR = LogDb.queryIndestrySum(startTime, endTime,LogDb.getNpcBuyInShelf());
-        list.add(new Document().append("type", MetaBuilding.RETAIL).append("supply", (sumR + demadnR)).append("demand", demadnR).append("time", endTime));
+        long demandR = LogDb.queryIndestrySum(startTime, endTime,LogDb.getNpcBuyInShelf());
+        list.add(new Document().append("bt", MetaBuilding.RETAIL).append("supply", (sumR + demandR)).append("demand", demandR).append("time", endTime).append("type", 1));
         // ground
         int sellingCount = GroundManager.instance().getAllSellingCount();
-        long demadnG = LogDb.queryIndestrySum(startTime, endTime,LogDb.getBuyGround());
-        list.add(new Document().append("type", Gs.SupplyAndDemand.IndustryType.GROUND_VALUE).append("supply", (sellingCount + demadnG)).append("demand", demadnG).append("time", endTime));
+        long demandG = LogDb.queryIndestrySum(startTime, endTime,LogDb.getBuyGround());
+        list.add(new Document().append("bt", Gs.SupplyAndDemand.IndustryType.GROUND_VALUE).append("supply", (sellingCount + demandG)).append("demand", demandG).append("time", endTime));
         return list;
     }
+
+    public List<Document> materialSource(long startTime, long endTime) {
+        List<Document> list = new ArrayList<>();
+        MetaData.getAllMaterialId().stream().forEach(itemId -> {
+            AtomicInteger saleNum = new AtomicInteger();
+            City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>()).stream().filter(o->!o.outOfBusiness()).forEach(b -> {
+                saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
+            });
+            long deman = LogDb.queryIndestrySum(MetaBuilding.MATERIAL, startTime, endTime, itemId);
+            list.add(new Document().append("bt", MetaBuilding.MATERIAL).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+        });
+        return list;
+    }
+
+    public List<Document> produceSource(long startTime, long endTime) {
+        List<Document> list = new ArrayList<>();
+        MetaData.getAllMaterialId().stream().forEach(itemId -> {
+            AtomicInteger saleNum = new AtomicInteger();
+            City.instance().typeBuilding.getOrDefault(MetaBuilding.PRODUCE, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
+            });
+            long deman = LogDb.queryIndestrySum(MetaBuilding.PRODUCE, startTime, endTime, itemId);
+            list.add(new Document().append("bt", MetaBuilding.PRODUCE).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+        });
+        return list;
+    }
+
+    public List<Document> promoteSource(long startTime, long endTime) {
+        List<Document> list = new ArrayList<>();
+        MetaData.getPromotionItemId().stream().forEach(itemId -> {
+            AtomicInteger saleNum = new AtomicInteger();
+            City.instance().typeBuilding.getOrDefault(MetaBuilding.PROMOTE, new HashSet<>()).stream().filter(o->!o.outOfBusiness()).forEach(b -> {
+                saleNum.addAndGet(((ScienceBuildingBase) b).getShelf().getSaleNum(itemId));
+            });
+            long deman = LogDb.queryIndestrySum(MetaBuilding.PROMOTE, startTime, endTime, itemId);
+            list.add(new Document().append("bt", MetaBuilding.PROMOTE).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+        });
+        return list;
+    }
+
+    public List<Document> technologySource(long startTime, long endTime) {
+        List<Document> list = new ArrayList<>();
+        MetaData.getAllScienCeId().stream().forEach(itemId -> {
+            AtomicInteger saleNum = new AtomicInteger();
+            City.instance().typeBuilding.getOrDefault(MetaBuilding.TECHNOLOGY, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                saleNum.addAndGet(((ScienceBuildingBase) b).getShelf().getSaleNum(itemId));
+            });
+            long deman = LogDb.queryIndestrySum(MetaBuilding.TECHNOLOGY, startTime, endTime, itemId);
+            list.add(new Document().append("bt", MetaBuilding.TECHNOLOGY).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+        });
+        return list;
+    }
+
+    public List<Document> retailSource(long startTime, long endTime) {
+        List<Document> list = new ArrayList<>();
+        MetaData.getAllMaterialId().stream().forEach(itemId -> {
+            AtomicInteger saleNum = new AtomicInteger();
+            City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                saleNum.addAndGet(((RetailShop) b).getShelf().getSaleNum(itemId));
+            });
+            long deman = LogDb.queryRetailSum(startTime, endTime, itemId);
+            list.add(new Document().append("bt", MetaBuilding.RETAIL).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+        });
+        return list;
+    }
+
 
     public  int getTodaySupply(int industryType) {
         switch (industryType) {
@@ -101,6 +181,42 @@ public class IndustryMgr {
         }
     }
 
+    public int getTodaySupply(int industryType, int itemId) {
+        AtomicInteger saleNum = new AtomicInteger(0);
+        switch (industryType) {
+            case MetaBuilding.MATERIAL:
+                City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                    FactoryBase factoryBase = (FactoryBase) b;
+                    saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
+                    return;
+                });
+                return saleNum.get();
+            case MetaBuilding.PRODUCE:
+                City.instance().typeBuilding.getOrDefault(MetaBuilding.PRODUCE, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                    saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
+                });
+                return saleNum.get();
+            case MetaBuilding.TECHNOLOGY:
+                City.instance().typeBuilding.getOrDefault(MetaBuilding.TECHNOLOGY, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                    saleNum.addAndGet(((ScienceBuildingBase) b).getShelf().getSaleNum(itemId));
+                });
+                return saleNum.get();
+            case MetaBuilding.PROMOTE:
+                City.instance().typeBuilding.getOrDefault(MetaBuilding.PROMOTE, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                    saleNum.addAndGet(((ScienceBuildingBase) b).getShelf().getSaleNum(itemId));
+                });
+                return saleNum.get();
+            case MetaBuilding.RETAIL:
+                City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
+                    saleNum.addAndGet(((RetailShop) b).getShelf().getSaleNum(itemId));
+                });
+                return saleNum.get();
+            default:
+                return 0;
+        }
+    }
+
+    // 详细商品今日货架剩余数量
     public  long getTodayDemand(int industryType) {
         long startTime = getEndTime(System.currentTimeMillis());
         long endTime = System.currentTimeMillis();
@@ -119,6 +235,25 @@ public class IndustryMgr {
                 return LogDb.queryIndestrySum(startTime, endTime, LogDb.getNpcBuyInShelf());
             case Gs.SupplyAndDemand.IndustryType.GROUND_VALUE:
                 return LogDb.queryIndestrySum(startTime, endTime, LogDb.getBuyGround());
+            default:
+                return 0;
+        }
+    }
+    // 详细商品今日成交量
+    public  long getTodayDemand(int industryType,int itemId) {
+        long startTime = getEndTime(System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+        switch (industryType) {
+            case MetaBuilding.MATERIAL:
+                return LogDb.queryIndestrySum(MetaBuilding.MATERIAL, startTime, endTime,itemId);
+            case MetaBuilding.PRODUCE:
+                return LogDb.queryIndestrySum(MetaBuilding.PRODUCE, startTime, endTime,itemId);
+            case MetaBuilding.TECHNOLOGY:
+                return LogDb.queryIndestrySum(MetaBuilding.TECHNOLOGY, startTime, endTime,itemId);
+            case MetaBuilding.PROMOTE:
+                return LogDb.queryIndestrySum(MetaBuilding.PROMOTE, startTime, endTime,itemId);
+            case MetaBuilding.RETAIL:
+                return LogDb.queryIndestrySum(startTime, endTime, LogDb.getNpcBuyInShelf(),itemId);
             default:
                 return 0;
         }

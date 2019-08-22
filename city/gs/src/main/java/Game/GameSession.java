@@ -5950,15 +5950,36 @@ public class GameSession {
         builder.setTodayS(demand+supply);
         builder.setTodayD(demand);
         list.stream().forEach(d->{
-            Gs.SupplyAndDemand.Info.Builder info = Gs.SupplyAndDemand.Info.newBuilder();
+            Gs.SupplyAndDemand.Info.Builder info = builder.addInfoBuilder();
             info.setTime(d.getLong("time"));
             info.setDemand(d.getLong("demand"));
             info.setSupply(d.getLong("supply"));
-            builder.addInfo(info);
         });
         this.write(Package.create(cmd, builder.build()));
 
     }
+    // 商品供需
+    public void queryItemSupplyAndDemand(short cmd, Message message) {
+        Gs.queryItemSupplyAndDemand q = (Gs.queryItemSupplyAndDemand) message;
+        int industryId = q.getIndustryId();
+        int itemId = q.getItemId();
+        Gs.SupplyAndDemand.Builder builder = Gs.SupplyAndDemand.newBuilder();
+        builder.setType(Gs.SupplyAndDemand.IndustryType.valueOf(industryId));
+        long demand = IndustryMgr.instance().getTodayDemand(industryId,itemId); // 行业今日成交数量
+        int supply = IndustryMgr.instance().getTodaySupply(industryId,itemId);  // 行业剩余数量
+        // 供： 交易总量+剩余数量
+        builder.setTodayS(demand+supply);
+        builder.setTodayD(demand);
+        List<Document> list = LogDb.querySupplyAndDemand(industryId, itemId);
+        list.stream().filter(o->o!=null).forEach(d->{
+            Gs.SupplyAndDemand.Info.Builder info = builder.addInfoBuilder();
+            info.setTime(d.getLong("time"));
+            info.setDemand(d.getLong("demand"));
+            info.setSupply(d.getLong("supply"));
+        });
+        this.write(Package.create(cmd, builder.build()));
+    }
+
 
     // 行业排行
     public void queryIndustryTopInfo(short cmd, Message message) {
@@ -6092,5 +6113,6 @@ public class GameSession {
                 grade.setLv(k).setSum(v);
             });
         }
+        this.write(Package.create(cmd, builder.build()));
     }
 }

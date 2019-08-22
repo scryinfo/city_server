@@ -2073,12 +2073,50 @@ public class LogDb {
 		});
 		return count[0];
 	}
+	public static long queryIndestrySum(int buidingType,long startTime,long endTime,int itemId) {
+		final long[] count = {0};
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("bt", buidingType),eq("tpi",itemId),gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null,Accumulators.sum(KEY_TOTAL,"$n"))
+				)
+		).forEach((Block<? super Document>) d->{
+			count[0] =d.getLong(KEY_TOTAL);
+		});
+		return count[0];
+	}
+	public static long queryRetailSum(long startTime,long endTime,int itemId) {
+		final long[] count = {0};
+		npcBuyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("tpi",itemId),gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null,Accumulators.sum(KEY_TOTAL,"$n"))
+				)
+		).forEach((Block<? super Document>) d->{
+			count[0] =d.getLong(KEY_TOTAL);
+		});
+		return count[0];
+	}
 
 	public static long queryIndestrySum(long startTime, long endTime,MongoCollection<Document> collection) {
 		final long[] count = {0};
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$n"))
+				)
+		).forEach((Block<? super Document>) d -> {
+			count[0] = d.getLong(KEY_TOTAL);
+		});
+		return count[0];
+
+	}
+
+	public static long queryIndestrySum(long startTime, long endTime, MongoCollection<Document> collection, int itemId) {
+		final long[] count = {0};
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("tpi", itemId), gte("t", startTime), lte("t", endTime))),
 						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$n"))
 				)
 		).forEach((Block<? super Document>) d -> {
@@ -2126,11 +2164,38 @@ public class LogDb {
 		long startTime=startDate.getTime();
 		List<Document> documentList = new ArrayList<>();
 		industrySupplyAndDemand.find(and(
-				eq("type",type),
+				eq("bt", type),
+				eq("type", 1),
 				gte("time", startTime),
 				lt("time", endTime)
 		))
-				.projection(fields(include("time", "supply","demand"), excludeId()))
+				.projection(fields(include("time", "supply", "demand"), excludeId()))
+				.sort(Sorts.descending("time"))
+				.forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> querySupplyAndDemand(int type,int itemId) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.set(Calendar.HOUR_OF_DAY,0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND,0);
+		Date endDate = calendar.getTime();
+		long endTime=endDate.getTime();
+
+		calendar.add(Calendar.DATE, -7);
+		Date startDate = calendar.getTime();
+		long startTime=startDate.getTime();
+		List<Document> documentList = new ArrayList<>();
+		industrySupplyAndDemand.find(and(
+				eq("bt", type),
+				eq("_id",itemId),
+				eq("type", 2),
+				gte("time", startTime),
+				lt("time", endTime)
+		))
+				.projection(fields(include("time", "supply", "demand"), excludeId()))
 				.sort(Sorts.descending("time"))
 				.forEach((Block<? super Document>) documentList::add);
 		return documentList;

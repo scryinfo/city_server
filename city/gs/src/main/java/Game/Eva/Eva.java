@@ -87,7 +87,6 @@ public class Eva {
 				.setBt(Gs.Eva.Btype.valueOf(bt))
 				.setLv(lv)
 				.setCexp(cexp)
-				.setB(b)
 				.setSumValue(sumValue); // 累计点数
 		if(bt==Gs.Eva.Btype.ProduceSpeed_VALUE){
 			MetaItem item = MetaData.getItem(at);

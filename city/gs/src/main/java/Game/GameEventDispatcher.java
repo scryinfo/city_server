@@ -245,6 +245,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryProductRanking_VALUE, Wrapper.newWithMessageAsync(Gs.queryProductRanking.PARSER, GameSession.class, "queryProductRanking"));
 			// Eva等级分布
 			table.put((short) GsCode.OpCode.queryEvaGrade_VALUE, Wrapper.newWithMessageAsync(Gs.queryEvaGrade.PARSER, GameSession.class, "queryEvaGrade"));
+			// 商品供需
+			table.put((short) GsCode.OpCode.queryItemSupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.queryItemSupplyAndDemand.PARSER, GameSession.class, "queryItemSupplyAndDemand"));
 
 
 			/*WareHouse*/
