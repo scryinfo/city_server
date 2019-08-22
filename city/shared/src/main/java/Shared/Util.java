@@ -99,6 +99,31 @@ public class Util {
         else
             return ThreadLocalRandom.current().nextInt(l, r);
     }
+    public static double random(double l, double r) {
+        if(l == r)
+            return l;
+        else if(l > r)
+            return ThreadLocalRandom.current().nextDouble(r, l);
+        else
+            return ThreadLocalRandom.current().nextDouble(l, r);
+    }
+    public static int randomIdx(double[] weight) {
+        assert weight.length > 0;
+        if(weight.length == 1)
+            return 0;
+        double[] copy = Arrays.copyOf(weight, weight.length);
+        process(copy);
+        double v =random(0, copy[copy.length-1]);
+        int idx = Arrays.binarySearch(copy, v);
+        if(idx >= 0)
+            return idx;
+        else
+            return -(idx+1);
+    }
+    private static void process(double[] weight) {
+        for(int i = 1; i < weight.length; ++i)
+            weight[i] = weight[i] + weight[i-1];
+    }
 //    public static double random(double l, double r) {
 //        return ThreadLocalRandom.current().nextDouble(l, r);
 //    }
@@ -114,5 +139,12 @@ public class Util {
     public static Document toDocument(final byte[] input) {
         BsonBinaryReader bsonReader = new BsonBinaryReader(ByteBuffer.wrap(input));
         return codec.decode(bsonReader, DecoderContext.builder().build());
+    }
+    public static  double[] toDoubleArray(List<Double> list){
+        double[] doubles=new double[list.size()];
+        for (int i=0;i<list.size();i++){
+            doubles[i]=list.get(i);
+        }
+        return doubles;
     }
 }

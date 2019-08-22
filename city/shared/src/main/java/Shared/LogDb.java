@@ -94,6 +94,8 @@ public class LogDb {
 	private static final String CITY_MONEY_POOL= "cityMoneyPool";
 	/*玩家登陆时长统计(玩家登陆时间统计) yty*/
 	private static final String PLAYER_LOGINTIME = "playerLoginTime";
+	//AI购物基础数据
+	private static final String DAY_AI_BASE_AVG = "dayAiBaseAvg";
 
 	//---------------------------------------------------
 	private static MongoCollection<Document> flowAndLift;
@@ -154,6 +156,8 @@ public class LogDb {
 	public static final String KEY_AVG = "avg";
 
 	private static MongoCollection<Document> incomeNotify;
+	private static MongoCollection<Document> dayAiBaseAvg;
+
 	//保持时间 7 天，单位秒
 	public static final long incomeNotify_expire = 7 * 24 * 3600;
 
@@ -237,6 +241,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		/*玩家登陆时长统计*/
 		playerLoginTime=database.getCollection(PLAYER_LOGINTIME)
+				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		dayAiBaseAvg=database.getCollection(DAY_AI_BASE_AVG)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		industrySupplyAndDemand = database.getCollection(INDUSTRY_SUPPLYANDDEMAND)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -1076,7 +1082,7 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,int type, int typeId,String brand,double score)
+								  UUID producerId, UUID bid,int type, int typeId,String brand,double score,double gbrd,double gqty,double rbrd,double rqty)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1089,7 +1095,11 @@ public class LogDb {
 				.append("i", producerId)
 				.append("tp", type)
 				.append("tpi", typeId)
-				.append("score", score);
+				.append("score", score)
+				.append("gbrd", gbrd) //商品知名度
+				.append("gqty", gqty) //商品品质
+				.append("rbrd", rbrd) //零售店知名度
+				.append("rqty", rqty);//零售店品质
 		npcBuyInShelf.insertOne(document);
 	}
 
@@ -1197,7 +1207,7 @@ public class LogDb {
 	}
 
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId,int score,int prosp,String roleName,String companyName)
+			UUID ownerId, UUID bid, int type, int mId,int score,int prosp,String roleName,String companyName,double brd,double qty)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1211,7 +1221,9 @@ public class LogDb {
 				.append("score", score)
 				.append("prosp", prosp)
 				.append("rn", roleName)
-				.append("cn", companyName);
+				.append("cn", companyName)
+				.append("abrd", brd)
+				.append("aqty", qty);
 		npcRentApartment.insertOne(document);
 	}
 
@@ -2152,12 +2164,77 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	//零售店知名度和品质均值
+	public static List<Document> getNpcBuyInShelfAvg1(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		npcBuyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
+						Aggregates.group(null,Accumulators.avg("rbrd","$rbrd"),Accumulators.avg("rqty","$rqty"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	//商品知名度和品质均值
+	public static List<Document> getNpcBuyInShelfAvg2(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		npcBuyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
+						Aggregates.group("$tpi",Accumulators.avg("gbrd","$gbrd"),Accumulators.avg("gqty","$gqty"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+//	//商品大类知名度和品质均值
+//	public static List<Document> getNpcBuyInShelfAvg3(long startTime, long endTime) {
+//		List<Document> documentList = new ArrayList<>();
+//		npcBuyInShelf.aggregate(
+//				Arrays.asList(
+//						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
+//						Aggregates.group("$tpi/1000",Accumulators.avg("gbrd","$gbrd"),Accumulators.avg("gqty","$gqty"))
+//				)
+//		).forEach((Block<? super Document>) documentList::add);
+//		return documentList;
+//	}
+//	//商品奢侈度知名度和品质均值
+//	public static List<Document> getNpcBuyInShelfAvg4(long startTime, long endTime) {
+//		List<Document> documentList = new ArrayList<>();
+//		npcBuyInShelf.aggregate(
+//				Arrays.asList(
+//						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
+//						Aggregates.group("$tpi/100%10",Accumulators.avg("gbrd","$gbrd"),Accumulators.avg("gqty","$gqty"))
+//				)
+//		).forEach((Block<? super Document>) documentList::add);
+//		return documentList;
+//	}
+	//住宅知名度和品质均值
+	public static List<Document> getNpcRentApartmentAvg1(long startTime, long endTime) {
+		List<Document> documentList = new ArrayList<>();
+		npcRentApartment.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
+						Aggregates.group(null,Accumulators.avg("abrd","$abrd"),Accumulators.avg("aqty","$aqty"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document> queryCityTransactionAmount(long startTime, long endTime, MongoCollection<Document> collection,int buildingType) {
 		List<Document> documentList = new ArrayList<>();
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(gte("t", startTime), lte("t", endTime),eq("bt",buildingType))),
 						Aggregates.group("$tpi", Accumulators.sum(KEY_TOTAL, "$a"))
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
+	public static List<Document> getDayAiBaseAvg(long time) {
+		List<Document> documentList = new ArrayList<>();
+		dayAiBaseAvg.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(eq("time", time))),
+						Aggregates.project(fields(include("time","type","brand","quality"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -2172,5 +2249,4 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-
 }

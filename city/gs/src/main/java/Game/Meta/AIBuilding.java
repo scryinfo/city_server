@@ -1,7 +1,6 @@
 package Game.Meta;
 
 import Game.Action.*;
-import Game.BrandManager;
 import org.bson.Document;
 
 import java.util.Arrays;
@@ -11,24 +10,22 @@ public class AIBuilding extends ProbBase {
         super(Type.ALL.ordinal(), d);
     }
     enum Type {
-        IDLE,
-        GOTO_HOME,
-        GOTO_WORK,
-        GOTO_APARTMENT,
-        GOTO_PUBLIC_FACILITY,
         GOTO_RETAIL_SHOP,
+        GOTO_APARTMENT,
+        GOTO_WORK,
+        GOTO_HOME,
+        IDLE,
         ALL
     }
-    public IAction random(double idleRatio, BrandManager.BuildingRatio ratio, int aiId) {
-        IAction.logger.info("AIBuilding id " + this.id + " building ratio " + ratio.toString() + " aiId " + aiId);
+    public IAction random(AIBuilding aiBuilding, int aiId) {
+        IAction.logger.info("AIBuilding id " + id + " AIBuilding weight " +Arrays.toString(weight)+ " aiId " + aiId);
         int[] d = Arrays.copyOf(weight, weight.length);
-        d[Type.IDLE.ordinal()] *= idleRatio;
-        d[Type.GOTO_HOME.ordinal()] *= idleRatio;
-        d[Type.GOTO_WORK.ordinal()] *= idleRatio;
-        d[Type.GOTO_APARTMENT.ordinal()] *= ratio.apartment;
-        d[Type.GOTO_PUBLIC_FACILITY.ordinal()] *= ratio.publicFacility;
-        d[Type.GOTO_RETAIL_SHOP.ordinal()] *= ratio.retail;
-        IAction.logger.info("AIBuilding id " + this.id + " weights " + Arrays.toString(d));
+        d[Type.GOTO_RETAIL_SHOP.ordinal()] = weight[0];
+        d[Type.GOTO_APARTMENT.ordinal()] = weight[1];
+        d[Type.GOTO_WORK.ordinal()] = weight[2];
+        d[Type.GOTO_HOME.ordinal()] = weight[3];
+        d[Type.IDLE.ordinal()] = weight[4];
+        IAction.logger.info("AIBuilding id " + id + " weights " + Arrays.toString(d));
         switch (Type.values()[super.randomIdx(d)]) {
             case IDLE:
                 return new Idle();
@@ -37,11 +34,24 @@ public class AIBuilding extends ProbBase {
             case GOTO_WORK:
                 return new GoWork();
             case GOTO_APARTMENT:
-                return new JustVisit(MetaBuilding.APARTMENT);
-            case GOTO_PUBLIC_FACILITY:
-                return new JustVisit(MetaBuilding.PUBLIC);
+                return new GoApartment(MetaBuilding.APARTMENT);
             case GOTO_RETAIL_SHOP:
                 return new Shopping(aiId);
+        }
+        return null;
+    }
+    public IAction randomAgain(AIBuilding aiBuilding, int aiId) {
+        int[] d=new int[3];
+        d[0]=weight[2];
+        d[1]=weight[3];
+        d[2]=weight[4];
+        switch (super.randomIdx(d)) {
+            case 2:
+                return new Idle();
+            case 1:
+                return new GoHome();
+            case 0:
+                return new GoWork();
         }
         return null;
     }

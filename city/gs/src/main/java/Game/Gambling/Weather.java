@@ -31,4 +31,9 @@ public class Weather
                 Gs.Weather.newBuilder().setIcon("01d").setTemp(20).build()
                 :Gs.Weather.newBuilder().setIcon(icon).setTemp(temp).build();
     }
+
+    public String getPrefixIcon()
+    {
+        return icon.substring(0,icon.length()-1);
+    }
 }

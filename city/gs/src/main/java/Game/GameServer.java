@@ -142,6 +142,16 @@ public class GameServer {
     }
     public void run() throws Exception {
         FriendManager.getInstance().init();
+        AiBaseAvgManager.getInstance().init();//初始化AI基础数据
+        thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());
+        thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
+            try {
+                ThirdPartyDataSource.instance().update(TimeUnit.SECONDS.toMillis(10));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 30, 10, TimeUnit.SECONDS);
         City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
@@ -166,15 +176,6 @@ public class GameServer {
         chainRpcMgr.instance();
         // DO NOT put init below this!!! city might can't see the init
         City.instance().run();
-        thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());
-        thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
-            try {
-                ThirdPartyDataSource.instance().update(TimeUnit.SECONDS.toMillis(10));
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, 30, 10, TimeUnit.SECONDS);
         EventLoopGroup clientGroup = new NioEventLoopGroup();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

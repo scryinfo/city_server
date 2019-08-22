@@ -157,7 +157,7 @@ public class Shopping implements IAction {
             double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
             double score = ((brandScore + goodQtyScore) / 2);
             LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,   //消费记录不计算旷工费
-                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score);
+                    chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score,chosen.getItemKey().getTotalBrand(),chosen.getItemKey().getTotalQty(),((RetailShop)sellShop).getTotalBrand(),((RetailShop)sellShop).getTotalQty());
             LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.bId, sellShop.type(), owner.id(), 1, chosen.price, chosen.meta.id);//记录建筑收益详细信息
@@ -252,7 +252,7 @@ public class Shopping implements IAction {
               BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
               String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
               LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
-                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score);
+                      chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score,chosen.getItemKey().getTotalBrand(),chosen.getItemKey().getTotalQty(),((RetailShop)sellShop).getTotalBrand(),((RetailShop)sellShop).getTotalQty());
               LogDb.buildingIncome(chosen.bId, npc.id(), chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
               if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.bId, sellShop.type(), owner.id(), 1, chosen.price, chosen.meta.id);//记录建筑收益详细信息
