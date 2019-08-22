@@ -79,18 +79,6 @@ public class GlobalUtil {
         /*获取全城最高和最低的Eva品牌加成信息*/
         EvaKey key = new EvaKey(item,Gs.Eva.Btype.Brand_VALUE);
         Set<Eva> evas = EvaManager.getInstance().typeEvaMap.get(key);
-        // 筛选出等级最大的
-        List<Integer> evaLv = new ArrayList<>();
-        for (Eva eva : evas) {
-            evaLv.add(eva.getLv());
-        }
-        Integer maxLv = Collections.max(evaLv);/*最高等级*/
-        double maxRation = maxLv > 0 ? MetaData.getAllExperiences().get(maxLv).p / 100000d : 0;
-        // 转换为提升比例
-        Integer minLv = Collections.min(evaLv);/*最低等级*/
-        double minRation = minLv > 0 ? MetaData.getAllExperiences().get(minLv).p / 100000d : 0;
-        map.put("max", maxRation);
-        map.put("min", minRation);
         if(evas!=null){
             // 筛选出等级最大的
             List<Integer> evaLv = new ArrayList<>();
@@ -108,6 +96,7 @@ public class GlobalUtil {
             map.put("max",0.0);
             map.put("min",0.0);
         }
+
 
         return map;
     }
