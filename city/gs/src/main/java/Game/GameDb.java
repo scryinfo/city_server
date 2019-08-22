@@ -745,6 +745,18 @@ public class GameDb {
 			return null;
 		}
 	}
+
+	public static Player getAccount(String account)
+	{
+		Session session = sessionFactory.openSession();
+		List<Player> list = session.createQuery("FROM Player WHERE account_name = :x ")
+				.setParameter("x", account).list();
+		if (list.size() > 0) {
+			return list.get(0);
+		}
+		return null;
+	}
+
 	public static List<Player.Info> getPlayerInfo(Collection<UUID> ids) throws ExecutionException {
 		ImmutableMap<UUID, Player.Info> map = playerInfoCache.getAll(ids);
 		return map.values().asList();

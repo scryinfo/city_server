@@ -191,9 +191,10 @@ public class GameSession {
         Gs.Str c = (Gs.Str)message;
         logger.debug("cheat command: " + c.getStr());
         Cheat cheat = _parseCheatString(c.getStr());
-        if(cheat != null)
-            _runCheat(cheat);
-        this.write(Package.create(cmd, message));
+        if (cheat != null && _runCheat(cheat))
+        {
+            this.write(Package.create(cmd, message));
+        }
     }
     private static class Cheat {
         enum Type {
@@ -201,12 +202,13 @@ public class GameSession {
             additem,
             addground,
             invent,
-            fill_warehouse
+            fill_warehouse,
+            payMoney
         }
         Type cmd;
         String[] paras;
     }
-    private void _runCheat(Cheat cheat) {
+    private boolean _runCheat(Cheat cheat) {
         switch (cheat.cmd) {
             case fill_warehouse:
             {
@@ -237,20 +239,55 @@ public class GameSession {
             case addmoney: {
                 int n = Integer.valueOf(cheat.paras[0]);
                 if(n <= 0)
-                    return;
+                    return false;
                 player.addMoney(n);
                 LogDb.playerIncome(player.id(), n,0);
                 GameDb.saveOrUpdate(player);
                 break;
             }
+            case payMoney:
+                {
+                    if (player.getAccount().equals(cheat.paras[0]))
+                    {
+                        String account = cheat.paras[1];
+                        long amount = Long.valueOf(cheat.paras[2]);
+                        Player p = GameDb.getAccount(account);
+                        if (p != null)
+                        {
+                            p = GameDb.getPlayer(p.id());
+                            long before = p.money();
+                            p.addMoney(amount);
+                            GameDb.saveOrUpdate(p);
+                            this.write(Package.create(GsCode.OpCode.cheat_VALUE,
+                                    Gs.PayStatus.newBuilder().setStatus(0)
+                                            .setAccount(account)
+                                            .setName(p.getName())
+                                            .setBefore(before)
+                                            .setAfter(p.money())
+                                            .setWho(player.getAccount())
+                                            .build()));
+                        }
+                        else
+                        {
+                            this.write(Package.create(GsCode.OpCode.cheat_VALUE,
+                                    Gs.PayStatus.newBuilder().setStatus(2).build()));
+                        }
+                    }
+                    else
+                    {
+                        this.write(Package.create(GsCode.OpCode.cheat_VALUE,
+                                Gs.PayStatus.newBuilder().setStatus(1).build()));
+                    }
+                    return false;
+                }
             case additem: {
                 int id = Integer.parseInt(cheat.paras[0]);
                 int n = Integer.parseInt(cheat.paras[1]);
                 MetaItem mi = MetaData.getItem(id);
                 if (mi == null)
-                    return;
+                    return false;
                 if (n <= 0)
-                    return;
+                    return false;
                 if(player.getBag().reserve(mi, n)) {
                     Item item;
                     if(mi instanceof MetaMaterial)
@@ -291,17 +328,18 @@ public class GameSession {
                 int lv = Integer.parseInt(cheat.paras[1]);
                 MetaItem mi = MetaData.getItem(mId);
                 if(mi == null)
-                    return;
+                    return false;
                 if(mi instanceof MetaMaterial && lv != 0)
-                    return;
+                    return false;
                 if(lv < 0)
-                    return;
+                    return false;
                 player.addItem(mId, lv);
                 TechTradeCenter.instance().techCompleteAction(mId, lv);
                 GameDb.saveOrUpdate(Arrays.asList(player, TechTradeCenter.instance()));
                 break;
             }
         }
+        return true;
     }
     private Cheat _parseCheatString(String str) {
         Cheat res = new Cheat();
@@ -443,8 +481,8 @@ public class GameSession {
             return;
         }
         Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
-        p.addMoney(999999999999999l);
-        LogDb.playerIncome(p.id(), 999999999999999l,0);
+        p.addMoney(10000);
+        LogDb.playerIncome(p.id(), 10000,0);
         if(!GameDb.createPlayer(p)) {
             this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
         }
