@@ -2073,6 +2073,16 @@ public class LogDb {
 		});
 		return count[0];
 	}
+	public static List<Document> queryIndestrySum(long startTime,long endTime) {
+		List<Document> list = new ArrayList<>();
+		buyInShelf.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
+						Aggregates.group("$bt", Accumulators.sum(KEY_TOTAL, "$n"))
+				)
+		).forEach((Block<? super Document>) list::add);
+		return list;
+	}
 	public static long queryIndestrySum(int buidingType,long startTime,long endTime,int itemId) {
 		final long[] count = {0};
 		buyInShelf.aggregate(

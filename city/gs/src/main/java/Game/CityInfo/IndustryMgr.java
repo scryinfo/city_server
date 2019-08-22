@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static Shared.LogDb.KEY_TOTAL;
+
 public class IndustryMgr {
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     private static IndustryMgr instance = new IndustryMgr();
@@ -63,7 +65,15 @@ public class IndustryMgr {
 
     public List<Document> industrySource(long startTime, long endTime) {
         List<Document> list = new ArrayList<>();
-        // material
+        List<Document> documents = LogDb.queryIndestrySum(startTime, endTime);
+        documents.stream().filter(o->o!=null).forEach(d->{
+            int bt = d.getInteger("_id");
+            int sum = City.instance().typeBuilding.getOrDefault(bt, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
+            long demand = d.getLong(KEY_TOTAL);
+            list.add(new Document().append("bt", bt).append("supply", (sum + demand)).append("demand", demand).append("time", endTime).append("type", 1));
+        });
+
+       /* // material
         int sumM = City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandM = LogDb.queryIndestrySum(MetaBuilding.MATERIAL, startTime, endTime);
         list.add(new Document().append("bt", MetaBuilding.MATERIAL).append("supply", (sumM + demandM)).append("demand", demandM).append("time", endTime).append("type", 1));
@@ -78,7 +88,7 @@ public class IndustryMgr {
         // promote
         int sumPro = City.instance().typeBuilding.getOrDefault(MetaBuilding.PROMOTE, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandPro = LogDb.queryIndestrySum(MetaBuilding.PROMOTE, startTime, endTime);
-        list.add(new Document().append("bt", MetaBuilding.PROMOTE).append("supply", (sumPro + demandPro)).append("demand", demandPro).append("time", endTime).append("type", 1));
+        list.add(new Document().append("bt", MetaBuilding.PROMOTE).append("supply", (sumPro + demandPro)).append("demand", demandPro).append("time", endTime).append("type", 1));*/
         // apartment
         int sumA = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandA = LogDb.queryApartmentIndestrySum(startTime, endTime,LogDb.getNpcRentApartment());
