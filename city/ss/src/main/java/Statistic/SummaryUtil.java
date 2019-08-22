@@ -1258,17 +1258,17 @@ public class SummaryUtil {
         long endTime = System.currentTimeMillis();
         Ss.AverageTransactionprice.AvgPrice.Builder builder = Ss.AverageTransactionprice.AvgPrice.newBuilder();
         if (isApartment) {
-            builder.setPrice(0);
+            builder.setSum(0);
             List<Document> list = LogDb.transactionPrice(startTime, endTime, LogDb.getNpcRentApartment());
             list.stream().filter(o->o!=null).forEach(d->{
-                builder.setPrice(d.getDouble(KEY_AVG));
+                builder.setSum(d.getDouble(KEY_AVG));
             });
             builder.setTime(todayStartTime(System.currentTimeMillis()));
         } else {
-            builder.setPrice(0);
+            builder.setSum(0);
             List<Document> list = LogDb.transactionPrice(startTime, endTime, LogDb.getBuyGround());
             list.stream().filter(o->o!=null).forEach(d->{
-                builder.setPrice(d.getDouble(KEY_AVG));
+                builder.setSum(d.getDouble(KEY_AVG));
             });
             builder.setTime(todayStartTime(System.currentTimeMillis()));
         }
@@ -1281,42 +1281,42 @@ public class SummaryUtil {
         Ss.AverageTransactionprice.AvgPrice.Builder builder = Ss.AverageTransactionprice.AvgPrice.newBuilder();
         switch (industryType) {
             case SummaryUtil.MATERIAL:
-                builder.setPrice(0);
+                builder.setSum(0);
                 List<Document> material = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
                 material.stream().filter(o -> o != null).forEach(d -> {
-                    builder.setPrice(d.getDouble(KEY_AVG));
+                    builder.setSum(d.getDouble(KEY_AVG));
                 });
                 builder.setTime(todayStartTime(System.currentTimeMillis()));
                 return builder.build();
             case SummaryUtil.PRODUCE:
-                builder.setPrice(0);
+                builder.setSum(0);
                 List<Document> produce = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
                 produce.stream().filter(o -> o != null).forEach(d -> {
-                    builder.setPrice(d.getDouble(KEY_AVG));
+                    builder.setSum(d.getDouble(KEY_AVG));
                 });
                 builder.setTime(todayStartTime(System.currentTimeMillis()));
                 return builder.build();
             case SummaryUtil.TECHNOLOGY:
-                builder.setPrice(0);
+                builder.setSum(0);
                 List<Document> technology = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
                 technology.stream().filter(o -> o != null).forEach(d -> {
-                    builder.setPrice(d.getDouble(KEY_AVG));
+                    builder.setSum(d.getDouble(KEY_AVG));
                 });
                 builder.setTime(todayStartTime(System.currentTimeMillis()));
                 return builder.build();
             case SummaryUtil.PROMOTE:
-                builder.setPrice(0);
+                builder.setSum(0);
                 List<Document> promote = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getBuyInShelf(), industryType, itemId);
                 promote.stream().filter(o -> o != null).forEach(d -> {
-                    builder.setPrice(d.getDouble(KEY_AVG));
+                    builder.setSum(d.getDouble(KEY_AVG));
                 });
                 builder.setTime(todayStartTime(System.currentTimeMillis()));
                 return builder.build();
             case MetaBuilding.RETAIL:
-                builder.setPrice(0);
+                builder.setSum(0);
                 List<Document> retail = LogDb.todayTransactionPrice(startTime, endTime, LogDb.getNpcBuyInShelf(), itemId);
                 retail.stream().filter(o -> o != null).forEach(d -> {
-                    builder.setPrice(d.getDouble(KEY_AVG));
+                    builder.setSum(d.getDouble(KEY_AVG));
                 });
                 builder.setTime(todayStartTime(System.currentTimeMillis()));
                 return builder.build();

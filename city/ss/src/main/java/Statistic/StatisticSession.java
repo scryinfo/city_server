@@ -591,7 +591,7 @@ public class StatisticSession {
 		if (!map.isEmpty() && map!=null) {
 			map.forEach((k, v) -> {
 				Ss.AverageTransactionprice.AvgPrice.Builder avg = builder.addAvgBuilder();
-				avg.setTime(k).setPrice(v);
+				avg.setTime(k).setSum(v);
 			});
 		}
 		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(bool.getB()));
@@ -643,7 +643,7 @@ public class StatisticSession {
 		if (!map.isEmpty() && map != null) {
 			map.forEach((k,v)->{
 				Ss.AverageTransactionprice.AvgPrice.Builder avg = builder.addAvgBuilder();
-				avg.setTime(k).setPrice(v);
+				avg.setTime(k).setSum(v);
 			});
 		}
 		builder.addAvg(SummaryUtil.getCurrenttransactionPrice(industryType, itemId));

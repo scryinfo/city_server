@@ -606,7 +606,7 @@ public class MetaData {
 		initBuilding();
         reloadGroundAuction();
 
-        initAIBuilding();
+//        initAIBuilding();
         initAIBuy();
         initAILux();
         initDayId();

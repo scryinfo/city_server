@@ -151,7 +151,7 @@ public class DayJob implements org.quartz.Job {
         SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.TECHNOLOGY, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
         // retailshop
         documentList = LogDb.retailshopTransactionPrice(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
-        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.RETAIL, documentList, todayStartTime, SummaryUtil.getAverageTransactionPrice());
+        SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.RETAIL, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
 
         //玩家当天开业情况
         documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness(),0);
