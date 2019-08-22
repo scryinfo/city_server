@@ -11,7 +11,7 @@ public class SysPara {
         this.centerStorePos.x = d.getInteger("centerStoreX");
         this.centerStorePos.y = d.getInteger("centerStoreY");
         this.auctionDelay = d.getInteger("groundAuctionSec")*1000;
-        this.minersCostRatio = d.getInteger("minersCostRatio")/10000.0;
+        this.minersCostRatio = d.getInteger("minersCostRatio")/100000.0;
     }
     final public int playerBagCapcaity;
     final public int bagCapacityDelta;
