@@ -3282,7 +3282,7 @@ public class GameSession {
     }
 
     /*Todo*/
-    public void queryMyEva(short cmd, Message message)
+    /*public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         Gs.Evas.Builder list = Gs.Evas.newBuilder();
@@ -3298,29 +3298,24 @@ public class GameSession {
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
         list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
-    }
+    }*/
     /*新版Eva分类查询(待调试)*/
-    /*public void queryMyEva(short cmd, Message message)
+    public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
+        List<Gs.EvaInfo.BuildingEvaInfo> evaInfo = new ArrayList<>();
         //区分建筑去查询Eva
-        Gs.EvaInfo.BuildingEvaInfo material = EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.MATERIAL);
-        Gs.EvaInfo.BuildingEvaInfo produce = EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.PRODUCE);
-        Gs.EvaInfo.BuildingEvaInfo apartment =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.APARTMENT);
-        Gs.EvaInfo.BuildingEvaInfo retail =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.RETAIL);
-        Gs.EvaInfo.BuildingEvaInfo technology =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.TECHNOLOGY);
-        Gs.EvaInfo.BuildingEvaInfo promote =EvaManager.getInstance().queryTypeBuildingEvaInfo(pid,MetaBuilding.PROMOTE);
+        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.MATERIAL));
+        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.PRODUCE));
+        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.APARTMENT));
+        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.RETAIL));
+        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.TECHNOLOGY));
+        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.PROMOTE));
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
         Gs.EvaInfo.Builder builder = Gs.EvaInfo.newBuilder();
-        builder.setMaterial(material)
-                .setProduce(produce)
-                .setApartment(apartment)
-                .setRetailShop(retail)
-                .setTechnology(technology)
-                .setPromotionCompany(promote)
-                .addAllBuildingPoint(buildingPoints);
+        builder.addAllBuildingEvaInfos(evaInfo).addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd,builder.build()));
-    }*/
+    }
 
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
@@ -3371,12 +3366,11 @@ public class GameSession {
            playerSciencePoint.forEach(p -> SciencePointManager.getInstance().updateSciencePoint(p));
            playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
            evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
-           Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
-           //Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);
-           /*重新查询玩家的所有点数信息*/
+           /*Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
            List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-           builder.addAllBuildingPoint(buildingPoints);
-           this.write(Package.create(cmd, builder.build()));
+           builder.addAllBuildingPoint(buildingPoints);*/
+           Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);//分类修改后的Eva
+           this.write(Package.create(cmd, evaInfo));
        }
     }
 

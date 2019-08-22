@@ -316,37 +316,29 @@ public class EvaManager
             int at = e.getAt();
             evaMap.computeIfAbsent(at, k -> new HashSet<Gs.Eva>()).add(e);
         });
-        Gs.EvaInfo.BuildingEvaInfo.Builder materialEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.MATERIAL);
-        Gs.EvaInfo.BuildingEvaInfo.Builder produceEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PRODUCE);
-        Gs.EvaInfo.BuildingEvaInfo.Builder apartmentEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.APARTMENT);
-        Gs.EvaInfo.BuildingEvaInfo.Builder retailEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.RETAIL);
-        Gs.EvaInfo.BuildingEvaInfo.Builder technologyEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.TECHNOLOGY);
-        Gs.EvaInfo.BuildingEvaInfo.Builder promoteEva = Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PROMOTE);
+        Map<Integer, Gs.EvaInfo.BuildingEvaInfo.Builder> buildingEvaInfo = new HashMap<>();//key为建筑大类型，value为建筑的Eva数组
         evaMap.forEach((k,v)->{
             Gs.EvaInfo.BuildingEvaInfo.TypeEva.Builder typeEva = Gs.EvaInfo.BuildingEvaInfo.TypeEva.newBuilder();
             typeEva.setAtype(k).addAllEva(v);
             if(MetaGood.isItem(k)){
-                materialEva.addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.PRODUCE,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PRODUCE)).addTypeEva(typeEva);
             }else if(MetaMaterial.isItem(k)){
-                produceEva.addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.MATERIAL,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.MATERIAL)).addTypeEva(typeEva);
             }else if(MetaBuilding.APARTMENT==k){
-                apartmentEva.addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.APARTMENT,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.APARTMENT)).addTypeEva(typeEva);
             }else if(MetaBuilding.RETAIL==k){
-                retailEva.addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.RETAIL,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.RETAIL)).addTypeEva(typeEva);
             }else if(MetaPromotionItem.isItem(k)){
-                promoteEva.addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.PROMOTE,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PROMOTE)).addTypeEva(typeEva);
             }else if(MetaScienceItem.isItem(k)){
-                technologyEva.addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.TECHNOLOGY,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.TECHNOLOGY)).addTypeEva(typeEva);
             }
         });
+        buildingEvaInfo.values().forEach(info->{
+            evaInfo.addBuildingEvaInfos(info);
+        });
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-        evaInfo.setMaterial(materialEva)
-                .setProduce(produceEva)
-                .setApartment(apartmentEva)
-                .setRetailShop(retailEva)
-                .setTechnology(technologyEva)
-                .setPromotionCompany(promoteEva)
-                .addAllBuildingPoint(buildingPoints);;
+        evaInfo.addAllBuildingPoint(buildingPoints);
         return evaInfo.build();
     }
 }
