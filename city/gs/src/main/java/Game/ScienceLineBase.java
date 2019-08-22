@@ -140,7 +140,9 @@ public abstract class ScienceLineBase {
         int add = 0;
         if(this.timer.update(diffNano))
         {
-            accumulated += item.n * this.workerNum;//Todo 未加入eva加成
+            Eva eva = EvaManager.getInstance().getEva(onwerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
+            double v = EvaManager.getInstance().computePercent(eva);
+            accumulated += item.n * this.workerNum * (1 + v);
             add = accumulated >= 1 ? left():0;
             if(add > 0) {
                 this.count += add;
