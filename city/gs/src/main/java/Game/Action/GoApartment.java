@@ -107,7 +107,7 @@ public class GoApartment implements IAction {
             long pay = chosen.cost();
 
             //TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
-            double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+            double minersRatio = MetaData.getSysPara().minersCostRatio;
             long minerCost = (long) Math.floor(chosen.cost() * minersRatio);
             income -= minerCost;
             pay += minerCost;
