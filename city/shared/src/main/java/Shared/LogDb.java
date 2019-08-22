@@ -1698,6 +1698,27 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
+	public static List<Document>  dayYesterdayPlayerByGroundIncome(long strartTime,long endTime,MongoCollection<Document> collection)
+	{
+		List<Document> documentList = new ArrayList<>();
+		Document projectObject = new Document()
+				.append("id", "$_id")
+				.append(KEY_TOTAL, "$" + KEY_TOTAL)
+				.append("_id", 0);
+		collection.aggregate(
+				Arrays.asList(
+						Aggregates.match(and(
+								gte("time", strartTime),
+								lte("time", endTime)
+						)),
+						Aggregates.group("$d", Accumulators.sum(KEY_TOTAL, "$a")),
+						Aggregates.sort(Sorts.descending(KEY_TOTAL)),
+						Aggregates.limit(10),
+						Aggregates.project(projectObject)
+				)
+		).forEach((Block<? super Document>) documentList::add);
+		return documentList;
+	}
 	public static List<Document>  dayYesterdayProductIncome(long strartTime,long endTime,int itemId,int buildType,MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -2049,7 +2070,7 @@ public class LogDb {
 						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$n"))
 				)
 		).forEach((Block<? super Document>) d -> {
-			count[0] = d.getInteger(KEY_TOTAL);
+			count[0] = d.getLong(KEY_TOTAL);
 		});
 		return count[0];
 

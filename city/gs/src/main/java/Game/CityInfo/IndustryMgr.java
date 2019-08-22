@@ -33,15 +33,17 @@ public class IndustryMgr {
         }
     }
 
-    public  long getEndTime(long nowTime) {
+    public static long getEndTime(long nowTime) {
         return nowTime - (nowTime + TimeZone.getDefault().getRawOffset()) % DAY_MILLISECOND;
     }
 
- /*   public static void main(String[] args) {
+/*    public static void main(String[] args) {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
         System.err.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
+        System.err.println(startTime);
+        System.err.println(endTime);
 
     }*/
 
@@ -165,7 +167,7 @@ public class IndustryMgr {
     public List<TopInfo> queryTop() {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
-        List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, Gs.SupplyAndDemand.IndustryType.GROUND_VALUE, LogDb.getDayPlayerIncome());
+        List<Document> list = LogDb.dayYesterdayPlayerByGroundIncome(startTime, endTime, LogDb.getDayPlayerIncome());
         ArrayList<TopInfo> tops = new ArrayList<>();
         list.stream().filter(o -> o.getInteger("id") != null).forEach(d -> {
             UUID pid = d.get("id", UUID.class);

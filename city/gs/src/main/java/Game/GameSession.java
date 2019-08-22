@@ -5634,6 +5634,17 @@ public class GameSession {
             GameDb.saveOrUpdate(Arrays.asList(player,seller,sellBuilding));
             //推送商品变化通知
             sellBuilding.sendToAllWatchers(Package.create(cmd, c));
+            Gs.IncomeNotify notify = Gs.IncomeNotify.newBuilder()
+                    .setBuyer(Gs.IncomeNotify.Buyer.PLAYER)
+                    .setBuyerId(Util.toByteString(player.id()))
+                    .setFaceId(player.getFaceId())
+                    .setCost(totalIncome)
+                    .setType(sellBuilding.type()==MetaBuilding.TECHNOLOGY?Gs.IncomeNotify.Type.LAB:Gs.IncomeNotify.Type.PROMO)
+                    .setBid(sellBuilding.metaBuilding.id)
+                    .setItemId(item.key.meta.id)
+                    .setCount(item.n)
+                    .build();
+            GameServer.sendIncomeNotity(seller.id(),notify);
            /* this.write(Package.create(cmd, c));*/
         }else{
             System.err.println("货架数量不足");
@@ -6062,7 +6073,7 @@ public class GameSession {
         if (map != null && !map.isEmpty()) {
             map.forEach((k,v)->{
                 Gs.EvaGrade.Grade.Builder grade = builder.addGradeBuilder();
-                grade.setLv(k).setNum(v);
+                grade.setLv(k).setSum(v);
             });
         }
     }
