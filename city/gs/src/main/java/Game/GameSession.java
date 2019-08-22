@@ -1,9 +1,6 @@
 package Game;
 
-import Game.CityInfo.CityLevel;
-import Game.CityInfo.EvaGradeMgr;
-import Game.CityInfo.IndustryMgr;
-import Game.CityInfo.TopInfo;
+import Game.CityInfo.*;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -3290,13 +3287,19 @@ public class GameSession {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
         Gs.Evas.Builder list = Gs.Evas.newBuilder();
         EvaManager.getInstance().getEvaList(pid).forEach(eva->{
-            list.addEva(eva.toProto());
+            if(MetaItem.isItem(eva.getAt())){
+                if(CityManager.instance().usable(eva.getAt())){
+                    list.addEva(eva.toProto());
+                }
+            }else{
+                list.addEva(eva.toProto());
+            }
         });
         List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
         list.addAllBuildingPoint(buildingPoints);
         this.write(Package.create(cmd, list.build()));
     }
-    /*新版Eva分类查询*/
+    /*新版Eva分类查询(待调试)*/
     /*public void queryMyEva(short cmd, Message message)
     {
         UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
