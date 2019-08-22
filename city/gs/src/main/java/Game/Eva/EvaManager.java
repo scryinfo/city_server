@@ -10,6 +10,9 @@ import org.bson.Document;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class EvaManager
 {
@@ -98,6 +101,21 @@ public class EvaManager
 		}
 		return null;
     }
+
+    public Map<Integer, Long> getScience(UUID playerId, int buildingTech) {
+        final long[] sum = {0,0};
+        Map<Integer, Long> map = new HashMap<>();
+        Set<Integer> tech = MetaData.getBuildingTech(buildingTech);
+        tech.stream().forEach(i -> {
+            List<Eva> eva = getEva(playerId, i);
+            sum[0] += eva.stream().filter(o -> o.getBt() == 2).mapToLong(Eva::getSumValue).sum();
+            sum[1] += eva.stream().filter(o -> o.getBt() != 2).mapToLong(Eva::getSumValue).sum();
+        });
+        map.put(1, sum[0]);
+        map.put(2, sum[1]);
+        return map;
+    }
+
     
     public void updateEva(Eva eva) {
     	Set<Eva> s=evaMap.get(eva.getPid());
@@ -147,6 +165,11 @@ public class EvaManager
         }
         return evas;
     }
+    public List<Eva> getPlayerAllEvas(UUID pid){
+        List<Eva> list = new ArrayList<>();
+        getAllEvas().stream().filter(e -> e.getPid().equals(pid)).forEach(list::add);
+        return list;
+    }
 
     public  Eva updateMyEva(Gs.Eva eva){
         int level=eva.getLv();
@@ -171,6 +194,7 @@ public class EvaManager
         e.setLv(level);
         e.setCexp(cexp);
         e.setB(-1);
+        e.setSumValue(eva.getSumValue()+eva.getDecEva());
         return e;
     }
 
@@ -222,5 +246,41 @@ public class EvaManager
         }
         Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(evaList);
         return builder.build();
+    }
+
+    // 全城所有玩家科技点数+推广点数
+    public long getAllSumValue() {
+        return getAllEvas().stream().filter(o -> o != null).mapToLong(Eva::getSumValue).sum();
+    }
+    public Map<Integer, Long> getPlayerSumValue(UUID playerId) {
+        final long[] sum = {0,0};
+        Map<Integer, Long> map = new HashMap<>();
+        List<Eva> playerAllEvas = getPlayerAllEvas(playerId);
+        sum[0] = playerAllEvas.stream().filter(e -> e.getBt() == 2).mapToLong(Eva::getSumValue).sum();
+        sum[1] = playerAllEvas.stream().filter(e -> e.getBt() != 2).mapToLong(Eva::getSumValue).sum();
+        map.put(1, sum[0]);
+        map.put(2, sum[1]);
+        return map;
+    }
+    public Map<Integer, Long> getItemPoint(UUID playerId,int itemId) {
+        final long[] sum = {0,0};
+        Map<Integer, Long> map = new HashMap<>();
+        List<Eva> playerAllEvas = getEva(playerId, itemId);
+        sum[0] = playerAllEvas.stream().filter(e -> e.getBt() == 2).mapToLong(Eva::getSumValue).sum();
+        sum[1] = playerAllEvas.stream().filter(e -> e.getBt() != 2).mapToLong(Eva::getSumValue).sum();
+        map.put(1, sum[0]);
+        map.put(2, sum[1]);
+        return map;
+    }
+
+    public Map<Integer, Long> getGrade(int at, int bt) {
+        Set<Eva> allEvas = getAllEvas();
+        List<Eva> list = new ArrayList<>();
+        for (Eva eva : allEvas) {
+            if (at == eva.getAt()) {
+                list.add(eva);
+            }
+        }
+        return list.stream().filter(e -> e.getBt() == bt).collect(Collectors.groupingBy(Eva::getLv, Collectors.counting()));
     }
 }

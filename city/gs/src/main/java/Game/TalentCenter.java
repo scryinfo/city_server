@@ -70,6 +70,11 @@ public class TalentCenter extends Building {
         }
     }
 
+    @Override
+    public int getTotalSaleCount() {
+        return 0;
+    }
+
     public static final class Line {
         public Line(int workerNum, int buildingType, long leftNano) {
             this.workerNum = workerNum;

@@ -1,9 +1,11 @@
 package Game;
 
+import Game.CityInfo.CityLevel;
+import Game.CityInfo.TopInfo;
 import Game.Contract.ContractManager;
 import Game.Eva.EvaManager;
-import Game.Eva.EvaSalary;
 import Game.Gambling.FlightManager;
+import Game.CityInfo.IndustryMgr;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -20,7 +22,6 @@ import com.google.common.collect.Sets;
 import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
-import org.bson.Document;
 
 import java.lang.reflect.Array;
 import java.time.Duration;
@@ -152,6 +153,15 @@ public class City {
             return (int) bmap.values().stream().filter(building -> building.type() == btype).count();
         }
         return 0;
+    }
+    // 获取玩家所有的建筑工人
+    public  long getPlayerStaffNum(UUID playerId)
+    {
+        try {
+            return playerBuilding.get(playerId).values().stream().filter(b -> b != null && !b.outOfBusiness()).mapToLong(Building::getWorkerNum).sum();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public List<Building> getPlayerBListByBtype(UUID playerId, int btype)
@@ -295,6 +305,8 @@ public class City {
         ProsperityManager.instance().totalProsperity(diffNano);
         // 历史成交
         GuidePriceMgr.instance().update(diffNano);
+        IndustryMgr.instance().update(diffNano);
+        CityLevel.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

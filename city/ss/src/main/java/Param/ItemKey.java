@@ -20,8 +20,9 @@ public class ItemKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItemKey itemKey = (ItemKey) o;
-        return Objects.equals(producerId, itemKey.producerId)
+        return this.producerId.equals(itemKey.producerId)
                 &&this.itemId==itemKey.itemId;
+
     }
 
     @Override

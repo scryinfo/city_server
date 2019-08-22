@@ -3,6 +3,7 @@ package Game;
 import Game.Exceptions.GroundAlreadySoldException;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGroundAuction;
+import Game.Meta.SysPara;
 import Game.Timers.DateTimeTracker;
 import Shared.LogDb;
 import Shared.Package;
@@ -146,10 +147,13 @@ public class GroundAuction {
             {
                 iter.remove();
                 assert (a.biderId() != null);
-
-
                 Player bider = GameDb.getPlayer(a.biderId());
                 long p = bider.spentLockMoney(a.transactionId);
+                /*扣除矿工费用,TODO*/
+                double minersRatio = MetaData.getSysPara().minersCostRatio;
+                long minerCost = (long) Math.floor(p * minersRatio);
+                bider.decMoney(minerCost);
+                LogDb.minersCost(bider.id(),minerCost,minersRatio);
                 try {
                     GroundManager.instance().addGround(bider.id(), a.meta.area, (int)p);
                 } catch (GroundAlreadySoldException e) {
@@ -163,9 +167,9 @@ public class GroundAuction {
                     plist1.add(new LogDb.Positon(c.x, c.y));
                 }
                 // 现在分开记录在landAuction日志中
-                LogDb.landAuction(bider.id(), null,   p, plist1);
+                LogDb.landAuction(bider.id(), null,   p+minerCost, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
-                LogDb.playerPay(bider.id(),p,0);//增加了土地拍卖  记录玩家的支出
+                LogDb.playerPay(bider.id(),p+minerCost,0);//增加了土地拍卖  记录玩家的支出
                 bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(p).build()));
                 //土地拍卖通知
                 List<Coordinate> areas = a.meta.area;
@@ -213,6 +217,12 @@ public class GroundAuction {
             else {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
+        }
+        /*如果算上矿工费，玩家没有那么多钱，拍卖失败*/
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
+        long minerCost = (long) Math.floor(price * minersRatio);
+        if(bider.money()<minerCost+price){
+            return Optional.of(Common.Fail.Reason.moneyNotEnough);/*返回钱不足错误码*/
         }
         a.bid(bider.id(), price, now);
         bider.lockMoney(a.transactionId, price);

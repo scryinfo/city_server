@@ -226,9 +226,26 @@ public class GameEventDispatcher extends DispatcherBase {
 			//小地图建筑摘要
 			table.put((short) GsCode.OpCode.queryMapBuidlingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndex.PARSER, GameSession.class, "queryMapBuidlingSummary"));
 			//小地图新版研究所摘要
-            table.put((short) GsCode.OpCode.queryTechnologySummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryTechnologySummary"));
-            //小地图新版数据公司摘要
-            table.put((short) GsCode.OpCode.queryPromotionSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryPromotionSummary"));
+			table.put((short) GsCode.OpCode.queryTechnologySummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryTechnologySummary"));
+			// 新研究所详情
+			table.put((short) GsCode.OpCode.queryTechnologyDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryTechnologyDetail.PARSER, GameSession.class, "queryTechnologyDetail"));
+			//小地图新版数据公司摘要
+			table.put((short) GsCode.OpCode.queryPromotionSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryPromotionSummary"));
+			// 数据公司详情
+			table.put((short) GsCode.OpCode.queryPromotionsDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryPromotionsDetail.PARSER, GameSession.class, "queryPromotionsDetail"));
+			// 行业供需
+			table.put((short) GsCode.OpCode.querySupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.SupplyAndDemand.PARSER, GameSession.class, "querySupplyAndDemand"));
+			// 行业排行
+			table.put((short) GsCode.OpCode.queryIndustryTopInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryIndustry.PARSER, GameSession.class, "queryIndustryTopInfo"));
+			// 富豪排行榜
+			table.put((short) GsCode.OpCode.queryRegalRanking_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryRegalRanking"));
+			// 城市发展等级点数
+			table.put((short) GsCode.OpCode.queryCityLevel_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryCityLevel"));
+			// 商品排行
+			table.put((short) GsCode.OpCode.queryProductRanking_VALUE, Wrapper.newWithMessageAsync(Gs.queryProductRanking.PARSER, GameSession.class, "queryProductRanking"));
+			// Eva等级分布
+			table.put((short) GsCode.OpCode.queryEvaGrade_VALUE, Wrapper.newWithMessageAsync(Gs.queryEvaGrade.PARSER, GameSession.class, "queryEvaGrade"));
+
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));

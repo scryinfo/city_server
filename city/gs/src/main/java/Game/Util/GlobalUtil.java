@@ -38,7 +38,7 @@ public class GlobalUtil {
         }
         minOrMaxEva.put("max", maxEva);
         minOrMaxEva.put("min", minEva);
-        return minOrMaxEva==null||maxEva==null?null: minOrMaxEva;
+        return minOrMaxEva;
     }
 
     //2.获取指定选项知名度的最大最小信息
@@ -91,6 +91,24 @@ public class GlobalUtil {
         double minRation = minLv > 0 ? MetaData.getAllExperiences().get(minLv).p / 100000d : 0;
         map.put("max", maxRation);
         map.put("min", minRation);
+        if(evas!=null){
+            // 筛选出等级最大的
+            List<Integer> evaLv = new ArrayList<>();
+            for (Eva eva : evas) {
+                evaLv.add(eva.getLv());
+            }
+            Integer maxLv = Collections.max(evaLv);/*最高等级*/
+            double maxRation = maxLv > 0 ? MetaData.getAllExperiences().get(maxLv).p / 100000d : 0;
+            // 转换为提升比例
+            Integer minLv = Collections.min(evaLv);/*最低等级*/
+            double minRation = minLv > 0 ? MetaData.getAllExperiences().get(minLv).p / 100000d : 0;
+            map.put("max", maxRation);
+            map.put("min", minRation);
+        }else{
+            map.put("max",0.0);
+            map.put("min",0.0);
+        }
+
         return map;
     }
 

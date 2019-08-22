@@ -97,6 +97,11 @@ public class Apartment extends Building implements IBuildingContract
     }
 
     @Override
+    public int getTotalSaleCount() {
+        return getCapacity() - getRenterNum();
+    }
+
+    @Override
     public boolean npcSelectable() {
         return meta.npc > this.renters.size();
     }
@@ -113,7 +118,7 @@ public class Apartment extends Building implements IBuildingContract
 
     public double getTotalQty(){ //yty
         Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
-        double qty = meta.qty * (1 + EvaManager.getInstance().computePercent(eva));
+        double qty = (meta.qty) * (1 + EvaManager.getInstance().computePercent(eva));
         return qty;
     }
     public int getRenterNum(){

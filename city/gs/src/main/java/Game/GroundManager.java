@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -153,6 +154,16 @@ public class GroundManager {
         int rentingCount;
     }
 
+    public int getAllSellingCount() {
+        AtomicInteger count = new AtomicInteger(0);
+        this.summaryInfo.forEach((k,v)->{
+            if (v.rentingCount == 0 && v.sellingCount == 0) {
+                return;
+            }
+            count.addAndGet(v.sellingCount);
+        });
+        return count.intValue();
+    }
     @Transient
     private Map<GridIndex, SummaryInfo> summaryInfo = new HashMap<>();
 
@@ -254,7 +265,7 @@ public class GroundManager {
         }
         long cost = rentPara.requiredPay() * coordinates.size();
         //TODO:矿工费用
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost * minersRatio);
         if(!renter.decMoney(cost+minerCost))
             return false;
@@ -365,7 +376,7 @@ public class GroundManager {
         }
         long cost = gis.size() * price;
         //TODO:矿工费用
-        double minersRatio = MetaData.getSysPara().minersCostRatio/10000;
+        double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost *minersRatio);
         if(buyer.money() < cost+minerCost)
             return false;
@@ -450,6 +461,7 @@ public class GroundManager {
             i.ownerId = id;
             i.auctionPrice = price;
             i.auctionTs = System.currentTimeMillis();
+            i.groundNum = area.size();
             info.put(c, i);
             gis.add(i);
             playerGround.computeIfAbsent(id, k->new HashSet<>()).add(i);

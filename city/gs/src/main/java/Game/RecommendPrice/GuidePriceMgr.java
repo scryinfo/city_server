@@ -8,10 +8,14 @@ import Game.Timers.PeriodicTimer;
 import Game.Util.GlobalUtil;
 import Shared.LogDb;
 import Shared.Util;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.ByteString;
 import gs.Gs;
+import org.checkerframework.checker.units.qual.A;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class GuidePriceMgr {
@@ -22,7 +26,7 @@ public class GuidePriceMgr {
 
     // 缓存全城均值
     private static LogDb.HistoryRecord historyRecord = new LogDb.HistoryRecord();
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(5));
+    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(5));
 
     private GuidePriceMgr() {
     }
@@ -38,7 +42,8 @@ public class GuidePriceMgr {
             double price = historyRecord.price;
             double score = historyRecord.score;
             double prosp = historyRecord.prosp;
-            return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7) * (1 + prosp));
+            //(score / 400 * 7)  会出现Nan 现在改为(score / 400 * 7+0.1)
+            return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7+0.1) * (1 + prosp));
         }
         return 0;
     }
@@ -93,6 +98,31 @@ public class GuidePriceMgr {
         }
     }
 
+    // 查询研究所或推广公司
+    public double getTechOrPromGuidePrice(int itemId, boolean isTechnology) {
+        AtomicDouble guidePrice = new AtomicDouble(0);
+        try {
+            if (isTechnology) {
+                Map<Integer, Double> map = historyRecord.laboratory;
+                map.forEach((k, v) -> {
+                    if (k == itemId) {
+                        guidePrice.set(v);
+                    }
+                });
+            } else {
+                Map<Integer, Double> map = historyRecord.promotion;
+                map.forEach((k, v) -> {
+                    if (k == itemId) {
+                        guidePrice.set(v);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            return 0.0;
+        }
+
+        return guidePrice.doubleValue();
+    }
     public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, UUID buildingId) {
 //        推荐定价 = 全城均商品成交价 * (1 + (玩家商品总评分 - 全城均商品总评分) / 50)
         Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
@@ -191,7 +221,11 @@ public class GuidePriceMgr {
     // 土地交易
     public double getGroundPrice() {
 //   推荐定价 = 全城均土地成交价
-        return historyRecord.groundPrice;
+        double price = historyRecord.groundPrice;
+        if (0.0 == price) {
+            price = LogDb.queryLandAuctionAvg();
+        }
+        return price;
     }
 
     public void _update() {
