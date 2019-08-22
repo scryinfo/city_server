@@ -3,7 +3,6 @@ package Game.CityInfo;
 import Game.Eva.EvaManager;
 import Game.GameDb;
 import Game.GameServer;
-import Game.MailBox;
 import Game.Meta.MetaCityLevel;
 import Game.Meta.MetaData;
 import Game.Player;
