@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class ProsperityManager {
 
     private ProsperityManager() {
+        cityLen = MetaData.getCity().x > MetaData.getCity().y ? MetaData.getCity().x : MetaData.getCity().y;
         //获取土地拍卖的所有有地块
         Collection<MetaGroundAuction> values = MetaData.getGroundAuction().values();
         values.forEach(g->{
@@ -33,10 +34,10 @@ public class ProsperityManager {
     }
 
     //1.城市最大范围
-    private int  cityLen = City.instance().getMeta().x > City.instance().getMeta().y ? City.instance().getMeta().x : City.instance().getMeta().y;
+    int cityLen;
 
     //2.城市人流量，可以先算出所有地块的的人流量
-    private int trafficTemp = 0;
+    int trafficTemp = 0;
 
     private Map<Coordinate, Integer> groundProsperityMap = new HashMap<>();//全城所有土地的繁华度
 
@@ -64,7 +65,7 @@ public class ProsperityManager {
     }
 
     /*计算建筑繁荣度，建筑繁荣度要把建筑包含的所有土地加起来(暂时不用)*/
-    private int computeBuildingProsperity(Building building) {  //获取坐标点的繁荣度
+   /* private int computeBuildingProsperity(Building building) {  //获取坐标点的繁荣度
         int buildingSumProsperity=0;
         ArrayList<Coordinate> coordinates = new ArrayList<>(building.area().toCoordinates());
         for (Coordinate coordinate : coordinates) {
@@ -88,7 +89,7 @@ public class ProsperityManager {
             }
         }
         return buildingSumProsperity;
-    }
+    }*/
 
     /*计算土地的繁荣度*/
     private int computeGroundProsperity(int beginX,int beginY){
