@@ -2201,7 +2201,7 @@ public class LogDb {
 		List<Document> documentList = new ArrayList<>();
 		industrySupplyAndDemand.find(and(
 				eq("bt", type),
-				eq("_id",itemId),
+				eq("tpi",itemId),
 				eq("type", 2),
 				gte("time", startTime),
 				lt("time", endTime)

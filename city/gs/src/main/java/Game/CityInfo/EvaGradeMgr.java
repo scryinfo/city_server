@@ -25,12 +25,8 @@ public class EvaGradeMgr {
         List<Eva> evas = new ArrayList<>();
         switch (buidingType) {
             case MetaBuilding.MATERIAL:
-                if (type == Gs.EvaGrade.GradeType.Promotion_VALUE) {
-                    grade = EvaManager.getInstance().getGrade(item, PROMOTION);
-                } else if (type == Gs.EvaGrade.GradeType.Quality_VALUE) {
-                    grade = EvaManager.getInstance().getGrade(item, SPEED);
-                }
-                return grade;
+                // 只有品质等级 bt = 3
+                return  grade = EvaManager.getInstance().getGrade(item, SPEED);
             case MetaBuilding.PRODUCE:
                 if (type == Gs.EvaGrade.GradeType.Promotion_VALUE) {
                     grade = EvaManager.getInstance().getGrade(item, PROMOTION);
@@ -57,19 +53,11 @@ public class EvaGradeMgr {
                 }
                 return grade;
             case MetaBuilding.PROMOTE:
-                if (type == Gs.EvaGrade.GradeType.Promotion_VALUE) {
-                    grade = EvaManager.getInstance().getGrade(item, PROMOTION);
-                } else if (type == Gs.EvaGrade.GradeType.Quality_VALUE) {
-                    grade = EvaManager.getInstance().getGrade(item, SPEED);
-                }
-                return grade;
+                // 只有品质等级 bt = 3
+                return grade = EvaManager.getInstance().getGrade(item, SPEED);
             case MetaBuilding.TECHNOLOGY:
-                if (type == Gs.EvaGrade.GradeType.Promotion_VALUE) {
-                    grade = EvaManager.getInstance().getGrade(item, PROMOTION);
-                } else if (type == Gs.EvaGrade.GradeType.Quality_VALUE) {
-                    grade = EvaManager.getInstance().getGrade(item, SPEED);
-                }
-                return grade;
+                // 只有品质等级 bt = 3
+                return  grade = EvaManager.getInstance().getGrade(item, SPEED);
             default:
                 return new HashMap<>();
         }

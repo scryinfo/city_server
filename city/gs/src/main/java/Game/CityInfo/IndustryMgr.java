@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static Shared.LogDb.KEY_TOTAL;
 
 public class IndustryMgr {
+    private static final int PROMOTION = 1;
+    private static final int TECHNOLOGY = 2;
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     private static IndustryMgr instance = new IndustryMgr();
 
@@ -284,12 +286,11 @@ public class IndustryMgr {
             //faceId
             String faceId = player == null ? "" : player.getFaceId();
             // 玩家昨日收入
-            long total = d.getLong("total");
+            long total = d.getLong(KEY_TOTAL);
             Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
-            // 玩家推广点数投入
-            long promotion = map.getOrDefault(1, 0l);
+            long promotion = map.getOrDefault(PROMOTION, 0l);
             // 玩家研究点数
-            long science = map.getOrDefault(2, 0l);
+            long science = map.getOrDefault(TECHNOLOGY, 0l);
             tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
         });
         return tops;
@@ -321,7 +322,7 @@ public class IndustryMgr {
             String playerName = player == null ? "" : player.getName();
             String faceId = player == null ? "" : player.getFaceId();
             // 玩家昨日收入
-            long total = d.getLong("total");
+            long total = d.getLong(KEY_TOTAL);
             // 成交量
             int count = LogDb.groundSum(startTime, endTime, pid); // 查询土地成交量
             tops.add(new TopInfo(pid, faceId, playerName, total, count));
@@ -347,9 +348,9 @@ public class IndustryMgr {
             int staffNum = getPlayerIndustryStaffNum(owner, type);
             Map<Integer, Long> map = EvaManager.getInstance().getScience(owner, type);
             // 玩家推广点数投入
-            long promotion = map.getOrDefault(1, 0l);
+            long promotion = map.getOrDefault(PROMOTION, 0l);
             // 玩家研究点数
-            long science = map.getOrDefault(2, 0l);
+            long science = map.getOrDefault(TECHNOLOGY, 0l);
             return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
         }
     }
@@ -369,12 +370,12 @@ public class IndustryMgr {
             //faceId
             String faceId = player == null ? "" : player.getFaceId();
             // 玩家昨日收入
-            long total = d.getLong("total");
+            long total = d.getLong(KEY_TOTAL);
             Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(pid);
             // 玩家推广点数投入
-            long promotion = map.getOrDefault(1, 0l);
+            long promotion = map.getOrDefault(PROMOTION, 0l);
             // 玩家研究点数
-            long science = map.getOrDefault(2, 0l);
+            long science = map.getOrDefault(TECHNOLOGY, 0l);
             tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
         });
         return tops;
@@ -391,9 +392,9 @@ public class IndustryMgr {
         String faceId =player == null ? "" :  player.getFaceId();
         Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(owner);
         // 玩家推广点数投入
-        long promotion = map.getOrDefault(1, 0l);
+        long promotion = map.getOrDefault(PROMOTION, 0l);
         // 玩家研究点数
-        long science = map.getOrDefault(2, 0l);
+        long science = map.getOrDefault(TECHNOLOGY, 0l);
         return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
     }
 
@@ -415,13 +416,13 @@ public class IndustryMgr {
             String playerName = player == null ? "" : player.getName();
             //faceId
             String faceId = player == null ? "" : player.getFaceId();
-            long total = d.getLong("total");
+            long total = d.getLong(KEY_TOTAL);
             // 具体商品投入的点数
             Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(pid, itemId);
             // 玩家推广点数投入
-            long promotion = map.getOrDefault(1, 0l);
+            long promotion = map.getOrDefault(PROMOTION, 0l);
             // 玩家研究点数
-            long science = map.getOrDefault(2, 0l);
+            long science = map.getOrDefault(TECHNOLOGY, 0l);
             tops.add(new TopInfo(pid, faceId, playerName, total, staffNum, science, promotion));
         });
         return tops;
@@ -442,9 +443,9 @@ public class IndustryMgr {
         int staffNum = getPlayerIndustryStaffNum(owner, bt);
         Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(owner, itemId);
         // 玩家推广点数投入
-        long promotion = map.getOrDefault(1, 0l);
+        long promotion = map.getOrDefault(PROMOTION, 0l);
         // 玩家研究点数
-        long science = map.getOrDefault(2, 0l);
+        long science = map.getOrDefault(TECHNOLOGY, 0l);
 
         return new TopInfo(owner, faceId, name, income, staffNum, science, promotion);
     }
