@@ -611,6 +611,7 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
+								eq("tp", buildType),		//yty
 								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),

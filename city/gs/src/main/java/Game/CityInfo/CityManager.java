@@ -10,14 +10,15 @@ import gs.Gs;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class CityManager {
     private CityManager() {}
     private static CityManager instance=new CityManager();
     /*缓存全城可用的原料*/
-    public  Set<Integer> cityMaterial = new HashSet<>();
+    public  Set<Integer> cityMaterial = new TreeSet<>();
     /*缓存全城可用的商品*/
-    public  Set<Integer> cityGood = new HashSet<>();
+    public  Set<Integer> cityGood = new TreeSet<>();
 
     public static CityManager instance(){
         return instance;

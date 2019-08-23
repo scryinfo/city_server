@@ -956,7 +956,7 @@ public class GameSession {
         //TODO:矿工费用（商品基本费用*矿工费用比例）(向下取整),
         double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost * minersRatio);
-        long income =cost - minerCost;//收入（扣除矿工费后）
+        long income =cost-minerCost;//收入（扣除矿工费后）
         long pay=cost+minerCost;
         if(player.money() < cost + freight+minerCost) {
             this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
@@ -3357,6 +3357,7 @@ public class GameSession {
 
     /*新版Eva修改*/
     public void updateMyEvas(short cmd, Message message){
+        long totalPoint=0L;//本次的总加点
         Gs.UpdateMyEvas evaSummary = (Gs.UpdateMyEvas)message;
         /*首先获取到所有的Eva信息并且设置好加点点数*/
         Gs.Evas evas = EvaManager.getInstance().getAllUpdateEvas(evaSummary);
@@ -3373,6 +3374,7 @@ public class GameSession {
            return;
        }else {
            for (Gs.Eva eva : evas.getEvaList()) {
+               totalPoint += eva.getDecEva();
                if (playerId == null) {
                    playerId = Util.toUuid(eva.getPid().toByteArray());
                }
@@ -3409,6 +3411,8 @@ public class GameSession {
            builder.addAllBuildingPoint(buildingPoints);*/
            Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);//分类修改后的Eva
            this.write(Package.create(cmd, evaInfo));
+           /*更新全城的等级经验*/
+           CityLevel.instance().updateCityLevel(totalPoint);
        }
     }
 
@@ -5160,6 +5164,10 @@ public class GameSession {
             type=21;//原料厂-原料
         }else if(buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
             type=22;//加工厂-商品
+        }else if(buildType==Gs.PlayerIncomePay.BuildType.TECHNOLOGY.getNumber()){
+            type = 15; //研究所 -研究点数
+        }else if(buildType==Gs.PlayerIncomePay.BuildType.PROMOTE.getNumber()){
+            type = 16; //推广公司-研究点数
         }
         Gs.PlayerIncomePay.Builder build=Gs.PlayerIncomePay.newBuilder();
         build.setPlayerId(((Gs.PlayerIncomePay) message).getPlayerId()).setBType(((Gs.PlayerIncomePay) message).getBType()).setIsIncome(isIncome);
@@ -5168,7 +5176,8 @@ public class GameSession {
         long todayStartTime=System.currentTimeMillis();
         List<Document> list=null;
         if(isIncome){//收入
-            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()
+                    ||buildType==Gs.PlayerIncomePay.BuildType.TECHNOLOGY.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PROMOTE.getNumber()){
                 list = LogDb.daySummaryShelfIncome(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
                 list.forEach(document -> {
                     Building sellBuilding = City.instance().getBuilding(document.get("b",UUID.class));
@@ -5220,7 +5229,8 @@ public class GameSession {
                 });
             }
         }else{//支出
-            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
+            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()
+                    ||buildType==Gs.PlayerIncomePay.BuildType.TECHNOLOGY.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PROMOTE.getNumber()){
                 list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
                 list.forEach(document -> {
                     Building buyBuilding = City.instance().getBuilding(document.get("w",UUID.class));
@@ -5635,7 +5645,8 @@ public class GameSession {
                 PromotePointManager.getInstance().updatePromotionPoint(promotePoint);
                 c=c.toBuilder().setTypePointAllNum(promotePoint.promotePoint).build();
             }
-            int type = MetaItem.scienceItemId(itemId);//获取商品类型
+            //int type = MetaItem.scienceItemId(itemId);//获取商品类型
+            int type = sellBuilding.type();
             //日志记录
             LogDb.minersCost(this.player.id(),minerCost, MetaData.getSysPara().minersCostRatio);
             LogDb.minersCost(seller.id(),minerCost, MetaData.getSysPara().minersCostRatio);

@@ -48,4 +48,9 @@ public abstract class MetaItem {
     public static int scienceItemId(int id){/*获取研究所、推广公司类型id*/
         return id % MetaData.ID_RADIX;
     }
+
+    /*是否是Eva点数商品*/
+    public static boolean isScienceItem(int id) {
+        return id / MetaData.ID_RADIX >= SCIENCE && id / MetaData.ID_RADIX<=PROMOTE;
+    }
 }

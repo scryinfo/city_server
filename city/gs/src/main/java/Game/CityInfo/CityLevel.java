@@ -59,16 +59,6 @@ public class CityLevel {
     public void update(long diffNano) {
         if (timer.update(diffNano)) {
             sumValue = EvaManager.getInstance().getAllSumValue();
-            int historyPoint=0;
-            /*减去已经使用过的点数*/
-            if(lv>1){
-                MetaCityLevel metaCityLevel = MetaData.getCityLevel().get(lv-1);
-                historyPoint = (int) (metaCityLevel.exp + cexp);
-            }else {
-                historyPoint = cexp;
-            }
-            updateCityLevel(sumValue-historyPoint);
-            GameDb.saveOrUpdate(this);
         }
     }
     public Gs.CityLevel toProto() {
@@ -95,6 +85,8 @@ public class CityLevel {
                 this.cexp = (int) cexp;
             }while(cexp>=exp);
         }
+        this.sumValue += addPoint;
+        GameDb.saveOrUpdate(this);
     }
 
     /*发明新商品*/

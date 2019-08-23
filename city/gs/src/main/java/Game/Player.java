@@ -1,5 +1,6 @@
 package Game;
 
+import Game.CityInfo.CityManager;
 import Game.FriendManager.FriendManager;
 import Game.Meta.MetaData;
 import Shared.DatabaseInfo;
@@ -336,6 +337,7 @@ public class Player {
         builder.setBagId(Util.toByteString(BAG_ID));
         builder.addAllBuildingBrands(BrandManager.instance().getBuildingBrandProto(id()));
         builder.addAllGoodBrands(BrandManager.instance().getGoodBrandProto(id()));
+        builder.setCityGoodInfo(CityManager.instance().toProto());
         goodLv.forEach((k,v)->builder.addGoodLv(Gs.IntNum.newBuilder().setId(k).setNum(v)));
 
         builder.addAllFriends(FriendManager.getInstance().getFriends(this.id));

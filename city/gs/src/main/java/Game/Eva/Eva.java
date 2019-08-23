@@ -8,8 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
-import Game.Meta.MetaData;
-import Game.Meta.MetaItem;
+import Game.BrandManager;
+import Game.Meta.*;
 import org.apache.log4j.Logger;
 
 import Shared.Util;
@@ -91,7 +91,21 @@ public class Eva {
 		if(bt==Gs.Eva.Btype.ProduceSpeed_VALUE){
 			MetaItem item = MetaData.getItem(at);
 			builder.setBasevalue(item.n);
-		}
+		}else if(bt==Gs.Eva.Btype.Quality_VALUE){
+			if(MetaGood.isItem(at)){
+                MetaGood good = MetaData.getGood(at);
+                builder.setBasevalue(good.quality);
+            }else{
+                builder.setBasevalue(100);
+            }
+		}else if(bt==Gs.Eva.Btype.Brand_VALUE){
+            if(MetaGood.isItem(at)){
+                MetaGood good = MetaData.getGood(at);
+                builder.setBasevalue(good.brand);
+            }else{
+                builder.setBasevalue(BrandManager.instance().BASE_BRAND);
+            }
+        }
         return builder.build();
     }
     
