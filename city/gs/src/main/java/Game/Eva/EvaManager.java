@@ -280,7 +280,8 @@ public class EvaManager
         return evas.stream().filter(e -> e.getBt() == bt).collect(Collectors.groupingBy(Eva::getLv, Collectors.counting()));
     }
 
-    public Gs.EvaInfo.BuildingEvaInfo queryTypeBuildingEvaInfo(UUID pid,int type){
+    public Gs.BuildingEva queryTypeBuildingEvaInfo(UUID pid,int type){
+        Gs.BuildingEva.Builder buildingEva = Gs.BuildingEva.newBuilder().setBuildingType(type);
         List<Integer> aTypes = new ArrayList<>();
         if(type==MetaBuilding.MATERIAL){
             aTypes.addAll(CityManager.instance().cityMaterial);
@@ -289,51 +290,54 @@ public class EvaManager
         }else{
             aTypes.addAll(MetaData.getBuildingTech(type));
         }
-        Gs.EvaInfo.BuildingEvaInfo.Builder buildingEvaInfo = Gs.EvaInfo.BuildingEvaInfo.newBuilder();
-        buildingEvaInfo.setType(type);
-        /*获取与原料厂相关的Eva信息*/
+        //获取与原料厂相关的Eva信息
         aTypes.forEach(itemId->{
-            Gs.EvaInfo.BuildingEvaInfo.TypeEva.Builder typeEva = Gs.EvaInfo.BuildingEvaInfo.TypeEva.newBuilder();
-            typeEva.setAtype(itemId);
             List<Eva> evas = EvaManager.getInstance().getEva(pid, itemId);
-            /*统统封装在同一个数组中*/
-            evas.forEach(eva->typeEva.addEva(eva.toProto()));
-            buildingEvaInfo.addTypeEva(typeEva);
+            Gs.BuildingEva.EvaType.Builder typeEva = Gs.BuildingEva.EvaType.newBuilder().setAtype(itemId);
+            evas.forEach(e->{
+                Gs.BuildingEva.EvaType.ItemEva.Builder itemEva = Gs.BuildingEva.EvaType.ItemEva.newBuilder();
+                itemEva.setBtype(e.getBt()).setEva(e.toProto());
+                typeEva.addItemEva(itemEva);
+            });
+            buildingEva.addEvaType(typeEva);
         });
-        return buildingEvaInfo.build();
+        //获取当前查询建筑的点数信息
+        Gs.BuildingPoint buildingTypePoint = EvaTypeUtil.getBuildingTypePoint(pid, type);
+        buildingEva.setBuildingPoint(buildingTypePoint);
+        return buildingEva.build();
     }
 
-    /*为修改的Eva归类（分类到具体的某一个建筑）*/
-    public Gs.EvaInfo classifyEvaType(List<Gs.Eva> evas,UUID playerId){
-        Map<Integer, Set<Gs.Eva>> evaMap = new HashMap<>();
-        Gs.EvaInfo.Builder evaInfo = Gs.EvaInfo.newBuilder();
+    /*为修改的Eva归类（分类到具体的某一个建筑,修改Eva使用）*/
+    public Gs.BuildingEvas classifyEvaType(List<Gs.Eva> evas,UUID playerId){
+        List<Gs.BuildingEva> list = new ArrayList<>();
+        Map<Integer, Set<Gs.BuildingEva.EvaType.ItemEva>> evaMap = new HashMap<>();//key 为atype value 为对应的所有eva
         evas.forEach(e->{
-            int at = e.getAt();
-            evaMap.computeIfAbsent(at, k -> new HashSet<Gs.Eva>()).add(e);
+            Gs.BuildingEva.EvaType.ItemEva.Builder itemEva = Gs.BuildingEva.EvaType.ItemEva.newBuilder().setBtype(e.getBt().getNumber()).setEva(e);
+            evaMap.computeIfAbsent(e.getAt(), k -> new HashSet()).add(itemEva.build());
         });
-        Map<Integer, Gs.EvaInfo.BuildingEvaInfo.Builder> buildingEvaInfo = new HashMap<>();//key为建筑大类型，value为建筑的Eva数组
+        Map<Integer,List<Gs.BuildingEva.EvaType>> buildingEvaInfo = new HashMap<>();//key为建筑大类型，value为建筑的Eva数组
         evaMap.forEach((k,v)->{
-            Gs.EvaInfo.BuildingEvaInfo.TypeEva.Builder typeEva = Gs.EvaInfo.BuildingEvaInfo.TypeEva.newBuilder();
-            typeEva.setAtype(k).addAllEva(v);
+            Gs.BuildingEva.EvaType.Builder evaType = Gs.BuildingEva.EvaType.newBuilder().setAtype(k).addAllItemEva(v);
             if(MetaGood.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.PRODUCE,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PRODUCE)).addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.PRODUCE,type-> new ArrayList<>()).add(evaType.build());
             }else if(MetaMaterial.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.MATERIAL,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.MATERIAL)).addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.MATERIAL,type-> new ArrayList<>()).add(evaType.build());
             }else if(MetaBuilding.APARTMENT==k){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.APARTMENT,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.APARTMENT)).addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.APARTMENT,type-> new ArrayList<>()).add(evaType.build());
             }else if(MetaBuilding.RETAIL==k){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.RETAIL,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.RETAIL)).addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.RETAIL,type-> new ArrayList<>()).add(evaType.build());
             }else if(MetaPromotionItem.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.PROMOTE,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.PROMOTE)).addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.PROMOTE,type-> new ArrayList<>()).add(evaType.build());
             }else if(MetaScienceItem.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.TECHNOLOGY,type-> Gs.EvaInfo.BuildingEvaInfo.newBuilder().setType(MetaBuilding.TECHNOLOGY)).addTypeEva(typeEva);
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.TECHNOLOGY,type-> new ArrayList<>()).add(evaType.build());
             }
         });
-        buildingEvaInfo.values().forEach(info->{
-            evaInfo.addBuildingEvaInfos(info);
+        buildingEvaInfo.forEach((k,v)->{
+            Gs.BuildingPoint buildingTypePoint = EvaTypeUtil.getBuildingTypePoint(playerId, k);
+            Gs.BuildingEva.Builder buildingEva = Gs.BuildingEva.newBuilder().setBuildingType(k).addAllEvaType(v).setBuildingPoint(buildingTypePoint);
+            list.add(buildingEva.build());
         });
-        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-        evaInfo.addAllBuildingPoint(buildingPoints);
-        return evaInfo.build();
+        Gs.BuildingEvas.Builder builder = Gs.BuildingEvas.newBuilder().addAllBuildingEvas(list);
+        return builder.build();
     }
 }

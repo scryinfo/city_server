@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 public class ProsperityManager {
 
     private ProsperityManager() {
-
         cityLen = MetaData.getCity().x > MetaData.getCity().y ? MetaData.getCity().x : MetaData.getCity().y;
         //获取土地拍卖的所有有地块
         Collection<MetaGroundAuction> values = MetaData.getGroundAuction().values();

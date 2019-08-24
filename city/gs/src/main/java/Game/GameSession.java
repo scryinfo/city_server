@@ -1020,7 +1020,7 @@ public class GameSession {
             score = (type == MetaItem.GOOD ? (brandScore + goodQtyScore) / 2 : -1);
         }
         LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, c.getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, sellBuilding.type());
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, score, sellBuilding.type(),minerCost);
         LogDb.buildingIncome(bid,player.id(),income,type,itemId);//商品支出记录不包含运费
         LogDb.buildingPay(bid,player.id(),freight);//建筑运费支出
         /*离线收益，只在玩家离线期间统计*/
@@ -3319,40 +3319,14 @@ public class GameSession {
         this.write(Package.create(cmd, list.build()));
     }
 
-    /*Todo*/
-    /*public void queryMyEva(short cmd, Message message)
-    {
-        UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        Gs.Evas.Builder list = Gs.Evas.newBuilder();
-        EvaManager.getInstance().getEvaList(pid).forEach(eva->{
-            if(MetaItem.isItem(eva.getAt())){
-                if(CityManager.instance().usable(eva.getAt())){
-                    list.addEva(eva.toProto());
-                }
-            }else{
-                list.addEva(eva.toProto());
-            }
-        });
-        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
-        list.addAllBuildingPoint(buildingPoints);
-        this.write(Package.create(cmd, list.build()));
-    }*/
-    /*新版Eva分类查询(待调试)*/
+    /*新版Eva分类查询*/
     public void queryMyEva(short cmd, Message message)
     {
-        UUID pid = Util.toUuid(((Gs.Id) message).getId().toByteArray());
-        List<Gs.EvaInfo.BuildingEvaInfo> evaInfo = new ArrayList<>();
-        //区分建筑去查询Eva
-        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.MATERIAL));
-        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.PRODUCE));
-        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.APARTMENT));
-        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.RETAIL));
-        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.TECHNOLOGY));
-        evaInfo.add(EvaManager.getInstance().queryTypeBuildingEvaInfo(pid, MetaBuilding.PROMOTE));
-        List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(pid);
-        Gs.EvaInfo.Builder builder = Gs.EvaInfo.newBuilder();
-        builder.addAllBuildingEvaInfos(evaInfo).addAllBuildingPoint(buildingPoints);
-        this.write(Package.create(cmd,builder.build()));
+        Gs.QueryMyEva myEva = (Gs.QueryMyEva) message;
+        UUID playerId = Util.toUuid(myEva.getPlayerId().toByteArray());
+        int buildingType = myEva.getBuildingType();
+        Gs.BuildingEva buildingEva = EvaManager.getInstance().queryTypeBuildingEvaInfo(playerId, buildingType);
+        this.write(Package.create(cmd,buildingEva));
     }
 
     /*新版Eva修改*/
@@ -3406,11 +3380,8 @@ public class GameSession {
            playerSciencePoint.forEach(p -> SciencePointManager.getInstance().updateSciencePoint(p));
            playerPromotePoints.forEach(p -> PromotePointManager.getInstance().updatePromotionPoint(p));
            evaData.forEach(eva->EvaManager.getInstance().updateEva(eva));//同步更新Evamanager 并保存到数据库
-           /*Gs.Evas.Builder builder = Gs.Evas.newBuilder().addAllEva(updateEvas);
-           List<Gs.BuildingPoint> buildingPoints = EvaTypeUtil.classifyBuildingTypePoint(playerId);
-           builder.addAllBuildingPoint(buildingPoints);*/
-           Gs.EvaInfo evaInfo = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);//分类修改后的Eva
-           this.write(Package.create(cmd, evaInfo));
+           Gs.BuildingEvas buildingEvas = EvaManager.getInstance().classifyEvaType(updateEvas, playerId);//分类修改后的Eva
+           this.write(Package.create(cmd, buildingEvas));
            /*更新全城的等级经验*/
            CityLevel.instance().updateCityLevel(totalPoint);
        }
@@ -3741,7 +3712,7 @@ public class GameSession {
             BrandManager.BrandName brandName = BrandManager.instance().getBrand(seller.id(), itemId).brandName;
             String goodName=brandName==null?seller.getCompanyName():brandName.getBrandName();
             LogDb.buyInShelf(player.id(), seller.id(), itemBuy.n, inShelf.getGood().getPrice(),
-                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, 0, sellBuilding.type());
+                    itemBuy.key.producerId, sellBuilding.id(), wid, type, itemId, goodName, 0, sellBuilding.type(),0);
             LogDb.buildingIncome(bid, player.id(), cost, type, itemId);
         }
         else{//租户货架上购买的（统计日志）
@@ -5653,7 +5624,7 @@ public class GameSession {
             LogDb.playerPay(player.id(),totalPay,sellBuilding.type());
             LogDb.playerIncome(seller.id(),totalIncome,sellBuilding.type());
             LogDb.buyInShelf(player.id(), seller.id(), item.n, content.getPrice(),
-                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,sellBuilding.type());
+                    item.key.producerId, sellBuilding.id(),player.id(),type,itemId,seller.getCompanyName(),0,sellBuilding.type(),minerCost);
             LogDb.buildingIncome(bid,player.id(),totalIncome,0,itemId);
             if(!GameServer.isOnline(seller.id())) {
                 LogDb.sellerBuildingIncome(sellBuilding.id(), sellBuilding.type(), seller.id(), item.n, c.getPrice(), itemId);//离线通知统计

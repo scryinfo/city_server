@@ -1063,7 +1063,7 @@ public class LogDb {
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
 								  UUID producerId, UUID bid, UUID wid,int type,
-								  int typeId,String brand,double score,int buildingType)
+								  int typeId,String brand,double score,int buildingType,long minerCost)//yty加入旷工费
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -1073,7 +1073,7 @@ public class LogDb {
 				.append("p", price)
 				.append("n",n)				//yty  数量
 				.append("brand",brand)      //yty 品牌名
-				.append("a", n * price)
+				.append("a", n * price+minerCost)
 				.append("i", producerId)
 				.append("tp", type)
 				.append("tpi", typeId)
@@ -1083,7 +1083,8 @@ public class LogDb {
 	}
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
-								  UUID producerId, UUID bid,int type, int typeId,String brand,double score,double gbrd,double gqty,double rbrd,double rqty)
+								  UUID producerId, UUID bid,int type, int typeId,
+							      String brand,double score,double gbrd,double gqty,double rbrd,double rqty,long minerCost)//yty加入旷工费
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1092,7 +1093,7 @@ public class LogDb {
 				.append("p", price)
 				.append("n",n)          //yty  数量
 				.append("brand",brand)  //yty 品牌名
-				.append("a", n * price)
+				.append("a", n * price+minerCost)
 				.append("i", producerId)
 				.append("tp", type)
 				.append("tpi", typeId)

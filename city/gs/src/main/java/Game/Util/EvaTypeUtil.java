@@ -73,6 +73,25 @@ public class EvaTypeUtil {
         return list;
     }
 
+    /*获取建筑类型的点数信息*/
+    public static Gs.BuildingPoint getBuildingTypePoint(UUID pId,int type){
+        SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePointByBuildingType(pId, type);
+        PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePointByBuildingType(pId, type);
+        Gs.BuildingPoint.Builder buildingPoint = Gs.BuildingPoint.newBuilder();
+        buildingPoint.setBuildingType(type);
+        if(sciencePoint!=null){
+            Gs.BuildingPoint.PointInfo.Builder pointInfo = Gs.BuildingPoint.PointInfo.newBuilder();
+            pointInfo.setPointId(sciencePoint.getType()).setPointNum(sciencePoint.point);
+            buildingPoint.setSciencePoint(pointInfo);
+        }
+        if(promotePoint!=null){
+            Gs.BuildingPoint.PointInfo.Builder pointInfo = Gs.BuildingPoint.PointInfo.newBuilder();
+            pointInfo.setPointId(promotePoint.getType()).setPointNum(promotePoint.promotePoint);
+            buildingPoint.setPromotionPoint(pointInfo);
+        }
+        return buildingPoint.build();
+    }
+
     /*判断是否有足够的点数*/
     public static boolean hasEnoughPoint(Gs.Evas evas){
         UUID playerId=null;
