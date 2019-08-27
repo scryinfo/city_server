@@ -27,7 +27,7 @@ public class EvaManager
     }
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
-    public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息
+    public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息，按照atype、btype进行分类
     private Map<UUID, Eva> evas = new HashMap<>();  /*key是Eva的Id*/
     private Map<UUID, EvaSalary> evaSalaryMap = new HashMap<UUID, EvaSalary>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
@@ -292,14 +292,9 @@ public class EvaManager
         }
         //获取与原料厂相关的Eva信息
         aTypes.forEach(itemId->{
-            List<Eva> evas = EvaManager.getInstance().getEva(pid, itemId);
-            Gs.BuildingEva.EvaType.Builder typeEva = Gs.BuildingEva.EvaType.newBuilder().setAtype(itemId);
-            evas.forEach(e->{
-                Gs.BuildingEva.EvaType.ItemEva.Builder itemEva = Gs.BuildingEva.EvaType.ItemEva.newBuilder();
-                itemEva.setBtype(e.getBt()).setEva(e.toProto());
-                typeEva.addItemEva(itemEva);
-            });
-            buildingEva.addEvaType(typeEva);
+           EvaManager.getInstance().getEva(pid, itemId).forEach(eva->{
+               buildingEva.addEva(eva.toSimpleEvaProto());
+           });
         });
         //获取当前查询建筑的点数信息
         Gs.BuildingPoint buildingTypePoint = EvaTypeUtil.getBuildingTypePoint(pid, type);
@@ -309,35 +304,30 @@ public class EvaManager
 
     /*为修改的Eva归类（分类到具体的某一个建筑,修改Eva使用）*/
     public Gs.BuildingEvas classifyEvaType(List<Gs.Eva> evas,UUID playerId){
-        List<Gs.BuildingEva> list = new ArrayList<>();
-        Map<Integer, Set<Gs.BuildingEva.EvaType.ItemEva>> evaMap = new HashMap<>();//key 为atype value 为对应的所有eva
+        Map<Integer,List<Gs.Eva>> buildingEvaInfo = new HashMap<>();//key 为建筑大类型，value为建筑对应的所有eva
         evas.forEach(e->{
-            Gs.BuildingEva.EvaType.ItemEva.Builder itemEva = Gs.BuildingEva.EvaType.ItemEva.newBuilder().setBtype(e.getBt().getNumber()).setEva(e);
-            evaMap.computeIfAbsent(e.getAt(), k -> new HashSet()).add(itemEva.build());
-        });
-        Map<Integer,List<Gs.BuildingEva.EvaType>> buildingEvaInfo = new HashMap<>();//key为建筑大类型，value为建筑的Eva数组
-        evaMap.forEach((k,v)->{
-            Gs.BuildingEva.EvaType.Builder evaType = Gs.BuildingEva.EvaType.newBuilder().setAtype(k).addAllItemEva(v);
-            if(MetaGood.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.PRODUCE,type-> new ArrayList<>()).add(evaType.build());
-            }else if(MetaMaterial.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.MATERIAL,type-> new ArrayList<>()).add(evaType.build());
-            }else if(MetaBuilding.APARTMENT==k){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.APARTMENT,type-> new ArrayList<>()).add(evaType.build());
-            }else if(MetaBuilding.RETAIL==k){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.RETAIL,type-> new ArrayList<>()).add(evaType.build());
-            }else if(MetaPromotionItem.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.PROMOTE,type-> new ArrayList<>()).add(evaType.build());
-            }else if(MetaScienceItem.isItem(k)){
-                buildingEvaInfo.computeIfAbsent(MetaBuilding.TECHNOLOGY,type-> new ArrayList<>()).add(evaType.build());
+            int atype = e.getAt();
+            if(MetaGood.isItem(atype)){
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.PRODUCE,type-> new ArrayList<>()).add(e);
+            }else if(MetaMaterial.isItem(atype)){
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.MATERIAL,type-> new ArrayList<>()).add(e);
+            }else if(MetaBuilding.APARTMENT==atype){
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.APARTMENT,type-> new ArrayList<>()).add(e);
+            }else if(MetaBuilding.RETAIL==atype){
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.RETAIL,type-> new ArrayList<>()).add(e);
+            }else if(MetaPromotionItem.isItem(atype)){
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.PROMOTE,type-> new ArrayList<>()).add(e);
+            }else if(MetaScienceItem.isItem(atype)){
+                buildingEvaInfo.computeIfAbsent(MetaBuilding.TECHNOLOGY,type-> new ArrayList<>()).add(e);
             }
         });
+        Gs.BuildingEvas.Builder builder = Gs.BuildingEvas.newBuilder();
+        //key为建筑大类型，value为建筑的Eva数组
         buildingEvaInfo.forEach((k,v)->{
             Gs.BuildingPoint buildingTypePoint = EvaTypeUtil.getBuildingTypePoint(playerId, k);
-            Gs.BuildingEva.Builder buildingEva = Gs.BuildingEva.newBuilder().setBuildingType(k).addAllEvaType(v).setBuildingPoint(buildingTypePoint);
-            list.add(buildingEva.build());
+            Gs.BuildingEva.Builder buildingEva = Gs.BuildingEva.newBuilder().addAllEva(v).setBuildingType(k).setBuildingPoint(buildingTypePoint);
+            builder.addBuildingEvas(buildingEva);
         });
-        Gs.BuildingEvas.Builder builder = Gs.BuildingEvas.newBuilder().addAllBuildingEvas(list);
         return builder.build();
     }
 }

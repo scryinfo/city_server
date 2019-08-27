@@ -1,20 +1,11 @@
 package Game.Eva;
 
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-
-import Game.BrandManager;
-import Game.Meta.*;
-import org.apache.log4j.Logger;
-
 import Shared.Util;
 import gs.Gs;
-import org.hibernate.boot.Metadata;
+import org.apache.log4j.Logger;
+
+import javax.persistence.*;
+import java.util.UUID;
 
 @Entity(name = "Eva")
 @Table(name = "Eva",indexes = {@Index(columnList = "pid")})
@@ -88,27 +79,20 @@ public class Eva {
 				.setLv(lv)
 				.setCexp(cexp)
 				.setSumValue(sumValue); // 累计点数
-		if(bt==Gs.Eva.Btype.ProduceSpeed_VALUE){
-			MetaItem item = MetaData.getItem(at);
-			builder.setBasevalue(item.n);
-		}else if(bt==Gs.Eva.Btype.Quality_VALUE){
-			if(MetaGood.isItem(at)){
-                MetaGood good = MetaData.getGood(at);
-                builder.setBasevalue(good.quality);
-            }else{
-                builder.setBasevalue(100);
-            }
-		}else if(bt==Gs.Eva.Btype.Brand_VALUE){
-            if(MetaGood.isItem(at)){
-                MetaGood good = MetaData.getGood(at);
-                builder.setBasevalue(good.brand);
-            }else{
-                builder.setBasevalue(BrandManager.instance().BASE_BRAND);
-            }
-        }
         return builder.build();
     }
-    
+
+    /*转换为精简的eva结构,Eva查询使用*/
+    public Gs.Eva toSimpleEvaProto(){
+		Gs.Eva.Builder builder = Gs.Eva.newBuilder();
+		builder.setId(Util.toByteString(id))
+				.setAt(at)
+				.setBt(Gs.Eva.Btype.valueOf(bt))
+				.setLv(lv)
+				.setCexp(cexp);
+		return builder.build();
+	}
+
 	public UUID getId() {
 		return id;
 	}

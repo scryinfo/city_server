@@ -1,6 +1,9 @@
 package Game;
 
-import Game.CityInfo.*;
+import Game.CityInfo.CityLevel;
+import Game.CityInfo.EvaGradeMgr;
+import Game.CityInfo.IndustryMgr;
+import Game.CityInfo.TopInfo;
 import Game.Contract.BuildingContract;
 import Game.Contract.Contract;
 import Game.Contract.ContractManager;
@@ -3360,7 +3363,7 @@ public class GameSession {
                    Eva newEva = EvaManager.getInstance().updateMyEva(eva); /*进行加点*/
                    playerPromotePoints.add(PromotePointManager.getInstance().updatePlayerPromotePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
-                   updateEvas.add(newEva.toProto());
+                   updateEvas.add(newEva.toSimpleEvaProto());
                    evaData.add(newEva);
                } else {                                                              //科技点数类型加成
                    int pointType = EvaTypeUtil.getEvaPointType(EvaTypeUtil.SCIENCE_TYPE, eva.getAt()); /*确定具体加点建筑类型*/
@@ -3370,7 +3373,7 @@ public class GameSession {
                    Eva newEva = EvaManager.getInstance().updateMyEva(eva);/*进行加点*/
                    playerSciencePoint.add(SciencePointManager.getInstance().updateSciencePoint(playerId, pointType, -eva.getDecEva())); /*扣减点数*/
                    EvaManager.getInstance().updateEvaSalary(eva.getDecEva());
-                   updateEvas.add(newEva.toProto());
+                   updateEvas.add(newEva.toSimpleEvaProto());
                    evaData.add(newEva);
                }
            }

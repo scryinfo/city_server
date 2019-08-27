@@ -9,6 +9,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
@@ -250,6 +251,8 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityMoneyPool = database.getCollection(CITY_MONEY_POOL)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
+		/*创建部分表的索引*/
+		createIndex();
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
 		{
@@ -1392,7 +1395,8 @@ public class LogDb {
 		Document document = new Document("t",System.currentTimeMillis());
 		document.append("p", playerId)
 				.append("lgt", loginTime)
-				.append("rt", recordTime);
+				.append("rt", recordTime)
+				.append("date",new Date());
 		playerLoginTime.insertOne(document);
 	}
 	public static MongoCollection<Document> getNpcBuyInRetailCol()
@@ -2325,5 +2329,21 @@ public class LogDb {
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
+	}
+
+	public static void createIndex(){
+		/*判断是否有索引*/
+		boolean hasIndex = false;
+		ListIndexesIterable<Document> documents = playerLoginTime.listIndexes();
+		for (Document doc : documents) {
+			String indexName = doc.getString("name");
+			if (indexName.startsWith("date")) {
+				System.err.println("已存在该索引");
+				hasIndex = true;
+			}
+		}
+		if(!hasIndex) {
+			playerLoginTime.createIndex(new Document("date", 1), new IndexOptions().expireAfter(1l, TimeUnit.DAYS));
+		}
 	}
 }

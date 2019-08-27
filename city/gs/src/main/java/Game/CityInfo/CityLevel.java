@@ -29,6 +29,7 @@ public class CityLevel {
     public CityLevel() {
         lv=1;
         cexp=0;
+        salary = MetaData.getCityLevel().get(1).baseSalary;
     }
     @Id
     public final int id = ID;
