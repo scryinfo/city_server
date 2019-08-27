@@ -5922,7 +5922,7 @@ public class GameSession {
         });
         this.write(Package.create(cmd, builder.build()));
     }
-
+    //行业供需
     public void querySupplyAndDemand(short cmd,Message message) {
         Gs.SupplyAndDemand msg = (Gs.SupplyAndDemand) message;
         int type = msg.getType().getNumber();
@@ -5979,12 +5979,11 @@ public class GameSession {
             List<TopInfo> infos = IndustryMgr.instance().queryTop();
             infos.stream().filter(o -> o != null).forEach(d -> {
                 owner.incrementAndGet();
-                Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
+                Gs.IndustryTopInfo.TopInfo.Builder info = builder.addTopInfoBuilder();
                 info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setCount(d.count).setFaceId(d.faceId);
                 if (d.pid.equals(id)) {
                     builder.setOwner(owner.intValue());
                 }
-                builder.addTopInfo(info);
             });
             TopInfo top = IndustryMgr.instance().queryMyself(id, type);
             builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder().setPid(Util.toByteString(top.pid)).setName(top.name).setIncome(top.yesterdayIncome).setCount(top.count).setFaceId(top.faceId).setMyself(true));
@@ -5994,12 +5993,11 @@ public class GameSession {
             List<TopInfo> infos = IndustryMgr.instance().queryTop(type);
             infos.stream().filter(o -> o != null).forEach(d -> {
                 owner.incrementAndGet();
-                Gs.IndustryTopInfo.TopInfo.Builder info = Gs.IndustryTopInfo.TopInfo.newBuilder();
+                Gs.IndustryTopInfo.TopInfo.Builder info = builder.addTopInfoBuilder();
                 info.setPid(Util.toByteString(d.pid)).setName(d.name).setIncome(d.yesterdayIncome).setScience(d.science).setPromotion(d.promotion).setWoker(d.workerNum).setFaceId(d.faceId);
                 if (d.pid.equals(id)) {
                     builder.setOwner(owner.intValue());
                 }
-                builder.addTopInfo(info);
             });
             TopInfo myself = IndustryMgr.instance().queryMyself(id, type);
             builder.addTopInfo(Gs.IndustryTopInfo.TopInfo.newBuilder()
@@ -6051,13 +6049,14 @@ public class GameSession {
     }
 
     // 商品排行榜
-    public void queryProductRanking(short cmd, Message message) {
+        public void queryProductRanking(short cmd, Message message) {
         Gs.queryProductRanking q = (Gs.queryProductRanking) message;
         int industryId = q.getIndustryId();
         int itemId = q.getItemId();
         UUID pid = Util.toUuid(q.getPlayerId().toByteArray());
         Gs.ProductRanking.Builder builder = Gs.ProductRanking.newBuilder();
         builder.setItemId(itemId);
+        builder.setIndustryId(industryId);
         builder.setOwner(0);
         AtomicInteger owner = new AtomicInteger(0);
         List<TopInfo> list = IndustryMgr.instance().queryProductRanking(industryId, itemId);

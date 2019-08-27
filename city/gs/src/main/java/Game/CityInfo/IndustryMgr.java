@@ -13,12 +13,20 @@ import org.bson.Document;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static Shared.LogDb.KEY_TOTAL;
 
 public class IndustryMgr {
     private static final int PROMOTION = 1;
     private static final int TECHNOLOGY = 2;
+    private static final int INDUSTRY = 1;
+    private static final int ITEM = 2;
+    private static final String SUPPLY = "supply";
+    private static final String DEMAND = "demand";
+    private static final String TIME = "time";
+    private static final String TYPE = "type";
+    private static final String BUILDINGTYPE = "bt";
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     private static IndustryMgr instance = new IndustryMgr();
 
@@ -72,7 +80,7 @@ public class IndustryMgr {
             int bt = d.getInteger("_id");
             int sum = City.instance().typeBuilding.getOrDefault(bt, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
             long demand = d.getLong(KEY_TOTAL);
-            list.add(new Document().append("bt", bt).append("supply", (sum + demand)).append("demand", demand).append("time", endTime).append("type", 1));
+            list.add(new Document().append(BUILDINGTYPE, bt).append(SUPPLY, (sum + demand)).append(DEMAND, demand).append(TIME, endTime).append(TYPE, INDUSTRY));
         });
 
        /* // material
@@ -94,15 +102,15 @@ public class IndustryMgr {
         // apartment
         int sumA = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandA = LogDb.queryApartmentIndestrySum(startTime, endTime,LogDb.getNpcRentApartment());
-        list.add(new Document().append("bt", MetaBuilding.APARTMENT).append("supply", (sumA + demandA)).append("demand", demandA).append("time", endTime).append("type", 1));
+        list.add(new Document().append(BUILDINGTYPE, MetaBuilding.APARTMENT).append(SUPPLY, (sumA + demandA)).append(DEMAND, demandA).append(TIME, endTime).append(TYPE, INDUSTRY));
         // retailShop
         int sumR = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL, new HashSet<>()).stream().mapToInt(Building::getTotalSaleCount).sum();
         long demandR = LogDb.queryIndestrySum(startTime, endTime,LogDb.getNpcBuyInShelf());
-        list.add(new Document().append("bt", MetaBuilding.RETAIL).append("supply", (sumR + demandR)).append("demand", demandR).append("time", endTime).append("type", 1));
+        list.add(new Document().append(BUILDINGTYPE, MetaBuilding.RETAIL).append(SUPPLY, (sumR + demandR)).append(DEMAND, demandR).append(TIME, endTime).append(TYPE, INDUSTRY));
         // ground
         int sellingCount = GroundManager.instance().getAllSellingCount();
         long demandG = LogDb.queryIndestrySum(startTime, endTime,LogDb.getBuyGround());
-        list.add(new Document().append("bt", Gs.SupplyAndDemand.IndustryType.GROUND_VALUE).append("supply", (sellingCount + demandG)).append("demand", demandG).append("time", endTime));
+        list.add(new Document().append(BUILDINGTYPE, Gs.SupplyAndDemand.IndustryType.GROUND_VALUE).append(SUPPLY, (sellingCount + demandG)).append(DEMAND, demandG).append(TIME, endTime).append(TYPE, INDUSTRY));
         return list;
     }
 
@@ -114,20 +122,20 @@ public class IndustryMgr {
                 saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
             });
             long deman = LogDb.queryIndestrySum(MetaBuilding.MATERIAL, startTime, endTime, itemId);
-            list.add(new Document().append("bt", MetaBuilding.MATERIAL).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+            list.add(new Document().append(BUILDINGTYPE, MetaBuilding.MATERIAL).append(SUPPLY, (saleNum.get() + deman)).append(DEMAND, deman).append(TIME, endTime).append(TYPE, ITEM).append("tpi", itemId));
         });
         return list;
     }
 
     public List<Document> produceSource(long startTime, long endTime) {
         List<Document> list = new ArrayList<>();
-        MetaData.getAllMaterialId().stream().forEach(itemId -> {
+        MetaData.getAllGoodId().stream().forEach(itemId -> {
             AtomicInteger saleNum = new AtomicInteger();
             City.instance().typeBuilding.getOrDefault(MetaBuilding.PRODUCE, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
                 saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
             });
             long deman = LogDb.queryIndestrySum(MetaBuilding.PRODUCE, startTime, endTime, itemId);
-            list.add(new Document().append("bt", MetaBuilding.PRODUCE).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+            list.add(new Document().append(BUILDINGTYPE, MetaBuilding.PRODUCE).append(SUPPLY, (saleNum.get() + deman)).append(DEMAND, deman).append(TIME, endTime).append(TYPE, ITEM).append("tpi", itemId));
         });
         return list;
     }
@@ -140,7 +148,7 @@ public class IndustryMgr {
                 saleNum.addAndGet(((ScienceBuildingBase) b).getShelf().getSaleNum(itemId));
             });
             long deman = LogDb.queryIndestrySum(MetaBuilding.PROMOTE, startTime, endTime, itemId);
-            list.add(new Document().append("bt", MetaBuilding.PROMOTE).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+            list.add(new Document().append(BUILDINGTYPE, MetaBuilding.PROMOTE).append(SUPPLY, (saleNum.get() + deman)).append(DEMAND, deman).append(TIME, endTime).append(TYPE, ITEM).append("tpi", itemId));
         });
         return list;
     }
@@ -153,7 +161,7 @@ public class IndustryMgr {
                 saleNum.addAndGet(((ScienceBuildingBase) b).getShelf().getSaleNum(itemId));
             });
             long deman = LogDb.queryIndestrySum(MetaBuilding.TECHNOLOGY, startTime, endTime, itemId);
-            list.add(new Document().append("bt", MetaBuilding.TECHNOLOGY).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+            list.add(new Document().append(BUILDINGTYPE, MetaBuilding.TECHNOLOGY).append(SUPPLY, (saleNum.get() + deman)).append(DEMAND, deman).append(TIME, endTime).append(TYPE, ITEM).append("tpi", itemId));
         });
         return list;
     }
@@ -166,7 +174,7 @@ public class IndustryMgr {
                 saleNum.addAndGet(((RetailShop) b).getShelf().getSaleNum(itemId));
             });
             long deman = LogDb.queryRetailSum(startTime, endTime, itemId);
-            list.add(new Document().append("bt", MetaBuilding.RETAIL).append("supply", (saleNum.get() + deman)).append("demand", deman).append("time", endTime).append("type", 2).append("tpi", itemId));
+            list.add(new Document().append(BUILDINGTYPE, MetaBuilding.RETAIL).append(SUPPLY, (saleNum.get() + deman)).append(DEMAND, deman).append(TIME, endTime).append(TYPE, ITEM).append("tpi", itemId));
         });
         return list;
     }
@@ -198,7 +206,6 @@ public class IndustryMgr {
         switch (industryType) {
             case MetaBuilding.MATERIAL:
                 City.instance().typeBuilding.getOrDefault(MetaBuilding.MATERIAL, new HashSet<>()).stream().filter(o -> !o.outOfBusiness()).forEach(b -> {
-                    FactoryBase factoryBase = (FactoryBase) b;
                     saleNum.addAndGet(((FactoryBase) b).getShelf().getSaleNum(itemId));
                     return;
                 });
@@ -228,7 +235,7 @@ public class IndustryMgr {
         }
     }
 
-    // 详细商品今日货架剩余数量
+    // 成交数量
     public  long getTodayDemand(int industryType) {
         long startTime = getEndTime(System.currentTimeMillis());
         long endTime = System.currentTimeMillis();
@@ -275,25 +282,23 @@ public class IndustryMgr {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, buildingType, LogDb.getDayPlayerIncome());
-        ArrayList<TopInfo> tops = new ArrayList<>();
-        list.stream().filter(o->o!=null).forEach(d->{
-            UUID pid = d.get("id", UUID.class);
-            // 玩家行业总工人数
-            int staffNum = getPlayerIndustryStaffNum(pid, buildingType);
-            // 玩家名称
-            Player player = GameDb.getPlayer(pid);
-            String playerName =  player == null ? "" : player.getName();
-            //faceId
-            String faceId = player == null ? "" : player.getFaceId();
-            // 玩家昨日收入
-            long total = d.getLong(KEY_TOTAL);
-            Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
-            long promotion = map.getOrDefault(PROMOTION, 0l);
-            // 玩家研究点数
-            long science = map.getOrDefault(TECHNOLOGY, 0l);
-            tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
-        });
-        return tops;
+        return list.stream().map(o -> {
+            try {
+                UUID pid = o.get("id", UUID.class);
+                // 玩家行业总工人数
+                int staffNum = getPlayerIndustryStaffNum(pid, buildingType);
+                Player player = GameDb.getPlayer(pid);
+                // 玩家昨日收入
+                long total = o.getLong(KEY_TOTAL);
+                Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
+                long promotion = map.getOrDefault(PROMOTION, 0l);
+                // 玩家研究点数
+                long science = map.getOrDefault(TECHNOLOGY, 0l);
+                return new TopInfo(pid, player.getFaceId(), player.getName(), total, staffNum, science, promotion);
+            } catch (Exception e) {
+                return null;
+            }
+        }).filter(o -> o != null).collect(Collectors.toList());
     }
 
     // 获取玩家行业总人工数
@@ -313,21 +318,21 @@ public class IndustryMgr {
     public List<TopInfo> queryTop() {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
-        List<Document> list = LogDb.dayYesterdayPlayerByGroundIncome(startTime, endTime, LogDb.getDayPlayerIncome());
-        ArrayList<TopInfo> tops = new ArrayList<>();
-        list.stream().filter(o -> o.getInteger("id") != null).forEach(d -> {
-            UUID pid = d.get("id", UUID.class);
-            Player player = GameDb.getPlayer(pid);
-            // 玩家名称
-            String playerName = player == null ? "" : player.getName();
-            String faceId = player == null ? "" : player.getFaceId();
-            // 玩家昨日收入
-            long total = d.getLong(KEY_TOTAL);
-            // 成交量
-            int count = LogDb.groundSum(startTime, endTime, pid); // 查询土地成交量
-            tops.add(new TopInfo(pid, faceId, playerName, total, count));
-        });
-        return tops;
+        List<Document> list = LogDb.dayYesterdayPlayerByGroundIncome(startTime, endTime, LogDb.getBuyGround());
+        return list.stream().map(o -> {
+            try {
+                UUID pid = o.get("id", UUID.class);
+                Player player = GameDb.getPlayer(pid);
+                // 玩家昨日收入
+                long total = o.getLong(KEY_TOTAL);
+                // 成交量
+                int count = LogDb.groundSum(startTime, endTime, pid); // 查询土地成交量
+
+                return new TopInfo(pid, player.getFaceId(), player.getName(), total, count);
+            } catch (Exception e) {
+                return null;
+            }
+        }).filter(o -> o != null).collect(Collectors.toList());
     }
 
     public TopInfo queryMyself(UUID owner, int type) {
@@ -336,22 +341,20 @@ public class IndustryMgr {
         if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
             long ground = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
             Player player = GameDb.getPlayer(owner);
-            String name = player == null ? "" : player.getName();
+            String name = player.getName();
             String faceId = player.getFaceId();
             int count = LogDb.groundSum(startTime, endTime, owner); // 查询土地成交量
             return new TopInfo(owner, faceId, name, ground, count);
         } else {
             long myself = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
             Player player = GameDb.getPlayer(owner);
-            String name = player == null ? "" : player.getName();
-            String faceId = player.getFaceId();
             int staffNum = getPlayerIndustryStaffNum(owner, type);
             Map<Integer, Long> map = EvaManager.getInstance().getScience(owner, type);
             // 玩家推广点数投入
             long promotion = map.getOrDefault(PROMOTION, 0l);
             // 玩家研究点数
             long science = map.getOrDefault(TECHNOLOGY, 0l);
-            return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
+            return new TopInfo(owner, player.getFaceId(), player.getName(), myself, staffNum, science, promotion);
         }
     }
 
@@ -359,73 +362,67 @@ public class IndustryMgr {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
         List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, LogDb.getDayPlayerIncome());
-        ArrayList<TopInfo> tops = new ArrayList<>();
-        list.stream().filter(o->o!=null).forEach(d->{
-            UUID pid = d.get("id", UUID.class);
-            // 玩家总工人数
-            long staffNum = City.instance().getPlayerStaffNum(pid);
-            // 玩家名称
-            Player player = GameDb.getPlayer(pid);
-            String playerName =  player == null ? "" : player.getName();
-            //faceId
-            String faceId = player == null ? "" : player.getFaceId();
-            // 玩家昨日收入
-            long total = d.getLong(KEY_TOTAL);
-            Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(pid);
-            // 玩家推广点数投入
-            long promotion = map.getOrDefault(PROMOTION, 0l);
-            // 玩家研究点数
-            long science = map.getOrDefault(TECHNOLOGY, 0l);
-            tops.add(new TopInfo(pid,faceId,playerName, total, staffNum, science, promotion));
-        });
-        return tops;
+        return list.stream().map(o -> {
+            try {
+                UUID pid = o.get("id", UUID.class);
+                // 玩家总工人数
+                long staffNum = City.instance().getPlayerStaffNum(pid);
+                Player player = GameDb.getPlayer(pid);
+                // 玩家昨日收入
+                long total = o.getLong(KEY_TOTAL);
+                Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(pid);
+                // 玩家推广点数投入
+                long promotion = map.getOrDefault(PROMOTION, 0l);
+                // 玩家研究点数
+                long science = map.getOrDefault(TECHNOLOGY, 0l);
+                return new TopInfo(pid, player.getFaceId(), player.getName(), total, staffNum, science, promotion);
+            } catch (Exception e) {
+                return null;
+            }
+        }).filter(o -> o != null).collect(Collectors.toList());
     }
 
     public TopInfo queryMyself(UUID owner) {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
         long myself = LogDb.queryMyself(startTime, endTime, owner, LogDb.getDayPlayerIncome());
-        ArrayList<TopInfo> tops = new ArrayList<>();
         Player player = GameDb.getPlayer(owner);
         long staffNum = City.instance().getPlayerStaffNum(owner);
-        String name = player == null ? "" : player.getName();
-        String faceId =player == null ? "" :  player.getFaceId();
         Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(owner);
         // 玩家推广点数投入
         long promotion = map.getOrDefault(PROMOTION, 0l);
         // 玩家研究点数
         long science = map.getOrDefault(TECHNOLOGY, 0l);
-        return new TopInfo(owner, faceId, name, myself, staffNum, science, promotion);
+        return new TopInfo(owner, player.getFaceId(), player.getName(), myself, staffNum, science, promotion);
     }
 
     public List<TopInfo> queryProductRanking(int bt, int itemId) {
         long endTime = getEndTime(System.currentTimeMillis());
         long startTime = endTime - DAY_MILLISECOND;
-        ArrayList<TopInfo> tops = new ArrayList<>();
         List<Document> list = null;
         if (bt == MetaBuilding.RETAIL) {
             list = LogDb.dayYesterdayRetailProductIncome(startTime, endTime, itemId, LogDb.getNpcBuyInShelf());
         } else {
             list = LogDb.dayYesterdayProductIncome(startTime, endTime, itemId, bt, LogDb.getBuyInShelf());
         }
-        list.stream().filter(o -> o != null).forEach(d -> {
-            UUID pid = d.get("id", UUID.class);
-            int staffNum = getPlayerIndustryStaffNum(pid, bt);
-            // 玩家名称
-            Player player = GameDb.getPlayer(pid);
-            String playerName = player == null ? "" : player.getName();
-            //faceId
-            String faceId = player == null ? "" : player.getFaceId();
-            long total = d.getLong(KEY_TOTAL);
-            // 具体商品投入的点数
-            Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(pid, itemId);
-            // 玩家推广点数投入
-            long promotion = map.getOrDefault(PROMOTION, 0l);
-            // 玩家研究点数
-            long science = map.getOrDefault(TECHNOLOGY, 0l);
-            tops.add(new TopInfo(pid, faceId, playerName, total, staffNum, science, promotion));
-        });
-        return tops;
+        return list.stream().map(o -> {
+            try {
+                UUID pid = o.get("id", UUID.class);
+                int staffNum = getPlayerIndustryStaffNum(pid, bt);
+                Player player = GameDb.getPlayer(pid);
+                long total = o.getLong(KEY_TOTAL);
+                // 具体商品投入的点数
+                Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(pid, itemId);
+                // 玩家推广点数投入
+                long promotion = map.getOrDefault(PROMOTION, 0l);
+                // 玩家研究点数
+                long science = map.getOrDefault(TECHNOLOGY, 0l);
+
+                return new TopInfo(pid, player.getFaceId(), player.getName(), total, staffNum, science, promotion);
+            } catch (Exception e) {
+                return null;
+            }
+        }).filter(o -> o != null).collect(Collectors.toList());
     }
 
     public TopInfo queryMyself(UUID owner, int bt, int itemId) {
@@ -438,8 +435,6 @@ public class IndustryMgr {
             income = LogDb.queryMyself(startTime, endTime, owner, bt, itemId, LogDb.getBuyInShelf());
         }
         Player player = GameDb.getPlayer(owner);
-        String name = player == null ? "" : player.getName();
-        String faceId = player == null ? "" : player.getFaceId();
         int staffNum = getPlayerIndustryStaffNum(owner, bt);
         Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(owner, itemId);
         // 玩家推广点数投入
@@ -447,7 +442,7 @@ public class IndustryMgr {
         // 玩家研究点数
         long science = map.getOrDefault(TECHNOLOGY, 0l);
 
-        return new TopInfo(owner, faceId, name, income, staffNum, science, promotion);
+        return new TopInfo(owner, player.getFaceId(), player.getName(), income, staffNum, science, promotion);
     }
 
 }
