@@ -1,11 +1,9 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
-import Game.CityInfo.TopInfo;
-import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
-import Game.Gambling.FlightManager;
 import Game.CityInfo.IndustryMgr;
+import Game.Contract.ContractManager;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
@@ -23,7 +21,6 @@ import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
-import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
