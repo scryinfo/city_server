@@ -414,7 +414,7 @@ public class LogDb {
 								Aggregates.match(and(
 										gte("t", yestodayStartTime),
 										lt("t", todayStartTime))),
-										Aggregates.group("$tp", Accumulators.sum(KEY_TOTAL, "$a")),
+										Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a")),
 								Aggregates.project(projectObject)
 						)
 		).forEach((Block<? super Document>) documentList::add);
@@ -1753,7 +1753,7 @@ public class LogDb {
 								lte("t", endTime)
 						)),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
-						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.sort(Sorts.descending(KEY_TOTAL)),
 						Aggregates.limit(10),
 						Aggregates.project(projectObject)
 				)
@@ -1775,7 +1775,7 @@ public class LogDb {
 								lte("t", endTime)
 						)),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
-						Aggregates.sort(Sorts.descending("total")),
+						Aggregates.sort(Sorts.descending(KEY_TOTAL)),
 						Aggregates.limit(10),
 						Aggregates.project(projectObject)
 				)
@@ -1792,8 +1792,9 @@ public class LogDb {
 		collection.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
-								gte("t", strartTime),
-								lte("t", endTime)
+								ne("id",null),
+								gte("time", strartTime),
+								lte("time", endTime)
 						)),
 						Aggregates.group("$id", Accumulators.sum(KEY_TOTAL, "$total")),
 						Aggregates.sort(Sorts.descending("total")),
@@ -2165,7 +2166,7 @@ public class LogDb {
 			cityMoneyPool.insertOne(new Document().append(KEY_TOTAL,total).append("time",time));
 	}
 
-	public static List<Document> querySupplyAndDemand(int type) {
+	public static List<Document> querySupplyAndDemand(int bt) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
 		calendar.set(Calendar.HOUR_OF_DAY,0);
@@ -2180,7 +2181,7 @@ public class LogDb {
 		long startTime=startDate.getTime();
 		List<Document> documentList = new ArrayList<>();
 		industrySupplyAndDemand.find(and(
-				eq("bt", type),
+				eq("bt", bt),
 				eq("type", 1),
 				gte("time", startTime),
 				lt("time", endTime)

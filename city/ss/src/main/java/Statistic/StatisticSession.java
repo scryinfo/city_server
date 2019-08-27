@@ -557,29 +557,27 @@ public class StatisticSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-
+	//城市信息-行业收入
 	public void queryIndustryIncome(short cmd) {
 		List<IndustryInfo> infos = SummaryUtil.queryIndustryIncom();
 		Map<Long, Map<Integer, Long>> map = SummaryUtil.queryInfo(infos);
 		Ss.IndustryIncome.Builder builder = Ss.IndustryIncome.newBuilder();
 		if (!map.isEmpty() && map.size() > 0) {
-			map.forEach((k,v)->{
-				Ss.IndustryIncome.IncomeInfo.Builder info = Ss.IndustryIncome.IncomeInfo.newBuilder();
+			map.forEach((k, v) -> {
+				Ss.IndustryIncome.IncomeInfo.Builder info = builder.addInfoBuilder();
 				info.setTime(k);
-				if (!v.isEmpty() && v!=null) {
-					v.forEach((x,y)->{
-						Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
+				if (!v.isEmpty() && v != null) {
+					v.forEach((x, y) -> {
+						Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = info.addMsgBuilder();
 						msg.setType(x).setIncome(y);
-						info.addMsg(msg);
 					});
 				}
-				builder.addInfo(info);
 			});
 
 		}
 		// 今日行业收入
-        builder.addInfo(SummaryUtil.queryTodayIncome());
-		this.write(Package.create(cmd,builder.build()));
+		builder.addInfo(SummaryUtil.queryTodayIncome());
+		this.write(Package.create(cmd, builder.build()));
 
 	}
 

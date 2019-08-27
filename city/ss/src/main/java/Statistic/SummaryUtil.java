@@ -1040,7 +1040,7 @@ public class SummaryUtil {
     public static List<IndustryInfo> queryIndustryIncom() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
+        calendar.set(Calendar.HOUR_OF_DAY,0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND,0);
@@ -1070,10 +1070,9 @@ public class SummaryUtil {
         }).filter(o -> o != null).collect(Collectors.toList());
 
     }
-
+    // 用时间分组
     public static Map<Long, Map<Integer, Long>> queryInfo(List<IndustryInfo> infos) {
-        Map<Long, Map<Integer, Long>> map = infos.stream().collect(Collectors.groupingBy(IndustryInfo::getTime, Collectors.toMap(IndustryInfo::getType, IndustryInfo::getTotal)));
-        return map;
+        return infos.stream().collect(Collectors.groupingBy(IndustryInfo::getTime, Collectors.toMap(IndustryInfo::getType, IndustryInfo::getTotal)));
     }
 
     public static long queryTodayIncome(long start, long endTime,int type) {
@@ -1163,9 +1162,8 @@ public class SummaryUtil {
         Ss.IndustryIncome.IncomeInfo.Builder builder = Ss.IndustryIncome.IncomeInfo.newBuilder();
         builder.setTime(todayStartTime(System.currentTimeMillis()));
         map.forEach((k,v)->{
-            Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = Ss.IndustryIncome.IncomeInfo.IncomeMsg.newBuilder();
+            Ss.IndustryIncome.IncomeInfo.IncomeMsg.Builder msg = builder.addMsgBuilder();
             msg.setType(k).setIncome(v);
-            builder.addMsg(msg);
         });
         return builder.build();
     }
@@ -1476,7 +1474,7 @@ public class SummaryUtil {
         List<Document> documentList = new ArrayList<>();
         collection.aggregate(
                 Arrays.asList(
-                        Aggregates.match(and(gte("t", startTime), lte("t", nowTime))),
+                        Aggregates.match(and(ne("p",null),gte("t", startTime), lte("t", nowTime))),
                         Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a"))
                 )
         ).forEach((Block<? super Document>) documentList::add);
