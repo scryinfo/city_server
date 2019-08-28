@@ -76,7 +76,7 @@ public class GoApartment implements IAction {
             buyKnownValueMap.put(k,buyKnownValue);
         });
         //随机选择3个住宅加入备选列表
-        Map<Building,Double> buyKnownBak=getRandomNN(moveKnownMap,3,cost,10);
+        Map<Building,Double> buyKnownBak=getRandomNN(buyKnownValueMap,3,cost,10);
         //如果没有备选,则原地不动
         if(buyKnownBak==null||buyKnownBak.size()==0){
             return null;
@@ -190,7 +190,7 @@ public class GoApartment implements IAction {
                 if(n<0){
                     break;
                 }
-                newMap.put(keyList.get(j),list.get(j));
+                newMap.put(b,list.get(j));
             }
         }
         return newMap;

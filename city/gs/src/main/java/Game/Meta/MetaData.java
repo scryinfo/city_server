@@ -37,6 +37,8 @@ public class MetaData {
     private static final String aiBuildingColName = "AIBuilding";
     private static final String aiBuyColName = "AIBuy";
     private static final String aiLuxColName = "AILux";
+    private static final String aiSelectColName = "AISelect";
+    private static final String aiSelectGoodColName = "AISelectGood";
     private static final String dayColName = "Holiday";
     private static final String buildingSpendColName = "BuildingSpendRatio";
     private static final String goodSpendColName = "GoodSpendRatio";
@@ -75,6 +77,8 @@ public class MetaData {
     private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
     private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
     private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
+    private static final TreeMap<Long, AISelect> aiSelect = new TreeMap<>();
+    private static final TreeMap<Integer, Integer> aiSelectGood = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Integer> costSpendRatio = new TreeMap<>();
@@ -344,6 +348,12 @@ public class MetaData {
     public static AILux getAILux(long id) {
         return aiLux.get(id);
     }
+    public static AISelect getAISelect(long id) {
+        return aiSelect.get(id);
+    }
+    public static int getAISelectGood(long id) {
+        return aiSelectGood.get(id);
+    }
     public static List<InitialBuildingInfo> getAllInitialBuilding() {
         return initialBuilding;
     }
@@ -413,6 +423,17 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(aiLuxColName).find().forEach((Block<Document>) doc -> {
             AILux m = new AILux(doc);
             aiLux.put(m.id, m);
+        });
+    }
+    private static void initAISelect() {
+        mongoClient.getDatabase(dbName).getCollection(aiSelectColName).find().forEach((Block<Document>) doc -> {
+            AISelect m = new AISelect(doc);
+            aiSelect.put(m.id, m);
+        });
+    }
+    private static void initAISelectGood() {
+        mongoClient.getDatabase(dbName).getCollection(aiSelectGoodColName).find().forEach((Block<Document>) doc -> {
+            aiSelectGood.put(doc.getInteger("gid"),doc.getInteger("_id"));
         });
     }
 //	public static void initNpc() {
@@ -622,6 +643,8 @@ public class MetaData {
         initAIBuilding();
         initAIBuy();
         initAILux();
+        initAISelect();
+        initAISelectGood();
         initDayId();
         initSpendRatio();
 
