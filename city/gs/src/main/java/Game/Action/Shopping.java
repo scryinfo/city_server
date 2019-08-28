@@ -45,13 +45,13 @@ public class Shopping implements IAction {
         Map<Building,Double> moveKnownMap=new HashMap<Building,Double>();
         Map<ItemKey,City.GoodSellInfo> buyKnownValueMap=new HashMap<ItemKey,City.GoodSellInfo>();
         AISelect aiSelect = MetaData.getAISelect(aiId);
-        for(City.GoodSellInfo goodSellInfo:goodSellInfos){//商品id重复有影响没？
+        for(City.GoodSellInfo goodSellInfo:goodSellInfos){
             ItemKey itemKey=goodSellInfo.itemKey;
             int goodMetaId=itemKey.meta.id;
             //实际某种商品购物预期(已发明) = 商品购物预期 * (1 + 全城某种商品知名度均值 / 全城知名度均值) * (1 + 全城某种商品品质均值 / 全城品质均值)
-            double realApartmentSpend=MetaData.getCostSpendRatio(goodMetaId)* (1 +  AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT) /AiBaseAvgManager.getInstance().getAllBrandAvg()) * (1 +  AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT) / AiBaseAvgManager.getInstance().getAllQualityAvg());
+            double realGoodSpend=MetaData.getCostSpendRatio(goodMetaId)* (1 +  AiBaseAvgManager.getInstance().getBrandMapVal(goodMetaId) /AiBaseAvgManager.getInstance().getAllBrandAvg()) * (1 +  AiBaseAvgManager.getInstance().getQualityMapVal(goodMetaId) / AiBaseAvgManager.getInstance().getAllQualityAvg());
             //NPC商品小类预期消费 = 城市工资标准 * (实际某种商品购物预期 / 实际总购物预期)
-            final int subCost = (int) (npc.salary() * (realApartmentSpend/allCostSpend));
+            final int subCost = (int) (npc.salary() * (realGoodSpend/allCostSpend));
             sumGoodSpendRatio+=MetaData.getCostSpendRatio(goodMetaId);
 
             logger.info("goodSellInfo goodSellInfo.b: " + goodSellInfo.b+" goodSellInfo.moveKnownValue: "+goodSellInfo.moveKnownValue);
