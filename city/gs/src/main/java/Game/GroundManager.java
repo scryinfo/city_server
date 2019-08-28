@@ -405,7 +405,7 @@ public class GroundManager {
             plist1.add(new LogDb.Positon(c.x, c.y));
             miniIndexList.add(c.toProto());
         }
-        LogDb.buyGround(buyer.id(),sellerId,price,plist1);//cost不包含矿工费用，并非真实收入
+        LogDb.buyGround(buyer.id(),sellerId,price,plist1,minerCost);//cost不包含矿工费用，并非真实收入
         for(GroundInfo i : gis) {
             swapOwner(buyer.id(), seller.id(), i);
         }

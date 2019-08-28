@@ -5202,9 +5202,8 @@ public class GameSession {
                     build.addIncomePay(incomePay.build());
                 });
             }
-        }else{//支出
-            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()
-                    ||buildType==Gs.PlayerIncomePay.BuildType.TECHNOLOGY.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PROMOTE.getNumber()){
+        }else{//支出（所有货架支出要加上旷工费(需要加2次)）
+            if(buildType==Gs.PlayerIncomePay.BuildType.MATERIAL.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PRODUCE.getNumber()){
                 list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
                 list.forEach(document -> {
                     Building buyBuilding = City.instance().getBuilding(document.get("w",UUID.class));
@@ -5212,7 +5211,7 @@ public class GameSession {
                     if(buildType==MetaItem.type(buyBuilding.metaId())){
                     incomePay.setItemId(document.getInteger("tpi"))
                             .setNum((int)(document.getLong("a")/document.getLong("p")))
-                            .setAmount(document.getLong("a"))
+                            .setAmount(document.getLong("a")+2*document.getLong("miner")) //加上旷工费（此处的价格是已经扣除了旷工费，所以要加2次旷工费）
                             .setTime(document.getLong("t"))
                             .setName(buyBuilding.getName())
                             .setMetaId(buyBuilding.metaId());
@@ -5250,7 +5249,20 @@ public class GameSession {
                         build.addIncomePay(incomePay.build());
                     }
                 });
-            }else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
+            }else if(buildType==Gs.PlayerIncomePay.BuildType.TECHNOLOGY.getNumber()||buildType==Gs.PlayerIncomePay.BuildType.PROMOTE.getNumber()){
+                list = LogDb.daySummaryShelfPay(yestodayStartTime, todayStartTime, LogDb.getBuyInShelf(),type,playerId);
+                list.forEach(document -> {
+                    Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
+                        incomePay.setItemId(5000)
+                                .setNum((int)(document.getLong("a")/document.getLong("p")))
+                                .setAmount(document.getLong("a")+2*document.getLong("miner"))
+                                .setTime(document.getLong("t"))
+                                .setName("Eva点数")
+                                .setMetaId(document.getInteger("tpi"));
+                        build.addIncomePay(incomePay.build());
+                });
+            }
+            else if(buildType==Gs.PlayerIncomePay.BuildType.APARTMENT.getNumber()){
             }else if(buildType==Gs.PlayerIncomePay.BuildType.GROUND.getNumber()){
                 list = LogDb.daySummaryGroundPay(yestodayStartTime, todayStartTime, LogDb.getBuyGround(),buildType,playerId);
                 list.forEach(document -> {

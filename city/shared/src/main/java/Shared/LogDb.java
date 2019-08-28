@@ -618,7 +618,7 @@ public class LogDb {
 								eq("r", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b","miner"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -1076,12 +1076,13 @@ public class LogDb {
 				.append("p", price)
 				.append("n",n)				//yty  数量
 				.append("brand",brand)      //yty 品牌名
-				.append("a", n * price+minerCost)
+				.append("a", n * price-minerCost)
 				.append("i", producerId)
 				.append("tp", type)
 				.append("tpi", typeId)
 				.append("score", score)
-				.append("bt",buildingType);
+				.append("bt",buildingType)
+				.append("miner",minerCost);
 		buyInShelf.insertOne(document);
 	}
 
@@ -1104,7 +1105,8 @@ public class LogDb {
 				.append("gbrd", gbrd) //商品知名度
 				.append("gqty", gqty) //商品品质
 				.append("rbrd", rbrd) //零售店知名度
-				.append("rqty", rqty);//零售店品质
+				.append("rqty", rqty)//零售店品质
+				.append("miner",minerCost);//旷工费
 		npcBuyInShelf.insertOne(document);
 	}
 
@@ -1154,7 +1156,7 @@ public class LogDb {
 		rentGround.insertOne(document);
 	}
 
-	public static void buyGround(UUID roleId, UUID ownerId, long price, List<Positon> plist1)
+	public static void buyGround(UUID roleId, UUID ownerId, long price, List<Positon> plist1,Long minerCost)
 	{
 		long all = price;
 		if (ownerId != null) {
@@ -1166,7 +1168,8 @@ public class LogDb {
 				.append("s", price)
 				.append("n", plist1.size())  // 地块数量
 				.append("a", all)
-				.append("p", positionToDoc(plist1));
+				.append("p", positionToDoc(plist1))
+				.append("miner",minerCost);		//yty 旷工费
 		buyGround.insertOne(document);
 	}
 	public static void landAuction(UUID roleId, UUID ownerId, long price, List<Positon> plist1)
