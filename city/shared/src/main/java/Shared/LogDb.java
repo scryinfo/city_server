@@ -2101,7 +2101,7 @@ public class LogDb {
 						Aggregates.group(null,Accumulators.sum(KEY_TOTAL,"$n"))
 				)
 		).forEach((Block<? super Document>) d->{
-			count[0] =d.getLong(KEY_TOTAL);
+			count[0] =d.getInteger(KEY_TOTAL);
 		});
 		return count[0];
 	}
@@ -2113,7 +2113,7 @@ public class LogDb {
 						Aggregates.group(null,Accumulators.sum(KEY_TOTAL,"$n"))
 				)
 		).forEach((Block<? super Document>) d->{
-			count[0] =d.getLong(KEY_TOTAL);
+			count[0] =d.getInteger(KEY_TOTAL);
 		});
 		return count[0];
 	}
@@ -2126,7 +2126,7 @@ public class LogDb {
 						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$n"))
 				)
 		).forEach((Block<? super Document>) d -> {
-			count[0] = d.getLong(KEY_TOTAL);
+			count[0] = d.getInteger(KEY_TOTAL);
 		});
 		return count[0];
 
