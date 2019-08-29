@@ -1,5 +1,6 @@
 package Game.CityInfo;
 
+import Game.BrandManager;
 import Game.Eva.EvaManager;
 import Game.GameDb;
 import Game.GameServer;
@@ -107,9 +108,10 @@ public class CityLevel {
                 //同步全城原料
                 CityManager.instance().cityMaterial.addAll(newMaterialId);
                 //TODO 给全城所有的玩家们发邮件通知xx新商品产生了，xxx原料产生了
-                /*分别把新商品和新原料添加给所有玩家*/
-                newMaterialId.add(itemId);
                 List<Player> allPlayer = GameDb.getAllPlayer();
+                BrandManager.instance().addNewGoodBrand(allPlayer,itemId);
+                newMaterialId.add(itemId);
+                /*分别把新商品和新原料添加给所有玩家*/
                 CityGoodInfo.updatePlayerGoodList(allPlayer,newMaterialId);
                 /*同时推送给所有的在线玩家新商品信息*/
                 GameServer.sendToAll(Package.create(GsCode.OpCode.newGoodMessage_VALUE,newGoodInfo.build()));

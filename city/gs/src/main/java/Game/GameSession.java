@@ -847,6 +847,10 @@ public class GameSession {
         if(s.addshelf(item, c.getPrice(),c.getAutoRepOn())) {
             GameDb.saveOrUpdate(s);
             Gs.ShelfAdd.Builder builder = c.toBuilder().setItem(item.toProto());
+            /*更新零售店Npc购物信息*/
+            if(building.type()==MetaBuilding.RETAIL) {
+                City.instance().buildRetailMoveKnownValue(building);
+            }
             this.write(Package.create(cmd, builder.build()));
         }
         else {
@@ -904,6 +908,10 @@ public class GameSession {
                 building.sendToWatchers(building.id(),item.key.meta.id, content.n,content.price,content.autoReplenish,producerId);
             }
             this.write(Package.create(cmd, c));
+            /*更新零售店的商品信息 移除掉下架的商品*/
+            if(building.type()==MetaBuilding.RETAIL) {
+                City.instance().removeRetailGoodInfo(building, item.key);
+            }
         }
         else{
             //this.write(Package.fail(cmd));
@@ -926,6 +934,10 @@ public class GameSession {
         if(s.shelfSet(item, c.getPrice(),c.getAutoRepOn())){
             GameDb.saveOrUpdate(s);
             this.write(Package.create(cmd, c));
+            /*更新零售点商品信息*/
+            if(building.type()==MetaBuilding.RETAIL) {
+                City.instance().buildRetailMoveKnownValue(building);
+            }
         } else {
             this.write(Package.fail(cmd, Common.Fail.Reason.numberNotEnough));
             //this.write(Package.fail(cmd));

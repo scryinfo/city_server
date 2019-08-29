@@ -731,7 +731,7 @@ public class City {
     public Map<Building,Double> getMoveKnownaApartmentMap(){
         return moveKnownApartmentMap;
     }
-    //购买零售店moveKnownValue   启动时
+    //购买零售店moveKnownValue   启动时  (修改零售店货架时、零售店上架、下架时)
     public void buildRetailMoveKnownValue(Building b){
         moveKnownRetailMap(b);
     }
@@ -809,6 +809,20 @@ public class City {
             return "type " + type + ", lux " + lux;
         }
     }
+
+    /*零售店下架时或调用、也可用于移除掉没有数量的商品  （移除单个商品）*/
+    public void removeRetailGoodInfo(Building b,ItemKey key){
+        MetaGood goods=MetaData.getGood(key.meta.id);
+        MetaGood.Type type=MetaGood.goodType(goods.id);
+        GoodFilter filter=new GoodFilter();
+        filter.type=type.ordinal();
+        filter.lux=goods.lux;
+        GoodSellInfo sellInfo= new GoodSellInfo();
+        sellInfo.itemKey = key;
+        sellInfo.b = b;
+        retailShopGoodMap.getOrDefault(filter, new HashSet<>()).remove(sellInfo);
+    }
+
     public static final class GoodSellInfo {
         public Building b;   //零售店
         public ItemKey itemKey; //商品信息
@@ -830,7 +844,7 @@ public class City {
                 return true;
             if(obj instanceof GoodSellInfo){
                 GoodSellInfo other = (GoodSellInfo) obj;
-                if((this.b==other.b)&&(this.itemKey==other.itemKey)){
+                if((this.b.equals(other.b))&&(this.itemKey.equals(other.itemKey))){
                     return true;
                 }else{
                     return false;

@@ -52,14 +52,14 @@ public class ItemKey implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItemKey itemKey = (ItemKey) o;
-        return qty == itemKey.qty &&
+        return getTotalQty() == itemKey.getTotalQty() &&
                 Objects.equals(meta, itemKey.meta) &&
                 Objects.equals(producerId, itemKey.producerId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(meta, producerId, qty);
+        return Objects.hash(meta, producerId,getTotalQty());
     }
 
     @Convert(converter = MetaItem.Converter.class)

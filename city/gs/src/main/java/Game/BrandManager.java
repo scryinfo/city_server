@@ -1,5 +1,6 @@
 package Game;
 
+import Game.CityInfo.CityManager;
 import Game.Eva.Eva;
 import Game.Eva.EvaManager;
 import Game.League.BrandLeague;
@@ -157,6 +158,10 @@ public class BrandManager {
         public int getV() {
             return v;
         }
+
+        public void setV(int v) {
+            this.v = v;
+        }
     }
     public void update(long diffNano) {
         if(dbSaveTimer.update(diffNano))
@@ -171,7 +176,7 @@ public class BrandManager {
     private PeriodicTimer brandQualityTimer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(1));
     public void update(UUID playerId, int mid, int add) {
         BrandInfo i = allBrandInfo.computeIfAbsent(new BrandKey(playerId, mid), k->new BrandInfo(k));
-        i.v += add;
+        i.v+=add;
         refineCache(i, add);
     }
     public static final class BuildingRatio {
@@ -341,6 +346,7 @@ public class BrandManager {
         BrandInfo bInfo = allBrandInfo.get(bk);
         if(bInfo == null){
             bInfo = new BrandInfo(bk);
+            bInfo.setV(BrandManager.BASE_BRAND);
             allBrandInfo.put(bk,bInfo);
             GameDb.saveOrUpdate(this);
             return true;
@@ -469,5 +475,75 @@ public class BrandManager {
     public boolean brandIsExist(UUID pid, int typeId){//查询是否存在该品牌信息
         BrandKey bk = new BrandKey(pid,typeId);
         return null==allBrandInfo.get(bk)?false:true;
+    }
+
+    /*新版品牌值更新*/
+    /*更新品牌信息，品牌已经由推广公司改为Eva加点来提升了*/
+    public void updateBrandValue(List<Eva> brandEvaUpdates) {
+        brandEvaUpdates.forEach(eva->{
+            BrandKey brandKey = new BrandKey(eva.getPid(), eva.getAt());
+            BrandInfo i = allBrandInfo.getOrDefault(brandKey,new BrandInfo(brandKey));
+            //计算当前总的品牌值
+            double v = EvaManager.getInstance().computePercent(eva);
+            int totalBrand = (int) (BrandManager.BASE_BRAND * (1 + v));
+            update(eva.getPid(), eva.getAt(), totalBrand - i.getV());
+        });
+    }
+
+    public void addAllBrand(List<Integer> typeId,UUID pid){
+        Set<BrandInfo> brandInfos = new HashSet<>();
+        for (Integer mid : typeId) {
+            BrandKey bk = new BrandKey(pid,mid);
+            BrandInfo bInfo = allBrandInfo.get(bk);
+            if(bInfo == null){
+                bInfo = new BrandInfo(bk);
+                bInfo.setV(BrandManager.BASE_BRAND);
+                allBrandInfo.put(bk,bInfo);
+                brandInfos.add(bInfo);
+            }
+        }
+        GameDb.saveOrUpdate(brandInfos);
+        updateCache(brandInfos);
+    }
+
+    public void updateCache(Set<BrandInfo> infos){
+        infos.forEach(i->{
+            if(i.key.mid < MetaBuilding.MAX_TYPE_ID) {
+              /*  int t = i.key.mid;
+                allBuilding.put(t, allBuilding.getOrDefault(t, 0) + i.getV());
+                Map<Integer, Integer> m = playerBuilding.computeIfAbsent(i.key.playerId, k->new HashMap<>());
+                m.put(i.key.mid, m.getOrDefault(i.key.mid, 0) + i.getV());*/
+            }
+            else if(MetaItem.isItem(i.key.mid)) {
+             /*   allGood.put(i.key, allGood.getOrDefault(i.key.mid, 0) + i.getV());
+                Map<Integer, Integer> m = playerGood.computeIfAbsent(i.key.playerId, k->new HashMap<>());
+                m.put(i.key.mid, m.getOrDefault(i.key.mid, 0) + i.getV());*/
+            }
+        });
+
+    }
+
+    /*初始化玩家的品牌信息，和eva类似*/
+    public void initBrandInfo(UUID playerId){
+        List<Integer> typeIds = new ArrayList<>();
+        typeIds.add(MetaBuilding.APARTMENT);
+        typeIds.add(MetaBuilding.RETAIL);
+        typeIds.addAll(CityManager.instance().cityGood);
+        addAllBrand(typeIds,playerId);
+    }
+    public void addNewGoodBrand(List<Player> player,int itemId){
+        Set<BrandInfo> brandInfos = new HashSet<>();
+        player.forEach(p->{
+            BrandKey bk = new BrandKey(p.id(),itemId);
+            BrandInfo bInfo = allBrandInfo.get(bk);
+            if(bInfo == null){
+                bInfo = new BrandInfo(bk);
+                bInfo.setV(BrandManager.BASE_BRAND);
+                allBrandInfo.put(bk,bInfo);
+                brandInfos.add(bInfo);
+                refineCache(bInfo,BrandManager.BASE_BRAND);
+            }
+        });
+        GameDb.saveOrUpdate(brandInfos);
     }
 }
