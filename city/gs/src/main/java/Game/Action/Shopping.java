@@ -35,7 +35,7 @@ public class Shopping implements IAction {
         filter.lux=lux;
         Map<City.GoodFilter,Set<City.GoodSellInfo>> retailShopGoodMap=City.instance().getRetailShopGoodMap();
         Set<City.GoodSellInfo> goodSellInfos=retailShopGoodMap.get(filter);
-        if(goodSellInfos==null||goodSellInfos.size()==0){
+            if(goodSellInfos==null||goodSellInfos.size()==0){
             return null;
         }
         //实际总购物预期 = 实际住宅购物预期 + 所有 实际某种商品购物预期(已发明)
@@ -66,7 +66,7 @@ public class Shopping implements IAction {
             buyKnownValueMap.put(itemKey,goodSellInfo);
         }
         // NPC商品大类+奢侈度预期消费 = 城市工资标准 * ( 符合奢侈度和大类的 全部 实际某种商品购物预期(已发明) 的和 / 实际总购物预期)
-        int cost = (int) (npc.salary() * (sumGoodSpendRatio/allCostSpend));
+        int cost = (int) (npc.salary() * (sumGoodSpendRatio*1d/allCostSpend));
 
         //零售店移动选择
         //随机选择3个零售店加入备选列表
@@ -94,7 +94,7 @@ public class Shopping implements IAction {
             double r= v.buyKnownValue * (2 - Building.distance(v.b, npc.buildingLocated())) / 160;
             //商品购买数量  随机出购买数量(0-最大购买数量之间随机)
             Random rand = new Random();
-            int buyNum = rand.nextInt(v.content.getN());
+            int buyNum = rand.nextInt(v.content.getN()+1);
             v.r=r;
             v.buyNum=buyNum;
             buyKnownBak.put(k,v);
@@ -117,7 +117,7 @@ public class Shopping implements IAction {
             //如果 本次购物资金 > 商品售价 * 随机出的数量 则购买成功
             int spend1=goodSellInfo.content.getPrice()*goodSellInfo.buyNum;
             //如果 本次购物资金 / 商品售价 > 1 则购买成功
-            double spend2=buyMoney/goodSellInfo.content.getPrice();
+            double spend2=buyMoney*1d/goodSellInfo.content.getPrice();
             if(buyMoney>spend1){
                 //购买
                 buyGood(npc,itemKey,goodSellInfo);
@@ -133,6 +133,7 @@ public class Shopping implements IAction {
 
         //购买后的行为,根据 w3 w4 w5 的权重进行随机选择
         int id = npc.chooseId();
+
         AIBuilding aiBuilding = MetaData.getAIBuilding(id);
         if(aiBuilding == null)
             return null;
