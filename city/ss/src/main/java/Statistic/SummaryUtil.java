@@ -344,7 +344,8 @@ public class SummaryUtil {
     	.sort(Sorts.descending("time"))
     	.forEach((Block<? super Document>) document ->
     	{
-    		map.put(document.getLong("time"), document.getLong("total"));
+            Long time = document.getLong("time");
+            map.put(time,map.getOrDefault(time,0L)+document.getLong("total"));
     	});
     	return map;
     }
