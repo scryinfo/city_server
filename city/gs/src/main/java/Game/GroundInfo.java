@@ -179,4 +179,8 @@ public class GroundInfo implements Serializable {
     {
         STATELESS,RENTING,RENTED,SELLING
     }
+
+    public GroundStatus getStatus() {
+        return status;
+    }
 }

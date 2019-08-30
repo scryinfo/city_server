@@ -47,7 +47,7 @@ public class City {
     private TreeMap<Integer, Integer> topGoodQty;
     private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
-    private Map<Building,Double> moveKnownApartmentMap=new HashMap<Building,Double>();
+    private Map<Building,Double> moveKnownApartmentMap=new HashMap<Building,Double>(); //应当在加载玩家住宅建筑、建筑开业时进行缓存，建筑拆除和停业时删除缓存
     Map<GoodFilter,Set<GoodSellInfo>> retailShopGoodMap=new HashMap<GoodFilter,Set<GoodSellInfo>>();
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
@@ -852,6 +852,9 @@ public class City {
             }
             return false;
         }
+    }
 
+    public void removeKnownApartmentMap(Building b){
+        moveKnownApartmentMap.remove(b);
     }
 }

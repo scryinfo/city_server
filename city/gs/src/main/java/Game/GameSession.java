@@ -575,6 +575,9 @@ public class GameSession {
             this.write(Package.create(cmd,c));
             //GameDb.saveOrUpdate(b);
             GameDb.saveOrUpdate(Arrays.asList(b,player));
+            if(b.type()==MetaBuilding.APARTMENT){/*更新购买住宅缓存*/
+               City.instance().buildApartmentMoveKnownValue(b);
+            }
         }
     }
 
@@ -596,6 +599,8 @@ public class GameSession {
             if(b.type()==MetaBuilding.RETAIL){
                 RetailShop r = (RetailShop) b;
                 r.cleanData();
+                /*更新npc住宅可选建筑的缓存*/
+                City.instance().removeKnownApartmentMap(b);
             }
         } else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
             FactoryBase f = (FactoryBase) b;
@@ -801,6 +806,12 @@ public class GameSession {
         if(MetaBuilding.type(mid) == MetaBuilding.TRIVIAL)
             return;
         MetaBuilding m = MetaData.getBuilding(mid);
+        Coordinate coordinate = new Coordinate(c.getPos());
+        GroundInfo groundInfo = GroundManager.instance().getGroundInfo(coordinate);
+        if(groundInfo.getStatus()!=GroundInfo.GroundStatus.STATELESS){
+            System.err.println("你的土地正在出售！不能建造");
+            return;
+        }
         if(m == null)
             return;
         Coordinate ul = new Coordinate(c.getPos());
