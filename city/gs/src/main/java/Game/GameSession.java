@@ -516,6 +516,7 @@ public class GameSession {
         }
     }
 
+
     public void move(short cmd, Message message) {
         Gs.GridIndex c = (Gs.GridIndex)message;
         logger.debug("move " + c.getX() + " " + c.getY());
