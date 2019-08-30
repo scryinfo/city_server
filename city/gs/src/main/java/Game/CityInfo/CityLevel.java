@@ -109,7 +109,6 @@ public class CityLevel {
                 CityManager.instance().cityMaterial.addAll(newMaterialId);
                 //TODO 给全城所有的玩家们发邮件通知xx新商品产生了，xxx原料产生了
                 List<Player> allPlayer = GameDb.getAllPlayer();
-                BrandManager.instance().addNewGoodBrand(allPlayer,itemId);
                 newMaterialId.add(itemId);
                 /*分别把新商品和新原料添加给所有玩家*/
                 CityGoodInfo.updatePlayerGoodList(allPlayer,newMaterialId);

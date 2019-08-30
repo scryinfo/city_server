@@ -108,7 +108,7 @@ public class Shopping implements IAction {
             //本次购物资金 = min(NPC商品大类+奢侈度预期消费 , 所持金)
             long buyMoney=npc.money();
             if(cost<npc.money()){
-                buyMoney=cost;
+                buyMoney=cost*5;
             }
 
             if(goodSellInfo.buyNum==0){
