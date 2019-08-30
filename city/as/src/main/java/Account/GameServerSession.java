@@ -10,11 +10,13 @@ import ga.Ga;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class GameServerSession {
 	private ChannelHandlerContext ctx;
+	private static final Logger logger = LoggerFactory.getLogger(GameServerSession.class);
 	public static class Info{
 		int id;
 		String ip;
@@ -30,7 +32,6 @@ public class GameServerSession {
 		}
 	}
 	
-	private static final Logger logger = Logger.getLogger(GameServerSession.class);
 	private int id;
 	private int port;
 	private String ip;
@@ -61,7 +62,7 @@ public class GameServerSession {
 			if(AccountServer.gsIdToChannelId.containsKey(id))
 			{
 				ctx.channel().writeAndFlush(Package.fail(cmd));
-				System.out.println("duplicated game server " + id);
+				logger.info("duplicated game server " + id);
 			}
 			else {
 				ip = gsInfo.getIp();
@@ -72,16 +73,16 @@ public class GameServerSession {
 				AccountServer.allGsChannels.add(ctx.channel());
 				AccountServer.gsIdToChannelId.put(id(), ctx.channel().id());
 				ctx.channel().writeAndFlush(Package.create(cmd));
-				System.out.println("game server " + id + " connected");
+				logger.info("game server " + id + " connected");
 			}
 		}
 		else{
-			System.out.println("can't find game server " + id);
+			logger.info("can't find game server " + id);
 		}
 	}
 	public void logout() {
 		AccountServer.gsIdToChannelId.remove(id());
-		System.out.println("game server " + id + " disconnected");
+		logger.info("game server " + id + " disconnected");
 	}
 	public void stateReport(short cmd, Message message) {
 		Ga.StateReport c = (Ga.StateReport)message;

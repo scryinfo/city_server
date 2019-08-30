@@ -138,7 +138,7 @@ public class GameServer {
         Ga.Login.Builder c = Ga.Login.newBuilder();
         c.setId(GameServer.id);
         f.channel().writeAndFlush(Package.create(GaCode.OpCode.login_VALUE, c.build()));
-        System.out.println("login to account server");
+        logger.info("login to account server");
     }
     public void run() throws Exception {
         FriendManager.getInstance().init();

@@ -34,12 +34,12 @@ public class AccountServerSession {
 		switch (c.getOpcode())
 		{
 			case GaCode.OpCode.login_VALUE:
-				System.out.println("already has same id game server connected to account server!");
+				logger.info("already has same id game server connected to account server!");
 				//ctx.channel().pipeline().remove(AutoReconnectHandler.class);
 				break;
 		}
 	}
 	public void loginACK(short cmd) {
-		System.out.println("login to account server success!");
+		logger.info("login to account server success!");
 	}
 }

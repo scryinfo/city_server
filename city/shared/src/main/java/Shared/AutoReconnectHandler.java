@@ -5,15 +5,18 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
 public class AutoReconnectHandler extends ChannelInboundHandlerAdapter {
     private Bootstrap bs;
     private Consumer<ChannelFuture> actionAfterConnect;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AutoReconnectHandler.class);
     public class ConnectionListener implements ChannelFutureListener {
         ConnectionListener() {
-            System.out.println("Connection lost, try to reconnect");
+            LOGGER.info("Connection lost, try to reconnect");
         }
         @Override
         public void operationComplete(ChannelFuture channelFuture) {
@@ -22,7 +25,7 @@ public class AutoReconnectHandler extends ChannelInboundHandlerAdapter {
             }
             else {
                 AutoReconnectHandler.this.actionAfterConnect.accept(channelFuture);
-                System.out.println("Reconnect success");
+                LOGGER.info("Reconnect success");
             }
         }
     }
