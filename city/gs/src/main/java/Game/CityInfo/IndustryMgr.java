@@ -10,6 +10,7 @@ import Shared.LogDb;
 import gs.Gs;
 import org.bson.Document;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -301,14 +302,14 @@ public class IndustryMgr {
         }).filter(o -> o != null).collect(Collectors.toList());
     }
 
-    // 获取玩家行业总人工数
+    // 获取玩家行业总人工数 不包含未开业建筑
     public int getPlayerIndustryStaffNum(UUID pid,int buildingType) {
-        return City.instance().getPlayerBListByBtype(pid, buildingType).stream().mapToInt(Building::getWorkerNum).sum();
+        return City.instance().getPlayerBListByBtype(pid, buildingType).stream().filter(b->!b.outOfBusiness()).mapToInt(Building::getWorkerNum).sum();
     }
 
-    // 获取行业总工人数
+    // 获取行业总工人数  不包含未开业建筑
     public long getIndustryStaffNum(int buildingType) {
-        return City.instance().typeBuilding.getOrDefault(buildingType, new HashSet<>()).stream().mapToInt(Building::getWorkerNum).sum();
+        return City.instance().typeBuilding.getOrDefault(buildingType, new HashSet<>()).stream().filter(b->!b.outOfBusiness()).mapToInt(Building::getWorkerNum).sum();
     }
     // 获取行业总营收
     public long getIndustrySumIncome(int buildingType) {

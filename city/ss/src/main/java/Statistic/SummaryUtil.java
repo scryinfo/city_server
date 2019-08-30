@@ -1426,9 +1426,9 @@ public class SummaryUtil {
     private static void insertAiBaseAvgData(List<Document> documentList,long yestodayStartTime,MongoCollection<Document> collection){
         documentList.forEach(document ->{
             document.append(TIME, yestodayStartTime)
-                    .append(TYPE,document.getInteger("_id"))
-                    .append(BRAND,document.getDouble("gbrd"))
-                    .append(QUALITY,document.getDouble("gqty"));
+                    .append(TYPE, document.getInteger("_id"));
+//                    .append(BRAND,document.getDouble("gbrd"))
+//                    .append(QUALITY,document.getDouble("gqty"));
         });
         if (!documentList.isEmpty()) {
             collection.insertMany(documentList);
@@ -1439,9 +1439,9 @@ public class SummaryUtil {
         List<Document> documentList = LogDb.getNpcBuyInShelfAvg1(yestodayStartTime, todayStartTime);
         documentList.forEach(document -> {
             document.append(TIME, yestodayStartTime)
-                    .append(TYPE, IndustryType.RETAIL.getValue())
-                    .append(BRAND, document.getDouble("rbrd"))
-                    .append(QUALITY, document.getDouble("rqty"));
+                    .append(TYPE, IndustryType.RETAIL.getValue());
+//                    .append(BRAND, document.getDouble("rbrd"))
+//                    .append(QUALITY, document.getDouble("rqty"));
         });
         if (!documentList.isEmpty()) {
             collection.insertMany(documentList);
@@ -1459,9 +1459,9 @@ public class SummaryUtil {
         documentList = LogDb.getNpcRentApartmentAvg1(yestodayStartTime, todayStartTime);
         documentList.forEach(document -> {
             document.append(TIME, yestodayStartTime)
-                    .append(TYPE, IndustryType.APARTMENT.getValue())
-                    .append(BRAND, document.getDouble("abrd"))
-                    .append(QUALITY, document.getDouble("aqty"));
+                    .append(TYPE, IndustryType.APARTMENT.getValue());
+//                    .append(BRAND, document.getDouble("abrd"))
+//                    .append(QUALITY, document.getDouble("aqty"));
         });
         if (!documentList.isEmpty()) {
             collection.insertMany(documentList);

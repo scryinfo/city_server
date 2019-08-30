@@ -1215,7 +1215,7 @@ public class LogDb {
 	}
 
 	public static void  npcRentApartment(UUID npcId, UUID sellId, long n, long price,
-			UUID ownerId, UUID bid, int type, int mId,int score,int prosp,String roleName,String companyName,double brd,double qty)
+			UUID ownerId, UUID bid, int type, int mId,int score,int prosp,double brd,double qty)
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
@@ -1228,8 +1228,6 @@ public class LogDb {
 				.append("mid", mId)
 				.append("score", score)
 				.append("prosp", prosp)
-				.append("rn", roleName)
-				.append("cn", companyName)
 				.append("abrd", brd)
 				.append("aqty", qty);
 		npcRentApartment.insertOne(document);
@@ -2079,7 +2077,7 @@ public class LogDb {
 						Aggregates.group(null,Accumulators.sum(KEY_TOTAL,"$n"))
 				)
 		).forEach((Block<? super Document>) d->{
-			count[0] =d.getLong(KEY_TOTAL);
+			count[0] =d.getInteger(KEY_TOTAL);
 		});
 		return count[0];
 	}
@@ -2140,7 +2138,7 @@ public class LogDb {
 						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$n"))
 				)
 		).forEach((Block<? super Document>) d -> {
-			count[0] = d.getLong(KEY_TOTAL);
+			count[0] = d.getInteger(KEY_TOTAL);
 		});
 		return count[0];
 
@@ -2153,7 +2151,7 @@ public class LogDb {
 						Aggregates.count()
 				)
 		).forEach((Block<? super Document>) d -> {
-			count[0] = d.getLong("count");
+			count[0] = d.getInteger("count");
 		});
 
 		return count[0];
@@ -2243,8 +2241,8 @@ public class LogDb {
 		List<Document> documentList = new ArrayList<>();
 		collection.aggregate(
 				Arrays.asList(
-						Aggregates.match(and(gte("t", startTime), lte("t", endTime))),
-						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$total"))
+						Aggregates.match(and(ne("p", null), gte("t", startTime), lte("t", endTime))),
+						Aggregates.group(null, Accumulators.sum(KEY_TOTAL, "$a"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -2255,7 +2253,7 @@ public class LogDb {
 		npcBuyInShelf.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
-						Aggregates.group(null,Accumulators.avg("rbrd","$rbrd"),Accumulators.avg("rqty","$rqty"))
+						Aggregates.group(null,Accumulators.avg("brand","$rbrd"),Accumulators.avg("quality","$rqty"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -2266,7 +2264,7 @@ public class LogDb {
 		npcBuyInShelf.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
-						Aggregates.group("$tpi",Accumulators.avg("gbrd","$gbrd"),Accumulators.avg("gqty","$gqty"))
+						Aggregates.group("$tpi",Accumulators.avg("brand","$gbrd"),Accumulators.avg("quality","$gqty"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -2299,7 +2297,7 @@ public class LogDb {
 		npcRentApartment.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(gte("t", startTime), lt("t", endTime))),
-						Aggregates.group(null,Accumulators.avg("abrd","$abrd"),Accumulators.avg("aqty","$aqty"))
+						Aggregates.group(null,Accumulators.avg("brand","$abrd"),Accumulators.avg("quality","$aqty"))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
