@@ -549,7 +549,11 @@ public class StatisticSession {
 					.setItemId(doc.getInteger("itemId"));
 			Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.Builder detail = Ss.BuildingHistorySaleDetail.HistorySaleDetail.SaleDetail.newBuilder();
 			long num = doc.getLong("num");
-			detail.setIncome(doc.getLong("total"))
+			Long miner = doc.getLong("miner");
+			if(miner==null){
+				miner = 0L;
+			}
+			detail.setIncome(doc.getLong("total")-miner)
 					.setSaleNum((int)num);
 			history.setSaleDetail(detail);
 			builder.addHistoryDetail(history);

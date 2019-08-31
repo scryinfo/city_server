@@ -602,7 +602,7 @@ public class LogDb {
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","r","w","d","b","miner"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -648,7 +648,7 @@ public class LogDb {
 								eq("d", playerId),
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
-						Aggregates.project(fields(include("tpi","p","a","t","d","b"), excludeId()))
+						Aggregates.project(fields(include("tpi","p","a","t","d","b","miner"), excludeId()))
 				)
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
@@ -982,7 +982,8 @@ public class LogDb {
 				.append("p","$_id.i")
 				.append("num","$n")
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
-				.append("_id", 0);
+				.append("_id", 0)
+				.append("miner","$miner");
 		//分组id(根据生产者id、建筑id、商品id分组)
 		Document groupObject = new Document("_id",
 				new Document("b", "$b")
@@ -994,7 +995,7 @@ public class LogDb {
 							gte("t", yestodayStartTime),
 							lt("t", todayStartTime))),
 					Aggregates.sort(Sorts.descending("t")),
-					Aggregates.group(groupObject,Accumulators.first("brand","$brand"),Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a")),
+					Aggregates.group(groupObject,Accumulators.first("brand","$brand"),Accumulators.sum("n","$n"),Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("miner", "$miner")),
 					Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) factoryInshelf::add);
@@ -1006,7 +1007,7 @@ public class LogDb {
 								gte("t", yestodayStartTime),
 								lt("t", todayStartTime))),
 						Aggregates.sort(Sorts.descending("t")),
-						Aggregates.group(groupObject,Accumulators.first("brand","$brand"), Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n")),
+						Aggregates.group(groupObject,Accumulators.first("brand","$brand"), Accumulators.sum(KEY_TOTAL, "$a"),Accumulators.sum("n", "$n"),Accumulators.sum("miner", "$miner")),
 						Aggregates.project(projectObject)
 				)
 		).forEach((Block<? super Document>) retailInshelf::add);
@@ -1097,7 +1098,7 @@ public class LogDb {
 				.append("p", price)
 				.append("n",n)          //yty  数量
 				.append("brand",brand)  //yty 品牌名
-				.append("a", n * price+minerCost)
+				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
 				.append("tpi", typeId)

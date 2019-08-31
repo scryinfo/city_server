@@ -5089,10 +5089,11 @@ public class GameSession {
                         n.addAndGet(1);
                 }
             });
-            builder.addInfoBuilder()
-                    .setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
+            Gs.BuildingGridSummary.Info.Builder info = Gs.BuildingGridSummary.Info.newBuilder();
+            info.setIdx(Gs.GridIndex.newBuilder().setX(grid.getX()).setY(grid.getY()))
                     .setType(type)
                     .setNum(n.intValue());
+            builder.addInfo(info);
         });
         this.write(Package.create(cmd,builder.build()));
     }
@@ -5181,7 +5182,7 @@ public class GameSession {
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(document.getInteger("tpi"))
                             .setNum((int)(document.getLong("a")/document.getLong("p")))
-                            .setAmount(document.getLong("a"))
+                            .setAmount(document.getLong("a")-document.getLong("miner"))/*需要减去旷工费才算是真正的收入*/
                             .setTime(document.getLong("t"))
                             .setName(sellBuilding.getName())
                             .setMetaId(sellBuilding.metaId());
@@ -5194,7 +5195,7 @@ public class GameSession {
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                     incomePay.setItemId(document.getInteger("tpi"))
                             .setNum((int)(document.getLong("a")/document.getLong("p")))
-                            .setAmount(document.getLong("a"))
+                            .setAmount(document.getLong("a")-document.getLong("miner"))
                             .setTime(document.getLong("t"))
                             .setName(sellBuilding.getName())
                             .setMetaId(sellBuilding.metaId());
@@ -5234,7 +5235,7 @@ public class GameSession {
                     if(buildType==MetaItem.type(buyBuilding.metaId())){
                     incomePay.setItemId(document.getInteger("tpi"))
                             .setNum((int)(document.getLong("a")/document.getLong("p")))
-                            .setAmount(document.getLong("a")+2*document.getLong("miner")) //加上旷工费（此处的价格是已经扣除了旷工费，所以要加2次旷工费）
+                            .setAmount(document.getLong("a")+document.getLong("miner")) //加上旷工费
                             .setTime(document.getLong("t"))
                             .setName(buyBuilding.getName())
                             .setMetaId(buyBuilding.metaId());
@@ -5278,7 +5279,7 @@ public class GameSession {
                     Gs.PlayerIncomePay.IncomePay.Builder incomePay=Gs.PlayerIncomePay.IncomePay.newBuilder();
                         incomePay.setItemId(5000)
                                 .setNum((int)(document.getLong("a")/document.getLong("p")))
-                                .setAmount(document.getLong("a")+2*document.getLong("miner"))
+                                .setAmount(document.getLong("a")+document.getLong("miner"))
                                 .setTime(document.getLong("t"))
                                 .setName("Eva点数")
                                 .setMetaId(document.getInteger("tpi"));
