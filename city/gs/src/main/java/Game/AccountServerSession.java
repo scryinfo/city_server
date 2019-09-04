@@ -1,6 +1,5 @@
 package Game;
 
-import Shared.AutoReconnectHandler;
 import Shared.Package;
 import Shared.Validator;
 import com.google.protobuf.InvalidProtocolBufferException;
