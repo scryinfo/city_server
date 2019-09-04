@@ -13,6 +13,9 @@ import io.netty.channel.ChannelId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+
 
 public class GameServerSession {
 	private ChannelHandlerContext ctx;
@@ -59,10 +62,28 @@ public class GameServerSession {
 
 		GameServerInfo gsInfo = ServerCfgDb.getGameServerInfo(id);
 		if(gsInfo != null){
-			if(AccountServer.gsIdToChannelId.containsKey(id))
+			if(AccountServer.gsIdToChannelId.containsKey(id) &&
+					AccountServer.allGsChannels.find(AccountServer.gsIdToChannelId.get(id)) != null)
 			{
-				ctx.channel().writeAndFlush(Package.fail(cmd));
-				logger.info("duplicated game server " + id);
+				Channel oldChannel = AccountServer.allGsChannels.find(AccountServer.gsIdToChannelId.get(id));
+				InetSocketAddress oldAddress = (InetSocketAddress)oldChannel.remoteAddress();
+				InetSocketAddress newAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+				if(oldAddress.getAddress().equals(newAddress.getAddress())){
+					AccountServer.allGsChannels.add(ctx.channel());
+					AccountServer.gsIdToChannelId.put(id(), ctx.channel().id());
+					ip = gsInfo.getIp();
+					port = gsInfo.getPort();
+					playerDbUri = gsInfo.getGameDbUrl();
+					valid = true;
+					AccountServer.allGsChannels.add(ctx.channel());
+					AccountServer.gsIdToChannelId.put(id(), ctx.channel().id());
+					ctx.channel().writeAndFlush(Package.create(cmd));
+					logger.info("ReConnected game server " + id + " success");
+
+				}else {
+					ctx.channel().writeAndFlush(Package.fail(cmd));
+					logger.info("duplicated game server " + id);
+				}
 			}
 			else {
 				ip = gsInfo.getIp();

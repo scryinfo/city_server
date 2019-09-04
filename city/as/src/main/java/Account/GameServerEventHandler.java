@@ -1,8 +1,11 @@
 package Account;
 
 import Shared.Package;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import gacode.GaCode;
+import io.netty.channel.*;
+import io.netty.handler.timeout.IdleStateEvent;
+
+import java.util.Collection;
 
 public class GameServerEventHandler extends SimpleChannelInboundHandler<Package> {
 	private GameServerSession session;
@@ -23,6 +26,26 @@ public class GameServerEventHandler extends SimpleChannelInboundHandler<Package>
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		super.channelRead(ctx, msg);
+	}
+
+	/*心跳检测*/
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+		if (evt instanceof IdleStateEvent) {
+			ctx.writeAndFlush(Package.create(GaCode.OpCode.heartInfo_VALUE))
+					.addListener(new ChannelFutureListener() {
+						@Override
+						public void operationComplete(ChannelFuture future) throws Exception {
+							if (!future.isSuccess()) {
+								if(session.valid())
+									session.logout();
+								future.channel().close();
+							}
+						}
+					});
+		} else {
+			super.userEventTriggered(ctx, evt);
+		}
 	}
 
 	@Override

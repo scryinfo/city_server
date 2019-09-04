@@ -1,5 +1,6 @@
 package Game;
 
+import Shared.AutoReconnectHandler;
 import Shared.Package;
 import Shared.Validator;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -36,10 +37,16 @@ public class AccountServerSession {
 			case GaCode.OpCode.login_VALUE:
 				logger.info("already has same id game server connected to account server!");
 				//ctx.channel().pipeline().remove(AutoReconnectHandler.class);
+				logger.error("game server Error==========================");
+				System.exit(0);
 				break;
 		}
 	}
 	public void loginACK(short cmd) {
 		logger.info("login to account server success!");
+	}
+	/*心跳检测*/
+	public void heartInfo(short cmd){
+		logger.info("heartConnect!");
 	}
 }

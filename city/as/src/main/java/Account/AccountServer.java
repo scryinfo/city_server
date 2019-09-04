@@ -11,6 +11,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -22,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 
 public class AccountServer {
@@ -78,6 +80,7 @@ public class AccountServer {
 								ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN,1024, 0, 4,2,4, true));
                                 ch.pipeline().addLast(new PackageDecoder());
                                 ch.pipeline().addLast(new PackageEncoder(GaCode.OpCode.class));
+								ch.pipeline().addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS));
                                 ch.pipeline().addLast(businessLogicExecutor, new GameServerEventHandler());
 								ch.pipeline().addLast(new ExceptionHandler());
                             }

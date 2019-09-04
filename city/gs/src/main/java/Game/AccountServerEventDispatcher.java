@@ -15,6 +15,7 @@ public class AccountServerEventDispatcher extends DispatcherBase {
 			table.put((short) GaCode.OpCode.validateInfo_VALUE,  Wrapper.newWithMessage(Ga.ValidationCode.PARSER, AccountServerSession.class,"validationCode"));
 			table.put((short) GaCode.OpCode.login_VALUE,  Wrapper.newOnlyOpcode(AccountServerSession.class,"loginACK"));
 			table.put((short) Common.OpCode.error_VALUE,  Wrapper.newWithMessage(Common.Fail.PARSER, AccountServerSession.class,"handleError"));
+			table.put((short) GaCode.OpCode.heartInfo_VALUE,  Wrapper.newOnlyOpcode(AccountServerSession.class,"heartInfo"));
 			if (GlobalConfig.debug()) {
 				// gsMap.put(GameEvent.CHEAT_ADD_COMMISSION,
 				// Game.GameSession.class.getMethod("cheatAddCommission"));
