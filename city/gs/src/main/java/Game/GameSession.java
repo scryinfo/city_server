@@ -484,8 +484,8 @@ public class GameSession {
             return;
         }
         Player p = new Player(c.getName(), this.accountName, c.getMale(), c.getCompanyName(), c.getFaceId());
-        p.addMoney(999999999999999l);
-        LogDb.playerIncome(p.id(), 999999999999999l,0);
+        p.addMoney(0);
+        LogDb.playerIncome(p.id(), 0,0);
         if(!GameDb.createPlayer(p)) {
             this.write(Package.fail(cmd, Common.Fail.Reason.roleNameDuplicated));
         }
