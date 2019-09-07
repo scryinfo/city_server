@@ -68,6 +68,8 @@ public class GameServerSession {
 				Channel oldChannel = AccountServer.allGsChannels.find(AccountServer.gsIdToChannelId.get(id));
 				InetSocketAddress oldAddress = (InetSocketAddress)oldChannel.remoteAddress();
 				InetSocketAddress newAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+                logger.info("旧的ip"+oldAddress.getAddress());
+                logger.info("新的ip"+newAddress.getAddress());
 				if(oldAddress.getAddress().equals(newAddress.getAddress())){
 					AccountServer.allGsChannels.add(ctx.channel());
 					AccountServer.gsIdToChannelId.put(id(), ctx.channel().id());
