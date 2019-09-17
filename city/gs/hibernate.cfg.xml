@@ -43,8 +43,7 @@
 		<mapping class="Game.GroundAuction"></mapping>
 		<mapping class="Game.GroundAuction$Entry"></mapping>
 		<mapping class="Game.GroundAuction$Entry$BidRecord"></mapping>
-		<mapping class="Game.Laboratory"></mapping>
-		<mapping class="Game.Laboratory$Line"></mapping>
+
 		<mapping class="Game.ItemKey"></mapping>
 		<mapping class="Game.Item"></mapping>
 		<mapping class="Game.Npc"></mapping>
@@ -78,35 +77,19 @@
 		<mapping class="Game.Contract.Contract"></mapping>
 		<mapping class="Game.League.LeagueInfo"></mapping>
 		<mapping class="Game.League.BrandLeague"></mapping>
-		<mapping class="Game.WareHouse"></mapping>
-		<mapping class="Game.WareHouseRenter"></mapping>
-		<mapping class="Game.PromotionMgr"></mapping>
-		<mapping class="Game.PromoOrder"></mapping>
-		<mapping class="Game.PromoOdTs"></mapping>
-		<mapping class="Game.TickManager"></mapping>	
+
+		<mapping class="Game.TickManager"></mapping>
 		<mapping class="Game.TickGroup"></mapping>			
 		<mapping class="Game.Ticker"></mapping>		
 		<mapping class="Game.Record"></mapping>		
-		<mapping class="Game.FlowRecord"></mapping>		
-		<mapping class="Game.EvaRecord"></mapping>			
+		<mapping class="Game.EvaRecord"></mapping>
 		<mapping class="Game.IndustryIncrease"></mapping>
 		<mapping class="Game.Gambling.FlightManager"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>
 		<mapping class="Game.ddd.ddd_purchase"></mapping>
 		<mapping class="Game.ddd.dddPurchaseMgr"></mapping>
-		<!--新版研究所-->
-		<mapping class="Game.Technology.Technology"></mapping>
-		<mapping class="Game.Technology.Technology$Line"></mapping>
-		<mapping class="Game.Technology.ScienceBox"></mapping>
-		<mapping class="Game.ScienceLineBase"></mapping>
-		<mapping class="Game.ScienceStore"></mapping>
-		<mapping class="Game.ScienceShelf"></mapping>
-		<mapping class="Game.ScienceShelf$Content"></mapping>
-		<mapping class="Game.Technology.SciencePoint"></mapping>
-		<mapping class="Game.Promote.PromotePoint"></mapping>
-		<mapping class="Game.Promote.PromotionCompany"></mapping>
-		<mapping class="Game.Promote.PromotionCompany$Line"></mapping>
+
 		<mapping class="Game.CityInfo.CityLevel"></mapping>
 	</session-factory>
 </hibernate-configuration> 

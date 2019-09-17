@@ -56,11 +56,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
 
     protected RetailShop() {}
 
-    @Override
-    public int quality() {
-        return this.qty;
-    }
-
     @Column(nullable = false)
     @Embedded
     private BuildingContract buildingContract;
