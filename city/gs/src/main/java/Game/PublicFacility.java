@@ -26,7 +26,6 @@ public class PublicFacility extends Building{
     public  void tick(long deltaTime){
         if(deltaTime == 0)
             return;
-        updatePromoAbility();
     }
     @Override
     protected void finalize(){
@@ -180,11 +179,6 @@ public class PublicFacility extends Building{
         return (long) (this.meta.output1P1Hour * this.getWorkerNum());
     }
 
-    public void updatePromoAbility() {
-        //4、 流量提升
-        flowPromoCur = (int)ContractManager.getInstance().getPlayerADLift(this.ownerId());
-        addPromoAbRecord(this.id(),(short)(0),flowPromoCur);
-    }
 
     //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
     private float curPromoAbility = 0;
@@ -215,14 +209,6 @@ public class PublicFacility extends Building{
         if(selledPromotion.indexOf(promoId) < 0){
             selledPromotion.add(promoId);
         }
-    }
-
-    public List<PromoOdTs> delSelledPromotion(UUID promoId ,boolean delOrder){
-        List<PromoOdTs> ret = PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion, delOrder);
-        //删除缓存的推广ID
-        selledPromotion.remove(promoId);
-        //更新推广公司广告列表中所有推广的起点
-        return ret;
     }
 
     public void setNewOrderOn(boolean on){
@@ -277,9 +263,6 @@ public class PublicFacility extends Building{
 		* 行为分析
 			* 不用通知客户端，直接更新数据库
 		*/
-    public float excutePromotion(PromoOrder promo){
-        return getAllPromoTypeAbility(promo.buildingType > 0 ? promo.buildingType : promo.productionType);
-    }
 
     @Column(nullable = false)
     protected int qty;
@@ -554,47 +537,7 @@ public class PublicFacility extends Building{
         builder.addPublicFacility((Gs.PublicFacility) this.detailProto());
     }
 
-    public EvaRecord getlastEvaRecord(UUID bid, short tid){
-        //重新开服,需要获取一下上次的记录
-        return GameDb.getlastEvaRecord(bid,tid);
-    }
-    public FlowRecord getlastFlowRecord(UUID inPid){
-        return GameDb.getlastFlowRecord(inPid);
-    }
 
-    public void addPromoAbRecord( UUID buildingId, short typeId, int value ){
-        //记录的时间间隔为 PromotionMgr._upDeltaMsint ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
-        int ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs/1000);
-        if(typeId < 1){
-            //人流量
-            Building bd = City.instance().getBuilding(buildingId);
-            if(bd == null){
-                //if(GlobalConfig.DEBUGLOG){
-                    //GlobalConfig.cityError("PublicFacility.addPromoAbRecord: building not exist!");
-                //}
-                return;
-            }
-            UUID pid = bd.ownerId();
-            FlowRecord lastRecord = getlastFlowRecord(pid);
-            //只记录变化的，减少数据量
-            if(lastRecord.value == value){
-                return;
-            }
-            FlowRecord newRecord = new FlowRecord(pid,ts, value);
-            GameDb.saveOrUpdateAndClear( newRecord );
-            GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear FlowRecord");
-        }else{
-            //eva
-            EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
-            //只记录变化的，减少数据量
-            if(lastRecord.value == value){
-                return;
-            }
-            EvaRecord newRecord = new EvaRecord(buildingId,typeId, ts, value);
-            GameDb.saveOrUpdateAndClear( newRecord );
-            GlobalConfig.cityError("PublicFacility.addPromoAbRecord: saveOrUpdateAndClear EvaRecord");
-        }
-    }
     @Override
     protected void _update(long diffNano) {
         final long now = System.currentTimeMillis();

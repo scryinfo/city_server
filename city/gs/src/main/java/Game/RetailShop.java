@@ -56,11 +56,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
 
     protected RetailShop() {}
 
-    @Override
-    public int quality() {
-        return this.qty;
-    }
-
     @Column(nullable = false)
     @Embedded
     private BuildingContract buildingContract;
@@ -85,10 +80,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         return builder.build();
     }
 
-    @Override
-    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
-        builder.addRetailShop((Gs.RetailShop) this.detailProto());
-    }
 
     @Override
     protected void _update(long diffNano) {
