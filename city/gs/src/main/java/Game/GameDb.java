@@ -46,7 +46,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 
 import Game.Contract.Contract;
-import Game.Eva.Eva;
 import Game.FriendManager.FriendRequest;
 import Game.FriendManager.OfflineMessage;
 import Game.FriendManager.Society;
@@ -259,18 +258,6 @@ public class GameDb {
 		return ret;
 	}
 
-	public static List<Eva> getEvaInfo(UUID playerId, int techId)
-	{
-		Session session = sessionFactory.openSession();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Eva> query = builder.createQuery(Eva.class);
-		Root root = query.from(Eva.class);
-		query.where(
-				builder.and(
-						builder.equal(root.get("pid"), playerId)
-						, builder.equal(root.get("at"), techId)));
-		return session.createQuery(query).list();
-	}
 
 	public static List<ddd_purchase> GetTradingRecords(UUID playerId, long range_StartTime, long range_EndTime)
 	{
@@ -1329,38 +1316,6 @@ public class GameDb {
 
 		list.forEach(o->res.put(o.mid, o.goodlv));
 		return res;
-	}
-
-	public static List<Eva> getEvaInfoList(UUID pid,Integer itemId)
-	{
-		List<Eva> list = new ArrayList<Eva>();
-		Session session = sessionFactory.openSession();
-		try
-		{
-			if(itemId==null){
-				list = session.createQuery("FROM Eva WHERE pid=:pid",Eva.class)
-						.setParameter("pid", pid)
-						.list();
-			}else{
-				list = session.createQuery("FROM Eva WHERE pid=:pid and at=:at",Eva.class)
-						.setParameter("pid", pid)
-						.setParameter("at", itemId)
-						.list();
-			}
-
-		}
-		catch (RuntimeException e)
-		{
-			logger.fatal("query player eva info failed");
-			e.printStackTrace();
-		}
-		finally
-		{
-			if (session != null) {
-				session.close();
-			}
-		}
-		return list;
 	}
 
 	public static long getPlayerAmount() {

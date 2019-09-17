@@ -15,8 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.*;
 import com.google.protobuf.Message;
 
@@ -284,14 +282,12 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     }
 
     public double getTotalQty(){
-        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
-        double qty = meta.qty * (1 + EvaManager.getInstance().computePercent(eva));
-        return qty;
+
+        return meta.qty;
     }
     //获取总知名度
     public double getTotalBrand(){
-        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Brand_VALUE);
-        return BrandManager.BASE_BRAND *(1 + EvaManager.getInstance().computePercent(eva));
+        return BrandManager.BASE_BRAND ;
     }
 
     public void cleanData(){

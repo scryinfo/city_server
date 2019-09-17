@@ -1,8 +1,5 @@
 package Game;
 
-import Game.CityInfo.CityManager;
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.League.BrandLeague;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
@@ -389,17 +386,14 @@ public class BrandManager {
     		playerId=bl.getPlayerId();
     	}
 
-    	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
-    	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
-        int buildingBrand= (int) (BASE_BRAND *(1+EvaManager.getInstance().computePercent(brandEva)));//品牌值，也通过Eva加点提升
 
-		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand));
-		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(BASE_BRAND));
-		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
+        int buildingBrand= (int) (BASE_BRAND);//品牌值
+
+		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+ (double) buildingBrand);
+		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, (double) BASE_BRAND);
         //住宅和零售店初始品质 = qty(yty)
-        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double((b.quality())*(1+EvaManager.getInstance().computePercent(qualityEva))));
-		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
-		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
+        qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+ (double) (b.quality()));
+		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, (double) b.quality());
     }
 
     public void getAllBuildingBrandOrQuality(){ //暂不使用
@@ -452,9 +446,6 @@ public class BrandManager {
             if(binfo.hasBrandName()){
                 band.setBrandName(binfo.getBrandName());
             }
-            EvaManager.getInstance().getEva(pid,itemId).forEach(eva -> {
-                band.addEva(eva.toProto());
-            });
             //优化
            /* GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
                 band.addEva(eva.toProto());

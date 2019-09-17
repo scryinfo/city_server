@@ -1,8 +1,5 @@
 package Game;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
-import Game.Meta.MetaBuilding;
 import Game.Meta.MetaItem;
 import Game.Meta.MetaWarehouse;
 import Shared.Util;
@@ -40,12 +37,9 @@ public class WareHouse extends Building implements IStorage, IShelf {
     //初始化原型、建筑坐标、建筑拥有者id
     public WareHouse(MetaWarehouse meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        //eva加成计算
-        Eva eva=EvaManager.getInstance().getEva(ownerId(), MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
-        int storeCapacity = (int) (this.metaWarehouse.storeCapacity * (1 + EvaManager.getInstance().computePercent(eva)));
         this.metaWarehouse = meta;
         this.shelf = new Shelf(meta.shelfCapacity);
-        this.store = new Storage(storeCapacity);
+        this.store = new Storage(this.metaWarehouse.storeCapacity);
     }
 
     public WareHouse() {}
@@ -93,8 +87,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
     @Override
     public Gs.WareHouse detailProto()//已添加eva属性
     {
-        Eva eva=EvaManager.getInstance().getEva(ownerId(), MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
-        int storeCapacity = (int) (this.metaWarehouse.storeCapacity * (1 + EvaManager.getInstance().computePercent(eva)));
+        int storeCapacity = this.metaWarehouse.storeCapacity;
         //详细原型）
         Gs.WareHouse.Builder builder = Gs.WareHouse.newBuilder();
         builder.setInfo(super.toProto());//建筑信息初始化
@@ -117,10 +110,8 @@ public class WareHouse extends Building implements IStorage, IShelf {
     @PostLoad
     protected void _1() {
         this.metaWarehouse = (MetaWarehouse) super.metaBuilding;
-        Eva eva=EvaManager.getInstance().getEva(ownerId(), MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
-        int storeCapacity = (int) (this.metaWarehouse.storeCapacity * (1 + EvaManager.getInstance().computePercent(eva)));
         this.shelf.setCapacity(this.metaWarehouse.shelfCapacity);
-        this.store.setCapacity(storeCapacity);
+        this.store.setCapacity(this.metaWarehouse.storeCapacity);
     }
 
     @Override

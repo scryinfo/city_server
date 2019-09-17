@@ -1,9 +1,6 @@
 package Game.Util;
 
 import Game.*;
-import Game.Eva.Eva;
-import Game.Eva.EvaKey;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
@@ -12,34 +9,6 @@ import gs.Gs;
 import java.util.*;
 
 public class GlobalUtil {
-
-    /*1.获取全城最大和最小的加成信息（找出全城Eva提升最大的那一个，然后进行计算）*/
-    public static Map<String, Eva>  getEvaMaxAndMinValue(int at,int bt){
-        EvaKey key = new EvaKey(at,bt);
-        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.getOrDefault(key,new HashSet<>());
-        Eva maxEva = null;
-        Eva minEva=null;
-        Map<String, Eva> minOrMaxEva = new HashMap<>();
-        int init=0;
-        for (Eva eva : evas) {
-            if(eva.getAt()==at&&eva.getBt()==bt){
-                if(maxEva==null&&minEva==null) {
-                    maxEva = eva;
-                    minEva = eva;
-                }else {
-                    if(eva.getLv()>maxEva.getLv()) {
-                        maxEva = eva;
-                    }
-                    if(eva.getLv()<maxEva.getLv()) {
-                        minEva = eva;
-                    }
-                }
-            }
-        }
-        minOrMaxEva.put("max", maxEva);
-        minOrMaxEva.put("min", minEva);
-        return minOrMaxEva;
-    }
 
     //2.获取指定选项知名度的最大最小信息
     public static Map<String, BrandManager.BrandInfo> getMaxOrMinBrandInfo(int item){
@@ -72,34 +41,6 @@ public class GlobalUtil {
             return null;
     }
 
-    //获取最大最小的知名度（就是帅选全程最高最低等级）
-    public static Map<String,Double> getMaxOrMinBrandValue(int item){
-        HashMap<String,Double> map=new HashMap<>();
-        //统计玩家人数
-        /*获取全城最高和最低的Eva品牌加成信息*/
-        EvaKey key = new EvaKey(item,Gs.Eva.Btype.Brand_VALUE);
-        Set<Eva> evas = EvaManager.getInstance().typeEvaMap.get(key);
-        if(evas!=null){
-            // 筛选出等级最大的
-            List<Integer> evaLv = new ArrayList<>();
-            for (Eva eva : evas) {
-                evaLv.add(eva.getLv());
-            }
-            Integer maxLv = Collections.max(evaLv);/*最高等级*/
-            double maxRation = maxLv > 0 ? MetaData.getAllExperiences().get(maxLv).p / 100000d : 0;
-            // 转换为提升比例
-            Integer minLv = Collections.min(evaLv);/*最低等级*/
-            double minRation = minLv > 0 ? MetaData.getAllExperiences().get(minLv).p / 100000d : 0;
-            map.put("max", maxRation);
-            map.put("min", minRation);
-        }else{
-            map.put("max",0.0);
-            map.put("min",0.0);
-        }
-
-
-        return map;
-    }
 
     //3.获取商品的全城销售均价(获取所有货架上该商品的销售价格取平均值)(*)
     public static int getCityItemAvgPrice(int goodItem, int type) {
@@ -179,9 +120,7 @@ public class GlobalUtil {
                 }
             }
         }
-        //计算发明或研究的的平均Eva加成信息
-        int avgEvaAdd = cityAvgEva(at, bt);
-        return count == 0 ? 1: (sumBaseOdds / count) * (1 + avgEvaAdd);
+        return count == 0 ? 1: (sumBaseOdds / count);
     }
 
    //6.全城商品均知名度 || 全城住宅均知名度
@@ -202,21 +141,6 @@ public class GlobalUtil {
        return  count==0?0: sum / count;
    }
 
-   //7.获取全城Eva属性商品品质均加成信息
-    public static int cityAvgEva(int at,int bt){
-        //获取eva值，求平均，然后加上商品的基础值即可
-       EvaKey key = new EvaKey(at, bt);
-       Set<Eva> allEvas = EvaManager.getInstance().typeEvaMap.get(key);
-       double evaSum=0;
-       int count = 0;
-       for (Eva eva : allEvas) {
-           if(eva.getAt()==at&&eva.getBt()==bt){
-               evaSum+=EvaManager.getInstance().computePercent(eva);
-               count++;
-            }
-       }
-       return count==0?0: (int) (evaSum / count);
-   }
 
    //8.获取全城推广该类型的推广能力平均值
     public static int cityAvgPromotionAbilityValue(int type,int buildingType){
@@ -236,7 +160,6 @@ public class GlobalUtil {
     //9.全城住宅零售店均品质(*)
     public static int getCityApartmentOrRetailShopQuality(int at,int bt,int buildingType){
         //1.计算均加成
-        int avgAdd = cityAvgEva(at, bt);
         int quality=0;
         int count = 0;
         //2.获得基本品质
@@ -247,7 +170,7 @@ public class GlobalUtil {
                 count++;
             }
         }
-        return  count==0?0:(quality/count) * (1 + avgAdd);
+        return  count==0?0:(quality/count);
     }
 
    //10.获取加工厂推荐定价
@@ -265,7 +188,7 @@ public class GlobalUtil {
         int cityAvgBrand = cityAvgBrand(at);
         double cityBrandWeight = CompeteAndExpectUtil.getBrandWeight(cityAvgBrand, at);
         //5.全城品质权重
-        int cityAvgQuality =(int)(qtyBase * (1+ cityAvgEva(at, bt)));
+        int cityAvgQuality =qtyBase;
         double cityQualityWeight = CompeteAndExpectUtil.getItemWeight(cityAvgQuality, at, bt, qtyBase);
         return (int) (cityItemAvgPrice * (brandWeight + qualityWeight) / (cityBrandWeight + cityQualityWeight));
     }
@@ -326,13 +249,8 @@ public class GlobalUtil {
 
     //获取商品的品质评分(参数1 当前品质总值，参数2 商品id 参数3 商品的基础品质值)
     public static double getGoodQtyScore(double localQuality,int goodId,int baseQty){
-        Map<String, Eva> cityQtyMap = GlobalUtil.getEvaMaxAndMinValue(goodId, Gs.Eva.Btype.Quality_VALUE);
-        Eva maxEva = cityQtyMap.get("max");//全城最大Eva
-        Eva minEva = cityQtyMap.get("min");//全城最小Eva
-        double maxAdd=EvaManager.getInstance().computePercent(maxEva);
-        double minAdd=EvaManager.getInstance().computePercent(minEva);
-        double maxQty = baseQty* (1 + maxAdd);
-        double minQty = baseQty* (1 + minAdd);
+        double maxQty = baseQty;
+        double minQty = baseQty;
         double qtyScore=1;//最小评分默认为1
         if(localQuality==minQty){
             qtyScore=1;

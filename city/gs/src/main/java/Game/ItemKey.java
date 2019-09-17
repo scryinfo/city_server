@@ -1,7 +1,5 @@
 package Game;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
@@ -75,13 +73,11 @@ public class ItemKey implements Serializable {
         if(!producerId.equals(NULL_PRODUCER_ID)) {
             builder.setProducerId(Util.toByteString(producerId));
 
-            Eva brandEva=EvaManager.getInstance().getEva(producerId, meta.id,Gs.Eva.Btype.Brand_VALUE);
-            Eva qualityEva=EvaManager.getInstance().getEva(producerId, meta.id,Gs.Eva.Btype.Quality_VALUE);
+
             MetaGood goods=MetaData.getGood(meta.id);
-            double b=EvaManager.getInstance().computePercent(brandEva);
-            double q=EvaManager.getInstance().computePercent(qualityEva);
-            double totalBrand=goods.brand*(1+b);
-            double totalQuality=goods.quality*(1+q);
+
+            double totalBrand=goods.brand;
+            double totalQuality=goods.quality;
             //品牌评分
             double brandScore = GlobalUtil.getBrandScore(totalBrand, meta.id);
             //品质评分
@@ -102,9 +98,8 @@ public class ItemKey implements Serializable {
     //获取商品的总品质
     public double getTotalQty(){
         if(MetaGood.isItem(this.meta.id)){
-            Eva eva = EvaManager.getInstance().getEva(this.producerId, meta.id,Gs.Eva.Btype.Quality_VALUE);
             MetaGood good = MetaData.getGood(meta.id);
-            return good.quality * (1 + EvaManager.getInstance().computePercent(eva));
+            return good.quality;
         }
         return 0;
     }
@@ -112,9 +107,7 @@ public class ItemKey implements Serializable {
     public double getTotalBrand(){
         if(MetaGood.isItem(this.meta.id)){
             MetaGood good = MetaData.getGood(meta.id);
-            /*获取Eva加成信息*/
-            Eva eva = EvaManager.getInstance().getEva(this.producerId, this.meta.id, Gs.Eva.Btype.Brand_VALUE);
-            return good.brand*(1 + EvaManager.getInstance().computePercent(eva));
+            return good.brand;
         }
         return 0;
     }

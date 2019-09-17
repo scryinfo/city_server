@@ -1,9 +1,7 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
-import Game.CityInfo.TopInfo;
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
 import Game.Gambling.FlightManager;
 import Game.CityInfo.IndustryMgr;
 import Game.League.LeagueManager;
@@ -307,7 +305,6 @@ public class City {
         // 历史成交
         GuidePriceMgr.instance().update(diffNano);
         IndustryMgr.instance().update(diffNano);
-        CityLevel.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

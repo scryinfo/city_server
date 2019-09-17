@@ -79,19 +79,16 @@ public class BuildingUtil {
     /*获取最大最小知名度值*/
     public Map<Integer,Integer> getMaxAndMinBrand(int item){
         Map<Integer, Integer> map = new HashMap<>();
-        Map<String, Double> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//查询的是Eva最大最小的提升比例
-        double minRatio=cityBrandMap.get("min");
-        double maxRatio=cityBrandMap.get("max");
         //如果是商品(使用商品的默认知名度)
         int maxBrand;
         int minBrand;
         if(MetaGood.isItem(item)){
             MetaGood good = MetaData.getGood(item);
-            maxBrand = (int) (good.brand*(1+maxRatio));
-            minBrand = (int) (good.brand*(1+minRatio));
+            maxBrand = good.brand;
+            minBrand = good.brand;
         }else{
-            maxBrand = (int) (BrandManager.BASE_BRAND * (1 + maxRatio));
-            minBrand = (int) (BrandManager.BASE_BRAND * (1 + minRatio));
+            maxBrand = BrandManager.BASE_BRAND;
+            minBrand = BrandManager.BASE_BRAND;
         }
         map.put(MAX, maxBrand);
         map.put(MIN, minBrand);

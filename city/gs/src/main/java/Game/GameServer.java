@@ -3,7 +3,6 @@ package Game;
 import Game.CityInfo.CityLevel;
 import Game.CityInfo.CityManager;
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
 import Game.FriendManager.FriendManager;
 import Game.FriendManager.SocietyManager;
 import Game.Gambling.FlightManager;
@@ -162,7 +161,6 @@ public class GameServer {
         MoneyPool.init();
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
-        EvaManager.getInstance().init();
         PromotePointManager.getInstance().init();//推广点数初始化
         SciencePointManager.getInstance().init();//科技点数初始化
         TickManager.init();
