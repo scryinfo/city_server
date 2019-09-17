@@ -15,7 +15,7 @@
 		</property>
 		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">
-			jdbc:postgresql://127.0.0.1/192
+			jdbc:postgresql://192.168.0.191/156
 			<!--jdbc:postgresql://192.168.0.191/105-->
 		</property>
 		<property name="hibernate.connection.username">
@@ -47,7 +47,6 @@
 
 		<mapping class="Game.ItemKey"></mapping>
 		<mapping class="Game.Item"></mapping>
-		<mapping class="Game.Npc"></mapping>
 		<mapping class="Game.RetailShop"></mapping>
 		<mapping class="Game.ProduceDepartment"></mapping>
 		<mapping class="Game.ProduceDepartment$Line"></mapping>
