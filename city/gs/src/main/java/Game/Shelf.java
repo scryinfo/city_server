@@ -59,7 +59,6 @@ public class Shelf {
 
     public final static class SellInfo {
         public UUID producerId;
-        public int qty;
         public int price;
         public MetaItem meta;
     }
@@ -67,7 +66,6 @@ public class Shelf {
         return slots.entrySet().stream().filter(e->e.getKey().meta.id==metaId).map(e->{
             SellInfo s = new SellInfo();
             s.producerId = e.getKey().producerId;
-            s.qty = e.getKey().qty;
             s.price = e.getValue().price;
             s.meta = e.getKey().meta;
             return s;

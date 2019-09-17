@@ -1,13 +1,9 @@
 package Game.Promote;
 
-import Game.Eva.EvaManager;
-import Game.GameDb;
-import Game.Technology.SciencePoint;
-import Game.Technology.SciencePointManager;
-import Game.Timers.PeriodicTimer;
 
+import Game.GameDb;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+
 
 public class PromotePointManager {
     private PromotePointManager(){}

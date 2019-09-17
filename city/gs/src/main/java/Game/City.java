@@ -1,17 +1,13 @@
 package Game;
 
-import Game.CityInfo.CityLevel;
-import Game.CityInfo.TopInfo;
-import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
-import Game.Gambling.FlightManager;
 import Game.CityInfo.IndustryMgr;
+import Game.Contract.ContractManager;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
-import Game.RecommendPrice.GuidePriceMgr;
 import Game.Timers.PeriodicTimer;
 import Game.Util.BuildingUtil;
 import Game.Util.DateUtil;
@@ -24,7 +20,6 @@ import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
-import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
@@ -263,7 +258,6 @@ public class City {
         FlightManager.instance().update(diffNano);
         LeagueManager.getInstance().update(diffNano);
         WareHouseManager.instance().update(diffNano);
-        BrandManager.instance().update(diffNano);
         // do this at last
         updateTimeSection(diffNano);
         specialTick(diffNano);
@@ -273,9 +267,7 @@ public class City {
         //繁荣度统计
         ProsperityManager.instance().totalProsperity(diffNano);
         // 历史成交
-        GuidePriceMgr.instance().update(diffNano);
         IndustryMgr.instance().update(diffNano);
-        CityLevel.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {
@@ -470,10 +462,6 @@ public class City {
                 terrain[x][y] = TERRIAN_NONE;
             }
         }
-        //更新零售店或者住宅建筑最高最低品质
-        if(building.type()==MetaBuilding.APARTMENT||building.type()==MetaBuilding.RETAIL){
-            BuildingUtil.instance().updateMaxOrMinTotalQty();
-        }
         building.broadcastDelete();
         //   GameDb.delete(npcs.add(building));
         GameDb.delete(building);
@@ -502,10 +490,6 @@ public class City {
             LogDb.cityBroadcast(null,null,0l,allBuilding.size(),5);
         }
         b.init();
-        //更新全城最高最低零售店或者住宅建筑品质
-        if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
-            BuildingUtil.instance().updateMaxOrMinTotalQty();
-        }
         updates.add(b);
         GameDb.saveOrUpdate(updates);
         b.broadcastCreate();
@@ -624,7 +608,7 @@ public class City {
     public void moveKnownApartmentMap(Building b){
         Apartment apartment=(Apartment)b;
         //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
-        double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + 0 / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
         logger.info("moveKnownApartmentMap moveKnownValue: " + moveKnownValue);
         moveKnownApartmentMap.put(b,moveKnownValue);
     }
@@ -639,7 +623,7 @@ public class City {
     public void moveKnownRetailMap(Building b){
         RetailShop shop = (RetailShop)b;
         //moveKnownValue = ((1 + 零售店品质 / 全城零售店品质均值) + (1 + 零售店知名度 / 全城零售店知名度均值)) * 繁荣度 * 100
-        double moveKnownValue = ((1 + shop.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.RETAIL)) + (1 + shop.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.RETAIL))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        double moveKnownValue = ((1 + 0 / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.RETAIL)) + (1 + 0 / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.RETAIL))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
 
         Shelf shelf=shop.getShelf();
         Collection<ItemKey> itemKeys=shelf.getGoodsItemKey();

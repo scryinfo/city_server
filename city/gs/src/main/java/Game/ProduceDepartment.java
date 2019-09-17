@@ -70,8 +70,6 @@ public class ProduceDepartment extends FactoryBase {
             ItemKey itemKey = new ItemKey(line.item,ownerId(), line.itemLevel,ownerId());
             Gs.ItemKey key = itemKey.toProto();
             Gs.Line.Builder l = line.toProto().toBuilder()
-                    .setBrandScore(key.getBrandScore())
-                    .setQtyScore(key.getQualityScore())
                     .setBrandName(key.getBrandName());
             builder.addLine(l.build());
         });

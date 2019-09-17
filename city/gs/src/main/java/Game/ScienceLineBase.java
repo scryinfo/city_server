@@ -1,7 +1,5 @@
 package Game;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
@@ -85,10 +83,7 @@ public abstract class ScienceLineBase {
     }
 
     public Gs.Line toProto(UUID producerId) {
-        /*获取生生产速度*/
-        Eva eva = EvaManager.getInstance().getEva(producerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
-        double v = EvaManager.getInstance().computePercent(eva);
-        double speed = item.n * workerNum * (1 + v);
+        double speed = item.n * workerNum ;
         return Gs.Line.newBuilder()
                 .setId(Util.toByteString(id))
                 .setItemId(item.id)
@@ -140,9 +135,7 @@ public abstract class ScienceLineBase {
         int add = 0;
         if(this.timer.update(diffNano))
         {
-            Eva eva = EvaManager.getInstance().getEva(onwerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
-            double v = EvaManager.getInstance().computePercent(eva);
-            accumulated += item.n * this.workerNum * (1 + v);
+            accumulated += item.n * this.workerNum;
             add = accumulated >= 1 ? left():0;
             if(add > 0) {
                 this.count += add;
@@ -159,9 +152,6 @@ public abstract class ScienceLineBase {
     }
 
     public double getItemSpeed(UUID producerId) {
-        Eva eva = EvaManager.getInstance().getEva(producerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
-        double v = EvaManager.getInstance().computePercent(eva);
-        double speed = item.n * workerNum * (1 + v);
-        return speed;
+        return item.n * workerNum;
     }
 }

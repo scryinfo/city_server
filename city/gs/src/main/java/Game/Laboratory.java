@@ -1,7 +1,5 @@
 package Game;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.GoodFormula;
 import Game.Meta.MetaData;
 import Game.Meta.MetaLaboratory;
@@ -419,15 +417,9 @@ public class Laboratory extends Building {
     @Transient
     Map<Integer, Double> evaMap = new HashMap<>();
 
-    public void updateEvaAdd(){//更新eva
-        for (Integer type : MetaData.getBuildingTech(type())) {//atype,因为研究所一个atype只对应1个eva，所以取第一个
-            Eva eva = EvaManager.getInstance().getEva(ownerId(), type).get(0);
-            evaMap.put(eva.getBt(), EvaManager.getInstance().computePercent(eva));
-        }
-    }
+
     //总的成功率数据（包含eva加成）
     public Map<Integer,Double> getTotalSuccessProb(){
-        updateEvaAdd();//更新eva信息
         Map<Integer, Double> map = new HashMap<>();
         //eva成功率
         double evaProb = this.evaProb * (1 + evaMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE));

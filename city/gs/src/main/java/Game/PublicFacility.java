@@ -1,8 +1,6 @@
 package Game;
 
 import Game.Contract.ContractManager;
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.*;
 import Game.Timers.PeriodicTimer;
 import Shared.GlobalConfig;
@@ -179,31 +177,10 @@ public class PublicFacility extends Building{
                 atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString());//确定Eva的a类型,拼接a类型，建筑类型+type
             }
         }
-        double evaAdd = EvaManager.getInstance().computePercent(EvaManager.getInstance().getEva(this.ownerId(), atype, Gs.Eva.Btype.PromotionAbility_VALUE));
-        return (long) (this.meta.output1P1Hour * this.getWorkerNum() * (1 + evaAdd));
+        return (long) (this.meta.output1P1Hour * this.getWorkerNum());
     }
 
     public void updatePromoAbility() {
-        //3、 计算Eva单项提升能力
-        Set<Eva> sellerEvas = EvaManager.getInstance().getEvaList(this.ownerId());
-        int abType = Gs.Eva.Btype.PromotionAbility.getNumber();
-        //查看是否有该广告商推广能力的Eva提升
-        int evaAdd = 0;
-        Iterator<Eva> it = sellerEvas.iterator();
-        while (it.hasNext()){
-            Eva eva =  it.next();
-            //根据取到的eva的等级，取出对应的能力值
-            Integer level=eva.getLv();
-            Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-            MetaExperiences evaAddMe= map.get(level);
-            if(evaAddMe != null){
-                evaAdd = evaAddMe.p;
-                evaPromoCur.put(eva.getAt(),evaAddMe.p);
-                if(eva.getAt() >= 1600 && eva.getAt() <= 1699){
-                    addPromoAbRecord(this.id(),(short) eva.getAt(),evaAdd);
-                }
-            }
-        }
         //4、 流量提升
         flowPromoCur = (int)ContractManager.getInstance().getPlayerADLift(this.ownerId());
         addPromoAbRecord(this.id(),(short)(0),flowPromoCur);
@@ -509,6 +486,33 @@ public class PublicFacility extends Building{
     }
 
     int tickPrice;
+<<<<<<< .mine
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+    @Override
+    protected void enterImpl(Npc npc){
+        this.ad.values().forEach(ad->{
+            ad.npcFlow++;
+        });
+        ++visitorCount;
+    }
+
+    @Override
+    protected void leaveImpl(Npc npc) {
+        --visitorCount;
+    }
+>>>>>>> .theirs
     private int visitorCount;
 
     @PostLoad

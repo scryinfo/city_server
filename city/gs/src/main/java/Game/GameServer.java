@@ -3,7 +3,6 @@ package Game;
 import Game.CityInfo.CityLevel;
 import Game.CityInfo.CityManager;
 import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
 import Game.FriendManager.FriendManager;
 import Game.FriendManager.SocietyManager;
 import Game.Gambling.FlightManager;
@@ -12,7 +11,6 @@ import Game.League.LeagueManager;
 import Game.Meta.MetaData;
 import Game.Promote.PromotePointManager;
 import Game.Technology.SciencePointManager;
-import Game.Util.BuildingUtil;
 import Game.ddd.chainRpcMgr;
 import Game.ddd.dddPurchaseMgr;
 import Shared.*;
@@ -160,14 +158,11 @@ public class GameServer {
         MoneyPool.init();
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
-        EvaManager.getInstance().init();
         PromotePointManager.getInstance().init();//推广点数初始化
         SciencePointManager.getInstance().init();//科技点数初始化
         TickManager.init();
-        BrandManager.init();
         FlightManager.init();
         SocietyManager.init();
-        BuildingUtil.instance().updateMaxOrMinTotalQty();//初始化全城最大最小建筑品质
         CityLevel.init();
         CityManager.instance().init();
         dddPurchaseMgr.init();

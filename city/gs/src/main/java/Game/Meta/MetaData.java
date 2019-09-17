@@ -310,10 +310,6 @@ public class MetaData {
     public static final Set<Integer> getAllMaterialId() {
         return material.keySet() == null ? new HashSet() : material.keySet();
     }
-    //获取所有原料id
-    public static final int getGoodQuality(int goodId) {
-        return good.get(goodId) == null ? -1 : good.get(goodId).quality;
-    }
     //获取所有商品id
     public static final Set<Integer> getAllGoodId() {
         return good.keySet() == null ? new HashSet() : good.keySet();

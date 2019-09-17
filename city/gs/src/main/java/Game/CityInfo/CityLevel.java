@@ -1,24 +1,19 @@
 package Game.CityInfo;
 
-import Game.BrandManager;
-import Game.Eva.EvaManager;
 import Game.GameDb;
 import Game.GameServer;
 import Game.Meta.MetaCityLevel;
 import Game.Meta.MetaData;
 import Game.Player;
-import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Entity
 public class CityLevel {
@@ -56,13 +51,6 @@ public class CityLevel {
         return cexp;
     }
 
-    @Transient
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(2));
-    public void update(long diffNano) {
-        if (timer.update(diffNano)) {
-            sumValue = EvaManager.getInstance().getAllSumValue();
-        }
-    }
     public Gs.CityLevel toProto() {
         return Gs.CityLevel.newBuilder().setLv(lv).setExp(cexp).setSalary(salary).setInventCount(inventCount).build();}
 

@@ -335,8 +335,6 @@ public class Player {
         builder.addAllGround(GroundManager.instance().getGroundProto(id()));
         builder.addAllRentGround(GroundManager.instance().getRentGroundProto(id()));
         builder.setBagId(Util.toByteString(BAG_ID));
-        builder.addAllBuildingBrands(BrandManager.instance().getBuildingBrandProto(id()));
-        builder.addAllGoodBrands(BrandManager.instance().getGoodBrandProto(id()));
         builder.setCityGoodInfo(CityManager.instance().toProto());
         goodLv.forEach((k,v)->builder.addGoodLv(Gs.IntNum.newBuilder().setId(k).setNum(v)));
 

@@ -1,7 +1,6 @@
 package Game.CityInfo;
 
 import Game.*;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
@@ -10,7 +9,6 @@ import Shared.LogDb;
 import gs.Gs;
 import org.bson.Document;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -279,29 +277,6 @@ public class IndustryMgr {
         }
     }
 
-    public List<TopInfo> queryTop(int buildingType) {
-        long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND;
-        List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, buildingType, LogDb.getDayPlayerIncome());
-        return list.stream().map(o -> {
-            try {
-                UUID pid = o.get("id", UUID.class);
-                // 玩家行业总工人数
-                int staffNum = getPlayerIndustryStaffNum(pid, buildingType);
-                Player player = GameDb.getPlayer(pid);
-                // 玩家昨日收入
-                long total = o.getLong(KEY_TOTAL);
-                Map<Integer, Long> map = EvaManager.getInstance().getScience(pid, buildingType);
-                long promotion = map.getOrDefault(PROMOTION, 0l);
-                // 玩家研究点数
-                long science = map.getOrDefault(TECHNOLOGY, 0l);
-                return new TopInfo(pid, player.getFaceId(), player.getName(), total, staffNum, science, promotion);
-            } catch (Exception e) {
-                return null;
-            }
-        }).filter(o -> o != null).collect(Collectors.toList());
-    }
-
     // 获取玩家行业总人工数 不包含未开业建筑
     public int getPlayerIndustryStaffNum(UUID pid,int buildingType) {
         return City.instance().getPlayerBListByBtype(pid, buildingType).stream().filter(b->!b.outOfBusiness()).mapToInt(Building::getWorkerNum).sum();
@@ -334,116 +309,6 @@ public class IndustryMgr {
                 return null;
             }
         }).filter(o -> o != null).collect(Collectors.toList());
-    }
-
-    public TopInfo queryMyself(UUID owner, int type) {
-        long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND;
-        if (type == Gs.SupplyAndDemand.IndustryType.GROUND_VALUE) {
-            long ground = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
-            Player player = GameDb.getPlayer(owner);
-            String name = player.getName();
-            String faceId = player.getFaceId();
-            int count = LogDb.groundSum(startTime, endTime, owner); // 查询土地成交量
-            return new TopInfo(owner, faceId, name, ground, count);
-        } else {
-            long myself = LogDb.queryMyself(startTime, endTime, owner, type, LogDb.getDayPlayerIncome());
-            Player player = GameDb.getPlayer(owner);
-            int staffNum = getPlayerIndustryStaffNum(owner, type);
-            Map<Integer, Long> map = EvaManager.getInstance().getScience(owner, type);
-            // 玩家推广点数投入
-            long promotion = map.getOrDefault(PROMOTION, 0l);
-            // 玩家研究点数
-            long science = map.getOrDefault(TECHNOLOGY, 0l);
-            return new TopInfo(owner, player.getFaceId(), player.getName(), myself, staffNum, science, promotion);
-        }
-    }
-
-    public List<TopInfo> queryRegalRanking() {
-        long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND;
-        List<Document> list = LogDb.dayYesterdayPlayerIncome(startTime, endTime, LogDb.getDayPlayerIncome());
-        return list.stream().map(o -> {
-            try {
-                UUID pid = o.get("id", UUID.class);
-                // 玩家总工人数
-                long staffNum = City.instance().getPlayerStaffNum(pid);
-                Player player = GameDb.getPlayer(pid);
-                // 玩家昨日收入
-                long total = o.getLong(KEY_TOTAL);
-                Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(pid);
-                // 玩家推广点数投入
-                long promotion = map.getOrDefault(PROMOTION, 0l);
-                // 玩家研究点数
-                long science = map.getOrDefault(TECHNOLOGY, 0l);
-                return new TopInfo(pid, player.getFaceId(), player.getName(), total, staffNum, science, promotion);
-            } catch (Exception e) {
-                return null;
-            }
-        }).filter(o -> o != null).collect(Collectors.toList());
-    }
-
-    public TopInfo queryMyself(UUID owner) {
-        long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND;
-        long myself = LogDb.queryMyself(startTime, endTime, owner, LogDb.getDayPlayerIncome());
-        Player player = GameDb.getPlayer(owner);
-        long staffNum = City.instance().getPlayerStaffNum(owner);
-        Map<Integer, Long> map = EvaManager.getInstance().getPlayerSumValue(owner);
-        // 玩家推广点数投入
-        long promotion = map.getOrDefault(PROMOTION, 0l);
-        // 玩家研究点数
-        long science = map.getOrDefault(TECHNOLOGY, 0l);
-        return new TopInfo(owner, player.getFaceId(), player.getName(), myself, staffNum, science, promotion);
-    }
-
-    public List<TopInfo> queryProductRanking(int bt, int itemId) {
-        long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND;
-        List<Document> list = null;
-        if (bt == MetaBuilding.RETAIL) {
-            list = LogDb.dayYesterdayRetailProductIncome(startTime, endTime, itemId, LogDb.getNpcBuyInShelf());
-        } else {
-            list = LogDb.dayYesterdayProductIncome(startTime, endTime, itemId, bt, LogDb.getBuyInShelf());
-        }
-        return list.stream().map(o -> {
-            try {
-                UUID pid = o.get("id", UUID.class);
-                int staffNum = getPlayerIndustryStaffNum(pid, bt);
-                Player player = GameDb.getPlayer(pid);
-                long total = o.getLong(KEY_TOTAL);
-                // 具体商品投入的点数
-                Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(pid, itemId);
-                // 玩家推广点数投入
-                long promotion = map.getOrDefault(PROMOTION, 0l);
-                // 玩家研究点数
-                long science = map.getOrDefault(TECHNOLOGY, 0l);
-
-                return new TopInfo(pid, player.getFaceId(), player.getName(), total, staffNum, science, promotion);
-            } catch (Exception e) {
-                return null;
-            }
-        }).filter(o -> o != null).collect(Collectors.toList());
-    }
-
-    public TopInfo queryMyself(UUID owner, int bt, int itemId) {
-        long endTime = getEndTime(System.currentTimeMillis());
-        long startTime = endTime - DAY_MILLISECOND;
-        long income = 0;
-        if (bt == MetaBuilding.RETAIL) {
-            income = LogDb.queryMyselfRetail(startTime, endTime, owner, itemId, LogDb.getNpcBuyInShelf());
-        } else {
-            income = LogDb.queryMyself(startTime, endTime, owner, bt, itemId, LogDb.getBuyInShelf());
-        }
-        Player player = GameDb.getPlayer(owner);
-        int staffNum = getPlayerIndustryStaffNum(owner, bt);
-        Map<Integer, Long> map = EvaManager.getInstance().getItemPoint(owner, itemId);
-        // 玩家推广点数投入
-        long promotion = map.getOrDefault(PROMOTION, 0l);
-        // 玩家研究点数
-        long science = map.getOrDefault(TECHNOLOGY, 0l);
-
-        return new TopInfo(owner, player.getFaceId(), player.getName(), income, staffNum, science, promotion);
     }
 
 }

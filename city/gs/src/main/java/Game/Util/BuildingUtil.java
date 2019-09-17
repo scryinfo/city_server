@@ -34,69 +34,6 @@ public class BuildingUtil {
     private static double laboratoryAvg = 0;
     //缓存零售店和住宅最大最小的基础品质
     private Map<Integer, Map<Integer, Double>> maxQtyTotalMap = new HashMap<>();
-    //获取最大最小品牌值
-    public Map<Integer,Double> getMaxOrMinQty(int type){
-        return maxQtyTotalMap.get(type);
-    }
-
-    //更新最大最小品质：建造建筑\拆除建筑和修改eva时更新
-    public void updateMaxOrMinTotalQty(){
-        Set<Double> retailSet = new HashSet<>();
-        Set<Double> apartmentSet = new HashSet<>();
-        Set<Building> retailShops = City.instance().typeBuilding.getOrDefault(MetaBuilding.RETAIL,new HashSet<>());
-        Set<Building> apartments = City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>());
-        for (Building b : retailShops) {
-            RetailShop retailShop = (RetailShop) b;
-            retailSet.add(retailShop.getTotalQty());
-        }
-        for (Building b : apartments) {
-            Apartment apartment = (Apartment) b;
-            apartmentSet.add(apartment.getTotalQty());
-        }
-        HashMap<Integer,Double> retailMap = new HashMap<>();
-        retailMap.put(MAX,0d);
-        retailMap.put(MIN,0d);
-        HashMap<Integer,Double> apartmentMap = new HashMap<>();
-        apartmentMap.put(MAX, 0d);
-        apartmentMap.put(MIN, 0d);
-        if(!retailSet.isEmpty()) {
-            Double maxRetailQty = Collections.max(retailSet);
-            Double minRetailQty = Collections.min(retailSet);
-            retailMap.put(MAX, maxRetailQty);
-            retailMap.put(MIN, minRetailQty);
-        }
-        if(!apartmentSet.isEmpty()) {
-            Double maxApartQty = Collections.max(apartmentSet);
-            Double minApartQty = Collections.min(apartmentSet);
-            apartmentMap.put(MAX, maxApartQty);
-            apartmentMap.put(MIN, minApartQty);
-        }
-        maxQtyTotalMap.put(MetaBuilding.RETAIL, retailMap);
-        maxQtyTotalMap.put(MetaBuilding.APARTMENT,apartmentMap);
-        _update();
-    }
-
-    /*获取最大最小知名度值*/
-    public Map<Integer,Integer> getMaxAndMinBrand(int item){
-        Map<Integer, Integer> map = new HashMap<>();
-        Map<String, Double> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//查询的是Eva最大最小的提升比例
-        double minRatio=cityBrandMap.get("min");
-        double maxRatio=cityBrandMap.get("max");
-        //如果是商品(使用商品的默认知名度)
-        int maxBrand;
-        int minBrand;
-        if(MetaGood.isItem(item)){
-            MetaGood good = MetaData.getGood(item);
-            maxBrand = (int) (good.brand*(1+maxRatio));
-            minBrand = (int) (good.brand*(1+minRatio));
-        }else{
-            maxBrand = (int) (BrandManager.BASE_BRAND * (1 + maxRatio));
-            minBrand = (int) (BrandManager.BASE_BRAND * (1 + minRatio));
-        }
-        map.put(MAX, maxBrand);
-        map.put(MIN, minBrand);
-        return map;
-    }
 
     public static Map<Integer, Double> getMaterial() {
         return materialAvg;

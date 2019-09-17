@@ -2,7 +2,6 @@ package Game;
 
 import DB.Db;
 import Game.Contract.IBuildingContract;
-import Game.Eva.EvaManager;
 import Game.Listener.ConvertListener;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaData;
@@ -341,6 +340,49 @@ public abstract class Building implements Ticker{
         return metaBuilding.workerNum;
     }
 
+<<<<<<< .mine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+    public long getAllStaffSize()
+    {
+        return allStaff.size();
+    }
+
+    public int allSalary() {
+        return singleSalary() * metaBuilding.workerNum;
+    }
+    public int singleSalary() {
+        return (int) (salaryRatio / 100.d);
+    }
+    public int allTax() {
+    	return singleTax() * metaBuilding.workerNum;
+    }
+    public int singleTax() {
+    	return (int)(MetaData.getCity().taxRatio / 100.d * singleSalary());
+    }
+    public int singleSalary(Talent talent) {
+        return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
+    }
+>>>>>>> .theirs
     public int cost() {
         return 0;
     }
@@ -498,19 +540,6 @@ public abstract class Building implements Ticker{
         builder.setBubble(this.showBubble);
         int type=MetaBuilding.type(metaBuilding.id);
     	builder.setType(type);
-    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
-    	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
-        	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-    	   	//单个建筑
-        	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
-           	double brand=BrandManager.instance().getValFromMap(brandMap, type());
-        	double quality=BrandManager.instance().getValFromMap(qtyMap, type());
-        	//知名度评分
-            int brandScore =(int)GlobalUtil.getBrandScore(brand, type);
-            //品质评分
-            int qtyScore = (int)GlobalUtil.getBuildingQtyScore(quality, type);
-            builder.setBrand(brandScore).setQuality(qtyScore);
-    	}
         return builder.build();
     }
 
