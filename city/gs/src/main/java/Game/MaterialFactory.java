@@ -74,16 +74,6 @@ public class MaterialFactory extends FactoryBase {
     }
 
     @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
-
-    @Override
     protected LineBase addLineImpl(MetaItem item, int workerNum, int targetNum, int itemLevel) {
         if(!(item instanceof MetaMaterial) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;

@@ -35,9 +35,6 @@ public class Apartment extends Building implements IBuildingContract
     private int rent;
 
     @Transient
-    private Map<UUID, Npc> renters = new HashMap<>();
-
-    @Transient
     private Deque<Integer> incomingHistory = new ArrayDeque<>();
 
     protected Apartment() {}
@@ -64,7 +61,7 @@ public class Apartment extends Building implements IBuildingContract
         return Gs.Apartment.newBuilder()
                 .setInfo(super.toProto())
                 .setRent(this.rent)
-                .setRenter(renters.size())
+                .setRenter(0)
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
                 .setQty(this.qty)
                 .setLift(getLift())
@@ -76,34 +73,13 @@ public class Apartment extends Building implements IBuildingContract
     }
 
     @Override
-    protected void enterImpl(Npc npc) {
-        npc.setApartment(this);
-        renters.put(npc.id(), npc);
-        if (!npcSelectable()) {
-            //住宅已满通知
-            MailBox.instance().sendMail(Mail.MailType.APARTMENT_FULL.getMailType(), this.ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
-        }
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-        npc.setApartment(null);
-        renters.remove(npc.id());
-    }
-
-    @Override
     protected void _update(long diffNano) {
 
     }
 
     @Override
     public int getTotalSaleCount() {
-        return getCapacity() - getRenterNum();
-    }
-
-    @Override
-    public boolean npcSelectable() {
-        return meta.npc > this.renters.size();
+        return getCapacity();
     }
 
     @Override
@@ -112,17 +88,10 @@ public class Apartment extends Building implements IBuildingContract
         return buildingContract;
     }
 
-    public void deleteRenter(){
-        renters.clear();
-    }
-
     public double getTotalQty(){ //yty
         Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
         double qty = (meta.qty) * (1 + EvaManager.getInstance().computePercent(eva));
         return qty;
-    }
-    public int getRenterNum(){
-        return renters.size();
     }
 
     public int getCapacity(){

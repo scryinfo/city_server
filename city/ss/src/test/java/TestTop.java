@@ -33,13 +33,13 @@ public class TestTop {
         System.err.println(income);*/
     }
 
-    @org.junit.Test
-    public void test2() {
-        LogDb.init("mongodb://192.168.0.191:27017","city191");
-                SummaryUtil.init();
-        List<Document> list = LogDb.daySummaryGroundHistoryIncome(1, 2, LogDb.getBuyGround());
-        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.GROUND, list, System.currentTimeMillis(), SummaryUtil.getDayIndustryIncome());
-        System.err.println(list);
-    }
+//    @org.junit.Test
+//    public void test2() {
+//        LogDb.init("mongodb://192.168.0.191:27017","city191");
+//                SummaryUtil.init();
+//        List<Document> list = LogDb.daySummaryGroundHistoryIncome(1, 2, LogDb.getBuyGround());
+//        SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.GROUND, list, System.currentTimeMillis(), SummaryUtil.getDayIndustryIncome());
+//        System.err.println(list);
+//    }
 
 }

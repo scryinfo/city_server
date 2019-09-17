@@ -122,34 +122,6 @@ public class CompeteAndExpectUtil {
         }
         return map;
     }
-
-    //6.TODO:获取住宅npc的预期花费
-    //参数：arg1:所有住宅建筑 arg2:当前eva信息  arg3:npc的花费比例
-    public static  Map<UUID,List<Integer>> getApartmentExpectSpend(List<Building> buildings,Eva eva,double npcSpendRatio) {
-        Map<UUID,List<Integer>> expectSpends = new HashMap<>();
-        int at = eva.getAt();
-        int bt = eva.getBt();
-        int avgAvgBrand = GlobalUtil.cityAvgBrand(at);//全城知名度
-        int cityAvgQuality = GlobalUtil.getCityApartmentOrRetailShopQuality(at, bt,MetaBuilding.APARTMENT);//全城品质
-        for (Building building : buildings) {
-            if (building.outOfBusiness())
-                continue;
-            Apartment apartment = (Apartment) building;
-            int localBrand= BrandManager.instance().getBrand(apartment.ownerId(), at).getV()==0?1:BrandManager.instance().getBrand(apartment.ownerId(), at).getV();//玩家品牌
-            int localQuality = (int) (apartment.quality() * (1+EvaManager.getInstance().computePercent(eva)));//玩家品质
-            double totalWeight = getItemWeight(localQuality, at, bt, apartment.quality()) + getBrandWeight(localBrand, at);
-            //玩家预期花费（住宅预期花费 = (总权重 * 200 / 3 + 1) * NPC预期花费比例 * NPC平均工资）
-            int expectSpend = (int) Math.ceil(((totalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary()));
-            //全城的预期花费
-            double cityTotalWeight = getItemWeight(cityAvgQuality, at, bt, apartment.quality()) + getBrandWeight(avgAvgBrand, at);
-            int cityExpectSpend =(int) Math.ceil(((cityTotalWeight * 200 / 3 + 1) * npcSpendRatio * CityUtil.cityAvgSalary()));
-            List<Integer> data=new ArrayList<>();
-            data.add(expectSpend);
-            data.add(cityExpectSpend);
-            expectSpends.put(building.id(), data);
-        }
-        return expectSpends;
-    }
     /*获取原料厂的竞争力,和eva无关*/
     public static Map<UUID,Double> getMaterialCompetitiveMap(List<Building> buildings,int item){
         Map<UUID, Double> map = new HashMap<>();

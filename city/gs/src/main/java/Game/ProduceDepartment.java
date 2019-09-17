@@ -82,16 +82,6 @@ public class ProduceDepartment extends FactoryBase {
         builder.addProduceDepartment(this.detailProto());
     }
 
-    @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
-
     protected LineBase addLineImpl(MetaItem item, int workerNum, int targetNum, int itemLevel) {
         if(!(item instanceof MetaGood) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;

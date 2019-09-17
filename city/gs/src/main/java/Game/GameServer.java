@@ -142,7 +142,6 @@ public class GameServer {
     }
     public void run() throws Exception {
         FriendManager.getInstance().init();
-        AiBaseAvgManager.getInstance().init();//初始化AI基础数据
         thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());
         thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
             try {
@@ -153,7 +152,6 @@ public class GameServer {
             }
         }, 30, 10, TimeUnit.SECONDS);
         City.init(MetaData.getCity()); // some other object depend on city, so startUp it first
-        NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
         GroundManager.init();
         PromotionMgr.init();

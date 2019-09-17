@@ -565,11 +565,6 @@ public class GameSession {
         Building b = City.instance().getBuilding(id);
         if(b == null || !b.ownerId().equals(player.id()))
             return;
-        if(player.money() < b.allSalary()) {
-            this.write(Package.fail(cmd, Common.Fail.Reason.moneyNotEnough));
-            return;
-        }
-        b.createNpc();//产生npc
         if(b.startBusiness(player)){
             LogDb.playerBuildingBusiness(player.id(),1,b.getWorkerNum(),b.type());
             this.write(Package.create(cmd,c));
@@ -588,10 +583,8 @@ public class GameSession {
         if (b == null || !b.ownerId().equals(player.id()))
             return;
         b.shutdownBusiness();
-        b.addUnEmployeeNpc();//变成失业人员
         if (b instanceof Apartment) { //住宅停业，清空入住人数
             Apartment apartment = (Apartment) b;
-            apartment.deleteRenter();
         } else if (b instanceof Technology||b instanceof PromotionCompany) {
             ScienceBuildingBase science = (ScienceBuildingBase) b;
             science.cleanData();//清除建筑数据
@@ -2490,51 +2483,6 @@ public class GameSession {
             this.write(Package.create(cmd, c));
         }
     }
-    public void allocTalent(short cmd, Message message) {
-        Gs.AllocTalent c = (Gs.AllocTalent)message;
-        UUID buildingId = Util.toUuid(c.getBuildingId().toByteArray());
-        Building b = City.instance().getBuilding(buildingId);
-        if(b == null || b.outOfBusiness() || !b.canUseBy(player.id()) || TalentCenter.inapplicable(b.type()))
-            return;
-        UUID talentId = Util.toUuid(c.getTalentId().toByteArray());
-        if(!TalentManager.instance().hasTalent(player.id(), talentId))
-            return;
-        Talent talent = TalentManager.instance().get(talentId);
-        if(talent == null || !talent.getOwnerId().equals(player.id()) || !b.canTake(talent))
-            return;
-        List<Object> updates;
-        if(!talent.payed()) {
-            int cost = b.singleSalary(talent) * talent.getWorkDays();
-            if (player.money() < cost) // if the salary is dynamic, client need to know it
-                return;
-            talent.addMoney(cost);
-            player.decMoney(cost);
-            LogDb.playerPay(player.id(), cost,0);
-            LogDb.playerIncome(talent.id(), cost, b.type());
-            updates = Arrays.asList(talent, player);
-        }
-        else
-            updates = Arrays.asList(talent);
-        b.take(talent, updates);
-        GameDb.saveOrUpdate(updates);
-        this.write(Package.create(cmd, c));
-    }
-    public void unallocTalent(short cmd, Message message) {
-        Gs.AllocTalent c = (Gs.AllocTalent)message;
-        UUID buildingId = Util.toUuid(c.getBuildingId().toByteArray());
-        Building b = City.instance().getBuilding(buildingId);
-        if(b == null || b.outOfBusiness() || !b.canUseBy(player.id()) || TalentCenter.inapplicable(b.type()))
-            return;
-        UUID talentId = Util.toUuid(c.getTalentId().toByteArray());
-        if(!b.hasTalent(talentId))
-            return;
-        Talent talent = TalentManager.instance().get(talentId);
-        Npc npc = b.untake(talent);
-        if(npc == null)
-            GameDb.saveOrUpdate(talent);
-        else
-            GameDb.saveOrUpdateAndDelete(Arrays.asList(talent), Arrays.asList(npc));
-    }
     //wxj========================================================
     private void sendSocialInfo()
     {
@@ -3263,63 +3211,6 @@ public class GameSession {
     }
 
     //===========================================================
-    /**
-     * (市民需求)每种类型npc的数量
-     */
-    public void eachTypeNpcNum(short cmd) {
-        Gs.EachTypeNpcNum.Builder list = Gs.EachTypeNpcNum.newBuilder();
-        NpcManager.instance().countRealNpcByType().forEach((k,v)->{
-            list.addCountNpcMap(Gs.CountNpcMap.newBuilder().setKey(k).setValue(v).build());
-        });
-        list.setWorkNpcNum(NpcManager.instance().getNpcCount())
-                .setUnEmployeeNpcNum(NpcManager.instance().getUnEmployeeNpcCount())
-                .setRealWorkNpc(NpcManager.instance().getRealNpcNumByType(1))
-                .setRealUnEmployeeNpcNum(NpcManager.instance().getRealNpcNumByType(2));
-        this.write(Package.create(cmd,list.build()));
-    }
-
-    //查询行业平均工资
-    public void QueryIndustryWages(short cmd, Message message)
-    {
-        Gs.QueryIndustryWages msg = (Gs.QueryIndustryWages)message;
-        MetaBuilding buildingdata = null;
-        int tp = msg.getType();
-        switch(MetaBuilding.type(tp))
-        {
-            case MetaBuilding.TRIVIAL:
-                buildingdata = MetaData.getTrivialBuilding(tp);
-                break;
-            case MetaBuilding.MATERIAL:
-                buildingdata = MetaData.getMaterialFactory(tp);
-                break;
-            case MetaBuilding.PRODUCE:
-                buildingdata = MetaData.getProduceDepartment(tp);
-                break;
-            case MetaBuilding.RETAIL:
-                buildingdata = MetaData.getRetailShop(tp);
-                break;
-            case MetaBuilding.APARTMENT:
-                buildingdata = MetaData.getApartment(tp);
-                break;
-           /* case MetaBuilding.LAB:
-                buildingdata = MetaData.getLaboratory(tp);
-                break;*/
-            case MetaBuilding.TECHNOLOGY:
-                buildingdata = MetaData.getTechnology(tp);
-                break;
-            case MetaBuilding.PROMOTE:
-                buildingdata = MetaData.getPromotionCompany(tp);
-                break;
-            case MetaBuilding.TALENT:
-                buildingdata = MetaData.getTalentCenter(tp);
-                break;
-        }
-        if(buildingdata != null){
-            this.write(Package.create(cmd, msg.toBuilder().setIndustryWages(buildingdata.salary).build()));
-        }else{
-            this.write(Package.fail(cmd));
-        }
-    }
     public void queryMyBuildings(short cmd, Message message) {
         Gs.QueryMyBuildings msg = (Gs.QueryMyBuildings)message;
         UUID id = Util.toUuid(msg.getId().toByteArray());
@@ -4064,31 +3955,6 @@ public class GameSession {
         }
         this.write(Package.create(cmd, Gs.Str.newBuilder().setStr(building.getName()).build()));
     }
-    //住宅推荐价格 √
-    public void queryApartmentRecommendPrice(short cmd, Message message) {
-        Gs.QueryBuildingInfo msg = (Gs.QueryBuildingInfo) message;
-        UUID buildingId = Util.toUuid(msg.getBuildingId().toByteArray());
-        UUID playerId = Util.toUuid(msg.getPlayerId().toByteArray()); //暂时不用
-        Building building = City.instance().getBuilding(buildingId);
-        if (building == null || building.type() != MetaBuilding.APARTMENT) {
-            return;
-        }
-        Apartment apartment = (Apartment) building;
-        // 玩家住宅评分
-        double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), apartment.type());
-        double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), apartment.type());
-        double curRetailScore = (brandScore + retailScore) / 2;
-        // 玩家住宅繁荣度
-        double prosperityScore = ProsperityManager.instance().getBuildingProsperityScore(building);
-        double guidePrice = GuidePriceMgr.instance().getApartmentGuidePrice(curRetailScore,prosperityScore);
-        //NPC预期消费 = 行业工资(可能会调整为城市工资) * 住宅预期消费比例
-        double moneyRatio = MetaData.getBuildingSpendMoneyRatio(building.type());
-        double salary = City.instance().getIndustrySalary(building.type());
-        Gs.ApartmentRecommendPrice.Builder builder = Gs.ApartmentRecommendPrice.newBuilder();
-        builder.setNpc(moneyRatio * salary).setGuidePrice(guidePrice);
-        this.write(Package.create(cmd,builder.setBuildingId(msg.getBuildingId()).build()));
-
-    }
 
     //原料推荐价格 √
     public void queryMaterialRecommendPrice(short cmd, Message message) {
@@ -4364,59 +4230,6 @@ public class GameSession {
 		this.write(Package.create(cmd, Gs.LaboratoryMsg.newBuilder().addLabPrice(labPrice.build()).setBuildingId(msg.getBuildingId()).build()));
 	}
 
-    //查询城市主页
-    public void queryCityIndex(short cmd){
-        Gs.QueryCityIndex.Builder builder = Gs.QueryCityIndex.newBuilder();
-        Map<Integer, Integer> npcMap = NpcManager.instance().countNpcByType();
-        //1.城市信息(名称)
-        MetaCity city = MetaData.getCity();
-        builder.setCityName(city.name);
-        //2.人口信息
-        Gs.QueryCityIndex.HumanInfo.Builder humanInfo = Gs.QueryCityIndex.HumanInfo.newBuilder();
-        Map<String, Integer> genderSex = CityUtil.genderSex(GameDb.getAllPlayer());
-        long socialNum =NpcManager.instance().getUnEmployeeNpcCount();//失业人员（社会福利人员）
-        long npcNum = NpcManager.instance().getNpcCount()+socialNum;//所有npc数量
-        humanInfo.setBoy(genderSex.get("boy"));
-        humanInfo.setGirl(genderSex.get("girl"));
-        humanInfo.setCitizens(npcNum);
-        builder.setSexNum(humanInfo);
-        //3.设置城市摘要信息
-        Gs.QueryCityIndex.CitySummary.Builder citySummary = Gs.QueryCityIndex.CitySummary.newBuilder();
-        //土地拍卖信息
-        int groundSum = 0;
-        for (Map.Entry<Integer, MetaGroundAuction> mg : MetaData.getGroundAuction().entrySet()) {
-            MetaGroundAuction value = mg.getValue();
-            groundSum+=value.area.size();
-        }
-        int auctionNum = GameDb.countGroundInfo();
-        citySummary.setTotalNum(groundSum).setAuctionNum(auctionNum);
-        //4.设置城市运费
-        citySummary.setTransferCharge(MetaData.getSysPara().transferChargeRatio);
-        //5.设置平均工资
-        citySummary.setAvgSalary((long) City.instance().getAvgIndustrySalary());//平均工资
-        citySummary.setUnEmployedNum(socialNum);//失业人员
-        citySummary.setEmployeeNum(npcNum - socialNum);//在职人员
-        citySummary.setUnEmployedPercent((int)Math.ceil((double)socialNum/npcNum*100));//失业率(数量/总数*100)
-        //平均资产（区分福利npc）
-        Gs.QueryCityIndex.CitySummary.AvgProperty.Builder avgProperty = Gs.QueryCityIndex.CitySummary.AvgProperty.newBuilder();
-        Map<Integer, Long> moneyMap = CityUtil.cityAvgProperty();//城市平均资产
-        avgProperty.setSocialMoney(moneyMap.get(1));
-        avgProperty.setEmployeeMoney(moneyMap.get(0));
-        citySummary.setAvgProperty(avgProperty);
-        builder.setSummary(citySummary);
-        //工资涨幅（指的是npc购买不起商品，然后商品和npc金钱的差价累加，/行业人数 就是下次增长的幅度）
-        double v = CityUtil.increaseRatio();
-        builder.setSalaryIncre(v);
-        //8.市民保障福利（不工作npc的待遇）
-        int socialMoney = CityUtil.socialMoney();
-        builder.setSocialWelfare(socialMoney);
-        //9.税收
-        long tax = CityUtil.getTax();
-        builder.setTax(tax);
-        //10.城市资金（奖金池）
-        builder.setMoneyPool(MoneyPool.instance().money());
-        this.write(Package.create(cmd,builder.build()));
-    }
 
     //修改建筑名称
     public void updateBuildingName(short cmd, Message message)
@@ -5136,7 +4949,7 @@ public class GameSession {
                                     .setRent(apartment.cost())
                                     //计算总评分及推荐定价
                                     .setGuidePrice((int) guidePrice)
-                                    .setRenter(apartment.getRenterNum());
+                                    .setRenter(0);
                             summary.setApartmentSummary(apartSummary);
                         } else if (b instanceof ScienceBuildingBase) {/*研究所和推广公司*/
                             ScienceBuildingBase science = (ScienceBuildingBase) b;

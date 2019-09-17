@@ -100,16 +100,6 @@ public class PromotionCompany extends ScienceBuildingBase {
     }//TODO
 
     @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
-
-    @Override
     protected void _update(long diffNano) {
         if (getState() == Gs.BuildingState.SHUTDOWN_VALUE) {
             return;

@@ -181,8 +181,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.delMail_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "delMail"));
 
 			//===========================================================
-			table.put((short) GsCode.OpCode.eachTypeNpcNum_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"eachTypeNpcNum"));
-			table.put((short) GsCode.OpCode.queryIndustryWages_VALUE, Wrapper.newWithMessage(Gs.QueryIndustryWages.PARSER,GameSession.class, "QueryIndustryWages"));
 			table.put((short) GsCode.OpCode.queryMyBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBuildings.PARSER, GameSession.class,"queryMyBuildings"));
 			table.put((short) GsCode.OpCode.queryMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyEva.PARSER, GameSession.class,"queryMyEva"));
 			//todo：eva改版
@@ -198,8 +196,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getPlayerAmount_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerAmount"));
 
 			//new
-			//获取住宅推荐价格
-			table.put((short) GsCode.OpCode.queryApartmentRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryApartmentRecommendPrice"));
 //			获取原料推荐价格
 			table.put((short) GsCode.OpCode.queryMaterialRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryMaterialRecommendPrice"));
 			//获取加工厂商品推荐价格

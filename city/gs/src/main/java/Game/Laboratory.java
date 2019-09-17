@@ -30,19 +30,11 @@ public class Laboratory extends Building {
 
     protected Laboratory() {}
     protected void setSalaryRatioAction(){
-        calcuProb();
     }
 
     @Override
     public int getTotalSaleCount() {
         return 0;
-    }
-
-    private void calcuProb() {
-        /*this.evaProb = (int) (this.meta.evaProb * this.salaryRatio / 100.f * this.getAllStaffSize());
-        this.goodProb = (int) (this.meta.goodProb * this.salaryRatio / 100.f * this.getAllStaffSize());*/
-        this.evaProb = (int) (this.meta.evaProb*100/ 100.f * this.getAllStaffSize());
-        this.goodProb = (int) (this.meta.goodProb*100/ 100.f * this.getAllStaffSize());
     }
 
     @Override
@@ -60,11 +52,9 @@ public class Laboratory extends Building {
             if (line.isRunning())
                 line.currentRoundPassNano = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis() - line.beginProcessTs) % TimeUnit.HOURS.toNanos(1);
         }
-        calcuProb();
     }
     @Override
     public Gs.Laboratory detailProto() {
-        calcuProb();
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
@@ -90,16 +80,6 @@ public class Laboratory extends Building {
     @Override
     public void appendDetailProto(Gs.BuildingSet.Builder builder) {
         builder.addLaboratory(this.detailProto());
-    }
-
-    @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
     }
 
     @Override
@@ -225,7 +205,6 @@ public class Laboratory extends Building {
         return null;
     }
     public RollResult roll(UUID lineId, Player player) {
-        calcuProb();
         Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
         RollResult res = null;//研究成果
         Line l = this.findInProcess(lineId);
@@ -448,7 +427,6 @@ public class Laboratory extends Building {
     }
     //总的成功率数据（包含eva加成）
     public Map<Integer,Double> getTotalSuccessProb(){
-        calcuProb();
         updateEvaAdd();//更新eva信息
         Map<Integer, Double> map = new HashMap<>();
         //eva成功率

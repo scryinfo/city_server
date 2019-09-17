@@ -129,15 +129,6 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    protected void enterImpl(Npc npc) { //进入建筑
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {//离开
-
-    }
-
-    @Override
     protected void _update(long diffNano) {
 
     }

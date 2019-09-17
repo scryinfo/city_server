@@ -74,10 +74,6 @@ public class MetaData {
     private static final TreeMap<Integer, MetaTalentCenter> talentCenter = new TreeMap<>();
     private static final TreeMap<Integer, MetaPublicFacility> publicFacility = new TreeMap<>();
     private static final TreeMap<Integer, MetaMaterialFactory> materialFactory = new TreeMap<>();
-    private static final TreeMap<Long, AIBuilding> aiBuilding = new TreeMap<>();
-    private static final TreeMap<Long, AIBuy> aiBuy = new TreeMap<>();
-    private static final TreeMap<Long, AILux> aiLux = new TreeMap<>();
-    private static final TreeMap<Long, AISelect> aiSelect = new TreeMap<>();
     private static final TreeMap<Integer, Integer> aiSelectGood = new TreeMap<>();
     private static final TreeMap<Integer, Double> buildingSpendRatio = new TreeMap<>();
     private static final TreeMap<Integer, Double> goodSpendRatio = new TreeMap<>();
@@ -341,16 +337,6 @@ public class MetaData {
         MetaItem item1=item == null ? getScienceItem(id) : item;
         return item1 == null ? getPromotionItem(id):item1;
     }
-    public static AIBuilding getAIBuilding(long id) { return aiBuilding.get(id); }
-    public static AIBuy getAIBuy(long id) {
-        return aiBuy.get(id);
-    }
-    public static AILux getAILux(long id) {
-        return aiLux.get(id);
-    }
-    public static AISelect getAISelect(long id) {
-        return aiSelect.get(id);
-    }
     public static int getAISelectGood(long id) {
         return aiSelectGood.get(id);
     }
@@ -406,35 +392,6 @@ public class MetaData {
         if(d == null)
             throw new Exception("SysPara table is empty!");
         sysPara = new SysPara(d);
-    }
-    private static void initAIBuilding() {
-        mongoClient.getDatabase(dbName).getCollection(aiBuildingColName).find().forEach((Block<Document>) doc -> {
-            AIBuilding m = new AIBuilding(doc);
-            aiBuilding.put(m.id, m);
-        });
-    }
-    private static void initAIBuy() {
-        mongoClient.getDatabase(dbName).getCollection(aiBuyColName).find().forEach((Block<Document>) doc -> {
-            AIBuy m = new AIBuy(doc);
-            aiBuy.put(m.id, m);
-        });
-    }
-    private static void initAILux() {
-        mongoClient.getDatabase(dbName).getCollection(aiLuxColName).find().forEach((Block<Document>) doc -> {
-            AILux m = new AILux(doc);
-            aiLux.put(m.id, m);
-        });
-    }
-    private static void initAISelect() {
-        mongoClient.getDatabase(dbName).getCollection(aiSelectColName).find().forEach((Block<Document>) doc -> {
-            AISelect m = new AISelect(doc);
-            aiSelect.put(m.id, m);
-        });
-    }
-    private static void initAISelectGood() {
-        mongoClient.getDatabase(dbName).getCollection(aiSelectGoodColName).find().forEach((Block<Document>) doc -> {
-            aiSelectGood.put(doc.getInteger("gid"),doc.getInteger("_id"));
-        });
     }
 //	public static void initNpc() {
 //		mongoClient.getDatabase(dbName).getCollection(npcColName).find().forEach((Block<Document>) doc -> {
@@ -640,11 +597,6 @@ public class MetaData {
 		initBuilding();
         reloadGroundAuction();
 
-        initAIBuilding();
-        initAIBuy();
-        initAILux();
-        initAISelect();
-        initAISelectGood();
         initDayId();
         initSpendRatio();
 

@@ -30,16 +30,6 @@ public class TrivialBuilding extends Building {
     }
 
     @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
-
-    @Override
     protected void _update(long diffNano) {
 
     }

@@ -50,15 +50,6 @@ public class TalentCenter extends Building {
 
     }
 
-    @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));

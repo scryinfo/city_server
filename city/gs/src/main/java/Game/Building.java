@@ -210,34 +210,6 @@ public abstract class Building implements Ticker{
             return false;
         return true;
     }
-    public boolean take(Talent talent, List<Object> updates) {
-        talent.inBuilding(this.id());
-        talentId.add(talent.id());
-        if(talent.money() > 0) {
-            Npc npc = NpcManager.instance().create(talent.id(), this, talent.money());
-            allStaff.add(npc);
-            npc.goWork();
-            updates.add(npc);
-        }
-        return true;
-    }
-    private Npc findNpc(UUID id) {
-        for (Npc npc : allStaff) {
-            if(npc.id().equals(id))
-                return npc;
-        }
-        return null;
-    }
-    public Npc untake(Talent talent) {
-        talent.outBuilding(this.id());
-        this.talentId.remove(talent.id());
-        Npc npc = this.findNpc(talent.id());
-        if(npc != null) {
-            talent.setMoney(npc.money());
-            NpcManager.instance().delete(Arrays.asList(npc));
-        }
-        return npc;
-    }
 
     @Transient  // init this from TalentManager!!!
     private Collection<UUID> talentId = new HashSet<>();
@@ -365,41 +337,16 @@ public abstract class Building implements Ticker{
         return builder.build();
     }
 
-    @Transient
-    private Set<Npc> allStaff = new HashSet<>();
-
     public int getWorkerNum(){
         return metaBuilding.workerNum;
     }
 
-    public long getAllStaffSize()
-    {
-        return allStaff.size();
-    }
-
-    public int allSalary() {
-        return singleSalary() * metaBuilding.workerNum;
-    }
-    public int singleSalary() {
-        return (int) (salaryRatio / 100.d * EvaManager.getInstance().getSalaryStandard());
-    }
-    public int allTax() {
-    	return singleTax() * metaBuilding.workerNum;
-    }
-    public int singleTax() {
-    	return (int)(MetaData.getCity().taxRatio / 100.d * singleSalary());
-    }
-    public int singleSalary(Talent talent) {
-        return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
-    }
     public int cost() {
         return 0;
     }
 
     public boolean startBusiness(Player player) {
         if(state == Gs.BuildingState.OPERATE_VALUE)
-            return false;
-        if(!this.payOff(player))
             return false;
         state = Gs.BuildingState.OPERATE_VALUE;
         openingTs = System.currentTimeMillis();
@@ -431,12 +378,6 @@ public abstract class Building implements Ticker{
     public String getName()
     {
         return name == null ? "" : name;
-    }
-
-	// ugly, but due to hibernate inject way, there is no better ways to build the reference relationship
-    public void takeAsWorker(Npc npc) {
-        if(npc.canWork())
-            this.allStaff.add(npc);
     }
 
     public void setDes(String des) {
@@ -505,81 +446,6 @@ public abstract class Building implements Ticker{
         this.metaBuilding = meta;
         this.constructCompleteTs = System.currentTimeMillis();
         this.last_modify_time = 0L;
-    }
-    public final List<Npc> destroy() {
-        List<Npc> npcs = new ArrayList<>(allStaff);
-        NpcManager.instance().delete(allStaff);
-        allStaff.clear();
-        return npcs;
-    }
-
-    public final void addUnEmployeeNpc() {
-    	NpcManager.instance().addUnEmployeeNpc(allStaff);
-    	allStaff.clear();
-    }
-
-    public List<Npc> hireNpc() {
-        List<Npc> npcs = new ArrayList<>();
-        this.metaBuilding.npc.forEach((k,v)->{
-            for(Npc npc : NpcManager.instance().create(k, v, this, 0))
-            {
-                npcs.add(npc);
-                takeAsWorker(npc);
-                npc.goWork();
-            }
-        });
-        return npcs;
-    }
-
-    public List<Npc> createNpc() {
-    	Map<UUID, Npc> unEmployeeNpc=NpcManager.instance().getUnEmployeeNpc();
-    	int unEmployeeNpcNum=unEmployeeNpc.size();
-    	List<Npc> npcList = new ArrayList<Npc>(unEmployeeNpc.values());
-    	List<Npc> npcs = new ArrayList<>();
-
-    	int requireWorkNum=0;
-    	for (Map.Entry<Integer, Integer> n : this.metaBuilding.npc.entrySet()) {
-    		requireWorkNum+=n.getValue();
-    	}
-    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口
-    		NpcManager.instance().addWorkNpc(npcList,this);
-    		npcs.addAll(npcList);
-    		int num=(requireWorkNum-unEmployeeNpcNum)/4; //每种类型还差npc数量
-            NpcManager.instance().startBusiness(requireWorkNum-unEmployeeNpcNum);
-    	  	this.metaBuilding.npc.forEach((k,v)->{
-        		for(Npc npc : NpcManager.instance().create(k, num, this, 0))
-        		{
-        			npcs.add(npc);
-        		}
-        	});
-    	}else if(requireWorkNum==unEmployeeNpcNum){//需求工人数量 = 失业人口  失业人口全部转化为工人
-    		NpcManager.instance().addWorkNpc(npcList,this);
-    		npcs.addAll(npcList);
-    	}else{//需求工人数量 < 失业人口  在失业人口中随机抽取需求工人数量的人口转化为工人
-    		int num=requireWorkNum/4;
-    		Map<Integer, List<Npc>> map=NpcManager.instance().getUnEmployeeNpcByType();
-    		List<Npc> totalNpc = new ArrayList<Npc>();
-      	  	this.metaBuilding.npc.forEach((k,v)->{
-      	  		List<Npc> list=map.get(k);
-      	  		//每一种类型的npc随机抽取num个
-      	  		List<Npc> sub=new ArrayList<Npc>();
-      	  		int[] idxArray=NpcUtil.getDifferentIndex(0,list.size()-1,num);
-      	  		for (int i = 0; i < idxArray.length; i++) {
-					int j = idxArray[i];
-					Npc npc=list.get(j);
-					sub.add(npc);
-				}
-      	  		NpcManager.instance().addWorkNpc(sub,this);
-      	  		totalNpc.addAll(sub);
-        	});
-      	  	npcs.addAll(totalNpc);
-    	}
-
-    	npcs.forEach(npc->{
-    		takeAsWorker(npc);
-			npc.goWork();
-    	});
-    	return npcs;
     }
 
     public CoordPair effectRange() {
@@ -651,17 +517,6 @@ public abstract class Building implements Ticker{
     public abstract Message detailProto();
     public abstract void appendDetailProto(Gs.BuildingSet.Builder builder);
 
-    protected abstract void enterImpl(Npc npc);
-
-    // for current requirements, there is no leaving actions
-    protected abstract void leaveImpl(Npc npc);
-    // there is no need to remember which npc is in this building now
-    public void enter(Npc npc) {
-        addFlowCount();
-//        flowCount += 1;
-        enterImpl(npc);
-    }
-
     public void addFlowCount()
     {
         flowCount += 1;
@@ -684,17 +539,8 @@ public abstract class Building implements Ticker{
 
     public void updateLift()
     {
-        float f =0;
-        long npcCount = NpcManager.instance().getNpcCount();
-        if(npcCount!=0) {
-            f = (float) this.flow / npcCount;
-        }
-        lift = new BigDecimal(f).setScale(2, 1).floatValue();
     }
 
-    public void leave(Npc npc) {
-        leaveImpl(npc);
-    }
     void update(long diffNano) {
         if(this.outOfBusiness() || !working)
             return;
@@ -720,15 +566,8 @@ public abstract class Building implements Ticker{
         flow = flowCount;
         flowCount = 0;
         flowHistory.add(new FlowInfo((int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()), flow));
-        updateLift();
         //this._d.dirty(); // isDirty the field, or else hibernate won't update this field!!!
         assert this.type() != MetaBuilding.TRIVIAL;
-        if(MetaData.getDayId() != 0 && nowHour == PAYMENT_HOUR && !this.allStaff.isEmpty()) {
-            Player p = GameDb.getPlayer(ownerId);
-            if(p != null) {
-                this.payOff(p);
-            }
-        }
         if(!outOfBusiness()) {
             Boolean w = isWorking(nowHour);
             this.working = (w == null ? this.working:w);
@@ -787,30 +626,6 @@ public abstract class Building implements Ticker{
         }
     }
 
-    private boolean payOff(Player p) {
-        if (p.decMoney(this.allSalary())) {
-            LogDb.playerPay(p.id(), this.allSalary(),type());
-            calcuHappy();
-            allStaff.forEach(npc -> {
-                npc.addMoney(this.singleSalary());
-                //缴纳社保
-                npc.decMoney(this.singleTax());
-                MoneyPool.instance().add(this.singleTax());
-            });
-            List<Object> updates = allStaff.stream().map(Object.class::cast).collect(Collectors.toList());
-            updates.add(p);
-            GameDb.saveOrUpdate(updates);
-            LogDb.paySalary(p.id(),type(),id(),this.singleSalary(), this.allStaff.size());
-            LogDb.buildingPay(id(),p.id(),this.singleSalary()*this.allStaff.size());//记录建筑支出
-            return true;
-        } else {
-            shutdownBusiness();
-            //停工通知(不足支付工资)
-            UUID[] ownerIdAndBuildingId = {this.ownerId(), this.id()};
-            MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(), this.ownerId(), null, ownerIdAndBuildingId, null);
-            return false;
-        }
-    }
     private void calcuHappy() {
         if(salaryRatio == 100)
             happy = HAPPY_MAX;

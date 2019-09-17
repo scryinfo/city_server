@@ -15,7 +15,7 @@
 		</property>
 		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">
-			jdbc:postgresql://127.0.0.1/189
+			jdbc:postgresql://127.0.0.1/192
 			<!--jdbc:postgresql://192.168.0.191/105-->
 		</property>
 		<property name="hibernate.connection.username">
@@ -29,7 +29,8 @@
 		<property name="hibernate.jdbc.batch_size">50</property>
 		<property name="hibernate.order_updates">true</property>
 		<property name="hibernate.order_inserts">true</property>
-		<property name="hibernate.cache.use_second_level_cache">false</property> <!--doc say the default value is true but default cache is NoCachingRegionFactory-->
+		<property name="hibernate
+		.cache.use_second_level_cache">false</property> <!--doc say the default value is true but default cache is NoCachingRegionFactory-->
 		<property name="hibernate.connection.isolation">2</property>
 		<mapping class="Game.Player$Info"></mapping>
 		<mapping class="Game.Player"></mapping>
@@ -93,7 +94,6 @@
 		<mapping class="Game.Record"></mapping>		
 		<mapping class="Game.FlowRecord"></mapping>		
 		<mapping class="Game.EvaRecord"></mapping>			
-		<mapping class="Game.IndustryIncrease"></mapping>
 		<mapping class="Game.Gambling.FlightManager"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos"></mapping>
 		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>

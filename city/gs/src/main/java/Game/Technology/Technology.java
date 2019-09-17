@@ -83,16 +83,6 @@ public class Technology extends ScienceBuildingBase {
         builder.addTechnology(this.detailProto());
     }//TODO
 
-    @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
-
     /*生产线生产*/
     @Override
     protected void _update(long diffNano) {

@@ -116,7 +116,7 @@ public class Society
             memberBuilder.setId(Util.toByteString(playerId))
                     .setJoinTs(joinTs);
             memberBuilder.setIdentity(Gs.SocietyMember.Identity.valueOf(identity));
-            memberBuilder.setStaffCount(City.instance().calcuPlayerStaff(playerId));
+            memberBuilder.setStaffCount(0);
             memberBuilder.setBelongToId(Util.toByteString(belongTo));
             memberBuilder.setOnline(GameServer.isOnline(playerId));
             return memberBuilder.build();

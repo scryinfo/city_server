@@ -94,16 +94,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     }
 
     @Override
-    protected void enterImpl(Npc npc) {
-
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-
-    }
-
-    @Override
     protected void _update(long diffNano) {
 
     }

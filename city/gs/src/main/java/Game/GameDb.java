@@ -317,14 +317,6 @@ public class GameDb {
 		return list;
 	}
 
-	public static List<IndustryIncrease> getAllIndustryIncrease()
-	{
-		Session session = sessionFactory.openSession();
-		List<IndustryIncrease> list = session.createQuery("from IndustryIncrease",IndustryIncrease.class).list();
-		session.close();
-		return list;
-	}
-
 	public static boolean saveOrUpdSociety(Society society)
 	{
 		Session session = sessionFactory.openSession();
@@ -1161,34 +1153,6 @@ public class GameDb {
 		transaction.commit();
 		session.close();
 		return logs;
-	}
-	public static List<Npc> getAllNpc() {
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Npc> criteria = builder.createQuery(Npc.class);
-		criteria.from(Npc.class);
-		List<Npc> res = session.createQuery(criteria).list();
-		transaction.commit();
-		session.close();
-		return res;
-	}
-	public static List<Npc> getAllNpcByStatus(int status){
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		List<Npc> list = session.createQuery("From NPC where status =:x", Npc.class)
-				.setParameter("x", status).list();
-		transaction.commit();
-		session.close();
-		return list;
-	}
-	public static Npc getNpc(UUID id) {
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		Npc res = session.get(Npc.class, id);
-		transaction.commit();
-		session.close();
-		return res;
 	}
 	public static void startUp(String arg) {
 		HIBERNATE_CFG_PATH = arg;

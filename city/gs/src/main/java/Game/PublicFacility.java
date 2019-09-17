@@ -509,19 +509,6 @@ public class PublicFacility extends Building{
     }
 
     int tickPrice;
-    @Override
-    protected void enterImpl(Npc npc){
-        this.ad.values().forEach(ad->{
-            ad.npcFlow++;
-            BrandManager.instance().update(ad.sr.renterId, ad.metaId, 1);
-        });
-        ++visitorCount;
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-        --visitorCount;
-    }
     private int visitorCount;
 
     @PostLoad
