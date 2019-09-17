@@ -151,7 +151,6 @@ public class PromotionMgr {
                     //累加提升值，以便计算平均值
                     promotion.promotedTotal += addition;
                     promotion.promProgress = (int) (((float) elapsedtime / (float) promotion.promDuration) * 100);
-                    BrandManager.instance().update(promotion.buyerId, objType, (int) addition);
                     promotion.promoNum++;
                 }
             }else {
@@ -160,7 +159,6 @@ public class PromotionMgr {
                     addition= fcySeller.getLocalPromoAbility(promType);
                     float residueProValue= (promHour - promotion.promoNum) * addition;
                     promotion.promotedTotal += residueProValue;
-                    BrandManager.instance().update(promotion.buyerId, objType, (int)residueProValue);
                 }
                 //超出时间的，移除掉，并通知玩家
                 Player buyer = GameDb.getPlayer(promotion.buyerId);

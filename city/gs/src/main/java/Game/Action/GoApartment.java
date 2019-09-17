@@ -141,11 +141,9 @@ public class GoApartment implements IAction {
             // 建筑繁荣度 建筑评分
             Apartment apartment = (Apartment) chosen;
             int prosperityScore = (int) ProsperityManager.instance().getBuildingProsperityScore(chosen);
-            double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), chosen.type());
-            double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
-            int curRetailScore = (int) ((brandScore + retailScore) / 2);
-            LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
+            /*LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
                     chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,apartment.getTotalBrand(),apartment.getTotalQty()); //不包含矿工费用
+            */
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
             }

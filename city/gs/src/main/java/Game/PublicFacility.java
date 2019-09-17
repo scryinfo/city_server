@@ -513,7 +513,6 @@ public class PublicFacility extends Building{
     protected void enterImpl(Npc npc){
         this.ad.values().forEach(ad->{
             ad.npcFlow++;
-            BrandManager.instance().update(ad.sr.renterId, ad.metaId, 1);
         });
         ++visitorCount;
     }

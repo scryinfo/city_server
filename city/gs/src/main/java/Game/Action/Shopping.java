@@ -25,9 +25,9 @@ public class Shopping implements IAction {
             return null;
         logger.info("Shopping building num: " + buildings.size());
         AIBuy ai = MetaData.getAIBuy(aiId);
-        MetaGood.Type type = ai.random(BrandManager.instance().getGoodWeightRatioWithType());
+        MetaGood.Type type = null;
         AILux aiLux = MetaData.getAILux(npc.type());
-        int lux = aiLux.random(BrandManager.instance().getGoodWeightRatioWithLux());
+        int lux = 0;
         logger.info("choose good type: " + type.ordinal()+" lux: " + lux);
         //取得对应的 NPC商品大类+奢侈度预期消费 和 相关的 NPC商品小类预期消费
         City.GoodFilter filter=new City.GoodFilter();
@@ -149,7 +149,7 @@ public class Shopping implements IAction {
         RetailShop retailShop=(RetailShop)sellShop;
 
         logger.info("chosen goodSellInfo retailShop id: "+retailShop.id() + " at: " + retailShop.coordinate()+"  goodMetaId"+ itemKey.meta.id + "  price: " + goodSellInfo.content.getPrice() + " cost: " + goodSellInfo.cost);
-        WeightInfo chosen=new WeightInfo(goodSellInfo.b.id(), itemKey.producerId, (int)itemKey.getTotalQty(), (int)goodSellInfo.r, goodSellInfo.content.getPrice(),(MetaGood) itemKey.meta,(int)retailShop.getTotalBrand(), (int)retailShop.getTotalQty());
+        WeightInfo chosen=new WeightInfo(goodSellInfo.b.id(), itemKey.producerId,0, (int)goodSellInfo.r, goodSellInfo.content.getPrice(),(MetaGood) itemKey.meta,(int)0, (int)0);
         sellShop.addFlowCount();
 
         //TODO:计算旷工费
@@ -202,14 +202,11 @@ public class Shopping implements IAction {
             LogDb.npcBuyInRetailCol(chosen.meta.id, chosen.price, chosen.getItemKey().producerId,    //消费记录不计算旷工费
                     chosen.qty,sellShop.ownerId(), chosen.buildingBrand,chosen.buildingQty);
             //获取品牌名
-            BrandManager.BrandName brandName = BrandManager.instance().getBrand(owner.id(),chosen.meta.id).brandName;
-            String goodName=brandName==null?owner.getCompanyName():brandName.getBrandName();
+            String goodName=owner.getCompanyName();
             // 记录商品评分
-            double brandScore = GlobalUtil.getBrandScore(chosen.getItemKey().getTotalBrand(), chosen.meta.id);
-            double goodQtyScore = GlobalUtil.getGoodQtyScore(chosen.getItemKey().getTotalQty(), chosen.meta.id, MetaData.getGoodQuality(chosen.meta.id));
-            double score = ((brandScore + goodQtyScore) / 2);
-            LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
+            /*LogDb.npcBuyInShelf(npc.id(),owner.id(),1,chosen.price,chosen.getItemKey().producerId,//不包含旷工费
                     chosen.bId,MetaItem.type(chosen.meta.id),chosen.meta.id,goodName,score,chosen.getItemKey().getTotalBrand(),chosen.getItemKey().getTotalQty(),((RetailShop)sellShop).getTotalBrand(),((RetailShop)sellShop).getTotalQty(),minerCost);
+            */
             LogDb.buildingIncome(chosen.bId, npc.id(),chosen.price-minerCost, MetaItem.type(chosen.meta.id), chosen.meta.id);
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.bId, sellShop.type(), owner.id(), 1, chosen.price, chosen.meta.id);//记录建筑收益详细信息

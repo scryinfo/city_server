@@ -870,14 +870,6 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
-	public static void initBrandManager() {
-		StatelessSession statelessSession = sessionFactory.openStatelessSession();
-		Transaction transaction = statelessSession.beginTransaction();
-		if(statelessSession.get(BrandManager.class, BrandManager.ID) == null)
-			statelessSession.insert(new BrandManager());
-		transaction.commit();
-		statelessSession.close();
-	}
 	public static void initFlightManager() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -898,14 +890,6 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		CityLevel res = session.get(CityLevel.class, CityLevel.ID);
-		transaction.commit();
-		session.close();
-		return res;
-	}
-	public static BrandManager getBrandManager() {
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		BrandManager res = session.get(BrandManager.class, BrandManager.ID);
 		transaction.commit();
 		session.close();
 		return res;
