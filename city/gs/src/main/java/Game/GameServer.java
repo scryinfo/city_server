@@ -9,8 +9,6 @@ import Game.Gambling.FlightManager;
 import Game.Gambling.ThirdPartyDataSource;
 import Game.League.LeagueManager;
 import Game.Meta.MetaData;
-import Game.Promote.PromotePointManager;
-import Game.Technology.SciencePointManager;
 import Game.ddd.chainRpcMgr;
 import Game.ddd.dddPurchaseMgr;
 import Shared.*;
@@ -154,14 +152,11 @@ public class GameServer {
         NpcManager.instance(); // load all npc, npc will refer building(enter it)
         GroundAuction.init();
         GroundManager.init();
-        PromotionMgr.init();
         Exchange.init();
         TechTradeCenter.init();
         MoneyPool.init();
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
-        PromotePointManager.getInstance().init();//推广点数初始化
-        SciencePointManager.getInstance().init();//科技点数初始化
         TickManager.init();
         FlightManager.init();
         SocietyManager.init();

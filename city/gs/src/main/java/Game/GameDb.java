@@ -98,22 +98,6 @@ public class GameDb {
 							return res;
 						}
 					});
-//	private static LoadingCache<UUID, Player> tmpPlayerCache = CacheBuilder.newBuilder()
-//			.concurrencyLevel(1)
-//			.expireAfterWrite(Duration.ofMinutes(2))
-//			.maximumSize(2560)
-//			.build(
-//					new CacheLoader<UUID, Player>() {
-//						public Player load(UUID id) {
-//							StatelessSession s = sessionFactory.openStatelessSession();
-//							Transaction transaction = s.beginTransaction();
-//							Player res = (Player) s.get(Player.class, id);
-//							transaction.commit();
-//							s.close();
-//							res.markTemp();
-//							return res;
-//						}
-//					});
 	private static LoadingCache<UUID, Player.Info> playerInfoCache = CacheBuilder.newBuilder()
 			.concurrencyLevel(1)
 			.maximumSize(10240)
@@ -184,44 +168,6 @@ public class GameDb {
 			return true;
 		}
 		return false;
-	}
-
-	public static  EvaRecord getlastEvaRecord(UUID bid, short tid){
-		Session session = sessionFactory.openSession();
-		List userList = null;
-		try{
-			//重新开服,需要获取一下上次的记录
-			int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs/1000 - PromotionMgr._upDeltaMs);
-			Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
-					.setParameter("tsSt",tsSart)
-					.setParameter("bdid",bid)
-					.setParameter("tpid",tid);
-			userList = query.list();
-		}catch (Exception e){
-			return new EvaRecord(bid,tid,0,0);
-		}
-		if(userList.size() > 0){
-			return (EvaRecord)userList.get(userList.size()-1);
-		}
-		return new EvaRecord(bid,tid,0,0);
-	}
-	public static FlowRecord getlastFlowRecord(UUID inPid){
-		Session session = sessionFactory.openSession();
-		//重新开服,需要获取一下上次的记录
-		List userList = null;
-		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs - 1);
-		try{
-		Query query = session.createQuery("from flow_records Record where ts>=:tsSt and playerId is :pid and typeId is :tpid")
-				.setParameter("tsSt",tsSart)
-				.setParameter("pid",inPid);
-			userList = query.list();
-		}catch (Exception e){
-			return new FlowRecord(inPid,0,0);
-		}
-		if(userList.size() > 0){
-			return (FlowRecord)userList.get(userList.size()-1);
-		}
-		return new FlowRecord(inPid,0,0);
 	}
 
 	public static List getEva_records(int tsSart,UUID bid,int tid, int count){
@@ -822,16 +768,6 @@ public class GameDb {
 		transaction.commit();
 		statelessSession.close();
 	}
-
-	public static void initPromotionMgr() {
-		StatelessSession statelessSession = sessionFactory.openStatelessSession();
-		Transaction transaction = statelessSession.beginTransaction();
-		if(statelessSession.get(PromotionMgr.class, PromotionMgr.ID) == null)
-			statelessSession.insert(new PromotionMgr());
-		transaction.commit();
-		statelessSession.close();
-	}
-
 	public static void initTickMgr() {
 		StatelessSession statelessSession = sessionFactory.openStatelessSession();
 		Transaction transaction = statelessSession.beginTransaction();
@@ -931,14 +867,7 @@ public class GameDb {
 		session.close();
 		return gp;
 	}
-	public static PromotionMgr getPromotionMgr() {
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		PromotionMgr res = session.get(PromotionMgr.class, PromotionMgr.ID);
-		transaction.commit();
-		session.close();
-		return res;
-	}
+
 	public static Exchange getExchange() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -1321,39 +1250,6 @@ public class GameDb {
 			}
 		}
 		return amount;
-	}
-
-
-	//集散中心增加的操作
-	//1.获取租户信息根据建筑id
-	public static List<WareHouseRenter> getAllRenterByBuilderId(UUID bid){
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		List<WareHouseRenter> list = session.createQuery("FROM WareHouseRenter r where wareHouse.id=:x ",WareHouseRenter.class)
-				.setParameter("x", bid)
-				.list();
-		transaction.commit();
-		session.close();
-		return list;
-	}
-	//2.查询所有的租户
-	public static List<WareHouseRenter> getAllRenter() {
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		List<WareHouseRenter> list = session.createCriteria(WareHouseRenter.class).list();
-		transaction.commit();
-		session.close();
-		return list;
-	}
-	//3.根据租户id查询所有的租户信息
-	public static List<WareHouseRenter> getWareHouseRenterByPlayerId(UUID playerId){
-		Session session = sessionFactory.openSession();
-		Transaction transaction = session.beginTransaction();
-		List<WareHouseRenter> list = session.createQuery("From WareHouseRenter where renterId =:x", WareHouseRenter.class)
-				.setParameter("x", playerId).list();
-		transaction.commit();
-		session.close();
-		return list;
 	}
 	public static  List<Player> getAllPlayer(){
 		Session session = sessionFactory.openSession();
