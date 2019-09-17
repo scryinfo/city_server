@@ -326,33 +326,6 @@ public abstract class Building implements Ticker{
         return metaBuilding.workerNum;
     }
 
-<<<<<<< .mine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
-    public long getAllStaffSize()
-    {
-        return allStaff.size();
-    }
-
     public int allSalary() {
         return singleSalary() * metaBuilding.workerNum;
     }
@@ -368,7 +341,6 @@ public abstract class Building implements Ticker{
     public int singleSalary(Talent talent) {
         return (int) (talent.getSalaryRatio() / 100.d * metaBuilding.salary);
     }
->>>>>>> .theirs
     public int cost() {
         return 0;
     }

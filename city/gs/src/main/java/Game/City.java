@@ -257,12 +257,10 @@ public class City {
         MailBox.instance().update(diffNano);
         FlightManager.instance().update(diffNano);
         LeagueManager.getInstance().update(diffNano);
-        WareHouseManager.instance().update(diffNano);
         // do this at last
         updateTimeSection(diffNano);
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
-        PromotionMgr.instance().update(diffNano);
         BuildingUtil.instance().update(diffNano);
         //繁荣度统计
         ProsperityManager.instance().totalProsperity(diffNano);
@@ -305,7 +303,6 @@ public class City {
     private void hourTickAction(int nowHour) {
         allBuilding.forEach((k,v)->v.hourTickAction(nowHour));
         ContractManager.getInstance().hourTickAction(nowHour);
-        PromotionMgr.instance().update(nowHour);
     }
 
     private void timeSectionTickAction(int newIndex, int nowHour, int hours) {

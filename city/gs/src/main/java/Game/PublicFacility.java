@@ -469,33 +469,7 @@ public class PublicFacility extends Building{
     }
 
     int tickPrice;
-<<<<<<< .mine
 
-
-
-
-
-
-
-
-
-
-
-
-=======
-    @Override
-    protected void enterImpl(Npc npc){
-        this.ad.values().forEach(ad->{
-            ad.npcFlow++;
-        });
-        ++visitorCount;
-    }
-
-    @Override
-    protected void leaveImpl(Npc npc) {
-        --visitorCount;
-    }
->>>>>>> .theirs
     private int visitorCount;
 
     @PostLoad

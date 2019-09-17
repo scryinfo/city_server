@@ -21,8 +21,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryMarketDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMarketDetail.PARSER, GameSession.class,"queryMarketDetail"));
 			table.put((short) GsCode.OpCode.queryMarketSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class,"queryMarketSummary"));
 			table.put((short) GsCode.OpCode.queryGroundSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryGroundSummary"));
-			table.put((short) GsCode.OpCode.queryLabSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryLabSummary"));
-			table.put((short) GsCode.OpCode.adQueryPromoSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryPromoSummary"));
 			table.put((short) GsCode.OpCode.createRole_VALUE, Wrapper.newWithMessageAsync(Gs.CreateRole.PARSER, GameSession.class,"createRole"));
 			table.put((short) GsCode.OpCode.queryPlayerBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryPlayerBuildings"));
 			table.put((short) GsCode.OpCode.getAllBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getAllBuildingDetail"));
@@ -47,8 +45,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.stopListenBuildingDetailInform_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"stopListenBuildingDetailInform"));
 			table.put((short) GsCode.OpCode.setBuildingInfo_VALUE, Wrapper.newWithMessageAsync(Gs.SetBuildingInfo.PARSER, GameSession.class,"setBuildingInfo"));
 			table.put((short) GsCode.OpCode.queryMoneyPoolInfo_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryMoneyPoolInfo"));
-			table.put((short) GsCode.OpCode.queryLabDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryLabDetail.PARSER, GameSession.class,"queryLabDetail"));
-			table.put((short) GsCode.OpCode.adQueryPromoDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryPromoDetail.PARSER, GameSession.class,"queryPromoDetail"));
 
 			table.put((short) GsCode.OpCode.exchangeItemList_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"exchangeItemList"));
 			table.put((short) GsCode.OpCode.exchangeBuy_VALUE, Wrapper.newWithMessageAsync(Gs.ExchangeBuy.PARSER, GameSession.class,"exchangeBuy"));
@@ -68,20 +64,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getFlightBetHistory_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getFlightBetHistory"));
 			table.put((short) GsCode.OpCode.searchFlight_VALUE, Wrapper.newWithMessageAsync(Gs.SearchFlight.PARSER, GameSession.class,"searchFlight"));
 
-			table.put((short) GsCode.OpCode.adAddSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AddSlot.PARSER, GameSession.class,"adAddSlot"));
-			table.put((short) GsCode.OpCode.adDelSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdDelSlot.PARSER, GameSession.class,"adDelSlot"));
-			table.put((short) GsCode.OpCode.adPutAdToSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AddAd.PARSER, GameSession.class,"adPutAdToSlot"));
-			table.put((short) GsCode.OpCode.adBuySlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdBuySlot.PARSER, GameSession.class,"adBuySlot"));
-			table.put((short) GsCode.OpCode.adDelAdFromSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdDelAdFromSlot.PARSER, GameSession.class,"adDelAdFromSlot"));
-			table.put((short) GsCode.OpCode.adSetTicket_VALUE, Wrapper.newWithMessageAsync(Gs.AdSetTicket.PARSER, GameSession.class,"adSetTicket"));
-			table.put((short) GsCode.OpCode.adSetSlot_VALUE, Wrapper.newWithMessageAsync(Gs.AdSetSlot.PARSER, GameSession.class,"adSetSlot"));
-			table.put((short) GsCode.OpCode.adQueryPromotion_VALUE, Wrapper.newWithMessageAsync(Gs.AdQueryPromotion.PARSER, GameSession.class,"AdQueryPromotion"));
-			table.put((short) GsCode.OpCode.adGetAllMyFlowSign_VALUE, Wrapper.newWithMessageAsync(Gs.GetAllMyFlowSign.PARSER, GameSession.class,"GetAllMyFlowSign"));
-			table.put((short) GsCode.OpCode.adAddNewPromoOrder_VALUE, Wrapper.newWithMessageAsync(Gs.AdAddNewPromoOrder.PARSER, GameSession.class,"AdAddNewPromoOrder"));
-			table.put((short) GsCode.OpCode.adRemovePromoOrder_VALUE, Wrapper.newWithMessageAsync(Gs.AdRemovePromoOrder.PARSER, GameSession.class,"AdRemovePromoOrder"));
-			table.put((short) GsCode.OpCode.adGetPromoAbilityHistory_VALUE, Wrapper.newWithMessageAsync(Gs.AdGetPromoAbilityHistory.PARSER, GameSession.class,"AdGetPromoAbilityHistory"));
-			table.put((short) GsCode.OpCode.adQueryPromoCurAbilitys_VALUE, Wrapper.newWithMessageAsync(Gs.AdQueryPromoCurAbilitys.PARSER, GameSession.class,"adQueryPromoCurAbilitys"));
-			table.put((short) GsCode.OpCode.adjustPromoSellingSetting_VALUE, Wrapper.newWithMessageAsync(Gs.AdjustPromoSellingSetting.PARSER, GameSession.class,"AdjustPromoSellingSetting"));
 
 			table.put((short) GsCode.OpCode.delItem_VALUE, Wrapper.newWithMessageAsync(Gs.DelItem.PARSER, GameSession.class,"delItem"));
 
@@ -89,7 +71,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.detailMaterialFactory_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailMaterialFactory"));
 			table.put((short) GsCode.OpCode.detailProduceDepartment_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailProduceDepartment"));
 			table.put((short) GsCode.OpCode.detailRetailShop_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailRetailShop"));
-			table.put((short) GsCode.OpCode.detailLaboratory_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailLaboratory"));
 			table.put((short) GsCode.OpCode.detailPublicFacility_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailPublicFacility"));
 
 
@@ -107,11 +88,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.cancelRentGround_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndexCollection.PARSER, GameSession.class,"cancelRentGround"));
 			table.put((short) GsCode.OpCode.cancelSellGround_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndexCollection.PARSER, GameSession.class,"cancelSellGround"));
 
-			table.put((short) GsCode.OpCode.labAddLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabAddLine.PARSER, GameSession.class,"labLineAdd"));
-			table.put((short) GsCode.OpCode.labCancelLine_VALUE, Wrapper.newWithMessageAsync(Gs.LabCancelLine.PARSER, GameSession.class,"labLineCancel"));
-			table.put((short) GsCode.OpCode.labSetting_VALUE, Wrapper.newWithMessageAsync(Gs.LabSetting.PARSER, GameSession.class,"labSetting"));
-			table.put((short) GsCode.OpCode.labRoll_VALUE, Wrapper.newWithMessageAsync(Gs.LabRoll.PARSER, GameSession.class,"labRoll"));
-			table.put((short) GsCode.OpCode.labExclusive_VALUE, Wrapper.newWithMessageAsync(Gs.LabExclusive.PARSER, GameSession.class,"labExclusive"));
 
 			table.put((short) GsCode.OpCode.techTradeAdd_VALUE, Wrapper.newWithMessageAsync(Gs.TechTradeAdd.PARSER, GameSession.class,"techTradeAdd"));
 			table.put((short) GsCode.OpCode.techTradeBuy_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"techTradeBuy"));
@@ -170,7 +146,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryLeagueTechList_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryLeagueTechList"));
 			table.put((short) GsCode.OpCode.queryBuildingListByPlayerTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingListByPlayerTech"));
 			table.put((short) GsCode.OpCode.joinLeague_VALUE, Wrapper.newWithMessageAsync(Gs.JoinLeague.PARSER, GameSession.class, "joinLeague"));
-			table.put((short) GsCode.OpCode.queryBuildingTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingTech"));
 			table.put((short) GsCode.OpCode.queryWeatherInfo_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryWeatherInfo"));
 
 			//===========================================================
@@ -182,12 +157,9 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			//===========================================================
 			table.put((short) GsCode.OpCode.queryMyBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBuildings.PARSER, GameSession.class,"queryMyBuildings"));
-			table.put((short) GsCode.OpCode.queryMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyEva.PARSER, GameSession.class,"queryMyEva"));
 			//todo：eva改版
-			table.put((short) GsCode.OpCode.updateMyEvas_VALUE, Wrapper.newWithMessageAsync(Gs.UpdateMyEvas.PARSER, GameSession.class,"updateMyEvas"));
 			table.put((short) GsCode.OpCode.queryBrand_VALUE, Wrapper.newWithMessageAsync(Gs.queryBrand.PARSER, GameSession.class,"queryBrand"));
 			table.put((short) GsCode.OpCode.queryMyBrands_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBrands.PARSER, GameSession.class,"queryMyBrands"));
-			table.put((short) GsCode.OpCode.queryMyBrandDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBrandDetail.PARSER, GameSession.class,"queryMyBrandDetail"));
 			table.put((short) GsCode.OpCode.updateMyBrandDetail_VALUE, Wrapper.newWithMessageAsync(Gs.BrandLeague.PARSER, GameSession.class,"updateMyBrandDetail"));
 			table.put((short) GsCode.OpCode.modyfyMyBrandName_VALUE, Wrapper.newWithMessageAsync(Gs.ModyfyMyBrandName.PARSER, GameSession.class,"modyfyMyBrandName"));
 			table.put((short) GsCode.OpCode.modifyCompanyName_VALUE, Wrapper.newWithMessageAsync(Gs.ModifyCompanyName.PARSER, GameSession.class,"modifyCompanyName"));
@@ -213,8 +185,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.apartmentGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.AartmentMsg.PARSER, GameSession.class, "apartmentGuidePrice"));
 			table.put((short) GsCode.OpCode.produceGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.GoodSummary.PARSER, GameSession.class, "produceGuidePrice"));
 			table.put((short) GsCode.OpCode.retailGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.GoodSummary.PARSER, GameSession.class, "retailGuidePrice"));
-			table.put((short) GsCode.OpCode.promotionGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.PromotionMsg.PARSER, GameSession.class, "promotionGuidePrice"));
-			table.put((short) GsCode.OpCode.laboratoryGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.LaboratoryMsg.PARSER, GameSession.class, "laboratoryGuidePrice"));
 			table.put((short) GsCode.OpCode.queryBuildingName_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryBuildingName"));
 
 			//小地图繁荣度
@@ -222,19 +192,12 @@ public class GameEventDispatcher extends DispatcherBase {
 			//小地图建筑摘要
 			table.put((short) GsCode.OpCode.queryMapBuidlingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndex.PARSER, GameSession.class, "queryMapBuidlingSummary"));
 			//小地图新版研究所摘要
-			table.put((short) GsCode.OpCode.queryTechnologySummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryTechnologySummary"));
 			// 新研究所详情
-			table.put((short) GsCode.OpCode.queryTechnologyDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryTechnologyDetail.PARSER, GameSession.class, "queryTechnologyDetail"));
 			//小地图新版数据公司摘要
 			table.put((short) GsCode.OpCode.queryPromotionSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryPromotionSummary"));
 			// 数据公司详情
-			table.put((short) GsCode.OpCode.queryPromotionsDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryPromotionsDetail.PARSER, GameSession.class, "queryPromotionsDetail"));
 			// 行业供需
 			table.put((short) GsCode.OpCode.querySupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.SupplyAndDemand.PARSER, GameSession.class, "querySupplyAndDemand"));
-			// 行业排行
-			table.put((short) GsCode.OpCode.queryIndustryTopInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryIndustry.PARSER, GameSession.class, "queryIndustryTopInfo"));
-			// 富豪排行榜
-			table.put((short) GsCode.OpCode.queryRegalRanking_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryRegalRanking"));
 			// 城市发展等级点数
 			table.put((short) GsCode.OpCode.queryCityLevel_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryCityLevel"));
 			// 商品排行
@@ -247,36 +210,6 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));
-			//设置仓库出租信息
-			table.put((short) GsCode.OpCode.setWareHouseRent_VALUE, Wrapper.newWithMessageAsync(Gs.SetWareHouseRent.PARSER, GameSession.class,"setWareHouseRent"));
-			//销毁货物
-			table.put((short) GsCode.OpCode.delItems_VALUE, Wrapper.newWithMessageAsync(Gs.ItemsInfo.PARSER, GameSession.class,"delItems"));
-			//运输（集散中心运输）
-			table.put((short) GsCode.OpCode.transportGood_VALUE, Wrapper.newWithMessageAsync(Gs.TransportGood.PARSER,GameSession.class,"transportGood"));
-			//关闭出租
-			table.put((short) GsCode.OpCode.closeWareHouseRent_VALUE, Wrapper.newWithMessageAsync(Gs.SetWareHouseRent.PARSER, GameSession.class,"closeWareHouseRent"));
-			//租用仓库
-			table.put((short) GsCode.OpCode.rentWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.rentWareHouse.PARSER, GameSession.class,"rentWareHouse"));
-			//查询玩家的（建筑）仓库信息（包含租用的仓库信息）
-			table.put((short) GsCode.OpCode.getPlayerBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerBuildingDetail"));
-			//购买商品
-			table.put((short) GsCode.OpCode.buyShelfGood_VALUE, Wrapper.newWithMessageAsync(Gs.BuyInShelfGood.PARSER,GameSession.class,"buyInShelfGood"));
-			//上架
-			table.put((short) GsCode.OpCode.putAway_VALUE, Wrapper.newWithMessageAsync(Gs.PutAway.PARSER,GameSession.class,"putAway"));
-			//修改租用仓库上架商品
-			table.put((short) GsCode.OpCode.rentWarehouseShelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.RentWarehouseShelfSet.PARSER,GameSession.class,"rentWarehouseShelfSet"));
-			//下架
-			table.put((short) GsCode.OpCode.soldOutShelf_VALUE, Wrapper.newWithMessageAsync(Gs.SoldOutShelf.PARSER,GameSession.class,"soldOutShelf"));
-			//设置自动补货
-			table.put((short) GsCode.OpCode.setRentAutoReplenish_VALUE, Wrapper.newWithMessageAsync(Gs.SetRentAutoReplenish.PARSER,GameSession.class,"setRentAutoReplenish"));
-			//获取集散中心收入情况
-			table.put((short) GsCode.OpCode.getWareHouseIncomeInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getWareHouseIncomeInfo"));
-			//获取集散中心租户详情
-			table.put((short) GsCode.OpCode.detailWareHouseRenter_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailWareHouseRenter"));
-			//获取集散中心的数据摘要
-			table.put((short) GsCode.OpCode.queryWareHouseSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryWareHouseSummary"));
-			//查询集散中心详情（非建筑详情）
-			table.put((short) GsCode.OpCode.queryWareHouseDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryWareHouseDetail.PARSER,GameSession.class,"queryWareHouseDetail"));
 			//修改建筑名称
 			table.put((short) GsCode.OpCode.updateBuildingName_VALUE, Wrapper.newWithMessageAsync(Gs.UpdateBuildingName.PARSER, GameSession.class,"updateBuildingName"));
 			//查询原料厂信息
@@ -285,12 +218,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryProduceDepInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryProduceDepInfo"));
 			//查询零售店或住宅信息
 			table.put((short) GsCode.OpCode.queryRetailShopOrApartmentInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryRetailShopOrApartmentInfo"));
-			//查询推广公司信息
-			table.put((short) GsCode.OpCode.queryPromotionCompanyInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryPromotionCompanyInfo"));
-			//查询仓库信息
-			table.put((short) GsCode.OpCode.queryWarehouseInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryWarehouseInfo"));
-			//查询研究所信息
-			table.put((short) GsCode.OpCode.queryLaboratoryInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryLaboratoryInfo"));
 
 			//查询原料厂的原料信息
 			table.put((short) GsCode.OpCode.queryBuildingMaterialInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingMaterialInfo"));
@@ -330,25 +257,10 @@ public class GameEventDispatcher extends DispatcherBase {
 
 			//新版研究所===============================
 			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//研究所建筑详情
-			table.put((short) GsCode.OpCode.openScienceBox_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"openScienceBox"));
-			table.put((short) GsCode.OpCode.useSciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"useSciencePoint"));
 
 			//新版广告公司=============================
-			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//建筑详情
-			table.put((short) GsCode.OpCode.usePromotionPoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"usePromotionPoint"));//建筑详情
 
 			/*研究所、推广公司公用协议*/
-			table.put((short) GsCode.OpCode.addScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.AddLine.PARSER,GameSession.class,"addScienceLine"));//添加生产线
-			table.put((short) GsCode.OpCode.delScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.DelLine.PARSER,GameSession.class,"delScienceLine"));//添加生产线
-			table.put((short) GsCode.OpCode.setScienceLineOrder_VALUE, Wrapper.newWithMessageAsync(Gs.SetLineOrder.PARSER,GameSession.class,"setScienceLineOrder"));//调整生产线顺序
-			table.put((short) GsCode.OpCode.scienceShelfAdd_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfAdd.PARSER,GameSession.class,"scienceShelfAdd"));
-			table.put((short) GsCode.OpCode.scienceShelfDel_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfDel.PARSER,GameSession.class,"scienceShelfDel"));
-			table.put((short) GsCode.OpCode.scienceShelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfSet.PARSER,GameSession.class,"scienceShelfSet"));
-			table.put((short) GsCode.OpCode.buySciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.BuySciencePoint.PARSER,GameSession.class,"buySciencePoint"));
-			table.put((short) GsCode.OpCode.getScienceShelfData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceShelfData"));
-			table.put((short) GsCode.OpCode.getScienceStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceStorageData"));
-			table.put((short) GsCode.OpCode.getScienceLineData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceLineData"));
-			table.put((short) GsCode.OpCode.getScienceItemSpeed_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getScienceItemSpeed"));
 
 			table.put((short) GsCode.OpCode.queryGroundProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndex.PARSER,GameSession.class,"queryGroundProsperity"));
 			table.put((short) GsCode.OpCode.queryAuctionProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER,GameSession.class,"queryAuctionProsperity"));
