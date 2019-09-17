@@ -1,14 +1,17 @@
 package Game;
 
 import Game.CityInfo.CityLevel;
-import Game.CityInfo.IndustryMgr;
+import Game.CityInfo.TopInfo;
 import Game.Contract.ContractManager;
+import Game.Eva.EvaManager;
 import Game.Gambling.FlightManager;
+import Game.CityInfo.IndustryMgr;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
+import Game.RecommendPrice.GuidePriceMgr;
 import Game.Timers.PeriodicTimer;
 import Game.Util.BuildingUtil;
 import Game.Util.DateUtil;
@@ -21,6 +24,7 @@ import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
@@ -301,7 +305,6 @@ public class City {
         ProsperityManager.instance().totalProsperity(diffNano);
         // 历史成交
         IndustryMgr.instance().update(diffNano);
-        CityLevel.instance().update(diffNano);
     }
     private long timeSectionAccumlateNano = 0;
     public int currentTimeSectionIdx() {

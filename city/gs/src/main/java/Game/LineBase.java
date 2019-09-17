@@ -1,7 +1,5 @@
 package Game;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaItem;
 import Game.Timers.PeriodicTimer;
 import Shared.Util;
@@ -83,9 +81,7 @@ public abstract class LineBase {
         int add = 0;
         if(this.timer.update(diffNano))
         {
-            Eva eva = EvaManager.getInstance().getEva(onwerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
-            double evaAdd = EvaManager.getInstance().computePercent(eva);
-            accumulated += item.n * this.workerNum*(1+evaAdd);
+            accumulated += item.n * this.workerNum;
             add = accumulated >= 1 ? left():0;
             if(add > 0) {
                 this.count += add;

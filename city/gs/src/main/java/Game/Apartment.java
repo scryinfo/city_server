@@ -2,10 +2,9 @@ package Game;
 
 import Game.Contract.BuildingContract;
 import Game.Contract.IBuildingContract;
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
+
 import Game.Meta.MetaApartment;
-import Game.Meta.MetaBuilding;
+
 import gs.Gs;
 
 import javax.persistence.*;
@@ -117,9 +116,7 @@ public class Apartment extends Building implements IBuildingContract
     }
 
     public double getTotalQty(){ //yty
-        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Quality_VALUE);
-        double qty = (meta.qty) * (1 + EvaManager.getInstance().computePercent(eva));
-        return qty;
+        return meta.qty;
     }
     public int getRenterNum(){
         return renters.size();
@@ -130,8 +127,6 @@ public class Apartment extends Building implements IBuildingContract
     }
     //获取总知名度(基础品牌*（1+eva加成比例）)
     public double getTotalBrand(){
-        /*获取Eva加成信息*/
-        Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Brand_VALUE);
-        return BrandManager.BASE_BRAND *(1 + EvaManager.getInstance().computePercent(eva));
+        return BrandManager.BASE_BRAND;
     }
 }

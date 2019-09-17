@@ -55,13 +55,6 @@ public class CityLevel {
         return cexp;
     }
 
-    @Transient
-    private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.HOURS.toMillis(2));
-    public void update(long diffNano) {
-        if (timer.update(diffNano)) {
-            sumValue = EvaManager.getInstance().getAllSumValue();
-        }
-    }
     public Gs.CityLevel toProto() {
         return Gs.CityLevel.newBuilder().setLv(lv).setExp(cexp).setSalary(salary).setInventCount(inventCount).build();}
 

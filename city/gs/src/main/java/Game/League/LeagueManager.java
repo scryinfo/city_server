@@ -13,10 +13,8 @@ import java.util.stream.Collectors;
 
 import Game.Building;
 import Game.City;
-import Game.Eva.EvaManager;
 import Game.GameDb;
 import Game.Player;
-import Game.Eva.Eva;
 import Game.Meta.MetaData;
 import Game.Timers.PeriodicTimer;
 import Shared.LogDb;
@@ -153,22 +151,7 @@ public class LeagueManager
 
     private List<Gs.LeagueInfo.TechInfo> getAllTechInfo(UUID playerId, int techId)
     {
-        List<Eva> evaList = GameDb.getEvaInfo(playerId, techId);
         List<Gs.LeagueInfo.TechInfo> techInfoList = new ArrayList<>();
-        Gs.LeagueInfo.TechInfo.Builder builder = Gs.LeagueInfo.TechInfo.newBuilder();
-        evaList.forEach(eva -> {
-            builder.clear();
-            builder.setType(Gs.Eva.Btype.valueOf(eva.getBt()));
-            if (eva.getBt() == Gs.Eva.Btype.Brand_VALUE)
-            {
-                builder.setValue(eva.getB());
-            }
-            else
-            {
-                builder.setValue(eva.getLv());
-            }
-            techInfoList.add(builder.build());
-        });
         return techInfoList;
     }
 
@@ -273,33 +256,7 @@ public class LeagueManager
                  new HashSet<LeagueInfo.UID>() : buildingLeagueInfo.get(buildingId);
     }
 
-    public List<Gs.BuildingTech.Infos> getBuildingLeagueTech(UUID buildingId, int techId)
-    {
 
-        List<Gs.BuildingTech.Infos> builders = new ArrayList<>();
-        if (buildingLeagueInfo.get(buildingId) != null) {
-            buildingLeagueInfo.get(buildingId).forEach(uid ->
-            {
-                if (uid.getTechId() == techId)
-                {
-                    LeagueInfo info = leagueInfoMap.get(uid);
-                    Gs.BuildingTech.Infos.Builder builder = Gs.BuildingTech.Infos.newBuilder();
-                    builder.setPId(Util.toByteString(uid.getPlayerId()));
-                    EvaManager.getInstance().getEva(uid.getPlayerId(), uid.getTechId()).forEach(eva -> builder.addTechInfo(eva.toTechInfo()));
-                    info.memberForEach(member -> {
-                        if (member.getBuildingId().equals(buildingId))
-                        {
-                            builder.setStartTs(member.getStartTs()).setHours(member.getSignHours());
-                        }
-                    });
-                    builders.add(builder.build());
-                }
-            });
-        }
-        return builders;
-    }
-
-    
     public Set<BrandLeague> getBrandLeagueList(UUID buildingId)
     {
     	return brandLeagueMap.get(buildingId) == null ?

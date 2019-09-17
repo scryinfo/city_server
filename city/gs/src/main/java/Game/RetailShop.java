@@ -15,8 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.*;
 import com.google.protobuf.Message;
 

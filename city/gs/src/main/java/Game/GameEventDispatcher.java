@@ -170,7 +170,6 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryLeagueTechList_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryLeagueTechList"));
 			table.put((short) GsCode.OpCode.queryBuildingListByPlayerTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingListByPlayerTech"));
 			table.put((short) GsCode.OpCode.joinLeague_VALUE, Wrapper.newWithMessageAsync(Gs.JoinLeague.PARSER, GameSession.class, "joinLeague"));
-			table.put((short) GsCode.OpCode.queryBuildingTech_VALUE, Wrapper.newWithMessageAsync(Gs.ByteNum.PARSER, GameSession.class, "queryBuildingTech"));
 			table.put((short) GsCode.OpCode.queryWeatherInfo_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryWeatherInfo"));
 
 			//===========================================================
@@ -208,14 +207,8 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryPromotionsDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryPromotionsDetail.PARSER, GameSession.class, "queryPromotionsDetail"));
 			// 行业供需
 			table.put((short) GsCode.OpCode.querySupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.SupplyAndDemand.PARSER, GameSession.class, "querySupplyAndDemand"));
-			// 行业排行
-			table.put((short) GsCode.OpCode.queryIndustryTopInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryIndustry.PARSER, GameSession.class, "queryIndustryTopInfo"));
-			// 富豪排行榜
-			table.put((short) GsCode.OpCode.queryRegalRanking_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryRegalRanking"));
 			// 城市发展等级点数
 			table.put((short) GsCode.OpCode.queryCityLevel_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryCityLevel"));
-			// 商品排行
-			table.put((short) GsCode.OpCode.queryProductRanking_VALUE, Wrapper.newWithMessageAsync(Gs.queryProductRanking.PARSER, GameSession.class, "queryProductRanking"));
 			// Eva等级分布
 			table.put((short) GsCode.OpCode.queryEvaGrade_VALUE, Wrapper.newWithMessageAsync(Gs.queryEvaGrade.PARSER, GameSession.class, "queryEvaGrade"));
 			// 商品供需

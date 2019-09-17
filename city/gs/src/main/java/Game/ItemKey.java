@@ -1,7 +1,5 @@
 package Game;
 
-import Game.Eva.Eva;
-import Game.Eva.EvaManager;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
 import Game.Meta.MetaItem;
