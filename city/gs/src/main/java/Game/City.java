@@ -1,17 +1,13 @@
 package Game;
 
-import Game.CityInfo.CityLevel;
-import Game.CityInfo.TopInfo;
-import Game.Contract.ContractManager;
-import Game.Eva.EvaManager;
-import Game.Gambling.FlightManager;
 import Game.CityInfo.IndustryMgr;
+import Game.Contract.ContractManager;
+import Game.Gambling.FlightManager;
 import Game.League.LeagueManager;
 import Game.Meta.MetaBuilding;
 import Game.Meta.MetaCity;
 import Game.Meta.MetaData;
 import Game.Meta.MetaGood;
-import Game.RecommendPrice.GuidePriceMgr;
 import Game.Timers.PeriodicTimer;
 import Game.Util.BuildingUtil;
 import Game.Util.DateUtil;
@@ -24,7 +20,6 @@ import gs.Gs;
 import gscode.GsCode;
 import org.apache.log4j.Logger;
 
-import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
@@ -713,7 +708,7 @@ public class City {
     public void moveKnownApartmentMap(Building b){
         Apartment apartment=(Apartment)b;
         //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
-        double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + 0 / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
         logger.info("moveKnownApartmentMap moveKnownValue: " + moveKnownValue);
         moveKnownApartmentMap.put(b,moveKnownValue);
     }

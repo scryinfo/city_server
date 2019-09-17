@@ -125,8 +125,4 @@ public class Apartment extends Building implements IBuildingContract
     public int getCapacity(){
         return this.meta.npc;
     }
-    //获取总知名度(基础品牌*（1+eva加成比例）)
-    public double getTotalBrand(){
-        return BrandManager.BASE_BRAND;
-    }
 }

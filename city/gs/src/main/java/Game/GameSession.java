@@ -22,7 +22,6 @@ import Game.Technology.SciencePointManager;
 import Game.Technology.Technology;
 import Game.Util.CityUtil;
 import Game.Util.DateUtil;
-import Game.Util.EvaTypeUtil;
 import Game.ddd.*;
 import Shared.*;
 import Shared.Package;
@@ -49,7 +48,6 @@ import org.bson.Document;
 import org.ethereum.crypto.ECKey;
 import org.spongycastle.util.encoders.Hex;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -3478,13 +3476,9 @@ public class GameSession {
             b.setItemId(itemId);
             b.setIsUsed(goods.useDirectly);
             b.setNumOneSec(goods.n);
-            b.setBrand(goods.brand);
-            b.setQuality(goods.quality);
             /*b.setAddNumOneSec(EvaManager.getInstance().computePercent(SpeedEva));
             b.setAddBrand(EvaManager.getInstance().computePercent(brandEva));
             b.setAddQuality(EvaManager.getInstance().computePercent(qualityEva));*/
-            totalBrand+=b.getBrand()*(1+b.getAddBrand());
-            totalQuality+=b.getQuality()*(1+b.getAddQuality());
         }
         this.write(Package.create(cmd, builder.build()));
     }
@@ -3786,14 +3780,6 @@ public class GameSession {
             MetaGood good = MetaData.getGood(goodId);
             //1.生产速度等于 员工人数*基础值*（1+eva加成）
             double numOneSec = workerNum * good.n;
-            //2.知名度评分
-            int brand=good.brand;//基础值
-            brand += BrandManager.instance().getBrand(playerId, goodId).getV();//当前品牌值
-            double brandScore = GlobalUtil.getBrandScore(brand, goodId);
-            //3.品质评分
-            double quality = good.quality;
-            quality =quality;
-            double qtyScore=GlobalUtil.getGoodQtyScore(quality, goodId,good.quality);
             //4.品牌名(如果没有则取公司名)
             String brandName=player.getCompanyName();
             Gs.BuildingGoodInfo.ItemInfo.Builder itemInfo = Gs.BuildingGoodInfo.ItemInfo.newBuilder();

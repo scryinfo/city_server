@@ -76,7 +76,6 @@
 		<mapping class="Game.Mail"></mapping>
 		<mapping class="Game.FriendManager.Society"></mapping>
 		<mapping class="Game.Contract.Contract"></mapping>
-		<mapping class="Game.Eva.Eva"></mapping>
 		<mapping class="Game.League.LeagueInfo"></mapping>
 		<mapping class="Game.League.BrandLeague"></mapping>
 		<mapping class="Game.WareHouse"></mapping>
@@ -108,7 +107,6 @@
 		<mapping class="Game.Promote.PromotePoint"></mapping>
 		<mapping class="Game.Promote.PromotionCompany"></mapping>
 		<mapping class="Game.Promote.PromotionCompany$Line"></mapping>
-		<mapping class="Game.Eva.EvaSalary"></mapping>
 		<mapping class="Game.CityInfo.CityLevel"></mapping>
 	</session-factory>
 </hibernate-configuration> 

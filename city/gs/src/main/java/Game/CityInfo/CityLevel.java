@@ -1,23 +1,19 @@
 package Game.CityInfo;
 
-import Game.Eva.EvaManager;
 import Game.GameDb;
 import Game.GameServer;
 import Game.Meta.MetaCityLevel;
 import Game.Meta.MetaData;
 import Game.Player;
-import Game.Timers.PeriodicTimer;
 import Shared.Package;
 import gs.Gs;
 import gscode.GsCode;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Entity
 public class CityLevel {
