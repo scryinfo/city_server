@@ -2789,7 +2789,7 @@ public class GameSession {
                 produceDepartment.lines.forEach(l->{
                     ItemKey itemKey = new ItemKey(l.item, building.ownerId(), l.itemLevel, building.ownerId());
                     Gs.ItemKey key = itemKey.toProto();
-                    Gs.Line.Builder builder = l.toProto().toBuilder().setBrandScore(key.getBrandScore()).setQtyScore(key.getQualityScore()).setBrandName(key.getBrandName());
+                    Gs.Line.Builder builder = l.toProto().toBuilder().setBrandName(key.getBrandName());
                     lineBuilder.addLine(builder.build());
                 });
                 break;

@@ -336,7 +336,6 @@ public class Player {
         builder.addAllRentGround(GroundManager.instance().getRentGroundProto(id()));
         builder.setBagId(Util.toByteString(BAG_ID));
         builder.setCityGoodInfo(CityManager.instance().toProto());
-        goodLv.forEach((k,v)->builder.addGoodLv(Gs.IntNum.newBuilder().setId(k).setNum(v)));
 
         builder.addAllFriends(FriendManager.getInstance().getFriends(this.id));
         if (societyId != null) {

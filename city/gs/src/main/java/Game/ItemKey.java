@@ -27,8 +27,6 @@ public class ItemKey implements Serializable {
         if(item.hasProducerId()) {
             if(mi instanceof MetaMaterial)
                 throw new Exception();
-            if(item.getQty()< 0)
-                throw new Exception();
             this.producerId = Util.toUuid(item.getProducerId().toByteArray());
         }
         else {

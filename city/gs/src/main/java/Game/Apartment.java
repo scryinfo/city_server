@@ -62,7 +62,6 @@ public class Apartment extends Building implements IBuildingContract
                 .setRent(this.rent)
                 .setRenter(0)
                 .setChart(Gs.Nums.newBuilder().addAllNum(incomingHistory))
-                .setQty(this.qty)
                 .setLift(getLift())
                 .setContractInfo(this.buildingContract.toProto())
                 .build();
