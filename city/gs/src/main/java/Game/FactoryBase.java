@@ -400,11 +400,6 @@ public abstract class FactoryBase extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public int quality() {
-        return 0;
-    }
-
-    @Override
     public int availableQuantity(MetaItem m) { return this.store.availableQuantity(m); }
 
     @Override

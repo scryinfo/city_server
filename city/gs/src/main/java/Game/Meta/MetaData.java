@@ -25,7 +25,6 @@ public class MetaData {
     private static final String materialFactoryColName = "MaterialFactory";
     private static final String produceDepartmentColName = "ProduceDepartment";
     private static final String retailShopColName = "RetailShop";
-    private static final String laboratoryColName = "Laboratory";
     private static final String publicFacilityColName = "PublicFacility";
     private static final String talentCenterColName = "TalentCenter";
     private static final String groundAuctionColName = "GroundAuction";
@@ -50,13 +49,6 @@ public class MetaData {
     private static final String evaColName = "Eva";
     private static final String expColName = "Experiences";
     private static final String buildingTechName = "BuildingTech";
-    private static final String warehouseColName = "WareHouse";//集散中心
-    //新版研究所
-    private static final String technologyColName = "Technology";
-    private static final String scienceItemColName = "ScienceItem";
-    //新版推广公司
-    private static final String promotionCompanyColName="PromotionCompany";
-    private static final String promotionItemColName="PromotionItem";//推广选项
     private static final String salaryStandardColName="SalaryStandard";//工资标准
     /*城市等级发明表*/
     private static final String cityLevelColName = "CityLevel";
@@ -83,12 +75,7 @@ public class MetaData {
     private static final HashMap<Formula.Key, Formula> formula = new HashMap<>();
     private static final HashMap<Integer, GoodFormula> goodFormula = new HashMap<>();
     private static final HashMap<Integer, Set<Integer>> buildingTech = new HashMap<>();
-    private static final TreeMap<Integer, MetaWarehouse> warehouse = new TreeMap<>();
     private static final Map<Integer,Integer> salaryMap=new HashMap<Integer,Integer>();
-    private static final TreeMap<Integer, MetaTechnology> technology = new TreeMap<>();
-    private static final TreeMap<Integer, MetaScienceItem> scienceItem = new TreeMap<>();
-    private static final TreeMap<Integer, MetaPromotionCompany> promotionCompany = new TreeMap<>();
-    private static final TreeMap<Integer, MetaPromotionItem> promotionItem = new TreeMap<>();
     private static final Map<Integer,MetaCityLevel> cityLevel = new HashMap<>();
 
     public static MetaBuilding getTrivialBuilding(int id) {
@@ -236,16 +223,6 @@ public class MetaData {
                 return retailShop.get(id);
             case MetaBuilding.APARTMENT:
                 return apartment.get(id);
-            /*case MetaBuilding.LAB:
-                return laboratory.get(id);*/
-            case MetaBuilding.TECHNOLOGY:
-                return technology.get(id);
-            /*case MetaBuilding.PUBLIC:
-                return publicFacility.get(id);*/
-            case MetaBuilding.PROMOTE:
-                return promotionCompany.get(id);
-            case MetaBuilding.WAREHOUSE:
-                return warehouse.get(id);//集散中心（替换以前的人才中心）
         }
         return null;
     }
@@ -277,35 +254,6 @@ public class MetaData {
         return material.get(id);
     }
 
-    public static MetaTechnology getTechnology(int id) {
-        return technology.get(id);
-    }
-
-    public static MetaScienceItem getScienceItem(int id) {
-        return scienceItem.get(id);
-    }
-
-    public static TreeMap<Integer, MetaScienceItem> getScienceItem() {
-        return scienceItem;
-    }
-
-    public static List<Integer> getAllScienCeId() {
-        return new ArrayList<>(scienceItem.keySet());
-    }
-    public static TreeMap<Integer, MetaPromotionItem> getPromotionItem() {
-        return promotionItem;
-    }
-
-    public static MetaPromotionCompany getPromotionCompany(int id){
-        return promotionCompany.get(id);
-    }
-
-    public static MetaPromotionItem getPromotionItem(int id) {
-        return promotionItem.get(id);
-    }
-    public static List<Integer> getPromotionItemId() {
-        return new ArrayList<>(promotionItem.keySet());
-    }
     //获取所有原料id
     public static final Set<Integer> getAllMaterialId() {
         return material.keySet() == null ? new HashSet() : material.keySet();
@@ -328,10 +276,7 @@ public class MetaData {
     }
     public static final MetaItem getItem(int id) {
         MetaItem res = getMaterial(id);
-        /*增加研究所生产列表*/
-        MetaItem item = res == null ? getGood(id) : res;
-        MetaItem item1=item == null ? getScienceItem(id) : item;
-        return item1 == null ? getPromotionItem(id):item1;
+        return res == null ? getGood(id) : res;
     }
     public static int getAISelectGood(long id) {
         return aiSelectGood.get(id);
@@ -356,9 +301,6 @@ public class MetaData {
 
     public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
-    }
-    public static MetaWarehouse getWarehouse(int id){//从缓存中获取集散中心
-        return warehouse.get(id);
     }
 	public static void init(String uri){
 		try{
@@ -420,22 +362,6 @@ public class MetaData {
         mongoClient.getDatabase(dbName).getCollection(goodColName).find().forEach((Block<Document>) doc -> {
             MetaGood m = new MetaGood(doc);
             good.put(m.id, m);
-            if(m.useDirectly)
-                defaultToUseItemId.add(m.id);
-        });
-
-        /*初始化研究所的商品*/
-        mongoClient.getDatabase(dbName).getCollection(scienceItemColName).find().forEach((Block<Document>) doc -> {
-            MetaScienceItem m = new MetaScienceItem(doc);
-            scienceItem.put(m.id,m);
-            if(m.useDirectly)
-                defaultToUseItemId.add(m.id);
-        });
-
-        /*推广公司推广列表*/
-        mongoClient.getDatabase(dbName).getCollection(promotionItemColName).find().forEach((Block<Document>) doc -> {
-            MetaPromotionItem m = new MetaPromotionItem(doc);
-            promotionItem.put(m.id,m);
             if(m.useDirectly)
                 defaultToUseItemId.add(m.id);
         });
@@ -504,22 +430,6 @@ public class MetaData {
             publicFacility.put(m.id, m);
             salaryMap.put(MetaBuilding.PUBLIC, m.salary);
         });
-        //旧版研究所
-       /* mongoClient.getDatabase(dbName).getCollection(laboratoryColName).find().forEach((Block<Document>) doc -> {
-            MetaLaboratory m = new MetaLaboratory(doc);
-            laboratory.put(m.id, m);
-            salaryMap.put(MetaBuilding.LAB, m.salary);
-        });*/
-        //新版研究所
-        mongoClient.getDatabase(dbName).getCollection(technologyColName).find().forEach((Block<Document>) doc -> {
-            MetaTechnology m = new MetaTechnology(doc);
-            technology.put(m.id, m);
-        });
-        //新版推广公司
-        mongoClient.getDatabase(dbName).getCollection(promotionCompanyColName).find().forEach((Block<Document>) doc -> {
-            MetaPromotionCompany m = new MetaPromotionCompany(doc);
-            promotionCompany.put(m.id, m);
-        });
         mongoClient.getDatabase(dbName).getCollection(initialBuildingColName).find().forEach((Block<Document>) doc -> {
             InitialBuildingInfo i = new InitialBuildingInfo(doc);
             initialBuilding.add(i);
@@ -528,12 +438,6 @@ public class MetaData {
             MetaTalentCenter m = new MetaTalentCenter(doc);
             talentCenter.put(m.id, m);
         });
-        //集散中心的初始化建筑
-        mongoClient.getDatabase(dbName).getCollection(warehouseColName).find().forEach((Block<Document>) doc -> {
-            MetaWarehouse m = new MetaWarehouse(doc);
-            warehouse.put(m.id, m);
-        });
-
     }
 
     public static TreeMap<Integer, MetaApartment> getApartment() {

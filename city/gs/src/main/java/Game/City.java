@@ -39,8 +39,6 @@ public class City {
     private MetaCity meta;
     private Grid[][] grids;
     private static City instance;
-    private TreeMap<Integer, Integer> topGoodQty;
-    private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private Map<Building,Double> moveKnownApartmentMap=new HashMap<Building,Double>(); //应当在加载玩家住宅建筑、建筑开业时进行缓存，建筑拆除和停业时删除缓存
     Map<GoodFilter,Set<GoodSellInfo>> retailShopGoodMap=new HashMap<GoodFilter,Set<GoodSellInfo>>();
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
@@ -65,45 +63,6 @@ public class City {
     public static final int TERRIAN_TRIVIAL = 0x00000001;
     public static final int TERRIAN_PLAYER = 0x00000002;
     public static final int TERRIAN_BUILDING = TERRIAN_TRIVIAL | TERRIAN_PLAYER;
-
-    public void updateTopGoodQty(int mId, int qty) {
-        topGoodQty.compute(mId, (k, oldQty)->{
-            if(oldQty == null)
-                return qty;
-            else if(oldQty < qty)
-                return qty;
-            else
-                return oldQty;
-        });
-    }
-    public double goodQtyScore(int mId, int qty) {
-        if(qty == 0)
-            return 0;
-        int top = topGoodQty(mId);
-        if(top == 0)
-            return 0;
-        return (double)qty / top * 100.d;
-    }
-    public double buildingQtyScore(int type, int qty) {
-        if(qty == 0)
-            return 0;
-        int top = topBuildingQty(type);
-        if(top == 0)
-            return 0;
-        return (double)qty / top * 100.d;
-    }
-    private int topGoodQty(int mId) {
-        Integer v = topGoodQty.get(mId);
-        if(v == null)
-            return 0;
-        return v;
-    }
-    private int topBuildingQty(int type) {
-        Integer v = topBuildingQty.get(type);
-        if(v == null)
-            return 0;
-        return v;
-    }
 
     public int weather() {
         return 0;
@@ -189,7 +148,6 @@ public class City {
         loadSysBuildings();
         // load all player buildings, cache them into maps
         loadPlayerBuildings();
-        this.topGoodQty = GameDb.getTopGoodQuality();
         this.metaAuctionLoadTimer.setPeriodic(TimeUnit.DAYS.toMillis(1), Util.getTimerDelay(0, 0));
 
         this.lastHour = this.localTime().getHour();
@@ -510,13 +468,6 @@ public class City {
         this.typeBuilding.computeIfAbsent(building.type(), k -> new HashSet<>()).add(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
-        this.topBuildingQty.compute(building.type(), (k, oldV)->{
-            if(oldV == null)
-                return building.quality();
-            if(oldV < building.quality())
-                return building.quality();
-            return oldV;
-        });
         //购买住宅 moveKnownValue
         if(building.type()== MetaBuilding.APARTMENT){
             buildApartmentMoveKnownValue(building);
@@ -605,7 +556,8 @@ public class City {
     public void moveKnownApartmentMap(Building b){
         Apartment apartment=(Apartment)b;
         //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
-        double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + 0 / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        //double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + 0 / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
+        double moveKnownValue=0;
         logger.info("moveKnownApartmentMap moveKnownValue: " + moveKnownValue);
         moveKnownApartmentMap.put(b,moveKnownValue);
     }

@@ -9,11 +9,6 @@ import java.util.UUID;
 public class TrivialBuilding extends Building {
     private MetaBuilding meta;
 
-    @Override
-    public int quality() {
-        return 0;
-    }
-
     public TrivialBuilding(MetaBuilding meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;

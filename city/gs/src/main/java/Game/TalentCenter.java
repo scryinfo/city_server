@@ -22,18 +22,11 @@ public class TalentCenter extends Building {
     public TalentCenter(MetaTalentCenter meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
-        this.qty = meta.qty;
     }
-    private int qty;
     @Transient
     private MetaTalentCenter meta;
 
     protected TalentCenter() {}
-
-    @Override
-    public int quality() {
-        return this.qty;
-    }
 
     @PostLoad
     private void _1() {

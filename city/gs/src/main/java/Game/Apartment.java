@@ -18,7 +18,6 @@ public class Apartment extends Building implements IBuildingContract
     {
         super(meta, pos, ownerId);
         this.meta = meta;
-        this.qty = meta.qty;
         this.buildingContract = new BuildingContract(0, 0, false);
     }
     @Transient
@@ -27,8 +26,6 @@ public class Apartment extends Building implements IBuildingContract
     @Column(nullable = false)
     @Embedded
     private BuildingContract buildingContract;
-
-    private int qty;
 
     @Column(nullable = false)
     private int rent;
@@ -41,10 +38,6 @@ public class Apartment extends Building implements IBuildingContract
     @Override
     public int cost() {
         return this.rent;
-    }
-    @Override
-    public int quality() {
-        return this.qty;
     }
 
     @PostLoad
@@ -86,9 +79,6 @@ public class Apartment extends Building implements IBuildingContract
         return buildingContract;
     }
 
-    public double getTotalQty(){ //yty
-        return meta.qty;
-    }
 
     public int getCapacity(){
         return this.meta.npc;

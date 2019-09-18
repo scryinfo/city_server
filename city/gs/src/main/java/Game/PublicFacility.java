@@ -35,7 +35,6 @@ public class PublicFacility extends Building{
     public PublicFacility(MetaPublicFacility meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
         this.meta = meta;
-        this.qty = meta.qty;
         this.curflowPromoAbTotall = -1;
     }
     @Override
@@ -263,10 +262,6 @@ public class PublicFacility extends Building{
 		* 行为分析
 			* 不用通知客户端，直接更新数据库
 		*/
-
-    @Column(nullable = false)
-    protected int qty;
-
     public int getMaxDayToRent() {
         return meta.maxDayToRent;
     }
@@ -448,7 +443,6 @@ public class PublicFacility extends Building{
     }
     public void delAd(UUID id) {
         ad.remove(id);
-        qty -= 1;
     }
     public Ad addAd(SlotRent sr, MetaItem m) {
         Ad ad = new Ad(sr, m.id, Ad.Type.GOOD);
@@ -458,15 +452,9 @@ public class PublicFacility extends Building{
     public Ad addAd(SlotRent sr, int buildingType) {
         Ad ad = new Ad(sr, buildingType, Ad.Type.BUILDING);
         this.ad.put(ad.id, ad);
-        qty += 1;
         return ad;
     }
     //protected PublicFacility() {}
-
-    @Override
-    public int quality() {
-        return this.qty;
-    }
 
     int tickPrice;
 
@@ -482,7 +470,6 @@ public class PublicFacility extends Building{
         Gs.PublicFacility.Builder builder = Gs.PublicFacility.newBuilder();
         builder.setInfo(this.toProto());
         builder.setAd(genAdPart());
-        builder.setQty(qty);
         builder.setTicketPrice(this.tickPrice);
         builder.setVisitorCount(visitorCount);
         builder.setSelledPromCount(this.getSelledPromotion().size());

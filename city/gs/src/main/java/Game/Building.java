@@ -58,7 +58,6 @@ public abstract class Building implements Ticker{
     private TickGroup tickGroup;
 
     public void tick(long deltaTime){};
-    public abstract int quality();
     boolean canUseBy(UUID userId) {
         return ownerId.equals(userId);
     }
