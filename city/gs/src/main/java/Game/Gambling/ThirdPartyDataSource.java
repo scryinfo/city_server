@@ -219,8 +219,10 @@ public class ThirdPartyDataSource {
 
         } finally {
             try {
-                if (response != null)
+                if (response != null) {
                     response.close();
+                }
+                httpclient.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -271,6 +273,7 @@ public class ThirdPartyDataSource {
             try {
                 if (response != null)
                     response.close();
+                httpclient.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

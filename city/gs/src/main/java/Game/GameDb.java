@@ -149,7 +149,7 @@ public class GameDb {
             if(transaction != null)
                 transaction.rollback();
         } finally {
-            session.close();
+			session.close();
         }
     }
 
@@ -163,7 +163,9 @@ public class GameDb {
 			userList = query.list();
 		}catch (Exception e){//异常情况下， 认为是名字使用中，避免后续操作
 			return true;
-		}
+		}finally {
+			session.close();
+        }
 		if(userList.size() > 0){
 			return true;
 		}
@@ -183,14 +185,16 @@ public class GameDb {
 		}
 		catch (Exception e){
 			int t = 0 ;
+		}finally {
+			session.close();
 		}
 		//eva
 		return  ret;
 	}
 	public static List getFlow_records(int tsSart,UUID pid, int count){
     	List ret = null;
+		Session session = sessionFactory.openSession();
     	try{
-			Session session = sessionFactory.openSession();
 			//人流量
 			Query query = session.createQuery( "FROM flow_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND playerId IS :pid" )
 					.setParameter("tsSt",tsSart)
@@ -199,8 +203,9 @@ public class GameDb {
 			ret = query.list();
 		}catch (Exception e){
 			int t = 0;
+		}finally{
+			session.close();
 		}
-
 		return ret;
 	}
 
@@ -214,6 +219,7 @@ public class GameDb {
 				.setParameter("st",range_StartTime)
 				.setParameter("ed",range_EndTime);
 		List<ddd_purchase> purchase = query.list();
+        session.close();
 		return purchase;
 	}
 
@@ -679,6 +685,7 @@ public class GameDb {
 		if (list.size() > 0) {
 			return list.get(0);
 		}
+        session.close();
 		return null;
 	}
 
@@ -1116,13 +1123,15 @@ public class GameDb {
                     .executeUpdate();
             transaction.commit();
         } catch (RuntimeException e) {
-            transaction.rollback();
+        	if(transaction!=null) {
+				transaction.rollback();
+			}
             logger.fatal("Delete mail failure");
             e.printStackTrace();
         } finally {
-            if (session != null) {
-                session.close();
-            }
+        	if(session!=null) {
+				session.close();
+			}
         }
     }
 
@@ -1140,13 +1149,15 @@ public class GameDb {
                     .executeUpdate();
             transaction.commit();
         } catch (RuntimeException e) {
-            transaction.rollback();
+        	if(transaction!=null) {
+				transaction.rollback();
+			}
             logger.fatal("Delete overdueMail failure");
             e.printStackTrace();
         } finally {
-            if (session != null) {
-                session.close();
-            }
+        	if(session!=null) {
+				session.close();
+			}
         }
     }
 
@@ -1161,13 +1172,15 @@ public class GameDb {
                     .executeUpdate();
             transaction.commit();
         } catch (RuntimeException e) {
-            transaction.rollback();
+			if(transaction!=null) {
+				transaction.rollback();
+			}
             logger.fatal("mailChangeRead failure");
             e.printStackTrace();
         } finally {
-            if (session != null) {
-                session.close();
-            }
+        	if(session!=null) {
+				session.close();
+			}
         }
     }
 
@@ -1205,11 +1218,13 @@ public class GameDb {
 			amount = (Long) session.createQuery("SELECT COUNT(ID) FROM Player").uniqueResult();
 			transaction.commit();
 		} catch (RuntimeException e) {
-			transaction.rollback();
+			if(transaction!=null) {
+				transaction.rollback();
+			}
 			logger.fatal("query player Amount failure");
 			e.printStackTrace();
 		} finally {
-			if (session != null) {
+			if(session!=null) {
 				session.close();
 			}
 		}

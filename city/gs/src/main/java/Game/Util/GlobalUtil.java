@@ -148,21 +148,4 @@ public class GlobalUtil {
         list.add(count == 0 ? 1 : sumScore / count);
         return list;
     }
-    public static double getPromotionInfo() {
-        int count = 0;
-        double sumAbilitys = 0;
-        Set<Integer> proIds = MetaData.getAllBuildingTech(MetaBuilding.PUBLIC);
-        Collection<Building> allBuilding = City.instance().typeBuilding.getOrDefault(MetaBuilding.PUBLIC, new HashSet<>());
-        for (Building b : allBuilding) {
-            if (!b.outOfBusiness()) {
-                PublicFacility facility = (PublicFacility) b;
-                for (Integer typeId : proIds) {
-                    sumAbilitys += facility.getLocalPromoAbility(typeId);
-                }
-                count++;
-            }
-        }
-        //全城推广能力 = 所有不同类型推广能力和 / 4
-        return sumAbilitys / count / 4;
-    }
 }

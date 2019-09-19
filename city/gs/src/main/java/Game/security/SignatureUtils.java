@@ -4,6 +4,7 @@ import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 
 public class SignatureUtils {
@@ -113,8 +114,9 @@ public class SignatureUtils {
         KeyPair keyPair1 = initKey();
         byte[] publicKey1 = getPublicKey(keyPair1);
         byte[] privateKey1 = getPrivateKey(keyPair1);
-        String st1 = privateKey1.toString();
-        String st2 = publicKey1.toString();
+
+        String st1 = Arrays.toString(privateKey1);;
+        String st2 = Arrays.toString(publicKey1);
 
         KeyPair keyPair2 = initKey();
         byte[] publicKey2 = getPublicKey(keyPair2);

@@ -273,11 +273,7 @@ public class GameSession {
                 if (n <= 0)
                     return false;
                 if(player.getBag().reserve(mi, n)) {
-                    Item item;
-                    if(mi instanceof MetaMaterial)
-                        item = new Item(new ItemKey(mi,player.id()), n);
-                    else
-                        item = new Item(new ItemKey(mi, player.id()), n);
+                    Item item = new Item(new ItemKey(mi, player.id()), n);
                     player.getBag().consumeReserve(item.key, n, 1);
                 }
                 GameDb.saveOrUpdate(player);
@@ -515,7 +511,7 @@ public class GameSession {
         if(err.isPresent()) {
             GroundAuction.Entry entry = GroundAuction.instance().getAuctions(c.getId());
             //如果是当前竞拍者并且价格相同则不发送高价竞拍者的信息
-            if(entry.price()!=c.getNum()&&!(entry.biderId().equals(player))){
+            if(entry.price()!=c.getNum()&&!(entry.biderId().equals(player.id()))){
                 Gs.BidChange.Builder builder = Gs.BidChange.newBuilder().setBiderId(Util.toByteString(entry.biderId()))
                         .setNowPrice(entry.price())
                         .setTargetId(c.getId())
@@ -2555,7 +2551,7 @@ public class GameSession {
                         ddd_purchase dp = dddPurchaseMgr.instance().getPurchase(Util.toUuid(response.getPurchaseId().getBytes()));
                         Player player = GameDb.getPlayer(dp.player_id);
                         GameDb.saveOrUpdate(pur);
-                        if(!player.equals(null)){
+                        if(player!=null){
                             this.write(Package.create(cmd,msg.toBuilder().setErrorCode(0).build()));
                         }else{
                             this.write(Package.create(cmd,msg.toBuilder().setErrorCode(2).build()));

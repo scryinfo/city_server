@@ -15,7 +15,7 @@ import static com.mongodb.client.model.Filters.*;
 
 /*统计工具类*/
 public class TotalUtil {
-    private static TotalUtil totalUtil = null;
+    private volatile  static TotalUtil totalUtil = null;//禁止指令重排序
 
     private TotalUtil() {
     }

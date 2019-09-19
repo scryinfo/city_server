@@ -5,8 +5,7 @@ package DB;
 
 public final class Db {
   private Db() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {
   }
   public interface LinesOrBuilder
       extends com.google.protobuf.MessageOrBuilder {

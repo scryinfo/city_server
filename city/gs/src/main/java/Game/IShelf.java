@@ -22,9 +22,10 @@ public interface IShelf {
         IStorage storage = (IStorage) shelf;
         if(i != null){
             shelf.delshelf(k, i.n, true);
+            Item itemInStore = new Item(k,storage.getItemCount(k));
+            shelf.addshelf(itemInStore,i.price, i.autoReplenish);
         }
-        Item itemInStore = new Item(k,storage.getItemCount(k));
-        shelf.addshelf(itemInStore,i.price, i.autoReplenish);
+
     }
     Map<Item, Integer> getSaleDetail(int itemId);
 

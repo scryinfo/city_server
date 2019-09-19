@@ -6,6 +6,7 @@ plugins {
     id 'com.google.protobuf' version '0.8.8'
     // Generate IntelliJ IDEA's .idea & .iml project files
     id 'idea'
+    id "org.sonarqube" version "2.6" // The Code Quality Tool
 }
 
 def grpcVersion = '1.21.0' // CURRENT_GRPC_VERSION

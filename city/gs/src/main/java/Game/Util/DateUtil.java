@@ -70,7 +70,7 @@ public class DateUtil{
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         Date startDate = calendar.getTime();
-        long endTime=startDate.getTime()+1000 * 60  * 55; 
+        long endTime=startDate.getTime()+1000 * 60  * 55;
         return endTime;
     }
 	public static void main(String[] args) throws IOException {
