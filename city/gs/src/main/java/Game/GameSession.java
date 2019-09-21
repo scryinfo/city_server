@@ -1108,6 +1108,7 @@ public class GameSession {
         updateBuildingVisitor(b);
         this.write(Package.create(cmd, b.detailProto()));
     }
+
     public void detailPublicFacility(short cmd, Message message) {
         Gs.Id c = (Gs.Id) message;
         UUID id = Util.toUuid(c.getId().toByteArray());
@@ -2435,9 +2436,6 @@ public class GameSession {
             b.setItemId(itemId);
             b.setIsUsed(goods.useDirectly);
             b.setNumOneSec(goods.n);
-            /*b.setAddNumOneSec(EvaManager.getInstance().computePercent(SpeedEva));
-            b.setAddBrand(EvaManager.getInstance().computePercent(brandEva));
-            b.setAddQuality(EvaManager.getInstance().computePercent(qualityEva));*/
         }
         this.write(Package.create(cmd, builder.build()));
     }

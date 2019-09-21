@@ -653,7 +653,7 @@ public abstract class Building implements Ticker{
 		return state;
 	}
 
-	//是否到了规定时间可以修改
+	//是否可以修改
     public boolean canBeModify(){
         Long now = new Date().getTime();
         long day = 24 * 60 * 60 * 1000;

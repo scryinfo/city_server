@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id "org.sonarqube" version "2.6"    //The Code Quality Tool
+    //id "org.sonarqube" version "2.6"    //The Code Quality Tool
 }
 
 group 'info.scry'

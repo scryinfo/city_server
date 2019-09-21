@@ -275,4 +275,9 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     public int getTotalSaleCount() {
         return this.shelf.getTotalContentNum();
     }
+
+    @Override
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {
+        builder.addRetailShop((Gs.RetailShop) this.detailProto());
+    }
 }
