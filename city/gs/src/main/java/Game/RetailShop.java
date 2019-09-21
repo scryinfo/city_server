@@ -23,7 +23,7 @@ import Game.Contract.IBuildingContract;
 import gs.Gs;
 
 @Entity
-public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuildingContract
+public class RetailShop extends Building implements IShelf, IStorage,IBuildingContract
 {
     public RetailShop(MetaRetailShop meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
@@ -61,8 +61,8 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     private BuildingContract buildingContract;
 
     @PostLoad
-    protected void _1() {
-        super._1();
+    protected void _1() {  //TODO
+        //super._1();
         this.meta = (MetaRetailShop) super.metaBuilding;
         this.shelf.setCapacity(this.meta.shelfCapacity);
         this.store.setCapacity(this.meta.storeCapacity);
@@ -74,7 +74,6 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         builder.setShelf(this.shelf.toProto());
         builder.setStore(this.store.toProto());
         builder.setInfo(this.toProto());
-        builder.setAd(genAdPart());
         builder.setLift(getLift());
         builder.setContractInfo(this.buildingContract.toProto());
         return builder.build();
