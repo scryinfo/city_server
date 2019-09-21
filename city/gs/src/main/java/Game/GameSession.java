@@ -551,13 +551,11 @@ public class GameSession {
         b.shutdownBusiness();
         if (b instanceof Apartment) { //住宅停业，清空入住人数
             Apartment apartment = (Apartment) b;
-        }  else if (b instanceof PublicFacility) {
-            if(b.type()==MetaBuilding.RETAIL){
-                RetailShop r = (RetailShop) b;
-                r.cleanData();
-                /*更新npc住宅可选建筑的缓存*/
-                City.instance().removeKnownApartmentMap(b);
-            }
+        }  else if (b instanceof RetailShop) {
+            RetailShop r = (RetailShop) b;
+            r.cleanData();
+            /*更新npc住宅可选建筑的缓存*/
+            City.instance().removeKnownApartmentMap(b);
         } else if (b instanceof FactoryBase) {//有仓库和货架，以及生产线，清除
             FactoryBase f = (FactoryBase) b;
             f.cleanData();
@@ -1238,12 +1236,7 @@ public class GameSession {
             this.write(Package.fail(cmd));
         }
     }
-
-
-
-
-
-    private boolean isValidDayToRent(int min, int max, PublicFacility pf) {
+   /* private boolean isValidDayToRent(int min, int max, PublicFacility pf) {
         if(min <= 0 || min > pf.getMinDayToRent() || max <= 0 || max < min || max > pf.getMaxDayToRent())
             return false;
         return true;
@@ -1253,7 +1246,7 @@ public class GameSession {
             return false;
         return true;
     }
-
+*/
 
     public void getAllBuildingDetail(short cmd) {
         Gs.BuildingSet.Builder builder = Gs.BuildingSet.newBuilder();
@@ -2835,7 +2828,7 @@ public class GameSession {
         Gs.Id id = (Gs.Id) message;
         UUID buildingId = Util.toUuid(id.getId().toByteArray());
         Building b = City.instance().getBuilding(buildingId);
-        if(null==b||!(b instanceof PublicFacility)||!(b.type()==MetaBuilding.RETAIL)){
+        if(null==b||!(b.type()==MetaBuilding.RETAIL)){
             System.err.println("建筑为空或不属于零售店");
             return;
         }
