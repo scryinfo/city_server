@@ -44,7 +44,7 @@ public class AccountServerSession {
 	public void loginACK(short cmd) {
 		logger.info("login to account server success!");
 	}
-	/*心跳检测*/
+	/*Heartbeat detection*/
 	public void heartInfo(short cmd){
 		logger.info("heartConnect!");
 	}

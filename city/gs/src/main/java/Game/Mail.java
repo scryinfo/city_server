@@ -23,25 +23,25 @@ import java.util.UUID;
 public class Mail {
 
     public enum MailType {
-        APARTMENT_FULL(1),//住宅已满
-        STORE_FULL(2), //仓库已满
-        PRODUCTION_LINE_COMPLETION(3),//生产线完成
-        LOCKOUT(4),//停工
-        PUBLICFACILITY_APPOINTMENT(5),//推广公司预约
-        LABORATORY_APPOINTMENT(6),//研究所预约
-        PROMOTE_FINISH(7),// 推广完成
-        INVENT_FINISH(8),//发明商品完成
-        EVA_POINT_FINISH(9),//EVA点数研究完成
-        LAND_AUCTION(10),// 土地拍卖
-        ADD_FRIEND_SUCCESS(11),//好友通知
-        LAND_SALE(12),//土地出售
-        LAND_RENT(13),//土地出租
-        SOCIETY_KICK_OUT(14),//踢出公会
-        ADD_SOCIETY_SUCCESS(15),//同意公会申请
-        ADD_SOCIETY_FAIL(16),//拒绝公会申请
-        LAND_AUCTION_HIGHER(17),//更高出价
-        DDD_RECHARGEREQUESTRES(18),//充值成功通知
-        DDD_DISCHARGERES(19);   //提币成功通知
+        APARTMENT_FULL(1),//The house is full
+        STORE_FULL(2), //The warehouse is full
+        PRODUCTION_LINE_COMPLETION(3),//Production line completed
+        LOCKOUT(4),//Shutdown
+        PUBLICFACILITY_APPOINTMENT(5),//Promotion company appointment
+        LABORATORY_APPOINTMENT(6),//Institute appointment
+        PROMOTE_FINISH(7),// Promotion completed
+        INVENT_FINISH(8),//Invention goods completed
+        EVA_POINT_FINISH(9),//EVA points research completed
+        LAND_AUCTION(10),// Land auction
+        ADD_FRIEND_SUCCESS(11),//Friends notification
+        LAND_SALE(12),//Land for sale
+        LAND_RENT(13),//Land lease
+        SOCIETY_KICK_OUT(14),//Kick out guild
+        ADD_SOCIETY_SUCCESS(15),//Agree to Guild Application
+        ADD_SOCIETY_FAIL(16),//Reject guild application
+        LAND_AUCTION_HIGHER(17),//Higher bid
+        DDD_RECHARGEREQUESTRES(18),//Recharge successful notification
+        DDD_DISCHARGERES(19);   //Notification of successful withdrawal
 
 
      /*   AD_SPACE_RENT_OUT(6),
@@ -104,7 +104,7 @@ public class Mail {
         this.uuidParas = uuidParas;
         this.intParasArr = intParasArr;
         ts = System.currentTimeMillis();
-        read = false;        //默认值为false,未读
+        read = false;        //The default value is false, unread
     }
     public Mail(int type, UUID playerId, int[] paras, UUID[] uuidParas, int[] intParasArr,String tparas) {
         id = UUID.randomUUID();
@@ -115,7 +115,7 @@ public class Mail {
         this.intParasArr = intParasArr;
         this.tparas = tparas;
         ts = System.currentTimeMillis();
-        read = false;        //默认值为false,未读
+        read = false;        //The default value is false, unread
     }
 
     protected Mail() {

@@ -52,18 +52,18 @@ public class Flight {
     protected Flight(){}
 
     String FlightDepcode;//"NKG"
-    String FlightArr;//成都"
-    String FlightDep;//南京"
+    String FlightArr;//Chengdu"
+    String FlightDep;//Nanjing"
     String FlightArrtimePlanDate;//2019-05-22 10:10:00"
     String FlightDeptimePlanDate;//2019-05-22 07:25:00"
-    String FlightArrAirport;//成都双流"
+    String FlightArrAirport;//ChengduShuangliu"
     String id;//MU2805"
-    String FlightCompany;//中国东方航空股份有限公司"
+    String FlightCompany;//China Eastern Airlines Co., Ltd."
     String FlightArrcode;//CTU"
     String FlightDeptimeDate;//2019-05-22 07:27:00"
     String FlightArrtimeDate;//2019-05-22 09:41:00"
-    String FlightDepAirport;//南京禄口"
-    String FlightState;//到达"
+    String FlightDepAirport;//Nanjing Lukou"
+    String FlightState;//Arrivals"
     int org_offset_hours;
 
     public boolean departured() {

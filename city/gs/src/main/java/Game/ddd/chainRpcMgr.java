@@ -123,7 +123,7 @@ public class chainRpcMgr {
         return response;
     }
 
-    //grpc服务器------------------------------------------------------------------------------------------------------
+    //grpc server------------------------------------------------------------------------------------------------------
     static class RechargeResultImpl extends cityapi.CityGrpc.CityImplBase{
         @Override
         public void rechargeResult(cityapi.CityOuterClass.RechargeResultReq req, io.grpc.stub.StreamObserver<cityapi.CityOuterClass.RechargeResultRes> responseObserver) {
@@ -136,5 +136,5 @@ public class chainRpcMgr {
             dddPurchaseMgr.instance().on_dddMsg(req);
         }
     }
-    //grpc服务器------------------------------------------------------------------------------------------------------
+    //grpc server------------------------------------------------------------------------------------------------------
 }

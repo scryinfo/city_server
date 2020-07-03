@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public  class WareHouseUtil {
-    //抽取添加所有的商品(添加到商品列表中)
+    //Extract and add all products (add to the product list)
     public static void addGoodInfo(List<Gs.Shelf.Content> goods, List<Gs.GoodInfo> shelfItemList, ByteString bid, Long orderId) {
         Gs.GoodInfo.Builder goodInfo = Gs.GoodInfo.newBuilder();
         goods.forEach(p -> {
@@ -28,7 +28,7 @@ public  class WareHouseUtil {
         });
     }
 
-    //抽取，获取指定租户信息
+    //Extract, get the information of the specified tenant
     public static WareHouseRenter getWareRenter(UUID bid, Long orderId){
         WareHouse building = (WareHouse) City.instance().getBuilding(bid);
         WareHouseRenter renter = null;

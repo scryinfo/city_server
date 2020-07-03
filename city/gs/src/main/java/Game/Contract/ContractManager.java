@@ -40,7 +40,7 @@ public class ContractManager
         updatePlayerLiftMap();
     }
 
-    //检查失效契约
+    //Check for invalid contracts
     public void update(long diffNano)
     {
         if (timer.update(diffNano))
@@ -145,13 +145,13 @@ public class ContractManager
         playerLiftMap.put(signId, playerLiftMap.getOrDefault(signId, 0f) + value);
     }
 
-    //按小时重置加成值
+    //Hourly reset bonus value
     public void hourTickAction(int nowHour)
     {
         updatePlayerLiftMap();
     }
 
-    //获取玩家人流量推广能力，20.5  --> 20.5%
+    //Get the ability to promote player traffic, 20.5 --> 20.5%
     public float getPlayerADLift(UUID playerId)
     {
         return playerLiftMap.getOrDefault(playerId, 0f);

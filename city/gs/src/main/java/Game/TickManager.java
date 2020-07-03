@@ -37,7 +37,7 @@ public class TickManager {
     //@OneToMany(mappedBy="tickManager",fetch = FetchType.LAZY)
     @OneToMany(fetch = FetchType.LAZY)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    private Map<Long, TickGroup> _groupList; //key是表示tick间隔的时长
+    private Map<Long, TickGroup> _groupList; //key is the duration of the tick interval
 
     public TickGroup registerTick(long tickInterval, Building obj, boolean needSave){
         TickGroup gp = _groupList.get(tickInterval);
@@ -51,7 +51,7 @@ public class TickManager {
         }
         return gp;
     }
-    //从特定的tick组中移除某个实例的tick
+    //Remove an instance's tick from a specific tick group
     public boolean unRegisterTick(long tickInterval, Building obj, boolean needSave){
         TickGroup gp =  _groupList.get(tickInterval);
         boolean changed = gp.del(obj);
@@ -64,7 +64,7 @@ public class TickManager {
         }
         return false;
     }
-    //从所有tick组中移除某个实例的tick
+    //Remove an instance's tick from a specific tick group
     public boolean unRegisterTick(Building obj , boolean needSave ){
         boolean changed = false;
         for(Iterator<Map.Entry<Long,TickGroup>> it = _groupList.entrySet().iterator(); it.hasNext();){

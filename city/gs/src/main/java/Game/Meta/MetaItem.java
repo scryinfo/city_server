@@ -7,8 +7,8 @@ import javax.persistence.AttributeConverter;
 public abstract class MetaItem {
     public static final int MATERIAL = 21;
     public static final int GOOD = 22;
-    public static final int SCIENCE = 15;//科技点数类型
-    public static final int PROMOTE = 16;//市场数据类型
+    public static final int SCIENCE = 15;//Types of technology points
+    public static final int PROMOTE = 16;//Market data types
     public static int level(int id) {
         return id % 1000;
     }
@@ -45,11 +45,11 @@ public abstract class MetaItem {
     public static boolean isItem(int id) {
         return id / MetaData.ID_RADIX >= MATERIAL;
     }
-    public static int scienceItemId(int id){/*获取研究所、推广公司类型id*/
+    public static int scienceItemId(int id){/*Get the type id of the research institute and promotion company*/
         return id % MetaData.ID_RADIX;
     }
 
-    /*是否是Eva点数商品*/
+    /*Whether it is Eva point product*/
     public static boolean isScienceItem(int id) {
         return id / MetaData.ID_RADIX >= SCIENCE && id / MetaData.ID_RADIX<=PROMOTE;
     }

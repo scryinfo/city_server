@@ -15,9 +15,9 @@ import java.util.TreeSet;
 public class CityManager {
     private CityManager() {}
     private static CityManager instance=new CityManager();
-    /*缓存全城可用的原料*/
+    /*Cache raw materials available throughout the city*/
     public  Set<Integer> cityMaterial = new TreeSet<>();
-    /*缓存全城可用的商品*/
+    /*Cache goods available throughout the city*/
     public  Set<Integer> cityGood = new TreeSet<>();
 
     public static CityManager instance(){
@@ -26,14 +26,14 @@ public class CityManager {
 
     public void init(){
         Player player = GameDb.queryPlayerForOne();
-        if(player!=null){//有玩家时，从玩家的可用商品列表取
+        if(player!=null){//When there is a player, take it from the player’s available product list
             classifyGood(player.itemIds());
-        }else{//无玩家，从配置表的可用商品列表获取
+        }else{//No players, get from the list of available products in the configuration table
             classifyGood(MetaData.getAllDefaultToUseItemId());
         }
     }
 
-    /*分类商品*/
+    /*Classified goods*/
     public void classifyGood(Set<Integer> itemIds){
         itemIds.forEach(id->{
             if(MetaGood.isItem(id)){
@@ -53,7 +53,7 @@ public class CityManager {
         return builder.build();
     }
 
-    /*判断某个商品是否包含在全城可生产的商品中*/
+    /*Determine whether a commodity is included in the commodities that can be produced in the city*/
     public boolean usable(int itemId){
         if(this.cityMaterial.contains(itemId)||this.cityGood.contains(itemId)){
             return true;

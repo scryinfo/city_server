@@ -59,16 +59,16 @@ public class StatisticServer {
                 .build());
         scheduler.scheduleJob(newJob(SecondJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.cronSchedule("*/10 * * * * ?"))
-                .build());//每种商品购买的npc,每10秒统计一次
+                .build());//The npc purchased for each product is counted every 10 seconds
         scheduler.scheduleJob(newJob(PerHourJob.class).build(), newTrigger()
         		.withSchedule(CronScheduleBuilder.cronSchedule("0 0 */1 * * ?"))
-        		.build());//每种商品购买的npc,每小时统计一次
+        		.build());//The npc purchased for each product is counted every hour
         scheduler.scheduleJob(newJob(YesterdayJob.class).build(), newTrigger()
         		.withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
-        		.build());//统计昨天包括以前的数据，每天凌晨1点统计
+        		.build());//Statistics include the previous data yesterday, statistics at 1 am every day
         scheduler.scheduleJob(newJob(MinuteJob.class).build(), newTrigger()
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * * * ?"))
-                .build());          //玩家收入和支出信息,每分钟计一次
+                .build());          //Player income and expenditure information, counted every minute
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         List<ChannelFuture> fs = new ArrayList<>();

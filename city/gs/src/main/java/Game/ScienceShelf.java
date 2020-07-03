@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/*研究出售（等同于以前的货架）*/
+/*Research sale (equivalent to previous shelves*/
 @Entity
 @SelectBeforeUpdate(false)
 public class ScienceShelf{
@@ -19,10 +19,10 @@ public class ScienceShelf{
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    private Map<ItemKey, ScienceShelf.Content> slots = new HashMap<>();//出售中科技
+    private Map<ItemKey, ScienceShelf.Content> slots = new HashMap<>();//SINOTECH
 
     public void updateAutoReplenish(ScienceBuildingBase scienceBuildingBase, ItemKey key) {
-        //更新货架： 执行一次下架上架操作
+        //Update shelf: Perform a shelf operation
         Content content = this.getContent(key);
         if(content!=null&&content.autoReplenish){
             scienceBuildingBase.delshelf(key,content.n, true);
@@ -33,7 +33,7 @@ public class ScienceShelf{
 
 
     @Embeddable
-    public static final class Content {                 //保存科技的属性
+    public static final class Content {                 //Save the properties of technology
         public Content(int n, int price,boolean autoReplenish) {
             this.n = n;
             this.price = price;
@@ -127,7 +127,7 @@ public class ScienceShelf{
         });
         return res;
     }
-    // 获取货架上所有数量
+    // Get all the quantities on the shelf
     public Integer getTotalContentNum(){
         int sum = this.slots.values().stream().mapToInt(c -> c.n).sum();
         return sum;

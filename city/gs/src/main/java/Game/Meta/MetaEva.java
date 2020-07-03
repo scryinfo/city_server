@@ -4,11 +4,11 @@ import org.bson.Document;
 
 public class MetaEva {
 	
-	public long cexp;//当前经验值
-	public int lv;   //级别
-	public long b;   //品牌值
-	public int bt;   //b类
-	public int at;   //a类
+	public long cexp;//Current experience
+	public int lv;   //level
+	public long b;   //Brand value
+	public int bt;   //Class b
+	public int at;   //Class a
 	
     public MetaEva(Document d) {
     	super();

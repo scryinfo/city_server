@@ -19,12 +19,12 @@ public class MetaBuilding {
     public static final int PRODUCE = 12;
     public static final int RETAIL = 13;
     public static final int APARTMENT = 14;
-    public static final int LAB = 18;  //TODO(以后删除)
-    public static final int TECHNOLOGY=15;//新版研究所
+    public static final int LAB = 18;  //TODO(Delete later)
+    public static final int TECHNOLOGY=15;//New Institute
     public static final int PUBLIC = 16;//TODO
-    public static final int PROMOTE=16;//新版推广公司
+    public static final int PROMOTE=16;//New promotion company
     public static final int TALENT = 17;
-    public static final int WAREHOUSE=17;//集散中心
+    public static final int WAREHOUSE=17;//Distribution center
     public static final int MAX_TYPE_ID = 20;
 
     public static boolean isBuilding(int id) {
@@ -95,7 +95,7 @@ public class MetaBuilding {
         return new CoordPair(pos, pos.offset(this.x-1, this.y-1));
     }
 
-    /*判断是否是建筑，根据基础type，比如14 、13....*/
+    /*Determine whether it is a building, based on the basic type, such as 14, 13,...*/
     public static boolean isBuildingByBaseType(int type){
         return  type<=PUBLIC&&type>=TRIVIAL;
     }

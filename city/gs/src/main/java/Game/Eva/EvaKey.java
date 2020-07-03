@@ -2,7 +2,7 @@ package Game.Eva;
 
 import java.util.Objects;
 
-/*此类用于封装和描述Eva的类型，便于做查询*/
+/*This type is used to encapsulate and describe the type of Eva, which is convenient for query*/
 public class EvaKey {
     private int at;
     private int bt;

@@ -149,7 +149,7 @@ public class GroundAuction {
                 assert (a.biderId() != null);
                 Player bider = GameDb.getPlayer(a.biderId());
                 long p = bider.spentLockMoney(a.transactionId);
-                /*扣除矿工费用,TODO*/
+                /*Deduct miner fees, TODO*/
                 double minersRatio = MetaData.getSysPara().minersCostRatio;
                 long minerCost = (long) Math.floor(p * minersRatio);
                 bider.decMoney(minerCost);
@@ -166,12 +166,12 @@ public class GroundAuction {
                 {
                     plist1.add(new LogDb.Positon(c.x, c.y));
                 }
-                // 现在分开记录在landAuction日志中
+                // Now separately recorded in the landAuction log
                 LogDb.landAuction(bider.id(), null,   p+minerCost, plist1);
                 GameDb.saveOrUpdate(Arrays.asList(bider, this, GroundManager.instance(), MoneyPool.instance()));
-                LogDb.playerPay(bider.id(),p+minerCost,0);//增加了土地拍卖  记录玩家的支出
+                LogDb.playerPay(bider.id(),p+minerCost,0);//Increased land auctions to record player spending
                 bider.send(Package.create(GsCode.OpCode.bidWinInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(p).build()));
-                //土地拍卖通知
+                //Land auction notice
                 List<Coordinate> areas = a.meta.area;
                 List<Integer> list = new ArrayList<>();
                 for (Coordinate c : areas) {
@@ -218,11 +218,11 @@ public class GroundAuction {
                 biderSession.getPlayer().groundBidingFail(bider.id(), a);
             }
         }
-        /*如果算上矿工费，玩家没有那么多钱，拍卖失败*/
+        /*If the miner's fee is included, the player does not have so much money and the auction fails*/
         double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(price * minersRatio);
         if(bider.money()<minerCost+price){
-            return Optional.of(Common.Fail.Reason.moneyNotEnough);/*返回钱不足错误码*/
+            return Optional.of(Common.Fail.Reason.moneyNotEnough);/*Return insufficient money error code*/
         }
         a.bid(bider.id(), price, now);
         bider.lockMoney(a.transactionId, price);
@@ -237,7 +237,7 @@ public class GroundAuction {
     @Transient
     private Set<ChannelId> watcher = new HashSet<>();
 
-    //获取土地拍卖信息
+    //Get land auction information
     public Entry getAuctions(int id) {
         return auctions.get(id);
     }

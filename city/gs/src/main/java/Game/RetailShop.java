@@ -125,7 +125,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         if(this.shelf.del(id, n)) {
             if(unLock)
                 this.store.unLock(id, n);
-            else{//如果是消费，那么需要消费lock的数量
+            else{//If it is consumption, then the number of locks that need to be consumed
                 this.store.consumeLock(id, n);
             }
             return true;
@@ -233,12 +233,12 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
     @Override
     public boolean shelfSet(Item item, int price,boolean autoRepOn) {
         Shelf.Content content = this.shelf.getContent(item.key);
-        //仓库数量需变化
+        //The number of warehouses needs to be changed
         if(content == null)
             return false;
-        if(!autoRepOn) {//非自动补货
-            int updateNum = content.n - item.n;//增加或减少：当前货架数量-现在货架数量
-            if(content.n==0&&item.n==0){//若非自动补货，且货架数量为0，直接删除
+        if(!autoRepOn) {//Non-automatic replenishment
+            int updateNum = content.n - item.n;//Increase or decrease: current number of shelves-current number of shelves
+            if(content.n==0&&item.n==0){//If it is not automatic replenishment, and the number of shelves is 0, delete it directly
                 content.autoReplenish=autoRepOn;
                 IShelf shelf=this;
                 shelf.delshelf(item.key, content.n, true);
@@ -259,17 +259,17 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
                 return false;
             }
         }else {
-            //1.判断容量是否已满
+            //1.Determine whether the capacity is full
             if(this.shelf.full())
                 return false;
-            //2.设置价格
+            //2.Set price
             content.price = price;
             IShelf shelf=this;
-            //删除
+            //delete
             shelf.delshelf(item.key, content.n, true);
-            //3.修改货架上的数量
+            //3.Modify the quantity on the shelf
             Item itemInStore = new Item(item.key,this.store.getItemCount(item.key));
-            //重新上架
+            //Relist
             shelf.addshelf(itemInStore,price,autoRepOn);
             return true;
         }
@@ -288,7 +288,7 @@ public class RetailShop extends PublicFacility implements IShelf, IStorage,IBuil
         double qty = meta.qty * (1 + EvaManager.getInstance().computePercent(eva));
         return qty;
     }
-    //获取总知名度
+    //Get total visibility
     public double getTotalBrand(){
         Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Brand_VALUE);
         return BrandManager.BASE_BRAND *(1 + EvaManager.getInstance().computePercent(eva));

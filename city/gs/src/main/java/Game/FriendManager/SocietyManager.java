@@ -110,7 +110,7 @@ public class SocietyManager
         }
     }
 
-    //必须在allGameSessions.remove(id())之后调用
+    //Must be called after allGameSessions.remove(id())
     public static void broadOffline(Player player)
     {
         if (player.getSocietyId() != null)
@@ -163,7 +163,7 @@ public class SocietyManager
                         null,
                         Gs.SocietyNotice.NoticeType.MODIFY_NAME_VALUE);
                 society.addNotice(notice);
-                //重名
+                //Duplicate name
                 if (GameDb.saveOrUpdSociety(society))
                 {
                     Gs.BytesStrings info = Gs.BytesStrings.newBuilder()
@@ -284,7 +284,7 @@ public class SocietyManager
                 Society.SocietyNotice notice = new Society.SocietyNotice(handler.id(),
                         reqId,Gs.SocietyNotice.NoticeType.JOIN_SOCIETY_VALUE);
 
-                //已加入其他公会
+                //Has joined other guilds
                 if (reqPlayer.getSocietyId() != null)
                 {
                     builder.setSocietyId(Util.toByteString(societyId))
@@ -309,14 +309,14 @@ public class SocietyManager
                     /**
                      * TODO:
                      * 2019/2/25
-                     * 发送邮件给申请人入会成功
+                     * Send an email to the applicant for successful membership
                      */
 
                     Mail mail = new Mail(Mail.MailType.ADD_SOCIETY_SUCCESS.getMailType(),reqId,null,new UUID[]{societyId},null);
                     GameDb.saveOrUpdate(mail);
                     GameServer.sendTo(Arrays.asList(reqId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
                 }
-                //拒绝
+                //Refuse
                 else
                 {
                     builder.setSocietyId(Util.toByteString(societyId))
@@ -327,7 +327,7 @@ public class SocietyManager
                     /**
                      * TODO:
                      * 2019/2/22
-                     * 发送邮件给申请人入会请求被拒绝 reqId
+                     * Request to send an email to the applicant is rejected reqId
                      */
 
                     Mail mail = new Mail(Mail.MailType.ADD_SOCIETY_FAIL.getMailType(),reqId,null,new UUID[]{societyId},null);
@@ -335,7 +335,7 @@ public class SocietyManager
                     GameServer.sendTo(Arrays.asList(reqId), Package.create(GsCode.OpCode.newMailInform_VALUE, mail.toProto()));
 
                 }
-                //通知权限人清除该请求
+                //Notify the authority to clear the request
                 GameServer.sendTo(getmodifyPermissionIds(society),
                         Package.create(GsCode.OpCode.delJoinReq_VALUE, builder.build()));
 
@@ -347,19 +347,19 @@ public class SocietyManager
                             .setType(Gs.MemberChange.ChangeType.JOIN)
                             .setInfo(society.getMemberHashMap().get(reqId).toProto(societyId, reqId));
 
-                    //给申请人发送加入公会信息
+                    //Send the applicant to join the association information
                     GameServer.sendTo(Collections.singletonList(reqId),
                             Package.create(GsCode.OpCode.joinHandle_VALUE,
                                     toSocietyDetailProto(society,reqPlayer)));
 
                     List<UUID> list = society.getMemberIds();
                     list.remove(reqId);
-                    //通知所有人角色变更
+                    //Notify everyone of role changes
                     GameServer.sendTo(list,Package.create(GsCode.OpCode.memberChange_VALUE,
                             Gs.MemberChanges.newBuilder()
                                     .addAllChangeLists(Collections.singletonList(mchange.build()))
                                     .build()));
-                    //入会公告
+                    //Announcement
                     GameServer.sendTo(list,Package.create(GsCode.OpCode.noticeAdd_VALUE,
                             notice.toProto(societyId)));
 

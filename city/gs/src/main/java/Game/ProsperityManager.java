@@ -7,12 +7,12 @@ import Game.Timers.PeriodicTimer;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-/*繁华度*/
+/*Prosperity*/
 public class ProsperityManager {
 
     private ProsperityManager() {
         cityLen = MetaData.getCity().x > MetaData.getCity().y ? MetaData.getCity().x : MetaData.getCity().y;
-        //获取土地拍卖的所有有地块
+        //Get all the parcels of land auction
         Collection<MetaGroundAuction> values = MetaData.getGroundAuction().values();
         values.forEach(g->{
             List<Coordinate> area = g.area;
@@ -24,31 +24,31 @@ public class ProsperityManager {
 
     private static ProsperityManager instance=new ProsperityManager();
 
-    List<Coordinate> allGround = new ArrayList<>();//全城所有的地块
+    List<Coordinate> allGround = new ArrayList<>();//All plots in the city
 
 
     public static ProsperityManager instance(){
         return instance;
     }
 
-    //1.城市最大范围
+    //1.The largest city
     int cityLen;
 
-    //2.城市人流量，可以先算出所有地块的的人流量
+    //2.City traffic, you can first calculate the traffic of all plots
     int trafficTemp = 0;
 
-    private Map<Coordinate, Integer> groundProsperityMap = new HashMap<>();//全城所有土地的繁华度
+    private Map<Coordinate, Integer> groundProsperityMap = new HashMap<>();//Prosperity of all land in the city
 
     List<Building> indexs = new ArrayList<>();
 
-    //定时器（每小时更新）
+    //Timer (updated every hour)
     PeriodicTimer timer;
 
     int updateIndex=0;
 
-    /*全城繁华值总和,1小时更新内根据地块位置逐步更新.*/
+    /*The sum of the prosperity value of the whole city, which is gradually updated according to the location of the plot within 1 hour of update.*/
     public void totalProsperity(long diffNano) {
-        /*一块一块的去更新地块，而不是一直去更新，直到完成,循环的去更新数据，从头开始更新*/
+        /*Update plots piece by piece instead of updating all the time until completion, update data in a loop and start updating from the beginning*/
         if (timer.update(diffNano)) {
             if(updateIndex==allGround.size()){
                 updateIndex=0;
@@ -62,25 +62,25 @@ public class ProsperityManager {
         }
     }
 
-    /*计算建筑繁荣度，建筑繁荣度要把建筑包含的所有土地加起来(暂时不用)*/
-   /* private int computeBuildingProsperity(Building building) {  //获取坐标点的繁荣度
+    /*Calculate the prosperity of the building. The prosperity of the building should add up all the land included in the building*/
+   /* private int computeBuildingProsperity(Building building) {  //Get the prosperity of coordinate points
         int buildingSumProsperity=0;
         ArrayList<Coordinate> coordinates = new ArrayList<>(building.area().toCoordinates());
         for (Coordinate coordinate : coordinates) {
-            trafficTemp=0;//清空人流量
-            double disTemp = 0;//位置关系
-            int prosperity = 0;//土地繁华度值
+            trafficTemp=0;//Clear traffic
+            double disTemp = 0;//Positional relationship
+            int prosperity = 0;//Land prosperity value
             for (int x = 1; x < cityLen; x++) {
                 for (int y = 1; y < cityLen; y++) {
-                    //1.位置关系
+                    //1.Positional relationship
                     int absX = Math.abs(coordinate.x - x);
                     int absY = Math.abs(coordinate.y - y);
                     disTemp = absX > absY ? absX : absY;
-                    //2.offsetTemp 位置偏差比例
+                    //2.offsetTemp Position deviation ratio
                     double offsetTemp = 1 - (disTemp / cityLen);
-                    //3.统计获取当前位置的人流量,筛选这一片范围内的建筑，如果有在建筑上的，计算人流量
+                    //3.Statistically obtain the current location of people, screen the buildings within this range, if there are buildings, calculate the number of people
                     trafficTemp =City.instance().getTraffic(x,y);
-                    //4.计算繁华值
+                    //4.Calculate bustling value
                     prosperity += trafficTemp * offsetTemp;
                     buildingSumProsperity += prosperity;
                 }
@@ -89,33 +89,33 @@ public class ProsperityManager {
         return buildingSumProsperity;
     }*/
 
-    /*计算土地的繁荣度*/
+    /*Calculate the prosperity of the land*/
     private int computeGroundProsperity(int beginX,int beginY){
-        double disTemp = 0;//距离
-        int prosperity = 0;//土地繁华度值
+        double disTemp = 0;//distance
+        int prosperity = 0;//Land prosperity value
         trafficTemp=0;
-        for (int x = 1; x < cityLen; x++) {     //初始坐标从1开始 100次
+        for (int x = 1; x < cityLen; x++) {     //The initial coordinate starts from 1 100 times
             for (int y = 1; y < cityLen; y++) {
-                //1.位置关系
+                //1.Positional relationship
                 disTemp=Math.abs(beginX - x)>Math.abs(beginY - y)?Math.abs(beginX - x):Math.abs(beginY - y);
-                //2.offsetTemp 位置偏差比例
+                //2.offsetTemp Position deviation ratio
                 double offsetTemp = 1 - (disTemp / cityLen);
-                //3.统计获取当前位置的人流量(也就是获取这个土地上是否修建了建筑，获取这个建筑的人流量)
-                trafficTemp= City.instance().getTraffic(x, y);//获取位置人流量
-                //4.计算繁华值
+                //3.Statistically obtain the number of people in the current location (that is, whether there is a building built on this land, and the number of people in this building)
+                trafficTemp= City.instance().getTraffic(x, y);//Get location traffic
+                //4.Calculate bustling value
                 prosperity += trafficTemp * offsetTemp;
             }
         }
         return prosperity;
     }
 
-    //获取土地繁荣度
+    //Gain land prosperity
     public int  getGroundProsperity(Coordinate c){
         return groundProsperityMap.getOrDefault(c, 0);
     }
-    //获取建筑繁华度
+    //Get building prosperity
     public int  getBuildingProsperity(Building building){
-        //建筑繁荣度，直接获取建筑所占土地的繁荣度
+        //Building prosperity, directly obtain the prosperity of the land occupied by the building
         Collection<Coordinate> coordinates = building.area().toCoordinates();
         int sumProsperity=0;
         for (Coordinate coordinate : coordinates) {
@@ -125,16 +125,16 @@ public class ProsperityManager {
         //return buildingProsperityMap.getOrDefault(building,0);
     }
 
-    /*获取建筑繁荣度评分:建筑繁华度 = 当前建筑包含地块的繁华值总和 / 全城繁华值总和*/
+    /*Get the building prosperity score: Building prosperity = the total prosperity value of the current building including the plot / the total prosperity value of the whole city*/
     public double getBuildingProsperityScore(Building building){
-        double localBuildProsperity = getBuildingProsperity(building);//当前建筑繁荣度
+        double localBuildProsperity = getBuildingProsperity(building);//Current building prosperity
         Integer sumProsperity = groundProsperityMap.values().stream().reduce(Integer::sum).orElse(0);
         if(sumProsperity==0)
             return 0;
         return localBuildProsperity/sumProsperity;
     }
 
-    /*获取土地繁荣度评分:当前土地繁华值 / 全城繁华值总和*/
+    /*Get land prosperity score: current land prosperity value / total prosperity value of the whole city*/
     public double getGroundProsperityScore(int x,int y){
         Coordinate coordinate = new Coordinate(x, y);
         int groundProsperity = groundProsperityMap.getOrDefault(coordinate,0);

@@ -82,9 +82,9 @@ public class ItemKey implements Serializable {
             double q=EvaManager.getInstance().computePercent(qualityEva);
             double totalBrand=goods.brand*(1+b);
             double totalQuality=goods.quality*(1+q);
-            //品牌评分
+            //Brand score
             double brandScore = GlobalUtil.getBrandScore(totalBrand, meta.id);
-            //品质评分
+            //Quality score
             double goodQtyScore = GlobalUtil.getGoodQtyScore(totalQuality, meta.id, goods.quality);
             builder.setBrandScore((int) brandScore);
             builder.setQualityScore((int) goodQtyScore);
@@ -99,7 +99,7 @@ public class ItemKey implements Serializable {
         return builder.build();
     }
 
-    //获取商品的总品质
+    //Get the total quality of the product
     public double getTotalQty(){
         if(MetaGood.isItem(this.meta.id)){
             Eva eva = EvaManager.getInstance().getEva(this.producerId, meta.id,Gs.Eva.Btype.Quality_VALUE);
@@ -108,11 +108,11 @@ public class ItemKey implements Serializable {
         }
         return 0;
     }
-    //获取商品的总知名度
+    //Get the total visibility of the product
     public double getTotalBrand(){
         if(MetaGood.isItem(this.meta.id)){
             MetaGood good = MetaData.getGood(meta.id);
-            /*获取Eva加成信息*/
+            /*Get Eva bonus information*/
             Eva eva = EvaManager.getInstance().getEva(this.producerId, this.meta.id, Gs.Eva.Btype.Brand_VALUE);
             return good.brand*(1 + EvaManager.getInstance().computePercent(eva));
         }

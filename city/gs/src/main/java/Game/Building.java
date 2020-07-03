@@ -95,12 +95,12 @@ public abstract class Building implements Ticker{
                 return new Apartment(MetaData.getApartment(id), pos, ownerId);
            /* case MetaBuilding.LAB:
                 return new Laboratory(MetaData.getLaboratory(id), pos, ownerId);*/
-           //新版研究所
+           //New Institute
             case MetaBuilding.TECHNOLOGY:
                 return new Technology(MetaData.getTechnology(id), pos, ownerId);
            /* case MetaBuilding.PUBLIC:
                 return new PublicFacility(MetaData.getPublicFacility(id), pos, ownerId);*/
-           //新版推广公司
+           //New promotion company
             case MetaBuilding.PROMOTE:
                 return new PromotionCompany(MetaData.getPromotionCompany(id),pos, ownerId);
             case MetaBuilding.WAREHOUSE:
@@ -123,10 +123,10 @@ public abstract class Building implements Ticker{
         ownerWatchers.remove(s.channelId());
     }
     @Transient
-    Set<ChannelId> detailWatchers = new HashSet<>();//所有在当前建筑中的人
+    Set<ChannelId> detailWatchers = new HashSet<>();//Everyone in the current building
 
     @Transient
-    Set<ChannelId> ownerWatchers = new HashSet<>();//建筑本人的ChannelId
+    Set<ChannelId> ownerWatchers = new HashSet<>();//The Channel Id of the building itself
 
     public void broadcastCreate() {
         GridIndexPair gip = this.coordinate().toGridIndex().toSyncRange();
@@ -155,7 +155,7 @@ public abstract class Building implements Ticker{
         }
         GameServer.sendTo(this.detailWatchers, Package.create(GsCode.OpCode.salesNotice_VALUE, builder.build()));
     }
-    /*发送给所有在建筑中的人*/
+    /*Sent to everyone in the building*/
     public void sendToAllWatchers(Shared.Package p){
         GameServer.sendTo(this.detailWatchers, p);
     }
@@ -283,7 +283,7 @@ public abstract class Building implements Ticker{
     protected int state = Gs.BuildingState.WAITING_OPEN_VALUE;
 
     @Column(name = "ts", nullable = false)
-    long openingTs = 0;    //最新的开业时间
+    long openingTs = 0;    //Latest opening time
 
     @Column(nullable = false)
     private long constructCompleteTs;
@@ -541,10 +541,10 @@ public abstract class Building implements Ticker{
     	for (Map.Entry<Integer, Integer> n : this.metaBuilding.npc.entrySet()) {
     		requireWorkNum+=n.getValue();
     	}
-    	if(requireWorkNum>unEmployeeNpcNum){//需求工人数量 > 失业人口  失业人口全部转化为工人  不足部分新增人口
+    	if(requireWorkNum>unEmployeeNpcNum){//Number of workers in demand> Unemployed population Unemployed population all converted into workers
     		NpcManager.instance().addWorkNpc(npcList,this);
     		npcs.addAll(npcList);
-    		int num=(requireWorkNum-unEmployeeNpcNum)/4; //每种类型还差npc数量
+    		int num=(requireWorkNum-unEmployeeNpcNum)/4; //The number of each type is still npc
             NpcManager.instance().startBusiness(requireWorkNum-unEmployeeNpcNum);
     	  	this.metaBuilding.npc.forEach((k,v)->{
         		for(Npc npc : NpcManager.instance().create(k, num, this, 0))
@@ -552,16 +552,16 @@ public abstract class Building implements Ticker{
         			npcs.add(npc);
         		}
         	});
-    	}else if(requireWorkNum==unEmployeeNpcNum){//需求工人数量 = 失业人口  失业人口全部转化为工人
+    	}else if(requireWorkNum==unEmployeeNpcNum){//Number of workers in demand = Unemployed Unemployed are all converted into workers
     		NpcManager.instance().addWorkNpc(npcList,this);
     		npcs.addAll(npcList);
-    	}else{//需求工人数量 < 失业人口  在失业人口中随机抽取需求工人数量的人口转化为工人
+    	}else{//Number of workers in demand <Unemployed population The number of unemployed persons randomly selected from the number of workers in demand is converted into workers
     		int num=requireWorkNum/4;
     		Map<Integer, List<Npc>> map=NpcManager.instance().getUnEmployeeNpcByType();
     		List<Npc> totalNpc = new ArrayList<Npc>();
       	  	this.metaBuilding.npc.forEach((k,v)->{
       	  		List<Npc> list=map.get(k);
-      	  		//每一种类型的npc随机抽取num个
+      	  		//Each type of npc randomly draws num
       	  		List<Npc> sub=new ArrayList<Npc>();
       	  		int[] idxArray=NpcUtil.getDifferentIndex(0,list.size()-1,num);
       	  		for (int i = 0; i < idxArray.length; i++) {
@@ -632,16 +632,16 @@ public abstract class Building implements Ticker{
         builder.setBubble(this.showBubble);
         int type=MetaBuilding.type(metaBuilding.id);
     	builder.setType(type);
-    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//只有住宅和零售店才有知名度和品质
+    	if(type==MetaBuilding.APARTMENT||type==MetaBuilding.RETAIL){//Only residential and retail stores have visibility and quality
     	  	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
         	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
-    	   	//单个建筑
+    	   	//Single building
         	BrandManager.instance().getBuildingBrandOrQuality(this, brandMap, qtyMap);
            	double brand=BrandManager.instance().getValFromMap(brandMap, type());
         	double quality=BrandManager.instance().getValFromMap(qtyMap, type());
-        	//知名度评分
+        	//Popularity score
             int brandScore =(int)GlobalUtil.getBrandScore(brand, type);
-            //品质评分
+            //Quality score
             int qtyScore = (int)GlobalUtil.getBuildingQtyScore(quality, type);
             builder.setBrand(brandScore).setQuality(qtyScore);
     	}
@@ -793,7 +793,7 @@ public abstract class Building implements Ticker{
             calcuHappy();
             allStaff.forEach(npc -> {
                 npc.addMoney(this.singleSalary());
-                //缴纳社保
+                //Pay social security
                 npc.decMoney(this.singleTax());
                 MoneyPool.instance().add(this.singleTax());
             });
@@ -801,11 +801,11 @@ public abstract class Building implements Ticker{
             updates.add(p);
             GameDb.saveOrUpdate(updates);
             LogDb.paySalary(p.id(),type(),id(),this.singleSalary(), this.allStaff.size());
-            LogDb.buildingPay(id(),p.id(),this.singleSalary()*this.allStaff.size());//记录建筑支出
+            LogDb.buildingPay(id(),p.id(),this.singleSalary()*this.allStaff.size());//Record construction expenditure
             return true;
         } else {
             shutdownBusiness();
-            //停工通知(不足支付工资)
+            //Work stop notice (not enough to pay wages)
             UUID[] ownerIdAndBuildingId = {this.ownerId(), this.id()};
             MailBox.instance().sendMail(Mail.MailType.LOCKOUT.getMailType(), this.ownerId(), null, ownerIdAndBuildingId, null);
             return false;
@@ -852,7 +852,7 @@ public abstract class Building implements Ticker{
 		return state;
 	}
 
-	//是否到了规定时间可以修改
+	//Whether it can be modified within the specified time
     public boolean canBeModify(){
         Long now = new Date().getTime();
         long day = 24 * 60 * 60 * 1000;

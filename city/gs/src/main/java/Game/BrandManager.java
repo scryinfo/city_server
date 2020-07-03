@@ -27,7 +27,7 @@ public class BrandManager {
         return instance;
     }
     public static final int ID = 0;
-    public static final int BASE_BRAND=100;//建筑基础知名度值
+    public static final int BASE_BRAND=100;//Building foundation visibility value
     private static final Logger logger = Logger.getLogger(BrandManager.class);
     protected BrandManager() {}
     public static void init(){
@@ -106,13 +106,13 @@ public class BrandManager {
         @OneToOne(cascade={CascadeType.ALL})
         public BrandName brandName = null;
 
-        //记录名字修改的时间戳，与当前时间大于7天才可以修改，用于防止抢注的情况
-        //鉴于每个玩家的BrandKey是有限的所以暂时不用处理这个数据，有必要的时候在实现
+        //Record the timestamp of the name modification, and the current time is greater than 7 days before it can be modified, used to prevent squatting
+        //Since each player's BrandKey is limited, it is not necessary to process this data for the time being, and it is necessary to implement it when necessary
         /*
-        数量没有限制才会导致抢注这种情况。比如100种商品，那么每个玩家顶多100多个BrandKey,
-        那么应该不会发生抢注的情况；况且玩家频繁修改自己的品牌名字，实际上会损害
-        自己的品牌认知度；如果是恶意针对对其它竞争玩家，那么我怎么知道人家要取啥名名字？
-        所以限制抢注的这个需求其实是伪需求。
+        There is no limit to the amount of squatting. For example, 100 kinds of products, then each player can have more than 100 BrandKey,
+         Then there should be no squatting; besides, players frequently modify their brand names, which will actually damage
+         My own brand recognition; if it is maliciously aimed at other competitors, how do I know what name people want to take?
+         Therefore, the requirement to limit squatting is actually a pseudo-need.
         */
         Long nameChangedTs=0L;
 
@@ -142,7 +142,7 @@ public class BrandManager {
             }else
                 brandName.setBrandName(newBrandName);
         }
-        public boolean canBeModify(){//距离上次修改时是否大于7天，true能修改、false不能修改
+        public boolean canBeModify(){//Whether it is greater than 7 days since the last modification, true can be modified, false cannot be modified
             Long now = new Date().getTime();
             long day = 24 * 60 * 60 * 1000;
             if(this.nameChangedTs+7*day<=now){
@@ -338,9 +338,9 @@ public class BrandManager {
     @JoinColumn(name = "brand_manager_id")
     private Map<BrandKey, BrandInfo> allBrandInfo = new HashMap<>();
 
-    //添加品牌，如果已经有使用该BrandKey的品牌了，返回false
-    //现在的规则是，BrandKey 只增不减，比如1万个玩家200种商品，那么最多就是200万个BrandKey
-    //服务器默认是只产生品牌key，不产生品牌名字的，客户端拿到品牌key自己生成品牌默认品牌名字
+    //Add a brand, if there is already a brand using the BrandKey, return false
+    //The current rule is that BrandKey only increases but does not decrease. For example, 10,000 players and 200 products, then the maximum is 2 million BrandKeys.
+    //The server only generates the brand key by default, but does not generate the brand name. The client gets the brand key and generates the brand default brand name by itself
     public boolean addBrand(UUID pid, int typeId){
         BrandKey bk = new BrandKey(pid,typeId);
         BrandInfo bInfo = allBrandInfo.get(bk);
@@ -359,9 +359,9 @@ public class BrandManager {
         return allBrandInfo.getOrDefault(bk,new BrandInfo(bk));
     }
 
-    //品牌名字是可以改变的，但要保证传入的validNewName是唯一性的(-1品牌名称重复、1修改成功、其他（表示时间不通过）)
+    //The brand name can be changed, but to ensure that the incoming validNewName is unique (-1 brand name is repeated, 1 is modified successfully, other (indicating that the time is not passed))
     public Long changeBrandName(UUID pid, int typeId, String validNewName){
-        //如果新名字是使用中的名字，那么操作失败，返回-1
+        //If the new name is the name in use, the operation fails and -1 is returned
         if(GameDb.brandNameIsInUsing(validNewName)){
             return -1l;
         }
@@ -369,9 +369,9 @@ public class BrandManager {
         if(!bInfo.canBeModify()) {
             return bInfo.nameChangedTs;
         }else {
-            //如果名字可用
+            //If the name is available
             bInfo.setBrandName(validNewName);
-            //级联保存
+            //Cascade save
             this.allBrandInfo.put(bInfo.key, bInfo);
             GameDb.saveOrUpdate(this);
             return 1l;
@@ -383,26 +383,26 @@ public class BrandManager {
 
     public void getBuildingBrandOrQuality(Building b,Map<Integer,Double> brandMap,Map<Integer,Double> qtyMap){
     	UUID playerId=b.ownerId();
-    	//住宅和零售店的techId是13和14
+    	//The techId for residential and retail stores is 13 and 14
     	BrandLeague bl=LeagueManager.getInstance().getBrandLeague(b.id(), b.type());
-    	if(bl!=null){//优先查询加盟玩家技术
+    	if(bl!=null){//Priority inquiry for joining player technology
     		playerId=bl.getPlayerId();
     	}
 
     	Eva brandEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Brand_VALUE);
     	Eva qualityEva=EvaManager.getInstance().getEva(playerId, b.type(), Gs.Eva.Btype.Quality_VALUE);
-        int buildingBrand= (int) (BASE_BRAND *(1+EvaManager.getInstance().computePercent(brandEva)));//品牌值，也通过Eva加点提升
+        int buildingBrand= (int) (BASE_BRAND *(1+EvaManager.getInstance().computePercent(brandEva)));//Brand value is also increased through Eva
 
 		brandMap.put(b.type(), getValFromMap(brandMap,b.type())+new Double(buildingBrand));
 		brandMap.put(Gs.ScoreType.BasicBrand_VALUE, new Double(BASE_BRAND));
 		brandMap.put(Gs.ScoreType.AddBrand_VALUE, EvaManager.getInstance().computePercent(brandEva));
-        //住宅和零售店初始品质 = qty(yty)
+        //Initial quality of residential and retail stores = qty(yty)
         qtyMap.put(b.type(), getValFromMap(qtyMap,b.type())+new Double((b.quality())*(1+EvaManager.getInstance().computePercent(qualityEva))));
 		qtyMap.put(Gs.ScoreType.BasicQuality_VALUE, new Double(b.quality()));
 		qtyMap.put(Gs.ScoreType.AddQuality_VALUE, EvaManager.getInstance().computePercent(qualityEva));
     }
 
-    public void getAllBuildingBrandOrQuality(){ //暂不使用
+    public void getAllBuildingBrandOrQuality(){ //Not in use
     	Map<Integer,Double> brandMap=new HashMap<Integer,Double>();
     	Map<Integer,Double> qtyMap=new HashMap<Integer,Double>();
     	City.instance().typeBuilding.getOrDefault(MetaBuilding.APARTMENT,new HashSet<>()).forEach(b->{
@@ -442,7 +442,7 @@ public class BrandManager {
     public double getValFromMap(Map<Integer,Double> map,int type){
     	return ((map!=null&&map.size()>0&&map.get(type)!=null)?map.get(type):0);
     }
-    //根据建筑类型获取品牌信息
+    //Get brand information based on building type
     public List<Gs.MyBrands.Brand> getBrandByType(int type,UUID pid){
         List<Gs.MyBrands.Brand> brands = new ArrayList<>();
         MetaData.getBuildingTech(type).forEach(itemId->{
@@ -455,7 +455,7 @@ public class BrandManager {
             EvaManager.getInstance().getEva(pid,itemId).forEach(eva -> {
                 band.addEva(eva.toProto());
             });
-            //优化
+            //optimization
            /* GameDb.getEvaInfoList(pid, itemId).forEach(eva -> {
                 band.addEva(eva.toProto());
             });*/
@@ -472,7 +472,7 @@ public class BrandManager {
         return infos;
     }
 
-    public boolean brandIsExist(UUID pid, int typeId){//查询是否存在该品牌信息
+    public boolean brandIsExist(UUID pid, int typeId){//Check if the brand information exists
         BrandKey bk = new BrandKey(pid,typeId);
         return null==allBrandInfo.get(bk)?false:true;
     }

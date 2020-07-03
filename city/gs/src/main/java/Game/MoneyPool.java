@@ -29,7 +29,7 @@ public class MoneyPool {
 
     public void add(long n) {
         this.n += n;
-        //城市奖金池突破,奖金池达到1000,发送广播给前端,包括奖金池金额，时间 
+        //City bonus pool breakthrough, bonus pool reaches 1000, broadcast to the front end, including bonus pool amount, time
         if(n>=10000000){
         	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
         			.setType(4)

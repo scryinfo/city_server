@@ -31,7 +31,7 @@ public class Eva {
     
     @Column(name = "b")
     private long b;
-    // 记录累加点数
+    // Record accumulated points
     @Column(name = "sumValue")
     private long sumValue;
     
@@ -44,7 +44,7 @@ public class Eva {
 	}
 
 	public void setSumValue(long sumValue) {
-		this.sumValue = sumValue;  // 累加
+		this.sumValue = sumValue;  // Accumulate
 	}
 
 	public Eva(UUID pid, int at, int bt, int lv, long cexp, long b) {
@@ -78,11 +78,11 @@ public class Eva {
 				.setBt(Gs.Eva.Btype.valueOf(bt))
 				.setLv(lv)
 				.setCexp(cexp)
-				.setSumValue(sumValue); // 累计点数
+				.setSumValue(sumValue); // Accumulated points
         return builder.build();
     }
 
-    /*转换为精简的eva结构,Eva查询使用*/
+    /*Converted to a streamlined eva structure, used by Eva queries*/
     public Gs.Eva toSimpleEvaProto(){
 		Gs.Eva.Builder builder = Gs.Eva.newBuilder();
 		builder.setId(Util.toByteString(id))

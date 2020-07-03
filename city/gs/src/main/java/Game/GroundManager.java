@@ -264,7 +264,7 @@ public class GroundManager {
             }
         }
         long cost = rentPara.requiredPay() * coordinates.size();
-        //TODO:矿工费用
+        //TODO:Miner's fee
         double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost * minersRatio);
         if(!renter.decMoney(cost+minerCost))
@@ -281,10 +281,10 @@ public class GroundManager {
         owner.addMoney(cost-minerCost);
         LogDb.playerPay(renter.id(), cost+minerCost,0);
         LogDb.playerIncome(owner.id(), cost-minerCost,0);
-        //矿工费用日志记录
+        //Miner fee logging
         LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
         LogDb.minersCost(renter.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+		if(cost>=10000000){//Major transaction,The transaction amount reaches 1000,Broadcast information to clients,Including player ID，The transaction amount，time
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(owner.id()))
@@ -301,7 +301,7 @@ public class GroundManager {
         List<GroundInfo> gis = new ArrayList<>(coordinates.size());
         for(Coordinate c : coordinates) {
             GroundInfo i = info.get(c);
-            i.rented(rentPara, tid, renter.id(), now);//设置土地状态
+            i.rented(rentPara, tid, renter.id(), now);//Set land status
             gis.add(i);
             this.summaryInfo.get(i.coordinate().toGridIndex()).rentingCount--;
         }
@@ -309,7 +309,7 @@ public class GroundManager {
         this.rentGround.put(tid, new HashSet<>(gis));
         this.broadcast(gis);
         
-        //租别人的地算玩家自己的地
+        //Renting someone else's land counts as the player's own land
         if(playerGround!=null&&playerGround.size()>0){
         	Set<GroundInfo> s=new HashSet<>(gis);
         	if(playerGround.get(renter.id())!=null){
@@ -328,7 +328,7 @@ public class GroundManager {
                 .addAllCoord(miniIndexList)
                 .build();
         GameServer.sendIncomeNotity(ownerId,notify);
-        //土地出租通知
+        //Land lease notice
         List<Integer> list = new ArrayList<>();
         for (Coordinate c : coordinates) {
             list.add(c.x);
@@ -375,7 +375,7 @@ public class GroundManager {
             gis.add(i);
         }
         long cost = gis.size() * price;
-        //TODO:矿工费用
+        //TODO:Miner's fee
         double minersRatio = MetaData.getSysPara().minersCostRatio;
         long minerCost = (long) Math.floor(cost *minersRatio);
         if(buyer.money() < cost+minerCost)
@@ -385,10 +385,10 @@ public class GroundManager {
         buyer.decMoney(cost+minerCost);
         LogDb.playerPay(buyer.id(), cost+minerCost,0);
 	    LogDb.playerIncome(seller.id(), cost-minerCost,0);
-	    //矿工费用记录
+	    //Miner's expense records
         LogDb.minersCost(buyer.id(),minerCost,MetaData.getSysPara().minersCostRatio);
         LogDb.minersCost(seller.id(),minerCost,MetaData.getSysPara().minersCostRatio);
-		if(cost>=10000000){//重大交易,交易额达到1000,广播信息给客户端,包括玩家ID，交易金额，时间
+		if(cost>=10000000){//Major transaction,The transaction amount reaches 1000,Broadcast information to clients,Including player ID，The transaction amount，time
 			GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
 					.setType(1)
                     .setSellerId(Util.toByteString(seller.id()))
@@ -405,7 +405,7 @@ public class GroundManager {
             plist1.add(new LogDb.Positon(c.x, c.y));
             miniIndexList.add(c.toProto());
         }
-        LogDb.buyGround(buyer.id(),sellerId,price,plist1,minerCost);//cost不包含矿工费用，并非真实收入
+        LogDb.buyGround(buyer.id(),sellerId,price,plist1,minerCost);//costDoes not include miner fees, not real income
         for(GroundInfo i : gis) {
             swapOwner(buyer.id(), seller.id(), i);
         }
@@ -421,7 +421,7 @@ public class GroundManager {
                 .addAllCoord(miniIndexList)
                 .build();
         GameServer.sendIncomeNotity(sellerId, notify);
-        //土地出售通知
+        //Land sale notice
         List<Integer> list = new ArrayList<>();
         for (Coordinate c : coordinates) {
             list.add(c.x);
@@ -436,7 +436,7 @@ public class GroundManager {
     }
 
     private void swapOwner(UUID buyer, UUID seller, GroundInfo info) {
-        info.buyGround(buyer);//改变土地状态
+        info.buyGround(buyer);//Change land status
       /*  playerGround.computeIfPresent(buyer,(k,v)->{
             v.remove(info);
             return v;

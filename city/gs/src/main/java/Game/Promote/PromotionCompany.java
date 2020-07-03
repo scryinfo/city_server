@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/*新版推广公司*/
+/*New promotion company*/
 @Entity
 public class PromotionCompany extends ScienceBuildingBase {
     @Transient
@@ -60,7 +60,7 @@ public class PromotionCompany extends ScienceBuildingBase {
         this.meta = (MetaPromotionCompany) this.metaBuilding;
     }
 
-    //广播
+    //broadcast
     private void broadcastLineInfo(ScienceLineBase line, ItemKey key) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(line.id))
@@ -127,16 +127,16 @@ public class PromotionCompany extends ScienceBuildingBase {
                 ItemKey key = l.newItemKey(ownerId());
                 if (this.store.offset(key, l.left())) {
                     l.resume();
-                    broadcastLineInfo(l, key);//广播
+                    broadcastLineInfo(l, key);//broadcast
                 }
             } else {
-                int add = l.update(diffNano, this.ownerId()); //新增了玩家id，作为eva查询
+                int add = l.update(diffNano, this.ownerId()); //Added player id as eva query
                 if (add > 0) {
                     ItemKey key = l.newItemKey(ownerId());
-                    if (this.store.offset(key, add)) {//添加到未开启宝箱中
-                        /*更新自动补货*/
+                    if (this.store.offset(key, add)) {//Add to unopened treasure chest
+                        /*Update automatic replenishment*/
                         updateAutoReplenish(key);
-                        broadcastLineInfo(l, key);//广播
+                        broadcastLineInfo(l, key);//broadcast
                     } else {
                         l.count -= add;
                         l.suspend(add);
@@ -144,8 +144,8 @@ public class PromotionCompany extends ScienceBuildingBase {
                 }
             }
         }
-        delComplementLine(completedLines);//删除已完成线
-        saveAndUpdate(diffNano);//定时更新
+        delComplementLine(completedLines);//Delete completed line
+        saveAndUpdate(diffNano);//Update regularly
     }
 
     @Override

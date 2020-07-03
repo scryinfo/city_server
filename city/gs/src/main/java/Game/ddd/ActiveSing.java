@@ -18,7 +18,7 @@ public class ActiveSing {
     String PurchaseId;
     long Ts;
     String EthAddr;         // Eee or ddd address
-    String Amount;     // 附加信息，可以不写
+    String Amount;     // Additional information, you can not write
 
     public String formatAmount(String count)
     {

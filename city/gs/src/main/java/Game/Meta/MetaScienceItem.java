@@ -5,7 +5,7 @@ import org.bson.Document;
 
 import javax.persistence.AttributeConverter;
 
-/*研究所商品选项*/
+/*Institute Product Options*/
 public class MetaScienceItem extends MetaItem {
     public MetaScienceItem(Document d) {
         super(d);

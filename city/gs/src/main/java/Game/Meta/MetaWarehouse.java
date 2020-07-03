@@ -3,18 +3,18 @@ package Game.Meta;
 import org.bson.Document;
 
 /**
- * @Description:集散中心（仓库）
+ * @Description:Distribution center (warehouse)
  * @Author: yty
  * @CreateDate: 2019/4/4 15:20
- * @UpdateRemark: 更新内容：
+ * @UpdateRemark: update content:
  * @Version: 1.0
  */
 public class MetaWarehouse extends MetaBuilding {
-    public int storeCapacity;//仓库容量
-    public int shelfCapacity;//货架容量
-    public int maxHourToRent;//最大出租时间
-    public int minHourToRent;//最小出租时间
-    public int output1P1Hour;//工人每小时产出量
+    public int storeCapacity;//Warehouse capacity
+    public int shelfCapacity;//Shelf capacity
+    public int maxHourToRent;//Maximum rental time
+    public int minHourToRent;//Minimum rental time
+    public int output1P1Hour;//Worker output per hour
 
 
     public MetaWarehouse(Document d) {

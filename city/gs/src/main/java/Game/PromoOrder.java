@@ -23,7 +23,7 @@ class PromoOdTs{
         return Gs.PromoOdTs.newBuilder().setPromotionId(Util.toByteString(promotionId)).setPromStartTs(promStartTs).build();
     }
     UUID promotionId;
-    long promStartTs;	//推广开始时间
+    long promStartTs;	//Promotion start time
 }
 
 @Entity(name = "PromoOrder")
@@ -33,17 +33,17 @@ public class PromoOrder {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    UUID promotionId;	//这个id只在本建筑内起效
-    UUID sellerId;		//广告商的 playerid
-    UUID sellerBuildingId;//广告商的建筑id，同一个玩家可能有多个推广公司建筑
-    UUID buyerId;		//广告主的 playerid
-    int buildingType;	//建筑类型xxxx
-    int productionType;	//产品id， 表字段定义.txt 道具类ID一共7位
-    long promStartTs;	//推广开始时间
-    long promDuration;	//推广时长
-    int promProgress;	//推广进度
-    int promotedTotal;  //总的推广力增加值，用来计算平均值
-    int transactionPrice; //成交价， 成交时，广告商 PublicFacility 中 curPromPricePerHour
+    UUID promotionId;	//This id only works in this building
+    UUID sellerId;		//Advertiser playerid
+    UUID sellerBuildingId;//Advertiser's building id, the same player may have multiple promotion company buildings
+    UUID buyerId;		//Advertiser playerid
+    int buildingType;	//Building type xxx
+    int productionType;	//Product id, table field definition. txt Prop class ID total 7 digits
+    long promStartTs;	//Promotion start time
+    long promDuration;	//Promotion time
+    int promProgress;	//Promotion progress
+    int promotedTotal;  //The added value of the total promotion power, used to calculate the average
+    int transactionPrice; //The transaction price, at the time of the transaction, in the advertiser's PublicFacility curPromPricePerHour
     @Transient
     int promoNum=0;
 

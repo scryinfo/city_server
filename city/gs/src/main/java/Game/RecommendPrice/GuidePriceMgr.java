@@ -24,7 +24,7 @@ public class GuidePriceMgr {
     private static GuidePriceMgr instance = new GuidePriceMgr();
     private static Calendar calendar = Calendar.getInstance();
 
-    // 缓存全城均值
+    // Cache city average
     private static LogDb.HistoryRecord historyRecord = new LogDb.HistoryRecord();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(5));
 
@@ -35,21 +35,21 @@ public class GuidePriceMgr {
         return instance;
     }
 
-    //params1.住宅评分,2.繁荣度
+    //params 1. Residential score, 2. Prosperity
     public double getApartmentGuidePrice(double currScore, double currProsp) {
-//        推荐定价 = (全城均住宅成交价 * (玩家住宅总评分 /400 * 7 + 1) * (1 + 玩家住宅繁荣度)) / ((全城均住宅总评分 /400 * 7 + 1) * (1 + 全城均住宅繁荣度))
+//       Recommended Pricing = (Average Residential Transaction Price in the City* (Total Player Rating/400 * 7 + 1) * (1 + Player Residence Prosperity)) / ((Average Residential Rating in the City/400 * 7 + 1) * (1 + housing prosperity across the city))
         if (null != historyRecord&&historyRecord.score!=0) {
             double price = historyRecord.price;
             double score = historyRecord.score;
             double prosp = historyRecord.prosp;
-            //(score / 400 * 7)  会出现Nan 现在改为(score / 400 * 7+0.1)
+            //(score / 400 * 7)  Nan will appear now(score / 400 * 7+0.1)
             return ((price * (currScore / 400 * 7 + 1) * (1 + currProsp)) / (score / 400 * 7+0.1) * (1 + prosp));
         }
         return 0;
     }
 
     public Gs.MaterialRecommendPrices getMaterialPrice(UUID buildingId) {
-//        推荐定价 = 全城均原料成交价
+//        Recommended pricing = average transaction price of raw materials across the city
         Gs.MaterialRecommendPrices.Builder builder = Gs.MaterialRecommendPrices.newBuilder();
         Map<Integer, Double> materialPrice = historyRecord.material;
         MetaData.getAllMaterialId().forEach(i -> {
@@ -69,7 +69,7 @@ public class GuidePriceMgr {
         return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
 
-    // 根据itemID查询原料或id推荐定价
+    // Query raw material or id recommended pricing based on itemID
     public double getMaterialOrGoodsPrice(Item item) {
         if (item == null) {
             return 0.0;
@@ -98,7 +98,7 @@ public class GuidePriceMgr {
         }
     }
 
-    // 查询研究所或推广公司
+    // Query Institute or Promotion Company
     public double getTechOrPromGuidePrice(int itemId, boolean isTechnology) {
         AtomicDouble guidePrice = new AtomicDouble(0);
         try {
@@ -124,7 +124,7 @@ public class GuidePriceMgr {
         return guidePrice.doubleValue();
     }
     public Gs.ProduceDepRecommendPrice getProducePrice(Map<Integer, Double> playerGoodsScore, UUID buildingId) {
-//        推荐定价 = 全城均商品成交价 * (1 + (玩家商品总评分 - 全城均商品总评分) / 50)
+//       Recommended Pricing = The average transaction price of the whole city * (1 + (total player product rating-total city average product rating) / 50)
         Gs.ProduceDepRecommendPrice.Builder builder = Gs.ProduceDepRecommendPrice.newBuilder();
         Map<Integer, Map<String, Double>> produce = historyRecord.produce;
         MetaData.getAllGoodId().forEach(i -> {
@@ -151,7 +151,7 @@ public class GuidePriceMgr {
     }
 
     public Gs.RetailShopRecommendPrice getRetailPrice(Map<Integer, Double> map, UUID buildingId) {
-        //推荐定价 = 全城均商品零售店货架成交价 * (1 + (玩家商品零售店货架总评分 - 全城均商品零售店货架总评分) / 50)
+        //Recommended Pricing = Dealing Price of Merchandise Retail Store Shelves in the City * (1 + (Total Rating of Player Merchandise Retail Store Shelves-Total Score of Merchandise Retail Store Shelves in the City) / 50)
         Gs.RetailShopRecommendPrice.Builder builder = Gs.RetailShopRecommendPrice.newBuilder();
         Map<Integer, Map<String, Double>> retail = historyRecord.retail;
         MetaData.getAllGoodId().forEach(i -> {
@@ -218,9 +218,9 @@ public class GuidePriceMgr {
         }
         return builder.setBuildingId(Util.toByteString(buildingId)).build();
     }
-    // 土地交易
+    // Land transaction
     public double getGroundPrice() {
-//   推荐定价 = 全城均土地成交价
+//   Recommended pricing = average land transaction price in the city
         double price = historyRecord.groundPrice;
         if (0.0 == price) {
             price = LogDb.queryLandAuctionAvg();
@@ -230,7 +230,7 @@ public class GuidePriceMgr {
 
     public void _update() {
         calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));// Modify the instant view, including the current day.
         calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -240,19 +240,19 @@ public class GuidePriceMgr {
         calendar.add(Calendar.DATE, -1);
         Date startDate = calendar.getTime();
         long startTime = startDate.getTime();
-        //住宅
+        //Residential
         historyRecord = LogDb.getApartmentRecord(startTime, endTime);
-        //原料
+        //raw material
         historyRecord.material = LogDb.getMaterialsRecord(startTime, endTime);
-        // 加工厂
+        // Processing plant
         historyRecord.produce = LogDb.getGoodsRecord(startTime, endTime);
-        //零售店
+        //Retail store
         historyRecord.retail = LogDb.getRetailRecord(startTime, endTime);
-        //研究所
+        //graduate School
         historyRecord.laboratory = LogDb.getLabOrProRecord(startTime, endTime, true);
-        //数据公司
+        //Data company
         historyRecord.promotion = LogDb.getLabOrProRecord(startTime, endTime, false);
-        //土地交易
+        //Land transaction
         historyRecord.groundPrice = LogDb.getGroundRecord(startTime, endTime);
     }
 

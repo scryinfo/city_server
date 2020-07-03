@@ -40,10 +40,10 @@ public abstract class LineBase {
     boolean suspend = false;
 
     @Column(nullable = false)
-    long ts = 0;      //生产开始时间
+    long ts = 0;      //Production start time
 
     @Transient
-    boolean pause=false;//生产线状态
+    boolean pause=false;//Production line status
 
     protected LineBase() {
     }

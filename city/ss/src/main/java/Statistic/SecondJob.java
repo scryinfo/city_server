@@ -38,16 +38,16 @@ public class SecondJob implements org.quartz.Job {
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("SecondJob start execute,time = " + timeStr);
 
-        //每种商品购买的npc人数,每10秒统计一次
-        //并把统计结果保存到数据库
+        //The number of npc purchased for each product is counted every 10 seconds
+        //And save the statistical results to the database
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
-        //apartment交易
+        //apartment transaction
         documentList = LogDb.dayApartmentNpcNum(startTime, endTime, LogDb.getNpcRentApartment());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYSECONDS, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
 
 
-        //统计耗时
+        //Time-consuming statistics
         StatisticSession.setIsReady(true);
         long nowcurrTime = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowcurrTime), ZoneId.systemDefault()));

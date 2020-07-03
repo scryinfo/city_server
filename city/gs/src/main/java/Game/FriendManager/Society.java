@@ -41,7 +41,7 @@ public class Society
     @MapKeyColumn(name = "member_id")
     private Map<UUID, SocietyMember> memberHashMap = new HashMap<>();
 
-    //添加公会通知时，请使用addNotice()方法，以便插入时清理过期数据
+    //When adding guild notifications, please use the addNotice() method to clear outdated data when inserting
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "society_notice", joinColumns = @JoinColumn(name = "society_id"))
     @OrderColumn
@@ -167,7 +167,7 @@ public class Society
 
             noticeBuilder.setBelongToId(Util.toByteString(belongTo));
 
-            //非个人行为
+            //Non-personal behavior
             if (!personalAct.contains(noticeType))
             {
                 noticeBuilder.setAffectedId(Util.toByteString(affectedId));
@@ -272,7 +272,7 @@ public class Society
         return builder.build();
     }
 
-    //不要随便调用，需要做权限控制，请在society manager中使用
+    //Don't call it casually, you need to do permission control, please use it in society manager
     protected Gs.SocietyInfo toDetailProto(boolean isPower)
     {
         Gs.SocietyInfo.Builder builder = Gs.SocietyInfo.newBuilder();

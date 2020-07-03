@@ -42,26 +42,26 @@ public class YesterdayJob implements org.quartz.Job {
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("YesterdayJob start execute,time = " + timeStr);
 
-        //统计昨天包括以前npc购买商品交易量
+        //Statistics yesterday include the transaction volume of previous npc purchases
         List<Document> documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayNpcBuyInShelf());
         
-        //统计昨天包括以前npc租房交易量
+        //Statistics yesterday include previous npc rental transaction volume
         documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getNpcRentApartment());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayNpcRentApartment());
         
-        //统计昨天包括以前player购买别人出售中的地的交易量
+        //Statistics yesterday including the previous player's transaction volume of buying land sold by others
         documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getBuyGround());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerBuyGround());
         
-        //统计昨天包括以前player购买货架商品的交易量（包含新版研究所、数据公司交易）
+        //Statistics include yesterday’s volume of previous players’ purchases of shelf goods (including new research institute and data company transactions)
         documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerBuyInShelf());
         
-        //统计昨天包括以前player租别人的地的交易量
+        //Statistics of yesterday's transaction volume including previous players renting others' land
         documentList = LogDb.dayYesterdayExchangeAmount(endTime, LogDb.getRentGround());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYDAY, documentList, startTime, SummaryUtil.getDayPlayerRentGround());
-        //统计耗时
+        //Time-consuming statistics
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));

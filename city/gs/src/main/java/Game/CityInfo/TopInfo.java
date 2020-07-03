@@ -3,16 +3,16 @@ package Game.CityInfo;
 
 import java.util.UUID;
 
-// 行业排行
+// Industry ranking
 public class TopInfo {
     public UUID pid;
     public String faceId;
-    public String name;  // 名称
-    public long yesterdayIncome;  // 昨日收入
-    public long workerNum;       // 行业总总人数
-    public  long science; // 科技点数
-    public  long promotion; // 推广点数
-    public  int count;    // 昨日成交量(土地才会有)
+    public String name;  // name
+    public long yesterdayIncome;  // Yesterday's income
+    public long workerNum;       // Total number of people in the industry
+    public  long science; // Technology Points
+    public  long promotion; // Promotion points
+    public  int count;    // Yesterday's trading volume (only for land)
     public TopInfo(UUID pid,String faceId,String name, long yesterdayIncome, long workerNum, long science, long promotion) {
         this.pid = pid;
         this.faceId = faceId;

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class EvaGradeMgr {
-    // 对应Eva中的bt
+    // Corresponds to bt in Eva
     private static final int QUALITY = 1;
     private static final int PROMOTION = 2;
     private static final int SPEED = 3;
@@ -25,7 +25,7 @@ public class EvaGradeMgr {
         List<Eva> evas = new ArrayList<>();
         switch (buidingType) {
             case MetaBuilding.MATERIAL:
-                // 只有品质等级 bt = 3
+                // Only quality level bt = 3
                 return  grade = EvaManager.getInstance().getGrade(item, SPEED);
             case MetaBuilding.PRODUCE:
                 if (type == Gs.EvaGrade.GradeType.Promotion_VALUE) {
@@ -53,10 +53,10 @@ public class EvaGradeMgr {
                 }
                 return grade;
             case MetaBuilding.PROMOTE:
-                // 只有品质等级 bt = 3
+                // Only quality level bt = 3
                 return grade = EvaManager.getInstance().getGrade(item, SPEED);
             case MetaBuilding.TECHNOLOGY:
-                // 只有品质等级 bt = 3
+                // Only quality level bt = 3
                 return  grade = EvaManager.getInstance().getGrade(item, SPEED);
             default:
                 return new HashMap<>();

@@ -16,19 +16,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/*研究所与推广公司公用信息*/
+/*Institute and promotion company public information*/
 @Entity
 public abstract class ScienceBuildingBase extends Building{
     private static final int DB_UPDATE_INTERVAL_MS = 30000;
-    //科技资料库
+    //Technology Database
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "store_id")
     public ScienceStore store;
-    //科技资料出售
+    //Technical information for sale
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "shelf_id")
     public ScienceShelf shelf;
-    //生产线
+    //production line
     @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     @MapKeyColumn(name = "line_id")
@@ -36,7 +36,7 @@ public abstract class ScienceBuildingBase extends Building{
 
 
     @Transient
-    protected ScienceLineBase delLine=null;//当前要删除的生产线
+    protected ScienceLineBase delLine=null;//The current production line to be deleted
 
     public ScienceBuildingBase() {
     }
@@ -68,7 +68,7 @@ public abstract class ScienceBuildingBase extends Building{
             if (line.get(i).getId().equals(lineId)){
                 ScienceLineBase remove = this.line.remove(i);
                 if(line.size() > 0){
-                    if(i==0) {//如果删除的就是当前生产线，第一条，则设置移除后的第一条为当前生产时间
+                    if(i==0) {//If the deletion is the current production line, the first one, then set the first one after removal as the current production time
                         line.get(0).ts = System.currentTimeMillis();
                     }
                 }
@@ -95,8 +95,8 @@ public abstract class ScienceBuildingBase extends Building{
         if(content == null)
             return false;
         if(!autoRepOn) {
-            int updateNum = content.n - item.getN();//增加或减少：当前货架数量-现在货架数量
-            if (content.n == 0 && item.getN() == 0) {//若非自动补货，且货架数量为0，直接删除
+            int updateNum = content.n - item.getN();//Increase or decrease: current number of shelves-current number of shelves
+            if (content.n == 0 && item.getN() == 0) {//If it is not automatic replenishment, and the number of shelves is 0, delete it directly
                 content.autoReplenish=autoRepOn;
                 delshelf(item.getKey(), content.n, true);
                 return true;
@@ -111,18 +111,18 @@ public abstract class ScienceBuildingBase extends Building{
                 content.price = price;
                 content.n = item.getN();
                 content.autoReplenish=autoRepOn;
-                //消息推送货物发生改变
+                //Message push goods change
                 this.sendToWatchers(id(), item.getKey().meta.id, item.getN(), price, content.autoReplenish, null);
                 return true;
             } else
                 return false;
         }else{
-            //1.设置价格
+            //1.Set price
             content.price = price;
             content.autoReplenish = autoRepOn;
-            updateAutoReplenish(item.getKey());//更新自动补货
-            //推送
-            this.sendToWatchers(id(),item.key.meta.id,content.n,price,content.autoReplenish,null);//推送消息
+            updateAutoReplenish(item.getKey());//Update automatic replenishment
+            //Push
+            this.sendToWatchers(id(),item.key.meta.id,content.n,price,content.autoReplenish,null);//forward news
             return true;
         }
     }
@@ -137,7 +137,7 @@ public abstract class ScienceBuildingBase extends Building{
     }
 
     public boolean addshelf(Item item, int price, boolean autoReplenish) {
-        if(autoReplenish){/*如果是自动补货，设置数量为仓库该商品的最大数量*/
+        if(autoReplenish){/*If it is automatic replenishment, set the quantity to the maximum quantity of the commodity in the warehouse*/
             item.n = this.store.getItemCount(item.getKey());
         }
         if(!shelfAddable(item.getKey()) || !this.store.has(item.getKey(),item.getN()))
@@ -154,7 +154,7 @@ public abstract class ScienceBuildingBase extends Building{
         if(this.shelf.del(id, n)) {
             if(unLock)
                 this.store.unLock(id, n);
-            else{//如果是消费，那么需要消费lock的数量
+            else{//If it is consumption, then the number of locks that need to be consumed
                 this.store.consumeLock(id, n);
             }
             return true;
@@ -162,11 +162,11 @@ public abstract class ScienceBuildingBase extends Building{
         return false;
     }
 
-    public void delComplementLine(List<UUID> completedLines){/*删除已完成的线*/
+    public void delComplementLine(List<UUID> completedLines){/*Delete completed line*/
         if (completedLines.size() > 0){
             UUID nextId = null;
             if(line.size() >= 2){
-                nextId = line.get(1).id; //第二条生产线
+                nextId = line.get(1).id; //The second production line
             }
             ScienceLineBase l= __delLine(completedLines.get(0));
             delLine = l;
@@ -175,7 +175,7 @@ public abstract class ScienceBuildingBase extends Building{
             }else{
                 this.sendToWatchers(Package.create(GsCode.OpCode.ftyDelLine_VALUE, Gs.DelLine.newBuilder().setBuildingId(Util.toByteString(id())).setLineId(Util.toByteString(l.id)).build()));
             }
-            //生产线完成通知
+            //Production line completion notice
             MailBox.instance().sendMail(Mail.MailType.PRODUCTION_LINE_COMPLETION.getMailType(), ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, new int[]{l.item.id, l.targetNum});
         }
     }
@@ -194,7 +194,7 @@ public abstract class ScienceBuildingBase extends Building{
     }
 
     public void cleanData(){
-        //删除生产线
+        //Delete production line
         GameDb.delete(line);
         this.line.clear();
         this.store.cleanData();
@@ -216,7 +216,7 @@ public abstract class ScienceBuildingBase extends Building{
         return this.store.has(key, num);
     }
 
-    public int getIndex(UUID lineId){/*获取生产线对应的下标*/
+    public int getIndex(UUID lineId){/*Get the subscript corresponding to the production line*/
         for (ScienceLineBase l : line) {
             if (l.id.equals(lineId)) {
                 int index = line.indexOf(l);

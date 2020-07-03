@@ -28,23 +28,23 @@ public class StatisticEventDispatcher extends DispatcherBase {
             table.put((short) SsCode.OpCode.queryBuildingLift_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class, "queryBuildingLift"));
             table.put((short) SsCode.OpCode.queryIncomeNotify_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER, StatisticSession.class,"queryIncomeNotify"));
 
-            table.put((short) SsCode.OpCode.queryPlayerExchangeAmount_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryPlayerExchangeAmount"));  //查询截止当前时间玩家交易量
-            table.put((short) SsCode.OpCode.queryPlayerGoodsCurve_VALUE, Wrapper.newWithMessage(Ss.PlayerGoodsCurve.PARSER,StatisticSession.class, "queryPlayerGoodsCurve"));// 查询玩家交易曲线图
-            table.put((short) SsCode.OpCode.queryPlayerIncomePayCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryPlayerIncomePayCurve")); //查询玩家收入支出曲线图
-            table.put((short) SsCode.OpCode.queryGoodsSoldDetailCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryGoodsSoldDetailCurve")); //查询商品销售详情曲线图
-//            table.put((short) SsCode.OpCode.queryIndustryDevelopment_VALUE, Wrapper.newWithMessage(Ss.IndustryDevelopment.PARSER,StatisticSession.class, "queryIndustryDevelopment")); //各行业信息-行业发展
-            table.put((short) SsCode.OpCode.queryIndustryCompetition_VALUE, Wrapper.newWithMessage(Ss.IndustryCompetition.PARSER,StatisticSession.class, "queryIndustryCompetition")); //各行业信息-行业竞争
-            /*建筑经营详情*/
+            table.put((short) SsCode.OpCode.queryPlayerExchangeAmount_VALUE, Wrapper.newOnlyOpcode(StatisticSession.class, "queryPlayerExchangeAmount"));  //Query player transaction volume as of the current time
+            table.put((short) SsCode.OpCode.queryPlayerGoodsCurve_VALUE, Wrapper.newWithMessage(Ss.PlayerGoodsCurve.PARSER,StatisticSession.class, "queryPlayerGoodsCurve"));// Query player transaction curve
+            table.put((short) SsCode.OpCode.queryPlayerIncomePayCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryPlayerIncomePayCurve")); //Query player income and expenditure curve
+            table.put((short) SsCode.OpCode.queryGoodsSoldDetailCurve_VALUE, Wrapper.newWithMessage(Ss.Id.PARSER,StatisticSession.class, "queryGoodsSoldDetailCurve")); //Query product sales details curve
+//            table.put((short) SsCode.OpCode.queryIndustryDevelopment_VALUE, Wrapper.newWithMessage(Ss.IndustryDevelopment.PARSER,StatisticSession.class, "queryIndustryDevelopment")); //Industry Information-Industry Development
+            table.put((short) SsCode.OpCode.queryIndustryCompetition_VALUE, Wrapper.newWithMessage(Ss.IndustryCompetition.PARSER,StatisticSession.class, "queryIndustryCompetition")); //Industry Information-Industry Competition
+            /*Construction operation details*/
             table.put((short) SsCode.OpCode.queryTodayBuildingSaleDetail_VALUE,Wrapper.newWithMessage(Ss.QueryBuildingSaleDetail.PARSER,StatisticSession.class, "queryBuildingSaleDetail"));
-            table.put((short) SsCode.OpCode.queryHistoryBuildingSaleDetail_VALUE,Wrapper.newWithMessage(Ss.QueryHistoryBuildingSaleDetail.PARSER,StatisticSession.class, "queryHistoryBuildingSaleDetail")); //查询一周经营详情
+            table.put((short) SsCode.OpCode.queryHistoryBuildingSaleDetail_VALUE,Wrapper.newWithMessage(Ss.QueryHistoryBuildingSaleDetail.PARSER,StatisticSession.class, "queryHistoryBuildingSaleDetail")); //Query business details for a week
 
-            // 城市信息.行业收入
-            table.put((short) SsCode.OpCode.queryIndustryIncome_VALUE, Wrapper.newOnlyOpcodeAsync(StatisticSession.class, "queryIndustryIncome")); //行业收入
-            table.put((short) SsCode.OpCode.queryGroundOrApartmentAvgPrice_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryGroundOrApartmentAvgPrice")); //土地或住宅平均交易价格
-            table.put((short) SsCode.OpCode.queryCityTransactionAmount_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryCityTransactionAmount")); //全城销售额
-            table.put((short) SsCode.OpCode.queryCityMoneyPool_VALUE, Wrapper.newOnlyOpcodeAsync(StatisticSession.class, "queryCityMoneyPool")); //城市信息-奖金池
-            table.put((short) SsCode.OpCode.queryItemAvgPrice_VALUE, Wrapper.newWithMessage(Ss.queryItemAvgPrice.PARSER,StatisticSession.class, "queryItemAvgPrice")); //查询商品交易均价折线图
-            table.put((short) SsCode.OpCode.queryItemSales_VALUE, Wrapper.newWithMessage(Ss.queryItemSales.PARSER,StatisticSession.class, "queryItemSales")); //查询商品营业额
+            // City Information. Industry Revenue
+            table.put((short) SsCode.OpCode.queryIndustryIncome_VALUE, Wrapper.newOnlyOpcodeAsync(StatisticSession.class, "queryIndustryIncome")); //Industry revenue
+            table.put((short) SsCode.OpCode.queryGroundOrApartmentAvgPrice_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryGroundOrApartmentAvgPrice")); //Average transaction price of land or residence
+            table.put((short) SsCode.OpCode.queryCityTransactionAmount_VALUE, Wrapper.newWithMessage(Gs.Bool.PARSER,StatisticSession.class, "queryCityTransactionAmount")); //Citywide sales
+            table.put((short) SsCode.OpCode.queryCityMoneyPool_VALUE, Wrapper.newOnlyOpcodeAsync(StatisticSession.class, "queryCityMoneyPool")); //City Information-Bonus Pool
+            table.put((short) SsCode.OpCode.queryItemAvgPrice_VALUE, Wrapper.newWithMessage(Ss.queryItemAvgPrice.PARSER,StatisticSession.class, "queryItemAvgPrice")); //Query the average price line chart of commodity transactions
+            table.put((short) SsCode.OpCode.queryItemSales_VALUE, Wrapper.newWithMessage(Ss.queryItemSales.PARSER,StatisticSession.class, "queryItemSales")); //Query product turnover
         } catch (Exception e) {
             e.printStackTrace();
         }

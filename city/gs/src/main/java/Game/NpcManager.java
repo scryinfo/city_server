@@ -95,25 +95,25 @@ public class NpcManager {
     }
     public void addUnEmployeeNpc(Collection<Npc> npc) {
         npc.forEach(n->{
-            allNpc.remove(n.id()); //移除失业npc
-            n.setStatus(1);  //状态改成失业
+            allNpc.remove(n.id()); //Remove unemployed npc
+            n.setStatus(1);  //Status changed to unemployed
             n.setUnEmpts(System.currentTimeMillis());
-            unEmployeeNpc.put(n.id(),n); //添加失业npc
+            unEmployeeNpc.put(n.id(),n); //Add unemployed npc
         });
-        //添加真实失业npc
+        //Add unemployed npc
         shutdownBusiness(npc.size());
         GameDb.saveOrUpdate(npc);
     }
 
     public void addWorkNpc(Collection<Npc> npc,Building born) {
     	npc.forEach(n->{
-    		unEmployeeNpc.remove(n.id()); //移除失业npc
-    		n.setStatus(0);  //状态改成工作
+    		unEmployeeNpc.remove(n.id()); //Remove unemployed npc
+    		n.setStatus(0);  //Change status to work
     		n.setUnEmpts(System.currentTimeMillis());
-    		n.setBorn(born);  //改为新建筑
-    		allNpc.put(n.id(),n); //添加工作npc
+    		n.setBorn(born);  //Change to a new building
+    		allNpc.put(n.id(),n); //Add work npc
     	});
-    	//添加真实就业npc
+    	//Add real employment npc
         startBusiness(npc.size());
     	GameDb.saveOrUpdate(npc);
     }
@@ -133,7 +133,7 @@ public class NpcManager {
     public Npc create(UUID id, Building building, long salary) {
        Npc npc = new Npc(building, salary, id);
        addImpl(npc);
-       //市民人数突破,市民人数达到500,发送广播给前端,包括市民数量，时间  
+       //The number of citizens broke through, the number of citizens reached 500, and broadcasts were sent to the front end, including the number of citizens, time
        if(allNpc!=null&&allNpc.size()>=500){
        	GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
        			.setType(2)
@@ -156,10 +156,10 @@ public class NpcManager {
         else // don't have chance to act in this round
             ;
     }
-    private Map<UUID, Npc> allNpc = new HashMap<>();  //工作npc
-    private Map<UUID, Npc> unEmployeeNpc = new HashMap<>();//未工作npc
+    private Map<UUID, Npc> allNpc = new HashMap<>();  //Work npc
+    private Map<UUID, Npc> unEmployeeNpc = new HashMap<>();//Not working npc
 
-    private Map<Integer,Integer> realNpc = new HashMap<>();  //所有的实际需求npc，1 工作 2失业
+    private Map<Integer,Integer> realNpc = new HashMap<>();  //All actual demand npc, 1 job 2 unemployment
 
     private List<Set<UUID>> waitToUpdate = new ArrayList<>();
     private List<Set<UUID>> waitToUpdateNext = new ArrayList<>();
@@ -186,9 +186,9 @@ public class NpcManager {
         //final int numInOneUpdate = (int) Math.ceil((double)allNpc.size() / updateTimesAtCurrentTimeSection);
       //GameDb.getAllNpc().forEach(npc->this.addImpl(npc));
 
-        //工作npc
+        //Work npc
         GameDb.getAllNpcByStatus(0).forEach(npc->this.addImpl(npc));
-        //失业npc
+        //Unemployed npc
         GameDb.getAllNpcByStatus(1).forEach(npc->{
     		unEmployeeNpc.put(npc.id(),npc);
     	});
@@ -197,8 +197,8 @@ public class NpcManager {
     public void hourTickAction(int nowHour) {
     }
     PeriodicTimer timer= new PeriodicTimer((int)TimeUnit.HOURS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getCurrentHour55()-nowTime)/1000));
-    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//每天0点开始更新数据
-    //PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//每天0点开始更新数据
+    PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis((DateUtil.getTodayEnd()-nowTime)/1000));//Update data at 0:00 every day
+    //PeriodicTimer realNpcTimer= new PeriodicTimer((int)TimeUnit.DAYS.toMillis(1),(int)TimeUnit.SECONDS.toMillis(5));//Update data at 0:00 every day
 
     public void countNpcNum(long diffNano) {
         if (this.timer.update(diffNano)) {
@@ -209,10 +209,10 @@ public class NpcManager {
             Date startDate = calendar.getTime();
             long countTime=startDate.getTime()+1000 * 60  * 60;
             countRealNpcByType().forEach((k,v)->{
-            	LogDb.npcTypeNum(countTime,k,v);//统计并入库
+            	LogDb.npcTypeNum(countTime,k,v);//Statistics and storage
             });
         }
-        if(realNpcTimer.update(diffNano)){//每天凌晨初始化npc实际需求数据
+        if(realNpcTimer.update(diffNano)){//Initialize the actual demand data of npc every morning
             realNpc.put(1, allNpc.size());
             realNpc.put(2, unEmployeeNpc.size());
         }
@@ -232,7 +232,7 @@ public class NpcManager {
     }
     public Map<Integer, Long> countNpcByBuildingType(){
     	Map<Integer, Long> countMap= new HashMap<Integer, Long>();
-    	//计算各种建筑npc的数量，包括工作npc和失业npc
+    	//Calculate the number of various construction npc, including working npc and unemployed npc
     	allNpc.forEach((k,v)->{
     		int type=v.building().type();
     		if(!countMap.containsKey(type)){
@@ -277,14 +277,14 @@ public class NpcManager {
         return allNpc;
     }
 
-    //添加实际需求工作npc
-    public void startBusiness(int npcNum){//添加实际工作npc
+    //Add actual demand work npc
+    public void startBusiness(int npcNum){//Add actual work npc
         long nowSecond = DateUtil.getNowSecond();
-        int v = (int)Math.ceil(npcNum * ((86400 - (int) nowSecond) / 86400.0));//要增加或减少的npc数量
-        //增加工作npc人口
+        int v = (int)Math.ceil(npcNum * ((86400 - (int) nowSecond) / 86400.0));//The number of npc to increase or decrease
+        //Increase working npc population
         int workNum = realNpc.getOrDefault(1,0) + v;
 
-        //失业npc减少
+        //Unemployment reduced npc
         int unEmployeeNpc =realNpc.getOrDefault(2,0) - v;
         if (unEmployeeNpc<0){
             unEmployeeNpc=0;
@@ -293,14 +293,14 @@ public class NpcManager {
         realNpc.put(2, unEmployeeNpc);
     }
 
-    //添加实际需求失业人口
-    public void shutdownBusiness(int npcNum){//添加实际工作npc
+    //Add actual demand unemployed
+    public void shutdownBusiness(int npcNum){//Add actual work npc
         long nowSecond = DateUtil.getNowSecond();
         int v = (int)Math.ceil(npcNum * ((86400 - (int) nowSecond) / 86400.0));
-        //失业npc增加
+        //Unemployment increased npc
         int unEmployeeNpc = realNpc.getOrDefault(2,0) + v;
 
-       //就业npc减少
+       //Decrease in employment npc
         int workNum = realNpc.getOrDefault(1,0) - v;
         if (workNum<0){
             workNum=0;

@@ -174,11 +174,11 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		List userList = null;
 		try{
-			//重新开服,需要获取一下上次的记录
+			//Reopen the service, you need to get the last record
 			Query query = session.createQuery("from brandname BrandName where BrandName.brandName is :testName")
 					.setParameter("testName",testName);
 			userList = query.list();
-		}catch (Exception e){//异常情况下， 认为是名字使用中，避免后续操作
+		}catch (Exception e){//Under abnormal circumstances, it is considered that the name is in use, to avoid subsequent operations
 			return true;
 		}
 		if(userList.size() > 0){
@@ -191,7 +191,7 @@ public class GameDb {
 		Session session = sessionFactory.openSession();
 		List userList = null;
 		try{
-			//重新开服,需要获取一下上次的记录
+			//Reopen the service, you need to get the last record
 			int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs/1000 - PromotionMgr._upDeltaMs);
 			Query query = session.createQuery("from eva_records Record where ts>=:tsSt and buildingId is :bdid and typeId is :tpid")
 					.setParameter("tsSt",tsSart)
@@ -208,7 +208,7 @@ public class GameDb {
 	}
 	public static FlowRecord getlastFlowRecord(UUID inPid){
 		Session session = sessionFactory.openSession();
-		//重新开服,需要获取一下上次的记录
+		//Reopen the service, you need to get the last record
 		List userList = null;
 		int tsSart = (int)(System.currentTimeMillis()/PromotionMgr._upDeltaMs - 1);
 		try{
@@ -246,7 +246,7 @@ public class GameDb {
     	List ret = null;
     	try{
 			Session session = sessionFactory.openSession();
-			//人流量
+			//human traffic
 			Query query = session.createQuery( "FROM flow_records Record WHERE ts>=:tsSt AND ts <= :tsEd AND playerId IS :pid" )
 					.setParameter("tsSt",tsSart)
 					.setParameter("tsEd",tsSart + count)
@@ -1009,7 +1009,7 @@ public class GameDb {
 			session.close();
 		}
 	}
-	//数据库更新后，清理缓存，适用于数据量很大的应用场景
+	//After the database is updated, the cache is cleared, which is suitable for application scenarios with large amount of data
     public static void saveOrUpdateAndClear(Collection objs) {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
@@ -1023,7 +1023,7 @@ public class GameDb {
                     session.flush();
                 }
             }
-            session.clear(); //清除缓存，避免内存开销太大
+            session.clear(); //Clear the cache to avoid too much memory overhead
             transaction.commit();
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -1040,7 +1040,7 @@ public class GameDb {
 			transaction = session.beginTransaction();
 			session.saveOrUpdate(o);
 			session.flush();
-			session.clear(); //清除缓存，避免内存开销太大
+			session.clear(); //Clear the cache to avoid too much memory overhead
 			transaction.commit();
 		} catch (RuntimeException e) {
 			e.printStackTrace();
@@ -1385,8 +1385,8 @@ public class GameDb {
 	}
 
 
-	//集散中心增加的操作
-	//1.获取租户信息根据建筑id
+	//Operations added by distribution centers
+	//1.Get tenant information based on building id
 	public static List<WareHouseRenter> getAllRenterByBuilderId(UUID bid){
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -1397,7 +1397,7 @@ public class GameDb {
 		session.close();
 		return list;
 	}
-	//2.查询所有的租户
+	//2.Query all tenants
 	public static List<WareHouseRenter> getAllRenter() {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -1406,7 +1406,7 @@ public class GameDb {
 		session.close();
 		return list;
 	}
-	//3.根据租户id查询所有的租户信息
+	//3.Query all tenant information based on tenant id
 	public static List<WareHouseRenter> getWareHouseRenterByPlayerId(UUID playerId){
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -1425,7 +1425,7 @@ public class GameDb {
 		return list;
 	}
 
-	//统计已经拍出去的地数量
+	//Count the number of sites that have been photographed
 	public static int countGroundInfo(){
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -1435,7 +1435,7 @@ public class GameDb {
 		return size;
 	}
 
-	//公司名称是否已存在
+	//Whether the company name already exists
 	public static boolean companyNameIsInUsed(String name){
 		Session session = sessionFactory.openSession();
 		List playerList = new ArrayList();
@@ -1485,9 +1485,9 @@ public class GameDb {
 		return players.get(0);
 	}
 
-	//游戏币/ddd的交换比率， 这里应该是访问数据库ddd与游戏币的交换比率
+	//Game currency/ddd exchange ratio, here should be the exchange ratio of accessing the database ddd and game currency
 	static public double getExchangeRate(){
-		return 1000000.00; //暂定1
+		return 1000000.00; //Tentative 1
 	}
 	static public double calGameCurrencyFromDDD(double ddd){
 		return ddd*getExchangeRate();

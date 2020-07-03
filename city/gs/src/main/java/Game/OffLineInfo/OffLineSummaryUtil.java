@@ -11,10 +11,10 @@ import java.util.*;
 
 import static com.mongodb.client.model.Filters.*;
 
-/*离线通知统计工具*/
+/*Offline notification statistics tool*/
 public class OffLineSummaryUtil {
 
-    /*1.获取航班预测离线记录的统计*/
+    /*1.Get statistics for offline forecasts of flight forecasts*/
     public static List<OffLineFlightRecord> getPlayerFlightForecast(UUID playerId, Long startTime, Long endTime){
         List<OffLineFlightRecord> records = new ArrayList<>();
         LogDb.getFlightBet().find(and(
@@ -37,16 +37,16 @@ public class OffLineSummaryUtil {
     }
 
 
-    //2.建筑的离线收入信息
+    //2.Offline revenue information for buildings
     /*
-     * arg1:玩家离线时间（作为统计条件的开始时间）
-     * arg2:玩家在线时间（做i为统计条件的结束时间）
-     * arg3:玩家id
+     * arg1:Player offline time (as the start time of statistical conditions)
+     * arg2:Player online time (do i as the end time of the statistical condition)
+     * arg3:Player id
      */
     public static Map<Integer,List<OffLineBuildingRecord>> getOffLineBuildingIncome(long unLineTime, long onlineTime, UUID playerId){
         Map<Integer,List<OffLineBuildingRecord>> incomeMap=new HashMap<>();
-        //首先筛选出玩家离线期间的所有数据
-        //原料厂的货架收入
+        //First filter out all the data while the player is offline
+        //Raw material factory's shelf revenue
         LogDb.getSellerBuildingIncome().find(and(
                 eq("pid", playerId),
                 gte("t", unLineTime),
@@ -62,7 +62,7 @@ public class OffLineSummaryUtil {
         return incomeMap;
     }
 
-    /*删除离线统计过的数据*/
+    /*Delete offline statistics*/
     public static long delUnLineData(long unLineTime,long onlineTime,UUID playerId){
        LogDb.getSellerBuildingIncome().deleteMany(and(
                 eq("pid", playerId),

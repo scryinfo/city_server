@@ -18,8 +18,8 @@ public class SignCharge {
     String PurchaseId;
     long Ts;
     String Addr;         // Eee or ddd address
-    String Amount;     // 附加信息，可以不写
-    //byte[] PubKey;        // 公钥
+    String Amount;     // Additional information, you can not write
+    //byte[] PubKey;        // Public key
 
     public byte[] ToHash() throws IOException {
         ByteArrayOutputStream all = new ByteArrayOutputStream();

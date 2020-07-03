@@ -25,7 +25,7 @@ public class GoApartment implements IAction {
     @Override
     public Set<Object> act(Npc npc) {
         logger.info("GoApartment buildingType" + buildingType + " npc id " + npc.id().toString() + " npc type " + npc.type() + " npc located at: " + npc.buildingLocated().coordinate());
-        //NPC成功购买住宅后,住宅状态保存24小时,在此期间不允许再次购买住宅
+        //After the NPC successfully purchases the house, the state of the house is kept for 24 hours, during which time it is not allowed to buy another house
         if(npc.hasApartment()){
             if(System.currentTimeMillis()-npc.getBuyApartmentTs()<TimeUnit.HOURS.toMillis(24)){
                 Building b=City.instance().getBuilding(npc.getApartment().id());
@@ -47,37 +47,37 @@ public class GoApartment implements IAction {
             return null;
         logger.info("GoApartment buildings num: " + buildings.size());
 
-        //实际住宅购物预期 = 住宅购物预期 * (1 + 全城住宅知名度均值 / 全城知名度均值) * (1 + 全城住宅品质均值 / 全城品质均值)
+        //Actual residential shopping expectation = residential shopping expectation * (1 + mean value of the city's residential popularity / mean value of the city's popularity) * (1 + mean value of the city's residential quality / mean value of the city's quality)
         double realApartmentSpend=MetaData.getCostSpendRatio(buildingType)* (1 +  AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT) /AiBaseAvgManager.getInstance().getAllBrandAvg()) * (1 +  AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT) / AiBaseAvgManager.getInstance().getAllQualityAvg());
-        //实际总购物预期 = 实际住宅购物预期 + 所有 实际某种商品购物预期(已发明)
+        //Actual total shopping expectation = actual residential shopping expectation + all actual shopping expectation for a certain commodity (invented)
         int allCostSpend=MetaData.getAllCostSpendRatio();
-        //NPC住宅预期消费 = 城市工资标准 * (实际住宅购物预期 / 实际总购物预期)
+        //NPC residential expected consumption = urban wage standard * (actual residential shopping expectation / actual total shopping expectation)
         final int cost = (int) (npc.salary() * (realApartmentSpend/allCostSpend));
 
-        //住宅移动选择
+        //Residential mobility options
         Map<Building,Double> moveKnownMap=City.instance().getMoveKnownaApartmentMap();
-        //随机选择3个住宅加入备选列表
+        //Randomly select 3 homes to add to the candidate list
         Map<Building,Double> moveKnownBak=getRandomN(moveKnownMap,3);
         moveKnownBak.forEach((k,v)->{
             double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160;
             moveKnownBak.put(k,r);
         });
-        //随机选中其中一个并移动到该住宅
+        //Randomly select one and move to the house
         Map<Building,Double> moveKnownSelect=getRandomN(moveKnownBak,1);
         List<Building> moveKnownList=new ArrayList<>(moveKnownSelect.keySet());
         Building moveKnownChosen=moveKnownList.get(0);
         npc.goFor(moveKnownChosen);
 
-        //住宅购买选择
+        //Residential purchase options
         Map<Building,Double> buyKnownValueMap=new HashMap<Building,Double>();
         moveKnownMap.forEach((k,v)->{
-            //buyKnownValue = NPC住宅预期消费 / 售价 * 10000
+            //buyKnownValue = NPC residential expected consumption / selling price * 10000
             double buyKnownValue = cost / k.cost() * 10000;
             buyKnownValueMap.put(k,buyKnownValue);
         });
-        //随机选择3个住宅加入备选列表
+        //Randomly select 3 homes to add to the candidate list
         Map<Building,Double> buyKnownBak=getRandomNN(buyKnownValueMap,3,cost,10);
-        //如果没有备选,则原地不动
+        //If there is no alternative, then stay in place
         if(buyKnownBak==null||buyKnownBak.size()==0){
             return null;
         }
@@ -85,14 +85,14 @@ public class GoApartment implements IAction {
             double r= v * (2 - Building.distance(k, npc.buildingLocated())) / 160;
             buyKnownBak.put(k,r);
         });
-        //否则，随机选中其中一个
+        //Otherwise, randomly select one of them
         Map<Building,Double> buyKnownSelect=getRandomN(buyKnownBak,1);
 
         List<Building> chosenList=new ArrayList<>(buyKnownSelect.keySet());
         Building chosen = chosenList.get(0);
         logger.info("chosen apartment building: " + chosen.id().toString() + " mId: " + chosen.metaId() + " which coord is: " + chosen.coordinate());
 
-        //如果NPC选择的不是当前位置的住宅 则NPC当前所在位置变动,移动到该住宅
+        //If the NPC selects a residence other than the current location, the current location of the NPC changes and moves to the residence
         if(!chosen.id().equals(moveKnownChosen.id())){
             npc.goFor(chosen);
         }
@@ -103,10 +103,10 @@ public class GoApartment implements IAction {
             return null;
         }else {
             Player owner = GameDb.getPlayer(chosen.ownerId());
-            long income = chosen.cost();//今日收入
+            long income = chosen.cost();//Today's income
             long pay = chosen.cost();
 
-            //TODO:暂时矿工费用是向下取整,矿工费用（商品基本费用*矿工费用比例）
+            //TODO:Temporary miner's cost is rounded down, miner's cost (commodity basic cost * miner's cost ratio)
             double minersRatio = MetaData.getSysPara().minersCostRatio;
             long minerCost = (long) Math.floor(chosen.cost() * minersRatio);
             income -= minerCost;
@@ -119,7 +119,7 @@ public class GoApartment implements IAction {
                     .setBid(chosen.metaId())
                     .build();
             GameServer.sendIncomeNotity(owner.id(), notify);
-            //矿工费记录
+            //Miner's fee records
            /* LogDb.minersCost(owner.id(),minerCost,MetaData.getSysPara().minersCostRatio);
             LogDb.npcMinersCost(npc.id(),minerCost,MetaData.getSysPara().minersCostRatio);*/
 
@@ -138,20 +138,20 @@ public class GoApartment implements IAction {
             LogDb.playerIncome(owner.id(), income,chosen.type());
             LogDb.incomeVisit(owner.id(),chosen.type(),income,chosen.id(),npc.id());
             LogDb.buildingIncome(chosen.id(),npc.id(),income,0,0);
-            // 建筑繁荣度 建筑评分
+            // Building Prosperity Building Rating
             Apartment apartment = (Apartment) chosen;
             int prosperityScore = (int) ProsperityManager.instance().getBuildingProsperityScore(chosen);
             double brandScore = GlobalUtil.getBrandScore(apartment.getTotalBrand(), chosen.type());
             double retailScore = GlobalUtil.getBuildingQtyScore(apartment.getTotalQty(), chosen.type());
             int curRetailScore = (int) ((brandScore + retailScore) / 2);
             LogDb.npcRentApartment(npc.id(), owner.id(), 1, chosen.cost(), chosen.ownerId(),
-                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,apartment.getTotalBrand(),apartment.getTotalQty()); //不包含矿工费用
+                    chosen.id(), chosen.type(), chosen.metaId(),curRetailScore,prosperityScore,apartment.getTotalBrand(),apartment.getTotalQty()); //Does not include miner fees
             if(!GameServer.isOnline(owner.id())) {
                 LogDb.sellerBuildingIncome(chosen.id(), chosen.type(), owner.id(), 1, chosen.cost(), 0);
             }
             chosen.updateTodayIncome(income);
 
-            //支付后的行为,根据 w3 w4 w5 的权重进行随机选择
+            //The behavior after payment is randomly selected according to the weight of w3 w4 w5
             int id = npc.chooseId();
             AIBuilding aiBuilding = MetaData.getAIBuilding(id);
             if(aiBuilding == null)
@@ -162,7 +162,7 @@ public class GoApartment implements IAction {
             return new HashSet<>(Arrays.asList(owner, npc, chosen));
         }
     }
-    //随机选择n个住宅加入备选列表
+    //Randomly select n homes to add to the candidate list
     private Map<Building,Double> getRandomN(Map<Building,Double> map,int n){
         Map<Building,Double> newMap=new HashMap<>();
         List<Building> keyList=new ArrayList<>(map.keySet());
@@ -181,7 +181,7 @@ public class GoApartment implements IAction {
         double[] doubles=Util.toDoubleArray(list);
         for (int i=0;i<limit;i++){
             int j=Util.randomIdx(doubles);
-            //随机到的住宅满足有空位且 售价 <= NPC住宅预期消费,则加入备选,最多进行10次随机选择.
+            //Randomly arrived houses meet the vacancies and the selling price <= NPC residences are expected to be consumed.
             Building b=keyList.get(j);
             Apartment apartment=(Apartment)b;
             logger.info("chosen apartment building: " + b.id().toString() + " renters: " + apartment.getRenterNum() + " capacity: " + apartment.getCapacity()+ " apartment.cost: " + apartment.cost() + " cost: " + cost);

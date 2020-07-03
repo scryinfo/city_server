@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/*新版本研究所*/
+/*New Version Institute*/
 @Entity
 public class Technology extends ScienceBuildingBase {
     @Transient
     private MetaTechnology meta;
-    //宝箱库
+    //Treasure chest
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "boxStore_id")
     protected ScienceBox boxStore;
@@ -33,7 +33,7 @@ public class Technology extends ScienceBuildingBase {
         this.boxStore = new ScienceBox();
     }
 
-    /*添加生产线*/
+    /*Add production line*/
     public ScienceLineBase addLine(MetaItem item, int workerNum, int targetNum){
         if(!(item instanceof MetaScienceItem) || workerNum < meta.lineMinWorkerNum || workerNum > meta.lineMaxWorkerNum)
             return null;
@@ -93,7 +93,7 @@ public class Technology extends ScienceBuildingBase {
 
     }
 
-    /*生产线生产*/
+    /*Production line production*/
     @Override
     protected void _update(long diffNano) {
         if (getState() == Gs.BuildingState.SHUTDOWN_VALUE) {
@@ -112,14 +112,14 @@ public class Technology extends ScienceBuildingBase {
                 ItemKey key = l.newItemKey(ownerId());
                 if (this.boxStore.offSet(key, l.left())) {
                     l.resume();
-                    broadcastLineInfo(l,key,0);//广播
+                    broadcastLineInfo(l,key,0);//broadcast
                 }
             } else {
-                int add = l.update(diffNano,this.ownerId()); //新增了玩家id，作为eva查询
+                int add = l.update(diffNano,this.ownerId()); //Added player id as eva query
                 if (add > 0) {
                    ItemKey key = l.newItemKey(ownerId());
-                    if (this.boxStore.offSet(key, add)) {//添加到未开启宝箱中
-                        broadcastLineInfo(l,key,add);//广播
+                    if (this.boxStore.offSet(key, add)) {//Add to unopened treasure chest
+                        broadcastLineInfo(l,key,add);//broadcast
                     } else {
                         l.count -= add;
                         l.suspend(add);
@@ -127,8 +127,8 @@ public class Technology extends ScienceBuildingBase {
                 }
             }
         }
-        delComplementLine(completedLines);//删除已完成线
-        saveAndUpdate(diffNano);//定时更新
+        delComplementLine(completedLines);//Delete completed line
+        saveAndUpdate(diffNano);//Update regularly
     }
 
     @Override
@@ -136,11 +136,11 @@ public class Technology extends ScienceBuildingBase {
         return this.shelf.getTotalContentNum();
     }
 
-    /*商品适配*/
+    /*Product adaptation*/
     protected boolean shelfAddable(ItemKey k) {
         return k.meta instanceof MetaScienceItem;
     }
-    //广播
+    //broadcast
     private void broadcastLineInfo(ScienceLineBase line, ItemKey key,int add) {
         Gs.LineInfo i = Gs.LineInfo.newBuilder()
                 .setId(Util.toByteString(line.id))
@@ -164,7 +164,7 @@ public class Technology extends ScienceBuildingBase {
         }
     }
 
-    /*参数1：宝箱类型，参数2：数量*/
+    /*Parameter 1: Treasure box type, Parameter 2: Quantity*/
     public int useScienceBox(ItemKey key,int num){
         Integer boxNum = this.boxStore.getAllBox().getOrDefault(key, 0);
         if(boxNum==0||boxNum<num){
@@ -173,14 +173,14 @@ public class Technology extends ScienceBuildingBase {
         int min = this.meta.minScienceAdd;
         int max = this.meta.maxScienceAdd;
         int totalPoint=0;
-        //1.步骤，使用多少数量，就要循环多少次，随机获取
-        //2.随机获取meta里面的minScience  到maxSciencd 区间的点数（怎么随机，获取每个）
+        //1.Step, how many times to use, how many times to loop, get randomly
+        //2.Randomly obtain the number of points in the interval from minScience to maxSciencd in the meta (how to get each randomly)
         for (int i = 0; i < num; i++) {
             totalPoint+= Prob.random(min, max);
         }
-        //3.扣减宝箱数量
+        //3.Deduct the number of treasure chests
         this.boxStore.offSet(key,-num);
-        //4.添加到仓库已开启点数
+        //4.Add to warehouse opened points
         this.store.offset(key, totalPoint);
         return totalPoint;
     }
@@ -203,7 +203,7 @@ public class Technology extends ScienceBuildingBase {
     public MetaTechnology getMeta() {
         return meta;
     }
-    /*清空建筑的所有的数据*/
+    /*Clear all the data of the building*/
 
     @Override
     public void cleanData() {

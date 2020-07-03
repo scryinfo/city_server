@@ -23,14 +23,14 @@ public class PlayerExchangeAmountUtil {
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String COUNTTYPE = "countType";
     private static MongoCollection<Document> playerExchangeAmount;
-    //初始化
+    //initialization
     static {
         MongoDatabase database = LogDb.getDatabase();
         playerExchangeAmount = database.getCollection(PLAYER_EXCHANGE_AMOUNT)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
     }
 
-    //获取成交量
+    //Get volume
     public static Long getExchangeAmount(int countType){
         long a=0;
         Map<Long, Long> map = new LinkedHashMap<>();

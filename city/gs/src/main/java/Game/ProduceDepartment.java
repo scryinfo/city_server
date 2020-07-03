@@ -103,32 +103,32 @@ public class ProduceDepartment extends FactoryBase {
     @Override
     protected boolean consumeMaterial(LineBase line,UUID pid) {
         Line l = (Line)line;
-        for(GoodFormula.Info i : l.formula.material) {  //此步判断数量是否足够
+        for(GoodFormula.Info i : l.formula.material) {  //This step determines whether the quantity is sufficient
             if(i.item == null)
                 continue;
             if(!this.store.has(new ItemKey(i.item,pid), i.n)) {
                 return false;
             }
         }
-        for(GoodFormula.Info i : l.formula.material) { //此步消耗材料
+        for(GoodFormula.Info i : l.formula.material) { //This step consumes materials
             if (i.item == null)
                 continue;
             ItemKey key = new ItemKey(i.item,pid);
             this.store.offset(key, -i.n);
             consumedCache.add(new Item(key,i.n));
         }
-        //如果有材料消耗，需要通知客户端更新
+        //If there is material consumption, you need to notify the client to update
         if(consumedCache.size() > 0 ){
             GameDb.saveOrUpdate(this);
             broadcastMaterialConsumed(this.id(),consumedCache);
-            //通知完之后，清掉缓存
+            //After notification, clear the cache
             consumedCache.clear();
         }
         return true;
     }
 
     @Override
-    protected boolean hasEnoughMaterial(LineBase line, UUID pid) {//是否有足够的数量
+    protected boolean hasEnoughMaterial(LineBase line, UUID pid) {//Is there a sufficient quantity
         Line l = (Line)line;
         for(GoodFormula.Info i : l.formula.material) {
             if(i.item == null)

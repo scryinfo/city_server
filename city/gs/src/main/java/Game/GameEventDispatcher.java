@@ -185,7 +185,7 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.queryIndustryWages_VALUE, Wrapper.newWithMessage(Gs.QueryIndustryWages.PARSER,GameSession.class, "QueryIndustryWages"));
 			table.put((short) GsCode.OpCode.queryMyBuildings_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBuildings.PARSER, GameSession.class,"queryMyBuildings"));
 			table.put((short) GsCode.OpCode.queryMyEva_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyEva.PARSER, GameSession.class,"queryMyEva"));
-			//todo：eva改版
+			//todo：eva revision
 			table.put((short) GsCode.OpCode.updateMyEvas_VALUE, Wrapper.newWithMessageAsync(Gs.UpdateMyEvas.PARSER, GameSession.class,"updateMyEvas"));
 			table.put((short) GsCode.OpCode.queryBrand_VALUE, Wrapper.newWithMessageAsync(Gs.queryBrand.PARSER, GameSession.class,"queryBrand"));
 			table.put((short) GsCode.OpCode.queryMyBrands_VALUE, Wrapper.newWithMessageAsync(Gs.QueryMyBrands.PARSER, GameSession.class,"queryMyBrands"));
@@ -198,19 +198,19 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.getPlayerAmount_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerAmount"));
 
 			//new
-			//获取住宅推荐价格
+			//Get residential recommended prices
 			table.put((short) GsCode.OpCode.queryApartmentRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryApartmentRecommendPrice"));
-//			获取原料推荐价格
+//			Get the recommended price of raw materials
 			table.put((short) GsCode.OpCode.queryMaterialRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryMaterialRecommendPrice"));
-			//获取加工厂商品推荐价格
+			//Get the recommended price of processing plant goods
 			table.put((short) GsCode.OpCode.queryProduceDepRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryProduceDepRecommendPrice"));
-			//获取零售店推荐价格
+			//Get retail store recommended prices
 			table.put((short) GsCode.OpCode.queryRetailShopRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryRetailShopRecommendPrice"));
-			//获取研究所推荐价格
+			//Get the recommended price of the institute
 			table.put((short) GsCode.OpCode.queryLaboratoryRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryLaboratoryRecommendPrice"));
-			//获取推广推荐价格
+			//Get Promotional Price
 			table.put((short) GsCode.OpCode.queryPromotionRecommendPrice_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class, "queryPromotionRecommendPrice"));
-			// 获取土地交易推荐价格
+			// Get recommended land transaction prices
 			table.put((short) GsCode.OpCode.queryGroundRecommendPrice_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryGroundRecommendPrice"));
 			//old
 			table.put((short) GsCode.OpCode.materialGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.GoodSummary.PARSER, GameSession.class, "materialGuidePrice"));
@@ -221,94 +221,94 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.laboratoryGuidePrice_VALUE, Wrapper.newWithMessageAsync(Gs.LaboratoryMsg.PARSER, GameSession.class, "laboratoryGuidePrice"));
 			table.put((short) GsCode.OpCode.queryBuildingName_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryBuildingName"));
 
-			//小地图繁荣度
+			//Minimap prosperity
 			table.put((short) GsCode.OpCode.queryMapProsperity_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryMapProsperity"));
-			//小地图建筑摘要
+			//Building Summary
 			table.put((short) GsCode.OpCode.queryMapBuidlingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.MiniIndex.PARSER, GameSession.class, "queryMapBuidlingSummary"));
-			//小地图新版研究所摘要
+			//Summary of the new version of the minimap Institute
 			table.put((short) GsCode.OpCode.queryTechnologySummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryTechnologySummary"));
-			// 新研究所详情
+			// New Institute Details
 			table.put((short) GsCode.OpCode.queryTechnologyDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryTechnologyDetail.PARSER, GameSession.class, "queryTechnologyDetail"));
-			//小地图新版数据公司摘要
+			//New Map Data Company Summary
 			table.put((short) GsCode.OpCode.queryPromotionSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER, GameSession.class, "queryPromotionSummary"));
-			// 数据公司详情
+			//Data Company Details
 			table.put((short) GsCode.OpCode.queryPromotionsDetail_VALUE, Wrapper.newWithMessageAsync(Gs.queryPromotionsDetail.PARSER, GameSession.class, "queryPromotionsDetail"));
-			// 行业供需
+			// Industry supply and demand
 			table.put((short) GsCode.OpCode.querySupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.SupplyAndDemand.PARSER, GameSession.class, "querySupplyAndDemand"));
-			// 行业排行
+			// Industry ranking
 			table.put((short) GsCode.OpCode.queryIndustryTopInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryIndustry.PARSER, GameSession.class, "queryIndustryTopInfo"));
-			// 富豪排行榜
+			// Rich List
 			table.put((short) GsCode.OpCode.queryRegalRanking_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class, "queryRegalRanking"));
-			// 城市发展等级点数
+			//City development level points
 			table.put((short) GsCode.OpCode.queryCityLevel_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class, "queryCityLevel"));
-			// 商品排行
+			// Commodity ranking
 			table.put((short) GsCode.OpCode.queryProductRanking_VALUE, Wrapper.newWithMessageAsync(Gs.queryProductRanking.PARSER, GameSession.class, "queryProductRanking"));
-			// Eva等级分布
+			//Eva rank distribution
 			table.put((short) GsCode.OpCode.queryEvaGrade_VALUE, Wrapper.newWithMessageAsync(Gs.queryEvaGrade.PARSER, GameSession.class, "queryEvaGrade"));
-			// 商品供需
+			// Commodity supply and demand
 			table.put((short) GsCode.OpCode.queryItemSupplyAndDemand_VALUE, Wrapper.newWithMessageAsync(Gs.queryItemSupplyAndDemand.PARSER, GameSession.class, "queryItemSupplyAndDemand"));
 
 
 			/*WareHouse*/
 			table.put((short) GsCode.OpCode.detailWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"detailWareHouse"));
-			//设置仓库出租信息
+			//Set warehouse rental information
 			table.put((short) GsCode.OpCode.setWareHouseRent_VALUE, Wrapper.newWithMessageAsync(Gs.SetWareHouseRent.PARSER, GameSession.class,"setWareHouseRent"));
-			//销毁货物
+			//Destroy the goods
 			table.put((short) GsCode.OpCode.delItems_VALUE, Wrapper.newWithMessageAsync(Gs.ItemsInfo.PARSER, GameSession.class,"delItems"));
-			//运输（集散中心运输）
+			//Transportation (distribution center transportation)
 			table.put((short) GsCode.OpCode.transportGood_VALUE, Wrapper.newWithMessageAsync(Gs.TransportGood.PARSER,GameSession.class,"transportGood"));
-			//关闭出租
+			//Close rental
 			table.put((short) GsCode.OpCode.closeWareHouseRent_VALUE, Wrapper.newWithMessageAsync(Gs.SetWareHouseRent.PARSER, GameSession.class,"closeWareHouseRent"));
-			//租用仓库
+			//Rent warehouse
 			table.put((short) GsCode.OpCode.rentWareHouse_VALUE, Wrapper.newWithMessageAsync(Gs.rentWareHouse.PARSER, GameSession.class,"rentWareHouse"));
-			//查询玩家的（建筑）仓库信息（包含租用的仓库信息）
+			//Query player's (building) warehouse information (including rented warehouse information)
 			table.put((short) GsCode.OpCode.getPlayerBuildingDetail_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"getPlayerBuildingDetail"));
-			//购买商品
+			//Purchase goods
 			table.put((short) GsCode.OpCode.buyShelfGood_VALUE, Wrapper.newWithMessageAsync(Gs.BuyInShelfGood.PARSER,GameSession.class,"buyInShelfGood"));
-			//上架
+			//Put on shelf
 			table.put((short) GsCode.OpCode.putAway_VALUE, Wrapper.newWithMessageAsync(Gs.PutAway.PARSER,GameSession.class,"putAway"));
-			//修改租用仓库上架商品
+			//Modify the goods listed in the rented warehouse
 			table.put((short) GsCode.OpCode.rentWarehouseShelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.RentWarehouseShelfSet.PARSER,GameSession.class,"rentWarehouseShelfSet"));
-			//下架
+			//Off shelf
 			table.put((short) GsCode.OpCode.soldOutShelf_VALUE, Wrapper.newWithMessageAsync(Gs.SoldOutShelf.PARSER,GameSession.class,"soldOutShelf"));
-			//设置自动补货
+			//Set up automatic replenishment
 			table.put((short) GsCode.OpCode.setRentAutoReplenish_VALUE, Wrapper.newWithMessageAsync(Gs.SetRentAutoReplenish.PARSER,GameSession.class,"setRentAutoReplenish"));
-			//获取集散中心收入情况
+			//Get the income of the distribution center
 			table.put((short) GsCode.OpCode.getWareHouseIncomeInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"getWareHouseIncomeInfo"));
-			//获取集散中心租户详情
+			//Get details of tenants in the distribution center
 			table.put((short) GsCode.OpCode.detailWareHouseRenter_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailWareHouseRenter"));
-			//获取集散中心的数据摘要
+			//Get a summary of the data in the distribution center
 			table.put((short) GsCode.OpCode.queryWareHouseSummary_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryWareHouseSummary"));
-			//查询集散中心详情（非建筑详情）
+			//For details of the distribution center (non-building details)
 			table.put((short) GsCode.OpCode.queryWareHouseDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryWareHouseDetail.PARSER,GameSession.class,"queryWareHouseDetail"));
-			//修改建筑名称
+			//Modify building name
 			table.put((short) GsCode.OpCode.updateBuildingName_VALUE, Wrapper.newWithMessageAsync(Gs.UpdateBuildingName.PARSER, GameSession.class,"updateBuildingName"));
-			//查询原料厂信息
+			//Query information of raw material factory
 			table.put((short) GsCode.OpCode.queryMaterialInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryMaterialInfo"));
-			//查询加工厂信息	
+			//Query processing plant information	
 			table.put((short) GsCode.OpCode.queryProduceDepInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryProduceDepInfo"));
-			//查询零售店或住宅信息
+			//Query retail store or residential information
 			table.put((short) GsCode.OpCode.queryRetailShopOrApartmentInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryRetailShopOrApartmentInfo"));
-			//查询推广公司信息
+			//Query promotion company information
 			table.put((short) GsCode.OpCode.queryPromotionCompanyInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryPromotionCompanyInfo"));
-			//查询仓库信息
+			//Query warehouse information
 			table.put((short) GsCode.OpCode.queryWarehouseInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryWarehouseInfo"));
-			//查询研究所信息
+			//Search Institute Information
 			table.put((short) GsCode.OpCode.queryLaboratoryInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryBuildingInfo.PARSER, GameSession.class,"queryLaboratoryInfo"));
 
-			//查询原料厂的原料信息
+			//Query the raw material information of the raw material factory
 			table.put((short) GsCode.OpCode.queryBuildingMaterialInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingMaterialInfo"));
-			//查询加工厂的商品信息
+			//Query the product information of the processing plant
 			table.put((short) GsCode.OpCode.queryBuildingGoodInfo_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingGoodInfo"));
-			//查询推广公司的商品推广选项详情
+			//Inquire about the promotion company's product promotion options
 			table.put((short) GsCode.OpCode.queryPromotionItemInfo_VALUE, Wrapper.newWithMessageAsync(Gs.QueryPromotionItemInfo.PARSER, GameSession.class,"queryPromotionItemInfo"));
-			//查询货架数据（用于客户端的更新）
+			//Query shelf data (for client update)
 			table.put((short) GsCode.OpCode.getShelfData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getShelfData"));
-			//查询仓库数据（用于客户端的更新）
+			//Query warehouse data (for client updates)
 			table.put((short) GsCode.OpCode.getStorageData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getStorageData"));
-			//查询生产线数据
+			//Query production line data
 			table.put((short) GsCode.OpCode.getLineData_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"getLineData"));
-			//充提
+			//Deposit and withdrawal
 			table.put((short) GsCode.OpCode.ct_createUser_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_createUser.PARSER, GameSession.class,"ct_createUser"));
 			table.put((short) GsCode.OpCode.ct_GenerateOrderReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GenerateOrderReq.PARSER, GameSession.class,"ct_GenerateOrderReq"));
 			table.put((short) GsCode.OpCode.ct_RechargeRequestReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_RechargeRequestReq.PARSER, GameSession.class,"ct_RechargeRequestReq"));
@@ -316,35 +316,35 @@ public class GameEventDispatcher extends DispatcherBase {
 			table.put((short) GsCode.OpCode.ct_DisPaySmVefifyReq_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_DisPaySmVefifyReq.PARSER, GameSession.class,"ct_DisPaySmVefifyReq"));
 			table.put((short) GsCode.OpCode.ct_GetTradingRecords_VALUE, Wrapper.newWithMessageAsync(ccapi.Dddbind.ct_GetTradingRecords.PARSER, GameSession.class,"ct_GetTradingRecords"));
 
-			//小地图改版（查询建筑生产线状态）
+			//Small map revision (inquiry about the status of building production line)
 			table.put((short) GsCode.OpCode.queryBuildingProduceStatue_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryBuildingProduceStatue"));
 			table.put((short) GsCode.OpCode.queryRetailShopGoods_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER, GameSession.class,"queryRetailShopGoods"));
-			//离线通知
+			//Offline notification
 			table.put((short) GsCode.OpCode.queryOffLineInformation_VALUE, Wrapper.newOnlyOpcodeAsync(GameSession.class,"queryOffLineInformation"));
-			//查询建筑繁荣度（1小时更新）
+			//Check building prosperity (updated in 1 hour)
 			table.put((short) GsCode.OpCode.queryBuildingProsperity_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"queryBuildingProsperity"));
-			//查询建筑摘要
+			//Query building summary
 			table.put((short) GsCode.OpCode.queryTypeBuildingSummary_VALUE, Wrapper.newWithMessageAsync(Gs.Num.PARSER,GameSession.class,"queryTypeBuildingSummary"));
-			//查询小地图建筑类别
+			//Query the construction type of mini map
 			table.put((short) GsCode.OpCode.queryTypeBuildingDetail_VALUE, Wrapper.newWithMessageAsync(Gs.QueryTypeBuildingDetail.PARSER,GameSession.class,"queryTypeBuildingDetail"));
-            //查询玩家在原料厂、加工厂、零售店、住宅的收入支出
+            //Query players' income and expenditures in raw material factories, processing plants, retail stores, and residences
 			table.put((short) GsCode.OpCode.queryPlayerIncomePay_VALUE, Wrapper.newWithMessage(Gs.PlayerIncomePay.PARSER,GameSession.class, "queryPlayerIncomePay"));
-			//查询各行业信息-玩家收入排行榜
+			//Query various industry information-Player income ranking
 			table.put((short) GsCode.OpCode.queryPlayerIncomeRanking_VALUE, Wrapper.newWithMessage(Gs.PlayerIncomeRanking.PARSER,GameSession.class, "queryPlayerIncomeRanking"));
 
-			//新版研究所===============================
-			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//研究所建筑详情
+			//New Institute===============================
+			table.put((short) GsCode.OpCode.detailTechnology_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailTechnology"));//Institute Building Details
 			table.put((short) GsCode.OpCode.openScienceBox_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"openScienceBox"));
 			table.put((short) GsCode.OpCode.useSciencePoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"useSciencePoint"));
 
-			//新版广告公司=============================
-			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//建筑详情
-			table.put((short) GsCode.OpCode.usePromotionPoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"usePromotionPoint"));//建筑详情
+			//New advertising company=============================
+			table.put((short) GsCode.OpCode.detailPromotionCompany_VALUE, Wrapper.newWithMessageAsync(Gs.Id.PARSER,GameSession.class,"detailPromotionCompany"));//Building details
+			table.put((short) GsCode.OpCode.usePromotionPoint_VALUE, Wrapper.newWithMessageAsync(Gs.OpenScience.PARSER,GameSession.class,"usePromotionPoint"));//Building details
 
-			/*研究所、推广公司公用协议*/
-			table.put((short) GsCode.OpCode.addScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.AddLine.PARSER,GameSession.class,"addScienceLine"));//添加生产线
-			table.put((short) GsCode.OpCode.delScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.DelLine.PARSER,GameSession.class,"delScienceLine"));//添加生产线
-			table.put((short) GsCode.OpCode.setScienceLineOrder_VALUE, Wrapper.newWithMessageAsync(Gs.SetLineOrder.PARSER,GameSession.class,"setScienceLineOrder"));//调整生产线顺序
+			/*Institute and promotion company public agreement*/
+			table.put((short) GsCode.OpCode.addScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.AddLine.PARSER,GameSession.class,"addScienceLine"));//Add production line
+			table.put((short) GsCode.OpCode.delScienceLine_VALUE, Wrapper.newWithMessageAsync(Gs.DelLine.PARSER,GameSession.class,"delScienceLine"));//Add production line
+			table.put((short) GsCode.OpCode.setScienceLineOrder_VALUE, Wrapper.newWithMessageAsync(Gs.SetLineOrder.PARSER,GameSession.class,"setScienceLineOrder"));//Adjust the production line order
 			table.put((short) GsCode.OpCode.scienceShelfAdd_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfAdd.PARSER,GameSession.class,"scienceShelfAdd"));
 			table.put((short) GsCode.OpCode.scienceShelfDel_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfDel.PARSER,GameSession.class,"scienceShelfDel"));
 			table.put((short) GsCode.OpCode.scienceShelfSet_VALUE, Wrapper.newWithMessageAsync(Gs.ShelfSet.PARSER,GameSession.class,"scienceShelfSet"));

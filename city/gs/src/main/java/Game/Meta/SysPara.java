@@ -17,6 +17,6 @@ public class SysPara {
     final public int bagCapacityDelta;
     final public int transferChargeRatio;
     final public int auctionDelay;
-    final public double minersCostRatio;//矿工费用
+    final public double minersCostRatio;//Miner's fee
     public Coordinate centerStorePos = new Coordinate();
 }

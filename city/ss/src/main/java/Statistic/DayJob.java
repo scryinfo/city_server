@@ -36,7 +36,7 @@ public class DayJob implements org.quartz.Job {
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("DayJob start execute,time = " + timeStr);
 
-        //统计AI均值  零售店、商品、商品大类、奢侈度、住宅
+        //Statistical AI Mean Retail Stores, Commodities, Commodity Categories, Luxury, Residential
         SummaryUtil.insertAiBaseAvg(yestodayStartTime,todayStartTime, SummaryUtil.getDayAiBaseAvg());
 
         //summary info to special collection once a day
@@ -124,7 +124,7 @@ public class DayJob implements org.quartz.Job {
         documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime, true);
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.APARTMENT, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         //promote
-        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,LogDb.PROMOTE); // 只会产生一条 document
+        documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,LogDb.PROMOTE); // Only one document
         SummaryUtil.insertDayIndustryIncomeData(SummaryUtil.IndustryType.PROMOTE, documentList, yestodayStartTime, SummaryUtil.getDayIndustryIncome());
         // technology
         documentList = LogDb.daySummaryHistoryIncome(yestodayStartTime, todayStartTime,LogDb.TECHNOLOGY);
@@ -156,25 +156,25 @@ public class DayJob implements org.quartz.Job {
         documentList = LogDb.retailshopTransactionPrice(yestodayStartTime, todayStartTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertAverageTransactionprice(SummaryUtil.IndustryType.RETAIL, documentList, yestodayStartTime, SummaryUtil.getAverageTransactionPrice());
 
-        //玩家当天开业情况
+        //Players’ opening on the day
         documentList = LogDb.playerBuildingBusiness(yestodayStartTime, todayStartTime, LogDb.getPlayerBuildingBusiness(),0);
         SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayBuildingBusiness());
 
 
-        //按天统计玩家收入支出
+        //Statistics player income and expenditure by day
         //player income
-        documentList=documentList = LogDb.dayPlayerIncomeOrPay(yestodayStartTime, todayStartTime, LogDb.getPlayerIncome());//统计天的收入量
+        documentList=documentList = LogDb.dayPlayerIncomeOrPay(yestodayStartTime, todayStartTime, LogDb.getPlayerIncome());//Statistics of the amount of income
         SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayPlayerIncome());
         //player pay
         documentList = LogDb.dayPlayerIncomeOrPay(yestodayStartTime, todayStartTime, LogDb.getPlayerPay());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, yestodayStartTime, SummaryUtil.getDayPlayerPay());
 
-        /*PlayerLoginTime(玩家每日登录时间统计)  YTY*/
+        /*PlayerLoginTime(Player daily login time statistics)  YTY*/
         documentList=LogDb.dayPlayerLoginTime(yestodayStartTime, todayStartTime, LogDb.getPlayerLoginTime());
         SummaryUtil.insertDayPlayerLoginTime(documentList,yestodayStartTime,SummaryUtil.getDayPlayerLoginTime());
 
 
-        // 城市交易量+商品销售额 (没有土地和住宅)
+        // City transaction volume + commodity sales (no land and housing)
         documentList = LogDb.queryCityAllTransactionAmount(yestodayStartTime,todayStartTime,LogDb.getPlayerIncome());
         SummaryUtil.insertCityTransactionAmount(documentList, yestodayStartTime, SummaryUtil.getCityTransactionAmount(), 0,SummaryUtil.AllTurnover);
         // material

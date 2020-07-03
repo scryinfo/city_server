@@ -142,7 +142,7 @@ public class GameServer {
     }
     public void run() throws Exception {
         FriendManager.getInstance().init();
-        AiBaseAvgManager.getInstance().init();//初始化AI基础数据
+        AiBaseAvgManager.getInstance().init();//Initialize AI basic data
         thirdPartyDataSourcePullExecutor.execute(() -> ThirdPartyDataSource.instance().updateWeatherInfo());
         thirdPartyDataSourcePullExecutor.scheduleAtFixedRate(()->{
             try {
@@ -163,13 +163,13 @@ public class GameServer {
         ContractManager.getInstance().init();
         LeagueManager.getInstance().init();
         EvaManager.getInstance().init();
-        PromotePointManager.getInstance().init();//推广点数初始化
-        SciencePointManager.getInstance().init();//科技点数初始化
+        PromotePointManager.getInstance().init();//Promotion points initialization
+        SciencePointManager.getInstance().init();//Technological points initialization
         TickManager.init();
         BrandManager.init();
         FlightManager.init();
         SocietyManager.init();
-        BuildingUtil.instance().updateMaxOrMinTotalQty();//初始化全城最大最小建筑品质
+        BuildingUtil.instance().updateMaxOrMinTotalQty();//Initialize the largest and smallest building quality in the city
         CityLevel.init();
         CityManager.instance().init();
         dddPurchaseMgr.init();

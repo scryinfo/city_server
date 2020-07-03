@@ -67,13 +67,13 @@ public class Npc {
     private int type;
     
     @Column(name = "status", nullable = false)
-    private int status = 0; //失业状态,初始时为工作状态
+    private int status = 0; //Unemployed, initially working
     
     @Column(name = "unEmpts", nullable = false)
-    private long unEmpts = 0;  //失业时间
+    private long unEmpts = 0;  //Unemployed time
     
     @Column(name = "buyApartmentTs", nullable = false)
-    private long buyApartmentTs = 0; //购买住宅时间
+    private long buyApartmentTs = 0; //Purchase time
  
     public int getStatus() {
 		return status;

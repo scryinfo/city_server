@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static com.mongodb.client.model.Filters.*;
 
-/*统计工具类*/
+/*Statistical tools*/
 public class TotalUtil {
     private static TotalUtil totalUtil = null;
 
@@ -31,12 +31,12 @@ public class TotalUtil {
         return totalUtil;
     }
 
-    //统计前面29天的数据
+    //Statistics for the first 29 days
     public  Map<Long,Long> monthTotal(Map<Long, Long> sourceMap){
         Map<Long, Long> total = new TreeMap<>();
-        //1.处理29天以前的数据，以天数统计求和
+        //1.Process data older than 29 days, and sum by day statistics
         sourceMap.forEach((time,money)->{
-            //获取当天开始时间
+            //Get the start time of the day
             Long st = TimeUtil.getTimeDayStartTime(time);
             if(total.containsKey(st)) {
                 total.put(st, total.get(st) + money);
@@ -48,7 +48,7 @@ public class TotalUtil {
         return total;
     }
 
-    //获取今日玩家收入支出最新数据（也需要累积）
+    //Get the latest data on today's player income and expenditure (also need to be accumulated)
     public  Long  todayIncomeOrPay(Map<Long, Long> sourceMap){
         //Long todayIncomeOrPay=0L;
         Map<Long, Long> today = new TreeMap<>();
@@ -61,7 +61,7 @@ public class TotalUtil {
         return todayIncomeOrPay;
     }
 
-    //获取今日最新收支信息
+    //Get the latest revenue and expenditure information today
     public static Long getTodayPlayerLastPayOrIncome(MongoCollection<Document> collection, UUID pid, Long startTime){
         long account = 0L;
         Document first = collection.find(and(
@@ -74,22 +74,22 @@ public class TotalUtil {
         return account;
     }
 
-    /*参数1.要统计的销售详情,参数2.表示建筑类型，参数3.表示是否有今日收入统计（false 则直接设置收益为0）*/
+    /*Parameter 1. The sales details to be counted, parameter 2. indicates the type of building, parameter 3. indicates whether there is today's income statistics (false then directly sets the revenue to 0)*/
     public static Ss.BuildingTodaySaleDetail.TodaySaleDetail totalBuildingSaleDetail(Document document,int buildingType, boolean isTodayIncome){
         Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder saleInfo = Ss.BuildingTodaySaleDetail.TodaySaleDetail.newBuilder();
-        /*设置通用信息*/
+        /*Set general information*/
         long num=0;
         long account=0;
         UUID producerId = document.get("p",UUID.class);
         saleInfo.setItemId(document.getInteger("itemId"))
                 .setProducerId(Util.toByteString(producerId))
-                .setIncreasePercent(1);//设置默认的提升比例为100
+                .setIncreasePercent(1);//Set the default lift ratio to 100
         System.err.println("商品的生产者Id是:"+producerId);
         if(isTodayIncome){
             num = document.getLong("num");
             account = document.getLong("total");
         }else{
-            saleInfo.setIncreasePercent(0);//非今日收入销售则把提升比例设置为0
+            saleInfo.setIncreasePercent(0);//For non-today revenue sales, the promotion ratio is set to 0
         }
         saleInfo.setNum((int) num)
                 .setSaleAccount(account);

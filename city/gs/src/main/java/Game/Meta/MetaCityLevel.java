@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MetaCityLevel {
-    public int lv;  //级别
-    public long exp;//经验值
-    public int baseSalary;//基础工资
-    public int inventCount;//发明数量
-    public List<Integer> inventItem = new ArrayList<>();//发明类型
+    public int lv;  //level
+    public long exp;//Experience
+    public int baseSalary;//Base salary
+    public int inventCount;//Number of inventions
+    public List<Integer> inventItem = new ArrayList<>();//Type of invention
     public MetaCityLevel() {
     }
     public MetaCityLevel(Document d) {

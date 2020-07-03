@@ -13,28 +13,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/*Eva工具*/
+/*Eva tools*/
 public class EvaTypeUtil {
     public static final int SCIENCE_TYPE=15;
     public static final int PROMOTE_TYPE=16;
-    //    判断点数类型(15 表示科技点数，16表示市场数据)
+    //    Judging the type of points (15 means technology points, 16 means market data)
     public static int judgeScienceType(Gs.Eva eva){
         return eva.getBt()==Gs.Eva.Btype.Brand ? PROMOTE_TYPE:SCIENCE_TYPE;
     }
 
-    /*获取建筑加点类型*/
-    public static int getEvaPointType(int type,int at){/*参数1：加点类型（科技点数、市场数据）   bt  Eva的a类型*/
+    /*Get building point type*/
+    public static int getEvaPointType(int type,int at){/*Parameter 1: Type of points added (technical points, market data)   bt  Eva's a type*/
         StringBuilder sb = new StringBuilder();
-        /*确定大类型*/
+        /*Determine the big type*/
         if(type==SCIENCE_TYPE){
             sb.append("15000");
         }else{
             sb.append("16000");
         }
-        /*确定小类型*/
-        if(MetaGood.isItem(at)){//商品（代表加工厂）
+        /*Determine small type*/
+        if(MetaGood.isItem(at)){//Commodities (representing processing plants)
             sb.append("12");
-        }else if(MetaMaterial.isItem(at)){  //代表原料厂
+        }else if(MetaMaterial.isItem(at)){  //Representative raw material factory
             sb.append("11");
         }else if(at==MetaBuilding.APARTMENT){
             sb.append(MetaBuilding.APARTMENT);
@@ -49,10 +49,10 @@ public class EvaTypeUtil {
         return pointType;
     }
 
-    /*获取当前所有建筑类型的点数信息*/
-    public static List<Gs.BuildingPoint> classifyBuildingTypePoint(UUID pId){/*分类玩家各种建筑类型的Eva加点*/
+    /*Get the point information of all current building types*/
+    public static List<Gs.BuildingPoint> classifyBuildingTypePoint(UUID pId){/*Eva added points for various player types*/
         List<Gs.BuildingPoint> list = new ArrayList<>();
-        Set<Integer> allBuildingType = MetaData.getAllBuildingType();/*所有的建筑类型*/
+        Set<Integer> allBuildingType = MetaData.getAllBuildingType();/*All building types*/
         allBuildingType.forEach(bt->{
             SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePointByBuildingType(pId, bt);
             PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePointByBuildingType(pId, bt);
@@ -73,7 +73,7 @@ public class EvaTypeUtil {
         return list;
     }
 
-    /*获取建筑类型的点数信息*/
+    /*All building types*/
     public static Gs.BuildingPoint getBuildingTypePoint(UUID pId,int type){
         SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePointByBuildingType(pId, type);
         PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePointByBuildingType(pId, type);
@@ -92,7 +92,7 @@ public class EvaTypeUtil {
         return buildingPoint.build();
     }
 
-    /*判断是否有足够的点数*/
+    /*Determine if there are enough points*/
     public static boolean hasEnoughPoint(Gs.Evas evas){
         UUID playerId=null;
         for (Gs.Eva eva : evas.getEvaList()) {

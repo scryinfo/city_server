@@ -65,11 +65,11 @@ public class Laboratory extends Building {
     @Override
     public Gs.Laboratory detailProto() {
         calcuProb();
-        Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
+        Map<Integer, Double> successMap = getTotalSuccessProb();//Total value of research success rate
         Gs.Laboratory.Builder builder = Gs.Laboratory.newBuilder().setInfo(super.toProto());
         this.inProcess.forEach(line -> builder.addInProcess(line.toProto()));
         /*this.completed.values().forEach(line -> {
-            //如果是已完成的线的主人是当前玩家，则显示已完成的线
+            //If the owner of the completed line is the current player, the completed line is displayed
            builder.addCompleted(line.toProto()));
         );*/
 
@@ -108,10 +108,10 @@ public class Laboratory extends Building {
             Line line = this.inProcess.get(0);
             if (line.update(diffNano)) {
                 if (line.goodCategory > 0) {
-                    //完成商品发明
+                    //Completion of commodity invention
                     MailBox.instance().sendMail(Mail.MailType.INVENT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times,line.goodCategory}, new UUID[]{this.id()}, null);
                 } else {
-                    //完成点数研究
+                    //Complete the point study
                     MailBox.instance().sendMail(Mail.MailType.EVA_POINT_FINISH.getMailType(), line.proposerId, new int[]{line.usedRoll+line.availableRoll,line.times,line.goodCategory}, new UUID[]{this.id()}, null);
                 }
                 if (line.isComplete()) {
@@ -130,15 +130,15 @@ public class Laboratory extends Building {
         if(exclusiveForOwner && !proposerId.equals(this.ownerId()))
             return null;
         Line line = new Line(goodCategory, times, proposerId, cost);
-        //设置开始时间
-        //获取到最后一个的开始时间
+        //Set start time
+        //Get the start time of the last one
         Line lastLine = getLastLine();
         if(lastLine==null){
             lastLine = new Line();
             lastLine.beginProcessTs=System.currentTimeMillis();
             lastLine.times=0;
         }
-        //设置开始时间
+        //Set start time
         long beginTime=lastLine.beginProcessTs+ TimeUnit.HOURS.toMillis(lastLine.times);
         line.beginProcessTs = beginTime;
         line.eva_transition_time = this.meta.evaTransitionTime;
@@ -150,7 +150,7 @@ public class Laboratory extends Building {
 
     public boolean delLine(UUID lineId) {
         Line line = this.findInProcess(lineId);
-        if(line != null) {//因为队列的所有开始时间在加入队列的时候已经设置好了，因此，不必要判断开始时间是否大于0
+        if(line != null) {//Because all the start time of the queue has been set when joining the queue, it is not necessary to judge whether the start time is greater than 0
 //            this.sendToWatchers(Shared.Package.create(GsCode.OpCode.labLineDel_VALUE,
 //                            Gs.LabDelLine.newBuilder()
 //                                    .setBuildingId(Util.toByteString(id()))
@@ -158,7 +158,7 @@ public class Laboratory extends Building {
 //                                    .build()));
             List<Line> lines = removeAndUpdateLine(lineId, true);
             //this.inProcess.remove(line);
-            //更新所有的队列
+            //Update all queues
             GameDb.delete(line);
             return true;
         }
@@ -186,16 +186,16 @@ public class Laboratory extends Building {
         return times;
     }
 
-    //Todo:可能以后的过渡时间不是1小时一次，而是不同类型有不同过渡时间
+    //Todo:Maybe the future transition time is not once every hour, but different types have different transition times
     public Long getLastQueuedCompleteTime(){
         int size = this.inProcess.size();
         long endTime = -1;
-        //有队列设置时间为最后一个队列完成时间，无队列设置为-1
+        //The queue setting time is the last queue completion time, and the no queue setting is -1
         if(size>0){
-            //获取最后一个队列
+            //Get the last queue
             Line line = this.inProcess.get(size - 1);
-            //那么整个完成时间为 开始时间
-            int labTime = line.times - line.usedRoll - line.availableRoll;//剩余的研究时间
+            //Then the entire completion time is the start time
+            int labTime = line.times - line.usedRoll - line.availableRoll;//Research time remaining
             endTime = line.beginProcessTs + TimeUnit.HOURS.toMillis(labTime);
         }
         return endTime;
@@ -214,7 +214,7 @@ public class Laboratory extends Building {
     public static final class RollResult {
         List<Integer> itemIds;
         int evaPoint;
-        List<Integer> labResult = new ArrayList(5);//Eva点数研究的成果包含5个信息（1表成功，0表示失败）
+        List<Integer> labResult = new ArrayList(5);//The results of the Eva point study include 5 pieces of information (1 indicates success, 0 indicates failure)
     }
     private Line findInProcess(UUID lineId) {
         for (Line line : this.inProcess) {
@@ -226,23 +226,23 @@ public class Laboratory extends Building {
     }
     public RollResult roll(UUID lineId, Player player) {
         calcuProb();
-        Map<Integer, Double> successMap = getTotalSuccessProb();//研究成功率的总值
-        RollResult res = null;//研究成果
+        Map<Integer, Double> successMap = getTotalSuccessProb();//Total value of research success rate
+        RollResult res = null;//Research results
         Line l = this.findInProcess(lineId);
         if(l == null)
              l = this.completed.get(lineId);
         if(l != null && l.availableRoll > 0) {
             res = new RollResult();
             l.useRoll();
-            if(l.eva()) {//是否是eva发明提升
-                //1次开启5个成果，所以循环5次
-                for (int i = 0; i <5 ; i++) {//新增===========================================
-                    if(Prob.success(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE), RADIX)) {//成功概率（第一个参数表示成功概率,后一个为基数）
+            if(l.eva()) {//Whether it is eva invention promotion
+                //Open 5 achievements at a time, so loop 5 times
+                for (int i = 0; i <5 ; i++) {//Add===========================================
+                    if(Prob.success(successMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE), RADIX)) {//Probability of success (the first parameter indicates the probability of success, the latter is the cardinality)
                         res.evaPoint+=10;
                         player.addEvaPoint(10);
-                        //每次都需要把结果保存起来
+                        //Need to save the result every time
                         res.labResult.add(1);
-                    }else{//失败
+                    }else{//failure
                         res.evaPoint+=1;
                         player.addEvaPoint(1);
                         res.labResult.add(0);
@@ -266,7 +266,7 @@ public class Laboratory extends Building {
                     }
                 }
             }
-        }else{//表明传递的数据有误
+        }else{//Indicates that the data passed is incorrect
             return null;
         }
         if(l.isComplete() && l.availableRoll == 0)
@@ -286,7 +286,7 @@ public class Laboratory extends Building {
         this.pricePreTime = pricePreTime;
         this.usedTime=0;
     }
-    //获取最后一条的研究信息
+    //Get the last research information
     public Line getLastLine(){
         if(inProcess.size()==0){
             return null;
@@ -296,7 +296,7 @@ public class Laboratory extends Building {
 
     /*public Map<String,Integer> getTotalSuccessProb(){
         Map<String, Integer> map = new HashMap<>();
-        //首先获取eva信息
+        //First get eva information
         Set<Integer> buildingTech = MetaData.getBuildingTech();
         buildingTech
     }*/
@@ -337,9 +337,9 @@ public class Laboratory extends Building {
         long payCost;
 
         @Transient
-        private  int eva_transition_time;//eva提升的过度时间
+        private  int eva_transition_time;//Excessive time of eva promotion
         @Transient
-        private  int invent_transition_time;//发明过渡时间
+        private  int invent_transition_time;//Invention transition time
         @Transient
         long currentRoundPassNano = 0;
 
@@ -362,24 +362,24 @@ public class Laboratory extends Building {
         boolean update(long diffNano) {
             if(!isLaunched())
                 this.launch();
-            //为了保证服务器即使在断线状态下，也可以按时完成研究成果，此处加判断，如果现在>研究的结束时间,直接把剩余的点数全部研究完成
-            int transitionTime=0;//当前研究的过渡时间
+            //In order to ensure that the server can complete the research results on time even when the server is disconnected, add judgment here. If it is now> the end time of the research, directly complete all the remaining points.
+            int transitionTime=0;//Transition time for current study
             if(goodCategory>0){
                 transitionTime = (int) TimeUnit.SECONDS.toHours(this.invent_transition_time);
             }else{
                 transitionTime=(int) TimeUnit.SECONDS.toHours(this.eva_transition_time);
             }
-            long endTime = this.beginProcessTs + TimeUnit.HOURS.toMillis(this.times*transitionTime);//结束时间
+            long endTime = this.beginProcessTs + TimeUnit.HOURS.toMillis(this.times*transitionTime);//End Time
             long now = System.currentTimeMillis();
-            if(now>endTime){//本来应该全部完成，但是到点还没有完成，全部出成果
-                //获取剩余的成果数量
+            if(now>endTime){//It should have been completed, but it hasn’t been completed yet, and all results have been achieved
+                //Get the remaining amount of results
                 int addPoint = this.times - usedRoll - availableRoll;
                 this.availableRoll += addPoint;
                 return true;
             }
-            currentRoundPassNano += diffNano;//当前通过的纳秒
-            //TODO:研究的过渡时间是从配置表读取，以后可能会区分Eva的过渡时间和发明的过渡时间，目前用的是一个值
-            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //从配置表读取的过渡时间
+            currentRoundPassNano += diffNano;//Nanoseconds currently passed
+            //TODO: The transition time of the study is read from the configuration table, and the transition time of Eva and the transition time of the invention may be distinguished in the future. At present, a value is used.
+            if (currentRoundPassNano >= TimeUnit.SECONDS.toNanos(this.eva_transition_time)) { //Transition time read from configuration table
                 currentRoundPassNano = 0;
                 this.availableRoll++;
                 return true;
@@ -410,7 +410,7 @@ public class Laboratory extends Building {
     @JoinColumn(name = "labId2")
     private Map<UUID, Line> completed = new HashMap<>();
 
-    private int usedTime=0;//已使用的时间
+    private int usedTime=0;//Elapsed time
 
     @Transient
     protected PeriodicTimer dbTimer = new PeriodicTimer(DB_UPDATE_INTERVAL_MS, (int) (Math.random()*DB_UPDATE_INTERVAL_MS));
@@ -436,22 +436,22 @@ public class Laboratory extends Building {
     private long totalGoodIncome;
     private int totalGoodTimes;
 
-    //Eva加成信息(map的key为btype)，由updateEvaAdd来更新
+    //Eva addition information (map key is btype), updated by updateEvaAdd
     @Transient
     Map<Integer, Double> evaMap = new HashMap<>();
 
-    public void updateEvaAdd(){//更新eva
-        for (Integer type : MetaData.getBuildingTech(type())) {//atype,因为研究所一个atype只对应1个eva，所以取第一个
+    public void updateEvaAdd(){//Update eva
+        for (Integer type : MetaData.getBuildingTech(type())) {//atype, because one atype in the research institute only corresponds to 1 eva, so take the first
             Eva eva = EvaManager.getInstance().getEva(ownerId(), type).get(0);
             evaMap.put(eva.getBt(), EvaManager.getInstance().computePercent(eva));
         }
     }
-    //总的成功率数据（包含eva加成）
+    //Total success rate data (including eva bonus)
     public Map<Integer,Double> getTotalSuccessProb(){
         calcuProb();
-        updateEvaAdd();//更新eva信息
+        updateEvaAdd();//Update eva information
         Map<Integer, Double> map = new HashMap<>();
-        //eva成功率
+        //eva success rate
         double evaProb = this.evaProb * (1 + evaMap.get(Gs.Eva.Btype.EvaUpgrade_VALUE));
         double goodProb = this.goodProb * (1 + evaMap.get(Gs.Eva.Btype.InventionUpgrade_VALUE));
         map.put(Gs.Eva.Btype.EvaUpgrade_VALUE, evaProb);
@@ -467,18 +467,18 @@ public class Laboratory extends Building {
         this.usedTime =0;
     }
     public int getRemainingTime(){
-        //获取剩余时间
+        //Get the remaining time
         return this.sellTimes - usedTime;
     }
-    //清除研究队列
+    //Clear research cohort
     public void clear() {
         this.completed.clear();
         this.inProcess.clear();
     }
 
     public  List<Line> removeAndUpdateLine(UUID delId,boolean delOrder){
-        long nextTs = 0;//下个开始时间
-        int findPos = -1 ;//定位
+        long nextTs = 0;//Next start time
+        int findPos = -1 ;//Positioning
         Line delLine=null;
         List<Line> changed = new ArrayList<>();
         SimpleDateFormat sm = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -499,7 +499,7 @@ public class Laboratory extends Building {
             }
             nextTs = line.beginProcessTs + TimeUnit.HOURS.toMillis(line.times);
         }
-        //更新完之后，移除掉要删除的推广。
+        //After the update is complete, remove the promotion you want to delete.
         if(delOrder){
             if(delLine!=null){
                 inProcess.remove(delLine);
@@ -519,7 +519,7 @@ public class Laboratory extends Building {
         });
         return lines;
     }
-    /*获取已完成生产线中自己的线*/
+    /*Get your own line in the completed production line*/
     public List<Gs.Laboratory.Line> getOwnerLine(UUID proposerId){
         List<Gs.Laboratory.Line> lines = new ArrayList<>();
         this.completed.values().forEach(line->{

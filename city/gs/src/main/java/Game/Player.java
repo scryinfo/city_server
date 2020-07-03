@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 )
 public class Player {
     public static final int MAX_FACE_ID_LEN = 100;
-    public static final int COST_FACE_SCORE_VALUE=10;//每次改变avata要扣减的积分值
+    public static final int COST_FACE_SCORE_VALUE=10;//Each time you change the value of avata to be deducted
     public List<UUID> getPayedPromotions() {
         return payedPromotions;
     }
@@ -273,7 +273,7 @@ public class Player {
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private long last_modify_time;//上次修改时间
+    private long last_modify_time;//Last modified time
 
     public void addEvaPoint(int d) {
         this.eva += d;
@@ -344,7 +344,7 @@ public class Player {
         if (societyId != null) {
             builder.setSocietyId(Util.toByteString(societyId));
         }
-        builder.setEva(eva);//eva点数 
+        builder.setEva(eva);//eva points 
         return builder.build();
     }
 
@@ -447,7 +447,7 @@ public class Player {
         GameDb.saveOrUpdate(this);
         if(!a.biderId().equals(id))
             this.send(Package.create(GsCode.OpCode.bidFailInform_VALUE, Gs.BidGround.newBuilder().setId(a.meta.id).setNum(a.price()).build()));
-        //更高出价通知
+        //Higher bid notification
         UUID biderId = a.biderId();
         List<Coordinate> areas = a.meta.area;
         List<Integer> list = new ArrayList<>();
@@ -555,7 +555,7 @@ public class Player {
         this.last_modify_time = last_modify_time;
     }
 
-    public boolean canBeModify(){//是否可以修改。判断修改时间是否超过7天
+    public boolean canBeModify(){//Whether it can be modified. Determine if the modification time exceeds 7 days
         Long now = new Date().getTime();
         long day = 24 * 60 * 60 * 1000;
         if(this.last_modify_time+day*7<=now){
@@ -564,11 +564,11 @@ public class Player {
             return false;
     }
 
-    public boolean decScoreValue(int value){//扣除幸运券
-        if(value>this.score){//不够扣减，返回false
+    public boolean decScoreValue(int value){//Lucky deduction
+        if(value>this.score){//Not enough deductions, return false
             return false;
         }else{
-            //扣减幸运券
+            //Lucky deduction
             this.score -= value;
             return true;
         }

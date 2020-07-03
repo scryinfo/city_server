@@ -17,7 +17,7 @@ public class PromotePointManager {
         return instance;
     }
 
-    private Map<UUID, Set<PromotePoint>> promoteMap = new HashMap<UUID, Set<PromotePoint>>();//缓存玩家所有的推广点数
+    private Map<UUID, Set<PromotePoint>> promoteMap = new HashMap<UUID, Set<PromotePoint>>();//Cache all player promotion points
     public void init()
     {
         GameDb.getAllFromOneEntity(PromotePoint.class).forEach(
@@ -27,14 +27,14 @@ public class PromotePointManager {
                 } );
     }
 
-    /*获取玩家的所有推广点数信息*/
+    /*Get all promotion points information of players*/
     public Set<PromotePoint> getPromotePointList(UUID playerId)
     {
         return promoteMap.get(playerId) == null ?
                 new HashSet<PromotePoint>() : promoteMap.get(playerId);
     }
 
-    /*获取指定的推广点数信息*/
+    /*Get specified promotion points information*/
     public PromotePoint getPromotePoint(UUID playerId,int type)
     {
         Set<PromotePoint> set=getPromotePointList(playerId);
@@ -46,7 +46,7 @@ public class PromotePointManager {
         return null;
     }
 
-    /*更新推广点数*/
+    /*Update promotion points*/
     public void updatePromotionPoint(PromotePoint promote) {
         Set<PromotePoint> s=promoteMap.get(promote.getPid());
         s.remove(getPromotePoint(promote.getPid(),promote.getType()));
@@ -54,7 +54,7 @@ public class PromotePointManager {
         promoteMap.put(promote.getPid(), s);
         GameDb.saveOrUpdate(promote);
     }
-    /*批量添加推广点数（初始化时用）*/
+    /*Add promotion points in bulk (used during initialization)*/
     public void addPromotePointList(List<PromotePoint> promoteList){
         promoteList.forEach(p->{
             promoteMap.computeIfAbsent(p.getPid(),
@@ -68,17 +68,17 @@ public class PromotePointManager {
     }
 
     public PromotePoint updatePlayerPromotePoint(UUID pid, int type, int point){
-        PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(pid, type);//获取玩家的推广类型点数
-        if(point<0&&Math.abs(point)>promotePoint.promotePoint){/*如果是扣除，还需判断库存是否充足*/
+        PromotePoint promotePoint = PromotePointManager.getInstance().getPromotePoint(pid, type);//Get the player's promotion type points
+        if(point<0&&Math.abs(point)>promotePoint.promotePoint){/*If it is a deduction, it is necessary to determine whether the inventory is sufficient*/
             return null;
         }
         promotePoint.promotePoint += point;
         return promotePoint;
     }
 
-    /*根据建筑大类型，查找玩家的的点数资料*/
+    /*According to the type of building, find the player's point data*/
     public PromotePoint getPromotePointByBuildingType(UUID pId,int buildingType){
-        //拼接类型
+        //Type of stitching
         StringBuffer sb = new StringBuffer("16000");
         int pointType = Integer.parseInt(sb.append(buildingType).toString());
         PromotePoint promotePoint = getPromotePoint(pId, pointType);

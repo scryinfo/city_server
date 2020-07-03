@@ -14,33 +14,33 @@ import java.util.*;
 @Entity(name = "WareHouse")
 public class WareHouse extends Building implements IStorage, IShelf {
     @Transient
-    public MetaWarehouse metaWarehouse;//集散中心原型
+    public MetaWarehouse metaWarehouse;//Distribution center prototype
 
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "shelf_id")
-    protected Shelf shelf; //货架
+    protected Shelf shelf; //Shelf
 
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "store_id")
-    protected Storage store;//库存
+    protected Storage store;//in stock
 
     @Column(nullable = false)
-    private int rent=0;//租金(1个小时的单价，99/1)
-    private int minHourToRent=0;//最小出租时间
-    private int maxHourToRent=0;//最大出租时间
-    private int rentCapacity=0;//出租的容量
-    private int rentUsedCapacity=0;//已出租的容量
-    private int rentIncome=0;//仓库收入
-    private boolean enableRent=false;//是否出租
+    private int rent=0;//Rent (unit price per hour, 99/1)
+    private int minHourToRent=0;//Minimum rental time
+    private int maxHourToRent=0;//Maximum rental time
+    private int rentCapacity=0;//Rental capacity
+    private int rentUsedCapacity=0;//Rental capacity
+    private int rentIncome=0;//Warehouse revenue
+    private boolean enableRent=false;//Whether to rent
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
 
-    @OneToMany(mappedBy = "wareHouse",cascade ={CascadeType.ALL},fetch = FetchType.EAGER)//让租户维护关系
-    protected Set<WareHouseRenter> renters = new HashSet<>();//租户信息
+    @OneToMany(mappedBy = "wareHouse",cascade ={CascadeType.ALL},fetch = FetchType.EAGER)//Let tenants maintain relationships
+    protected Set<WareHouseRenter> renters = new HashSet<>();//Tenant information
 
-    //初始化原型、建筑坐标、建筑拥有者id
+    //Initialize prototype, building coordinates, building owner id
     public WareHouse(MetaWarehouse meta, Coordinate pos, UUID ownerId) {
         super(meta, pos, ownerId);
-        //eva加成计算
+        //eva bonus calculation
         Eva eva=EvaManager.getInstance().getEva(ownerId(), MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
         int storeCapacity = (int) (this.metaWarehouse.storeCapacity * (1 + EvaManager.getInstance().computePercent(eva)));
         this.metaWarehouse = meta;
@@ -86,28 +86,28 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public int quality() {//建筑品质(暂时不做)
+    public int quality() {//Building quality (not for now)
         return 0;
     }
 
     @Override
-    public Gs.WareHouse detailProto()//已添加eva属性
+    public Gs.WareHouse detailProto()//Added eva attribute
     {
         Eva eva=EvaManager.getInstance().getEva(ownerId(), MetaBuilding.WAREHOUSE, Gs.Eva.Btype.WarehouseUpgrade_VALUE);
         int storeCapacity = (int) (this.metaWarehouse.storeCapacity * (1 + EvaManager.getInstance().computePercent(eva)));
-        //详细原型）
+        //Detailed prototype)
         Gs.WareHouse.Builder builder = Gs.WareHouse.newBuilder();
-        builder.setInfo(super.toProto());//建筑信息初始化
-        builder.setStore(this.store.toProto());//仓库
-        builder.setShelf(this.shelf.toProto());//上架商品
-        builder.setMaxHourToRent(this.maxHourToRent);//最大出租小时(区间)
+        builder.setInfo(super.toProto());//Building information initialization
+        builder.setStore(this.store.toProto());//warehouse
+        builder.setShelf(this.shelf.toProto());//Listed goods
+        builder.setMaxHourToRent(this.maxHourToRent);//Maximum rental hours (interval)
         builder.setMinHourToRent(this.minHourToRent);
-        builder.setAvailableCapacity(this.store.availableSize());//可用容量
-        builder.setStoreCapacity(storeCapacity);//仓库容量
-        builder.setRentCapacity(this.rentCapacity);//出租的容量
-        builder.setRent(this.rent);//租金
+        builder.setAvailableCapacity(this.store.availableSize());//Available capacity
+        builder.setStoreCapacity(storeCapacity);//Warehouse capacity
+        builder.setRentCapacity(this.rentCapacity);//Rental capacity
+        builder.setRent(this.rent);//rent
         builder.setRentUsedCapacity(this.rentUsedCapacity);
-        //封装集散中心的租户的信息
+        //Encapsulate the information of the tenants of the distribution center
         if(renters!=null&&renters.size()>0){
             renters.forEach(p->builder.addRenter(p.toProto()));
         }
@@ -124,16 +124,16 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public void appendDetailProto(Gs.BuildingSet.Builder builder) {//追加原型，也就是要添加一个建筑
+    public void appendDetailProto(Gs.BuildingSet.Builder builder) {//Add a prototype, that is to add a building
         builder.addWareHouse(this.detailProto());
     }
 
     @Override
-    protected void enterImpl(Npc npc) { //进入建筑
+    protected void enterImpl(Npc npc) { //Enter the building
     }
 
     @Override
-    protected void leaveImpl(Npc npc) {//离开
+    protected void leaveImpl(Npc npc) {//go away
 
     }
 
@@ -143,7 +143,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public boolean addshelf(Item mi, int price, boolean autoReplenish) { //上架
+    public boolean addshelf(Item mi, int price, boolean autoReplenish) { //Put on shelf
         if(!this.store.has(mi.key, mi.n))
             return false;
         if(this.shelf.add(mi, price,autoReplenish)) {
@@ -155,11 +155,11 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public boolean delshelf(ItemKey id, int n, boolean unLock) {//下架
+    public boolean delshelf(ItemKey id, int n, boolean unLock) {//Off shelf
         if(this.shelf.del(id, n)) {
             if(unLock)
                 this.store.unLock(id, n);
-            else{//如果是消费，那么需要消费lock的数量
+            else{//If it is consumption, then the number of locks that need to be consumed
                 this.store.consumeLock(id, n);
             }
             return true;
@@ -168,12 +168,12 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public Shelf.Content getContent(ItemKey id) {//获取货架目录
+    public Shelf.Content getContent(ItemKey id) {//Get shelf catalog
         return this.shelf.getContent(id);
     }
 
     @Override
-    public boolean setPrice(ItemKey id, int price) {//设置价格
+    public boolean setPrice(ItemKey id, int price) {//Set price
         Shelf.Content i = this.shelf.getContent(id);
         if(i == null)
             return false;
@@ -182,7 +182,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public boolean setAutoReplenish(ItemKey id, boolean autoRepOn) {//设置商品是否自动补货，传递补货
+    public boolean setAutoReplenish(ItemKey id, boolean autoRepOn) {//Set whether the goods are automatically replenished and transfer the replenishment
         Shelf.Content i = this.shelf.getContent(id);
         if(i == null)
             return false;
@@ -191,67 +191,67 @@ public class WareHouse extends Building implements IStorage, IShelf {
     }
 
     @Override
-    public int getSaleCount(int itemId) {//获取销售数量，你需要给我货物的id然后查询出来
+    public int getSaleCount(int itemId) {//Get the sales quantity, you need to give me the id of the goods and check it out
         return this.shelf.getSaleNum(itemId);
     }
 
     @Override
-    public Map<Item, Integer> getSaleDetail(int itemId) {//获取销售清单，也就是我卖出去的详细信息，买了多少个
+    public Map<Item, Integer> getSaleDetail(int itemId) {//Get the sales list, which is the detailed information of what I sold, how many I bought
         return this.shelf.getSaleDetail(itemId);
     }
 
     @Override
-    public boolean reserve(MetaItem m, int n) { //进行储备，你给我一个货物选项和 数量（如果我已经存不下了，返回false，否则，存储到原先的位置上）
+    public boolean reserve(MetaItem m, int n) { //To reserve, you give me a cargo option and quantity (if I can’t store it anymore, return false, otherwise, store it in the original position)
         return store.reserve(m, n);
     }
 
     @Override
-    public boolean lock(ItemKey m, int n) { //锁住货物（你要运输的货物，必须要锁住）
+    public boolean lock(ItemKey m, int n) { //Lock the goods (the goods you want to transport must be locked)
         return store.lock(m, n);
     }
 
     @Override
-    public boolean unLock(ItemKey m, int n) {//解锁货物
+    public boolean unLock(ItemKey m, int n) {//Unlock cargo
         return store.unLock(m, n);
     }
 
     @Override
-    public Storage.AvgPrice consumeLock(ItemKey m, int n) {//使用已锁所物品
+    public Storage.AvgPrice consumeLock(ItemKey m, int n) {//Use locked items
         return store.consumeLock(m, n);
     }
 
     @Override
-    public void consumeReserve(ItemKey m, int n, int price) {//使用存储的货物
+    public void consumeReserve(ItemKey m, int n, int price) {//Use stored goods
         store.consumeReserve(m, n, price);
     }
 
     @Override
-    public void markOrder(UUID orderId) {//订购单
+    public void markOrder(UUID orderId) {//Purchase order
         store.markOrder(orderId);
     }
 
     @Override
-    public void clearOrder(UUID orderId) {//清除订单
+    public void clearOrder(UUID orderId) {//Clear order
         store.clearOrder(orderId);
     }
 
     @Override
-    public boolean delItem(ItemKey mi) {//删除(销毁)货物
+    public boolean delItem(ItemKey mi) {//Delete (destroy) the goods
         return this.store.delItem(mi);
     }
 
     @Override
-    public int availableQuantity(MetaItem m) {//空闲数量，也就我仓库中空闲的数目
+    public int availableQuantity(MetaItem m) {//The number of vacancies, that is, the number of vacancies in my warehouse
         return this.store.availableQuantity(m);
     }
 
     @Override
-    public boolean has(ItemKey m, int n) {//是否有我指定货物
+    public boolean has(ItemKey m, int n) {//Is there my designated goods
         return this.store.has(m,n);
     }
 
     @Override
-    public boolean offset(ItemKey item, int n) {//抵消
+    public boolean offset(ItemKey item, int n) {//offset
         return this.store.offset(item,n);
     }
 
@@ -314,11 +314,11 @@ public class WareHouse extends Building implements IStorage, IShelf {
         return this.shelf;
     }
 
-    //删除租户
+    //Delete tenant
     public void removeRenter(WareHouseRenter renter){
         renters.remove(renter);
     }
-    //添加租户
+    //Add tenant
     public void addRenter(WareHouseRenter renter){
         renters.add(renter);
     }
@@ -326,7 +326,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
     public boolean delItem(Item item) {
         return this.store.delItem(item);
     }
-    //到期删除租户
+    //Delete tenants at expiration
     public Set<WareHouseRenter> rentersOverdueAndRemove(){
         Set<WareHouseRenter> set = new HashSet<>();
         Iterator<WareHouseRenter> iterator = renters.iterator();
@@ -351,7 +351,7 @@ public class WareHouse extends Building implements IStorage, IShelf {
 
     public void closeRent(){
         this.enableRent = false;
-        this.store.setOtherUseSize(this.rentUsedCapacity);//设置其他使用容量为当前已经租出去的容量
+        this.store.setOtherUseSize(this.rentUsedCapacity);//Set the other used capacity to the currently rented capacity
     }
     public void updateOtherSize(){
         this.store.setOtherUseSize(this.rentUsedCapacity);

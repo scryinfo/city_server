@@ -14,42 +14,42 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * @Description:仓库租户表（实体映射）
+ * @Description:Warehouse tenant table (entity mapping)
  * @Author: yty
  * @CreateDate: 2019/4/8 10:17
- * @UpdateRemark: 更新内容：
+ * @UpdateRemark: update content:
  * @Version: 1.0
  */
 @Entity
 public class WareHouseRenter implements Serializable, IStorage, IShelf {
     @Id
-    private Long orderId; //订单编号
+    private Long orderId; //Order number
 
-    private UUID renterId;    //租户id
+    private UUID renterId;    //Tenant id
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="wareHouse_id")
-    private WareHouse wareHouse;//建筑
+    private WareHouse wareHouse;//building
 
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "store_id")
-    protected Storage store;   //仓库
+    protected Storage store;   //warehouse
 
     @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "shelf_id")
-    protected Shelf shelf; //货架
+    protected Shelf shelf; //Shelf
 
     @Column(nullable = false)
     private long todayIncome = 0;
 
     @Column(nullable = false)
-    private long todayIncomeTs = 0;//一天已经过去的时间
+    private long todayIncomeTs = 0;//A day has passed
 
     private static final long DAY_MILLISECOND = 1000 * 3600 * 24;
-    private Integer rentCapacity;//租用的库存
-    private Long beginTs;    //租用的开始时间
-    private Integer hourToRent; //租赁时间
-    private Integer rent;       //租金
+    private Integer rentCapacity;//Rented inventory
+    private Long beginTs;    //Lease start time
+    private Integer hourToRent; //Lease time
+    private Integer rent;       //rent
     public WareHouseRenter(
             UUID renterId,
             WareHouse wareHouse,
@@ -144,7 +144,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     public void updateTodayIncome(long income)
     {
-        if (System.currentTimeMillis() - todayIncomeTs >= DAY_MILLISECOND)//超过一天
+        if (System.currentTimeMillis() - todayIncomeTs >= DAY_MILLISECOND)//More than one day
         {
             todayIncome = income;
             todayIncomeTs = Util.getTodayStartTs();
@@ -174,7 +174,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
 
     public Gs.WareHouseRenter toProto(){
         Gs.WareHouseRenter.Builder builder = Gs.WareHouseRenter.newBuilder();
-        //开始赋值
+        //Start assignment
         builder.setBuildingId(Util.toByteString(this.getWareHouse().id()))
                 .setRenterId(Util.toByteString(this.renterId))
                 .setBeginTs(this.beginTs)
@@ -190,7 +190,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         return builder.build();
     }
 
-    //获取所有的租户信息
+    //Get all tenant information
     public void forEachRenderByBuildId(UUID buildId, Consumer<WareHouseRenter> f) {
         List<WareHouseRenter> renter = GameDb.getAllRenterByBuilderId(buildId);
         if(renter != null&&renter.size()>0) {
@@ -198,7 +198,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         }
     }
 
-    //上架功能
+    //Shelf function
     @Override
     public boolean addshelf(Item mi, int price, boolean autoReplenish) {
         if(!this.store.has(mi.key, mi.n))
@@ -216,7 +216,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
         if(this.shelf.del(id, n)) {
             if(unLock)
                 this.store.unLock(id, n);
-            else{//如果是消费，那么需要消费lock的数量
+            else{//If it is consumption, then the number of locks that need to be consumed
                 this.store.consumeLock(id, n);
             }
             return true;
@@ -327,7 +327,7 @@ public class WareHouseRenter implements Serializable, IStorage, IShelf {
     public boolean delItem(Item item) {
         return this.store.delItem(item);
     }
-    public boolean isOverTime() {//是否超期了
+    public boolean isOverTime() {//Is it overdue
         return System.currentTimeMillis() > beginTs + TimeUnit.HOURS.toMillis(hourToRent);
     }
 

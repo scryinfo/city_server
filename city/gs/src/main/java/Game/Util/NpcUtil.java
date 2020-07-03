@@ -2,11 +2,11 @@ package Game.Util;
 
 public class NpcUtil {
     /** 
-     * 随机指定范围内N个不重复的数 
-     * 最简单最基本的方法 
-     * @param min 指定范围最小值 
-     * @param max 指定范围最大值 
-     * @param n 随机数个数 
+     * Randomly specify N unique numbers in the range
+     * The simplest and most basic method
+     * @param min Minimum value of specified range 
+     * @param max Maximum specified range
+     * @param n Random number 
      */  
     public static int[] getDifferentIndex(int min, int max, int n){  
         if (n > (max - min + 1) || max < min) {  

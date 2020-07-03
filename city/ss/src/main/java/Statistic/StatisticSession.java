@@ -71,9 +71,9 @@ public class StatisticSession {
 		UUID buildingId = Util.toUuid(((Ss.Id)message).getId().toByteArray());
 		Ss.BuildingIncome.Builder builder = Ss.BuildingIncome.newBuilder();
 		builder.setBuildingId(Util.toByteString(buildingId));
-		Map<Long, Long> income = SummaryUtil.getBuildDayIncomeById(buildingId);//建筑今日的营收
-		Map<Long, Long> pay = SummaryUtil.getBuildDayPayById(buildingId);//建筑今日的支出
-		//合并收入支出
+		Map<Long, Long> income = SummaryUtil.getBuildDayIncomeById(buildingId);//Construction revenue today
+		Map<Long, Long> pay = SummaryUtil.getBuildDayPayById(buildingId);//Construction expenditures today
+		//Consolidated revenue and expenditure
 		Map<Long,Ss.NodeIncome> nodes = new HashMap<>();
 		income.forEach((k,v)->{
 			Ss.NodeIncome.Builder node = Ss.NodeIncome.newBuilder();
@@ -161,10 +161,10 @@ public class StatisticSession {
 	public void queryNpcExchangeAmount(short cmd)
 	{
 		Ss.NpcExchangeAmount.Builder builder = Ss.NpcExchangeAmount.newBuilder();
-		//npc购买商品的交易量
+		//npc transaction volume
 		long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
 		long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
-		//npc租房的交易量
+		//npc rental transaction volume
 		long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
 		long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
 
@@ -175,17 +175,17 @@ public class StatisticSession {
 	public void queryExchangeAmount(short cmd)
 	{
 		Ss.ExchangeAmount.Builder builder = Ss.ExchangeAmount.newBuilder();
-		//npc交易量
+		//npc transaction volume
 		long yesterdayNpcBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcBuyInShelf(),CountType.BYDAY);
 		long todayNpcBuyInShelf=SummaryUtil.getTodayData(LogDb.getNpcBuyInShelf());
 		long yesterdayNpcRentApartment=SummaryUtil.getHistoryData(SummaryUtil.getDayNpcRentApartment(),CountType.BYDAY);
 		long todayNpcRentApartment=SummaryUtil.getTodayData(LogDb.getNpcRentApartment());
 		long npcExchangeAmount=yesterdayNpcBuyInShelf+todayNpcBuyInShelf+yesterdayNpcRentApartment+todayNpcRentApartment;
-		//player交易量
+		//player volume
 		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
 		long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
 		long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
-		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf()); // 新版研究所、广告公司也包含在内
+		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf()); // New edition research institutes and advertising companies are also included
 		long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
 		long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
@@ -268,11 +268,11 @@ public class StatisticSession {
 	public void queryPlayerExchangeAmount(short cmd) {
 		Ss.PlayExchangeAmount.Builder builder = Ss.PlayExchangeAmount.newBuilder();
 //        long playerExchangeAmount = SummaryUtil.getTodayData(SummaryUtil.getPlayerExchangeAmount(), CountType.BYSECONDS);
-		//player交易量
+		//player volume
 		long yesterdayPlayerBuyGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyGround(),CountType.BYDAY);
 		long todayPlayerBuyGround=SummaryUtil.getTodayData(LogDb.getBuyGround());
 		long yesterdayPlayerBuyInShelf=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerBuyInShelf(),CountType.BYDAY);
-		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf()); // 新版研究所、数据公司也包含在内
+		long todayPlayerBuyInShelf=SummaryUtil.getTodayData(LogDb.getBuyInShelf()); // New research institutes and data companies are also included
 		long yesterdayPlayerRentGround=SummaryUtil.getHistoryData(SummaryUtil.getDayPlayerRentGround(),CountType.BYDAY);
 		long todayPlayerRentGround=SummaryUtil.getTodayData(LogDb.getRentGround());
 		long playerExchangeAmount = yesterdayPlayerBuyGround + todayPlayerBuyGround + yesterdayPlayerBuyInShelf
@@ -281,7 +281,7 @@ public class StatisticSession {
         this.write(Package.create(cmd, builder.build()));
     }
 
-	// 查询一周曲线图
+	// Query one week curve
 	public void queryPlayerGoodsCurve(short cmd, Message message) {
 		Ss.PlayerGoodsCurve curve = (Ss.PlayerGoodsCurve) message;
 		long id = curve.getId();
@@ -304,13 +304,13 @@ public class StatisticSession {
 	public void queryPlayerIncomePayCurve(short cmd, Message message)
 	{
 		UUID id = Util.toUuid(((Ss.Id) message).getId().toByteArray());
-		Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();//用于统计收入和支出的合并数据
-		/*前29天的收入支出数据（按天统计）*/
+		Map<Long,Ss.PlayerIncomePayCurve.PlayerIncomePay> totalMap = new TreeMap<>();//Consolidated data used to count income and expenses
+		/*Income and expenditure data for the first 29 days (by day)*/
 		Map<Long, Long> playerIncomeMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerIncome(),id);
 		Map<Long, Long> playerPayMap=SummaryUtil.queryPlayerIncomePayCurve(SummaryUtil.getDayPlayerPay(),id);
 		Map<Long, Long> monthTotalIncome = TotalUtil.getInstance().monthTotal(playerIncomeMap);
 		Map<Long, Long> monthTotalPay = TotalUtil.getInstance().monthTotal(playerPayMap);
-		//1.处理收入信息
+		//1.Processing income information
 		monthTotalIncome.forEach((k,v)->{
 			Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b=Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
 			b.setTime(k);
@@ -318,25 +318,25 @@ public class StatisticSession {
 			b.setPay((monthTotalPay!=null&&monthTotalPay.get(k)!=null)?monthTotalPay.get(k):0);
 			totalMap.put(k,b.build());
 		});
-		//2.处理支出信息
+		//2.Processing expenditure information
 		for (Map.Entry<Long, Long> pay : monthTotalPay.entrySet()) {
-			//如果在收入中已经处理了，则跳过
+			//If already processed in the income, skip
 			Long time = pay.getKey();
 			if(totalMap.containsKey(time)){
 				continue;
 			}
 			Ss.PlayerIncomePayCurve.PlayerIncomePay.Builder b = Ss.PlayerIncomePayCurve.PlayerIncomePay.newBuilder();
-			//添加其他的信息
+			//Add additional information
 			b.setTime(pay.getKey());
 			b.setPay(pay.getValue());
-			//由于所有的收入在上面已经处理过了，所以，现在不可能存在收入的情况了，统一设置为0 ，一旦经过这里，都是有支出无收入的情况
+			//Since all the income has been processed above, there is no possibility of income now. Set it to 0 uniformly. Once passing here, there will be cases of expenditure and no income
 			b.setIncome(0);
 			totalMap.put(pay.getKey(),b.build());
 		}
-		//3.处理今日最新收入和支出信息（之恶杰从LogDb的玩家u收入支出中统计）
+		//3.Handle the latest income and expenditure information for today (the bad guys count from LogDb's player u income and expenditure)
 		Long todayIncome =LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerIncome(), id).stream().reduce(Long::sum).orElse(0L);
 		Long todayPay = LogDb.getTodayPlayerIncomeOrPay(TimeUtil.todayStartTime(), System.currentTimeMillis(), LogDb.getPlayerPay(), id).stream().reduce(Long::sum).orElse(0L);
-		//返回数据
+		//Return data
 		Ss.PlayerIncomePayCurve.Builder builder=Ss.PlayerIncomePayCurve.newBuilder();
 		builder.setId(Util.toByteString(id));
 		builder.setTodayIncome(todayIncome);
@@ -350,7 +350,7 @@ public class StatisticSession {
 		int itemId = ((Ss.GoodsSoldDetailCurve) message).getItemId();
 		UUID produceId = Util.toUuid(((Ss.GoodsSoldDetailCurve) message).getProduceId().toByteArray());
 
-		Map<Long,Ss.GoodsSoldDetailCurve.GoodsSoldDetail> totalMap = new TreeMap<>();//用于统计商品的销售量和销售额的合并数据
+		Map<Long,Ss.GoodsSoldDetailCurve.GoodsSoldDetail> totalMap = new TreeMap<>();//Consolidated data used to count product sales and sales
 		Map<Long, Document> goodsSoldMap=SummaryUtil.queryGoodsSoldDetailCurve(SummaryUtil.getDayGoodsSoldDetail(),itemId,produceId);
 		goodsSoldMap.forEach((k,v)->{
 			Ss.GoodsSoldDetailCurve.GoodsSoldDetail.Builder b=Ss.GoodsSoldDetailCurve.GoodsSoldDetail.newBuilder();
@@ -359,9 +359,9 @@ public class StatisticSession {
 			b.setSoldAmount(v.getLong("total"));
 			totalMap.put(k,b.build());
 		});
-		//处理今日最新销售量和销售额信息
+		//Handle today's latest sales volume and sales information
 		List<Document> documentList = LogDb.getDayGoodsSoldDetail(TimeUtil.todayStartTime(),System.currentTimeMillis(), LogDb.getNpcBuyInShelf());
-		//返回数据
+		//Return data
 		Ss.GoodsSoldDetailCurve.Builder builder=Ss.GoodsSoldDetailCurve.newBuilder();
 		builder.setItemId(itemId);
 		builder.setProduceId(Util.toByteString(produceId));
@@ -402,11 +402,11 @@ public class StatisticSession {
 		b.setType(msg.getType());
 		Map<Long,Long> singleMap=new TreeMap<Long,Long>();
 		Map<Long,Long> totalMap=new TreeMap<Long,Long>();
-		//前六天数据
+		//Data for the first six days
 		List<Document> sixDaylist=SummaryUtil.queryWeekIndustryDevelopment(SummaryUtil.getDayIndustryIncome());
-		//前六天每天的行业总收入和每天指定类型建筑的总收入
+		//The total daily income of the industry in the first six days and the total income of the specified types of buildings every day
 		getIndustryIncomeList(sixDaylist,buildType,totalMap,singleMap);
-		//今天不同行业的收入
+		//Today's income in different industries
 		long now=System.currentTimeMillis();
 		List<Document> documentList = LogDb.daySummaryHistoryIncome(TimeUtil.todayStartTime(), now, LogDb.getBuyInShelf());
 		getTodayIndustryIncomeList(documentList,now,0);
@@ -414,10 +414,10 @@ public class StatisticSession {
 		getTodayIndustryIncomeList(documentList,now,Ss.BuildType.RETAILSHOP.getNumber());
 		documentList = LogDb.daySummaryHistoryIncome(TimeUtil.todayStartTime(), now, LogDb.getNpcRentApartment());
 		List<Document> todaylist=getTodayIndustryIncomeList(documentList,now,Ss.BuildType.APARTMENT.getNumber());
-		//...研究所和广告公司
-		//今天的总收入
+		//...Research institutes and advertising companies
+		//Today's total income
 		getIndustryIncomeList(todaylist,buildType,totalMap,singleMap);
-		//一周的数据
+		//One week of data
 		totalMap.forEach((k,v)->{
 			Ss.IndustryDevelopment.CityInfo.Builder industryInfo=Ss.IndustryDevelopment.CityInfo.newBuilder();
 			industryInfo.setTime(k).setAmount(singleMap.get(k)).setTotalAmount(v).setPercent(singleMap.get(k)/v/1.d);
@@ -431,7 +431,7 @@ public class StatisticSession {
 			long total=document.getLong("total");
 			int type=document.getInteger("type");
 			totalMap.put(time,total+(totalMap.get(time)!=null?totalMap.get(time):0));
-			if(buildType==type){//每天指定的建筑类型的总收入
+			if(buildType==type){//The total revenue of the specified building type per day
 				singleMap.put(time,total);
 			}
 		});
@@ -443,9 +443,9 @@ public class StatisticSession {
 			int type= document.getInteger("id");
 			long total=document.getLong("total");
 			if(buildType==0){
-				if(type==21){//原料厂
+				if(type==21){//Raw material factory
 					d=new Document().append("time",now).append("total",total).append("type", Ss.BuildType.MATERIAL.getNumber());
-				}else{//加工厂
+				}else{//Processing plant
 					d=new Document().append("time",now).append("total",total).append("type",  Ss.BuildType.PRODUCE.getNumber());
 				}
 			}
@@ -460,14 +460,14 @@ public class StatisticSession {
 
 		Ss.IndustryCompetition.Builder b=Ss.IndustryCompetition.newBuilder();
 		b.setType(msg.getType());
-		//前六天数据
+		//Data for the first six days
 		List<Document> sixDaylist=SummaryUtil.queryWeekIndustryCompetition(SummaryUtil.getDayBuildingBusiness(),buildType);
 		sixDaylist.forEach(d->{
 			Ss.IndustryCompetition.IndustryInfo.Builder info=Ss.IndustryCompetition.IndustryInfo.newBuilder();
 			info.setCompanyNum(d.getLong("n")).setStaffNum(d.getLong("total")).setTime(d.getLong("time"));
 			b.addIndustryInfo(info);
 		});
-		//今天的数据
+		//Today's data
         List<Document> todaylist=LogDb.playerBuildingBusiness(TimeUtil.todayStartTime(),System.currentTimeMillis(),LogDb.getPlayerBuildingBusiness(),buildType);
         todaylist.forEach(d->{
             Ss.IndustryCompetition.IndustryInfo.Builder info=Ss.IndustryCompetition.IndustryInfo.newBuilder();
@@ -476,35 +476,35 @@ public class StatisticSession {
         });
 		this.write(Package.create(cmd,b.build()));
     }
-	/*查询今日的商品销售情况(建筑经营详情,yty)*/
+	/*Check today's merchandise sales (construction details,yty)*/
 	public void queryBuildingSaleDetail(short cmd, Message message){
 		Ss.QueryBuildingSaleDetail saleDetail = (Ss.QueryBuildingSaleDetail) message;
 		UUID bid = Util.toUuid(saleDetail.getBuildingId().toByteArray());
 		int buildingType = saleDetail.getType();
-		//返回数据
+		//Return data
 		Ss.BuildingTodaySaleDetail.Builder builder = Ss.BuildingTodaySaleDetail.newBuilder();
 		builder.setBuildingId(saleDetail.getBuildingId());
-		//1.查询并且获取到7天的销售(出现过的商品)信息
+		//1.Query and get 7 days of sales (products that have appeared) information
 		Map<Long, Map<ItemKey, Document>> historyDetail = SummaryUtil.queryBuildingGoodsSoldDetail(SummaryUtil.getDayBuildingGoodSoldDetail(), bid);
-		/*2.查询今日的经营详情，直接从buyInshelf中统计（需要根据建筑类型来选择统计哪些）*/
+		/*2.Query today's business details, and count directly from buyInshelf (which ones need to be selected according to building type)*/
 		List<Document> todaySale = new ArrayList<>();
 		Long todayStartTime = TimeUtil.todayStartTime();
 		Long now = System.currentTimeMillis();
-		if(buildingType==MetaBuilding.RETAIL){/*只有零售店需要到npc购买统计表中统计数据*/
-			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getNpcBuyInShelf());//统计今天的销售额
+		if(buildingType==MetaBuilding.RETAIL){/*Only retail stores need to go to the statistical data in the npc purchase statistics table*/
+			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getNpcBuyInShelf());//Statistics of today's sales
 		}else{
-			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//统计今天的销售额
+			todaySale = LogDb.buildingDaySaleDetailByBuilding(todayStartTime,now,bid,LogDb.getBuyInShelf());//Statistics of today's sales
 		}
-		//今日收入销售信息
-		Set<ItemKey> todayAllItem = new HashSet<>();//保存今日有哪些商品销售
+		//Today's revenue sales information
+		Set<ItemKey> todayAllItem = new HashSet<>();//Save what products are sold today
 		for (Document d : todaySale) {
 			ItemKey itemKey = new ItemKey(d.getInteger("itemId"), (UUID) d.get("p"));
 			todayAllItem.add(itemKey);
 			Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(d, buildingType, true);
 			builder.addTodaySaleDetail(saleDetail1);
 		}
-		//从7天内的历史记录获取是否有其他的销售记录（有则代表记录为0）
-		Map<ItemKey, Long> yesterdaySale = new HashMap<>();//昨日的销售额度
+		//Obtain whether there are other sales records from the historical records within 7 days (there is a record of 0)
+		Map<ItemKey, Long> yesterdaySale = new HashMap<>();//Yesterday's sales
 		historyDetail.forEach((k,v)->{
 			v.forEach((key,doc)->{
 				if(doc.getLong("time")<TimeUtil.todayStartTime()&&doc.getLong("time")>=TimeUtil.getYesterdayStartTime()){
@@ -512,12 +512,12 @@ public class StatisticSession {
 				}
 				if(!todayAllItem.contains(key)){
 					todayAllItem.add(key);
-					Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(doc, buildingType, false);//统计历史中的收入记录，但今日收益为0
+					Ss.BuildingTodaySaleDetail.TodaySaleDetail saleDetail1 = TotalUtil.totalBuildingSaleDetail(doc, buildingType, false);//Statistical history of income records, but today's income is 0
 					builder.addTodaySaleDetail(saleDetail1);
 				}
 			});
 		});
-		/*求提升比例,如果昨天的销售记录中存在，就取出计算比例，只有今天的就设置为1，今天和昨天都没有设置为0 */
+		/*To increase the ratio, if yesterday's sales record exists, the calculation ratio is taken out, only today's is set to 1, neither today nor yesterday is set to 0 */
 		for (Ss.BuildingTodaySaleDetail.TodaySaleDetail.Builder todaySaleInfo : builder.getTodaySaleDetailBuilderList()) {
 			ItemKey itemKey = new ItemKey(todaySaleInfo.getItemId(),Util.toUuid(todaySaleInfo.getProducerId().toByteArray()));
 			if(yesterdaySale.containsKey(itemKey))
@@ -533,7 +533,7 @@ public class StatisticSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	//获取商品历史统计（7天）(建筑经营详情,yty)
+	//Obtain historical statistics of goods (7 days) (Construction details,yty)
 	public void queryHistoryBuildingSaleDetail(short cmd, Message message){
 		Ss.QueryHistoryBuildingSaleDetail itemInfo = (Ss.QueryHistoryBuildingSaleDetail) message;
 		UUID bid = Util.toUuid(itemInfo.getBuildingId().toByteArray());
@@ -561,7 +561,7 @@ public class StatisticSession {
 		this.write(Package.create(cmd,builder.build()));
 	}
 
-	//城市信息-行业收入
+	//City Information-Industry Revenue
 	public void queryIndustryIncome(short cmd) {
 		List<IndustryInfo> infos = SummaryUtil.queryIndustryIncom();
 		Map<Long, Map<Integer, Long>> map = SummaryUtil.queryInfo(infos);
@@ -579,16 +579,16 @@ public class StatisticSession {
 			});
 
 		}
-		// 今日行业收入
+		// Industry revenue today
 		builder.addInfo(SummaryUtil.queryTodayIncome());
 		this.write(Package.create(cmd, builder.build()));
 
 	}
 
-	// 土地或住宅
+	//Land or residence
 	public void queryGroundOrApartmentAvgPrice(short cmd, Message message) {
 		Gs.Bool bool = (Gs.Bool) message;
-		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(bool.getB()); // t 为住宅 f为土地
+		Map<Long, Double> map = SummaryUtil.queryAverageTransactionprice(bool.getB()); // t is house f is land
 		Ss.AverageTransactionprice.Builder builder = Ss.AverageTransactionprice.newBuilder();
 		if (!map.isEmpty() && map!=null) {
 			map.forEach((k, v) -> {
@@ -600,18 +600,18 @@ public class StatisticSession {
 		this.write(Package.create(cmd, builder.build()));
 	}
 
-	// 城市信息-全城销售额
+	// City Information-Citywide Sales
     public void queryCityTransactionAmount(short cmd, Message message) {
         Gs.Bool bool = (Gs.Bool) message;
         Ss.CityTransactionAmount.Builder builder = Ss.CityTransactionAmount.newBuilder();
 		builder.setFlag(bool.getB());
-        if (bool.getB()) { // 历史记录
+        if (bool.getB()) { // history record
             Map<Long, Long> map = SummaryUtil.queryCityTransactionAmount(SummaryUtil.getCityTransactionAmount());
             map.forEach((k, v) -> {
                 Ss.CityTransactionAmount.Amount.Builder amountBuilder = builder.addAmountBuilder();
                 amountBuilder.setTime(k).setSum(v);
             });
-        } else { // 今日记录
+        } else { // Today's record
             Map<Long, Long> map = SummaryUtil.queryCurrCityTransactionAmount(LogDb.getPlayerIncome());
             if (map != null && !map.isEmpty()) {
                 map.forEach((k, v) -> {

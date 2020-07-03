@@ -10,7 +10,7 @@ public class SignatureUtils {
     public static final String ALGORITHM = "EC";
     public static final String SIGN_ALGORITHM = "SHA256withECDSA";
 
-    // 初始化密钥对
+    // Initialize the key pair
     public static KeyPair initKey() {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM);
@@ -23,75 +23,75 @@ public class SignatureUtils {
         }
     }
 
-    // 获取公钥
+    // Get public key
     public static byte[] getPublicKey(KeyPair keyPair) {
         byte[] bytes = keyPair.getPublic().getEncoded();
         return bytes;
     }
 
-    // 获取公钥
+    // Get public key
     public static String getPublicKeyStr(KeyPair keyPair) {
         byte[] bytes = keyPair.getPublic().getEncoded();
         return encodeHex(bytes);
     }
 
-    // 获取私钥
+    // Get private key
     public static byte[] getPrivateKey(KeyPair keyPair) {
         byte[] bytes = keyPair.getPrivate().getEncoded();
         return bytes;
     }
 
-    // 获取私钥
+    // Get private key
     public static String getPrivateKeyStr(KeyPair keyPair) {
         byte[] bytes = keyPair.getPrivate().getEncoded();
         return encodeHex(bytes);
     }
 
-    // 签名
+    // signature
     public static byte[] sign(byte[] data, byte[] privateKey, String signAlgorithm) {
         try {
-            // 还原使用
+            // Restore to use
             PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey);
             KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
             PrivateKey priKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-            // 1、实例化Signature
+            // 1、Instantiate Signature
             Signature signature = Signature.getInstance(signAlgorithm);
-            // 2、初始化Signature
+            // 2、Initialize Signature
             signature.initSign(priKey);
-            // 3、更新数据
+            // 3、update data
             signature.update(data);
-            // 4、签名
+            // 4、signature
             return signature.sign();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    // 验证
+    // verification
     public static boolean verify(byte[] data, byte[] publicKey, byte[] sign, String signAlgorithm) {
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey);
             KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
             PublicKey pubKey = keyFactory.generatePublic(keySpec);
-            // 1、实例化Signature
+            // 1、Instantiate Signature
             Signature signature = Signature.getInstance(signAlgorithm);
-            // 2、初始化Signature
+            // 2、Initialize Signature
             signature.initVerify(pubKey);
-            // 3、更新数据
+            // 3、update data
             signature.update(data);
-            // 4、签名
+            // 4、signature
             return signature.verify(sign);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    // 数据准16进制编码
+    // Data quasi-hexadecimal encoding
     public static String encodeHex(final byte[] data) {
         return encodeHex(data, true);
     }
 
-    // 数据转16进制编码
+    // Data to hexadecimal encoding
     public static String encodeHex(final byte[] data, final boolean toLowerCase) {
         final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -109,7 +109,7 @@ public class SignatureUtils {
     public static void testfun() {
         String str = "java小工匠";
         byte[] data = str.getBytes();
-        // 初始化密钥度
+        // Initial key
         KeyPair keyPair1 = initKey();
         byte[] publicKey1 = getPublicKey(keyPair1);
         byte[] privateKey1 = getPrivateKey(keyPair1);
@@ -120,9 +120,9 @@ public class SignatureUtils {
         byte[] publicKey2 = getPublicKey(keyPair2);
         byte[] privateKey2 = getPrivateKey(keyPair2);
 
-        // 签名
+        // signature
         byte[] sign = sign(str.getBytes(), privateKey1, SIGN_ALGORITHM);
-        // 验证
+        // verification
         boolean b = verify(data, publicKey1, sign, SIGN_ALGORITHM);
         System.out.println("验证:" + b);
     }

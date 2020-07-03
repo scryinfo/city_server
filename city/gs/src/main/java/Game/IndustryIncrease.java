@@ -13,13 +13,13 @@ public class IndustryIncrease {
 	
     @Id
     @Column(name = "buildingType")
-    private int buildingType; //建筑类型
+    private int buildingType; //Building Type
     
     @Column(name = "industryMoney")
-    private long industryMoney; //行业涨薪指数
+    private long industryMoney; //Industry salary increase index
     
     @Column(name = "industrySalary")
-    private double industrySalary; //行业工资
+    private double industrySalary; //Industry wages
     
 	public IndustryIncrease() {
 		super();

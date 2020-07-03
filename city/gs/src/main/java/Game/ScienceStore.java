@@ -10,7 +10,7 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 import javax.persistence.*;
 import java.util.*;
 
-/*资料库（已开启的资料，等同于以前的仓库）*/
+/*Database (the opened data is equivalent to the previous warehouse)*/
 @Entity
 @SelectBeforeUpdate(false)
 public class ScienceStore{
@@ -22,16 +22,16 @@ public class ScienceStore{
     }
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    private Map<ItemKey, Integer> inHand = new HashMap<>();      //实际有的科技
+    private Map<ItemKey, Integer> inHand = new HashMap<>();      //The actual technology
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    private Map<ItemKey, Integer> locked = new HashMap<>();      //出售中的科技
+    private Map<ItemKey, Integer> locked = new HashMap<>();      //Technology for sale
 
 
 
     public List<Gs.ScienceStoreItem> toProto(){
-        /*合并2张表*/
+        /*Combine 2 tables*/
         List<Gs.ScienceStoreItem> list = new ArrayList<>();
         List<ItemKey> totalKey = new ArrayList<>();
         this.inHand.forEach((k,v)->{
@@ -50,7 +50,7 @@ public class ScienceStore{
         return list;
     }
 
-    public int getAllNum(){/*返回仓库的库存所有数量*/
+    public int getAllNum(){/*Return all the stock quantity in warehouse*/
         int inhand = this.inHand.entrySet().stream().mapToInt(e -> e.getValue()).sum();
         int locked = this.locked.entrySet().stream().mapToInt(e -> e.getValue()).sum();
         return inhand + locked;

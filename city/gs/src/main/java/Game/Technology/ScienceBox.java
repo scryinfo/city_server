@@ -9,7 +9,7 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 import javax.persistence.*;
 import java.util.*;
 
-/*存放未开启的资料*/
+/*Store unopened data*/
 @Entity
 @SelectBeforeUpdate(false)
 public class ScienceBox {
@@ -22,9 +22,9 @@ public class ScienceBox {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
-    private Map<ItemKey, Integer> allBox = new HashMap<>();      //实际有的科技
+    private Map<ItemKey, Integer> allBox = new HashMap<>();      //The actual technology
 
-    /*未开启宝箱的proto*/
+    /*Proto not opened*/
     public List<Gs.Item> toProto(){
         List<Gs.Item> boxInfo = new ArrayList<>();
         allBox.forEach((k,v)->{

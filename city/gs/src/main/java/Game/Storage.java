@@ -121,7 +121,7 @@ public class Storage implements IStorage {
     private Map<ItemKey, Integer> locked = new HashMap<>();
 
     @Column(name = "other_use_size")
-    private int otherUseSize=0;//其他使用容量，集散中心仓库出租需要设置此容量
+    private int otherUseSize=0;//Other usage capacity, this capacity needs to be set for warehouse rental
 
     void setCapacity(int capacity) {
         this.capacity = capacity;
@@ -200,10 +200,10 @@ public class Storage implements IStorage {
     public boolean delItem(Item item) {
         if(!this.has(item.key, item.n))
             return false;
-        if(inHand.get(item.key)==item.n){       //删除货物
+        if(inHand.get(item.key)==item.n){       //Delete goods
             inHand.remove(item.key);
         }else {
-            this.inHand.put(item.key, inHand.get(item.key) - item.n);   //从已有的仓库中删除指定的数量
+            this.inHand.put(item.key, inHand.get(item.key) - item.n);   //Delete the specified quantity from the existing warehouse
         }
         return true;
     }
@@ -244,7 +244,7 @@ public class Storage implements IStorage {
         this.otherUseSize = otherUseSize;
     }
 
-    //当前货架是否可以存储
+    //Whether the current shelf can be stored
     public boolean canSave(ItemKey item,int n){
         if(n == 0)
             return true;
@@ -260,7 +260,7 @@ public class Storage implements IStorage {
         return true;
     }
 
-    public void clearData(){//清除当前仓库的所有数据
+    public void clearData(){//Clear all data in the current warehouse
         this.inHand.clear();
         this.inHandPrice.clear();
         this.locked.clear();

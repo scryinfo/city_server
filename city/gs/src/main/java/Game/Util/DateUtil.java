@@ -10,7 +10,7 @@ public class DateUtil{
 	static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	/**
-	* 得到本周周一
+	* Get this week monday
 	*/
 	public static String getMondayOfThisWeek() {
 		Calendar c = Calendar.getInstance();
@@ -21,7 +21,7 @@ public class DateUtil{
 		return format.format(c.getTime());
 	}
 	/**
-	* 得到本周周日24点
+	* Get 24 o'clock this Sunday
 	*/
 	public static long getSundayOfThisWeek() {
 		Calendar c = Calendar.getInstance();
@@ -35,7 +35,7 @@ public class DateUtil{
 		return c.getTime().getTime();
 	}
 	/**
-	* 得到今天0点
+	* Get 0 o'clock today
 	*/
 	public static long getTodayStart(){
  	    Calendar calendar = Calendar.getInstance();
@@ -48,7 +48,7 @@ public class DateUtil{
         return endDate.getTime();
     }
     /**
-	* 得到今天晚上24点
+	* Get at 24 tonight
 	*/
 	public static long getTodayEnd(){
  	    Calendar calendar = Calendar.getInstance();
@@ -62,7 +62,7 @@ public class DateUtil{
         return endDate.getTime();
     }
 	/**
-	* 得到当前小时55分
+	* Get the current hour 55 minutes
 	*/
 	public static long getCurrentHour55(){
         Calendar calendar = Calendar.getInstance();
@@ -74,9 +74,9 @@ public class DateUtil{
         return endTime;
     }
 	public static void main(String[] args) throws IOException {
-		//本周周一
+		//Monday this week
 		getMondayOfThisWeek();
-		//得到本周周日
+		//Get this week sunday
 		getSundayOfThisWeek();
 		System.out.println(format.format(getSundayOfThisWeek()));
 		System.out.println(format.format(getTodayEnd()));
@@ -85,7 +85,7 @@ public class DateUtil{
 	}
 
 	public static long  getNowSecond(){
-		//得到今天经过的秒数
+		//Get the number of seconds elapsed today
 		Calendar calendar = Calendar.getInstance();
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
 		int minute = calendar.get(Calendar.MINUTE);
@@ -93,7 +93,7 @@ public class DateUtil{
 		int todaySecond = (hour * 3600 + minute * 60 + seconds);
 		return todaySecond;
 	}
-	//今日的开始时间
+	//Today's start time
 	public static Long todayStartTime(){
 		TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
 		Calendar calendar = Calendar.getInstance(timeZone);
@@ -105,13 +105,13 @@ public class DateUtil{
 		return calendar.getTime().getTime();
 	}
 
-	//获取指定时间的起始时间
+	//Get the start time of the specified time
 	public static Long getTimeDayStartTime(Long time){
-		//获取东八区的时间
+		//Get the time in Dongba District
 		TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
 		Calendar calendar = Calendar.getInstance(timeZone);
 		calendar.setTime(new Date(time));
-		//首先把时间设置到最初始时间
+		//First set the time to the initial time
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);

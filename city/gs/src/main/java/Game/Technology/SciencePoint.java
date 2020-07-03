@@ -6,7 +6,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.util.UUID;
 
-/*科技点*/
+/*Technology Point*/
 @Entity
 public class SciencePoint {
     @Id

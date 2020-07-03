@@ -47,7 +47,7 @@ public class City {
     private TreeMap<Integer, Integer> topGoodQty;
     private Map<Integer, Integer> topBuildingQty = new HashMap<>();
     private Map<Integer, IndustryIncrease> industryMoneyMap = new HashMap<>();
-    private Map<Building,Double> moveKnownApartmentMap=new HashMap<Building,Double>(); //应当在加载玩家住宅建筑、建筑开业时进行缓存，建筑拆除和停业时删除缓存
+    private Map<Building,Double> moveKnownApartmentMap=new HashMap<Building,Double>(); //The cache should be loaded when the player's residential building is loaded or the building is opened, and the cache should be deleted when the building is demolished and closed
     Map<GoodFilter,Set<GoodSellInfo>> retailShopGoodMap=new HashMap<GoodFilter,Set<GoodSellInfo>>();
     private ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
@@ -59,7 +59,7 @@ public class City {
     public int[] timeSection() {
         return meta.timeSection;
     }
-    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);//1分钟转为200纳秒颗粒数
+    public final static long UpdateIntervalNano = TimeUnit.MILLISECONDS.toNanos(200);//1 minute to 200 nanosecond particles
     public MetaCity getMeta() {
         return meta;
     }
@@ -139,7 +139,7 @@ public class City {
 
     private void initAllBuildings() {
         this.playerBuilding.values().forEach(m->m.values().forEach(b->b.init()));
-        instance.initTypeBuildings();//初始化不同的建筑类型,建筑分类
+        instance.initTypeBuildings();//Initialize different building types, building classification
     }
 
     public static City instance() {
@@ -155,7 +155,7 @@ public class City {
         }
         return 0;
     }
-    // 获取玩家所有的建筑工人
+    // Get all construction workers from the player
     public  long getPlayerStaffNum(UUID playerId)
     {
         try {
@@ -200,7 +200,7 @@ public class City {
 
         this.lastHour = this.localTime().getHour();
 
-        //行业涨薪指数
+        //Industry salary increase index
         //loadIndustryIncrease();
     }
     private void loadSysBuildings() {
@@ -227,7 +227,7 @@ public class City {
             list.forEach(industry->{
                 industryMoneyMap.put(industry.getBuildingType(),industry);
             });
-        }else{//初始化工资
+        }else{//Initial salary
             MetaData.getSalaryMap().forEach((k,v)->{
                 GameDb.saveOrUpdate(new IndustryIncrease(k,0));
                 industryMoneyMap.put(k,new IndustryIncrease(k,0));
@@ -297,14 +297,14 @@ public class City {
         specialTick(diffNano);
         TickManager.instance().tick(diffNano);
         PromotionMgr.instance().update(diffNano);
-        //发放失业金
+        //Pay unemployment benefits
         updateInsurance(diffNano);
-        //计算下周行业工资
+        //Calculate industry wages next week
         updateIndustryMoney(diffNano);
         BuildingUtil.instance().update(diffNano);
-        //繁荣度统计
+        //Prosperity statistics
         ProsperityManager.instance().totalProsperity(diffNano);
-        // 历史成交
+        // Historical deal
         GuidePriceMgr.instance().update(diffNano);
         IndustryMgr.instance().update(diffNano);
         CityLevel.instance().update(diffNano);
@@ -342,8 +342,8 @@ public class City {
         if (this.insuranceTimer.update(diffNano)) {
             Map<UUID, Npc> map=NpcManager.instance().getUnEmployeeNpc();
             map.forEach((k,v)->{
-                if(v.getUnEmployeddTs()>=TimeUnit.HOURS.toMillis(24)){ //失业超过24小时
-                    v.addMoney((int) (City.instance().getAvgIndustrySalary()*MetaData.getCity().insuranceRatio));  //失业人员领取社保
+                if(v.getUnEmployeddTs()>=TimeUnit.HOURS.toMillis(24)){ //Unemployed for more than 24 hours
+                    v.addMoney((int) (City.instance().getAvgIndustrySalary()*MetaData.getCity().insuranceRatio));  //Unemployed people receive social security
                 }
             });
             GameDb.saveOrUpdate(map.values());
@@ -352,10 +352,10 @@ public class City {
 
     private void updateIndustryMoney(long diffNano) {
         if (this.industryMoneyTimer.update(diffNano)) {
-            //跌幅 =   (1 - 社保发放比例 - 税收比例) * 失业率
+            //Decrease = (1-Social Security Distribution Ratio-Taxation Ratio) * Unemployment Rate
             double unEmpRatio=NpcManager.instance().getUnEmployeeNpcCount()/(double)(NpcManager.instance().getUnEmployeeNpcCount()+NpcManager.instance().getNpcCount());
             double decrMoney=(1-MetaData.getCity().taxRatio / 100.d-MetaData.getCity().insuranceRatio / 100.d)*unEmpRatio;
-            // 行业涨薪指数 / 行业人数<0.001  不清0
+            // Industry salary increase index / industry number <0.001 not clear 0
             industryMoneyMap.forEach((k,v)->{
                 Map<Integer, Long> industryNpcNumMap=NpcManager.instance().countNpcByBuildingType();
                 double r=v.getIndustryMoney()/(double)industryNpcNumMap.get(k);
@@ -364,11 +364,11 @@ public class City {
                     industryMoneyMap.put(k, v);
                     GameDb.saveOrUpdate(new IndustryIncrease(k,0l));
                 }
-                //下周行业工资 = 行业工资 * （1-跌幅） + 行业涨薪指数 / 行业人数
+                //Industry salary next week = industry salary * (1-decrease) + industry salary increase index / industry number
                 double nextIndustrySalary=v.getIndustrySalary()*(1-decrMoney)+ r;
                 IndustryIncrease ii=new IndustryIncrease(k,0l,nextIndustrySalary);
                 industryMoneyMap.put(k, ii);
-                GameDb.saveOrUpdate(ii);  //更新行业工资
+                GameDb.saveOrUpdate(ii);  //Update industry wages
             });
 
         }
@@ -399,15 +399,15 @@ public class City {
         NpcManager.instance().timeSectionTick(newIndex, nowHour, hours);
         allBuilding.forEach((k,v)->v.timeSectionTick(newIndex, nowHour, hours));
     }
-    //秒转纳秒
+    //Seconds to nanoseconds
     public static long senond2Ns(int sd){
         return TimeUnit.SECONDS.toNanos(sd);
     }
 
-    //特殊的tick
-    private static long _elapsedtime = 0 ;      //上次更新时间
-    public static final int second = 20;        //tick间隔时间，秒为单位
-    public static final long _upDeltaNs = TimeUnit.MILLISECONDS.toNanos(1000*second); //间隔时间换算成纳秒
+    //Special tick
+    private static long _elapsedtime = 0 ;      //Last update time
+    public static final int second = 20;        //tick interval, in seconds
+    public static final long _upDeltaNs = TimeUnit.MILLISECONDS.toNanos(1000*second); //Interval time converted to nanoseconds
     private void specialTick(long diffNano){
         /*if(_elapsedtime < _upDeltaNs){
             _elapsedtime += diffNano;
@@ -533,24 +533,24 @@ public class City {
 
     public void delBuilding(Building building) {
         //   List npcs = building.destroy();
-        building.addUnEmployeeNpc();//添加失业人员
+        building.addUnEmployeeNpc();//Add unemployed
         this.allBuilding.remove(building.id());
         Map<UUID, Building> buildings = this.playerBuilding.get(building.ownerId());
         assert buildings != null;
         buildings.remove(building.id());
-        //类型建筑中也要删除
+        //Type buildings should also be deleted
         this.typeBuilding.get(building.type()).remove(building);
         moveKnownApartmentMap.remove(building);
         updateRetailShopGoodMapOrBuilding(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].del(building);
-        //重置土地建筑
+        //Reset land construction
         for(int x = building.area().l.x; x <= building.area().r.x; ++x) {
             for(int y = building.area().l.y; y <= building.area().r.y; ++y) {
                 terrain[x][y] = TERRIAN_NONE;
             }
         }
-        //更新零售店或者住宅建筑最高最低品质
+        //Update the highest and lowest quality of retail stores or residential buildings
         if(building.type()==MetaBuilding.APARTMENT||building.type()==MetaBuilding.RETAIL){
             BuildingUtil.instance().updateMaxOrMinTotalQty();
         }
@@ -572,7 +572,7 @@ public class City {
         //     List updates = b.hireNpc();
         List updates = new ArrayList();
         take(b);
-        //城市建筑突破,建筑数量达到100,发送广播给前端,包括市民数量，时间
+        //City building breakthrough, the number of buildings reaches 100, send broadcast to the front end, including the number of citizens, time
         if(allBuilding!=null&&allBuilding.size()>=100){
             GameServer.sendToAll(Package.create(GsCode.OpCode.cityBroadcast_VALUE,Gs.CityBroadcast.newBuilder()
                     .setType(5)
@@ -582,7 +582,7 @@ public class City {
             LogDb.cityBroadcast(null,null,0l,allBuilding.size(),5);
         }
         b.init();
-        //更新全城最高最低零售店或者住宅建筑品质
+        //Update the highest and lowest retail store or residential building quality in the city
         if(b.type()==MetaBuilding.APARTMENT||b.type()==MetaBuilding.RETAIL){
             BuildingUtil.instance().updateMaxOrMinTotalQty();
         }
@@ -605,7 +605,7 @@ public class City {
         calcuTerrain(building);
         this.allBuilding.put(building.id(), building);
         this.playerBuilding.computeIfAbsent(building.ownerId(), k->new HashMap<>()).put(building.id(), building);
-        //同步类型建筑map
+        //Sync type building map
         this.typeBuilding.computeIfAbsent(building.type(), k -> new HashSet<>()).add(building);
         GridIndex gi = building.coordinate().toGridIndex();
         this.grids[gi.x][gi.y].add(building);
@@ -616,11 +616,11 @@ public class City {
                 return building.quality();
             return oldV;
         });
-        //购买住宅 moveKnownValue
+        //Buy a house moveKnownValue
         if(building.type()== MetaBuilding.APARTMENT){
             buildApartmentMoveKnownValue(building);
         }
-        //购买零售店moveKnownValue
+        //Buy retail store moveKnownValue
         if(building.type()== MetaBuilding.RETAIL){
             buildRetailMoveKnownValue(building);
         }
@@ -674,7 +674,7 @@ public class City {
         return industryMoneyMap.get(type) != null ? industryMoneyMap.get(type).getIndustrySalary() : 0.0;
     }
 
-    //获取该建筑类型已开放的数量
+    //Get the open number of the building type
     public int getOpentNumByType(int type){
         int count=0;
         Set<Building> buildings = typeBuilding.getOrDefault(type,new HashSet<>());
@@ -685,14 +685,14 @@ public class City {
         return count;
     }
 
-    //封装建筑类型建筑
+    //Encapsulated building type building
     private void initTypeBuildings(){
         forEachBuilding(b->{
             typeBuilding.computeIfAbsent(b.type(), k -> new HashSet<>()).add(b);
         });
     }
 
-    //根据建筑类型获取所有建筑
+    //Get all buildings based on building type
     public int getBuildingNumByType(int type){
         Map<Integer,List<Building>> map=new HashMap<Integer,List<Building>>();
         getAllBuilding().forEach(b->{
@@ -703,10 +703,10 @@ public class City {
         return list!=null?list.size():0;
     }
 
-    public int getTraffic(int x,int y){//获取位置人流量(单块的土地)
+    public int getTraffic(int x,int y){//Get location traffic (single block of land)
         List<Integer> sum = new ArrayList<>();
         Coordinate local = new Coordinate(x, y);
-        //1.找出这个坐标点是否有建筑，没有则为0
+        //1. Find out whether there is a building at this coordinate point, or 0 if there is no building
         GridIndex gridIndex = local.toGridIndex();
         City.instance().forEachBuilding(gridIndex, b -> {
             Collection<Coordinate> coordinates = b.area().toCoordinates();
@@ -716,14 +716,14 @@ public class City {
         });
         return sum.stream().reduce(Integer::sum).orElse(0);
     }
-    //购买住宅moveKnownValue   启动时
+    //When buying a house moveKnownValue starts
     public void buildApartmentMoveKnownValue(Building b){
         moveKnownApartmentMap(b);
     }
-    //变化时更新(修改定价 修改住宅相关eva改变到升级程度 繁荣度变化 时)
+    //Update when changes (modify pricing, modify residential eva change to upgrade degree, and prosperity change)
     public void moveKnownApartmentMap(Building b){
         Apartment apartment=(Apartment)b;
-        //moveKnownValue = ((1 + 住宅品质 / 全城住宅品质均值) + (1 + 住宅知名度 / 全城住宅知名度均值)) * 繁荣度 * 100
+        //moveKnownValue = ((1 + residential quality / average value of residential quality in the city) + (1 + residential popularity / average value of residential recognition in the city)) * prosperity * 100
         double moveKnownValue = ((1 + apartment.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.APARTMENT)) + (1 + apartment.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.APARTMENT))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
         logger.info("moveKnownApartmentMap moveKnownValue: " + moveKnownValue);
         moveKnownApartmentMap.put(b,moveKnownValue);
@@ -731,14 +731,14 @@ public class City {
     public Map<Building,Double> getMoveKnownaApartmentMap(){
         return moveKnownApartmentMap;
     }
-    //购买零售店moveKnownValue   启动时  (修改零售店货架时、零售店上架、下架时)
+    //At the start of the purchase of the moveKnownValue of the retail store (when the retail store shelf is modified, the retail store is put on the shelf, and the shelf is removed)
     public void buildRetailMoveKnownValue(Building b){
         moveKnownRetailMap(b);
     }
-    //变化时更新(修改定价 修改零售店相关eva改变到升级程度 繁荣度变化 时)
+    //Update when changes (modify pricing, modify retail store-related eva change to upgrade level, and prosperity change)
     public void moveKnownRetailMap(Building b){
         RetailShop shop = (RetailShop)b;
-        //moveKnownValue = ((1 + 零售店品质 / 全城零售店品质均值) + (1 + 零售店知名度 / 全城零售店知名度均值)) * 繁荣度 * 100
+        //moveKnownValue = ((1 + retail store quality / average retail store quality across the city) + (1 + retail store popularity / average retail store visibility across the city)) * prosperity * 100
         double moveKnownValue = ((1 + shop.getTotalQty() / AiBaseAvgManager.getInstance().getQualityMapVal(MetaBuilding.RETAIL)) + (1 + shop.getTotalBrand() / AiBaseAvgManager.getInstance().getBrandMapVal(MetaBuilding.RETAIL))) * ProsperityManager.instance().getBuildingProsperity(b) * 100;
 
         Shelf shelf=shop.getShelf();
@@ -756,19 +756,19 @@ public class City {
             goodSellInfo.itemKey=itemKey;
             goodSellInfo.content=shelf.getContent(itemKey);
             goodSellInfo.moveKnownValue=moveKnownValue;
-            retailShopGoodMap.computeIfAbsent(filter,k -> new HashSet<GoodSellInfo>()).add(goodSellInfo); //key为奢侈度和商品种类大类型，value该类型奢侈度对应的零售店和商品信息
+            retailShopGoodMap.computeIfAbsent(filter,k -> new HashSet<GoodSellInfo>()).add(goodSellInfo); //The key is a large type of luxury and product type, and the value of the retail store and product information corresponding to this type of luxury
         });
     }
     public Map<GoodFilter,Set<GoodSellInfo>> getRetailShopGoodMap(){
         return  retailShopGoodMap;
     }
-    /*此方法在停业、拆除建筑的时候调用*/
+    /*This method is called when the business is closed and the building is demolished*/
     public void updateRetailShopGoodMapOrBuilding(Building b){
         if(b instanceof RetailShop||b.outOfBusiness())
             return;
         RetailShop retail = (RetailShop) b;
         Shelf shelf = retail.getShelf();
-        Collection<ItemKey> goodsItemKey = shelf.getGoodsItemKey();//该货架上的所有商品
+        Collection<ItemKey> goodsItemKey = shelf.getGoodsItemKey();//All goods on this shelf
         goodsItemKey.forEach(key->{
             Integer goodId = key.meta.id;
             MetaGood goods=MetaData.getGood(goodId);
@@ -781,13 +781,12 @@ public class City {
             sellInfo.b = b;
             Set<GoodSellInfo> goodSellInfos = retailShopGoodMap.getOrDefault(goodFilter, new HashSet<>());
             if(goodSellInfos.contains(sellInfo))
-                goodSellInfos.remove(sellInfo);//更新奢侈度、类型对应的商品
+                goodSellInfos.remove(sellInfo);//Update products corresponding to luxury and type
         });
     }
     public static final class GoodFilter {
-        public int type = 0; //商品大类
-        public int lux = 0;  //商品奢侈度
-
+        public int type = 0; //Commodity categories
+        public int lux = 0;  //Commodity luxury
         @Override
         public int hashCode() {
             return Integer.parseInt(type+""+lux);
@@ -810,7 +809,7 @@ public class City {
         }
     }
 
-    /*零售店下架时或调用、也可用于移除掉没有数量的商品  （移除单个商品）*/
+    /*It can also be used to remove an unlimited number of items when the retail store is off the shelf (remove a single item)*/
     public void removeRetailGoodInfo(Building b,ItemKey key){
         MetaGood goods=MetaData.getGood(key.meta.id);
         MetaGood.Type type=MetaGood.goodType(goods.id);
@@ -824,14 +823,14 @@ public class City {
     }
 
     public static final class GoodSellInfo {
-        public Building b;   //零售店
-        public ItemKey itemKey; //商品信息
-        public Shelf.Content content; //销售价格
+        public Building b;   //Retail store
+        public ItemKey itemKey; //Product information
+        public Shelf.Content content; //selling price
         public double moveKnownValue;
         public double buyKnownValue;
-        public int cost; //消费预期
-        public double r; //购买权重
-        public int buyNum;//购买数量
+        public int cost; //Consumption expectations
+        public double r; //Purchase weight
+        public int buyNum;//Purchase quantity
 
         @Override
         public int hashCode() {

@@ -8,6 +8,6 @@ public class MetaBuilding {
     public static final int LAB = 15;
     public static final int PUBLIC = 16;
     public static final int TALENT = 17;
-    public static final int WAREHOUSE=17;//集散中心
+    public static final int WAREHOUSE=17;//Distribution center
     public static final int MAX_TYPE_ID = 20;
 }

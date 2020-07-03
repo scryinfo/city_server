@@ -11,7 +11,7 @@ import javax.persistence.*;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/*研究所生产线*/
+/*Research line*/
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class ScienceLineBase {
@@ -38,7 +38,7 @@ public abstract class ScienceLineBase {
     public boolean suspend = false;
 
     @Column(nullable = false)
-    public long ts = 0;      //生产开始时间
+    public long ts = 0;      //Production start time
 
     public ScienceLineBase() {
     }
@@ -85,7 +85,7 @@ public abstract class ScienceLineBase {
     }
 
     public Gs.Line toProto(UUID producerId) {
-        /*获取生生产速度*/
+        /*Get production speed*/
         Eva eva = EvaManager.getInstance().getEva(producerId, item.id, Gs.Eva.Btype.ProduceSpeed_VALUE);
         double v = EvaManager.getInstance().computePercent(eva);
         double speed = item.n * workerNum * (1 + v);

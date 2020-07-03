@@ -38,9 +38,9 @@ public class GroundInfo implements Serializable {
     long sellPrice;
     long rentBeginTs;
     long payTs;
-    int auctionPrice;   //拍地价格
-    long auctionTs;     //拍地的时间戳
-    int groundNum;      //拍卖土地1x1数量
+    int auctionPrice;   //Auction price
+    long auctionTs;     //Time stamp
+    int groundNum;      //1x1 land for auction
     @Column(nullable = false)
     private GroundStatus status = GroundStatus.STATELESS;
     public GroundInfo(int x, int y) {

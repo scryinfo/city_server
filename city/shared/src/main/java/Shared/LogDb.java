@@ -30,8 +30,8 @@ import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
 public class LogDb {
-	public static final int TECHNOLOGY=15;//新版研究所
-	public static final int PROMOTE=16;//新版推广公司
+	public static final int TECHNOLOGY=15;//New Institute
+	public static final int PROMOTE=16;//New promotion company
 	private static MongoClientURI connectionUrl;
 	private static MongoClient mongoClient;
 	private static MongoDatabase database;
@@ -48,7 +48,7 @@ public class LogDb {
 	private static final String NPC_BUY_INSHELF = "npcBuyInShelf";
 	private static final String RENT_GROUND = "rentGround";
 	private static final String BUY_GROUND = "buyGround";
-	private static final String LAND_AUCTION = "landAuction"; //土地拍卖
+	private static final String LAND_AUCTION = "landAuction"; //Land auction
 
 	private static final String EXTEND_BAG = "extendBag";
 	private static final String FLIGHT_BET = "flightBet";
@@ -57,9 +57,9 @@ public class LogDb {
 	private static final String PLAYER_INFO = "playerInfo";
 	private static final String BUILDING_INCOME = "buildingIncome";
 	private static final String BUILDING_PAY = "buildingPay";
-	//研究所日志记录
+	//Institute Log
 	private static final String LABORATORY_RECORD = "laboratoryRecord";
-	// 推广公司日志记录
+	// Promote company logging
 	private static final String PROMOTION_RECORD = "promotionRecord";
 
 	private static final String NPC_RENT_APARTMENT = "npcRentApartment";
@@ -69,33 +69,33 @@ public class LogDb {
 	private static final String FLOW_AND_LIFT = "flowAndLift";
 	private static final String NPCBUY_INRETAILCOL = "npcBuyInRetailCol";
 
-	//集散中心租用仓库的收入记录
+	//Revenue records of the warehouse rented by the distribution center
 	private static final String RENT_WAREHOUSE_INCOME = "rentWarehouseIncome";
 
 	private static final String PLAYER_INCOME = "playerIncome";
 	private static final String PLAYER_PAY = "playerPay";
-	//购买租户上架的商品记录
+	//Purchase of tenant's commodity record
 	private static final String BUY_RENTER_INSHELF = "buyRenterInShelf";
-	//租户仓库收入记录
+	//Tenant warehouse revenue record
 	private static final String RENTER_SHELF_INCOME = "renterShelfIncome";
-	//运输记录（租用仓库之间的运输记录）
+	//Transport records (transport records between rented warehouses)
 	private static final String PAY_RENTER_TRANSFER = "payRenterTransfer";
-	private static final String MINERS_COST= "minersCost";//矿工费用
-	private static final String NPC_MINERS_COST = "npcMinersCost";//npc支付矿工费用
+	private static final String MINERS_COST= "minersCost";//Miner's fee
+	private static final String NPC_MINERS_COST = "npcMinersCost";//npc pays the miner's fee
 
-	//收入通知
+	//Income notice
 	private static final String INCOME_NOTIFY = "incomeNotify";
 
-	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//(离线收入)
+	private static final String SELLER_BUILDING_INCOME = "sellerBuildingIncome";//(Offline revenue)
 	private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
 	private static final String PLAYER_BUILDING_BUSINESS = "playerBuildingBusiness";
 
-	private static final String INDUSTRY_SUPPLYANDDEMAND = "industrySupplyAndDemand"; // 行业供需
-	private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";     // 行业收入表
+	private static final String INDUSTRY_SUPPLYANDDEMAND = "industrySupplyAndDemand"; // Industry supply and demand
+	private static final String DAY_INDUSTRY_INCOME= "dayIndustryIncome";     // Industry income statement
 	private static final String CITY_MONEY_POOL= "cityMoneyPool";
-	/*玩家登陆时长统计(玩家登陆时间统计) yty*/
+	/*Player landing time statistics (player landing time statistics)yty*/
 	private static final String PLAYER_LOGINTIME = "playerLoginTime";
-	//AI购物基础数据
+	//AI shopping basic data
 	private static final String DAY_AI_BASE_AVG = "dayAiBaseAvg";
 
 	//---------------------------------------------------
@@ -119,7 +119,7 @@ public class LogDb {
 
 	private static MongoCollection<Document> playerInfo;
 	private static MongoCollection<Document> buildingIncome;
-	private static MongoCollection<Document> buildingPay;		//建筑支出（不含详细信息，用于建筑曲线图支出统计，非经营详情）
+	private static MongoCollection<Document> buildingPay;		//Construction expenditure (excluding detailed information, used for construction curve expenditure statistics, non-operating details)
 	private static MongoCollection<Document> flightBet;
 	private static MongoCollection<Document> laboratoryRecord;
 	private static MongoCollection<Document> promotionRecord;
@@ -133,25 +133,25 @@ public class LogDb {
 	private static MongoCollection<Document> playerIncome;
 	private static MongoCollection<Document> playerPay;
 	//WareHouserenter
-	private static MongoCollection<Document> buyRenterInShelf;	//购买了租户仓库的商品
-	private static MongoCollection<Document> renterShelfIncome;//租户仓库的收入
-	private static MongoCollection<Document> payRenterTransfer;//租用仓库间的运输记录
+	private static MongoCollection<Document> buyRenterInShelf;	//Purchased goods from tenant warehouse
+	private static MongoCollection<Document> renterShelfIncome;//Tenant warehouse revenue
+	private static MongoCollection<Document> payRenterTransfer;//Transportation records between rented warehouses
 	//npc and player pay Miner cost
-	private static MongoCollection<Document> minersCost;	//矿工费用
-	private static MongoCollection<Document> npcMinersCost;//矿工费用
+	private static MongoCollection<Document> minersCost;	//Miner's fee
+	private static MongoCollection<Document> npcMinersCost;//Miner's fee
 
-	/*用作离线通知*/
-	private static MongoCollection<Document> sellerBuildingIncome;//建筑收入
+	/*Use as offline notification*/
+	private static MongoCollection<Document> sellerBuildingIncome;//Construction revenue
 	private static MongoCollection<Document> dayPlayerIncome;
 	private static MongoCollection<Document> playerBuildingBusiness;
-	// 行业供需
+	// Industry supply and demand
 	private static MongoCollection<Document> industrySupplyAndDemand;
-	// 行业收入--
+	// Industry revenue--
 	private static MongoCollection<Document> dayIndustryIncome;
 	private static MongoCollection<Document> cityMoneyPool;
 
 
-	private static MongoCollection<Document> playerLoginTime; //玩家登录时间统计 Yty
+	private static MongoCollection<Document> playerLoginTime; //Player login time statistics Yty
 
 	public static final String KEY_TOTAL = "total";
 	public static final String KEY_AVG = "avg";
@@ -159,7 +159,7 @@ public class LogDb {
 	private static MongoCollection<Document> incomeNotify;
 	private static MongoCollection<Document> dayAiBaseAvg;
 
-	//保持时间 7 天，单位秒
+	//Hold time 7 days, in seconds
 	public static final long incomeNotify_expire = 7 * 24 * 3600;
 
 	public static void init(String url, String dbName)
@@ -210,20 +210,20 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		laboratoryRecord = database.getCollection(LABORATORY_RECORD)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		//租用仓库
+		//Rent warehouse
 		rentWarehouseIncome = database.getCollection(RENT_WAREHOUSE_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerIncome = database.getCollection(PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerPay = database.getCollection(PLAYER_PAY)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		//购买租户上架商品
+		//Purchase tenant shelves
 		buyRenterInShelf = database.getCollection(BUY_RENTER_INSHELF)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		//租户仓库的收入
+		//Tenant warehouse revenue
 		renterShelfIncome=database.getCollection(RENTER_SHELF_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		//租用仓库间的运输记录
+		//Transportation records between rented warehouses
 		payRenterTransfer = database.getCollection(PAY_RENTER_TRANSFER)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		minersCost=database.getCollection(MINERS_COST)
@@ -233,14 +233,14 @@ public class LogDb {
 
 		incomeNotify = database.getCollection(INCOME_NOTIFY)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		/*离线通知统计使用*/
+		/*Offline notification statistics*/
 		sellerBuildingIncome=database.getCollection(SELLER_BUILDING_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		playerBuildingBusiness = database.getCollection(PLAYER_BUILDING_BUSINESS)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		/*玩家登陆时长统计*/
+		/*Player login time statistics*/
 		playerLoginTime=database.getCollection(PLAYER_LOGINTIME)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		dayAiBaseAvg=database.getCollection(DAY_AI_BASE_AVG)
@@ -251,7 +251,7 @@ public class LogDb {
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
 		cityMoneyPool = database.getCollection(CITY_MONEY_POOL)
 				.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-		/*创建部分表的索引*/
+		/*Create an index of some tables*/
 		createIndex();
 		AtomicBoolean hasIndex = new AtomicBoolean(false);
 		incomeNotify.listIndexes().forEach((Consumer<? super Document>) document ->
@@ -789,7 +789,7 @@ public class LogDb {
 				).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-/*按天统计玩家收入支出（yty）*/
+/*Statistics player income and expenditure by day（yty）*/
 	public static List<Document> dayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection)
 	{
 		List<Document> documentList = new ArrayList<>();
@@ -812,7 +812,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-//获取今日玩家收入支出（yty）
+//Get today's player income and expenses（yty）
 	public static List<Long> getTodayPlayerIncomeOrPay(long startTime, long endTime, MongoCollection<Document> collection,UUID pid){
         List<Long> incomeOrPay = new ArrayList<>();
         collection.find(
@@ -950,8 +950,8 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	//统计建筑1天的支出（yty）
-	public static List<Document> buildingDayPaySummary(long yestodayStartTime, long todayStartTime)		//统计玩家建筑一天的所有支出（不含详细信息）
+	//Calculate 1 day of construction expenditure（yty）
+	public static List<Document> buildingDayPaySummary(long yestodayStartTime, long todayStartTime)		//Count all expenditures of the player's construction day (without detailed information)
 	{
 		List<Document> documentList = new ArrayList<>();
 		Document projectObject = new Document()
@@ -970,11 +970,11 @@ public class LogDb {
 		return documentList;
 	}
 
-	/*统计所有货架建筑的经营详情(包括了零售店)的货物经营详情(yty)*/
+	/*Statistics of the operation details of all shelf buildings (including retail stores)(yty)*/
 	public static Map<Integer,List<Document>> buildingDaySaleDetailIncomeSummary(long yestodayStartTime, long todayStartTime){
 		Map<Integer, List<Document>> map = new HashMap<>();
-		List<Document> factoryInshelf = new ArrayList<>();//工厂类（或者研究所、零售店）货架营收
-		List<Document> retailInshelf = new ArrayList<>();//零售店
+		List<Document> factoryInshelf = new ArrayList<>();//Factory category (or research institute, retail store) shelf revenue
+		List<Document> retailInshelf = new ArrayList<>();//Retail store
 		Document projectObject = new Document()
 				.append("bid","$_id._id.b")
 				.append("itemId","$_id._id.tpi")
@@ -984,7 +984,7 @@ public class LogDb {
 				.append(KEY_TOTAL, "$" + KEY_TOTAL)
 				.append("_id", 0)
 				.append("miner","$miner");
-		//分组id(根据生产者id、建筑id、商品id分组)
+		//Grouping id (grouped by producer id, building id, commodity id)
 		Document groupObject = new Document("_id",
 				new Document("b", "$b")
 						.append("tpi", "$tpi"))
@@ -1000,7 +1000,7 @@ public class LogDb {
 				)
 		).forEach((Block<? super Document>) factoryInshelf::add);
 
-		//再统计零售店建筑的每日经营详情
+		//Recalculate the daily operating details of retail store buildings
 		npcBuyInShelf.aggregate(
 				Arrays.asList(
 						Aggregates.match(and(
@@ -1016,7 +1016,7 @@ public class LogDb {
 		return map;
 	}
 
-	/*统计建筑今日的经营详情)(yty)*/
+	/*Statistics on the operation details of the building today)(yty)*/
 	public static List<Document> buildingDaySaleDetailByBuilding(long startTime,long endTime,UUID bid,MongoCollection<Document> collection){
 		List<Document> record = new ArrayList<>();
 		Document projectObject = new Document()
@@ -1067,7 +1067,7 @@ public class LogDb {
 
 	public static void buyInShelf(UUID buyId, UUID sellId, long n, long price,
 								  UUID producerId, UUID bid, UUID wid,int type,
-								  int typeId,String brand,double score,int buildingType,long minerCost)//yty加入旷工费
+								  int typeId,String brand,double score,int buildingType,long minerCost)//ytyJoin absenteeism fee
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
@@ -1075,8 +1075,8 @@ public class LogDb {
 				.append("b", bid)
 				.append("w", wid)
 				.append("p", price)
-				.append("n",n)				//yty  数量
-				.append("brand",brand)      //yty 品牌名
+				.append("n",n)				//yty  Quantity
+				.append("brand",brand)      //yty Brand name
 				.append("a", n * price-minerCost)
 				.append("i", producerId)
 				.append("tp", type)
@@ -1089,25 +1089,25 @@ public class LogDb {
 
 	public static void  npcBuyInShelf(UUID npcId, UUID sellId, long n, long price,
 								  UUID producerId, UUID bid,int type, int typeId,
-							      String brand,double score,double gbrd,double gqty,double rbrd,double rqty,long minerCost)//yty加入旷工费
+							      String brand,double score,double gbrd,double gqty,double rbrd,double rqty,long minerCost)//ytyJoin absenteeism fee
 	{
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", npcId)
 				.append("d", sellId)
 				.append("b", bid)
 				.append("p", price)
-				.append("n",n)          //yty  数量
-				.append("brand",brand)  //yty 品牌名
+				.append("n",n)          //yty  Quantity
+				.append("brand",brand)  //yty Brand name
 				.append("a", n * price)
 				.append("i", producerId)
 				.append("tp", type)
 				.append("tpi", typeId)
 				.append("score", score)
-				.append("gbrd", gbrd) //商品知名度
-				.append("gqty", gqty) //商品品质
-				.append("rbrd", rbrd) //零售店知名度
-				.append("rqty", rqty)//零售店品质
-				.append("miner",minerCost);//旷工费
+				.append("gbrd", gbrd) //Product awareness
+				.append("gqty", gqty) //Product quality
+				.append("rbrd", rbrd) //Retail store visibility
+				.append("rqty", rqty)//Retail store quality
+				.append("miner",minerCost);//Miner's fee
 		npcBuyInShelf.insertOne(document);
 	}
 
@@ -1167,10 +1167,10 @@ public class LogDb {
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("s", price)
-				.append("n", plist1.size())  // 地块数量
+				.append("n", plist1.size())  // Number of plots
 				.append("a", all)
 				.append("p", positionToDoc(plist1))
-				.append("miner",minerCost);		//yty 旷工费
+				.append("miner",minerCost);		//yty Miner's fee
 		buyGround.insertOne(document);
 	}
 	public static void landAuction(UUID roleId, UUID ownerId, long price, List<Positon> plist1)
@@ -1179,7 +1179,7 @@ public class LogDb {
 		document.append("r", roleId)
 				.append("d", ownerId)
 				.append("n", plist1.size())  // ly
-				.append("s", price/plist1.size()) // ly 单价
+				.append("s", price/plist1.size()) // ly unit price
 				.append("a", price)
 				.append("p", positionToDoc(plist1));
 		landAuction.insertOne(document);
@@ -1236,7 +1236,7 @@ public class LogDb {
 
 	public static void  cityBroadcast(UUID sellerId, UUID buyerId, long cost, int num, int type)
 	{
-		//重大交易不删以前的提示，其他都要删除以前的提示
+		//Do not delete the previous reminder for major transactions
 		if(type!=1){
 			cityBroadcast.deleteMany(and(
 	    			eq("tp",type)
@@ -1257,7 +1257,7 @@ public class LogDb {
 				.append("n", n);
 		npcTypeNum.insertOne(document);
 	}
-	//记录推广成交记录
+	//Record promotion transaction records
 	public static void promotionRecord(UUID sellerId, UUID buyerId,UUID bid,int price,long cost, int typeId,int categoryType,boolean isBuilding) {
 		int type = TYPE_BUILDING;
 		if (!isBuilding) {
@@ -1266,7 +1266,7 @@ public class LogDb {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("s", sellerId);
 		document.append("b", buyerId);
-		document.append("p", price); //每毫秒价格
+		document.append("p", price); //Price per millisecond
 		document.append("a", cost);
 		document.append("bid", bid);
 		document.append("tp", type);
@@ -1275,7 +1275,7 @@ public class LogDb {
 		promotionRecord.insertOne(document);
 	}
 
-	//记录研究所成交记录
+	//Record Institute Transaction Records
 	public static void laboratoryRecord(UUID sellerId, UUID buyerId,UUID bid,int price,long cost, int typeId,boolean isInvent) {
 /*		int type = TYPE_INVENT;
 		if (!isInvent) {
@@ -1293,7 +1293,7 @@ public class LogDb {
 	}
 
 
-	//租用仓库记录：租用时间、结束时间、租金、租用者id、订单编号、租用容量等数据
+	//Lease warehouse records: lease time, end time, rent, renter id, order number, lease capacity and other data
 	public static void rentWarehouseIncome(Long orderId,UUID bid,UUID renterId,Long endTime,int hourToRent,int rent,int rentCapacity){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("or", orderId)
@@ -1319,13 +1319,13 @@ public class LogDb {
 				.append("tp",buildType);
 		playerPay.insertOne(document);
 	}
-	//购买租户上架商品记录
+	//Purchase tenant shelf product record
 	public static void buyRenterInShelf(UUID buyId, UUID sellId, long n, long price,
 										UUID producerId, Long orderId, int type, int typeId){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", buyId)
 				.append("d", sellId)
-				.append("or", orderId)//订单编号
+				.append("or", orderId)//Order number
 				.append("p", price)
 				.append("a", n * price)
 				.append("i", producerId)
@@ -1333,8 +1333,8 @@ public class LogDb {
 				.append("tpi", typeId);
 		buyRenterInShelf.insertOne(document);
 	}
-	//记录租户仓库收入
-	public static void renterShelfIncome(Long orderId,UUID payId,long cost,int type,int typeId){ //租用仓库的货架收入
+	//Record tenant warehouse income
+	public static void renterShelfIncome(Long orderId,UUID payId,long cost,int type,int typeId){ //Revenue from renting warehouse shelves
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("or", orderId)
 				.append("p", payId)
@@ -1344,7 +1344,7 @@ public class LogDb {
 		renterShelfIncome.insertOne(document);
 	}
 
-	//租用仓库之间的运输
+	//Transportation between rented warehouses
 	public static void payRenterTransfer(UUID roleId, long charge, Serializable srcId, Serializable dstId, UUID producerId, int n){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("r", roleId)
@@ -1360,15 +1360,15 @@ public class LogDb {
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("pid", pid)
 				.append("a", money)
-				.append("ratio", ratio);//矿工费用收取比例
+				.append("ratio", ratio);//Proportion of miner fees charged
 		minersCost.insertOne(document);
 	}
 
 	public static void npcMinersCost(UUID npcId,double money,double  ratio){
 		Document document = new Document("t", System.currentTimeMillis());
 		document.append("pid", npcId)//npcId
-				.append("a", money)  //矿工费用
-				.append("ratio", ratio);//矿工费用收取比例
+				.append("a", money)  //Miner's fee
+				.append("ratio", ratio);//Proportion of miner fees charged
 		npcMinersCost.insertOne(document);
 	}
 
@@ -1392,7 +1392,7 @@ public class LogDb {
 		playerBuildingBusiness.insertOne(document);
 	}
 
-	/*玩家登陆时长记录(arg1:玩家id agr2: 登陆时长  arg3:记录的登录时间)*/
+	/*Player login duration record (arg1: player id agr2: login duration arg3: recorded login time)*/
 	public static void playerLoginTime(UUID playerId,Long loginTime,Long recordTime){
 		Document document = new Document("t",System.currentTimeMillis());
 		document.append("p", playerId)
@@ -1444,7 +1444,7 @@ public class LogDb {
 	}
 	public static Long getTodayBuildingPay(UUID buildingId){
 		Long sum=0L;
-		//获取今日建筑的支出金额
+		//Get the amount of construction expenditure today
 		FindIterable<Document> documents = buildingPay.find(and(
 				eq("b", buildingId),
 				gte("t", Util.getTodayStartTs())
@@ -1528,7 +1528,7 @@ public class LogDb {
 		return npcMinersCost;
 	}
 
-	/*用于离线通知，货架收入*/
+	/*Used for offline notifications, shelf revenue*/
 	public static MongoCollection<Document> getSellerBuildingIncome() {
 		return sellerBuildingIncome;
 	}
@@ -1920,15 +1920,15 @@ public class LogDb {
 
 
 	public static class HistoryRecord {
-		public double price;  // 全城住宅均价
-		public double score;  // 全城住宅均品质
-		public double prosp;  // 全城住宅均繁荣度
-		public Map<Integer, Double> material;//原料
-		public Map<Integer, Map<String, Double>> produce; //加工厂
-		public Map<Integer, Map<String, Double>> retail;  //零售店
-		public Map<Integer, Double> laboratory;//研究所
-		public Map<Integer, Double> promotion; //数据公司
-		public double groundPrice; // 土地交易均价
+		public double price;  // Average price of houses in the city
+		public double score;  // All residential properties in the city
+		public double prosp;  // Prosperity of the whole city
+		public Map<Integer, Double> material;//raw material
+		public Map<Integer, Map<String, Double>> produce; //Processing plant
+		public Map<Integer, Map<String, Double>> retail;  //Retail store
+		public Map<Integer, Double> laboratory;//graduate School
+		public Map<Integer, Double> promotion; //Data company
+		public double groundPrice; // Average land transaction price
 
 		public HistoryRecord() {
 		}
@@ -2049,7 +2049,7 @@ public class LogDb {
 		});
 		return avg[0];
 	}
-/*统计一天玩家的登陆时长*/
+/*Count the length of time a player logs in*/
 	public static List<Document> dayPlayerLoginTime(long startTime, long endTime, MongoCollection<Document> collection) {
 		List<Document> documentList = new ArrayList<>();
 		Document groupObject = new Document("_id",
@@ -2248,7 +2248,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	//零售店知名度和品质均值
+	//Retail store visibility and average quality
 	public static List<Document> getNpcBuyInShelfAvg1(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
 		npcBuyInShelf.aggregate(
@@ -2259,7 +2259,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-	//商品知名度和品质均值
+	//Product awareness and average quality
 	public static List<Document> getNpcBuyInShelfAvg2(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
 		npcBuyInShelf.aggregate(
@@ -2270,7 +2270,7 @@ public class LogDb {
 		).forEach((Block<? super Document>) documentList::add);
 		return documentList;
 	}
-//	//商品大类知名度和品质均值
+//	//Merchandise category popularity and average quality
 //	public static List<Document> getNpcBuyInShelfAvg3(long startTime, long endTime) {
 //		List<Document> documentList = new ArrayList<>();
 //		npcBuyInShelf.aggregate(
@@ -2281,7 +2281,7 @@ public class LogDb {
 //		).forEach((Block<? super Document>) documentList::add);
 //		return documentList;
 //	}
-//	//商品奢侈度知名度和品质均值
+//	//Product luxury awareness and average quality
 //	public static List<Document> getNpcBuyInShelfAvg4(long startTime, long endTime) {
 //		List<Document> documentList = new ArrayList<>();
 //		npcBuyInShelf.aggregate(
@@ -2292,7 +2292,7 @@ public class LogDb {
 //		).forEach((Block<? super Document>) documentList::add);
 //		return documentList;
 //	}
-	//住宅知名度和品质均值
+	//Residential popularity and average quality
 	public static List<Document> getNpcRentApartmentAvg1(long startTime, long endTime) {
 		List<Document> documentList = new ArrayList<>();
 		npcRentApartment.aggregate(
@@ -2335,13 +2335,13 @@ public class LogDb {
 	}
 
 	public static void createIndex(){
-		/*判断是否有索引*/
+		/*Determine if there is an index*/
 		boolean hasIndex = false;
 		ListIndexesIterable<Document> documents = playerLoginTime.listIndexes();
 		for (Document doc : documents) {
 			String indexName = doc.getString("name");
 			if (indexName.startsWith("date")) {
-				System.err.println("已存在该索引");
+				System.err.println("The index already exists");
 				hasIndex = true;
 			}
 		}

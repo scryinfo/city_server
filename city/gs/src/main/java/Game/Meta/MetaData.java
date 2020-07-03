@@ -50,15 +50,15 @@ public class MetaData {
     private static final String evaColName = "Eva";
     private static final String expColName = "Experiences";
     private static final String buildingTechName = "BuildingTech";
-    private static final String warehouseColName = "WareHouse";//集散中心
-    //新版研究所
+    private static final String warehouseColName = "WareHouse";//Distribution center
+    //New Institute
     private static final String technologyColName = "Technology";
     private static final String scienceItemColName = "ScienceItem";
-    //新版推广公司
+    //New promotion company
     private static final String promotionCompanyColName="PromotionCompany";
-    private static final String promotionItemColName="PromotionItem";//推广选项
-    private static final String salaryStandardColName="SalaryStandard";//工资标准
-    /*城市等级发明表*/
+    private static final String promotionItemColName="PromotionItem";//Promotion options
+    private static final String salaryStandardColName="SalaryStandard";//fee standard
+    /*List of city-level inventions*/
     private static final String cityLevelColName = "CityLevel";
 
     //global field
@@ -249,7 +249,7 @@ public class MetaData {
             case MetaBuilding.PROMOTE:
                 return promotionCompany.get(id);
             case MetaBuilding.WAREHOUSE:
-                return warehouse.get(id);//集散中心（替换以前的人才中心）
+                return warehouse.get(id);//Distribution center (replacing the former talent center)
         }
         return null;
     }
@@ -310,24 +310,24 @@ public class MetaData {
     public static List<Integer> getPromotionItemId() {
         return new ArrayList<>(promotionItem.keySet());
     }
-    //获取所有原料id
+    //Get all raw material ids
     public static final Set<Integer> getAllMaterialId() {
         return material.keySet() == null ? new HashSet() : material.keySet();
     }
-    //获取所有原料id
+    //Get all raw material ids
     public static final int getGoodQuality(int goodId) {
         return good.get(goodId) == null ? -1 : good.get(goodId).quality;
     }
-    //获取所有商品id
+    //Get all product ids
     public static final Set<Integer> getAllGoodId() {
         return good.keySet() == null ? new HashSet() : good.keySet();
     }
-    //获取所有推广类型id
+    //Get all promotion type ids
     public static final Set<Integer> getAllBuildingTech(int id) {
         return buildingTech.get(id) == null ? new HashSet<>() : buildingTech.get(id);
     }
 
-   public static Set<Integer> getAllBuildingType() {  /*获取所有的建筑类型*/
+   public static Set<Integer> getAllBuildingType() {  /*Get all building types*/
         return buildingTech.keySet();
     }
 
@@ -336,7 +336,7 @@ public class MetaData {
     }
     public static final MetaItem getItem(int id) {
         MetaItem res = getMaterial(id);
-        /*增加研究所生产列表*/
+        /*Increase the production list of the institute*/
         MetaItem item = res == null ? getGood(id) : res;
         MetaItem item1=item == null ? getScienceItem(id) : item;
         return item1 == null ? getPromotionItem(id):item1;
@@ -375,7 +375,7 @@ public class MetaData {
     public static MetaGroundAuction getGroundAuction(int id) {
         return groundAuction.get(id);
     }
-    public static MetaWarehouse getWarehouse(int id){//从缓存中获取集散中心
+    public static MetaWarehouse getWarehouse(int id){//Get the distribution center from the cache
         return warehouse.get(id);
     }
 	public static void init(String uri){
@@ -471,7 +471,7 @@ public class MetaData {
                 defaultToUseItemId.add(m.id);
         });
 
-        /*初始化研究所的商品*/
+        /*Initial Research Institute Products*/
         mongoClient.getDatabase(dbName).getCollection(scienceItemColName).find().forEach((Block<Document>) doc -> {
             MetaScienceItem m = new MetaScienceItem(doc);
             scienceItem.put(m.id,m);
@@ -479,7 +479,7 @@ public class MetaData {
                 defaultToUseItemId.add(m.id);
         });
 
-        /*推广公司推广列表*/
+        /*Promotion company promotion list*/
         mongoClient.getDatabase(dbName).getCollection(promotionItemColName).find().forEach((Block<Document>) doc -> {
             MetaPromotionItem m = new MetaPromotionItem(doc);
             promotionItem.put(m.id,m);
@@ -551,18 +551,18 @@ public class MetaData {
             publicFacility.put(m.id, m);
             salaryMap.put(MetaBuilding.PUBLIC, m.salary);
         });
-        //旧版研究所
+        //Old Research Institute
        /* mongoClient.getDatabase(dbName).getCollection(laboratoryColName).find().forEach((Block<Document>) doc -> {
             MetaLaboratory m = new MetaLaboratory(doc);
             laboratory.put(m.id, m);
             salaryMap.put(MetaBuilding.LAB, m.salary);
         });*/
-        //新版研究所
+        //New Institute
         mongoClient.getDatabase(dbName).getCollection(technologyColName).find().forEach((Block<Document>) doc -> {
             MetaTechnology m = new MetaTechnology(doc);
             technology.put(m.id, m);
         });
-        //新版推广公司
+        //New promotion company
         mongoClient.getDatabase(dbName).getCollection(promotionCompanyColName).find().forEach((Block<Document>) doc -> {
             MetaPromotionCompany m = new MetaPromotionCompany(doc);
             promotionCompany.put(m.id, m);
@@ -575,7 +575,7 @@ public class MetaData {
             MetaTalentCenter m = new MetaTalentCenter(doc);
             talentCenter.put(m.id, m);
         });
-        //集散中心的初始化建筑
+        //Initial building of the distribution center
         mongoClient.getDatabase(dbName).getCollection(warehouseColName).find().forEach((Block<Document>) doc -> {
             MetaWarehouse m = new MetaWarehouse(doc);
             warehouse.put(m.id, m);

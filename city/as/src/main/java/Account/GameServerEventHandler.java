@@ -28,7 +28,7 @@ public class GameServerEventHandler extends SimpleChannelInboundHandler<Package>
 		super.channelRead(ctx, msg);
 	}
 
-	/*心跳检测*/
+	/*Heartbeat detection*/
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 		if (evt instanceof IdleStateEvent) {

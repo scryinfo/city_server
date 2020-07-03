@@ -4,9 +4,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-/*时间工具类，用于对时间的计算*/
+/*Time tools, used to calculate time*/
 public class TimeUtil {
-    //今日的开始时间
+    //Today's start time
     public static Long todayStartTime(){
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
         Calendar calendar = Calendar.getInstance(timeZone);
@@ -17,7 +17,7 @@ public class TimeUtil {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime().getTime();
     }
-    //一个月的开始时间，30天的起始时间
+    //Start time of one month, start time of 30 days
     public static Long monthStartTime(){
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
         Calendar calendar = Calendar.getInstance(timeZone);
@@ -29,7 +29,7 @@ public class TimeUtil {
         calendar.add(Calendar.DAY_OF_MONTH,-30);
         return calendar.getTime().getTime();
     }
-    //前30天
+    //30 days before
     public static Calendar monthCalendar(){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -39,7 +39,7 @@ public class TimeUtil {
         calendar.add(Calendar.DATE, -30);
         return calendar;
     }
-    //前6天
+    //6 days before
     public static Calendar beforeSixDay(){
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
         Calendar calendar = Calendar.getInstance(timeZone);
@@ -50,7 +50,7 @@ public class TimeUtil {
         calendar.add(Calendar.DATE, -6);
         return calendar;
     }
-    //前7天
+    //7 days before
     public static Calendar beforeSevenDay(){
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
         Calendar calendar = Calendar.getInstance(timeZone);
@@ -61,13 +61,13 @@ public class TimeUtil {
         calendar.add(Calendar.DATE, -7);
         return calendar;
     }
-    //获取指定时间的起始时间
+    //Get the start time of the specified time
     public static Long getTimeDayStartTime(Long time){
-        //获取东八区的时间
+        //Get the time in Dongba District
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
         Calendar calendar = Calendar.getInstance(timeZone);
         calendar.setTime(new Date(time));
-        //首先把时间设置到最初始时间
+        //First set the time to the initial time
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -75,7 +75,7 @@ public class TimeUtil {
         return calendar.getTime().getTime();
     }
 
-    /*获取昨天的开始时间*/
+    /*Get the start time of yesterday*/
     public static Long getYesterdayStartTime(){
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
         Calendar calendar = Calendar.getInstance(timeZone);

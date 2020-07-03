@@ -6,21 +6,21 @@ import java.util.Date;
 import java.util.Random;
 
 public class OrderCodeFactory {
-    /** 订单类别头 */
+    /** Order category header */
     private static final String ORDER_CODE = "1";
-    /** 退货类别头 */
+    /** Return category header */
     private static final String RETURN_ORDER = "2";
-    /** 退款类别头 */
+    /** Refund category header */
     private static final String REFUND_ORDER = "3";
-    /** 未付款重新支付别头 */
+    /** Unpaid re-payment header */
     private static final String AGAIN_ORDER = "4";
-    /** 随即编码 */
+    /** Random coding */
     private static final int[] r = new int[]{7, 9, 6, 2, 8 , 1, 3, 0, 5, 4};
-    /** 用户id和随机数总长度 */
+    /** Total length of user id and random number */
     private static final int maxLength = 14;
 
     /**
-     * 根据id进行加密+加随机数组成固定长度编码
+     * Encrypt according to id + add random number to form fixed length code
      */
     private static String toCode(Long id) {
         String idStr = id.toString();
@@ -32,7 +32,7 @@ public class OrderCodeFactory {
     }
      
     /**
-     * 生成时间戳
+     * Generate timestamp
      */
     private static String getDateTime(){
         DateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -40,8 +40,8 @@ public class OrderCodeFactory {
     }
     
     /**
-     * 生成固定长度随机码
-     * @param n    长度
+     * Generate a fixed-length random code
+     * @param n    length
      */
     private static long getRandom(long n) {
         long min = 1,max = 9;
@@ -54,7 +54,7 @@ public class OrderCodeFactory {
     }
     
     /**
-     * 生成不带类别标头的编码
+     * Generate codes without category headers
      * @param userId
      */
     private static synchronized String getCode(Long userId){
@@ -63,7 +63,7 @@ public class OrderCodeFactory {
     }
     
     /**
-     * 生成订单单号编码
+     * Generate order number code
      * @param userId
      */
     public static String getOrderCode(Long userId){
@@ -71,7 +71,7 @@ public class OrderCodeFactory {
     }
     
     /**
-     * 生成退货单号编码
+     * Generate return order number code
      * @param userId
      */
     public static String getReturnCode(Long userId){
@@ -79,7 +79,7 @@ public class OrderCodeFactory {
     }
     
     /**
-     * 生成退款单号编码
+     * Generate refund order number code
      * @param userId
      */
     public static String getRefundCode(Long userId){
@@ -87,7 +87,7 @@ public class OrderCodeFactory {
     }
     
     /**
-     * 未付款重新支付
+     * Repay without payment
      * @param userId
      */
     public static String getAgainCode(Long userId){

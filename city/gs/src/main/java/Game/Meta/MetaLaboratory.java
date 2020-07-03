@@ -14,7 +14,7 @@ public class MetaLaboratory extends MetaBuilding {
 
     public int evaProb;
     public int goodProb;
-    public int evaTransitionTime;   //eva研究过渡时间
-    public int inventTransitionTime;//发明的过渡时间
+    public int evaTransitionTime;   //eva study transition time
+    public int inventTransitionTime;//Invention transition time
 
 }

@@ -4,9 +4,9 @@ import org.bson.Document;
 
 public class MetaExperiences {
 	
-	public int lv;  //级别
-	public long exp;//经验值
-	public int p;   //百分比值
+	public int lv;  //level
+	public long exp;//Experience
+	public int p;   //Percentage value
 	
     public MetaExperiences(Document d) {
     	super();

@@ -80,7 +80,7 @@ public class Apartment extends Building implements IBuildingContract
         npc.setApartment(this);
         renters.put(npc.id(), npc);
         if (!npcSelectable()) {
-            //住宅已满通知
+            //Notice of full house
             MailBox.instance().sendMail(Mail.MailType.APARTMENT_FULL.getMailType(), this.ownerId(), new int[]{metaBuilding.id}, new UUID[]{this.id()}, null);
         }
     }
@@ -128,9 +128,9 @@ public class Apartment extends Building implements IBuildingContract
     public int getCapacity(){
         return this.meta.npc;
     }
-    //获取总知名度(基础品牌*（1+eva加成比例）)
+    //Get total visibility (basic brand* (1+eva plus percentage))
     public double getTotalBrand(){
-        /*获取Eva加成信息*/
+        /*Get Eva bonus information*/
         Eva eva = EvaManager.getInstance().getEva(ownerId(), type(), Gs.Eva.Btype.Brand_VALUE);
         return BrandManager.BASE_BRAND *(1 + EvaManager.getInstance().computePercent(eva));
     }

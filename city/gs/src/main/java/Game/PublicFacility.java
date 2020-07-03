@@ -52,7 +52,7 @@ public class PublicFacility extends Building{
         return curPromPricePerHour;
     }
 
-    //获取每毫秒价格
+    //Get price per millisecond
     public int getCurPromPricePerMs() {
         return curPromPricePerHour/3600000;
     }
@@ -64,7 +64,7 @@ public class PublicFacility extends Building{
         this.curPromPricePerHour = curPromPricePerHour;
     }
 
-    private int curPromPricePerHour = 0;		//推广价格
+    private int curPromPricePerHour = 0;		//Promotion price
 
     public long getPromRemainTime() {
         return promRemainTime;
@@ -78,7 +78,7 @@ public class PublicFacility extends Building{
         this.promRemainTime = promRemainTime;
     }
 
-    private long promRemainTime = 0;		//可推广时间
+    private long promRemainTime = 0;		//Available time
 
     public boolean isTakeOnNewOrder() {
         return takeOnNewOrder;
@@ -88,13 +88,13 @@ public class PublicFacility extends Building{
         this.takeOnNewOrder = takeOnNewOrder;
     }
 
-    private boolean takeOnNewOrder = false;	//接受新订单
+    private boolean takeOnNewOrder = false;	//Accept new orders
 
     public static Logger getLogger() {
         return logger;
     }
 
-    private long GuidedPrice = 0;			//缓存的指导价格
+    private long GuidedPrice = 0;			//Guided price of cache
 
     public long getNewPromoStartTs() {
         return newPromoStartTs;
@@ -104,7 +104,7 @@ public class PublicFacility extends Building{
         this.newPromoStartTs = startTs;
     }
 
-    private long newPromoStartTs = -1;			    //新推广开始时间，如果之前有推广，那么startTs为最后一个推广结束之时
+    private long newPromoStartTs = -1;			    //New promotion start time, if there is a promotion before, then startTs is the end of the last promotion
 
 
     public List<UUID> getSelledPromotions() {
@@ -119,10 +119,10 @@ public class PublicFacility extends Building{
         this.flowPromoCur = flowPromoCur;
     }
 
-    //流量推广力缓存
+    //Traffic promotion force cache
     @Transient
     private int flowPromoCur = 0;
-    //eva推广力缓存
+    //eva promotion force cache
     @Transient
     private Map<Integer,Integer>evaPromoCur = new HashMap<>();
 
@@ -131,52 +131,52 @@ public class PublicFacility extends Building{
     }
 
     public float getAllPromoTypeAbility(int inObjType){
-        //计算公式：
+        //Calculation formula：
 			/*
-				* 基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
-				* 单项推广能力 = 基础推广力 * （1 + %单项eva能力提升） *（1+%流量提升）
-					单项eva能力提升 = 从eva等级表中取出的p（百分百 percent）的值除以 10 万
+				* Basic promotion force = Wage distribution ratio * Number of construction NPCs * 1 worker output per hour
+				* Single promotion ability = basic promotion ability * (1 +% single eva ability promotion) * (1+% flow promotion)
+					Single eva capacity improvement = the value of p (percent percent) taken from the eva rating table divided by 100,000
 			*/
 
-        //1、 发放工资比例 *建筑NPC数量
+        //1、 Wage distribution ratio * Number of construction NPCs
         PublicFacility fcySeller = this ;
         int salaryAdd = fcySeller.getSalaryRatio()*fcySeller.getWorkerNum();
         //private MetaPublicFacility meta;
-        //2、 1个工人1小时产出
+        //2、 1 worker 1 hour output
         int workerAdd1H = meta.output1P1Hour;
 			/*
 				gs.proto
 				message Eva
 				   required bytes pid = 1; //playerid
-				   required int32 at = 2;  //a类型：只能填  原料itemid（2101001） 商品itemid（2251001） 建筑大类ID（13-零售店，14-住宅,15-研究所,16-推广公司,17-仓库） 商品大类ID（2251-主食。。。）
-				   //推广公司的买家是零售店 1613 ；推广公司的买家是住宅 1614 ；   研究所下面的两项能力155，156
-				   required Btype bt = 3;  //b类型：1=品质   2=品牌   3=生产速度  4=推广能力    5=发明提升  6=EVA提升    7=仓库提升
-				   required int32 lv = 4;  //级别   -1为品牌加成  级别>= 1为可生产   级别 = 0 不可生产,可依靠发明提升为1，-1和0时，不计算等级
-				   required int64 cexp = 5;//当前经验值
-				   optional int64 b = 6;   //品牌
+				   required int32 at = 2;  //a Type: Only fill in raw itemitem (2101001) Commodity itemid (2251001) Construction category ID (13-retail store, 14-residential, 15-research institute, 16-promotion company, 17-warehouse) Commodity category ID (2251 -Staple food...)
+				   //The buyer of the promotion company is a retail store 1613; the buyer of the promotion company is a residential 1614; the two capabilities below the institute 155,156
+				   required Btype bt = 3;  //Type b: 1=quality 2=brand 3=production speed 4=promotion ability 5=invention improvement 6=EVA promotion 7=warehouse promotion
+				   required int32 lv = 4;  //Level -1 is a brand bonus. Level >= 1 is manufacturable. Level = 0 is not manufacturable. It can be upgraded to 1, -1 and 0 by invention.
+				   required int64 cexp = 5;//Current experience
+				   optional int64 b = 6;   //Brand
 			*/
-        //3、 计算Eva单项提升能力
-        //查看是否有该广告商推广能力的Eva提升
+        //3、 Calculate Eva's single lift ability
+        //Check if there is an Eva improvement of the advertiser's promotion ability
         int evaAdd = evaPromoCur.getOrDefault(inObjType,0);
-        //4、 流量提升
+        //4、 Increased traffic
         float flowRatios = getFlowPromoCur();
         return salaryAdd * workerAdd1H * (1 + (float)evaAdd /100000) * (1 + flowRatios);
     }
 
-    /*推广能力=基础推广值*员工人数*(1+eva加成)*/
+    /*Promotion ability = basic promotion value * number of employees * (1+eva bonus)*/
     public long getLocalPromoAbility(int type){
         int atype=0;
-        //确定a类型
-        if(type/100==type()) {//如果传递的是eva中的类型，直接查询
+        //Determine a type
+        if(type/100==type()) {//If the type passed is eva, query directly
             atype = type;
         }
         else{
-            if (MetaBuilding.isBuildingByBaseType(type / 100)) { //如果是建筑,基础类型等于type/100
+            if (MetaBuilding.isBuildingByBaseType(type / 100)) { //If it is a building, the base type is equal to type/100
                 type = type / 100;
-                atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString()); //确定Eva的a类型,拼接a类型，建筑类型+type
-            } else {//商品  基础类型%100
+                atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString()); //Determine the type of Eva, splice a type, building type +type
+            } else {//Commodity base type%100
                 type = type % 100;
-                atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString());//确定Eva的a类型,拼接a类型，建筑类型+type
+                atype = Integer.parseInt(new StringBuilder().append(this.type()).append(type).toString());//Determine the type of Eva, splice a type, building type +type
             }
         }
         double evaAdd = EvaManager.getInstance().computePercent(EvaManager.getInstance().getEva(this.ownerId(), atype, Gs.Eva.Btype.PromotionAbility_VALUE));
@@ -184,15 +184,15 @@ public class PublicFacility extends Building{
     }
 
     public void updatePromoAbility() {
-        //3、 计算Eva单项提升能力
+        //3、 Calculate Eva's single lift ability
         Set<Eva> sellerEvas = EvaManager.getInstance().getEvaList(this.ownerId());
         int abType = Gs.Eva.Btype.PromotionAbility.getNumber();
-        //查看是否有该广告商推广能力的Eva提升
+        //Check if there is an Eva improvement of the advertiser's promotion ability
         int evaAdd = 0;
         Iterator<Eva> it = sellerEvas.iterator();
         while (it.hasNext()){
             Eva eva =  it.next();
-            //根据取到的eva的等级，取出对应的能力值
+            //According to the level of eva, take out the corresponding ability value
             Integer level=eva.getLv();
             Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
             MetaExperiences evaAddMe= map.get(level);
@@ -204,12 +204,12 @@ public class PublicFacility extends Building{
                 }
             }
         }
-        //4、 流量提升
+        //4、 Increased traffic
         flowPromoCur = (int)ContractManager.getInstance().getPlayerADLift(this.ownerId());
         addPromoAbRecord(this.id(),(short)(0),flowPromoCur);
     }
 
-    //当前各个基础类型的推广能力值，随Eva值、流量值、工资比例发生改变
+    //The current promotion ability value of each basic type changes with the Eva value, flow value, and salary ratio
     private float curPromoAbility = 0;
     private int curflowPromoAbTotall = -1;
     /*@ElementCollection(fetch = FetchType.EAGER)
@@ -242,9 +242,9 @@ public class PublicFacility extends Building{
 
     public List<PromoOdTs> delSelledPromotion(UUID promoId ,boolean delOrder){
         List<PromoOdTs> ret = PromotionMgr.instance().AdRemovePromoOrder(promoId,selledPromotion, delOrder);
-        //删除缓存的推广ID
+        //Delete cached promotion ID
         selledPromotion.remove(promoId);
-        //更新推广公司广告列表中所有推广的起点
+        //Update the starting point of all promotions in the company's advertising list
         return ret;
     }
 
@@ -263,42 +263,42 @@ public class PublicFacility extends Building{
     }
     private long getGuidedPrice(){
         //TODO
-        //这个价格应该从 统计服 上请求
+        //This price should be requested from the statistical service
         return GuidedPrice;
     }
 
     /*
-		* 每小时计算一次，广告主品牌值根据当前广告公司推广能力进行累计
-			* 基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
-			* 单项推广能力 = 基础推广力 * （1 + %单项eva能力提升） *（1+%流量提升）
-				单项eva能力提升 = 从eva等级表中取出的p（百分百 percent）的值除以 10 万
-			* 1个工人1小时能增加的知名度（新增字段到PublicFacility）
-		* 依赖数据分析
-			* 数据
-				* 工资发放比例、建筑NPC数量
-				* 1个工人1小时能增加的知名度
-				* 流量提升
-			* 有的
-				* 工资发放比例、建筑NPC数量
+		* Calculated every hour, the advertiser’s brand value is accumulated based on the current advertising company’s promotion capabilities
+			* Basic promotion power = ratio of wages paid *Number of building NPCs * 1 worker 1 hour output
+			* Single promotion ability = basic promotion ability * (1 +% single eva ability improvement) *(1+% flow increase)
+				Single eva capacity improvement = the value of p (percent percent) taken from the eva rating table divided by 100,000
+			* 1 worker can increase visibility in 1 hour (new field added to PublicFacility)
+		* Rely on data analysis
+			* data
+				* Wage distribution ratio, number of construction NPCs
+				* 1 worker can increase visibility in 1 hour
+				* Increased traffic
+			* some
+				* Wage distribution ratio, number of construction NPCs
 					allSalary()
-				* 1个工人1小时能增加的知名度
+				* 1 worker can increase visibility in 1 hour
 					meta.output1P1Hour;
-				* 单项eva能力提升
-					* 配置表
-						* Eva 能力表
-						* Eva 等级表
-					* 二者关系
-						* Eva能力表共享Eva等级表
-						player 维护
+				* Single eva capacity improvement
+					* Configuration table
+						* Eva capability table
+						* Eva rating table
+					* The relationship between the two
+						* Eva capability table shared Eva rating table
+						player maintenance
 							List<Eva> list = new ArrayList<Eva>();
-							提升的是二级类，比如 食品
-					* 计算
+							The promotion is the second class, such as food
+					* Calculation
 						public class Eva {
 						queryMyEva
-				* 流量提升
+				* Increased traffic
 					Game.Contract.ContractManager#getPlayerADLift
-		* 行为分析
-			* 不用通知客户端，直接更新数据库
+		* Behavior analysis
+			* Update the database directly without notifying the client
 		*/
     public float excutePromotion(PromoOrder promo){
         return getAllPromoTypeAbility(promo.buildingType > 0 ? promo.buildingType : promo.productionType);
@@ -564,7 +564,7 @@ public class PublicFacility extends Building{
     }
 
     public EvaRecord getlastEvaRecord(UUID bid, short tid){
-        //重新开服,需要获取一下上次的记录
+        //Re-open service, we need to get at the last record
         return GameDb.getlastEvaRecord(bid,tid);
     }
     public FlowRecord getlastFlowRecord(UUID inPid){
@@ -572,10 +572,10 @@ public class PublicFacility extends Building{
     }
 
     public void addPromoAbRecord( UUID buildingId, short typeId, int value ){
-        //记录的时间间隔为 PromotionMgr._upDeltaMsint ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
+        //The recording interval is PromotionMgr._upDeltaMsint ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs);
         int ts = (int)(System.currentTimeMillis() / PromotionMgr._upDeltaMs/1000);
         if(typeId < 1){
-            //人流量
+            //human traffic
             Building bd = City.instance().getBuilding(buildingId);
             if(bd == null){
                 //if(GlobalConfig.DEBUGLOG){
@@ -585,7 +585,7 @@ public class PublicFacility extends Building{
             }
             UUID pid = bd.ownerId();
             FlowRecord lastRecord = getlastFlowRecord(pid);
-            //只记录变化的，减少数据量
+            //Only record changes, reduce the amount of data
             if(lastRecord.value == value){
                 return;
             }
@@ -595,7 +595,7 @@ public class PublicFacility extends Building{
         }else{
             //eva
             EvaRecord lastRecord = getlastEvaRecord(buildingId,typeId);
-            //只记录变化的，减少数据量
+            //Only record changes, reduce the amount of data
             if(lastRecord.value == value){
                 return;
             }
@@ -651,12 +651,12 @@ public class PublicFacility extends Building{
         return 0;
     }
 
-    //基础能力加成
+    //Basic ability bonus
     public double getBaseAbility(){
-        //基础推广力 = 发放工资比例 *建筑NPC数量 * 1个工人1小时产出
-        //1.发放工资比例 *建筑NPC数量
+        //Basic promotion force = Wage distribution ratio * Number of construction NPCs * 1 worker output per hour
+        //1.Wage distribution ratio * Number of construction NPCs
         int salaryAdd = this.getSalaryRatio()*this.getWorkerNum();
-        //2、 1个工人1小时产出
+        //2、 1 worker 1 hour output
         int workerAdd1H = meta.output1P1Hour;
         return salaryAdd * workerAdd1H;
     }

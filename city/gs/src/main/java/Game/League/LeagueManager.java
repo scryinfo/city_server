@@ -34,7 +34,7 @@ public class LeagueManager
         return instance;
     }
 
-    //任何对leagueInfoMap作出的改变，必要信息一定要同步到buildingLeagueInfo中
+    //For any changes made to leagueInfoMap, the necessary information must be synchronized to buildingLeagueInfo
     private Map<LeagueInfo.UID, LeagueInfo> leagueInfoMap = new HashMap<>();
     //key = buildingId
     private Map<UUID, Set<LeagueInfo.UID>> buildingLeagueInfo = new HashMap<>();
@@ -63,7 +63,7 @@ public class LeagueManager
         if (timer.update(diffNano))
         {
             List<LeagueInfo> updateList = new ArrayList<>();
-            //过期检查
+            //Expiry check
             leagueInfoMap.values().forEach(leagueInfo ->
             {
                 List<LeagueInfo.Member> removes = leagueInfo.memberOverdueAndRemove();
@@ -74,7 +74,7 @@ public class LeagueManager
                 removes.forEach(member -> {
                     buildingLeagueInfo.get(member.getBuildingId()).remove(leagueInfo.getUid());
                     
-                    //删除建筑某项过期的加盟技术
+                    //Delete an expired franchise technology in the building
         			delBrandLeague(member.getBuildingId(),leagueInfo.getUid().getTechId(),leagueInfo.getUid().getPlayerId());
                 });
             });
@@ -266,7 +266,7 @@ public class LeagueManager
         return true;
     }
 
-    //获取建筑加盟技术列表,playerId,techId
+    //Get a list of architectural franchise technologies,playerId,techId
     public Set<LeagueInfo.UID> getBuildingLeagueTech(UUID buildingId)
     {
          return buildingLeagueInfo.get(buildingId) == null ?

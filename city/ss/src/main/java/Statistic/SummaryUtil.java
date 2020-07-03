@@ -33,9 +33,9 @@ public class SummaryUtil {
     public static final int PRODUCE = 12;
     public static final int RETAIL = 13;
     public static final int APARTMENT = 14;
-    public static final int TECHNOLOGY=15;//新版研究所
-    public static final int PROMOTE=16;//新版推广公司
-    public static final int GROUND = 20; // 土地相关
+    public static final int TECHNOLOGY=15;//New Institute
+    public static final int PROMOTE=16;//New promotion company
+    public static final int GROUND = 20; // Land related
     public static final long DAY_MILLISECOND = 1000 * 3600 * 24;
     public static final long HOUR_MILLISECOND = 1000 * 3600;
     public static final long SECOND_MILLISECOND = 1000 * 10;
@@ -62,7 +62,7 @@ public class SummaryUtil {
     private static final String DAY_PLAYER_RESEARCH = "dayPlayerResearch";
     private static final String DAY_PLAYER_PROMOTION = "dayPlayePromotion";
     private static final String DAY_BUILDING_INCOME = "dayBuildingIncome";
-    private static final String DAY_BUILDING_PAY = "dayBuildingPay";            //建筑每日收入统计
+    private static final String DAY_BUILDING_PAY = "dayBuildingPay";            //Daily income statistics of construction
     private static final String DAY_PLAYER_INCOME = "dayPlayerIncome";
     private static final String DAY_PLAYER_PAY = "dayPlayerPay";
     private static final String DAY_GOODS_SOLD_DETAIL= "dayGoodsSoldDetail";
@@ -93,15 +93,15 @@ public class SummaryUtil {
     private static MongoCollection<Document> dayPlayerResearch;
     private static MongoCollection<Document> dayPlayerPromotion;
     private static MongoCollection<Document> dayBuildingIncome;
-    private static MongoCollection<Document> dayBuildingPay;        //建筑每日收入
+    private static MongoCollection<Document> dayBuildingPay;        //Construction daily income
     private static MongoCollection<Document> dayPlayerIncome;
     private static MongoCollection<Document> dayPlayerPay;
     private static MongoCollection<Document> dayGoodsSoldDetail;
     private static MongoCollection<Document> dayIndustryIncome;
     private static MongoCollection<Document> dayBuildingBusiness;
-    private static MongoCollection<Document> dayBuildingGoodSoldDetail; //建筑销售明细
+    private static MongoCollection<Document> dayBuildingGoodSoldDetail; //Construction sales details
     private static MongoCollection<Document> dayAiBaseAvg;
-    private static MongoCollection<Document> averageTransactionPrice; // 平均交易价格
+    private static MongoCollection<Document> averageTransactionPrice; // Average transaction price
     //--ly
     private static MongoCollection<Document> playerExchangeAmount;
     private static MongoCollection<Document> cityTransactionAmount;
@@ -146,7 +146,7 @@ public class SummaryUtil {
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayBuildingIncome = database.getCollection(DAY_BUILDING_INCOME)
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        dayBuildingPay = database.getCollection(DAY_BUILDING_PAY)           //建筑每日收入统计
+        dayBuildingPay = database.getCollection(DAY_BUILDING_PAY)           //Daily income statistics of construction
                 .withWriteConcern(WriteConcern.UNACKNOWLEDGED);
         dayPlayerIncome = database.getCollection(DAY_PLAYER_INCOME)
         		.withWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -330,9 +330,9 @@ public class SummaryUtil {
     }
     public static Map<Long, Long> queryPlayerIncomePayCurve(MongoCollection<Document> collection,UUID id)
     {
-        //开始时间（前30天）
+        //Start time (first 30 days)
         long startTime = TimeUtil.monthStartTime();
-    	//结束时间
+    	//End Time
         long endTime=TimeUtil.todayStartTime();
     	Map<Long, Long> map = new LinkedHashMap<>();
     	collection.find(and(
@@ -352,11 +352,11 @@ public class SummaryUtil {
     public static Map<Long, Document> queryGoodsSoldDetailCurve(MongoCollection<Document> collection,int itemId,UUID produceId)
     {
     	Calendar calendar =TimeUtil.monthCalendar();
-        //开始时间
+        //Starting time
     	Date startDate = calendar.getTime();
     	long startTime=startDate.getTime();
     	calendar.setTime(new Date());
-    	//结束时间（到现在时间点的统计）
+    	//End time (statistics up to the present time)
         Date endDate = calendar.getTime();
         long endTime=endDate.getTime();
     	Map<Long, Document> map = new LinkedHashMap<>();
@@ -482,7 +482,7 @@ public class SummaryUtil {
         }
     }
 
-    /*玩家每天的登陆时长*/
+    /*Player's daily login time*/
     public static void insertDayPlayerLoginTime(List<Document> documentList,
                                                 long time,MongoCollection<Document> collection){
         documentList.forEach(document ->
@@ -749,7 +749,7 @@ public class SummaryUtil {
         });
     }
 
-    /*获取建筑一个月的收入（yty）*/
+    /*Get a month's income from construction (yty)*/
     public static Map<Long,Long> getBuildDayIncomeById(UUID bid)
     {
         Map<Long, Long> income = new HashMap<>();
@@ -764,7 +764,7 @@ public class SummaryUtil {
         return income;
     }
 
-    //获取建筑一个月的支出(yty)
+    //Get one month of construction expenditure (yty)
     public static Map<Long,Long> getBuildDayPayById(UUID bid)
     {
         Map<Long, Long> pay = new HashMap<>();
@@ -778,10 +778,10 @@ public class SummaryUtil {
                 });
         return pay;
     }
-    /*查询建筑7天内收入统计*/
+    /*Query building income statistics within 7 days*/
     public static Map<Long, Map<ItemKey, Document>> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection, UUID bid) {
         long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
-        /*存储格式  key为时间，value存这人一天内出现过的销售商品*/
+        /*The storage format key is time, and value is stored in this person's sales goods that have appeared in a day*/
         Map<Long, Map<ItemKey, Document>> detail = new HashMap<>();
         collection.find(and(eq("bid", bid),
                 gte(TIME, startTime),
@@ -794,7 +794,7 @@ public class SummaryUtil {
         return detail;
     }
 
-    /*获取建筑中某一个商品的历史销售记录*/
+    /*Get the historical sales record of a certain product in the building*/
     public static Map<Long,Document> queryBuildingGoodsSoldDetail(MongoCollection<Document> collection,int itemId,UUID bid,UUID producerId){
         long startTime = todayStartTime(System.currentTimeMillis()) - DAY_MILLISECOND * 6;
         Map<Long, Document> map = new HashMap<>();
@@ -911,7 +911,7 @@ public class SummaryUtil {
             collection.insertMany(documentList);
         }
     }
-    //玩家交易汇总表中查询开服截止当前时间玩家交易量。
+    //The player transaction summary table inquires about the player transaction volume at the current time of opening and closing of the server.
     public static long getTodayData(MongoCollection<Document> collection,SummaryUtil.CountType countType)
     {
         long a=0;
@@ -939,7 +939,7 @@ public class SummaryUtil {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
+        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// Modify the instant view, including the current day.
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND,0);
@@ -1071,7 +1071,7 @@ public class SummaryUtil {
         }).filter(o -> o != null).collect(Collectors.toList());
 
     }
-    // 用时间分组
+    // Group by time
     public static Map<Long, Map<Integer, Long>> queryInfo(List<IndustryInfo> infos) {
         return infos.stream().collect(Collectors.groupingBy(IndustryInfo::getTime, Collectors.toMap(IndustryInfo::getType, IndustryInfo::getTotal)));
     }
@@ -1149,7 +1149,7 @@ public class SummaryUtil {
     }
 
     public static Ss.IndustryIncome.IncomeInfo queryTodayIncome() {
-        // 当日0点-当前时间
+        // 0 o'clock on the day-current time
         Map<Integer, Long> map = new HashMap<>();
         long startTime = SummaryUtil.todayStartTime(System.currentTimeMillis());
         long endTime = System.currentTimeMillis();
@@ -1172,7 +1172,7 @@ public class SummaryUtil {
     public static Map<Long, Double> queryAverageTransactionprice(boolean isApartment) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// 修改即时查看,包括当天.
+        calendar.set(Calendar.HOUR_OF_DAY,calendar.get(Calendar.HOUR_OF_DAY));// Modify the instant view, including the current day.
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND,0);
@@ -1436,7 +1436,7 @@ public class SummaryUtil {
         }
     }
     public static void insertAiBaseAvg(long yestodayStartTime,long todayStartTime,MongoCollection<Document> collection) {
-        //零售店知名度和品质均值
+        //Retail store visibility and average quality
         List<Document> documentList = LogDb.getNpcBuyInShelfAvg1(yestodayStartTime, todayStartTime);
         documentList.forEach(document -> {
             document.append(TIME, yestodayStartTime)
@@ -1447,16 +1447,16 @@ public class SummaryUtil {
         if (!documentList.isEmpty()) {
             collection.insertMany(documentList);
         }
-        //商品知名度和品质均值
+        //Product awareness and average quality
         documentList = LogDb.getNpcBuyInShelfAvg2(yestodayStartTime, todayStartTime);
         insertAiBaseAvgData(documentList, yestodayStartTime, collection);
-/*        //商品大类知名度和品质均值
+/*        //Merchandise category popularity and average quality
         documentList = LogDb.getNpcBuyInShelfAvg3(yestodayStartTime, todayStartTime);
         insertAiBaseAvgData(documentList,yestodayStartTime,collection);
-        //商品奢侈度知名度和品质均值
+        //Product luxury awareness and average quality
         documentList = LogDb.getNpcBuyInShelfAvg4(yestodayStartTime, todayStartTime);
         insertAiBaseAvgData(documentList,yestodayStartTime,collection);*/
-        //住宅知名度和品质均值
+        //Residential popularity and average quality
         documentList = LogDb.getNpcRentApartmentAvg1(yestodayStartTime, todayStartTime);
         documentList.forEach(document -> {
             document.append(TIME, yestodayStartTime)

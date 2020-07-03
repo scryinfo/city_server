@@ -21,21 +21,21 @@ public class MinuteJob implements org.quartz.Job{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
         StatisticSession.setIsReady(false);
         long time = System.currentTimeMillis();
-        long endTime = time - time%(1000 * 60); //每1分钟统计一次
-        long startTime = endTime - 1000 * 60;//前1分钟
+        long endTime = time - time%(1000 * 60); //Statistics every 1 minute
+        long startTime = endTime - 1000 * 60;//1 minute before
 
         long nowTime = System.currentTimeMillis();
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("MinuteJob start execute,time = " + timeStr);
 
         //player income
-      /*  List<Document> documentList= LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());//统计每分钟的收入量
+      /*  List<Document> documentList= LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());//Statistics of revenue per minute
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerIncome());
         //player pay
         documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerPay());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerPay());*/
 
-        //统计耗时
+        //Time-consuming statistics
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));

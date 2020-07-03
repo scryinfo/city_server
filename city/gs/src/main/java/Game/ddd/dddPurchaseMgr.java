@@ -53,25 +53,25 @@ public class dddPurchaseMgr {
     public ddd_purchase getPurchase(UUID purId){
         return allddd_purchase.get(purId);
     }
-    //添加订单
+    //Add order
     public boolean addPurchase(ddd_purchase purchase){
-        //有足够的eee的情况下
+        //If there is enough eee
         purchase.status = StatusPurchase.PROCESSING;
         Player player = GameDb.getPlayer(purchase.player_id);
         if(purchase.ddd < 0){
-            //判断交易是否合法
+            //Determine if the transaction is legal
             long eee = (long)GameDb.calGameCurrencyFromDDD(purchase.ddd);
-            if(player.money() + eee*10000 < 0 ){ //游戏币不够
+            if(player.money() + eee*10000 < 0 ){ //Insufficient game currency
                 return false;
             }
-            //提币操作，需锁定eee
+            //Withdraw operation, need to lock eee
             player.lockMoney(purchase.purchaseId,-eee*10000);
         }
 
-        //不允许多次设置相同id的交易
+        //Do not allow multiple transactions with the same id
         if(!allddd_purchase.containsKey(purchase.purchaseId)){
             allddd_purchase.put(purchase.purchaseId,purchase);
-            //持久化
+            //Persistence
             if(purchase.ddd < 0){
                 GameDb.saveOrUpdate(player);
             }
@@ -80,7 +80,7 @@ public class dddPurchaseMgr {
         return  true;
     }
 
-    //移除订单，后边定期处理超期订单，目前先不考虑
+    //Remove the order and process the overdue order regularly later
     public void delPurchase(){
         List<ddd_purchase> toRemove = new ArrayList();
         for (Iterator<Map.Entry<UUID, ddd_purchase>> it = allddd_purchase.entrySet().iterator(); it.hasNext();) {
@@ -96,8 +96,8 @@ public class dddPurchaseMgr {
         GameDb.saveOrUpdate(this);
     }
 
-    //充值请求验证，正常city服务器转发就行，因为请求在ccapi服务器会进行验证，所以不需要city这边验证
-    //city服务器验证的好处是可以防止恶意的刷单
+    //Recharge request verification, normal city server forwarding is required, because the request will be verified on the ccapi server, so no city verification is required
+    //The advantage of city server verification is to prevent malicious billing
     public boolean varifyPurchaseReq( UUID purchaseId ){
         ddd_purchase pur = allddd_purchase.get(purchaseId);
         if(pur != null ){
@@ -107,9 +107,9 @@ public class dddPurchaseMgr {
     }
 
     public boolean varifyPurchaseResp( UUID purchaseId ){
-        //暂时还没有resp的验证,所以直接返回true
+        //There is no verification of resp yet, so it returns true directly
         return true;
-        //后边有了resp的验证后，撤销下面的注销
+        //After having resp verification, cancel the following logout
         /*ddd_purchase pur = allddd_purchase.get(purchaseId);
         if(pur != null ){
             return pur.verifyResp();
@@ -117,14 +117,14 @@ public class dddPurchaseMgr {
         return false;*/
     }
 
-    //这个是充值请求成功后的回调
+    //This is the callback after the successful recharge request
     public void on_RechargeReqResp(RechargeResultReq ccapiReq){
         UUID purId = Util.toUuid(ccapiReq.getCityPurchaseId().getBytes());
         ddd_purchase pur = allddd_purchase.get(purId);
-        if(varifyPurchaseResp(purId)){ //验证ccapi请求
+        if(varifyPurchaseResp(purId)){ //Verify ccapi request
             Player player = GameDb.getPlayer(pur.player_id);
             if(pur == null){
-                //todo 这种是异常的情况，city服务器没有订单，但是ccap服务器还有，这种情况需要人工处理
+                //todo This is an abnormal situation. The city server has no orders, but the ccap server still has it. This situation requires manual processing.
             }
 
             if(pur.ddd < 0){
@@ -141,7 +141,7 @@ public class dddPurchaseMgr {
             GameDb.saveOrUpdate(player);
             GameDb.saveOrUpdate(pur);
 
-            if(pur.ddd > 0){//充值成功
+            if(pur.ddd > 0){//Deposit successfully
                 ct_RechargeRequestRes.Builder msg = ct_RechargeRequestRes.newBuilder();
                 GlobalDef.ResHeader.Builder header = GlobalDef.ResHeader.newBuilder();
                 header.setErrCode(ERR_SUCCESS).setReqId(ccapiReq.getReqHeader().getReqId())
@@ -160,7 +160,7 @@ public class dddPurchaseMgr {
                 Package pack = Package.create(GsCode.OpCode.ct_RechargeRequestRes_VALUE, msg.build());
                 player.send(pack);
                 MailBox.instance().sendMail(Mail.MailType.DDD_RECHARGEREQUESTRES.getMailType(), pur.player_id, null, null);
-            }else{//提币
+            }else{//Withdraw
                 ct_DisChargeRes.Builder msg = ct_DisChargeRes.newBuilder();
                 DisChargeRes.Builder disC = DisChargeRes.newBuilder();
                 disC.setAmount(String.valueOf(pur.ddd))
@@ -174,13 +174,13 @@ public class dddPurchaseMgr {
         }
     }
 
-    //这个是充值上链成功后的回调
+    //This is the callback after the recharge is successful
     public void on_RechargeSuccess(UUID pid, UUID purchaseId, int ErrCode){
-        if(varifyPurchaseResp(purchaseId)){ //验证ccapi请求
+        if(varifyPurchaseResp(purchaseId)){ //Verify ccapi request
             Player player = GameDb.getPlayer(pid);
             ddd_purchase pur = allddd_purchase.get(purchaseId);
             if(pur == null){
-                //todo 这种是异常的情况，city服务器没有订单，但是ccap服务器还有，这种情况需要人工处理
+                //todo This is an abnormal situation. The city server has no orders, but the ccap server still has it. This situation requires manual processing.
             }
             long eee = (long)GameDb.calGameCurrencyFromDDD(pur.ddd);
             player.addMoney(eee);

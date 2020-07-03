@@ -17,7 +17,7 @@ public interface IShelf {
     int getSaleCount(int itemId);
 
     static void updateAutoReplenish(IShelf shelf, ItemKey k){
-        //更新货架： 执行一次下架上架操作
+        //Update shelf: Perform a shelf operation
         Shelf.Content i = shelf.getContent(k);
         IStorage storage = (IStorage) shelf;
         if(i != null){
@@ -28,5 +28,5 @@ public interface IShelf {
     }
     Map<Item, Integer> getSaleDetail(int itemId);
 
-    int getTotalSaleCount();//获取总的出售数量
+    int getTotalSaleCount();//Get the total number of sales
 }

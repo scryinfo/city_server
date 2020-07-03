@@ -16,7 +16,7 @@ import static com.mongodb.client.model.Filters.*;
 
 public class CityUtil {
 
-    //获取玩家的性别信息
+    //Get the player's gender information
     public static Map<String,Integer> genderSex(List<Player> players){
         Map<String, Integer> sex = new HashMap<>();
         int man=0;
@@ -32,7 +32,7 @@ public class CityUtil {
         return sex;
     }
 
-    //获取城市的平均工资
+    //Get the average salary in the city
     public static Long cityAvgSalary(){
         long count=0;
         long sumSalary=0;
@@ -48,10 +48,10 @@ public class CityUtil {
         return count == 0 ? 0L : sumSalary / count;
     }
 
-    //平均资产
-    public static Map<Integer, Long> cityAvgProperty(){//1表示福利npc、0表示员工的平均资产
-        long socialSumMoney=0;//福利npc总资产
-        long employeeSumMoney=0;//员工总资产
+    //Average assets
+    public static Map<Integer, Long> cityAvgProperty(){//1 means welfare npc, 0 means the employee's average assets
+        long socialSumMoney=0;//Welfare npc total assets
+        long employeeSumMoney=0;//Employee total assets
         int socialSize=0;
         int employeeSize=0;
         Map<Integer, Long> avgProperty = new HashMap<>();
@@ -70,24 +70,24 @@ public class CityUtil {
         return avgProperty;
     }
 
-    //工资涨幅
-    public static double increaseRatio(){//工资涨幅比例（一周统计一次）我现在要计算总共的涨幅。
+    //Wage increase
+    public static double increaseRatio(){//Wage increase rate (stated once a week) I now want to calculate the total increase.
         double increaseRatio=0d;
         Map<Integer, IndustryIncrease> map = City.instance().getIndustryMoneyMap();
         for (Map.Entry<Integer, IndustryIncrease> entry : map.entrySet()) {
             Map<Integer, Long> industryNpcNumMap=NpcManager.instance().countNpcByBuildingType();
-            double r=entry.getValue().getIndustryMoney()/(double)industryNpcNumMap.get(entry.getKey());//涨幅
+            double r=entry.getValue().getIndustryMoney()/(double)industryNpcNumMap.get(entry.getKey());//Increase
             increaseRatio+= r;
         }
         return increaseRatio/ map.size();
     }
 
-    //社保福利(城市产业平均工资*社保比例)
+    //Social security benefits (urban industry average wage * social security ratio)
     public static int socialMoney(){
         int v = (int) (City.instance().getAvgIndustrySalary() * MetaData.getCity().insuranceRatio);
         return v;
     }
-    //获取城市税收
+    //Get city tax
     public static long getTax(){
         long allTax = 0;
         List<Building> allBuilding = new ArrayList<>();

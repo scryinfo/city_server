@@ -4,12 +4,12 @@ import gs.Gs;
 
 import java.util.UUID;
 
-/*封装离线期间的数据*/
+/*Encapsulate data during offline*/
 public class OffLineFlightRecord {
     public UUID playerId;
     public boolean win;
-    public int profitOrLoss;//盈亏
-    public Gs.FlightData data;//航班信息
+    public int profitOrLoss;//Profit and loss
+    public Gs.FlightData data;//flight information
 
     public OffLineFlightRecord(UUID playerId, boolean win, int profitOrLoss, Gs.FlightData data) {
         this.playerId=playerId;

@@ -19,11 +19,11 @@ public class TestTop {
         list.add(new IndustryInfo(2,200l,555l));
         list.add(new IndustryInfo(3,300l,555l));
         list.add(new IndustryInfo(4,400l,555l));
-        //第二天
+        //the next day
         list.add(new IndustryInfo(1,500l,777l));
         list.add(new IndustryInfo(2,600l,777l));
         list.add(new IndustryInfo(3,700l,777l));
-        // 第三天
+        //The third day
 
         list.add(new IndustryInfo(1,800l,999l));
         list.add(new IndustryInfo(2,900l,999l));

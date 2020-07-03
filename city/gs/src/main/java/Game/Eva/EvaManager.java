@@ -27,8 +27,8 @@ public class EvaManager
     }
 
     private Map<UUID, Set<Eva>> evaMap = new HashMap<UUID, Set<Eva>>();
-    public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//封装各种类型的Eva信息，按照atype、btype进行分类
-    private Map<UUID, Eva> evas = new HashMap<>();  /*key是Eva的Id*/
+    public Map<EvaKey,Set<Eva>> typeEvaMap = new HashMap<>();//Encapsulate various types of Eva information and classify them according to atype and btype
+    private Map<UUID, Eva> evas = new HashMap<>();  /*key is Eva's Id*/
     private Map<UUID, EvaSalary> evaSalaryMap = new HashMap<UUID, EvaSalary>();
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.SECONDS.toMillis(1));
 
@@ -49,7 +49,7 @@ public class EvaManager
     }
 
 
-    //分类eva
+    //Classification eva
     public void initTypeEvaMap(){
         EvaKey key=null;
         Set<Eva> evas = getAllEvas();
@@ -65,7 +65,7 @@ public class EvaManager
             GameDb.saveOrUpdate(es);
         }
     }
-    /*缓存Eva*/
+    /*Cache Eva*/
     public void initEvas(){
         Set<Eva> allEvas = getAllEvas();
         allEvas.forEach(eva->{
@@ -123,8 +123,8 @@ public class EvaManager
     	s.remove(getEva(eva.getPid(),eva.getAt(),eva.getBt()));
     	s.add(eva);
 		evaMap.put(eva.getPid(), s);
-        evas.put(eva.getId(), eva);/*更新Eva缓存*/
-		//同步Eva类型map
+        evas.put(eva.getId(), eva);/*Update Eva cache*/
+		//Synchronous Eva type map
         updateTypeEvaMap(eva);
      	GameDb.saveOrUpdate(eva);
     }
@@ -133,7 +133,7 @@ public class EvaManager
     	evaList.forEach(e->{
     	   	evaMap.computeIfAbsent(e.getPid(),
                     k -> new HashSet<>()).add(e);
-            //同步Eva类型map
+            //Synchronous Eva type map
     	   	typeEvaMap.computeIfAbsent(new EvaKey(e.getAt(),e.getBt()),
                     k->new HashSet<>()).add(e);
             evas.put(e.getId(),e);
@@ -176,18 +176,18 @@ public class EvaManager
         int level=eva.getLv();
         long cexp=eva.getCexp()+eva.getDecEva();
         Map<Integer,MetaExperiences> map=MetaData.getAllExperiences();
-        if(level>=1){//计算等级
+        if(level>=1){//Calculation level
             long exp=0l;
             do{
                 MetaExperiences obj=map.get(level);
                 exp=obj.exp;
                 if(cexp>=exp){
-                    cexp=cexp-exp; //减去升级需要的经验
+                    cexp=cexp-exp; //Minus the experience needed to upgrade
                     level++;
                 }
             }while(cexp>=exp);
         }
-        Eva e=new Eva();//修改后的Eva
+        Eva e=new Eva();//Modified Eva
         e.setId(Util.toUuid(eva.getId().toByteArray()));
         e.setPid(Util.toUuid(eva.getPid().toByteArray()));
         e.setAt(eva.getAt());
@@ -228,12 +228,12 @@ public class EvaManager
         return 0;
     }
 
-    /*根据EvaId获取Eva*/
+    /*Get Eva according to EvaId*/
     public Eva getEvaById(UUID id){
         return evas.get(id);
     }
 
-    /*根据要修改eva的摘要，获取eva信息*/
+    /*According to the summary of eva to be modified, get eva information*/
     public Gs.Evas getAllUpdateEvas(Gs.UpdateMyEvas updateMyEvas){
         List<Gs.Eva> evaList = new ArrayList<>();
         List<Gs.UpdateMyEvas.EvaSummary> list = updateMyEvas.getEvaSummarysList();
@@ -249,7 +249,7 @@ public class EvaManager
         return builder.build();
     }
 
-    // 全城所有玩家科技点数+推广点数
+    // Technology points + promotion points for all players in the city
     public long getAllSumValue() {
         return getAllEvas().stream().filter(o -> o != null).mapToLong(Eva::getSumValue).sum();
     }
@@ -290,21 +290,21 @@ public class EvaManager
         }else{
             aTypes.addAll(MetaData.getBuildingTech(type));
         }
-        //获取与原料厂相关的Eva信息
+        //Get Eva information related to the raw material plant
         aTypes.forEach(itemId->{
            EvaManager.getInstance().getEva(pid, itemId).forEach(eva->{
                buildingEva.addEva(eva.toSimpleEvaProto());
            });
         });
-        //获取当前查询建筑的点数信息
+        //Get the point information of the current query building
         Gs.BuildingPoint buildingTypePoint = EvaTypeUtil.getBuildingTypePoint(pid, type);
         buildingEva.setBuildingPoint(buildingTypePoint);
         return buildingEva.build();
     }
 
-    /*为修改的Eva归类（分类到具体的某一个建筑,修改Eva使用）*/
+    /*Classify the modified Eva (classify to a specific building, modify Eva to use)*/
     public Gs.BuildingEvas classifyEvaType(List<Gs.Eva> evas,UUID playerId){
-        Map<Integer,List<Gs.Eva>> buildingEvaInfo = new HashMap<>();//key 为建筑大类型，value为建筑对应的所有eva
+        Map<Integer,List<Gs.Eva>> buildingEvaInfo = new HashMap<>();//key is the major type of building, and value is all eva corresponding to the building
         evas.forEach(e->{
             int atype = e.getAt();
             if(MetaGood.isItem(atype)){
@@ -322,7 +322,7 @@ public class EvaManager
             }
         });
         Gs.BuildingEvas.Builder builder = Gs.BuildingEvas.newBuilder();
-        //key为建筑大类型，value为建筑的Eva数组
+        //key is a large type of building, and value is the Eva array of the building
         buildingEvaInfo.forEach((k,v)->{
             Gs.BuildingPoint buildingTypePoint = EvaTypeUtil.getBuildingTypePoint(playerId, k);
             Gs.BuildingEva.Builder buildingEva = Gs.BuildingEva.newBuilder().addAllEva(v).setBuildingType(k).setBuildingPoint(buildingTypePoint);

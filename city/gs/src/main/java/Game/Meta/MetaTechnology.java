@@ -14,8 +14,8 @@ public class MetaTechnology extends MetaBuilding{
     public int lineNum;
     public int lineMaxWorkerNum;
     public int lineMinWorkerNum;
-    public int minScienceAdd;//开启宝箱最小点数
-    public int maxScienceAdd;//开启宝箱最大点数
+    public int minScienceAdd;//Open the treasure box minimum points
+    public int maxScienceAdd;//Open the treasure box maximum points
 
 
 }

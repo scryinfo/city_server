@@ -18,28 +18,28 @@ public class BuildingUtil {
         return instance;
     }
     private PeriodicTimer timer = new PeriodicTimer((int) TimeUnit.MINUTES.toMillis(2));
-    //缓存全城原料均定价
+    //Cache all raw materials throughout the city
     private static Map<Integer, Double> materialAvg = new HashMap<>();
-    //缓存全城住宅均定价和评分
+    //Caching city-wide residential pricing and scoring
     private static List<Double> apartmentAvg = new ArrayList<>();
-    //缓存全城加工厂定价和评分
+    //Caching citywide factory pricing and scoring
     private static Map<Integer, List<Double>> produceAvg = new HashMap<>();
-    //缓存全城零售店商品定价和商品评分
+    //Cache product pricing and product ratings for retail stores across the city
     private static Map<Integer, List<Double>> retailGoodsAvg = new HashMap<>();
-    //全城零售店评分
+    //Citywide retail store ratings
     private static double retailScore = 0;
-    //缓存全城推广均价
+    //Cache citywide promotion average price
     private static double promotionAvg = 0;
-    //缓存全城研究均价
+    //Cache city average research price
     private static double laboratoryAvg = 0;
-    //缓存零售店和住宅最大最小的基础品质
+    //Cache the largest and smallest basic quality of retail stores and residences
     private Map<Integer, Map<Integer, Double>> maxQtyTotalMap = new HashMap<>();
-    //获取最大最小品牌值
+    //Get the maximum and minimum brand value
     public Map<Integer,Double> getMaxOrMinQty(int type){
         return maxQtyTotalMap.get(type);
     }
 
-    //更新最大最小品质：建造建筑\拆除建筑和修改eva时更新
+    //Update the maximum and minimum quality: update when constructing buildings\demolition buildings and modifying eva
     public void updateMaxOrMinTotalQty(){
         Set<Double> retailSet = new HashSet<>();
         Set<Double> apartmentSet = new HashSet<>();
@@ -76,13 +76,13 @@ public class BuildingUtil {
         _update();
     }
 
-    /*获取最大最小知名度值*/
+    /*Get the maximum and minimum visibility value*/
     public Map<Integer,Integer> getMaxAndMinBrand(int item){
         Map<Integer, Integer> map = new HashMap<>();
-        Map<String, Double> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//查询的是Eva最大最小的提升比例
+        Map<String, Double> cityBrandMap = GlobalUtil.getMaxOrMinBrandValue(item);//Query is the maximum and minimum lift ratio of Eva
         double minRatio=cityBrandMap.get("min");
         double maxRatio=cityBrandMap.get("max");
-        //如果是商品(使用商品的默认知名度)
+        //If it is a product (use the product's default visibility)
         int maxBrand;
         int minBrand;
         if(MetaGood.isItem(item)){

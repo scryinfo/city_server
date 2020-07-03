@@ -1,7 +1,7 @@
 package Game.Meta;
 
 import org.bson.Document;
-/*新版推广公司*/
+/*New promotion company*/
 public class MetaPromotionCompany extends MetaBuilding{
     public MetaPromotionCompany(Document d) {
         super(d);

@@ -20,21 +20,21 @@ enum StatusPurchase
 @Entity
 public class ddd_purchase {
     ddd_purchase(){}
-    //关键数据----------------------------
+    //Key data----------------------------
     @Id
     //@GeneratedValue(strategy = GenerationType.AUTO)
-    public UUID purchaseId;   //订单id city 提供
+    public UUID purchaseId;   //Order id city offers
 
-    public UUID player_id;      //玩家 uuid
-    //关键数据----------------------------
+    public UUID player_id;      //Player uuid
+    //Key data----------------------------
 
-    double ddd;	 		//ddd ，充值为正，提币为负
+    double ddd;	 		//ddd, recharge value is positive, withdrawal is negative
     public String ddd_from;    //
-    public String ddd_to;	    //ddd 充值到的用户地址
+    public String ddd_to;	    //ddd Recharge user address
     String ddd_tx_id;	//todo add
     String ddd_tx_info;	//
     public int ddd_date;
-    StatusPurchase status;         //交易状态
+    StatusPurchase status;         //trading status
 
     public long getExpire_time() {
         return expire_time;
@@ -50,16 +50,16 @@ public class ddd_purchase {
     long completion_time;
     int type;
 
-    //关键数据签名验证----------------------------
-    String req_pubkey;     	//请求方公钥
+    //Key data signature verification----------------------------
+    String req_pubkey;     	//Requester public key
 
     public byte[] getReq_Signature() {
         return req_Signature;
     }
 
-    byte[] req_Signature;	//请求方签名
+    byte[] req_Signature;	//Requester's signature
 
-    String resp_pubkey;    	//响应服务器公钥
+    String resp_pubkey;    	//Response server public key
 
     public byte[] getResp_Signature() {
         return resp_Signature;
@@ -69,8 +69,8 @@ public class ddd_purchase {
         this.resp_Signature = resp_Signature;
     }
 
-    byte[] resp_Signature;	//响应方方签名
-    //关键数据签名验证----------------------------
+    byte[] resp_Signature;	//Responder's signature
+    //Key data signature verification----------------------------
 
     public ddd_purchase(UUID inPurchaseId, UUID playerid, double dddCount, String addsFrom, String addsTo){
         purchaseId = inPurchaseId;
@@ -128,7 +128,7 @@ public class ddd_purchase {
                     new BigInteger(1,Arrays.copyOfRange(sigbts, 32, 64))
             );
             ECKey newpubkey = ECKey.fromPublicOnly(pubKey);
-            boolean pass =  newpubkey.verify(hSignCharge ,newsig); //验证通过
+            boolean pass =  newpubkey.verify(hSignCharge ,newsig); //Verified
             return pass;
         }catch (Exception e){
             return false;

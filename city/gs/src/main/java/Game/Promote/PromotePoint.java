@@ -5,15 +5,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.UUID;
 
-/*推广点数*/
+/*Promotion points*/
 @Entity
 public class PromotePoint {
     @Id
     @GeneratedValue
     public UUID id;
-    public UUID pid;//玩家id
-    public int  type;//推广类型id
-    public long promotePoint;//点数
+    public UUID pid;//Player id
+    public int  type;//Promotion type id
+    public long promotePoint;//Points
 
     public PromotePoint() {
     }

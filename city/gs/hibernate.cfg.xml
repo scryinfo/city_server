@@ -99,7 +99,7 @@
 		<mapping class="Game.Gambling.FlightManager$BetInfos$Info"></mapping>
 		<mapping class="Game.ddd.ddd_purchase"></mapping>
 		<mapping class="Game.ddd.dddPurchaseMgr"></mapping>
-		<!--新版研究所-->
+		<!--New Institute-->
 		<mapping class="Game.Technology.Technology"></mapping>
 		<mapping class="Game.Technology.Technology$Line"></mapping>
 		<mapping class="Game.Technology.ScienceBox"></mapping>

@@ -66,19 +66,19 @@ public class CityLevel {
     public Gs.CityLevel toProto() {
         return Gs.CityLevel.newBuilder().setLv(lv).setExp(cexp).setSalary(salary).setInventCount(inventCount).build();}
 
-    /*修改更新城市等级或经验值*/
+    /*Modify and update city level or experience value*/
     public void updateCityLevel(long addPoint){
-        long cexp = addPoint + this.cexp;//当前的新增点数+城市的经验值
+        long cexp = addPoint + this.cexp;//Current new points + city experience
         Map<Integer, MetaCityLevel> cityLevel = MetaData.getCityLevel();
-        if(this.lv>=1){//计算等级
+        if(this.lv>=1){//Calculation level
             long exp=0l;
             do{
                 MetaCityLevel obj=cityLevel.get(this.lv);
-                exp=obj.exp;//获取所需的经验值
+                exp=obj.exp;//Get the required experience
                 if(cexp>=exp){
-                    cexp=cexp-exp; //减去升级需要的经验
+                    cexp=cexp-exp; //Minus the experience needed to upgrade
                     this.lv++;
-                    /*升级完成，发明新的商品*/
+                    /*Upgrade completed, invent new products*/
                     MetaCityLevel cityLevelInfo = cityLevel.get(this.lv);
                     inventNewGood(cityLevelInfo);
                 }
@@ -91,28 +91,28 @@ public class CityLevel {
         GameDb.saveOrUpdate(this);
     }
 
-    /*发明新商品*/
+    /*Invent new products*/
     public void inventNewGood(MetaCityLevel cityLevelInfo){
         for (int i = 0; i <cityLevelInfo.getInventCount();i++) {
-            /*获取可发明的商品列表*/
+            /*Get a list of inventable products*/
             Set<Integer> cityInventGoodByType = CityGoodInfo.getCityInventGoodByType(cityLevelInfo.inventItem);
             Integer itemId = CityGoodInfo.randomGood(cityInventGoodByType);
-            //同步全城商品
+            //Synchronize goods across the city
             CityManager.instance().cityGood.add(itemId);
             if(itemId!=null){
-                //获取发明新商品产生的新原料
+                //Obtain new raw materials produced by inventing new products
                 Set<Integer> newMaterialId = CityGoodInfo.getNewMaterialId(itemId);
                 Gs.CityGoodInfo.Builder newGoodInfo = Gs.CityGoodInfo.newBuilder();
                 newGoodInfo.setGoods(Gs.Nums.newBuilder().addNum(itemId));
                 newGoodInfo.setMaterial(Gs.Nums.newBuilder().addAllNum(newMaterialId));
-                //同步全城原料
+                //Synchronize raw materials across the city
                 CityManager.instance().cityMaterial.addAll(newMaterialId);
-                //TODO 给全城所有的玩家们发邮件通知xx新商品产生了，xxx原料产生了
+                //TODO Send an email to all players in the city to inform xx that new products have been produced and xxx materials have been produced
                 List<Player> allPlayer = GameDb.getAllPlayer();
                 newMaterialId.add(itemId);
-                /*分别把新商品和新原料添加给所有玩家*/
+                /*Add new products and new materials to all players separately*/
                 CityGoodInfo.updatePlayerGoodList(allPlayer,newMaterialId);
-                /*同时推送给所有的在线玩家新商品信息*/
+                /*Push new product information to all online players at the same time*/
                 GameServer.sendToAll(Package.create(GsCode.OpCode.newGoodMessage_VALUE,newGoodInfo.build()));
             }
         }

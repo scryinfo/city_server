@@ -14,7 +14,7 @@ public class SciencePointManager {
         return instance;
     }
 
-    private Map<UUID, Set<SciencePoint>> sciencePointMap = new HashMap<UUID, Set<SciencePoint>>();//缓存玩家所有的科技点数
+    private Map<UUID, Set<SciencePoint>> sciencePointMap = new HashMap<UUID, Set<SciencePoint>>();//Cache all player technology points
     public void init()
     {
         GameDb.getAllFromOneEntity(SciencePoint.class).forEach(
@@ -24,14 +24,14 @@ public class SciencePointManager {
                 } );
     }
 
-    /*获取玩家的所有科技点数信息*/
+    /*Get all the technology points of players*/
     public Set<SciencePoint> getSciencePointList(UUID playerId)
     {
         return sciencePointMap.get(playerId) == null ?
                 new HashSet<SciencePoint>() : sciencePointMap.get(playerId);
     }
 
-    /*获取指定的科技点数信息*/
+    /*Get the specified technology points information*/
     public SciencePoint getSciencePoint(UUID playerId,int type)
     {
         Set<SciencePoint> set=getSciencePointList(playerId);
@@ -43,7 +43,7 @@ public class SciencePointManager {
         return null;
     }
 
-    /*更新推广点数*/
+    /*Update promotion points*/
     public void updateSciencePoint(SciencePoint sciencePoint) {
         Set<SciencePoint> s=sciencePointMap.get(sciencePoint.getPid());
         s.remove(getSciencePoint(sciencePoint.getPid(),sciencePoint.getType()));
@@ -51,7 +51,7 @@ public class SciencePointManager {
         sciencePointMap.put(sciencePoint.getPid(), s);
         GameDb.saveOrUpdate(sciencePoint);
     }
-    /*批量添加推广点数（初始化时用）*/
+    /*Add promotion points in bulk (used during initialization)*/
     public void addSciencePointList(List<SciencePoint> sciencePoints){
         sciencePoints.forEach(p->{
             sciencePointMap.computeIfAbsent(p.getPid(),
@@ -65,15 +65,15 @@ public class SciencePointManager {
 
     public SciencePoint updateSciencePoint(UUID pid,int type,int point){
         SciencePoint sciencePoint = SciencePointManager.getInstance().getSciencePoint(pid, type);
-        if(point<0&&Math.abs(point)>sciencePoint.point){/*如果是扣除，还需判断库存是否充足*/
+        if(point<0&&Math.abs(point)>sciencePoint.point){/*If it is a deduction, it is necessary to determine whether the inventory is sufficient*/
             return null;
         }
         sciencePoint.point += point;
         return sciencePoint;
     }
-    /*根据建筑大类型，查找玩家的的点数资料*/
+    /*According to the type of building, find the player's point data*/
     public SciencePoint getSciencePointByBuildingType(UUID pId,int buildingType){
-        //拼接类型
+        //Type of stitching
         StringBuffer sb = new StringBuffer("15000");
         int pointType = Integer.parseInt(sb.append(buildingType).toString());
         SciencePoint sciencePoint = getSciencePoint(pId, pointType);

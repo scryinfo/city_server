@@ -17,7 +17,7 @@ import static Statistic.SummaryUtil.HOUR_MILLISECOND;
 
 public class PerHourJob implements org.quartz.Job {
     private static final Logger LOGGER = Logger.getLogger(PerHourJob.class);
-    //基础数据表中没有id，给客户端指定id
+    //There is no id in the basic data table, specify the id to the client
     public final static int BUYGROUND_ID = 999;
     public final static int RENTGROUND_ID = 888;
     @Override
@@ -31,11 +31,11 @@ public class PerHourJob implements org.quartz.Job {
         String timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime), ZoneId.systemDefault()));
         LOGGER.debug("PerHourJob start execute,time = " + timeStr);
 
-        //每种商品购买的npc人数,每小时统计一次
-        //并把统计结果保存到数据库
+        //The number of npc purchased for each product is counted every hour
+        //And save the statistical results to the database
         List<Document> documentList = LogDb.dayNpcGoodsNum(startTime, endTime, LogDb.getNpcBuyInShelf());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, endTime, SummaryUtil.getDayGoodsNpcNum());
-        //apartment交易
+        //apartment transaction
         documentList = LogDb.dayApartmentNpcNum(startTime, endTime, LogDb.getNpcRentApartment());
         SummaryUtil.insertHistoryData(SummaryUtil.CountType.BYHOUR, documentList, endTime, SummaryUtil.getDayApartmentNpcNum());
 
@@ -60,7 +60,7 @@ public class PerHourJob implements org.quartz.Job {
         SummaryUtil.insertPlayerExchangeData(SummaryUtil.CountType.BYHOUR, SummaryUtil.ExchangeType.LABORATORY, documentList, endTime, SummaryUtil.getPlayerExchangeAmount());
 
 
-        //player income 由每小时统计变为每分钟统计
+        //player income changes from hourly statistics to minutely statistics
     /*    documentList = LogDb.dayPlayerIncomeOrPay(startTime, endTime, LogDb.getPlayerIncome());
         SummaryUtil.insertPlayerIncomeOrPay(documentList, startTime, SummaryUtil.getDayPlayerIncome());
         //player pay
@@ -70,7 +70,7 @@ public class PerHourJob implements org.quartz.Job {
 
 
     */
-        //统计耗时
+        //Time-consuming statistics
         StatisticSession.setIsReady(true);
         long nowTime1 = System.currentTimeMillis();
         timeStr = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(nowTime1), ZoneId.systemDefault()));
